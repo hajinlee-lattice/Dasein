@@ -55,7 +55,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <argLine>
-                                        -XX:MaxPermSize=1024m
+                                        ${maxpermsize}
                                         ${argLine}
                                     </argLine>
                                     <skip>false</skip>

@@ -38,6 +38,7 @@
         <jetty.version>9.1.1.v20140108</jetty.version>
         <spring.version>4.0.0.RELEASE</spring.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
+        <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize>
     </properties>
 
     <!-- set up to use LE local Nexus Repository for dependencies -->
@@ -185,7 +186,7 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=256m
+                                    <argLine>${maxpermsize}
                                         ${argLine}</argLine>
                                     <skip>false</skip>
                                     <includes>
@@ -242,7 +243,7 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=256m
+                                    <argLine>${maxpermsize}
                                         ${argLine}</argLine>
                                     <skip>false</skip>
                                     <includes>
@@ -300,7 +301,7 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=256m
+                                    <argLine>${maxpermsize}
                                         ${argLine}</argLine>
                                     <skip>false</skip>
                                     <includes>
