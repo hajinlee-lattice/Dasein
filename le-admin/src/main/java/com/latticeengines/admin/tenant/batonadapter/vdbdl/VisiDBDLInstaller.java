@@ -33,7 +33,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         super(VisiDBDLComponent.componentName);
     }
 
-    protected void setDLUrl(String dlUrl){
+    protected void setDLUrl(String dlUrl) {
         this.dlUrl = dlUrl;
     }
 
@@ -57,39 +57,34 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant, tenantAlias, dmDeployment, contractExternalID,
                 visiDBName, visiDBServerName);
         Map<String, Object> response = getTenantInfo(getRequest, headers);
-        if ((Integer)response.get("Status") != SUCCESS) {
+
+        int status = response.get("Status") == null ? -1 : (Integer) response.get("Status");
+        String errorMessage = response.get("ErrorMessage") == null ? null : (String) response.get("ErrorMessage");
+
+        if (status == -1) {
+            throw new LedpException(LedpCode.LEDP_18032, new String[] { "Status is null" });
+        }
+        if (errorMessage != null && errorMessage.contains("does not exist")) {
             CreateVisiDBDLRequest postRequest = new CreateVisiDBDLRequest(tenant, tenantAlias, ownerEmail,
-                    dmDeployment, contractExternalID, Boolean.parseBoolean(createNewVisiDB), visiDBName,
-                    visiDBServerName);
+                    dmDeployment, contractExternalID, Boolean.parseBoolean(createNewVisiDB), visiDBName, visiDBServerName);
             response = createTenant(postRequest, headers);
             log.info("response is: " + response);
-            if((Integer)response.get("Status")!= SUCCESS){
+            status = response.get("Status") == null ? -1 : (Integer) response.get("Status");
+            if (status != SUCCESS) {
                 throw new LedpException(LedpCode.LEDP_18032);
             }
-        }else if(response.get("ErrorMessage") == null){
+        } else if (errorMessage == null && status == SUCCESS) {
             log.info("Tenant is already in VisiDB/Dataloader");
-        }else{
-            throw new LedpException(LedpCode.LEDP_18032, new String[]{(String)response.get("ErrorMessage")});
+        } else {
+            throw new LedpException(LedpCode.LEDP_18032, new String[] { errorMessage });
         }
     }
 
-    public Map<String, Object> getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers){
+    public Map<String, Object> getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers) {
         String jsonString = JsonUtils.serialize(getRequest);
         String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/GetDLTenantSettings", false,
-                    headers, jsonString);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-        }
-        return convertToMap(response);
-    }
-    
-    public Map<String, Object> createTenant(CreateVisiDBDLRequest postRequest, List<BasicNameValuePair> headers){
-        String jsonString = JsonUtils.serialize(postRequest);
-        String response = "";
-        try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/createDLTenant",
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/GetDLTenantSettings",
                     false, headers, jsonString);
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
@@ -97,8 +92,20 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         return convertToMap(response);
     }
 
+    public Map<String, Object> createTenant(CreateVisiDBDLRequest postRequest, List<BasicNameValuePair> headers) {
+        String jsonString = JsonUtils.serialize(postRequest);
+        String response = "";
+        try {
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/CreateDLTenant", false,
+                    headers, jsonString);
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+        }
+        return convertToMap(response);
+    }
+
     @SuppressWarnings("unchecked")
-    private Map<String, Object> convertToMap(String response){
+    private Map<String, Object> convertToMap(String response) {
         Map<String, Object> map = new HashMap<>();
         try {
             map = new ObjectMapper().readValue(response, Map.class);
