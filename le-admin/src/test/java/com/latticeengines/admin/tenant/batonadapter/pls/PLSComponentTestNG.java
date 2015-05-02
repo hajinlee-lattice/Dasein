@@ -157,7 +157,7 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         Assert.assertNotNull(tenant);
 
-        return restTemplate.postForObject(getPlsHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
+        return restTemplate.postForObject(getPlsHostPort() + "/pls/attach", tenant,
                 UserDocument.class);
     }
 
