@@ -10,19 +10,23 @@ module.exports = function (grunt) {
         env:  {
             dev:         {
                 url:            'http://localhost:8080',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.dev.js'
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.dev.js',
+                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.dev.js'
             },
             integration: {
                 url:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js'
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js',
+                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             },
             qa:          {
                 url:            'http://bodcdevhdpweb53.dev.lattice.local:8080',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js'
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js',
+                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             },
             prod:        {
                 url:            'https://app.lattice-engines.com',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js'
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js',
+                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             }
         }
     };
@@ -505,7 +509,7 @@ module.exports = function (grunt) {
                 keepAlive: false,
                 noColor: false,
                 coverageDir: 'target/protractor_coverage',
-                configFile: '<%= testenv.protractorConf %>'
+                configFile: '<%= testenv.protractorCcConf %>'
             },
             chrome:           {
                 options: {
