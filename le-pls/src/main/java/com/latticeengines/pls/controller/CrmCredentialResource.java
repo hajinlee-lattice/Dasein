@@ -28,10 +28,13 @@ public class CrmCredentialResource {
     @ResponseBody
     @ApiOperation(value = "Verify CRM credential")
     @PreAuthorize("hasRole('Edit_PLS_Configuration')")
-    public CrmCredential verifyCredential(@PathVariable String crmType, @RequestParam(value = "tenantId") String tenantId,
-            @RequestParam(value = "contractId") String contractId, @RequestBody CrmCredential crmCredential) {
+    public CrmCredential verifyCredential(@PathVariable String crmType,
+            @RequestParam(value = "tenantId") String tenantId,
+            @RequestParam(value = "isProduction", required = false) Boolean isProduction,
+            @RequestBody CrmCredential crmCredential) {
 
-        CrmCredential newCrmCredential = crmCredentialService.verifyCredential(crmType, tenantId, contractId, crmCredential);
+        CrmCredential newCrmCredential = crmCredentialService.verifyCredential(crmType, tenantId, isProduction,
+                crmCredential);
         return newCrmCredential;
 
     }
@@ -40,9 +43,9 @@ public class CrmCredentialResource {
     @ResponseBody
     @ApiOperation(value = "Get CRM credential")
     public CrmCredential getCredential(@PathVariable String crmType, @RequestParam(value = "tenantId") String tenantId,
-            @RequestParam(value = "contractId") String contractId) {
+            @RequestParam(value = "isProduction", required = false) Boolean isProduction) {
 
-        return crmCredentialService.getCredential(crmType, tenantId, contractId);
+        return crmCredentialService.getCredential(crmType, tenantId, isProduction);
 
     }
 }
