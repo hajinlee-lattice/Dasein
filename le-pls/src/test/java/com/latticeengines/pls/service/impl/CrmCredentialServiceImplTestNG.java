@@ -20,7 +20,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private CrmCredentialService crmService;
 
-    @BeforeClass(groups = { "deployment" })
+    @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), "contractId", "tenantId");
@@ -31,7 +31,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
     }
 
-    @AfterClass(groups = { "deployment" })
+    @AfterClass(groups = { "functional" })
     public void afterClass() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), "contractId", "tenantId");
