@@ -32,7 +32,7 @@
 	<bean id="dellebiManagerCronTrigger"
 		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="dellebiManagerJob" />
-		<property name="cronExpression" value="0 0 16 ? * MON-FRI" />
+		<property name="cronExpression" value="0 0/3 14 ? * MON-FRI" />
 	</bean>
 
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
@@ -59,9 +59,12 @@
 			</util:list>
 		</constructor-arg>
 	</bean>
+	
+	<bean id="hadoopfilesystemoperations"
+		class="com.latticeengines.dellebi.util.HadoopFileSystemOperations" />
 		
-
-
-
-
+	<bean id="normalfilesystemoperations"
+		class="com.latticeengines.dellebi.util.NormalFileSystemOperations" />
+		
+	<bean id= "mail" class="com.latticeengines.dellebi.util.MailSender"/>
 </beans>
