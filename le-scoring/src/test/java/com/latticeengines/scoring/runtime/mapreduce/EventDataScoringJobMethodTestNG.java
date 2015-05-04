@@ -52,7 +52,7 @@ public class EventDataScoringJobMethodTestNG extends ScoringFunctionalTestNGBase
     }
 
     @Test(groups = "functional")
-    public void testGenerateDateTypeSchema() throws JsonParseException, JsonMappingException, IOException, Exception{
+    public void testGenerateDataTypeSchema() throws JsonParseException, JsonMappingException, IOException, Exception{
         Schema schema = AvroUtils.getSchema(hadoopConfiguration, new Path(dir + "/part-m-00000.avro"));
         scoringJob.generateDataTypeSchema(schema, dir + "/datatype.json", hadoopConfiguration);
         @SuppressWarnings("deprecation")
