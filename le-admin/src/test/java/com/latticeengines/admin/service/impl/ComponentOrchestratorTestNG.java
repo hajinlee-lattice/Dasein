@@ -94,7 +94,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
         tenantService.bootstrap(TestContractId, TestTenantId, "Component1",
                 new SerializableDocumentDirectory(dir).flatten());
 
-        int numOfRetries = 5;
+        int numOfRetries = 40;
         BootstrapState state;
         do {
             state = tenantService.getTenantServiceState(TestContractId, TestTenantId, "Component1");
@@ -111,7 +111,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
         tenantService.bootstrap(TestContractId, TestTenantId, "Component4",
                 new SerializableDocumentDirectory(dir).flatten());
 
-        int numOfRetries = 5;
+        int numOfRetries = 40;
         BootstrapState state;
         do {
             state = tenantService.getTenantServiceState(TestContractId, TestTenantId, "Component4");

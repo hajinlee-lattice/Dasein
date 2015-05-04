@@ -91,7 +91,7 @@ public class ComponentOrchestrator {
                     Map<String, String> bootstrapProperties = properties.get(component.getName());
                     batonService.bootstrap(contractId, tenantId, spaceId, component.getName(), bootstrapProperties);
 
-                    int numOfRetries = 30;
+                    int numOfRetries = 100;
                     BootstrapState state;
                     do {
                         state = batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId, component.getName());
