@@ -14,6 +14,7 @@
         <le.propdata.version>1.0.32-SNAPSHOT</le.propdata.version>
         <le.pls.version>1.0.32-SNAPSHOT</le.pls.version>
         <le.scoring.version>1.0.32-SNAPSHOT</le.scoring.version>
+        <le.dellebi.version>1.0.32-SNAPSHOT</le.dellebi.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
@@ -149,6 +150,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scoring</artifactId>
             <version>${le.scoring.version}</version>
+            <scope>runtime</scope> 
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dellebi</artifactId>
+            <version>${le.dellebi.version}</version>
             <scope>runtime</scope>
         </dependency>
         <!--dependency>
