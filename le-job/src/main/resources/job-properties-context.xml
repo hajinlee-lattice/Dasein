@@ -30,6 +30,7 @@
                 <value>file:${DATAFLOW_PROPDIR}/dataflow.properties</value>
                 <!-- value>file:${PLS_PROPDIR}/pls.properties</value -->
                 <value>file:${SCORING_PROPDIR}/scoring.properties</value>
+                <value>file:${DELLEBI_PROPDIR}/dellebi.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
