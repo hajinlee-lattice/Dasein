@@ -25,7 +25,6 @@ import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
 import com.latticeengines.dellebi.util.NormalFileSystemOperations;
 
-//@Component("dailyFlow")
 public class DailyFlow{
 
     private static final Log log = LogFactory.getLog(DailyFlow.class);
@@ -50,6 +49,15 @@ public class DailyFlow{
     @Value("${dellebi.mailreceivelist}")
     private String mailReceiveList;
     
+    @Autowired
+    private HadoopFileSystemOperations hadoopfilesystemoperations;
+    
+    @Autowired
+    private NormalFileSystemOperations normalfilesystemoperations;
+    
+    @Autowired
+    private MailSender mailSender;
+    
     private ArrayList<FlowDef> flowList;
     
     public DailyFlow(ArrayList<FlowDef> flowList){
@@ -70,9 +78,9 @@ public class DailyFlow{
         FileSystemOperations fileSystem = null;
 
         if(System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")){        	
-            fileSystem = new NormalFileSystemOperations();
+            fileSystem = normalfilesystemoperations;
         }else{
-            fileSystem = new HadoopFileSystemOperations();
+            fileSystem = hadoopfilesystemoperations;
         }
         
         try {
@@ -101,7 +109,7 @@ public class DailyFlow{
         	log.error("Seems there is corrupt data!", e);
         } catch (Exception e) {
         	log.warn("Failed!", e);
-            //mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed for some reasons!","Please check Dell EBI logs.");
+            mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed because of some reasons!","Please check Dell EBI logs.");
         }
     }
     
@@ -125,7 +133,15 @@ public class DailyFlow{
         this.warrantyGlobal = s;
     }
     
+    public void setQuoteTrans(String s){
+        this.quoteTrans = s;
+    }
+    
     public void setDataHadoopWorkingPath(String s){
         this.dataHadoopWorkingPath = s;
+    }
+    
+    public void setMailReceiveList(String s){
+    	this.mailReceiveList = s;
     }
 }
