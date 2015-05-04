@@ -133,8 +133,8 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
             }
         }
     }
-    
-    void cleanHdfs(ScoringCommand scoringCommand){
+
+    private void cleanHdfs(ScoringCommand scoringCommand){
         try {
             HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + scoringCommand.getId() + "/scoring/" + scoringCommand.getTableName());
         } catch (Exception e) {

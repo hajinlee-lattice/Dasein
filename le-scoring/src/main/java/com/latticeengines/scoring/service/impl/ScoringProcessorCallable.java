@@ -1,6 +1,5 @@
 package com.latticeengines.scoring.service.impl;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
