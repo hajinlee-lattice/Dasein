@@ -8,9 +8,9 @@ angular.module('mainApp.config.modals.EnterCredentialsModal', [
     var self = this;
     
     this.TopologyType = {
-        Salesforce: "SFDC",
-        Marketo: "Marketo",
-        Eloqua: "Eloqua"
+        Salesforce: "sfdc",
+        Marketo: "marketo",
+        Eloqua: "eloqua"
     };
     
     this.show = function (topologyType, previousCredentials, successCallback) {
@@ -81,7 +81,7 @@ angular.module('mainApp.config.modals.EnterCredentialsModal', [
             $scope.apiUserIdLabel = ResourceUtility.getString('ENTER_CREDENTIALS_API_USER_NAME');
             $scope.apiPasswordLabel = ResourceUtility.getString('ENTER_CREDENTIALS_API_PASSWORD');
             $scope.securityTokenLabel = ResourceUtility.getString('ENTER_CREDENTIALS_API_SECURITY_TOKEN');
-            $scope.connectionUrlLabel = ResourceUtility.getString('ENTER_CREDENTIALS_API_URL');
+            $scope.connectionUrlLabel = ResourceUtility.getString('ENTER_CREDENTIALS_API_ORG_ID');
             $scope.showPassword = true;
             $scope.showConnectionUrl = true;
             $scope.showCompany = false;
@@ -159,13 +159,13 @@ angular.module('mainApp.config.modals.EnterCredentialsModal', [
                 toReturn.UserName = $scope.apiUserId;
                 toReturn.Password = $scope.apiPassword;
                 toReturn.SecurityToken = $scope.securityToken;
-                toReturn.ConnectionURL = $scope.connectionUrl;
+                toReturn.Url = $scope.connectionUrl;
                 break;
             case EnterCredentialsModal.TopologyType.Marketo:
                 toReturn.UserName = $scope.apiUserId;
                 // Have to add this hack because of DataLoader
                 toReturn.Password = $scope.securityToken;
-                toReturn.ConnectionURL = $scope.connectionUrl;
+                toReturn.Url = $scope.connectionUrl;
                 break;
             case EnterCredentialsModal.TopologyType.Eloqua:
                 toReturn.UserName = $scope.apiUserId;
@@ -186,7 +186,7 @@ angular.module('mainApp.config.modals.EnterCredentialsModal', [
         if (areCredentialsValid() && !$scope.validateInProgess) {
             var apiObj = createApiCredentialsObject();
             $scope.validateInProgess = true;
-            ConfigService.ValidateApiCredentials(apiObj).then(function(data) {
+            ConfigService.ValidateApiCredentials($scope.topologyType, apiObj).then(function(data) {
                 $scope.validateInProgess = false;
                 if (data != null && data.Success === true) {
                     $("#modalContainer").modal('hide');

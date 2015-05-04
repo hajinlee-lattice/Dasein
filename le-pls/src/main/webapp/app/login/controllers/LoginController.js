@@ -109,12 +109,6 @@ angular.module('mainApp.login.controllers.LoginController', [
         });
     };
     
-    $scope.getConfigDoc = function () {
-        ConfigService.GetConfigDocument().then(function(result) {
-            $scope.getWidgetConfigDoc();
-        });
-    };
-    
     $scope.getWidgetConfigDoc = function () {
         ConfigService.GetWidgetConfigDocument().then(function(result) {
             $("body").removeClass("login-body");

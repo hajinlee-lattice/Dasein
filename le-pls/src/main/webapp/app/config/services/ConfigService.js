@@ -7,63 +7,6 @@ angular.module('mainApp.config.services.ConfigService', [
 ])
 .service('ConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, URLUtility, SessionService) {
     
-    this.GetConfigDocument = function () {
-        var deferred = $q.defer();
-        var result = null;
-        
-        // Check cache first
-        var cachedConfigDoc = BrowserStorageUtility.getConfigDocument();
-        if (cachedConfigDoc != null && cachedConfigDoc.Timestamp > new Date().getTime()) {
-            result = {
-                success: true,
-                resultObj: cachedConfigDoc,
-                resultErrors: null
-            };
-            deferred.resolve(result);
-            return deferred.promise;
-        }
-        $http({
-            method: "GET", 
-            url: "./GriotService.svc/GetConfigDocument"
-        })
-        .success(function(data, status, headers, config) {
-            if (data == null) {
-                result = {
-                    success: false,
-                    resultObj: null,
-                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
-                };
-                
-                deferred.resolve(result);
-            } else {
-                result = {
-                    success: data.Success,
-                    resultObj: null,
-                    resultErrors: null
-                };
-                if (data.Success === true) {
-                    result.resultObj = data.Result;
-                    BrowserStorageUtility.setConfigDocument(data.Result);
-                } else {
-                    SessionService.HandleResponseErrors(data, status);
-                    result.resultErrors = ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
-                }
-            }
-            deferred.resolve(result);
-        })
-        .error(function(data, status, headers, config) {
-            SessionService.HandleResponseErrors(data, status);
-            var result = {
-                success: false,
-                resultObj: null,
-                resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
-            };
-            deferred.resolve(result);
-        });
-        
-        return deferred.promise;
-    };
-    
     this.GetWidgetConfigDocument = function () {
         var deferred = $q.defer();
         var result = null;
@@ -118,36 +61,90 @@ angular.module('mainApp.config.services.ConfigService', [
         return deferred.promise;
     };
     
-    //If a user forgets their password, this will reset it and notify them
-    this.ValidateApiCredentials = function (apiObj) {
-        if (apiObj == null) {
-            return null;
-        }
+    this.GetCurrentCredentials = function (topologyType, isProduction) {
+        isProduction = typeof isProduction !== 'undefined' ? isProduction : true;
         var deferred = $q.defer();
+        var test = BrowserStorageUtility.getClientSession().Tenant;
+        var tenant = BrowserStorageUtility.getClientSession().Tenant.Identifier;
         
+        var credentialUrl = "/pls/credentials/" + topologyType + "?tenantId=" + tenant;
+        if (topologyType === "sfdc") {
+            credentialUrl += "&isProduction=" + isProduction;
+        }
         $http({
-            method: "POST", 
-            url: "/pls/credentials/sfdc/",
-            data: JSON.stringify(apiObj)
+            method: "GET", 
+            url: credentialUrl
         })
         .success(function(data, status, headers, config) {
             var result = null;
             if (data != null && data !== "") {
                 result = data;
-                if (data.Success !== true) {
+                /*if (data.Success === true) {
                     SessionService.HandleResponseErrors(data, status);
                     if (ServiceErrorUtility.ServiceResponseContainsError(data, "VALIDATE_CREDENTIALS_FAILURE")) {
                         result.FailureReason = "VALIDATE_CREDENTIALS_FAILURE";
                     } else {
                         result.FailureReason = "SYSTEM_ERROR";
                     }
-                }
+                }*/
             }
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
             SessionService.HandleResponseErrors(data, status);
             deferred.resolve(data);
+        });
+        
+        return deferred.promise;
+    };
+    
+    //If a user forgets their password, this will reset it and notify them
+    this.ValidateApiCredentials = function (topologyType, apiObj, isProduction) {
+        if (apiObj == null) {
+            return null;
+        }
+        isProduction = typeof isProduction !== 'undefined' ? isProduction : true;
+        var deferred = $q.defer();
+        var tenant = BrowserStorageUtility.getClientSession().Tenant.Identifier;
+        var credentialUrl = "/pls/credentials/" + topologyType + "/?tenantId=" + tenant;
+        if (topologyType === "sfdc") {
+            credentialUrl += "&isProduction=" + isProduction;
+        }
+        var result;
+        $http({
+            method: "POST", 
+            url: credentialUrl,
+            data: JSON.stringify(apiObj)
+        })
+        .success(function(data, status, headers, config) {
+            var result = null;
+            if (data != null && data !== "") {
+                result = {
+                    success: data.Success,
+                    resultObj: null,
+                    resultErrors: null
+                };
+                if (data.Success !== true) {
+                    SessionService.HandleResponseErrors(data, status);
+                    result.resultErrors = ResourceUtility.getString("VALIDATE_CREDENTIALS_FAILURE");
+                }
+            }
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var errorMessage;
+            if (data == null || data === "") {
+                errorMessage = ResourceUtility.getString("SYSTEM_ERROR");
+            } else {
+                errorMessage = data.errorMsg;
+            }
+            result = {
+                success: false,
+                resultObj: null,
+                resultErrors: errorMessage
+            };
+            deferred.resolve(result);
         });
         
         return deferred.promise;
