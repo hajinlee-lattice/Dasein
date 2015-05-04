@@ -3,7 +3,6 @@ package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
-import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
