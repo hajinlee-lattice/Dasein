@@ -24,7 +24,7 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void getTenantsWithContractId() {
-        String url = getRestHostPort() + "/admin/tenants?contractId=CONTRACT1";
+        String url = getRestHostPort() + "/admin/tenants?contractId=" + TestContractId;
         assertSingleTenant(restTemplate.getForObject(url, List.class, new HashMap<>()));
     }
     
