@@ -25,9 +25,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import com.latticeengines.dellebi.flowdef.DailyFlow;
-import com.latticeengines.dellebi.util.FileSystemOperations;
 
 @ContextConfiguration(locations = { "classpath:dellebi-properties-context.xml" })
 public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
@@ -65,7 +63,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 	@BeforeMethod(groups = "functional")
 	public void setUpBeforeMethod() throws Exception {
 		ApplicationContext springContext = new ClassPathXmlApplicationContext(
-				"test-dellebi-properties-context.xml");
+				"dellebi-properties-context.xml");
 
 		// Copy test files to remote test folder.
 		smbPut("smb://192.168.4.145/DATASTORE/Dataload/TestInbox",
@@ -107,8 +105,6 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		} catch (Exception e) {
 			System.out.println("HDFS file not found");
 		}
-		
-		new ClassPathXmlApplicationContext("dellebi-properties-context.xml", "dellebi-context-camel.xml");
 
 	}
 
@@ -146,7 +142,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 	@Test(groups = "functional")
 	public void testExecute() throws Exception {
 		ApplicationContext springContext = new ClassPathXmlApplicationContext(
-				"dellebi-properties-context.xml", "dellebi-context.xml");
+				"dellebi-properties-context.xml", "dellebi-camel-context.xml","dellebi-quartz-context.xml");
 
 		// Wait for a while to let Camel process data.
 		try {
@@ -155,9 +151,17 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		}
 
 		// Process data using Cascading
-		DailyFlow dailFlow = springContext
+		DailyFlow dailyFlow = springContext
 				.getBean("dailyFlow", DailyFlow.class);
-		dailFlow.doDailyFlow(); // todo: springContext);
+		dailyFlow.setDataHadoopInPath("/latticeengines/in");
+		dailyFlow.setDataHadoopWorkingPath("/latticeengines");
+		dailyFlow.setOrderDetail("order_detail");
+		dailyFlow.setOrderSummary("order_summary");
+		dailyFlow.setShipToAddrLattice("ship_to_addr_lattice");
+		dailyFlow.setWarrantyGlobal("warranty_global");
+		dailyFlow.setQuoteTrans("quote_trans");
+		dailyFlow.setMailReceiveList("llu@Lattice-Engines.com,jwilliams@lattice-engines.com,LYan@Lattice-Engines.com");
+		dailyFlow.doDailyFlow();
 
 		try {
 			Thread.sleep(60000);
@@ -216,7 +220,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(URI.create(dataHadoopRootPath), conf);
 		if (fs.exists(path)) {
-			fs.delete(path, true); // Directory
+			fs.delete(path, true);
 		}
 	}
 	
@@ -227,3 +231,4 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		}
 	}
 }
+
