@@ -27,6 +27,8 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
@@ -81,6 +83,10 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     @BeforeClass(groups = {"functional", "deployment"})
     public void setup() {
         loginAD();
+
+        String podId = CamilleEnvironment.getPodId();
+        Assert.assertNotNull(podId);
+
         try {
             deleteTenant(TestContractId, TestTenantId);
         } catch (Exception e) {

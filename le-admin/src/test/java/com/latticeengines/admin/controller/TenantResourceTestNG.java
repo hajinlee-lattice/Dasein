@@ -42,7 +42,7 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         try {
             for (Map<String, Object> obj : tenantObjs) {
                 TenantDocument tenant = mapper.treeToValue(mapper.valueToTree(obj), TenantDocument.class);
-                if (tenant.getSpace().getTenantId().equals("TENANT1")) {
+                if (tenant.getSpace().getTenantId().equals(TestTenantId)) {
                     existTENANT1 = true;
                     break;
                 }
@@ -53,7 +53,7 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         }
     }
     
-    @Test(groups = "functional")
+    @Test(groups = "functional", timeOut = 10000)
     public void getServiceState() throws InterruptedException {
         String url = getRestHostPort() + String.format("/admin/tenants/%s/services/%s/state?contractId=%s",
                 TestTenantId, testLatticeComponent.getName(), TestContractId);
@@ -65,7 +65,7 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
             state = restTemplate.getForObject(url, BootstrapState.class, new HashMap<>());
             Thread.sleep(1000L);
             numTries++;
-        } while (state.state != BootstrapState.State.OK && numTries < 5);
+        } while (state.state != BootstrapState.State.OK && numTries < 10);
         Assert.assertEquals(state.state, BootstrapState.State.OK);
     }
     

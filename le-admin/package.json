@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "le-admin grunt tasks",
   "scripts": {
-    "install": "node node_modules/grunt-protractor-runner/scripts/webdriver-manager-update; node node_modules/protractor/bin/webdriver-manager update"
+    "install": "node node_modules/grunt-protractor-runner/scripts/webdriver-manager-update"
   },
   "dependencies": {},
   "devDependencies": {

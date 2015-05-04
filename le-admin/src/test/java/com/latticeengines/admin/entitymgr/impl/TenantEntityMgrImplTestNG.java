@@ -20,7 +20,7 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
     @Autowired
     private TestLatticeComponent testLatticeComponent;
 
-    @Test(groups = "functional", timeOut = 5000)
+    @Test(groups = "functional", timeOut = 10000)
     public void getTenantServiceState() throws Exception {
         bootstrap(TestContractId, TestTenantId, testLatticeComponent.getName());
 
@@ -31,7 +31,7 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
                     TestContractId, TestTenantId, testLatticeComponent.getName());
             Thread.sleep(1000L);
             numTries++;
-        } while (state.state != BootstrapState.State.OK && numTries < 5);
+        } while (state.state != BootstrapState.State.OK && numTries < 10);
 
         assertEquals(state.installedVersion, 1);
     }
