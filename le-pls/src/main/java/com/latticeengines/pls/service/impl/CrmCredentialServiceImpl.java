@@ -53,57 +53,51 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     @Override
     public CrmCredential verifyCredential(String crmType, String tenantId, Boolean isProduction,
             CrmCredential crmCredential) {
-        String[] tenantKeys = getTenantKeys(tenantId);
-        String contractId = tenantKeys[0];
-        tenantId = tenantKeys[1];
         switch (crmType) {
         case CrmConstants.CRM_SFDC:
-            return updateSfdcConfig(crmType, tenantId, contractId, isProduction, crmCredential);
+            return updateSfdcConfig(crmType, tenantId, isProduction, crmCredential);
         case CrmConstants.CRM_MARKETO:
-            return updateMarketoConfig(crmType, tenantId, contractId, crmCredential);
+            return updateMarketoConfig(crmType, tenantId, crmCredential);
         case CrmConstants.CRM_ELOQUA:
-            return updateEloquaConfig(crmType, tenantId, contractId, crmCredential);
+            return updateEloquaConfig(crmType, tenantId, crmCredential);
         }
 
         return new CrmCredential();
     }
 
-    private CrmCredential updateSfdcConfig(String crmType, String tenantId, String contractId, Boolean isProduction,
+    private CrmCredential updateSfdcConfig(String crmType, String tenantId, Boolean isProduction,
             CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
         String orgId = getSfdcOrgId(crmCredential);
         newCrmCredential.setOrgId(orgId);
         crmCredential.setOrgId(orgId);
-        verifySfdcFromDataLoader(crmType, tenantId, contractId, crmCredential);
-        writeToZooKeeper(crmType, tenantId, contractId, isProduction, crmCredential, true);
+        verifySfdcFromDataLoader(crmType, crmCredential);
+        writeToZooKeeper(crmType, tenantId, isProduction, crmCredential, true);
 
         return newCrmCredential;
     }
 
-    private CrmCredential updateMarketoConfig(String crmType, String tenantId, String contractId,
-            CrmCredential crmCredential) {
+    private CrmCredential updateMarketoConfig(String crmType, String tenantId, CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        verifyMarketoFromDataLoader(crmType, tenantId, contractId, crmCredential);
-        writeToZooKeeper(crmType, tenantId, contractId, true, crmCredential, false);
+        verifyMarketoFromDataLoader(crmType, crmCredential);
+        writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
         return newCrmCredential;
 
     }
 
-    private CrmCredential updateEloquaConfig(String crmType, String tenantId, String contractId,
-            CrmCredential crmCredential) {
+    private CrmCredential updateEloquaConfig(String crmType, String tenantId, CrmCredential crmCredential) {
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        verifyEloquaFromDataLoader(crmType, tenantId, contractId, crmCredential);
-        writeToZooKeeper(crmType, tenantId, contractId, true, crmCredential, false);
+        verifyEloquaFromDataLoader(crmType, crmCredential);
+        writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
         return newCrmCredential;
 
     }
 
-    private void verifyEloquaFromDataLoader(String crmType, String tenantId, String contractId,
-            CrmCredential crmCredential) {
+    private void verifyEloquaFromDataLoader(String crmType, CrmCredential crmCredential) {
 
         String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
         Map<String, String> parameters = new HashMap<>();
@@ -116,8 +110,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     }
 
-    private void verifyMarketoFromDataLoader(String crmType, String tenantId, String contractId,
-            CrmCredential crmCredential) {
+    private void verifyMarketoFromDataLoader(String crmType, CrmCredential crmCredential) {
         String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
 
         Map<String, String> parameters = new HashMap<>();
@@ -128,8 +121,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         excuteHttpRequest(url, parameters);
     }
 
-    private void verifySfdcFromDataLoader(String crmType, String tenantId, String contractId,
-            CrmCredential crmCredential) {
+    private void verifySfdcFromDataLoader(String crmType, CrmCredential crmCredential) {
         String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
 
         Map<String, String> parameters = new HashMap<>();
@@ -173,37 +165,41 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         return false;
     }
 
-    private void writeToZooKeeper(String crmType, String tenantId, String contractId, Boolean isProduction,
-            CrmCredential crmCredential, boolean isWriteCustomerSpace) {
+    private void writeToZooKeeper(String crmType, String tenantId, Boolean isProduction, CrmCredential crmCredential,
+            boolean isWriteCustomerSpace) {
         try {
             if (isWriteCustomerSpace) {
-                writeAsCustomerSpace(tenantId, contractId, isProduction, crmCredential);
+                writeAsCustomerSpace(tenantId, isProduction, crmCredential);
             }
 
             crmCredential.setPassword(CipherUtils.encrypt(crmCredential.getPassword()));
-            writeAsCredential(crmType, tenantId, contractId, isProduction, crmCredential);
+            writeAsCredential(crmType, tenantId, isProduction, crmCredential);
 
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18030, ex);
         }
     }
 
-    private void writeAsCredential(String crmType, String tenantId, String contractId, Boolean isProduction,
-            CrmCredential crmCredential) throws Exception {
+    private void writeAsCredential(String crmType, String tenantId, Boolean isProduction, CrmCredential crmCredential)
+            throws Exception {
+
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
 
         Camille camille = CamilleEnvironment.getCamille();
-        Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, crmType);
-        addExtraPath(crmType, docPath, isProduction);
+        Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
+                customerSpace.getTenantId(), customerSpace.getSpaceId());
+        docPath = addExtraPath(crmType, docPath, isProduction);
         Document doc = new Document(JsonUtils.serialize(crmCredential));
         camille.upsert(docPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
     }
 
-    private void writeAsCustomerSpace(String tenantId, String contractId, Boolean isProduction,
-            CrmCredential crmCredential) throws Exception {
+    private void writeAsCustomerSpace(String tenantId, Boolean isProduction, CrmCredential crmCredential)
+            throws Exception {
         CustomerSpaceInfo spaceInfo = null;
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
         try {
-            spaceInfo = SpaceLifecycleManager
-                    .getInfo(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+            spaceInfo = SpaceLifecycleManager.getInfo(customerSpace.getContractId(), customerSpace.getTenantId(),
+                    customerSpace.getSpaceId());
         } catch (Exception ex) {
             log.warn("Space does not exist!");
         }
@@ -218,7 +214,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         } else {
             spaceInfo.properties.sfdcOrgId = crmCredential.getOrgId();
         }
-        SpaceLifecycleManager.create(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, spaceInfo);
+        SpaceLifecycleManager.create(customerSpace.getContractId(), customerSpace.getTenantId(),
+                customerSpace.getSpaceId(), spaceInfo);
     }
 
     private String getSfdcOrgId(CrmCredential crmCredential) {
@@ -250,13 +247,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
         try {
 
-            String[] tenantKeys = getTenantKeys(tenantId);
-            String contractId = tenantKeys[0];
-            tenantId = tenantKeys[1];
+            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
 
-            Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
-                    crmType);
-            addExtraPath(crmType, docPath, isProduction);
+            Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                    customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId());
+            docPath = addExtraPath(crmType, docPath, isProduction);
 
             Camille camille = CamilleEnvironment.getCamille();
             Document doc = camille.get(docPath);
@@ -270,22 +265,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         }
     }
 
-    private void addExtraPath(String crmType, Path docPath, Boolean isProduction) {
+    private Path addExtraPath(String crmType, Path docPath, Boolean isProduction) {
+        docPath = docPath.append(crmType);
         if (crmType.equalsIgnoreCase(CrmConstants.CRM_SFDC)) {
-            docPath.append(isProduction ? "Production" : "Sandbox");
+            docPath = docPath.append(isProduction ? "Production" : "Sandbox");
         }
+        return docPath;
     }
-
-    private String[] getTenantKeys(String tenantId) {
-        String[] keys = new String[2];
-        keys[0] = tenantId;
-        keys[1] = tenantId;
-        String[] tokens = tenantId.split("[" + CrmConstants.KEY_DELIMITER + "]");
-        if (tokens.length > 1) {
-            keys[0] = tokens[0];
-            keys[1] = tokens[1];
-        }
-        return keys;
-    }
-
 }

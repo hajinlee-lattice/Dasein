@@ -27,9 +27,10 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
         setupDb(tenant1, tenant2);
-        
+
         Camille camille = CamilleEnvironment.getCamille();
-        Path path = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), "contractId", "tenantId");
+        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId",
+                "spaceId");
         try {
             camille.delete(path);
         } catch (Exception ex) {
@@ -40,7 +41,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
     @AfterClass(groups = { "deployment" })
     public void afterClass() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
-        Path path = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), "contractId", "tenantId");
+        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId", "spaceId");
         camille.delete(path);
     }
 
@@ -55,7 +56,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/sfdc?tenantId=contractId.tenantId.displayName&isProduction=true", crmCredential,
+                + "/pls/credentials/sfdc?tenantId=contractId.tenantId.spaceId&isProduction=true", crmCredential,
                 CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
         Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
@@ -64,8 +65,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "deployment" }, dependsOnMethods = { "verifySfdcCredential" })
     public void getSfdcCredential() {
         CrmCredential crmCredential = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/credentials/sfdc?tenantId=contractId.tenantId.displayName&&isProduction=true",
-                CrmCredential.class);
+                + "/pls/credentials/sfdc?tenantId=contractId.tenantId.spaceId&&isProduction=true", CrmCredential.class);
         Assert.assertEquals(crmCredential.getOrgId(), "00D80000000KvZoEAK");
         Assert.assertEquals(crmCredential.getUserName(), "apeters-widgettech@lattice-engines.com");
     }
@@ -80,15 +80,14 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setUserName("latticeenginessandbox1_9026948050BD016F376AE6");
         crmCredential.setPassword("41802295835604145500BBDD0011770133777863CA58");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/marketo?tenantId=contractId.tenantId.displayName", crmCredential, CrmCredential.class);
+                + "/pls/credentials/marketo?tenantId=contractId.tenantId.spaceId", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getUserName(), "latticeenginessandbox1_9026948050BD016F376AE6");
     }
-    
+
     @Test(groups = { "deployment" }, dependsOnMethods = { "verifyMarketoCredential" })
     public void getMarketoCredential() {
         CrmCredential crmCredential = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/credentials/marketo?tenantId=contractId.tenantId",
-                CrmCredential.class);
+                + "/pls/credentials/marketo?tenantId=contractId.tenantId.spaceId", CrmCredential.class);
         Assert.assertEquals(crmCredential.getUserName(), "latticeenginessandbox1_9026948050BD016F376AE6");
         Assert.assertEquals(crmCredential.getPassword(), "41802295835604145500BBDD0011770133777863CA58");
     }
@@ -104,15 +103,14 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setPassword("Lattice1");
         crmCredential.setCompany("TechnologyPartnerLatticeEngines");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/eloqua?tenantId=contractId.tenantId", crmCredential, CrmCredential.class);
+                + "/pls/credentials/eloqua?tenantId=contractId.tenantId.spaceId", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getUserName(), "Matt.Sable");
     }
-    
+
     @Test(groups = { "deployment" }, dependsOnMethods = { "verifyEloquaCredential" })
     public void getEloquaCredential() {
         CrmCredential crmCredential = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/credentials/eloqua?tenantId=contractId.tenantId",
-                CrmCredential.class);
+                + "/pls/credentials/eloqua?tenantId=contractId.tenantId.spaceId", CrmCredential.class);
         Assert.assertEquals(crmCredential.getUserName(), "Matt.Sable");
         Assert.assertEquals(crmCredential.getPassword(), "Lattice1");
     }
