@@ -1,18 +1,20 @@
 package com.latticeengines.scoring.util;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
@@ -20,7 +22,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.apache.commons.codec.binary.Base64;
 
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 
@@ -35,6 +36,8 @@ public class ScoringMapperTransformUtil {
     private static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
     private static final String MODEL = "Model";
     private static final String MODEL_COMPRESSED_SUPPORT_Files = "CompressedSupportFiles";
+    private static final String MODEL_SCRIPT = "Script";
+    private static final String SCORING_SCRIPT_NAME = "scoringengine.py";
     
     public static void parseModelFiles(HashMap<String, JSONObject> models, Path path, HashMap<String, Integer> modelNumberMap) {
 		try {
@@ -47,6 +50,7 @@ public class ScoringMapperTransformUtil {
             String modelID = path.getName();
             models.put(modelID, jsonObject);
             decodeSupportedFiles(modelID, (JSONObject)jsonObject.get(MODEL));
+            writeScoringScript(modelID, (JSONObject)jsonObject.get(MODEL));
             log.info("length is " + models.size());
             log.info("modelName is " + jsonObject.get("Name"));
             modelNumberMap.put(modelID, 0);
@@ -60,12 +64,25 @@ public class ScoringMapperTransformUtil {
             ex.printStackTrace();
         }
     }
+    
+	public static void writeScoringScript(String modelID, JSONObject modelObject) {
+		String scriptContent = (String) modelObject.get(MODEL_SCRIPT);
+		String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
+		String fileName = absolutePath + modelID + SCORING_SCRIPT_NAME;
+		try {
+			File file = new File(fileName);
+			FileUtils.writeStringToFile(file, scriptContent);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
     			
 	private static void decodeSupportedFiles(String modelID, JSONObject modelObject) {
 		JSONArray compressedSupportedFiles = (JSONArray) modelObject.get(MODEL_COMPRESSED_SUPPORT_Files);
 		for (int i = 0; i < compressedSupportedFiles.size(); i++) {
 			JSONObject compressedFile = (JSONObject) compressedSupportedFiles.get(i);
-			String compressedFileName = modelID + compressedFile.get("Key");
+			String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
+			String compressedFileName = absolutePath + modelID + compressedFile.get("Key");
 			decodeBase64ThenDecompressToFile((String)compressedFile.get("Value"), compressedFileName);
 		}
 		
@@ -73,33 +90,40 @@ public class ScoringMapperTransformUtil {
 	
 	private static void decodeBase64ThenDecompressToFile(String value, String fileName)
 	{
-		byte[] decoded = Base64.decodeBase64(value);
 		FileOutputStream stream;
 		try {
 			stream = new FileOutputStream(fileName);
-			
-			Inflater inflater = new Inflater();
-			inflater.setInput(decoded); 		
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(decoded.length); 
-			byte[] buffer = new byte[1024];		
-			while (!inflater.finished()) { 
-				int count;				
-				count = inflater.inflate(buffer);
-				outputStream.write(buffer, 0, count); 
-			} 
-			//byte[] output = outputStream.toByteArray();
-			outputStream.writeTo(stream);;
-			outputStream.close(); 
-		    stream.close();
-		} catch (DataFormatException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
+			GZIPInputStream gzis = 
+		    		new GZIPInputStream(new Base64InputStream(IOUtils.toInputStream(value)));
+			IOUtils.copy(gzis, stream);
+	        gzis.close();
+	        stream.close();
+	    } catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
     
+	public static void writeModelsToFile(HashMap<String, JSONObject> models, String filePath) {
+		try {
+			File file = new File(filePath);
+			if (file.exists()) {
+				file.delete();
+			}
+			BufferedWriter bw = new BufferedWriter (new FileWriter(filePath, true));
+			Set<String> modelIDSet = models.keySet();
+			for (String modelID : modelIDSet) {
+				bw.write(modelID);
+			}
+			bw.flush();
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
     public static void manipulateLeadFile(HashMap<String, Integer> modelNumberMap, String record, HashMap<String, JSONObject> models) {
     	// find the column which contains the modelID   	
     	try {
