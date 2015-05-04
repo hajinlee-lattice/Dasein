@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TypeConverter;
+import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -133,6 +134,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         mapReduceCustomizationService.addCustomizations(job, mrJobName, properties);
         if (properties != null) {
             Configuration config = job.getConfiguration();
+            config.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
             for (Object key : properties.keySet()) {
                 config.set(key.toString(), properties.getProperty((String) key));
             }

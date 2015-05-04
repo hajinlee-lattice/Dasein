@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.sqoop.LedpSqoop;
@@ -102,6 +103,9 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
         cmds.add(StringUtils.join(splitCols, ","));
         cmds.add("--target-dir");
         cmds.add(targetDir);
+        yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
+//        yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS, 
+//        "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5003,server=y,suspend=y");
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
 
     }
