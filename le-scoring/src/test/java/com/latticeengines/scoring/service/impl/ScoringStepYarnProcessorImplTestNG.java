@@ -109,7 +109,7 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
                 scoringCommand);
         waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
 
-        HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + customer + "/scoring/data/" + testInputTable + "/datatype.json");
+        HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + customer + "/scoring/" + testInputTable +"/data/datatype.avsc");
         appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(), ScoringCommandStep.EXPORT_DATA,
                 scoringCommand);
         waitForSuccess(appId, ScoringCommandStep.EXPORT_DATA);

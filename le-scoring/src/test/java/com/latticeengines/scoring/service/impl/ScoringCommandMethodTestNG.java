@@ -70,7 +70,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
     private String appTimeLineWebAppAddress = "";
 
-    private static final String cleanUpInterval = "0.000001";
+    private static final double cleanUpInterval = 0.000001;
 
     private ScoringManagerServiceImpl scoringManager;
 
@@ -90,6 +90,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringManager.setMetadataService(metadataService);
         scoringManager.setScoringCreds(scoringCreds);
         scoringManager.setScoringJdbcTemplate(scoringJdbcTemplate);
+        scoringManager.setEnableCleanHdfs(false);
     }
 
     @Test(groups = "functional")

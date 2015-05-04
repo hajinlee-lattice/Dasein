@@ -188,7 +188,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
         scoringCommandStateEntityMgr.update(scoringCommandState);
 
         scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
-        scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.update(scoringCommand);
 
         String appIds = "";

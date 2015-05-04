@@ -24,8 +24,10 @@
                 <entry key="yarnConfiguration" value-ref="yarnConfiguration" />
                 <entry key="appTimeLineWebAppAddress" value="${dataplatform.yarn.timeline-service.webapp.address}" />
                 <entry key="scoringJdbcTemplate" value-ref="scoringJdbcTemplate" />
-                <entry key="cleanUpInterval" value="${scoring.cleanup.timeinternval}" />
                 <entry key="scoringCreds" value-ref="scoringCreds" />
+                <entry key="customerBaseDir" value="${dataplatform.customer.basedir}" />
+                <entry key="cleanUpInterval" value="#{T(java.lang.Double).parseDouble(${scoring.cleanup.timeinternval})}" />
+                <entry key="enableCleanHdfs" value="#{T(java.lang.Boolean).parseBoolean(${scoring.cleanup.enableCleanHdfs})}" />
             </map>
         </property>
     </bean>

@@ -22,7 +22,7 @@ import com.latticeengines.scoring.service.ScoringCommandLogService;
 @Component("scoringCommandLogService")
 public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
-    public static final String SCORINGCOMMAND_ID_LOG_PREFIX = "ScoringCommandId";
+    public static final String SCORINGCOMMAND_ID_LOG_PREFIX = "LeadInputQueue_ID";
     private static final Log log = LogFactory.getLog(ScoringCommandLogServiceImpl.class);
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
@@ -39,6 +39,7 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
         // Insert new row for each message
         scoringCommandLogEntityMgr.create(scoringCommandLog);
+        log.info(scoringCommandLog);
     }
 
     @Override

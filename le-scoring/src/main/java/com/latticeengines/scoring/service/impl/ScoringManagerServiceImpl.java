@@ -20,6 +20,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
@@ -68,16 +69,20 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
 
     private JdbcTemplate scoringJdbcTemplate;
 
-    private String cleanUpInterval;
+    private double cleanUpInterval;
 
     private DbCreds scoringCreds;
+    
+    private String customerBaseDir;
+    
+    private boolean enableCleanHdfs;
 
     private int waitTime = 180;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         log.info("ScoringManager started!");
-        log.info("look at database rows:" + scoringCommandEntityMgr.getPopulated());
+        log.info("look at database rows: " + scoringCommandEntityMgr.getPopulated());
         cleanTables();
         List<Future<Long>> futures = new ArrayList<>();
         List<ScoringCommand> scoringCommands = scoringCommandEntityMgr.getPopulated();
@@ -104,11 +109,9 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
 
     @VisibleForTesting
     void cleanTables() {
-        double cleanUpInterval = Double.parseDouble(this.cleanUpInterval);
-
          List<ScoringCommand> consumedCommands = scoringCommandEntityMgr.getConsumed();
          for(ScoringCommand scoringCommand : consumedCommands){
-             if (scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < System.currentTimeMillis()) {
+             if (scoringCommand.getConsumed() != null && scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < System.currentTimeMillis()) {
                  metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
                  for(ScoringCommandState scoringCommandState : scoringCommandStateEntityMgr.findByScoringCommand(scoringCommand)){
                      scoringCommandStateEntityMgr.delete(scoringCommandState);
@@ -116,6 +119,8 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
                  for(ScoringCommandLog scoringCommandLog : scoringCommandLogService.findByScoringCommand(scoringCommand)){
                      scoringCommandLogService.delete(scoringCommandLog);
                  }
+                 if (enableCleanHdfs)
+                     cleanHdfs(scoringCommand);
                  scoringCommandEntityMgr.delete(scoringCommand);
              }
          }
@@ -126,6 +131,14 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
                 metadataService.dropTable(scoringJdbcTemplate, scoringCommandResult.getTableName());
                 scoringCommandResultEntityMgr.delete(scoringCommandResult);
             }
+        }
+    }
+    
+    void cleanHdfs(ScoringCommand scoringCommand){
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + scoringCommand.getId() + "/scoring/" + scoringCommand.getTableName());
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -233,14 +246,6 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         this.scoringJdbcTemplate = scoringJdbcTemplate;
     }
 
-    public String getCleanUpInterval() {
-        return cleanUpInterval;
-    }
-
-    public void setCleanUpInterval(String cleanUpInterval) {
-        this.cleanUpInterval = cleanUpInterval;
-    }
-
     public DbCreds getScoringCreds() {
         return scoringCreds;
     }
@@ -248,4 +253,29 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     public void setScoringCreds(DbCreds scoringCreds) {
         this.scoringCreds = scoringCreds;
     }
+
+    public String getCustomerBaseDir() {
+        return customerBaseDir;
+    }
+
+    public void setCustomerBaseDir(String customerBaseDir) {
+        this.customerBaseDir = customerBaseDir;
+    }
+
+    public double getCleanUpInterval() {
+        return cleanUpInterval;
+    }
+
+    public void setCleanUpInterval(double cleanUpInterval) {
+        this.cleanUpInterval = cleanUpInterval;
+    }
+
+    public boolean getEnableCleanHdfs() {
+        return enableCleanHdfs;
+    }
+
+    public void setEnableCleanHdfs(boolean enableCleanHdfs) {
+        this.enableCleanHdfs = enableCleanHdfs;
+    }
+
 }

@@ -39,7 +39,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     private static final String SCORING_JOB_TYPE = "scoringJob";
 
-    private static final String dataTypeFile = "datatype.json";
+    private static final String dataTypeFile = "datatype.avsc";
 
     private static String comma = ",";
 
