@@ -71,28 +71,35 @@ angular.module('mainApp.config.services.ConfigService', [
         if (topologyType === "sfdc") {
             credentialUrl += "&isProduction=" + isProduction;
         }
+        var result;
         $http({
             method: "GET", 
             url: credentialUrl
         })
         .success(function(data, status, headers, config) {
-            var result = null;
-            if (data != null && data !== "") {
-                result = data;
-                /*if (data.Success === true) {
-                    SessionService.HandleResponseErrors(data, status);
-                    if (ServiceErrorUtility.ServiceResponseContainsError(data, "VALIDATE_CREDENTIALS_FAILURE")) {
-                        result.FailureReason = "VALIDATE_CREDENTIALS_FAILURE";
-                    } else {
-                        result.FailureReason = "SYSTEM_ERROR";
-                    }
-                }*/
+            if (status === 200) {
+                result = {
+                    success: true,
+                    resultObj: data,
+                    resultErrors: null
+                };
+            } else {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: data.errorMsg
+                };
             }
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
             SessionService.HandleResponseErrors(data, status);
-            deferred.resolve(data);
+            result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString("SYSTEM_ERROR")
+                };
+            deferred.resolve(result);
         });
         
         return deferred.promise;
@@ -117,7 +124,6 @@ angular.module('mainApp.config.services.ConfigService', [
             data: JSON.stringify(apiObj)
         })
         .success(function(data, status, headers, config) {
-            var result = null;
             if (status === 200) {
                 result = {
                     success: true,

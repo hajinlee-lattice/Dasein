@@ -23,6 +23,7 @@ BUTTON_ACTIVATE_LABEL=Activate
 BUTTON_YES_LABEL=Yes
 BUTTON_NO_LABEL=No
 BUTTON_SAVE_AND_VERIFY=Save & Verify
+BUTTON_EDIT_LABEL=Edit
 FORGOT_PASSWORD_TITLE=Forgot your password?
 FORGOT_PASSWORD_MESSAGE=Enter your username below and we'll send you a temporary password to use for login.
 FORGOT_PASSWORD_SUCCESS_MESSAGE=An email has been sent to you with more details for resetting your password.

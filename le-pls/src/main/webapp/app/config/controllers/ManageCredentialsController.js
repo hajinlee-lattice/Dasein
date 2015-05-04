@@ -61,11 +61,30 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     $scope.crmSandboxCredentials = new Credentials();
     $scope.crmProductionCredentials = new Credentials();
     $scope.mapCredentials = new Credentials();
-    $scope.isMarketo = false;
+    $scope.isMarketo = true;
+    
+    ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
+        if (result != null && result.success === true) {
+            var returned = result.resultObj;
+            $scope.crmProductionCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
+            $scope.crmProductionComplete = true;
+        }
+    });
+    
+    ConfigService.GetCurrentCredentials("sfdc", false).then(function(result) {
+        if (result != null && result.success === true) {
+            var returned = result.resultObj;
+            $scope.crmSandboxCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
+            $scope.crmSandboxComplete = true;
+        }
+    });
     
     ConfigService.GetCurrentCredentials("marketo").then(function(result) {
         if (result != null && result.success === true) {
-            
+            $scope.isMarketo = true;
+            var returned = result.resultObj;
+            $scope.mapCredentials = new Credentials(returned.Url, null, null, returned.Password, returned.UserName, null);
+            $scope.mapComplete = true;
         }
     });
     
@@ -81,7 +100,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
                 if (result == null) {
                     $scope.crmProductionError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
-                    
+                    $scope.crmProductionComplete = true;
                 } else {
                     $scope.crmProductionError = result.resultErrors;
                 }
@@ -103,7 +122,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
                 if (result == null) {
                     $scope.crmSandboxError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
-                    
+                    $scope.crmSandboxComplete = true;
                 } else {
                     $scope.crmSandboxError = result.resultErrors;
                 }
@@ -125,7 +144,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
                 if (result == null) {
                     $scope.mapError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
-                    
+                    $scope.mapComplete = true;
                 } else {
                     $scope.mapError = result.resultErrors;
                 }
