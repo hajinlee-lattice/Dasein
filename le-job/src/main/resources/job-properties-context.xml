@@ -28,7 +28,7 @@
                 <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
                 <value>file:${PROPDATA_PROPDIR}/propdata.properties</value>
                 <value>file:${DATAFLOW_PROPDIR}/dataflow.properties</value>
-                <!-- value>file:${PLS_PROPDIR}/pls.properties</value -->
+                <value>file:${PLS_PROPDIR}/pls.properties</value>
                 <value>file:${SCORING_PROPDIR}/scoring.properties</value>
                 <value>file:${DELLEBI_PROPDIR}/dellebi.properties</value>
             </list>

@@ -20,3 +20,5 @@ export DPQUARTZ_ENABLED=disabled
 export DPDL_QUARTZ_ENABLED=disabled
 export PROPDATA_MADISON_QUARTZ_ENABLED=disabled
 export SCORING_MGR_QUARTZ_ENABLED=disabled
+export DELLEBI_QUARTZ_ENABLED=disabled
+export MODEL_DL_QUARTZ_ENABLED=disabled

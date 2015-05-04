@@ -145,6 +145,24 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-propdata</artifactId>
             <version>${le.propdata.version}</version>
+	    <exclusions>
+                <exclusion>
+                    <groupId>com.latticeengines</groupId>
+                    <artifactId>le-dataflow</artifactId>
+                </exclusion>
+	        <exclusion>
+                    <groupId>org.springframework.data</groupId>
+                    <artifactId>spring-data-cassandra</artifactId>
+	            </exclusion>
+	        <exclusion>
+                    <groupId>com.latticeengines</groupId>
+                    <artifactId>le-db</artifactId>
+	        </exclusion>
+	        <exclusion>
+                    <groupId>com.latticeengines</groupId>
+                    <artifactId>le-dataplatform</artifactId>
+	        </exclusion>
+	    </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -158,12 +176,17 @@
             <version>${le.dellebi.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <!--dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dellebi</artifactId>
+            <version>${le.dellebi.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-pls</artifactId>
             <version>${le.pls.version}</version>
             <scope>runtime</scope>
-        </dependency-->
+        </dependency>
         <!-- use this instead of <artifactId>persistence-api</artifactId> 
             1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>

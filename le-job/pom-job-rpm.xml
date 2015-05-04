@@ -6,11 +6,11 @@
     <artifactId>le-job-rpm</artifactId>
     <packaging>rpm</packaging>
     <description>LE JOB RPM</description>
-	
-	<properties>
-		<le.rpm.version>1.0.32-SNAPSHOT</le.rpm.version>
-	</properties>
-	
+
+    <properties>
+        <le.rpm.version>1.0.32-SNAPSHOT</le.rpm.version>
+    </properties>
+
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
@@ -42,35 +42,47 @@
                 <score.properties.path>
                     ../le-scoring/conf/env/devcluster
                 </score.properties.path>
+                <dellebi.properties.path>
+                    ../le-dellebi/conf/env/devcluster
+                </dellebi.properties.path>
+                <pls.properties.path>
+                    ../le-pls/conf/env/devcluster
+                </pls.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
-	    </profile>
-		<profile>
-			<id>integration</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-				<property>
-					<name>environment.type</name>
-					<value>intcluster</value>
-				</property>
-			</activation>
-			<properties>
-				<job.properties.path>conf/env/intcluster</job.properties.path>
-				<dataplatform.properties.path>
-					../le-dataplatform/conf/env/intcluster
-				</dataplatform.properties.path>
+        </profile>
+        <profile>
+            <id>integration</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>intcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <job.properties.path>conf/env/intcluster</job.properties.path>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/intcluster
+                </dataplatform.properties.path>
                 <dataflow.properties.path>
                     ../le-dataflow/conf/env/intcluster
                 </dataflow.properties.path>
                 <propdata.properties.path>
                     ../le-propdata/conf/env/intcluster
                 </propdata.properties.path>
-                 <score.properties.path>
+                <score.properties.path>
                     ../le-scoring/conf/env/intcluster
                 </score.properties.path>
-				<bin.env.path>bin/env/intcluster</bin.env.path>
-			</properties>
-		</profile>
+                <dellebi.properties.path>
+                    ../le-dellebi/conf/env/intcluster
+                </dellebi.properties.path>
+                <pls.properties.path>
+                    ../le-pls/conf/env/intcluster
+                </pls.properties.path>
+                <bin.env.path>bin/env/intcluster</bin.env.path>
+            </properties>
+        </profile>
         <profile>
             <id>qa</id>
             <activation>
@@ -93,6 +105,12 @@
                 <score.properties.path>
                     ../le-scoring/conf/env/qacluster
                 </score.properties.path>
+                <dellebi.properties.path>
+                    ../le-dellebi/conf/env/qacluster
+                </dellebi.properties.path>
+                <pls.properties.path>
+                    ../le-pls/conf/env/qacluster
+                </pls.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -115,9 +133,15 @@
                 <propdata.properties.path>
                     ../le-propdata/conf/env/prodcluster
                 </propdata.properties.path>
-                 <score.properties.path>
+                <score.properties.path>
                     ../le-scoring/conf/env/prodcluster
                 </score.properties.path>
+                <dellebi.properties.path>
+                    ../le-dellebi/conf/env/prodcluster
+                </dellebi.properties.path>
+                <pls.properties.path>
+                    ../le-pls/conf/env/prodcluster
+                </pls.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -169,6 +193,12 @@
                                 </source>
                                 <source>
                                     <location>${score.properties.path}/scoring.properties</location>
+                                </source>
+                                <source>
+                                    <location>${dellebi.properties.path}/dellebi.properties</location>
+                                </source>
+                                <source>
+                                    <location>${pls.properties.path}/pls.properties</location>
                                 </source>
                             </sources>
                         </mapping>
