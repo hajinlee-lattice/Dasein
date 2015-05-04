@@ -77,9 +77,6 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelCommand modelCommand;
 
-    @SuppressWarnings("unused")
-    private String httpFsPrefix;
-
     private String resourceManagerWebAppAddress;
 
     private String appTimeLineWebAppAddress;
@@ -97,36 +94,27 @@ public class ModelCommandCallable implements Callable<Long> {
     public ModelCommandCallable() {
     }
 
-    public ModelCommandCallable(ModelCommand modelCommand, Configuration yarnConfiguration,
-            ModelingJobService modelingJobService, ModelCommandEntityMgr modelCommandEntityMgr,
-            ModelCommandStateEntityMgr modelCommandStateEntityMgr, ModelStepYarnProcessor modelStepYarnProcessor,
-            ModelCommandLogService modelCommandLogService, ModelCommandResultEntityMgr modelCommandResultEntityMgr,
-            ModelStepProcessor modelStepFinishProcessor, ModelStepProcessor modelStepOutputResultsProcessor,
-            ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl,
-            AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress,
-            String appTimeLineWebAppAddress, int rowFailThreshold, int rowWarnThreshold,
-            int positiveEventFailThreshold, int positiveEventWarnThreshold, MetadataService metadataService) {
-        this.modelCommand = modelCommand;
-        this.yarnConfiguration = yarnConfiguration;
-        this.modelingJobService = modelingJobService;
-        this.modelCommandEntityMgr = modelCommandEntityMgr;
-        this.modelCommandStateEntityMgr = modelCommandStateEntityMgr;
-        this.modelStepYarnProcessor = modelStepYarnProcessor;
-        this.modelCommandLogService = modelCommandLogService;
-        this.modelCommandResultEntityMgr = modelCommandResultEntityMgr;
-        this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
-        this.modelStepFinishProcessor = modelStepFinishProcessor;
-        this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
-        this.debugProcessorImpl = debugProcessorImpl;
-        this.alertService = alertService;
-        this.httpFsPrefix = httpFsPrefix;
-        this.resourceManagerWebAppAddress = resourceManagerWebAppAddress;
-        this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
-        this.rowFailThreshold = rowFailThreshold;
-        this.rowWarnThreshold = rowWarnThreshold;
-        this.positiveEventFailThreshold = positiveEventFailThreshold;
-        this.positiveEventWarnThreshold = positiveEventWarnThreshold;
-        this.metadataService = metadataService;
+    public ModelCommandCallable(Builder builder) {
+        this.modelCommand = builder.modelCommand;
+        this.yarnConfiguration = builder.yarnConfiguration;
+        this.modelingJobService = builder.modelingJobService;
+        this.modelCommandEntityMgr = builder.modelCommandEntityMgr;
+        this.modelCommandStateEntityMgr = builder.modelCommandStateEntityMgr;
+        this.modelStepYarnProcessor = builder.modelStepYarnProcessor;
+        this.modelCommandLogService = builder.modelCommandLogService;
+        this.modelCommandResultEntityMgr = builder.modelCommandResultEntityMgr;
+        this.modelStepOutputResultsProcessor = builder.modelStepOutputResultsProcessor;
+        this.modelStepFinishProcessor = builder.modelStepFinishProcessor;
+        this.modelStepRetrieveMetadataProcessor = builder.modelStepRetrieveMetadataProcessor;
+        this.debugProcessorImpl = builder.debugProcessorImpl;
+        this.alertService = builder.alertService;
+        this.resourceManagerWebAppAddress = builder.resourceManagerWebAppAddress;
+        this.appTimeLineWebAppAddress = builder.appTimeLineWebAppAddress;
+        this.rowFailThreshold = builder.rowFailThreshold;
+        this.rowWarnThreshold = builder.rowWarnThreshold;
+        this.positiveEventFailThreshold = builder.positiveEventFailThreshold;
+        this.positiveEventWarnThreshold = builder.positiveEventWarnThreshold;
+        this.metadataService = builder.metadataService;
     }
 
     @Override
@@ -412,6 +400,134 @@ public class ModelCommandCallable implements Callable<Long> {
             modelCommandLogService.log(modelCommand, "Data diagnostics:\n" + warnings);
         }
 
+    }
+    
+
+    public static class Builder {
+        
+        ModelCommand modelCommand;
+        Configuration yarnConfiguration;
+        ModelingJobService modelingJobService;
+        ModelCommandEntityMgr modelCommandEntityMgr;
+        ModelCommandStateEntityMgr modelCommandStateEntityMgr;
+        ModelStepYarnProcessor modelStepYarnProcessor;
+        ModelCommandLogService modelCommandLogService;
+        ModelCommandResultEntityMgr modelCommandResultEntityMgr;
+        ModelStepProcessor modelStepFinishProcessor;
+        ModelStepProcessor modelStepOutputResultsProcessor;
+        ModelStepProcessor modelStepRetrieveMetadataProcessor;
+        DebugProcessorImpl debugProcessorImpl;
+        AlertService alertService;
+        String resourceManagerWebAppAddress;
+        String appTimeLineWebAppAddress;
+        int rowFailThreshold;
+        int rowWarnThreshold;
+        int positiveEventFailThreshold;
+        int positiveEventWarnThreshold;
+        MetadataService metadataService;
+        
+        public Builder() {
+        }
+        
+        public Builder modelCommand(ModelCommand modelCommand) {
+            this.modelCommand = modelCommand;
+            return this;
+        }
+        
+        public Builder yarnConfiguration(Configuration yarnConfiguration) {
+            this.yarnConfiguration = yarnConfiguration;
+            return this;
+        }
+        
+        public Builder modelingJobService(ModelingJobService modelingJobService) {
+            this.modelingJobService = modelingJobService;
+            return this;
+        }
+        
+        public Builder modelCommandEntityMgr(ModelCommandEntityMgr modelCommandEntityMgr) {
+            this.modelCommandEntityMgr = modelCommandEntityMgr;
+            return this;
+        }
+        
+        public Builder modelCommandStateEntityMgr(ModelCommandStateEntityMgr modelCommandStateEntityMgr) {
+            this.modelCommandStateEntityMgr = modelCommandStateEntityMgr;
+            return this;
+        }
+        
+        public Builder modelStepYarnProcessor(ModelStepYarnProcessor modelStepYarnProcessor) {
+            this.modelStepYarnProcessor = modelStepYarnProcessor;
+            return this;
+        }
+        
+        public Builder modelCommandLogService(ModelCommandLogService modelCommandLogService) {
+            this.modelCommandLogService = modelCommandLogService;
+            return this;
+        }
+        
+        public Builder modelCommandResultEntityMgr(ModelCommandResultEntityMgr modelCommandResultEntityMgr) {
+            this.modelCommandResultEntityMgr = modelCommandResultEntityMgr;
+            return this;
+        }
+        
+        public Builder modelStepFinishProcessor(ModelStepProcessor modelStepFinishProcessor) {
+            this.modelStepFinishProcessor = modelStepFinishProcessor;
+            return this;
+        }
+        
+        public Builder modelStepOutputResultsProcessor(ModelStepProcessor modelStepOutputResultsProcessor) {
+            this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
+            return this;
+        }
+        
+        public Builder modelStepRetrieveMetadataProcessor(ModelStepProcessor modelStepRetrieveMetadataProcessor) {
+            this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
+            return this;
+        }
+        
+        public Builder debugProcessorImpl(DebugProcessorImpl debugProcessorImpl) {
+            this.debugProcessorImpl = debugProcessorImpl;
+            return this;
+        }
+        
+        public Builder alertService(AlertService alertService) {
+            this.alertService = alertService;
+            return this;
+        }
+        
+        public Builder resourceManagerWebAppAddress(String resourceManagerWebAppAddress) {
+            this.resourceManagerWebAppAddress = resourceManagerWebAppAddress;
+            return this;
+        }
+        
+        public Builder appTimeLineWebAppAddress(String appTimeLineWebAppAddress) {
+            this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
+            return this;
+        }
+        
+        public Builder rowFailThreshold(int rowFailThreshold) {
+            this.rowFailThreshold = rowFailThreshold;
+            return this;
+        }
+        
+        public Builder rowWarnThreshold(int rowWarnThreshold) {
+            this.rowWarnThreshold = rowWarnThreshold;
+            return this;
+        }
+        
+        public Builder positiveEventFailThreshold(int positiveEventFailThreshold) {
+            this.positiveEventFailThreshold = positiveEventFailThreshold;
+            return this;
+        }
+        
+        public Builder positiveEventWarnThreshold(int positiveEventWarnThreshold) {
+            this.positiveEventWarnThreshold = positiveEventWarnThreshold;
+            return this;
+        }
+        
+        public Builder metadataService(MetadataService metadataService) {
+            this.metadataService = metadataService;
+            return this;
+        }
     }
 
 }

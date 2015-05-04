@@ -64,8 +64,6 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     private Configuration yarnConfiguration;
 
-    private String httpFsPrefix;
-
     private String resourceManagerWebAppAddress;
 
     private String appTimeLineWebAppAddress;
@@ -97,13 +95,28 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         }
 
         for (ModelCommand modelCommand : modelCommands) {
-            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand, yarnConfiguration,
-                    modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
-                    modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
-                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl,
-                    alertService, httpFsPrefix, resourceManagerWebAppAddress, appTimeLineWebAppAddress,
-                    rowFailThreshold, rowWarnThreshold, positiveEventFailThreshold, positiveEventWarnThreshold,
-                    metadataService)));
+            ModelCommandCallable.Builder builder = new ModelCommandCallable.Builder();
+            builder.modelCommand(modelCommand) //
+            .yarnConfiguration(yarnConfiguration) //
+            .modelingJobService(modelingJobService) //
+            .modelCommandEntityMgr(modelCommandEntityMgr) //
+            .modelCommandStateEntityMgr(modelCommandStateEntityMgr) //
+            .modelStepYarnProcessor(modelStepYarnProcessor) //
+            .modelCommandLogService(modelCommandLogService) //
+            .modelCommandResultEntityMgr(modelCommandResultEntityMgr) //
+            .modelStepFinishProcessor(modelStepFinishProcessor) //
+            .modelStepOutputResultsProcessor(modelStepOutputResultsProcessor) //
+            .modelStepRetrieveMetadataProcessor(modelStepRetrieveMetadataProcessor) //
+            .debugProcessorImpl(debugProcessorImpl) //
+            .alertService(alertService) //
+            .resourceManagerWebAppAddress(resourceManagerWebAppAddress) //
+            .appTimeLineWebAppAddress(appTimeLineWebAppAddress) //
+            .rowFailThreshold(rowFailThreshold) //
+            .rowWarnThreshold(rowWarnThreshold) //
+            .positiveEventFailThreshold(positiveEventFailThreshold) //
+            .positiveEventWarnThreshold(positiveEventWarnThreshold) //
+            .metadataService(metadataService);
+            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(builder)));
         }
         for (Future<Long> future : futures) {
             try {
@@ -225,14 +238,6 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     public void setYarnConfiguration(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
-    }
-
-    public String getHttpFsPrefix() {
-        return httpFsPrefix;
-    }
-
-    public void setHttpFsPrefix(String httpFsPrefix) {
-        this.httpFsPrefix = httpFsPrefix;
     }
 
     public AlertService getAlertService() {

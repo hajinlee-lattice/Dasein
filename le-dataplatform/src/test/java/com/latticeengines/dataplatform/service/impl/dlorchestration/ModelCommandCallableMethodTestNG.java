@@ -71,9 +71,6 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     @Autowired
     private AlertServiceImpl alertService;
 
-    @Value("${dataplatform.fs.web.defaultFS}")
-    private String httpFsPrefix;
-
     @Value("${dataplatform.yarn.resourcemanager.webapp.address}")
     private String resourceManagerWebAppAddress;
 
@@ -114,12 +111,29 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 ModelCommandStatus.IN_PROGRESS);
         modelCommandResultEntityMgr.create(result);
 
-        ModelCommandCallable callable = new ModelCommandCallable(command, yarnConfiguration, modelingJobService,
-                modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
-                modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
-                modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold,
-                positiveEventFailThreshold, positiveEventWarnThreshold, metadataService);
+        ModelCommandCallable.Builder builder = new ModelCommandCallable.Builder();
+        builder.modelCommand(command) //
+        .yarnConfiguration(yarnConfiguration) //
+        .modelingJobService(modelingJobService) //
+        .modelCommandEntityMgr(modelCommandEntityMgr) //
+        .modelCommandStateEntityMgr(modelCommandStateEntityMgr) //
+        .modelStepYarnProcessor(modelStepYarnProcessor) //
+        .modelCommandLogService(modelCommandLogService) //
+        .modelCommandResultEntityMgr(modelCommandResultEntityMgr) //
+        .modelStepFinishProcessor(modelStepFinishProcessor) //
+        .modelStepOutputResultsProcessor(modelStepOutputResultsProcessor) //
+        .modelStepRetrieveMetadataProcessor(modelStepRetrieveMetadataProcessor) //
+        .debugProcessorImpl(debugProcessorImpl) //
+        .alertService(alertService) //
+        .resourceManagerWebAppAddress(resourceManagerWebAppAddress) //
+        .appTimeLineWebAppAddress(appTimeLineWebAppAddress) //
+        .rowFailThreshold(rowFailThreshold) //
+        .rowWarnThreshold(rowWarnThreshold) //
+        .positiveEventFailThreshold(positiveEventFailThreshold) //
+        .positiveEventWarnThreshold(positiveEventWarnThreshold) //
+        .metadataService(metadataService);
+
+        ModelCommandCallable callable = new ModelCommandCallable(builder);
 
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
 
@@ -135,12 +149,29 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         command.setModelCommandStep(ModelCommandStep.SUBMIT_MODELS);
         modelCommandEntityMgr.create(command);
 
-        ModelCommandCallable callable = new ModelCommandCallable(command, yarnConfiguration, modelingJobService,
-                modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
-                modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
-                modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold,
-                positiveEventFailThreshold, positiveEventWarnThreshold, metadataService);
+        ModelCommandCallable.Builder builder = new ModelCommandCallable.Builder();
+        builder.modelCommand(command) //
+        .yarnConfiguration(yarnConfiguration) //
+        .modelingJobService(modelingJobService) //
+        .modelCommandEntityMgr(modelCommandEntityMgr) //
+        .modelCommandStateEntityMgr(modelCommandStateEntityMgr) //
+        .modelStepYarnProcessor(modelStepYarnProcessor) //
+        .modelCommandLogService(modelCommandLogService) //
+        .modelCommandResultEntityMgr(modelCommandResultEntityMgr) //
+        .modelStepFinishProcessor(modelStepFinishProcessor) //
+        .modelStepOutputResultsProcessor(modelStepOutputResultsProcessor) //
+        .modelStepRetrieveMetadataProcessor(modelStepRetrieveMetadataProcessor) //
+        .debugProcessorImpl(debugProcessorImpl) //
+        .alertService(alertService) //
+        .resourceManagerWebAppAddress(resourceManagerWebAppAddress) //
+        .appTimeLineWebAppAddress(appTimeLineWebAppAddress) //
+        .rowFailThreshold(rowFailThreshold) //
+        .rowWarnThreshold(rowWarnThreshold) //
+        .positiveEventFailThreshold(positiveEventFailThreshold) //
+        .positiveEventWarnThreshold(positiveEventWarnThreshold) //
+        .metadataService(metadataService);
+
+        ModelCommandCallable callable = new ModelCommandCallable(builder);
         ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
         JobStatus jobStatus = new JobStatus();
 
