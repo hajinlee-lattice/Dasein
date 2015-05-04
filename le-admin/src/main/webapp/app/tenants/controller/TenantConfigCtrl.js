@@ -2,6 +2,7 @@ var app = angular.module("app.tenants.controller.TenantConfigCtrl", [
     'app.tenants.service.TenantService',
     'app.services.service.ServiceService',
     'app.tenants.directive.CamilleConfigDirective',
+    'app.tenants.directive.FeatureFlagDirective',
     'le.common.util.UnderscoreUtility',
     "app.tenants.util.TenantUtility",
     'ui.bootstrap',
@@ -10,19 +11,34 @@ var app = angular.module("app.tenants.controller.TenantConfigCtrl", [
 ]);
 
 app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal, $interval, _, TenantService, TenantUtility, ServiceService) {
+    //==================================================
+    // initialize flags
+    //==================================================
     $scope.new = false;
     $scope.readonly = true;
     $scope.listenState = true;
+    $scope.loading = true;
 
+    //==================================================
+    // parse state parameters flags
+    //==================================================
     if ($stateParams.new) $scope.new = $stateParams.new === "true";
     if ($stateParams.readonly) $scope.readonly = $stateParams.readonly === "true";
     if ($stateParams.listenState) $scope.listenState = $stateParams.listenState === "true";
 
+    //==================================================
+    // setup customer space ==> 3 IDs
+    //==================================================
     $scope.tenantId = $stateParams.tenantId;
     $scope.contractId = $stateParams.contractId || $stateParams.tenantId;
+    $scope.spaceId = "Production";
     $scope.product = $stateParams.product;
 
-    $scope.loading = true;
+    //==================================================
+    // system-wise options
+    //==================================================
+    $scope.availableProducts = ["LPA"];
+    $scope.availableTopologies = ["MARKETO", "ELOQUA"];
     $scope.services = [];
 
     $scope.accordion = _.map($scope.services, function(){
@@ -37,9 +53,13 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
             properties: {
                 displayName: "LPA_" + $scope.tenantId,
                 description: "A LPA solution for " + $scope.tenantId + " in " + $scope.contractId,
-                product: $scope.product
+                product: $scope.availableProducts[0],
+                topology: $scope.availableTopologies[0]
             },
             featureFlags: ""
+        };
+        $scope.featureFlags = {
+            Dante: false
         };
 
         ServiceService.GetRegisteredServices().then( function(result) {
@@ -69,6 +89,9 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                 $scope.spaceInfo = result1.resultObj.CustomerSpaceInfo;
                 $scope.contractInfo = result1.resultObj.ContractInfo;
                 $scope.tenantInfo = result1.resultObj.TenantInfo;
+
+                $scope.featureFlags = JSON.parse($scope.spaceInfo.featureFlags);
+
                 ServiceService.GetRegisteredServices().then( function(result2) {
                     if (result2.success) {
                         $scope.services = result2.resultObj;
@@ -105,7 +128,8 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         var infos = {CustomerSpaceInfo: $scope.spaceInfo};
 
         $scope.tenantRegisration =
-            TenantUtility.constructTenantRegistration($scope.components, $scope.tenantId, $scope.contractId, infos);
+            TenantUtility.constructTenantRegistration($scope.components,
+                $scope.tenantId, $scope.contractId, infos, $scope.featureFlags);
 
         $modal.open({
             template: '<div class="modal-header">' +

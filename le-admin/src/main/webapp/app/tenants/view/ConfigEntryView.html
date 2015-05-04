@@ -21,13 +21,11 @@
 
         <input ng-if="isBoolean" class="checkbox"
                type="checkbox" ng-model="config.Data"
-               ng-model-options="{ debounce: 200 }"
                ng-change="validateInput()" />
 
         <select ng-if="isSelect" class="form-control"
                 ng-options="option for option in options"
                 ng-model="config.Data"
-                ng-model-options="{ debounce: 200 }"
                 ng-change="validateInput()"></select>
 
         <label ng-if="showError" class="control-label">

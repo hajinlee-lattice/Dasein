@@ -1,22 +1,61 @@
 <div ng-controller="TenantConfigCtrl">
-    <div class="panel panel-default">
+    <div class="panel panel-default tenant-info-panel">
         <div class="panel-heading">
-            <h3 class="panel-title">Tenant Info</h3>
+            <h3 class="panel-title">
+                Contract: <strong>{{ contractId }}</strong>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                Tenant: <strong>{{ tenantId }}</strong>
+            </h3>
         </div>
         <div class="panel-body">
+            <h4>Tenant Info</h4>
             <div class="row">
-                <div class="col col-md-4 col-sm-4 col-xs-6">Tenant ID: {{ tenantId }}</div>
-                <div class="col col-md-4 col-sm-4 col-xs-6">Contract ID: {{ contractId }}</div>
+                <div class="col col-md-4 col-sm-4 col-xs-6">
+                    Name: <strong>{{ tenantInfo.properties.displayName }}</strong>
+                </div>
+                <div class="col col-md-4 col-sm-4 col-xs-6">
+                    Created at: <strong>{{ tenantInfo.properties.created | date : "yyyy-MM-dd" }}</strong>
+                </div>
+                <div class="col col-md-4 col-sm-4 col-xs-6">
+                    Last modified: <strong>{{ tenantInfo.properties.lastModified | date : "yyyy-MM-dd" }}</strong>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">CustomerSpace Info</h3>
-        </div>
-        <div class="panel-body">
-            <div class="row">
-                <div class="col col-md-4 col-sm-4 col-xs-6">Product: {{ spaceInfo.properties.product }}</div>
+            <br>
+            <h4>Space Info</h4>
+            <form ng-if="!readonly" class="row form-inline">
+                <div class="col col-md-4 col-sm-4 col-xs-6">
+                    <label class="control-label">
+                        Product
+                    </label>
+                    <select class="form-control"
+                            ng-options="option for option in availableProducts"
+                            ng-model="spaceInfo.properties.product">
+                    </select>
+                </div>
+                <div class="col col-md-4 col-sm-4 col-xs-6">
+                    <label class="control-label">
+                        CRM Topology
+                    </label>
+                    <select class="form-control"
+                            ng-options="option for option in availableTopologies"
+                            ng-model="spaceInfo.properties.topology">
+                    </select>
+                </div>
+            </form>
+            <form ng-if="readonly" class="row form-inline">
+                <div class="col col-md-4 col-sm-4 col-xs-6">
+                    Product: <strong>{{ spaceInfo.properties.product }}</strong>
+                </div>
+                <div class="col col-md-4 col-sm-4 col-xs-6">
+                    Topology: <strong>{{ spaceInfo.properties.topology }}</strong>
+                </div>
+            </form>
+            <br>
+            <div class="panel panel-default tenant-info-panel">
+                <div class="panel-heading">Feature flags</div>
+                <div class="panel-body">
+                    <feature-flag flag="featureFlags.Dante" name="Dante" readonly="readonly"></feature-flag>
+                </div>
             </div>
         </div>
     </div>

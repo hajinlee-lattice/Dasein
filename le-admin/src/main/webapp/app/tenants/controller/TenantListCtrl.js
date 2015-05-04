@@ -153,12 +153,11 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
         modalInstance.result.then(function (tenantInfo) {
             $scope.tenantInfo = tenantInfo;
             $state.go('TENANT.CONFIG', {
-                new: true,
+                contractId: tenantInfo.contractId,
                 tenantId: tenantInfo.tenantId,
+                new: true,
                 readonly: false,
-                listenState: false,
-                product: tenantInfo.product,
-                contractId: tenantInfo.contractId
+                listenState: false
             });
         }, function () {
             $state.go('TENANT.LIST');

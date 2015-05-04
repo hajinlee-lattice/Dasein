@@ -172,6 +172,7 @@ module.exports = function(grunt) {
                         '<%= app.distDir %>/app/services/service/ServiceService.js',
                         '<%= app.distDir %>/app/tenants/util/TenantUtility.js',
                         '<%= app.distDir %>/app/tenants/service/TenantService.js',
+                        '<%= app.distDir %>/app/tenants/directive/FeatureFlagDirective.js',
                         '<%= app.distDir %>/app/tenants/directive/ListEntryDirective.js',
                         '<%= app.distDir %>/app/tenants/directive/CamilleConfigDirective.js',
                         '<%= app.distDir %>/app/tenants/controller/TenantListCtrl.js',

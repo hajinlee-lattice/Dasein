@@ -30,7 +30,7 @@ app.service('TenantUtility', function(_){
         return data;
     };
 
-    function constructTenantRegistration(components, tenantId, contractId, infos) {
+    function constructTenantRegistration(components, tenantId, contractId, infos, featureFlags) {
         var result = {};
         result.ConfigDirectories = _.map(components,
             function(component){
@@ -47,11 +47,14 @@ app.service('TenantUtility', function(_){
 
         if (infos.hasOwnProperty("CustomerSpaceInfo")) {
             result.CustomerSpaceInfo = infos.CustomerSpaceInfo;
+            result.CustomerSpaceInfo.featureFlags = JSON.stringify(featureFlags);
         } else {
             result.CustomerSpaceInfo = {
                 properties: {
                     displayName: "LPA_" + tenantId,
-                    description: "A LPA solution for " + tenantId + " in " + contractId
+                    description: "A LPA solution for " + tenantId + " in " + contractId,
+                    product: "LPA 2.0",
+                    topology: "Marketo"
                 },
                 featureFlags: ""
             };

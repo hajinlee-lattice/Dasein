@@ -58,6 +58,7 @@ public class TenantServiceImpl implements TenantService {
             tenantEntityMgr.deleteTenant(contractId, tenantId);
             return false;
         }
+
         List<SerializableDocumentDirectory> configSDirs = tenantRegistration.getConfigDirectories();
         if (configSDirs == null) { return true; }
         Map<String, Map<String, String>> props = new HashMap<>();
