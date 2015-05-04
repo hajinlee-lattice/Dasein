@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
+import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceBootstrapManager;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -46,6 +48,9 @@ public class CamilleTestEnvironment {
             ContractLifecycleManager.create(getContractId(), getContractInfo());
             TenantLifecycleManager.create(getContractId(), getTenantId(), getTenantInfo(), getSpaceId(),
                     getCustomerSpaceInfo());
+
+            CustomerSpaceServiceBootstrapManager.resetAll();
+            ServiceBootstrapManager.resetAll();
         } catch (Exception e) {
             log.error("Error starting Camille environment", e);
             throw e;

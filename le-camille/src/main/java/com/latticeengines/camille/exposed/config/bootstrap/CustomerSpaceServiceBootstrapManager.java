@@ -54,6 +54,10 @@ public class CustomerSpaceServiceBootstrapManager {
         bootstrapper.bootstrap(scope.getCustomerSpace(), scope.getProperties());
     }
 
+    public static void resetAll() {
+        bootstrappers.clear();
+    }
+
     public static void reset(String serviceName, CustomerSpace space) {
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
         if (bootstrapper != null) {

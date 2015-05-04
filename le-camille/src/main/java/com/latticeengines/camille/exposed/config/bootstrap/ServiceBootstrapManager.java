@@ -46,6 +46,10 @@ public class ServiceBootstrapManager {
         bootstrapper.bootstrap(scope.getProperties());
     }
 
+    public static void resetAll() {
+        bootstrappers.clear();
+    }
+
     public static void reset(String serviceName) {
         bootstrappers.remove(serviceName);
     }
