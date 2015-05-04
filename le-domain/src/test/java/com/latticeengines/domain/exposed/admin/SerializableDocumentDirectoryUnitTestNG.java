@@ -9,7 +9,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -32,12 +34,14 @@ public class SerializableDocumentDirectoryUnitTestNG {
         properties.put("/Config1/Config1.2", "value1.2");
         properties.put("/Config2", "1.23");
         properties.put("/Config3", "true");
+        properties.put("/Config4/Config4.1", "value4.1");
+        properties.put("/Config4/Config4.2", "value4.2");
         properties.put("CustomerSpaceProperties", JsonUtils.serialize(spaceProperties));
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(properties);
         DocumentDirectory dir = sDir.getDocumentDirectory();
         dir.makePathsLocal();
         sDir = new SerializableDocumentDirectory(dir);
-        String expected = "{\"RootPath\":\"/\",\"Nodes\":[{\"Node\":\"Config1\",\"Data\":\"value1\",\"Version\":-1,\"Children\":[{\"Node\":\"Config1.1\",\"Data\":\"value1.1\",\"Version\":-1}]},{\"Node\":\"Config2\",\"Data\":\"1.23\",\"Version\":-1},{\"Node\":\"Config3\",\"Data\":\"true\",\"Version\":-1}]}";
+        String expected = "{\"RootPath\":\"/\",\"Nodes\":[{\"Node\":\"Config1\",\"Data\":\"value1\",\"Version\":-1,\"Children\":[{\"Node\":\"Config1.1\",\"Data\":\"value1.1\",\"Version\":-1},{\"Node\":\"Config1.2\",\"Data\":\"value1.2\",\"Version\":-1}]},{\"Node\":\"Config2\",\"Data\":\"1.23\",\"Version\":-1},{\"Node\":\"Config4\",\"Version\":-1,\"Children\":[{\"Node\":\"Config4.1\",\"Data\":\"value4.1\",\"Version\":-1},{\"Node\":\"Config4.2\",\"Data\":\"value4.2\",\"Version\":-1}]},{\"Node\":\"Config3\",\"Data\":\"true\",\"Version\":-1}]}";
         Assert.assertEquals(objectMapper.valueToTree(sDir), objectMapper.readTree(expected));
 
         Map<String, String> flattendSDir = sDir.flatten();
@@ -190,5 +194,27 @@ public class SerializableDocumentDirectoryUnitTestNG {
         DocumentDirectory metaDir = sDir.getMetadataAsDirectory();
         SerializableDocumentDirectory metaSDir = new SerializableDocumentDirectory(metaDir);
         Assert.assertEquals(objectMapper.valueToTree(metaSDir), objectMapper.readTree(expectedMetadataJson));
+    }
+
+    private static JsonNode removeDataVersion(ObjectNode oNode){
+        ObjectMapper mapper = new ObjectMapper();
+        if (oNode.has("Version")) oNode.remove("Version");
+        if (oNode.has("Children")) {
+            ArrayNode newChildren = new ArrayNode(mapper.getNodeFactory());
+            for (JsonNode child : oNode.get("Children")) {
+                ObjectNode childNode = mapper.valueToTree(child);
+                newChildren.add(removeDataVersion(childNode));
+            }
+            oNode.put("Children", newChildren);
+        }
+        if (oNode.has("Nodes")) {
+            ArrayNode newChildren = new ArrayNode(mapper.getNodeFactory());
+            for (JsonNode child : oNode.get("Nodes")) {
+                ObjectNode childNode = mapper.valueToTree(child);
+                newChildren.add(removeDataVersion(childNode));
+            }
+            oNode.put("Nodes", newChildren);
+        }
+        return oNode;
     }
 }

@@ -107,15 +107,19 @@ public class DocumentDirectory implements Serializable {
     }
 
     public Node add(String relativePath, String data) {
-        return add(relativePath, data, false);
+        return add(relativePath, data, false, false);
     }
 
-    public Node add(String path, String data, boolean pathIsAbsolute) {
+    public Node add(String relativePath, String data, boolean withParent) {
+        return add(relativePath, data, false, withParent);
+    }
+
+    public Node add(String path, String data, boolean pathIsAbsolute, boolean withParent) {
         Path relativePath = new Path(path);
         if (pathIsAbsolute) {
-            return add(relativePath, new Document(data));
+            return add(relativePath, new Document(data), withParent);
         } else {
-            return add(this.root.append(relativePath), new Document(data));
+            return add(this.root.append(relativePath), new Document(data), withParent);
         }
     }
 
@@ -124,16 +128,28 @@ public class DocumentDirectory implements Serializable {
     }
 
     public Node add(Path path, Document document) {
-        Node node;
+        return add(path, document, false);
+    }
+
+    public Node add(Path path, Document document, boolean withParent) {
+        Node node = get(path);
+        if (node != null) {
+            node.setDocument(document);
+            return node;
+        }
         Path parentPath = path.parent();
         if (parentPath.equals(root)) {
             node = new Node(path, document);
             children.add(node);
         } else {
             Node parent = get(parentPath);
-            if (parent == null) {
+            if (!withParent && parent == null) {
                 throw new IllegalArgumentException("Cannot add path " + path
                         + ".  No such parent node exists with path " + parentPath);
+            } else if (withParent) {
+                while (parent == null) {
+                    parent = add(parentPath, new Document(), true);
+                }
             }
             node = new Node(path, document);
             parent.children.add(node);

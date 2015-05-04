@@ -41,7 +41,7 @@ public class SerializableDocumentDirectory {
             try {
                 Path nodePath = new Path(entry.getKey());
                 docDir.add(nodePath,
-                        new Document(StringEscapeUtils.unescapeJava(entry.getValue())));
+                        new Document(StringEscapeUtils.unescapeJava(entry.getValue())), true);
             } catch (IllegalArgumentException e) {
                 //ignore
             }
