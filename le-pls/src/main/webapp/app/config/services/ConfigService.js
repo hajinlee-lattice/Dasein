@@ -118,16 +118,19 @@ angular.module('mainApp.config.services.ConfigService', [
         })
         .success(function(data, status, headers, config) {
             var result = null;
-            if (data != null && data !== "") {
+            if (status === 200) {
                 result = {
-                    success: data.Success,
-                    resultObj: null,
+                    success: true,
+                    resultObj: data,
                     resultErrors: null
                 };
-                if (data.Success !== true) {
-                    SessionService.HandleResponseErrors(data, status);
-                    result.resultErrors = ResourceUtility.getString("VALIDATE_CREDENTIALS_FAILURE");
-                }
+            } else {
+                SessionService.HandleResponseErrors(data, status);
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString("VALIDATE_CREDENTIALS_FAILURE")
+                };
             }
             deferred.resolve(result);
         })

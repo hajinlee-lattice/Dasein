@@ -18,12 +18,12 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
                     !StringUtility.IsEmptyString(credentials.SecurityToken);
                 break;
             case "eloqua":
-                isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.SecurityToken) &&
-                    !StringUtility.IsEmptyString(credentials.Url);
+                isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.Password) &&
+                    !StringUtility.IsEmptyString(credentials.Company);
                 break;
             case "marketo":
                 isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.Password) &&
-                    !StringUtility.IsEmptyString(credentials.SecurityToken);
+                    !StringUtility.IsEmptyString(credentials.Url);
                 break;
         }
         return isValid;
@@ -35,15 +35,15 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     
     $scope.crmProductionComplete = false;
     $scope.crmProductionError = "";
-    var crmProductionSaveInProgress = false;
+    $scope.crmProductionSaveInProgress = false;
     
     $scope.crmSandboxComplete = false;
     $scope.crmSandboxError = "";
-    var crmSandboxSaveInProgress = false;
+    $scope.crmSandboxSaveInProgress = false;
     
     $scope.mapComplete = false;
     $scope.mapError = "";
-    var mapSaveInProgress = false;
+    $scope.mapSaveInProgress = false;
     
     $scope.loading = true;
     
@@ -61,8 +61,9 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     $scope.crmSandboxCredentials = new Credentials();
     $scope.crmProductionCredentials = new Credentials();
     $scope.mapCredentials = new Credentials();
-    $scope.isMarketo = true;
-    ConfigService.GetCurrentCredentials("sfdc").then(function(result) {
+    $scope.isMarketo = false;
+    
+    ConfigService.GetCurrentCredentials("marketo").then(function(result) {
         if (result != null && result.success === true) {
             
         }
@@ -71,12 +72,12 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     $scope.crmProductionSaveClicked = function () {
         $scope.crmProductionError = "";
         if (ManageCredentialsService.ValidateCredentials("sfdc", $scope.crmProductionCredentials)) {
-            if (crmProductionSaveInProgress) {
+            if ($scope.crmProductionSaveInProgress) {
                 return;
             }
-            crmProductionSaveInProgress = true;
+            $scope.crmProductionSaveInProgress = true;
             ConfigService.ValidateApiCredentials("sfdc", $scope.crmProductionCredentials, true).then(function(result) {
-                crmProductionSaveInProgress = false;
+                $scope.crmProductionSaveInProgress = false;
                 if (result == null) {
                     $scope.crmProductionError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
@@ -93,12 +94,12 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     $scope.crmSandboxSaveClicked = function () {
         $scope.crmSandboxError = "";
         if (ManageCredentialsService.ValidateCredentials("sfdc", $scope.crmSandboxCredentials)) {
-            if (crmSandboxSaveInProgress) {
+            if ($scope.crmSandboxSaveInProgress) {
                 return;
             }
-            crmSandboxSaveInProgress = true;
+            $scope.crmSandboxSaveInProgress = true;
             ConfigService.ValidateApiCredentials("sfdc", $scope.crmSandboxCredentials, false).then(function(result) {
-                crmSandboxSaveInProgress = false;
+                $scope.crmSandboxSaveInProgress = false;
                 if (result == null) {
                     $scope.crmSandboxError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
@@ -109,6 +110,50 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
             });
         } else {
             $scope.crmSandboxError = ResourceUtility.getString("SYSTEM_SETUP_REQUIRED_FIELDS_ERROR");
+        }
+    };
+    
+    $scope.marketoSaveClicked = function () {
+        $scope.mapError = "";
+        if (ManageCredentialsService.ValidateCredentials("marketo", $scope.mapCredentials)) {
+            if ($scope.mapSaveInProgress) {
+                return;
+            }
+            $scope.mapSaveInProgress = true;
+            ConfigService.ValidateApiCredentials("marketo", $scope.mapCredentials, false).then(function(result) {
+                $scope.mapSaveInProgress = false;
+                if (result == null) {
+                    $scope.mapError = ResourceUtility.getString("SYSTEM_ERROR");
+                } else if (result.success === true) {
+                    
+                } else {
+                    $scope.mapError = result.resultErrors;
+                }
+            });
+        } else {
+            $scope.mapError = ResourceUtility.getString("SYSTEM_SETUP_REQUIRED_FIELDS_ERROR");
+        }
+    };
+    
+    $scope.eloquaSaveClicked = function () {
+        $scope.mapError = "";
+        if (ManageCredentialsService.ValidateCredentials("eloqua", $scope.mapCredentials)) {
+            if ($scope.mapSaveInProgress) {
+                return;
+            }
+            $scope.mapSaveInProgress = true;
+            ConfigService.ValidateApiCredentials("eloqua", $scope.mapCredentials, false).then(function(result) {
+                $scope.mapSaveInProgress = false;
+                if (result == null) {
+                    $scope.mapError = ResourceUtility.getString("SYSTEM_ERROR");
+                } else if (result.success === true) {
+                    $scope.mapComplete = true;
+                } else {
+                    $scope.mapError = result.resultErrors;
+                }
+            });
+        } else {
+            $scope.mapError = ResourceUtility.getString("SYSTEM_SETUP_REQUIRED_FIELDS_ERROR");
         }
     };
     
