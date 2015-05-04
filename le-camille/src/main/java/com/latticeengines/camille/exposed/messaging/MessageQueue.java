@@ -8,9 +8,11 @@ import org.apache.curator.framework.recipes.queue.QueueBuilder;
 import org.apache.curator.framework.recipes.queue.QueueConsumer;
 import org.apache.curator.framework.recipes.queue.QueueSerializer;
 import org.apache.curator.framework.state.ConnectionState;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -19,17 +21,16 @@ public class MessageQueue<T> {
 
     /**
      * Do not invoke directly. Instead use MessageQueueFactory
-     * 
-     * @throws Exception
      */
     public MessageQueue(Path path, Class<T> messageClazz, MessageConsumer<T> consumer) {
         this.messageClazz = messageClazz;
         this.path = path;
-        QueueBuilder<T> builder = QueueBuilder.builder(CamilleEnvironment.getCamille().getCuratorClient(),
-                consumer != null ? new Consumer<T>(consumer, path) : null, new Serializer<T>(messageClazz),
-                path.toString());
-        this.inner = builder.buildQueue();
         try {
+            Camille c = CamilleEnvironment.getCamille();
+            c.upsert(path, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            QueueBuilder<T> builder = QueueBuilder.builder(c.getCuratorClient(), consumer != null ? new Consumer<T>(
+                    consumer, path) : null, new Serializer<T>(messageClazz), path.toString());
+            this.inner = builder.buildQueue();
             this.inner.start();
         } catch (Exception e) {
             String error = String.format("Error starting queue %s: %s", path, e.getMessage());
