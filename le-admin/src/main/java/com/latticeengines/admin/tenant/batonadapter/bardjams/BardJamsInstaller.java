@@ -82,9 +82,17 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
             DocumentDirectory configDir) {
         BardJamsTenant tenant = new BardJamsTenant();
 
-        tenant.setTenant(getData(configDir, "Tenant"));
+        String tenantId = getData(configDir, "Tenant");
+        if (tenantId == null) {
+            tenantId = space.getTenantId();
+        }
+        tenant.setTenant(tenantId);
         tenant.setTenantType(getData(configDir, "TenantType"));
-        tenant.setDlTenantName(getData(configDir, "DL_TenantName"));
+        String dlTenantName = getData(configDir, "DL_TenantName");
+        if (dlTenantName == null) {
+            dlTenantName = tenantId;
+        }
+        tenant.setDlTenantName(dlTenantName);
         tenant.setDlUrl(getData(configDir, "DL_URL"));
         tenant.setDlUser(getData(configDir, "DL_User"));
         tenant.setDlPassword(getData(configDir, "DL_Password"));
