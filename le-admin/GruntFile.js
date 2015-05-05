@@ -323,7 +323,6 @@ module.exports = function(grunt) {
                     '<%= app.dir %>/lib/js/underscore.js',
                     '<%= app.dir %>/lib/js/le-common.js',
                     '<%= app.dir %>/app/**/*.js'
-
                 ],
                 frameworks: ['jasmine']
 
@@ -337,7 +336,8 @@ module.exports = function(grunt) {
                     outputFile: 'target/karma-test-results.xml'
                 },
                 preprocessors:    {
-                    'src/main/webapp/app/**/!(*Spec).js': 'coverage'
+                    //'src/main/webapp/app/**/!(*Spec).js': 'coverage'
+                    'temp/!(*Spec).js': 'coverage'
                 },
                 coverageReporter: {
                     dir:       'target/jscoverage',
@@ -350,30 +350,16 @@ module.exports = function(grunt) {
                         {type: 'cobertura', subdir: '.', file: 'cobertura.xml'}
                     ]
                 }
-
             },
 
             devunit: {
                 options: {
-                    browsers:  ['Chrome'],
-                    singleRun: false
-                }
-            },
-
-            watch:    {
-                options: {
-                    browsers:   ['PhantomJS'],
-                    singleRun:  false,
-                    background: true,
-                    autoWatch:  true
-                }
-            },
-            watchAll: {
-                options: {
-                    browsers:   ['PhantomJS'],
-                    singleRun:  false,
-                    background: false,
-                    autoWatch:  true
+                    browsers:  ['PhantomJS'],
+                    singleRun: true
+                },
+                reporters:     ['dots', 'junit', 'coverage'],
+                junitReporter: {
+                    outputFile: 'target/karma-test-results.xml'
                 }
             }
         },

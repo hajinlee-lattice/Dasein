@@ -61,6 +61,12 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         $scope.featureFlags = {
             Dante: false
         };
+        $scope.tenantInfo = {
+            properties: {
+                displayName: "Test LPA tenant",
+                description: "A LPA tenant under the contract " + $scope.contractId
+            }
+        };
 
         ServiceService.GetRegisteredServices().then( function(result) {
             if (result.success) {

@@ -13,7 +13,7 @@ describe('TenantUtility tests', function (){
         ]);
     });
 
-    it('should have an exciteText function', function () {
+    it('should render status correctly', function () {
         var displayName = tenantUtility.getStatusDisplayName("OK");
         expect(tenantUtility.getStatusTemplate(displayName)).toContain(displayName);
     });

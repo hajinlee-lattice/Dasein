@@ -123,6 +123,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
         Map<String, String> bootstrapProperties = sDir.flatten();
 
+        loginAD();
         String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s",
                 getRestHostPort(), tenantId, serviceName, contractId);
         restTemplate.put(url, bootstrapProperties, new HashMap<>());

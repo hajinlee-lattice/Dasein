@@ -17,6 +17,10 @@
     "grunt-contrib-cssmin": "~0.12.2",
     "grunt-contrib-jshint": "~0.11.1",
     "grunt-contrib-watch": "~0.6.1",
+    "grunt-concurrent": "~1.0.0",
+    "grunt-protractor-runner": "~2.0.0",
+    "grunt-protractor-coverage": "~0.2.14",
+    "grunt-istanbul": "~0.5.0",
     "karma": "~0.12.31",
     "grunt-karma": "~0.10.1",
     "jasmine-core": "~2.2.0",
@@ -29,11 +33,7 @@
     "karma-firefox-launcher": "~0.1.4",
     "karma-coverage": "~0.3.1",
     "jshint-stylish-ex": "~0.2.0",
-    "grunt-concurrent": "~1.0.0",
-    "grunt-protractor-runner": "~2.0.0",
     "jasmine-reporters": "~2.0.5",
-    "grunt-protractor-coverage": "~0.2.14",
-    "grunt-istanbul": "~0.5.0",
     "protractor": "~2.0.0"
   }
 }
