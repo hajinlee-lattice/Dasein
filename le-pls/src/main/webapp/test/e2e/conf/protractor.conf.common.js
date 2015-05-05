@@ -6,12 +6,12 @@ var Config = function() {
 
         return {
             specs: [
-                //specBasePath + '/mainflow_spec.js',
-                //specBasePath + '/modellist_spec.js',
-                //specBasePath + '/modeldetail_spec.js',
-                //specBasePath + '/predictors_spec.js',
-                //specBasePath + '/thresholdexplorer_spec.js',
-                //specBasePath + '/leadsample_spec.js',
+                specBasePath + '/mainflow_spec.js',
+                specBasePath + '/modellist_spec.js',
+                specBasePath + '/modeldetail_spec.js',
+                specBasePath + '/predictors_spec.js',
+                specBasePath + '/thresholdexplorer_spec.js',
+                specBasePath + '/leadsample_spec.js',
                 specBasePath + '/usermgmt_spec.js'
             ],
 
