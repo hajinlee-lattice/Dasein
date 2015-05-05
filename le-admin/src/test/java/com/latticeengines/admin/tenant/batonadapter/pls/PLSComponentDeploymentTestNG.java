@@ -21,7 +21,7 @@ public class PLSComponentDeploymentTestNG extends PLSComponentTestNG {
         } catch (Exception e) {
             //ignore
         }
-        createTenant(contractId, tenantId);
+        createTenant(contractId, tenantId, false);
 
         String testAdminUsername = "bnguyen@lattice-engines.com";
         String testAdminPassword = "admin";

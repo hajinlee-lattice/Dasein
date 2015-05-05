@@ -69,6 +69,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
     protected void bootstrap(DocumentDirectory confDir) { super.bootstrap(contractId, tenantId, serviceName, confDir); }
 
     private void testGetDefaultConfig(String expectedJson) {
+        loginAD();
         String url = String.format("%s/admin/services/%s/default", getRestHostPort(), serviceName);
         SerializableDocumentDirectory serializableDir =
                 restTemplate.getForObject(url, SerializableDocumentDirectory.class);

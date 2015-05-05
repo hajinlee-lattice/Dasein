@@ -39,8 +39,12 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         String PLSTenantId = String.format("%s.%s.%s",
                 contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
 
-        deletePLSAdminUser(PLSTenantId, testAdminUsername);
-        deletePLSTestTenant(PLSTenantId);
+        try {
+            deletePLSAdminUser(PLSTenantId, testAdminUsername);
+            deletePLSTestTenant(PLSTenantId);
+        } catch (Exception e) {
+            // ignore
+        }
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();

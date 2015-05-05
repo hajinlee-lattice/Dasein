@@ -132,11 +132,19 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
         restTemplate.delete(url, new HashMap<>());
     }
-    
+
     protected void createTenant(String contractId, String tenantId) {
+        createTenant(contractId, tenantId, true);
+    }
+
+    protected void createTenant(String contractId, String tenantId, boolean refreshContract) {
         try {
             if (ContractLifecycleManager.exists(contractId)) {
-                ContractLifecycleManager.delete(contractId);
+                if (refreshContract) {
+                    ContractLifecycleManager.delete(contractId);
+                }
+            } else {
+                ContractLifecycleManager.create(contractId, new ContractInfo());
             }
         } catch (Exception e) {
             throw new AssertionError("Camille failed to clean up the place holder for test tenant.");
