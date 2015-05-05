@@ -6,8 +6,6 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import com.latticeengines.dellebi.DellEBIMain;
-
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
