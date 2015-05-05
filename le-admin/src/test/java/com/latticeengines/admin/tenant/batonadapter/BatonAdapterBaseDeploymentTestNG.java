@@ -50,7 +50,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = {"deployment", "functional"})
     public void tearDown() throws Exception {
         try {
             deleteTenant(contractId, tenantId);
@@ -59,7 +59,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = {"deployment", "functional"})
     public void getDefaultConfig() throws Exception {
         testGetDefaultConfig(getExpectedJsonFile());
     }

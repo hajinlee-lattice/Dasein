@@ -1,24 +1,14 @@
 package com.latticeengines.admin.tenant.batonadapter.pls;
 
-import java.util.Arrays;
-
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.security.exposed.Constants;
 
 public class PLSComponentDeploymentTestNG extends PLSComponentTestNG {
 
     @Test(groups = "deployment", dependsOnMethods = "testInstallation")
     public void installTestTenants() {
-        loginAD();
-
-        // setup magic rest template
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
-
         createTestTenant("Tenant1", "Tenant 1");
         createTestTenant("Tenant2", "Tenant 2");
     }

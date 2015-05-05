@@ -3,6 +3,7 @@ package com.latticeengines.admin.functionalframework;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -187,7 +188,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         Credentials creds = new Credentials();
         creds.setUsername(ADTesterUsername);
         creds.setPassword(ADTesterPassword);
-
+        restTemplate.setInterceptors(new ArrayList<ClientHttpRequestInterceptor>());
         Map<String, String> map = restTemplate.postForObject(getRestHostPort() + "/admin/adlogin", creds, Map.class);
         String token = map.get("Token");
         assertNotNull(token);
