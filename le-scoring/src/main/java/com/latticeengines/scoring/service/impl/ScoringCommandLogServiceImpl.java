@@ -44,7 +44,6 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
         // Insert new row for each message
         scoringCommandLogEntityMgr.create(scoringCommandLog);
-        log.info(scoringCommandLog);
     }
 
     @Override
