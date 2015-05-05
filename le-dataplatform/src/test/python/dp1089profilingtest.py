@@ -1,4 +1,3 @@
-import json
 from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
 

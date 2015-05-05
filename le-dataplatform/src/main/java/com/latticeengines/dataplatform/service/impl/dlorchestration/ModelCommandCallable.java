@@ -81,13 +81,13 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private String appTimeLineWebAppAddress;
 
-    private int rowFailThreshold;
+    private int rowFailThreshold = -1;
 
-    private int rowWarnThreshold;
+    private int rowWarnThreshold = -1;
 
-    private int positiveEventFailThreshold;
+    private int positiveEventFailThreshold = -1;
 
-    private int positiveEventWarnThreshold;
+    private int positiveEventWarnThreshold = -1;
 
     private MetadataService metadataService;
 
@@ -115,6 +115,28 @@ public class ModelCommandCallable implements Callable<Long> {
         this.positiveEventFailThreshold = builder.positiveEventFailThreshold;
         this.positiveEventWarnThreshold = builder.positiveEventWarnThreshold;
         this.metadataService = builder.metadataService;
+        
+        assert(modelCommand != null);
+        assert(yarnConfiguration != null);
+        assert(modelingJobService != null);
+        assert(modelCommandEntityMgr != null);
+        assert(modelCommandStateEntityMgr != null);
+        assert(modelStepYarnProcessor != null);
+        assert(modelCommandLogService != null);
+        assert(modelCommandResultEntityMgr != null);
+        assert(modelStepOutputResultsProcessor != null);
+        assert(modelStepFinishProcessor != null);
+        assert(modelStepRetrieveMetadataProcessor != null);
+        assert(debugProcessorImpl != null);
+        assert(alertService != null);
+        assert(resourceManagerWebAppAddress != null);
+        assert(appTimeLineWebAppAddress != null);
+        assert(rowFailThreshold != -1);
+        assert(rowWarnThreshold != -1);
+        assert(positiveEventFailThreshold != -1);
+        assert(positiveEventWarnThreshold != -1);
+        assert(metadataService != null);
+        
     }
 
     @Override

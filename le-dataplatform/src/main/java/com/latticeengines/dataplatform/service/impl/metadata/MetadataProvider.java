@@ -26,8 +26,6 @@ public abstract class MetadataProvider {
     
     public abstract String getDriverName();
 
-    public abstract String getConnectionString(DbCreds creds);
-
     public abstract ConnManager getConnectionManager(SqoopOptions options);
     
     public abstract Long getRowCount(JdbcTemplate jdbcTemplate, String tableName);
@@ -39,6 +37,10 @@ public abstract class MetadataProvider {
     public abstract void dropTable(JdbcTemplate jdbcTemplate, String table);
 
     public abstract List<String> showTable(JdbcTemplate jdbcTemplate, String table);
+    
+    public abstract String getDriverClass();
+    
+    public abstract String getJdbcUrlTemplate();
 
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();
@@ -52,17 +54,21 @@ public abstract class MetadataProvider {
         }
     }
 
-    protected String replaceUrlWithParamsAndTestConnection(String url, DbCreds creds) {
+    public String replaceUrlWithParamsAndTestConnection(String url, String driverClass, DbCreds creds) {
         Connection conn = null;
         try {
-            url = url.replaceFirst("\\$\\$HOST\\$\\$", creds.getHost());
+            Class.forName(driverClass);
+        } catch (ClassNotFoundException e) {
+            throw new LedpException(LedpCode.LEDP_11000, e, new String[] { driverClass });
+        }
+        
+        try {
+            url = creds.getHost() != null ? url.replaceFirst("\\$\\$HOST\\$\\$", creds.getHost()) : url;
             url = url.replaceFirst("\\$\\$PORT\\$\\$", Integer.toString(creds.getPort()));
-            url = url.replaceFirst("\\$\\$DB\\$\\$", creds.getDb());
-            url = url.replaceFirst("\\$\\$USER\\$\\$", creds.getUser());
-            url = url.replaceFirst("\\$\\$PASSWD\\$\\$", creds.getPassword());
-            
-            String instance = creds.getInstance();
-            url = instance != null ? url.replaceFirst("\\$\\$INSTANCE\\$\\$", instance) : url;
+            url = creds.getDb() != null ? url.replaceFirst("\\$\\$DB\\$\\$", creds.getDb()) : url;
+            url = creds.getUser() != null ? url.replaceFirst("\\$\\$USER\\$\\$", creds.getUser()) : url;
+            url = creds.getPassword() != null ? url.replaceFirst("\\$\\$PASSWD\\$\\$", creds.getPassword()) : url;
+            url = creds.getInstance() != null ? url.replaceFirst("\\$\\$INSTANCE\\$\\$", creds.getInstance()) : url;
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
             throw new LedpException(LedpCode.LEDP_11001, e);
@@ -72,6 +78,10 @@ public abstract class MetadataProvider {
             }
         }
         return url;
-
     }
+
+    public String getConnectionString(DbCreds creds) {
+        return replaceUrlWithParamsAndTestConnection(getJdbcUrlTemplate(), getDriverClass(), creds);
+    }
+
 }

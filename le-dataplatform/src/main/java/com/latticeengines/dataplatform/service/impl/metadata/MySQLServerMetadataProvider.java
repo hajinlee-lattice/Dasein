@@ -9,8 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.MySQLManager;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @SuppressWarnings("deprecation")
@@ -25,14 +23,7 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     public String getConnectionString(DbCreds creds) {
         String url = "jdbc:mysql://$$HOST$$:$$PORT$$/$$DB$$?user=$$USER$$&password=$$PASSWD$$";
-        String driverClass = "com.mysql.jdbc.Driver";
-        try {
-            Class.forName(driverClass);
-        } catch (ClassNotFoundException e) {
-            throw new LedpException(LedpCode.LEDP_11000, e,
-                    new String[] { driverClass });
-        }
-        return replaceUrlWithParamsAndTestConnection(url, creds);
+        return replaceUrlWithParamsAndTestConnection(url, getDriverClass(), creds);
     }
 
     public ConnManager getConnectionManager(SqoopOptions options) {
@@ -70,5 +61,15 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     @Override
     public List<String> showTable(JdbcTemplate jdbcTemplate, String table){
         return jdbcTemplate.queryForList("show tables like '" + table + "'", String.class);
+    }
+
+    @Override
+    public String getDriverClass() {
+        return "com.mysql.jdbc.Driver";
+    }
+
+    @Override
+    public String getJdbcUrlTemplate() {
+        return "jdbc:mysql://$$HOST$$:$$PORT$$/$$DB$$?user=$$USER$$&password=$$PASSWD$$";
     }
 }

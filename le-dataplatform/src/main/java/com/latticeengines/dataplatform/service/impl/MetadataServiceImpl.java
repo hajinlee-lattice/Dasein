@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.metadata.MetadataProvider;
@@ -42,6 +43,16 @@ public class MetadataServiceImpl implements MetadataService {
     public String getJdbcConnectionUrl(DbCreds creds) {
         String dbType = creds.getDBType();
         MetadataProvider provider = metadataProviders.get(dbType);
+        
+        String url = creds.getJdbcUrl();
+        String driverClass = creds.getDriverClass();
+        
+        if (StringUtils.isEmpty(driverClass)) {
+            driverClass = provider.getDriverClass();
+        }
+        if (!StringUtils.isEmpty(url)) {
+            return provider.replaceUrlWithParamsAndTestConnection(url, driverClass, creds);
+        }
         return provider.getConnectionString(creds);
     }
 
