@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -98,11 +97,11 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
                 Long pid = future.get(waitTime, TimeUnit.SECONDS);
                 log.info("PId: " + pid);
             } catch (InterruptedException e) {
-                log.error(ExceptionUtils.getStackTrace(e));
+                log.error(e.getMessage(), e);
             } catch (ExecutionException e) {
-                log.error(ExceptionUtils.getStackTrace(e));
+                log.error(e.getMessage(), e);
             } catch (TimeoutException e) {
-                log.error(ExceptionUtils.getStackTrace(e));
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -138,7 +137,7 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         try {
             HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + scoringCommand.getId() + "/scoring/" + scoringCommand.getTableName());
         } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.error(e.getMessage(), e);
         }
     }
 

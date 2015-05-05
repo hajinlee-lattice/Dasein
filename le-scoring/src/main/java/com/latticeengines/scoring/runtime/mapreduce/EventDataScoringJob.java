@@ -9,7 +9,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -143,7 +142,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         try {
             HdfsUtils.writeToFile(config, dataTypeFilePath, jsonObj.toJSONString());
         } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.error(e.getMessage(), e);
         }
     }
 

@@ -1,7 +1,9 @@
 package com.latticeengines.scoring.service.impl;
 
-import java.sql.Timestamp;
 
+import java.sql.Timestamp;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +25,14 @@ public class ScoringStepFinishProcessorImpl implements ScoringStepProcessor {
 
     @Override 
     public void executeStep(ScoringCommand scoringCommand) {
+        DateTime dt = new DateTime(DateTimeZone.UTC);
         ScoringCommandResult result = scoringCommandResultEntityMgr.findByScoringCommand(scoringCommand);
         result.setStatus(ScoringCommandStatus.POPULATED);
-        result.setPopulated(new Timestamp(System.currentTimeMillis()));
+        result.setPopulated(new Timestamp(dt.getMillis()));
         result.setTotal(scoringCommand.getTotal());
         scoringCommandResultEntityMgr.update(result);
 
-        scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));
+        scoringCommand.setConsumed(new Timestamp(dt.getMillis()));
         scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
         scoringCommandEntityMgr.update(scoringCommand);
     }

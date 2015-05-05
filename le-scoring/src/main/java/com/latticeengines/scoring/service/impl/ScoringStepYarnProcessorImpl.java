@@ -17,6 +17,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -82,7 +84,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private static final String JSON_SUFFIX = ".json";
 
     private static final String OUTPUT_TABLE_PREFIX = "Lead_";
-    
+
     private static final String LeadID = "LeadID";
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
@@ -124,8 +126,10 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), customer);
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getMRQueueNameForSubmission());
 
-        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table + "/data");
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table + "/scores");
+        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table
+                + "/data");
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table
+                + "/scores");
         String customerModelPath = customerBaseDir + "/" + customer + "/models";
 
         List<String> modelFilePaths = Collections.emptyList();
@@ -143,7 +147,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                         }
                     });
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Customer " + customer + "'s scoring job failed due to: " + e.getMessage(), e);
         }
         if (CollectionUtils.isEmpty(modelFilePaths)) {
             throw new LedpException(LedpCode.LEDP_18023);
@@ -156,9 +160,11 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     }
 
     private ApplicationId export(String customer, ScoringCommand scoringCommand) {
-        //remove later
+        // remove later
         try {
-            HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName() + "/data/datatype.avsc");
+            HdfsUtils.rmdir(yarnConfiguration,
+                    customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName()
+                            + "/data/datatype.avsc");
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -166,8 +172,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
         String targetTable = createNewTable(customer, scoringCommand);
 
+        DateTime dt = new DateTime(DateTimeZone.UTC);
         ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
-                targetTable, 0, new Timestamp(System.currentTimeMillis()));
+                targetTable, 0, new Timestamp(dt.getMillis()));
         scoringCommandResultEntityMgr.create(result);
 
         String sourceDir = customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName() + "/data";
@@ -177,12 +184,14 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     }
 
     private String createNewTable(String customer, ScoringCommand scoringCommand) {
-//        scoringCreds.setDb("ScoringDB_buildmachine");
-//        scoringCreds.setDBType("SQLServer");
-//        scoringCreds.setHost("10.41.1.250");
-//        scoringCreds.setPort(1433);
-//        DataSource dataSource = new DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine", "root", "welcome");
-//        scoringJdbcTemplate.setDataSource(dataSource);
+        // scoringCreds.setDb("ScoringDB_buildmachine");
+        // scoringCreds.setDBType("SQLServer");
+        // scoringCreds.setHost("10.41.1.250");
+        // scoringCreds.setPort(1433);
+        // DataSource dataSource = new
+        // DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine",
+        // "root", "welcome");
+        // scoringJdbcTemplate.setDataSource(dataSource);
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
         metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
         return newTable;

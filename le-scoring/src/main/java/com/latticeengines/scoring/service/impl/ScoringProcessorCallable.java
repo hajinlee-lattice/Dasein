@@ -46,6 +46,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
     private JobService jobService;
 
+    @SuppressWarnings("unused")
     private Configuration yarnConfiguration;
 
     private String appTimeLineWebAppAddress;
@@ -78,7 +79,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
         try {
             log.info("Begin scheduled work on " + ScoringCommandLogServiceImpl.SCORINGCOMMAND_ID_LOG_PREFIX + ":"
                     + scoringCommand.getPid()); // Need this line to associate
-                                                // modelCommandId with threadId
+                                                // scoringCommandId with threadId
                                                 // in
                                                 // log4j output.
             executeWorkflow();
@@ -189,7 +190,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
         scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
         scoringCommandEntityMgr.update(scoringCommand);
 
-        String appIds = "";
         StringBuilder clientUrl = new StringBuilder(appTimeLineWebAppAddress);
         if (failedYarnApplicationId != null) {
             // Currently each step only generates one yarn job anyways so first
@@ -200,7 +200,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
         List<BasicNameValuePair> details = new ArrayList<>();
         details.add(new BasicNameValuePair("commandId", scoringCommand.getPid().toString()));
-        details.add(new BasicNameValuePair("yarnAppId", failedYarnApplicationId == null ? "None" : appIds));
+        details.add(new BasicNameValuePair("yarnAppId", failedYarnApplicationId == null ? "None" : ""));
         details.add(new BasicNameValuePair("deploymentExternalId", scoringCommand.getId()));
         details.add(new BasicNameValuePair("failedStep", scoringCommandState.getScoringCommandStep().getDescription()));
         List<ScoringCommandLog> logs = scoringCommandLogService.findByScoringCommand(scoringCommand);

@@ -6,6 +6,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import com.latticeengines.scoring.service.ScoringCommandLogService;
 public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
     public static final String SCORINGCOMMAND_ID_LOG_PREFIX = "LeadInputQueue_ID";
+    public static final String SCORINGCOMMAND_CUSTOMER_ID_LOG_PREFIX = "LEDeployment_ID";
     private static final Log log = LogFactory.getLog(ScoringCommandLogServiceImpl.class);
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
@@ -33,8 +35,11 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
     @Override
     public void log(ScoringCommand scoringCommand, String message) {
-        log.info(SCORINGCOMMAND_ID_LOG_PREFIX + ":" + scoringCommand.getPid() + " " + message);
-
+        StringBuilder sb = new StringBuilder();
+        sb.append(SCORINGCOMMAND_ID_LOG_PREFIX).append(":").append(scoringCommand.getPid()).append(" ,")
+                .append(SCORINGCOMMAND_CUSTOMER_ID_LOG_PREFIX).append(":").append(scoringCommand.getId()).append(" ")
+                .append(message);
+        log.info(sb.toString());
         ScoringCommandLog scoringCommandLog = new ScoringCommandLog(scoringCommand, message);
 
         // Insert new row for each message
@@ -45,7 +50,7 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
     @Override
     public void logBeginStep(ScoringCommand scoringCommand, ScoringCommandStep step) {
         StringBuilder sb = new StringBuilder();
-        sb.append(step.getDescription()).append(" submitted at ").append(dateTimeFormatter.print(new DateTime()));
+        sb.append(step.getDescription()).append(" submitted at ").append(dateTimeFormatter.print(new DateTime(DateTimeZone.UTC)));
         log(scoringCommand, sb.toString());
     }
 
@@ -53,7 +58,7 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
     public void logCompleteStep(ScoringCommand scoringCommand, ScoringCommandStep step, ScoringCommandStatus status) {
         StringBuilder sb = new StringBuilder();
         sb.append(step.getDescription()).append(" [").append(status).append("] ").append("completed at ")
-                .append(dateTimeFormatter.print(new DateTime()));
+                .append(dateTimeFormatter.print(new DateTime(DateTimeZone.UTC)));
         log(scoringCommand, sb.toString());
     }
 
