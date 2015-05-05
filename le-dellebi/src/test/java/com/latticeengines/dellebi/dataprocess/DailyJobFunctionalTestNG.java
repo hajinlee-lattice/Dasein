@@ -66,17 +66,17 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 				"dellebi-properties-context.xml");
 
 		// Copy test files to remote test folder.
-		smbPut("smb://192.168.4.145/DATASTORE/Dataload/TestInbox",
+		smbPut(smbInboxPath,
 				"./src/test/resources/tgt_lat_order_summary_global_2014.zip");
-		smbPut("smb://192.168.4.145/DATASTORE/Dataload/TestInbox",
+		smbPut(smbInboxPath,
 				"./src/test/resources/tgt_order_detail_global_2_20141214_201155.zip");
-		smbPut("smb://192.168.4.145/DATASTORE/Dataload/TestInbox",
+		smbPut(smbInboxPath,
 				"./src/test/resources/tgt_ship_to_addr_lattice_1_20141109_184552.zip");
-		smbPut("smb://192.168.4.145/DATASTORE/Dataload/TestInbox",
+		smbPut(smbInboxPath,
 				"./src/test/resources/tgt_warranty_global_1_20141213_190323.zip");
-		smbPut("smb://192.168.4.145/DATASTORE/Dataload/TestInbox",
+		smbPut(smbInboxPath,
 				"./src/test/resources/tgt_quote_trans_global_1_2015.zip");
-		smbPut("smb://192.168.4.145/DATASTORE/Dataload/TestInbox",
+		smbPut(smbInboxPath,
 				"./src/test/resources/tgt_quote_trans_global_4_2015.zip");
 
 		try {
@@ -142,7 +142,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 	@Test(groups = "functional")
 	public void testExecute() throws Exception {
 		ApplicationContext springContext = new ClassPathXmlApplicationContext(
-				"dellebi-properties-context.xml", "dellebi-camel-context.xml","dellebi-quartz-context.xml");
+				"dellebi-properties-context.xml", "dellebi-camel-context.xml","dellebi-component-context.xml");
 
 		// Wait for a while to let Camel process data.
 		try {
