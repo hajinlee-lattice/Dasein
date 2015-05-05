@@ -13,9 +13,6 @@
            http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://camel.apache.org/schema/spring
 		   http://camel.apache.org/schema/spring/camel-spring.xsd">
-	
-	<import resource="classpath:dataplatform-context.xml"/>
-	
 	<bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow">
 		<constructor-arg>
 			<util:list list-class="java.util.ArrayList">
@@ -35,16 +32,5 @@
 		class="com.latticeengines.dellebi.util.NormalFileSystemOperations" />
 
 	<bean id="mail" class="com.latticeengines.dellebi.util.MailSender" />
-
-	<bean id="sqoopDataService" class="com.latticeengines.dellebi.util.SqoopDataService" />
-
-	<bean id="scoringCreds_2" class="com.latticeengines.domain.exposed.modeling.DbCreds">
-		<property name="host" value="${dellebi.datasource.host}" />
-		<property name="port" value="${dellebi.datasource.port}" />
-		<property name="db" value="${dellebi.datasource.dbname}" />
-		<property name="DBType" value="${dellebi.datasource.type}" />
-		<property name="user" value="${dellebi.datasource.user}" />
-		<property name="password" value="${dellebi.datasource.password.encrypted}" />
-	</bean>
 
 </beans>
