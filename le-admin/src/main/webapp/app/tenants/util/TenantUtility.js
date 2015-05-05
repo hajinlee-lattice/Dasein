@@ -47,7 +47,6 @@ app.service('TenantUtility', function(_){
 
         if (infos.hasOwnProperty("CustomerSpaceInfo")) {
             result.CustomerSpaceInfo = infos.CustomerSpaceInfo;
-            result.CustomerSpaceInfo.featureFlags = JSON.stringify(featureFlags);
         } else {
             result.CustomerSpaceInfo = {
                 properties: {
@@ -58,6 +57,10 @@ app.service('TenantUtility', function(_){
                 },
                 featureFlags: ""
             };
+        }
+
+        if (featureFlags != null) {
+            result.CustomerSpaceInfo.featureFlags = JSON.stringify(featureFlags);
         }
 
         if (infos.hasOwnProperty("TenantInfo")) {
@@ -120,9 +123,24 @@ app.service('TenantUtility', function(_){
             valid: true,
             reason: null
         };
-        if (tenantId.indexOf(" ") > -1) {
+        if (tenantId == null || tenantId === "") {
+            result.valid = false;
+            result.reason = "Tenant ID cannot be empty";
+            return result;
+        }
+        if (tenantId.indexOf(" ") > -1 || tenantId.indexOf("\t") > -1) {
             result.valid = false;
             result.reason = "Tenant ID must not contain spaces";
+            return result;
+        }
+        if (tenantId.indexOf(".") > -1) {
+            result.valid = false;
+            result.reason = "Tenant ID must not contain periods";
+            return result;
+        }
+        if (tenantId.indexOf("\\") > -1 || tenantId.indexOf("/") > -1) {
+            result.valid = false;
+            result.reason = "Tenant ID must not contain slashes";
             return result;
         }
         return result;
