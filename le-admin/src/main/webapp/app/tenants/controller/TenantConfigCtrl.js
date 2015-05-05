@@ -96,7 +96,11 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                 $scope.contractInfo = result1.resultObj.ContractInfo;
                 $scope.tenantInfo = result1.resultObj.TenantInfo;
 
-                $scope.featureFlags = JSON.parse($scope.spaceInfo.featureFlags);
+                try {
+                    $scope.featureFlags = JSON.parse($scope.spaceInfo.featureFlags);
+                } catch (err) {
+                    $scope.featureFlags = "";
+                }
 
                 ServiceService.GetRegisteredServices().then( function(result2) {
                     if (result2.success) {
