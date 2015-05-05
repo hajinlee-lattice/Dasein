@@ -148,9 +148,9 @@ public class PipeFactory {
         		.append(new Fields("QUOTE_CREATE_DATE"))
         		.append(new Fields("SLDT_CUST_NUM_VAL"))
         		.append(new Fields("ITM_NUM_VAL"))
-        		.append(new Fields("REVN_USD_AMT"))
-        		.append(new Fields("SYS_QTY"))
         		.append(new Fields("LEAD_SLS_REP_ASSOC_BDGE_NBR"))
+        		.append(new Fields("SYS_QTY"))
+        		.append(new Fields("REVN_USD_AMT"))
         		.append(new Fields("fileName"));
 
         docPipe = new Pipe("copy");

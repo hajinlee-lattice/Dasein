@@ -24,6 +24,7 @@
         <property name="locations">
             <list>
                 <value>file:${DELLEBI_PROPDIR}/dellebi.properties</value>
+                <value>file:${DELLEBI_PROPDIR}/dataplatform.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

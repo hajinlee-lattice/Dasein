@@ -26,6 +26,7 @@
 		<property name="jobDataMap">
         <map>
             <entry key="dailyFlow" value-ref="dailyFlow" />
+            <entry key="sqoopDataService" value-ref="sqoopDataService" />
         </map>
     </property>
 
