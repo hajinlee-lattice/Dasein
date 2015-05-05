@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -10,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +24,10 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
 public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
+
+    private static final Log LOGGER = LogFactory.getLog(EndToEndDeploymentTestNG.class);
 
     @Value("${pls.modelingservice.rest.endpoint.hostport}")
     private String modelingServiceHostPort;
@@ -51,28 +53,15 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private GlobalAuthenticationService globalAuthenticationService;
-
     private static String tenant;
     private static Tenant tenantToAttach;
 
     @BeforeClass(groups = "deployment", enabled = true)
     public void setup() throws Exception {
         setupUsers();
-
         setupDbUsingDefaultTenantIds(true, true, false, false);
-        tenantToAttach = mainTestingTenant;
-        tenant = mainTestingTenant.getId();
-//        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-//        assertTrue(ticket.getTenants().size() >= 2);
-//        assertNotNull(ticket);
-//        String tenant1 = ticket.getTenants().get(0).getId();
-//        String tenant2 = ticket.getTenants().get(1).getId();
-//        tenantToAttach = ticket.getTenants().get(1);
-//        tenant = tenantToAttach.getId();
-//        setupDb(tenant1, tenant2, false, false);
-//        globalAuthenticationService.discard(ticket);
+        tenantToAttach = testingTenants.get(1);
+        tenant = tenantToAttach.getId();
     }
     
     private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table) throws Exception {
@@ -119,22 +108,30 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     
     @Test(groups = "deployment", enabled = true, dataProvider = "modelMetadataProvider")
     public void runPipeline(String tenant, String modelName, String metadataSuffix, String tableName) throws Exception {
+        LOGGER.info(String.format(
+                "Running pipeline for model %s in tenant %s using table %s",
+                modelName, tenant, tableName));
         ModelingServiceExecutor executor = buildModel(tenant, modelName, metadataSuffix, tableName);
         executor.init();
         executor.runPipeline();
-        Thread.sleep(30000L);
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "runPipeline" })
-    public void checkModels() {
+    public void checkModels() throws InterruptedException {
         UserDocument doc = loginAndAttachAdmin(tenantToAttach);
         addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
-        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        int numOfRetries = 50;
+        List response;
+        do {
+            response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+            numOfRetries--;
+            Thread.sleep(1000L);
+        } while (numOfRetries > 0 && (response == null || response.size() < 2));
         assertNotNull(response);
-        assertEquals(response.size(), 2);
+        assertTrue(response.size() >= 2);
         Map<String, String> map = (Map) response.get(0);
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertTrue(summary.getName().startsWith("PLSModel-Eloqua"));
@@ -144,7 +141,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @DataProvider(name = "modelMetadataProvider")
     public static Object[][] getModelMetadataProvider() {
         return new Object[][] { //
-                { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant1" }, //
+                { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant2" }, //
                 { tenant, "PLSModel-Eloqua2", "eloqua2", "Q_PLS_Modeling_Tenant2" }
         };
     }
