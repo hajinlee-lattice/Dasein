@@ -151,7 +151,7 @@ public class PipeFactory {
         		.append(new Fields("REVN_USD_AMT"))
         		.append(new Fields("SYS_QTY"))
         		.append(new Fields("LEAD_SLS_REP_ASSOC_BDGE_NBR"))
-        		.append(new Fields("PROCESSED_FLG"));
+        		.append(new Fields("fileName"));
 
         docPipe = new Pipe("copy");
         docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments), Fields.RESULTS);
