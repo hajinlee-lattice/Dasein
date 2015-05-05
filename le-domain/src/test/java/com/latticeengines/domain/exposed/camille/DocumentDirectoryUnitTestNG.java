@@ -1,11 +1,7 @@
-package com.latticeengines.domain.exposed.camille.lifecycle;
+package com.latticeengines.domain.exposed.camille;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 
 public class DocumentDirectoryUnitTestNG {
 
