@@ -1,16 +1,11 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,14 +19,22 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.service.UserService;
 
 public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -42,26 +45,39 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
+
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TenantService tenantService;
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         setupUsers();
 
-        ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-        assertTrue(ticket.getTenants().size() >= 2);
-        assertNotNull(ticket);
-        String tenant1 = ticket.getTenants().get(0).getId();
-        String tenant2 = ticket.getTenants().get(1).getId();
-        setupDb(tenant1, tenant2);
+        Tenant tenant1 = new Tenant();
+        tenant1.setId("TENANT1");
+        tenant1.setName("Tenant 1");
+        tenantService.discardTenant(tenant1);
+        tenantService.registerTenant(tenant1);
+        userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, "TENANT1",
+                SUPER_ADMIN_USERNAME);
 
-        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
+        setupDb("TENANT2", "TENANT1");
+
+        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestingTenant.getId());
         String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1" + "/models/Q_PLS_Modeling_TENANT1/8195dcf1-0898-4ad3-b94d-0d0f806e979e/1423547416066_0001/";
+                + "/TENANT1/models/Q_PLS_Modeling_TENANT1/8195dcf1-0898-4ad3-b94d-0d0f806e979e/1423547416066_0001/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
@@ -76,13 +92,21 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/rf_model.txt");
     }
 
+    @AfterClass(groups = { "functional", "deployment" })
+    public void teardown() throws Exception {
+        userService.resignAccessLevel("TENANT1", SUPER_ADMIN_USERNAME);
+        setupDbUsingDefaultTenantIds(true, true);
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvider")
     public void dataFileResource(String fileType, final String mimeType) {
-        switchToSuperAdmin();
+        Tenant tenantToAttach = tenantService.findByTenantId("TENANT1");
+        UserDocument uDoc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
+        useSessionDoc(uDoc);
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
-        assertNotNull(response);
-        assertEquals(response.size(), 1);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.size(), 1);
         Map<String, String> map = (Map) response.get(0);
 
         String modelId = map.get("Id");
@@ -94,12 +118,12 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
                 }, new ResponseExtractor<Map<String, String>>() {
                     @Override
                     public Map<String, String> extractData(ClientHttpResponse response) throws IOException {
-                        assertEquals(response.getStatusCode(), HttpStatus.OK);
+                        Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
                         HttpHeaders headers = response.getHeaders();
-                        assertTrue(headers.containsKey("Content-Disposition"));
-                        assertTrue(headers.containsKey("Content-Type"));
-                        assertEquals(headers.getFirst("Content-Type"), mimeType);
-                        assertTrue(IOUtils.readLines(response.getBody()).size() > 0);
+                        Assert.assertTrue(headers.containsKey("Content-Disposition"));
+                        Assert.assertTrue(headers.containsKey("Content-Type"));
+                        Assert.assertEquals(headers.getFirst("Content-Type"), mimeType);
+                        Assert.assertTrue(IOUtils.readLines(response.getBody()).size() > 0);
                         response.close();
                         return Collections.emptyMap();
                     }

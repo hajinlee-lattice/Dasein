@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -78,12 +77,6 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
         return user;
     }
 
-    private void addOldFashionAdminUser() {
-        for (GrantedRight grantedRight : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
-            globalUserManagementService.grantRight(grantedRight.getAuthority(), testTenant.getId(), deprecatedAdminUsername);
-        }
-    }
-
     protected void createTestUsers() {
         for (AccessLevel accessLevel : AccessLevel.values()) {
             User user = createTestUser(accessLevel);
@@ -91,8 +84,6 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
             testUserDocs.put(accessLevel, doc);
             testUsers.put(accessLevel, user);
         }
-
-        addOldFashionAdminUser();
     }
 
     protected void switchToAccessLevel(AccessLevel accessLevel) {

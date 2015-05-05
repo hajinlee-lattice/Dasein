@@ -57,7 +57,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <argLine>
-                                        -XX:MaxPermSize=256m
+                                        ${maxpermsize}
                                         ${argLine}
                                     </argLine>
                                     <skip>false</skip>
@@ -138,7 +138,7 @@
                                         <threadSleep>${SLEEP_TIME}</threadSleep>
                                     </systemPropertyVariables>
                                     <argLine>
-                                        -XX:MaxPermSize=256m
+                                        ${maxpermsize}
                                         ${argLine}
                                     </argLine>
                                     <skip>false</skip>

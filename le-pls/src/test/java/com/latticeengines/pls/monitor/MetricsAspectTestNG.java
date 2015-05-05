@@ -25,7 +25,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.controller.ModelSummaryResource;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
@@ -36,9 +35,6 @@ public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
 
     private Log origLog;
     private ModelSummaryEntityMgr origSummaryEntityMgr;

@@ -58,6 +58,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String getFilePath() throws Exception {
 
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        String tenantId = summary.getTenant().getId();
         String lookupId = summary.getLookupId();
         String tokens[] = lookupId.split("\\|");
 

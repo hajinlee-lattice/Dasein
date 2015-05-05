@@ -26,7 +26,7 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         setupUsers();
-        setupDbUsingAdminTenantIds(true, true);
+        setupDbUsingDefaultTenantIds(true, true);
         adminDoc = loginAndAttachAdmin();
         generalDoc = loginAndAttachGeneral();
     }
@@ -34,7 +34,7 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeMethod(groups = { "functional", "deployment" })
     public void beforeMethod() {
         // using admin session by default
-        useSessionDoc(adminDoc);
+        switchToSuperAdmin();
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
     }
     

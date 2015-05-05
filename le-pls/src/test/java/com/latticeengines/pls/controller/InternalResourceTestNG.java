@@ -36,21 +36,9 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
-
-    @Autowired
-    private GlobalAuthenticationService globalAuthenticationService;
-
-    @Autowired
-    private GlobalUserManagementService globalUserManagementService;
-
-    @Autowired
-    private GlobalTenantManagementService globalTenantManagementService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -65,7 +53,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = {"functional", "deployment"})
     public void setup() throws Exception {
-        setupDbUsingAdminTenantIds(true, true);
+        setupDbUsingDefaultTenantIds(true, true);
 
         tenant = new Tenant();
         tenant.setName("Internal Resource Test Tenant");

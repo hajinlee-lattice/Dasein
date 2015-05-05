@@ -49,7 +49,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         setupUsers();
-        setupDbUsingAdminTenantIds(true, true);
+        setupDbUsingDefaultTenantIds(true, true);
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })

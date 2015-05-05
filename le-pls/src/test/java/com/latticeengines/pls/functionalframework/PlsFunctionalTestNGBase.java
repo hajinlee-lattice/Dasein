@@ -5,6 +5,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -48,6 +50,7 @@ import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
+import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -55,6 +58,8 @@ import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
+
+import junit.framework.Assert;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
@@ -69,9 +74,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String generalUsername = "lming@lattice-engines.com";
     protected static final String generalPassword = "admin";
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
-    protected static final String deprecatedAdminUsername = Constants.DEPRECATED_ADMIN_USERNAME;
-    protected static final String deprecatedAdminEmail = Constants.DEPRECATED_ADMIN_EMAIL;
-    protected static final String deprecatedAdminPassword = "admin";
 
     protected static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@test.lattice-engines.com";
     protected static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@test.lattice-engines.com";
@@ -108,8 +110,14 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TenantService tenantService;
+
     @Value("${pls.api.hostport}")
     private String hostPort;
+
+    @Value("${pls.test.contract}")
+    protected String contractId;
 
     protected RestTemplate restTemplate = new RestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
@@ -243,12 +251,12 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Deprecated
     protected UserDocument loginAndAttachAdmin(Tenant tenant) {
-        return loginAndAttach(adminUsername, adminPassword, tenant);
+        return loginAndAttach(SUPER_ADMIN_USERNAME, generalPassword, tenant);
     }
 
     @Deprecated
     protected UserDocument loginAndAttachGeneral() {
-        return loginAndAttach(generalUsername, generalPassword);
+        return loginAndAttach(EXTERNAL_USER_USERNAME, generalPassword);
     }
 
     protected UserDocument loginAndAttach(AccessLevel level, Tenant tenant) {
@@ -331,44 +339,43 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         return summary;
     }
 
-    protected void setupDbUsingAdminTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
-        setupDbUsingAdminTenantIds(useTenant1, useTenant2, true, true);
+    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
+        setupDbUsingDefaultTenantIds(useTenant1, useTenant2, true, true);
     }
 
-    /**
-     *
-     * @param useTenant1 use the first tenant of testing admin user?
-     * @param useTenant2 use the second tenant of testing admin user?
-     * @param createSummaries create model summaries?
-     * @throws Exception
-     */
-    protected void setupDbUsingAdminTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries, boolean createSegments) throws Exception {
+    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries, boolean createSegments) throws Exception {
         setupUsers();
-
-        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-        String tenant1Name = useTenant1 ? ticket.getTenants().get(0).getId() : null;
-        String tenant2Name = useTenant2 ? ticket.getTenants().get(1).getId() : null;
-        setupDb(tenant1Name, tenant2Name, createSummaries, createSegments);
-        globalAuthenticationService.discard(ticket);
+        String tenant1Id = useTenant1 ? testingTenants.get(0).getId() : null;
+        String tenant1Name = useTenant1 ?  testingTenants.get(0).getName() : null;
+        String tenant2Id = useTenant2 ? testingTenants.get(1).getId() : null;
+        String tenant2Name = useTenant2 ? testingTenants.get(1).getName() : null;
+        setupDb(tenant1Id, tenant1Name, tenant2Id, tenant2Name, createSummaries, createSegments);
     }
 
     protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
-        setupDb(tenant1Name, tenant2Name, true, true);
+        setupDb(tenant1Name, tenant1Name, tenant2Name, tenant2Name, true, true);
     }
 
-    protected void setupDb(String tenant1Name, String tenant2Name, boolean createSummaries, boolean createSegments) throws Exception {
+    protected void setupDb(
+            String tenant1Id, String tenant1Name,
+            String tenant2Id, String tenant2Name,
+            boolean createSummaries, boolean createSegments) throws Exception {
         keyValueEntityMgr.deleteAll();
         tenantEntityMgr.deleteAll();
 
-        if (tenant1Name != null) {
+        if (tenant1Name != null && tenant1Id != null) {
             Tenant tenant1 = new Tenant();
-            tenant1.setId(tenant1Name);
+            tenant1.setId(tenant1Id);
             tenant1.setName(tenant1Name);
             tenantEntityMgr.create(tenant1);
 
             ModelSummary summary1 = null;
             if (createSummaries) {
                 summary1 = getDetails(tenant1, "marketo");
+                String[] tokens = summary1.getLookupId().split("\\|");
+                tokens[0] = tenant1Id;
+                tokens[1] = "Q_PLS_Modeling_" + tenant1Id;
+                summary1.setLookupId(String.format("%s|%s|%s", tokens));
                 modelSummaryEntityMgr.create(summary1);
             }
             
@@ -383,9 +390,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         
         }
 
-        if (tenant2Name != null) {
+        if (tenant2Name != null && tenant2Id != null) {
             Tenant tenant2 = new Tenant();
-            tenant2.setId(tenant2Name);
+            tenant2.setId(tenant2Id);
             tenant2.setName(tenant2Name);
             tenantEntityMgr.create(tenant2);
 
@@ -450,7 +457,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         for (Tenant tenant: testingTenants) {
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
             userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), generalUsername);
-            userService.resignAccessLevel(tenant.getId(), "admin");
 
             for (AccessLevel level : AccessLevel.values()) {
                 User user = getTheTestingUserAtLevel(level);
@@ -539,24 +545,22 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private void setTestingTenants(){
         if (testingTenants == null || testingTenants.isEmpty()) {
-            Ticket ticket;
-            int numOfTestingTenants = 2;
-            if (globalUserManagementService.getUserByEmail(adminUsername) != null) {
-                ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-                // all tenants of bnguyen are testing tenants
-                numOfTestingTenants = ticket.getTenants().size();
-            } else {
-                ticket = globalAuthenticationService.authenticateUser(
-                        deprecatedAdminUsername, DigestUtils.sha256Hex(deprecatedAdminPassword));
+            List<String> subTenantIds = Arrays.asList("Tenant1", "Tenant2");
+            testingTenants = new ArrayList<>();
+            for (String subTenantId: subTenantIds) {
+                String tenantId = String.format("%s.%s.%s", contractId + "PLS" + "Contract", subTenantId,
+                        CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+                if (!tenantService.hasTenantId(tenantId)) {
+                    Tenant tenant = new Tenant();
+                    tenant.setId(tenantId);
+                    String name = subTenantId.equals("Tenant1") ? "Tenant 1" : "Tenatn 2";
+                    tenant.setName(contractId + " " + name);
+                    tenantService.registerTenant(tenant);
+                }
+                Tenant tenant = tenantService.findByTenantId(tenantId);
+                Assert.assertNotNull(tenant);
+                testingTenants.add(tenant);
             }
-
-            if (numOfTestingTenants < 2) {
-                ticket = globalAuthenticationService.authenticateUser(
-                        deprecatedAdminUsername, DigestUtils.sha256Hex(deprecatedAdminPassword));
-                numOfTestingTenants = 2;
-            }
-
-            testingTenants = ticket.getTenants().subList(0, numOfTestingTenants);
             mainTestingTenant = testingTenants.get(0);
         }
     }

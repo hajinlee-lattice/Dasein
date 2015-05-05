@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -12,20 +11,15 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
 
-    private Ticket ticket = null;
-
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupUsers();
-        ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-        String tenant1 = ticket.getTenants().get(0).getId();
-        String tenant2 = ticket.getTenants().get(1).getId();
+        String tenant1 = testingTenants.get(0).getId();
+        String tenant2 = testingTenants.get(1).getId();
         setupDb(tenant1, tenant2);
 
         Camille camille = CamilleEnvironment.getCamille();
@@ -34,6 +28,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         try {
             camille.delete(path);
         } catch (Exception ex) {
+            //ignore
         }
         camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
     }
@@ -47,8 +42,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "deployment" })
     public void verifySfdcCredential() {
-        UserDocument adminDoc = loginAndAttachAdmin();
-        useSessionDoc(adminDoc);
+        switchToSuperAdmin();
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         CrmCredential crmCredential = new CrmCredential();
@@ -72,8 +66,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "deployment" })
     public void verifyMarketoCredential() {
-        UserDocument adminDoc = loginAndAttachAdmin();
-        useSessionDoc(adminDoc);
+        switchToSuperAdmin();
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         CrmCredential crmCredential = new CrmCredential();
@@ -94,8 +87,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "deployment" })
     public void verifyEloquaCredential() {
-        UserDocument adminDoc = loginAndAttachAdmin();
-        useSessionDoc(adminDoc);
+        switchToSuperAdmin();
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         CrmCredential crmCredential = new CrmCredential();

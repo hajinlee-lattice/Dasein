@@ -53,7 +53,7 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
                 
                 if (!registeredUser) {
                     // Create user and add general rights.
-                    UserRegistration commonUserReg = getUserRegistration(generalUsername, generalUsername, "General", "User", generalPasswordHash);
+                    UserRegistration commonUserReg = getUserRegistration(EXTERNAL_USER_USERNAME, EXTERNAL_USER_USERNAME, "General", "User", generalPasswordHash);
                     String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", commonUserReg, String.class);
                     ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
                     String pwd = response.getResult().getPassword(); 
@@ -73,7 +73,7 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
                     rightsDataMap.put("PLS_Reporting", rightsData);
                     data.setRights(rightsDataMap);
 
-                    String url = getRestAPIHostPort() + "/pls/users/" + generalUsername;
+                    String url = getRestAPIHostPort() + "/pls/users/" + EXTERNAL_USER_USERNAME;
                     restTemplate.put(url, data, new HashMap<String, Object>());
                 }
             } catch (Exception e) {

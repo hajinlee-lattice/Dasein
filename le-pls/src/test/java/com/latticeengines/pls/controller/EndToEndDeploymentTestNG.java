@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
@@ -63,16 +61,18 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
         setupUsers();
 
-        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-        assertTrue(ticket.getTenants().size() >= 2);
-        assertNotNull(ticket);
-        String tenant1 = ticket.getTenants().get(0).getId();
-        String tenant2 = ticket.getTenants().get(1).getId();
-        tenantToAttach = ticket.getTenants().get(1);
-        tenant = tenantToAttach.getId();
-        setupDb(tenant1, tenant2, false, false);
-
-        globalAuthenticationService.discard(ticket);
+        setupDbUsingDefaultTenantIds(true, true, false, false);
+        tenantToAttach = mainTestingTenant;
+        tenant = mainTestingTenant.getId();
+//        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
+//        assertTrue(ticket.getTenants().size() >= 2);
+//        assertNotNull(ticket);
+//        String tenant1 = ticket.getTenants().get(0).getId();
+//        String tenant2 = ticket.getTenants().get(1).getId();
+//        tenantToAttach = ticket.getTenants().get(1);
+//        tenant = tenantToAttach.getId();
+//        setupDb(tenant1, tenant2, false, false);
+//        globalAuthenticationService.discard(ticket);
     }
     
     private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table) throws Exception {
