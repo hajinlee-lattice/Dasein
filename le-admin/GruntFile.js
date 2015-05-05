@@ -17,7 +17,7 @@ module.exports = function(grunt) {
             "angular-local-storage": '0.1.5',
             "angular-ui-router": '0.2.13',
             "angular-ui-bootstrap": '0.12.1',
-            underscore: '1.8.3',
+            underscore: '1.8.2',
             webfont: '1.5.16',
 
             bootstrap: '3.3.4',
@@ -317,12 +317,12 @@ module.exports = function(grunt) {
         karma: {
             options: {
                 files:      [
-                    '<%= app.dir %>/lib/js/jquery.js',
-                    '<%= app.dir %>/lib/js/angular.js',
-                    '<%= app.dir %>/lib/js/angular-mocks.js',
-                    '<%= app.dir %>/lib/js/underscore.js',
-                    '<%= app.dir %>/lib/js/le-common.js',
-                    '<%= app.dir %>/app/**/*.js'
+                    '<%= app.dir %>/lib/js/*jquery.js',
+                    '<%= app.dir %>/lib/js/*angular.js',
+                    '<%= app.dir %>/lib/js/*angular-mocks.js',
+                    '<%= app.dir %>/lib/js/*underscore.js',
+                    '<%= app.dir %>/lib/js/*le-common.js',
+                    '<%= app.dir %>/**/*.js'
                 ],
                 frameworks: ['jasmine']
 
@@ -336,8 +336,7 @@ module.exports = function(grunt) {
                     outputFile: 'target/karma-test-results.xml'
                 },
                 preprocessors:    {
-                    //'src/main/webapp/app/**/!(*Spec).js': 'coverage'
-                    'temp/!(*Spec).js': 'coverage'
+                    'src/main/webapp/app/**/!(*Spec).js': 'coverage'
                 },
                 coverageReporter: {
                     dir:       'target/jscoverage',
