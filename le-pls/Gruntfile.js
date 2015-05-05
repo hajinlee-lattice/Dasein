@@ -11,21 +11,21 @@ module.exports = function (grunt) {
             dev:         {
                 url:            'http://localhost:8080',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.dev.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.dev.js'
+                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             },
             integration: {
                 url:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js',
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.int.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             },
             qa:          {
                 url:            'http://bodcdevhdpweb53.dev.lattice.local:8080',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.qa.js',
+                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.qa.js'
             },
             prod:        {
                 url:            'https://app.lattice-engines.com',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js',
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.prod.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             }
         }

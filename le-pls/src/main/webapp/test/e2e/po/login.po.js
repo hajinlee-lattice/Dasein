@@ -8,14 +8,14 @@ var Login = function() {
 	this.password = element(by.model('password'));
     this.loginButton = element(by.id('loginButton'));
 
-    this.loginUser = function(name, password, tenantIdx) {
-        tenantIdx = tenantIdx || browser.params.tenantIndex;
+    this.loginUser = function(name, password, tenantName) {
+        tenantName = tenantName || browser.params.tenantName;
         getWebApp();
         isLoginPage().then(function(ispresent){
             if (!ispresent) { logout(); }
             submitLoginCredentials(name, password);
             tenants.tenantSelectionIsPresent().then(function(present){
-                if (present) tenants.selectTenantByIndex(tenantIdx);
+                if (present) tenants.selectTenantByName(tenantName);
             });
         });
         browser.wait(function(){

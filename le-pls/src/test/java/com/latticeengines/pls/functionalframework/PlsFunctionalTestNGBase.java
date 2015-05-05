@@ -525,20 +525,23 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 return null;
         }
 
-        User user = new User();
-        user.setEmail(username);
-        user.setFirstName("Lattice");
-        user.setLastName("Tester");
+        if (userService.findByEmail(username) == null) {
 
-        Credentials credentials = new Credentials();
-        credentials.setUsername(user.getEmail());
-        credentials.setPassword("WillBeModifiedImmediately");
+            User user = new User();
+            user.setEmail(username);
+            user.setFirstName("Lattice");
+            user.setLastName("Tester");
 
-        user.setUsername(credentials.getUsername());
+            Credentials credentials = new Credentials();
+            credentials.setUsername(user.getEmail());
+            credentials.setPassword("WillBeModifiedImmediately");
 
-        makeSureUserDoesNotExist(credentials.getUsername());
+            user.setUsername(credentials.getUsername());
 
-        createUser(credentials.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName());
+            makeSureUserDoesNotExist(credentials.getUsername());
+
+            createUser(credentials.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName());
+        }
 
         return globalUserManagementService.getUserByEmail(username);
     }

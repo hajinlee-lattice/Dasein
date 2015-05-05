@@ -2,24 +2,20 @@
 
 var Config = function() {
 
-    this.generateConfig = function(specBasePath, dev) {
-
-        dev = dev || false;
+    this.generateConfig = function(specBasePath) {
 
         return {
             specs: [
-                //specBasePath + '/mainflow_spec.js',
-                //specBasePath + '/modellist_spec.js',
-                //specBasePath + '/modeldetail_spec.js',
-                //specBasePath + '/predictors_spec.js',
-                //specBasePath + '/thresholdexplorer_spec.js',
-                //specBasePath + '/leadsample_spec.js',
+                specBasePath + '/mainflow_spec.js',
+                specBasePath + '/modellist_spec.js',
+                specBasePath + '/modeldetail_spec.js',
+                specBasePath + '/predictors_spec.js',
+                specBasePath + '/thresholdexplorer_spec.js',
+                specBasePath + '/leadsample_spec.js',
                 specBasePath + '/usermgmt_spec.js'
             ],
 
             params: {
-                tenantIndex: dev ? 1 : 0,
-                alternativeTenantIndex: dev ? 0 : 1,
                 superAdminUsername:     'pls-super-admin-tester@test.lattice-engines.com',
                 internalAdminUsername:  'pls-internal-admin-tester@test.lattice-engines.com',
                 internalUserUsername:   'pls-internal-user-tester@test.lattice-engines.com',
