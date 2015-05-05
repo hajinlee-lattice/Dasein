@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
@@ -91,8 +90,6 @@ public class SessionServiceImpl implements SessionService {
     public AccessLevel upgradeFromDeprecatedBARD(String tenantId, String username, String email, List<String> rights) {
 
         if (!hasPLSRights(rights)) { return null; }
-        if (username.equals(Constants.DEPRECATED_ADMIN_USERNAME)) { return null; }
-        if (email.equals(Constants.DEPRECATED_ADMIN_EMAIL)) { return null; }
 
         AccessLevel level;
         if (isDeprecatedAdmin(rights)) {

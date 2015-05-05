@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -205,16 +204,14 @@ public class UserServiceImpl implements UserService {
                     = globalUserManagementService.getAllUsersOfTenant(tenantId);
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
-                if (!user.getUsername().equals(Constants.DEPRECATED_ADMIN_USERNAME)) {
-                    AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
-                    if (accessLevel == null) {
-                        accessLevel = getAccessLevel(tenantId, user.getUsername());
-                    }
-                    if (accessLevel != null) {
-                        user.setAccessLevel(accessLevel.name());
-                    }
-                    users.add(user);
+                AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
+                if (accessLevel == null) {
+                    accessLevel = getAccessLevel(tenantId, user.getUsername());
                 }
+                if (accessLevel != null) {
+                    user.setAccessLevel(accessLevel.name());
+                }
+                users.add(user);
             }
         } catch (LedpException e) {
             LOGGER.warn(String.format("Trying to get all users from a non-existing tenant %s", tenantId), e);
