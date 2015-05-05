@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
@@ -29,7 +27,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public abstract class LatticeComponent implements HasName, GraphNode {
-    private static Log log = LogFactory.getLog(LatticeComponent.class);
 
     protected Collection<? extends LatticeComponent> dependencies = new HashSet<>();
 
