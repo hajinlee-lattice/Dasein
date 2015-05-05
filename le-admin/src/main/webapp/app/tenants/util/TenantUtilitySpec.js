@@ -84,11 +84,11 @@ describe('TenantUtility tests', function (){
         expect(tenantReg.hasOwnProperty("TenantInfo")).toBe(true);
         expect(tenantReg.hasOwnProperty("ContractInfo")).toBe(true);
 
-        var configDirs = tenantReg.ConfigDirectories;
+        configDirs = tenantReg.ConfigDirectories;
         expect(configDirs.length).toEqual(1);
 
-        var spaceInfo = tenantReg.CustomerSpaceInfo;
-        var parsedFlags = JSON.parse(spaceInfo.featureFlags);
+        spaceInfo = tenantReg.CustomerSpaceInfo;
+        parsedFlags = JSON.parse(spaceInfo.featureFlags);
         expect(parsedFlags.Feature1).toBe(true);
         expect(parsedFlags.Feature2).toBe(false);
     });

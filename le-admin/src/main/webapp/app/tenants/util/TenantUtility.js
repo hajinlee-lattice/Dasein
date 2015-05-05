@@ -59,7 +59,7 @@ app.service('TenantUtility', function(_){
             };
         }
 
-        if (featureFlags != null) {
+        if (featureFlags !== null) {
             result.CustomerSpaceInfo.featureFlags = JSON.stringify(featureFlags);
         }
 
@@ -123,7 +123,7 @@ app.service('TenantUtility', function(_){
             valid: true,
             reason: null
         };
-        if (tenantId == null || tenantId === "") {
+        if (tenantId === null || tenantId === "") {
             result.valid = false;
             result.reason = "Tenant ID cannot be empty";
             return result;
