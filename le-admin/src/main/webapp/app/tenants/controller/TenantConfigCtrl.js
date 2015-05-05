@@ -131,7 +131,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     }
 
     $scope.onSaveClick = function(){
-        var infos = {CustomerSpaceInfo: $scope.spaceInfo};
+        var infos = {CustomerSpaceInfo: $scope.spaceInfo, TenantInfo: $scope.tenantInfo};
 
         $scope.tenantRegisration =
             TenantUtility.constructTenantRegistration($scope.components,
