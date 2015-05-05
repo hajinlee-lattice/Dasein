@@ -523,7 +523,7 @@ module.exports = function (grunt) {
         },
 
         instrument: {
-            files: 'src/main/webapp/app/**/*.js',
+            files: 'src/main/webapp/app/**/**[!vendor]/*[!Spec].js',
             options: {
             	lazy: true,
                 basePath: "target/protractor_coverage/instrumented"
