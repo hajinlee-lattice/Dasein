@@ -83,7 +83,7 @@ describe('model list', function() {
     it('should be able to cancel editing model name', function () {
         model.findElement(By.xpath(modellist.xpath.CancelEditModelName)).click();
         expect(browser.driver.isElementPresent(By.xpath(modellist.xpath.ModelNameInput))).toBe(false);
-        model.findElement(By.css('h2.editable')).getInnerHtml().then(function(text){
+        model.findElement(By.css('h2.editable')).getText().then(function(text){
             expect(text).toEqual(originalModelName);
         });
     });
@@ -108,9 +108,8 @@ describe('model list', function() {
 
     it('should confirm the new name', function () {
         expect(element(by.xpath(modellist.xpath.ModelNameInput)).isPresent()).toBe(false);
-        element.all(by.xpath(modellist.xpath.ModelTileWidget)).first().then(function(elem){
-            expect(elem.element(by.css('h2.editable')).getInnerHtml()).toEqual("Testing Name");
-        });
+        var elem = element.all(by.xpath(modellist.xpath.ModelTileWidget)).first();
+        expect(elem.element(by.css('h2.editable')).getText()).toEqual("Testing Name");
     });
 
     it('should alert for duplicate name', function () {
@@ -129,12 +128,11 @@ describe('model list', function() {
     });
 
     it('should reset model names', function () {
-        element.all(by.xpath(modellist.xpath.ModelTileWidget)).first().then(function(elem){
-            elem.element(by.css('i.fa-pencil')).click();
-            elem.element(by.model('data.name')).clear();
-            elem.element(by.model('data.name')).sendKeys(originalModelName);
-            elem.element(by.buttonText('SAVE')).click();
-        });
+        var elem = element.all(by.xpath(modellist.xpath.ModelTileWidget)).first();
+        elem.element(by.css('i.fa-pencil')).click();
+        elem.element(by.model('data.name')).clear();
+        elem.element(by.model('data.name')).sendKeys(originalModelName);
+        elem.element(by.buttonText('Save')).click();
     });
 
     it('should log out', function () {
