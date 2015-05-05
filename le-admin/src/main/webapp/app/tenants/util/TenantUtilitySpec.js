@@ -16,5 +16,6 @@ describe('TenantUtility tests', function (){
     it('should render status correctly', function () {
         var displayName = tenantUtility.getStatusDisplayName("OK");
         expect(tenantUtility.getStatusTemplate(displayName)).toContain(displayName);
+        expect(tenantUtility.getStatusTemplate(displayName)).toContain("text-success");
     });
 });
