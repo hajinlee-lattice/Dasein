@@ -547,6 +547,26 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     private void setTestingTenants(){
+        Tenant tenant1 = new Tenant();
+        tenant1.setId("TopologyDev.TopologyDev.Production");
+        tenant1.setName("Tenant for topology development");
+        tenantService.discardTenant(tenant1);
+
+        tenant1 = new Tenant();
+        tenant1.setId("TopologyDev.Marketo.Production");
+        tenant1.setName("Topology - Marketo");
+        tenantService.discardTenant(tenant1);
+
+        tenant1 = new Tenant();
+        tenant1.setId("Topology.Marketo.Production");
+        tenant1.setName("Topology - Marketo (001)");
+        tenantService.discardTenant(tenant1);
+
+        tenant1 = new Tenant();
+        tenant1.setId("TopoloyDev.Marketo.Production");
+        tenant1.setName("Topology develop - Marketo");
+        tenantService.discardTenant(tenant1);
+
         if (testingTenants == null || testingTenants.isEmpty()) {
             List<String> subTenantIds = Arrays.asList("Tenant1", "Tenant2");
             testingTenants = new ArrayList<>();
