@@ -4,12 +4,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.log4j.Logger;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
+import cascading.tap.hadoop.io.MultiInputSplit;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -24,7 +27,11 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry argument = functionCall.getArguments();
-        String processdFlg = "0";
+        
+        HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;
+        MultiInputSplit mis = (MultiInputSplit) hfp.getReporter().getInputSplit();
+        FileSplit fs = (FileSplit) mis.getWrappedInputSplit();
+        String fileName = fs.getPath().getName();
         
         String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
 
@@ -36,7 +43,7 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         result.add(argument.getString("REVN_USD_AMT"));
         result.add(argument.getString("SYS_QTY"));
         result.add(argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR"));
-        result.add(processdFlg);
+        result.add(fileName);
 
         functionCall.getOutputCollector().add(result);
 
