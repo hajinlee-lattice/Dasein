@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -29,7 +28,10 @@ public class ScoringMapperTransformUtil {
 	
 	private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
 
-    private static final int THRESHOLD = 10000;
+	//TODO
+	private static final String absolutePath = "/Users/ygao/test/e2e/";
+	
+    //private static final int THRESHOLD = 10000;
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
     private static final String LEAD_RECORD_MODEL_ID_COLUMN = "ModelID";
@@ -41,7 +43,7 @@ public class ScoringMapperTransformUtil {
     
     public static void parseModelFiles(HashMap<String, JSONObject> models, Path path, HashMap<String, Integer> modelNumberMap) {
 		try {
-			log.info("come to the helper function");
+			log.info("come to the parseModelFiles function");
 	        FileReader reader;
 			reader = new FileReader(path.toString());
 	        JSONParser jsonParser = new JSONParser();
@@ -65,10 +67,29 @@ public class ScoringMapperTransformUtil {
         }
     }
     
+    public static JSONObject parseDatatypeFile(Path path) {
+    	JSONObject datatypeObject = null;
+    	String fileName = path.getName();
+    	String content = null;
+		try {
+			content = FileUtils.readFileToString(new File(fileName));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	JSONParser jsonParser = new JSONParser();
+    	try {
+			datatypeObject = (JSONObject) jsonParser.parse(content);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+    	return datatypeObject;
+    }
+    
 	public static void writeScoringScript(String modelID, JSONObject modelObject) {
 		String scriptContent = (String) modelObject.get(MODEL_SCRIPT);
-		String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
-		String fileName = absolutePath + modelID + SCORING_SCRIPT_NAME;
+		//String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
+		//String fileName = absolutePath + modelID + SCORING_SCRIPT_NAME;
+		String fileName = modelID + SCORING_SCRIPT_NAME;
 		try {
 			File file = new File(fileName);
 			FileUtils.writeStringToFile(file, scriptContent);
@@ -81,8 +102,9 @@ public class ScoringMapperTransformUtil {
 		JSONArray compressedSupportedFiles = (JSONArray) modelObject.get(MODEL_COMPRESSED_SUPPORT_Files);
 		for (int i = 0; i < compressedSupportedFiles.size(); i++) {
 			JSONObject compressedFile = (JSONObject) compressedSupportedFiles.get(i);
-			String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
-			String compressedFileName = absolutePath + modelID + compressedFile.get("Key");
+			//String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
+			//String compressedFileName = absolutePath + modelID + compressedFile.get("Key");
+			String compressedFileName = modelID + compressedFile.get("Key");
 			decodeBase64ThenDecompressToFile((String)compressedFile.get("Value"), compressedFileName);
 		}
 		
@@ -119,12 +141,11 @@ public class ScoringMapperTransformUtil {
 			bw.flush();
 			bw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-    public static void manipulateLeadFile(HashMap<String, Integer> modelNumberMap, String record, HashMap<String, JSONObject> models) {
+    public static void manipulateLeadFile(HashMap<String, Integer> modelNumberMap, String record, HashMap<String, JSONObject> models, int threshold) {
     	// find the column which contains the modelID   	
     	try {
     		JSONParser jsonParser = new JSONParser();
@@ -136,12 +157,12 @@ public class ScoringMapperTransformUtil {
 			String modelID = identifyModelID(modelIDVal, modelNumberMap);
 			int currentNum = modelNumberMap.get(modelID);
 			modelNumberMap.put(modelID, ++currentNum);
-			String leadInputFileName = modelID + "-" + (currentNum/THRESHOLD);
+			String leadInputFileName = modelID + "-" + (currentNum/threshold);
 			//debug
-			String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
-			leadInputFileName = absolutePath +leadInputFileName;
+			//String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
+			//leadInputFileName = absolutePath +leadInputFileName;
 			
-			log.info("leadInputFileName name is " + leadInputFileName);
+			//log.info("leadInputFileName name is " + leadInputFileName);
 			File file = new File(leadInputFileName);
 			if (!file.exists()) {
 					file.createNewFile();
@@ -163,7 +184,7 @@ public class ScoringMapperTransformUtil {
     	for (String ID : modelIDSet) {
     		if (modelIDVal.contains(ID)) {
     			modelID = ID;
-    			log.info("Find the model " + ID);
+    			//log.info("Find the model " + ID);
     			break;
     		}
     	}
@@ -183,7 +204,7 @@ public class ScoringMapperTransformUtil {
 			//TODO unify with Haitao about the name of the columnID and the type
 			JSONObject jsonObj = new JSONObject();
 			String columnID = (String) leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
-			log.info("The lead comlumn id is " + columnID);
+			//log.info("The lead comlumn id is " + columnID);
 			JSONArray jsonArray = new JSONArray();  
 			jsonObj.put("value", jsonArray); 
 			jsonObj.put("key", columnID); 
