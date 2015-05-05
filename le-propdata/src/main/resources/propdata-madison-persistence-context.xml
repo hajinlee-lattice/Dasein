@@ -50,7 +50,7 @@
     </bean>
 
     <bean id="madisonLogicDailyProgressDao"
-        class="com.latticeengines.madison.dao.impl.MadisonLogicDailyProgressDaoImpl">
+        class="com.latticeengines.propdata.madison.dao.impl.MadisonLogicDailyProgressDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataMadison" />
     </bean>
 

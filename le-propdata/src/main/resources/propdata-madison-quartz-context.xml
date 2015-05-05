@@ -8,7 +8,7 @@
         class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="durability" value="true" />
         <property name="jobClass"
-            value="com.latticeengines.madison.jobs.impl.MadisonLogicDownloadServiceImpl" />
+            value="com.latticeengines.propdata.madison.jobs.impl.MadisonLogicDownloadServiceImpl" />
         <property name="jobDataAsMap">
             <map>
                 <entry key="propDataMadisonService" value-ref="propDataMadisonService" />
@@ -36,7 +36,7 @@
         class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="durability" value="true" />
         <property name="jobClass"
-            value="com.latticeengines.madison.jobs.impl.MadisonLogicUploadServiceImpl" />
+            value="com.latticeengines.propdata.madison.jobs.impl.MadisonLogicUploadServiceImpl" />
         <property name="jobDataAsMap">
             <map>
                 <entry key="propDataMadisonService" value-ref="propDataMadisonService" />
