@@ -3,11 +3,11 @@
 var Tenants = function() {
     this.getTenantByIndex = function(index) {    	
         return element(by.repeater('tenant in tenantList').row(index));
-    };  	
-
-    function getTenantByName(name) {
-        return element(by.cssContainingText('option', name));
     };
+
+    function selectTenantByName(name) {
+        element(by.css('select option[value="'+ name + '"]')).click()
+    }
 
     this.selectTenantByIndex = function(index) {
         browser.wait(function(){
@@ -20,7 +20,7 @@ var Tenants = function() {
         browser.wait(function(){
             return element(by.css('select#tenantSelectionInput')).isDisplayed();
         }, 10000, 'tenant list should appear with in 10 sec.');
-        getTenantByName(name).click();
+        selectTenantByName(name);
     };
 
     this.tenantSelectionIsPresent = function(){
