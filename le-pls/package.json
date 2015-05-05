@@ -41,6 +41,6 @@
     "underscore": "^1.8.2"
   },
   "scripts": {
-    "install": "node node_modules/grunt-protractor-runner/scripts/webdriver-manager-update; node node_modules/protractor/bin/webdriver-manager update"
+    "install": "node node_modules/grunt-protractor-runner/scripts/webdriver-manager-update"
   }
 }
