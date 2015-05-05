@@ -11,6 +11,8 @@ public class DbCreds {
     private String db;
     private String dbType;
     private String instance;
+    private String jdbcUrl;
+    private String driverClass;
     
     public DbCreds() {
     }
@@ -23,6 +25,8 @@ public class DbCreds {
         this.db = builder.db;
         this.dbType = builder.dbType;
         this.instance = builder.instance;
+        this.jdbcUrl = builder.jdbcUrl;
+        this.driverClass = builder.driverClass;
     }
 
     public String getUser() {
@@ -83,6 +87,24 @@ public class DbCreds {
         this.instance = instance;
     }
 
+    @JsonProperty(value = "jdbc_url", required = false)
+    public String getJdbcUrl() {
+        return jdbcUrl;
+    }
+
+    public void setJdbcUrl(String jdbcUrl) {
+        this.jdbcUrl = jdbcUrl;
+    }
+    
+    @JsonProperty(value = "driver_class", required = false)
+    public String getDriverClass() {
+        return driverClass;
+    }
+    
+    public void setDriverClass(String driverClass) {
+        this.driverClass = driverClass;
+    }
+
     public static class Builder {
 
         private String user;
@@ -92,6 +114,8 @@ public class DbCreds {
         private String db;
         private String dbType = "SQLServer";
         private String instance;
+        private String jdbcUrl;
+        private String driverClass;
 
         public Builder() {
         }
@@ -128,6 +152,16 @@ public class DbCreds {
         
         public Builder instance(String instance) {
             this.instance = instance;
+            return this;
+        }
+        
+        public Builder jdbcUrl(String jdbcUrl) {
+            this.jdbcUrl = jdbcUrl;
+            return this;
+        }
+        
+        public Builder driverClass(String driverClass) {
+            this.driverClass = driverClass;
             return this;
         }
         
