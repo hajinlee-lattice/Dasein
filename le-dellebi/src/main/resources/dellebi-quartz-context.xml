@@ -16,6 +16,8 @@
 
 	<context:annotation-config />
 	<context:component-scan base-package="com.latticeengines.dellebi" />
+	
+	<import resource="classpath:dellebi-component-context.xml"/>
 
 	<bean name="dellebiManagerJob"
 		class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -32,7 +34,7 @@
 	<bean id="dellebiManagerCronTrigger"
 		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="dellebiManagerJob" />
-		<property name="cronExpression" value="0 0 16 ? * MON-FRI" />
+		<property name="cronExpression" value="0 0/1 * * * ?" />
 	</bean>
 
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
@@ -47,24 +49,5 @@
             </list>
         </property>
 	</bean>
-	
-		<bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow">
-		<constructor-arg>
-			<util:list list-class="java.util.ArrayList">
-				<ref bean="getOrderSumDailyFlow" />
-				<ref bean="getOrderDetailDailyFlow" />
-				<ref bean="getShipDailyFlow" />
-				<ref bean="getWarrantyDailyFlow" />
-				<ref bean="getQuoteDailyFlow" />
-			</util:list>
-		</constructor-arg>
-	</bean>
-	
-	<bean id="hadoopfilesystemoperations"
-		class="com.latticeengines.dellebi.util.HadoopFileSystemOperations" />
-		
-	<bean id="normalfilesystemoperations"
-		class="com.latticeengines.dellebi.util.NormalFileSystemOperations" />
-		
-	<bean id= "mail" class="com.latticeengines.dellebi.util.MailSender"/>
+
 </beans>
