@@ -14,6 +14,8 @@ public class PLSComponentDeploymentTestNG extends PLSComponentTestNG {
     }
 
     private void createTestTenant(String tenantId, String tenantName) {
+        loginAD();
+
         try {
             deleteTenant(contractId, tenantId);
         } catch (Exception e) {
