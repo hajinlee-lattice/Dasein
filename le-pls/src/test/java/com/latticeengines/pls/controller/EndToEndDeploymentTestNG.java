@@ -4,7 +4,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -24,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.security.exposed.AccessLevel;
 
 public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
@@ -119,9 +118,8 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "runPipeline" })
     public void checkModels() throws InterruptedException {
-        UserDocument doc = loginAndAttachAdmin(tenantToAttach);
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        UserDocument doc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
+        useSessionDoc(doc);
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         int numOfRetries = 50;
         List response;
