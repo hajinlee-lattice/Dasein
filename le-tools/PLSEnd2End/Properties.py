@@ -22,8 +22,8 @@ class PLSEnvironments(object):
     pls_version=parser.get('TestSetup', 'pls_version');
 
     
-    dl_server="https://bodcdevvint207.dev.lattice.local:8080/";
-    visidb_server="bodcdevvint207.dev.lattice.local";
+    dl_server="https://bodcdevvint187.dev.lattice.local:8080/";
+    visidb_server="bodcdevvint187.dev.lattice.local";
     
     
     pls_url_1="https://%s/%s" % (pls_server, pls_bard_1);
@@ -49,6 +49,8 @@ class PLSEnvironments(object):
     visidb_server_pwd="visid@t@b@se";
     
     template_location="\\\\%s\PLSTemplate" % visidb_server#"\\\\10.61.0.210\DevQA\share\PLSTemplate";
+    visidb_data_folder="D:\\VisiDBData";
+    visidb_data_bak="D:\\performanceTest\\dbbak";
     
     pls_SFDC_user="apeters-widgettech@lattice-engines.com";
     pls_SFDC_pwd="Happy2010";
@@ -77,9 +79,9 @@ class PLSEnvironments(object):
     SQL_JAMS_CFG = "DRIVER={SQL Server};SERVER=10.41.1.247;DATABASE=JAMSCFG;uid=dataloader_user;pwd=password";
     SQL_ScoringDaemon = "DRIVER={SQL Server};SERVER=%s\SQL2012STD;DATABASE=SD_%s;uid=dataloader_prod;pwd=L@ttice2" % (pls_server, pls_bard_1[3:]);
     SQL_BasicDataForIntegrationTest = "DRIVER={SQL Server};SERVER=10.41.1.187\SQL2008;DATABASE=BasicDataForIntegrationTest;uid=dataloader_user;pwd=password";
-    SQL_conn_dataloader = "DRIVER={SQL Server};SERVER=10.41.1.187\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;";
+    SQL_conn_dataloader = "DRIVER={SQL Server};SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % visidb_server;
     SQL_conn_pdMatch = "DRIVER={SQL Server};SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
-    SQL_conn_leadscoring = "DRIVER={SQL Server};SERVER=10.41.1.187\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;";
+    SQL_conn_leadscoring = "DRIVER={SQL Server};SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % "10.41.1.187";
         
     #dataloader providers
     SQL_PropDataForModeling = "Data Source=bodcprodvsql130;" + \

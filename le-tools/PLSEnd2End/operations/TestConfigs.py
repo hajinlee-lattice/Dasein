@@ -292,21 +292,21 @@ ConfigDLC["New Refresh Data Source"] = {"command": "-NRDS",
 
 ConfigDLC["Edit Refresh Data Source"] = {"command": "-ERDS",
                                          "definition": """dlc -ERDS -s [DataLoader URL] -u [User Name] 
-                                         -p [Password] -t [Tenant Name] -g [Group Name]
-                                         -rn [Refresh Data Source Name] -sn [Table Schema Name: ]
-                                         -cn [Data Provider Name: ] -usqls [Use SQL Statement: ]
-                                         -sqls [SQL Statement: ] -tab [Table Name: ] -f [Filters: ]
-                                         -ade [Delete Expired Extracts Automatically: true|false] 
-                                         -em [Exact Match: true|false, ]
-                                         -rcs [Required Columns: the names of columns are separated by '|']
-                                         -td [Throttling Data: ] -idc [Id Column: ]
-                                         -diff [Date Diff: ] -limit [Limitation: ]
-                                         -stw [Split into Time Windows: ] -csr [Confidence Succeed Rows: ]
-                                         -htw [Hours of Time Window: ]
-                                         -mmtw [Minutes of Min Time Window: ]
-                                         -mdrc [Max Days of Record Count: ]
-                                         -ewmt [extract Data With Multiple Threads: ]
-                                         -acd [Always Commit Data: ] -guid [GUID: the guid for log]""",
+                                                         -p [Password] -t [Tenant Name] -g [Group Name]
+                                                         -rn [Refresh Data Source Name] -sn [Table Schema Name: ]
+                                                         -cn [Data Provider Name: ] -usqls [Use SQL Statement: ]
+                                                         -sqls [SQL Statement: ] -tab [Table Name: ] -f [Filters: ]
+                                                         -ade [Delete Expired Extracts Automatically: true|false] 
+                                                         -em [Exact Match: true|false, ]
+                                                         -rcs [Required Columns: the names of columns are separated by '|']
+                                                         -td [Throttling Data: ] -idc [Id Column: ]
+                                                         -diff [Date Diff: ] -limit [Limitation: ]
+                                                         -stw [Split into Time Windows: ] -csr [Confidence Succeed Rows: ]
+                                                         -htw [Hours of Time Window: ]
+                                                         -mmtw [Minutes of Min Time Window: ]
+                                                         -mdrc [Max Days of Record Count: ]
+                                                         -ewmt [extract Data With Multiple Threads: ]
+                                                         -acd [Always Commit Data: ] -guid [GUID: the guid for log]""",
                                          "-s":    ("required", "DataLoader URL"),
                                          "-u":    ("required", "User Name"),
                                          "-p":    ("required", "Password"),
@@ -333,6 +333,47 @@ ConfigDLC["Edit Refresh Data Source"] = {"command": "-ERDS",
                                          "-mdrc": ("optional", "Max Days of Record Count"),
                                          "-ewmt": ("optional", "extract Data With Multiple Threads"),
                                          "-acd ": ("optional", "Always Commit Data"),
+                                         "-guid": ("optional", "GUID: the guid for log")
+                                         }
+
+ConfigDLC["DeTach Visidb DataBase"] = {"command": "-RD",
+                                         "definition": """dlc -RD -s [DataLoader URL] -u [User Name] 
+                                                         -p [Password] -dc [VisiDB Connection String] 
+                                                         -dn [VisiDB Name] 
+                                                         -guid [GUID: the guid for log]""",
+                                         "-s":    ("required", "DataLoader URL"),
+                                         "-u":    ("required", "User Name"),
+                                         "-p":    ("required", "Password"),
+                                         "-dc":    ("required", "VisiDB Connection String"),
+                                         "-dn":    ("required", "VisiDB Name"),
+                                         "-guid": ("optional", "GUID: the guid for log")
+                                         }
+ConfigDLC["Delete Visidb DataBase"] = {"command": "-DD",
+                                         "definition": """dlc -DD -s [DataLoader URL] -u [User Name] 
+                                                         -p [Password] -dc [VisiDB Connection String] 
+                                                         -dn [VisiDB Name] 
+                                                         -guid [GUID: the guid for log]""",
+                                         "-s":    ("required", "DataLoader URL"),
+                                         "-u":    ("required", "User Name"),
+                                         "-p":    ("required", "Password"),
+                                         "-dc":    ("required", "VisiDB Connection String"),
+                                         "-dn":    ("required", "VisiDB Name"),
+                                         "-guid": ("optional", "GUID: the guid for log")
+                                         }
+ConfigDLC["Attach Visidb DataBase"] = {"command": "-AD",
+                                         "definition": """dlc -AD -s [DataLoader URL] -u [User Name] 
+                                                         -p [Password] -dc [VisiDB Connection String] 
+                                                         -dn [VisiDB Name]
+                                                         -cl [size of the DB]
+                                                         -dfd [db definition file] 
+                                                         -guid [GUID: the guid for log]""",
+                                         "-s":    ("required", "DataLoader URL"),
+                                         "-u":    ("required", "User Name"),
+                                         "-p":    ("required", "Password"),
+                                         "-dc":    ("required", "VisiDB Connection String"),
+                                         "-dn":    ("required", "VisiDB Name"),
+                                         "-cl":    ("required", "size of the DB"),
+                                         "-dfd":    ("required", "db definition file"),
                                          "-guid": ("optional", "GUID: the guid for log")
                                          }
 

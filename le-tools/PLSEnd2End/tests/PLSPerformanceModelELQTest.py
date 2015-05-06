@@ -8,7 +8,6 @@ from operations.PerformanceHelpers import PerformanceTest
 from operations.PerformanceHelpers import VisiDBRollBack
 from operations import PlsOperations
 
-revisionId=-1;
 tenantName=PLSEnvironments.pls_bard_1;
 app=PLSEnvironments.pls_marketing_app_ELQ;
 bardAdmin=PLSEnvironments.pls_bardAdminTool_1;
@@ -18,16 +17,13 @@ class Test(unittest.TestCase):
     
     def setUp(self):
         print "start a new test......"
-#         global revisionId
-#         visidb = VisiDBRollBack();        
-#         revisionId = visidb.dlGetRevision(tenantName)
-#         print revisionId
+        visidb = VisiDBRollBack();        
+        visidb.bakVisidbDB(tenantName)
       
     def tearDown(self):
         print "end the test......"
-#         visidb = VisiDBRollBack();        
-#         visidb.dlRollBack(tenantName,revisionId);
-#         print revisionId
+        visidb = VisiDBRollBack();        
+        visidb.copyBackVisidbDB(tenantName)
         
     def testPerformanceModelingEloqua_20K(self):
         pt.PerformanceModelingTest("testPerformanceModelingEloqua_20K",20000)

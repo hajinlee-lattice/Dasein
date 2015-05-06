@@ -9,8 +9,10 @@ import time
 import base64
 import random
 import string
+import os.path
 from selenium import webdriver
 
+import TestHelpers;
 from Properties import PLSEnvironments
 from operations.TestHelpers import JamsRunner
 from operations.TestRunner import SessionRunner
@@ -422,7 +424,12 @@ class VisiDBRollBack(SessionRunner):
         super(VisiDBRollBack, self).__init__(dl_server, logfile);
         self.exception = exception;
         self.dl_server=dl_server;
-        self.dlUI = webdriver.Firefox();
+#         self.dlUI = webdriver.Firefox();
+        self.dlc_host = "http://bodcdevvint187.dev.lattice.local:5000"#PLSEnvironments.pls_test_server
+        self.dlc_path= "E:\Sharing\dl_2.3.3.9571n\DLC";#"D:\prod\DLC"
+        self.dl_user=PLSEnvironments.dl_server_user
+        self.dl_pwd=PLSEnvironments.dl_server_pwd
+        self.visidb_conn="ServerName=%s;UserID=%s;Password=%s;" % (PLSEnvironments.visidb_server,PLSEnvironments.visidb_server_user,PLSEnvironments.visidb_server_pwd)
         
     def dlLogin(self, tenant_name):
         self.dlUI.get(self.dl_server);
@@ -477,7 +484,68 @@ class VisiDBRollBack(SessionRunner):
         self.dlUI.switch_to_alert().accept();
         self.dlUI.close();
 
-
-
+    def detachVisidbDb(self,tenant_name):
+        dlc = DLCRunner(host=self.dlc_host, dlc_path=self.dlc_path)
+        params = {"-s": self.dl_server,
+                  "-u": self.dl_user,
+                  "-p": self.dl_pwd,
+                  "-dc": self.visidb_conn,
+                  "-dn": tenant_name
+                 }
+        command = "DeTach Visidb DataBase"
+       
+        print "Detaching visidb DB %s" % tenant_name
+        status = dlc.runDLCcommand(command, params,local=False);
+        return status       
     
+    def attachVisidbDb(self,tenant_name):
+        dlc = DLCRunner(host=self.dlc_host, dlc_path=self.dlc_path)
+        params = {"-s": self.dl_server,
+                  "-u": self.dl_user,
+                  "-p": self.dl_pwd,
+                  "-dc": self.visidb_conn,
+                  "-dn": tenant_name,
+                  "-cl": "4096",
+                  "-dfd": "D:\VisiDBData\BD_ADEDTBDd70064747nG26263627r1\BD_ADEDTBDd70064747nG26263627r1.vdb"
+                 }
+        command = "Attach Visidb DataBase"
+       
+        print "Attach visidb DB %s" % tenant_name
+        status = dlc.runDLCcommand(command, params,local=False)
+        
+        return status;
     
+    def bakVisidbDB(self,tenant_name):
+        if self.isExistVisidbDB(tenant_name):
+            return True;
+        else:
+            dlc = DLCRunner(host=self.dlc_host, dlc_path=self.dlc_path)        
+            command="xcopy %s\%s %s\%s /E /I /Y" % (PLSEnvironments.visidb_data_folder,tenant_name,PLSEnvironments.visidb_data_bak,tenant_name)
+            print "copying the db to bak folders"
+            status = dlc.runCommand(command);
+            
+            return status;
+    
+    def copyBackVisidbDB(self,tenant_name):
+        self.detachVisidbDb(tenant_name);
+        dlc = DLCRunner(host=self.dlc_host, dlc_path=self.dlc_path)        
+        command="xcopy %s\%s %s\%s /E /I /Y" % (PLSEnvironments.visidb_data_bak,tenant_name,PLSEnvironments.visidb_data_folder,tenant_name)
+        print "copying the db back to data folder"
+        dlc.runCommand(command);
+        
+        return self.attachVisidbDb(tenant_name);
+    
+    def isExistVisidbDB(self,tenant_name):
+        dlc = DLCRunner(host=self.dlc_host, dlc_path=self.dlc_path)
+        command="mkdir %s\%s" % (PLSEnvironments.visidb_data_bak,tenant_name)
+        
+        dlc.runCommand(command);
+        errorMessage = "A subdirectory or file %s\\%s already exists" % (PLSEnvironments.visidb_data_bak,tenant_name)
+        if -1 == dlc.request_text[0].find(errorMessage):
+            return False;
+        else:
+            return True;
+        
+
+        
+        

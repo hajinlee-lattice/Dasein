@@ -18,16 +18,13 @@ class Test(unittest.TestCase):
     
     def setUp(self):
         print "start a new test......"
-#         global revisionId
-# #         revisionId=44
-#         visidb = VisiDBRollBack();        
-#         revisionId = visidb.dlGetRevision(tenantName)
-#         print revisionId
+        visidb = VisiDBRollBack();        
+        visidb.bakVisidbDB(tenantName)
       
     def tearDown(self):
         print "end the test......"
-#         visidb = VisiDBRollBack();        
-#         visidb.dlRollBack(tenantName,revisionId);
+        visidb = VisiDBRollBack();        
+        visidb.copyBackVisidbDB(tenantName)
     
     def testPerformanceModelingMKTO_20K(self):        
         pt.PerformanceModelingTest("testPerformanceModelingMKTO_20K",20000)  

@@ -75,6 +75,26 @@ class Test(unittest.TestCase):
     def testVisiDBRollBack(self):
         visidb = VisiDBRollBack();
         visidb.dlRollBack("BD2_ADEDTBDd710159nP27060n1542",109);
+        
+    def testDetachVisidb(self):
+        visidb = VisiDBRollBack();
+        print visidb.detachVisidbDb("BD_ADEDTBDd70064747nG26263627r1");
+        
+    def testAttachVisidb(self):
+        visidb = VisiDBRollBack();
+        print visidb.attachVisidbDb("BD_ADEDTBDd70064747nG26263627r1");
+        
+    def testBakVisidbDB(self):
+        visidb = VisiDBRollBack();
+        print visidb.bakVisidbDB("BD_ADEDTBDd70064747nH26263627r1");
+        
+    def testCopyBackVisidbDB(self):
+        visidb = VisiDBRollBack();
+        print visidb.copyBackVisidbDB("BD_ADEDTBDd70064747nG26263627r1");
+        
+    def testIsExistVisidbDB(self):
+        visidb = VisiDBRollBack();
+        print visidb.isExistVisidbDB("BD_ADEDTBDd70064747nG26263627r1");
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
