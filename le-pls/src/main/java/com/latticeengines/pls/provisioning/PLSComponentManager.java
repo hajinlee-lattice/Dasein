@@ -29,6 +29,7 @@ public class PLSComponentManager {
         if (tenantService.hasTenantId(tenant.getId())) {
             tenantService.updateTenant(tenant);
         } else {
+            tenantService.discardTenant(tenant);
             tenantService.registerTenant(tenant);
         }
 

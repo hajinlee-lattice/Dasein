@@ -43,6 +43,11 @@ public class TenantServiceImpl implements TenantService {
         } else {
             oldTenant.setRegisteredTime(tenant.getRegisteredTime());
         }
+        try {
+            globalTenantManagementService.registerTenant(tenant);
+        } catch (LedpException e) {
+            log.warn("Tenant already exist in GA.", e);
+        }
         tenantEntityMgr.update(oldTenant);
     }
 

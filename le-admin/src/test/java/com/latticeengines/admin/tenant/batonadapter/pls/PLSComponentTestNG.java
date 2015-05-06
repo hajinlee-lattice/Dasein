@@ -17,10 +17,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -58,14 +65,18 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         // wait a while, then test your installation
         int numOfRetries = 10;
-        BootstrapState.State state;
+        BootstrapState state;
         do {
-            state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "PLS").state;
+            state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "PLS");
             numOfRetries--;
             Thread.sleep(1000L);
-        } while (state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
+        } while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
 
-        Assert.assertEquals(state, BootstrapState.State.OK);
+        if (!state.state.equals(BootstrapState.State.OK)) {
+            System.out.println(state.errorMessage);
+        }
+
+        Assert.assertEquals(state.state, BootstrapState.State.OK);
 
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
 
@@ -113,6 +124,101 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
             }
         }
 
+    }
+
+    @Test(groups = {"deployment", "functional"})
+    public void installTestTenants() throws Exception {
+        createTestTenant("Tenant1", "Tenant 1", "MARKETO");
+        createTestTenant("Tenant2", "Tenant 2", "ELOQUA");
+        createCommonTenant();
+    }
+
+    private void createTestTenant(String tenantId, String tenantName, String topology)
+            throws Exception{
+        loginAD();
+
+        CustomerSpaceProperties props = new CustomerSpaceProperties();
+        props.description = "PLS Test tenant";
+        props.displayName = TestContractId + " " + tenantName;
+        props.topology = topology;
+        props.product = "LPA";
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
+
+        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
+        TenantInfo tenantInfo = new TenantInfo(
+                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
+
+        TenantRegistration reg = new TenantRegistration();
+        reg.setSpaceInfo(spaceInfo);
+        reg.setTenantInfo(tenantInfo);
+        reg.setContractInfo(contractInfo);
+
+        try {
+            deleteTenant(contractId, tenantId);
+        } catch (Exception e) {
+            //ignore
+        }
+        createTenant(contractId, tenantId, false, reg);
+
+        String testAdminUsername = "bnguyen@lattice-engines.com";
+
+        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
+        confDir.makePathsLocal();
+
+        // modify the default config
+        DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
+        node.getDocument().setData("[\"" + testAdminUsername + "\"]");
+
+        node = confDir.get(new Path("/TenantName"));
+        node.getDocument().setData(TestContractId + " " + tenantName);
+
+        // send to bootstrapper message queue
+        super.bootstrap(contractId, tenantId, serviceName, confDir);
+    }
+
+    private void createCommonTenant() throws Exception {
+
+        String contractId = "CommonTestContract";
+        String tenantId = "TestTenant";
+        loginAD();
+
+        CustomerSpaceProperties props = new CustomerSpaceProperties();
+        props.description = "PLS Test tenant";
+        props.displayName = "Lattice Internal Test Tenant";
+        props.topology = "MARKETO";
+        props.product = "LPA";
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
+
+        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
+        TenantInfo tenantInfo = new TenantInfo(
+                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
+
+        TenantRegistration reg = new TenantRegistration();
+        reg.setSpaceInfo(spaceInfo);
+        reg.setTenantInfo(tenantInfo);
+        reg.setContractInfo(contractInfo);
+
+        try {
+            deleteTenant(contractId, tenantId);
+        } catch (Exception e) {
+            //ignore
+        }
+        createTenant(contractId, tenantId, false, reg);
+
+        String testAdminUsername = "bnguyen@lattice-engines.com";
+
+        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
+        confDir.makePathsLocal();
+
+        // modify the default config
+        DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
+        node.getDocument().setData("[\"" + testAdminUsername + "\"]");
+
+        node = confDir.get(new Path("/TenantName"));
+        node.getDocument().setData("Lattice Internal Test Tenant");
+
+        // send to bootstrapper message queue
+        super.bootstrap(contractId, tenantId, serviceName, confDir);
     }
 
     @Override
