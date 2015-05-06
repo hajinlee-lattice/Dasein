@@ -240,10 +240,10 @@ public class SerializableDocumentDirectoryUnitTestNG {
             }
         }
 
-        List<OptionalConfigurationField> optionalFields = sDir.findOptionalFields();
+        List<SelectableConfigurationField> optionalFields = sDir.findSelectableFields();
 
         Assert.assertEquals(optionalFields.size(), 2);
-        for (OptionalConfigurationField field : optionalFields) {
+        for (SelectableConfigurationField field : optionalFields) {
             if (field.getNode().equals("/Config1")) {
                 Assert.assertEquals(field.getOptions().size(), 3);
             } else if (field.getNode().equals("/Config2")) {
@@ -271,7 +271,7 @@ public class SerializableDocumentDirectoryUnitTestNG {
             node.setData("option4");
         }
 
-        optionalFields = sDir.findOptionalFields();
+        optionalFields = sDir.findSelectableFields();
         Assert.assertEquals(optionalFields.size(), 0);
 
         //==================================================
@@ -292,9 +292,9 @@ public class SerializableDocumentDirectoryUnitTestNG {
         sDir = new SerializableDocumentDirectory(configDir);
         sDir.applyMetadata(metaDir);
 
-        optionalFields = sDir.findOptionalFields();
+        optionalFields = sDir.findSelectableFields();
         Assert.assertEquals(optionalFields.size(), 1);
-        for (OptionalConfigurationField field : optionalFields) {
+        for (SelectableConfigurationField field : optionalFields) {
             if (field.getNode().equals("/Parent/Child2")) {
                 Assert.assertEquals(field.getOptions().size(), 3);
             }

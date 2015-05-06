@@ -4,13 +4,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class OptionalConfigurationField {
+public class SelectableConfigurationField {
 
     private String node;
     private List<String> options;
     private String defaultOption;
 
-    public OptionalConfigurationField(){ }
+    public SelectableConfigurationField(){ }
 
     @JsonProperty("Node")
     public String getNode() { return node; }

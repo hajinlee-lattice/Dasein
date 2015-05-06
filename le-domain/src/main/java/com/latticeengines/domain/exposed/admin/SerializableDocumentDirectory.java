@@ -158,12 +158,12 @@ public class SerializableDocumentDirectory {
         }
     }
 
-    public List<OptionalConfigurationField> findOptionalFields() {
-        List<OptionalConfigurationField> optFields = new ArrayList<>();
+    public List<SelectableConfigurationField> findSelectableFields() {
+        List<SelectableConfigurationField> optFields = new ArrayList<>();
         if (this.getNodes() != null && !this.getNodes().isEmpty()) {
             String parent = "";
             for(Node node : this.getNodes()) {
-                optFields.addAll(node.findOptionalFields(parent));
+                optFields.addAll(node.findSelectableFields(parent));
             }
         }
         return optFields;
@@ -339,11 +339,11 @@ public class SerializableDocumentDirectory {
         }
 
 
-        public List<OptionalConfigurationField> findOptionalFields(String parent) {
-            List<OptionalConfigurationField> optFields = new ArrayList<>();
+        public List<SelectableConfigurationField> findSelectableFields(String parent) {
+            List<SelectableConfigurationField> optFields = new ArrayList<>();
             if (this.getMetadata() != null && this.getMetadata().getType().equals("options")) {
                 if (this.getMetadata().validateData(this.getData())) {
-                    OptionalConfigurationField field = new OptionalConfigurationField();
+                    SelectableConfigurationField field = new SelectableConfigurationField();
                     field.setNode(parent + "/" + this.getNode());
                     field.setDefaultOption(this.getData());
                     field.setOptions(new ArrayList<>(this.getMetadata().getOptions()));
@@ -354,7 +354,7 @@ public class SerializableDocumentDirectory {
             }
             if (this.getChildren() != null && !this.getChildren().isEmpty()) {
                 for (Node child : this.getChildren()) {
-                    optFields.addAll(child.findOptionalFields(parent + "/" + this.getNode()));
+                    optFields.addAll(child.findSelectableFields(parent + "/" + this.getNode()));
                 }
             }
             return optFields;
