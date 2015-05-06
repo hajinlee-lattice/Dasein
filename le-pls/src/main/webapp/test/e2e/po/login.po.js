@@ -20,7 +20,7 @@ var Login = function() {
         });
         browser.wait(function(){
             return element(by.css('div.page-title')).isPresent();
-        }, 5000, 'page title should appear with in 5 sec.');
+        }, 30000, 'page title should appear with in 30 sec.');
     };
 
     function getWebApp() {
@@ -50,7 +50,7 @@ var Login = function() {
                 userDropdown.toggleDropdown();
                 browser.wait(function(){
                     return userDropdown.signout.isPresent();
-                }, 5000, 'dropdown menu should appear with in 5 sec.');
+                }, 10000, 'dropdown menu should appear with in 10 sec.');
                 userDropdown.signout.click();
                 browser.driver.sleep(3000);
             }
