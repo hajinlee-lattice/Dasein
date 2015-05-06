@@ -32,7 +32,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
     private String plsHostPort;
 
     @BeforeClass(groups = {"deployment", "functional"})
-    public void setup() {
+    public void setup() throws Exception {
         serviceName = getServiceName();
         contractId = TestContractId + serviceName + "Contract";
         tenantId = serviceName + "Tenant";
