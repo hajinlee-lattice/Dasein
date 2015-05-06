@@ -35,7 +35,7 @@
 	<bean id="dellebiManagerCronTrigger"
 		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="dellebiManagerJob" />
-		<property name="cronExpression" value="0 0 16 * * ?" />
+		<property name="cronExpression" value="0 0/5 * * * ?" />
 	</bean>
 
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
