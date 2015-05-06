@@ -26,7 +26,7 @@
                             <th>{{ResourceUtility.getString('MULTIPLE_MODEL_MODEL_NAME')}}</th>
                             <th>{{ResourceUtility.getString('MULTIPLE_MODEL_MODEL_ID')}}</th>
                             <th data-ng-hide="segments.length === 1">{{ResourceUtility.getString('MULTIPLE_MODEL_PRIORITY')}}</th>
-                            <th>{{ResourceUtility.getString('MULTIPLE_MODEL_DELETE')}}</th>
+                            <th data-ng-show="allowAddAndDelete">{{ResourceUtility.getString('MULTIPLE_MODEL_DELETE')}}</th>
                         </thead>
                         <tbody>
                             <tr data-ng-repeat="segment in segments" data-ng-class="{shaded: $index % 2}">
@@ -62,14 +62,14 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="edit-icons">
+                                <td class="edit-icons" data-ng-show="allowAddAndDelete">
                                     <a class="delete-user-link" data-ng-click="deleteSegmentClicked(segment)" href="#"><i class="fa fa-trash-o"></i></a>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                     <div class="text-left">
-                        <button class="btn btn-primary" data-ng-click="addNewSegmentClicked()">
+                        <button class="btn btn-primary" data-ng-click="addNewSegmentClicked()" data-ng-show="allowAddAndDelete">
                             {{ResourceUtility.getString('MULTIPLE_MODEL_ADD_NEW')}}
                         </button>
                     </div>

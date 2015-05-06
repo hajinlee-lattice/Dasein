@@ -15,6 +15,8 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
     $scope.segments = [];
     $scope.showError = false;
     $scope.errorMessage = "";
+    // Can't Add or Delete segments. Leaving this in case we want to reactivate it in the future.
+    $scope.allowAddAndDelete = false;
     
     $scope.closeErrorClick = function ($event) {
         if ($event != null) {
