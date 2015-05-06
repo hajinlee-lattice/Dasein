@@ -64,7 +64,7 @@ public class PLSComponentDeploymentTestNG extends PLSComponentTestNG {
         super.bootstrap(contractId, tenantId, serviceName, confDir);
     }
 
-    private void createCommonTenant() {
+    private void createCommonTenant() throws Exception {
 
         String contractId = "CommonTestContract";
         String tenantId = "TestTenant";
