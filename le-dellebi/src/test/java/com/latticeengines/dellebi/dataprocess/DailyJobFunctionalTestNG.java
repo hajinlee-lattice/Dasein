@@ -68,14 +68,6 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
 		// Copy test files to remote test folder.
 		smbPut(smbInboxPath,
-				"./src/test/resources/tgt_lat_order_summary_global_2014.zip");
-		smbPut(smbInboxPath,
-				"./src/test/resources/tgt_order_detail_global_2_20141214_201155.zip");
-		smbPut(smbInboxPath,
-				"./src/test/resources/tgt_ship_to_addr_lattice_1_20141109_184552.zip");
-		smbPut(smbInboxPath,
-				"./src/test/resources/tgt_warranty_global_1_20141213_190323.zip");
-		smbPut(smbInboxPath,
 				"./src/test/resources/tgt_quote_trans_global_1_2015.zip");
 		smbPut(smbInboxPath,
 				"./src/test/resources/tgt_quote_trans_global_4_2015.zip");
@@ -87,20 +79,9 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
 		try {
 			// Remove output folder on HDFS.
-			Path orderSummaryPath = new Path(dataHadoopWorkingPath + "/"
-					+ orderSummary);
-			Path orderDetailsPath = new Path(dataHadoopWorkingPath + "/"
-					+ orderDetail);
-			Path shipToPath = new Path(dataHadoopWorkingPath + "/"
-					+ shipToAddrLattice);
-			Path warrantyPath = new Path(dataHadoopWorkingPath + "/"
-					+ warrantyGlobal);
+
 			Path quotePath = new Path(dataHadoopWorkingPath + "/" + quoteTrans);
 
-			deleteHDFSFolder(orderSummaryPath);
-			deleteHDFSFolder(orderDetailsPath);
-			deleteHDFSFolder(shipToPath);
-			deleteHDFSFolder(warrantyPath);
 			deleteHDFSFolder(quotePath);
 
 		} catch (Exception e) {
@@ -111,39 +92,26 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
 	@AfterMethod(groups = "functional")
 	public void setUpAfterMethod() throws Exception {
-		
+
 		NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("",
 				smbAccount, smbPS);
-		
-		deleteSMBFile(new SmbFile(smbArchivePath + "/tgt_lat_order_summary_global_2014.zip", auth));
-		deleteSMBFile(new SmbFile(smbArchivePath + "/tgt_order_detail_global_2_20141214_201155.zip", auth));
-		deleteSMBFile(new SmbFile(smbArchivePath + "/tgt_ship_to_addr_lattice_1_20141109_184552.zip", auth));
-		deleteSMBFile(new SmbFile(smbArchivePath + "/tgt_warranty_global_1_20141213_190323.zip", auth));
-		deleteSMBFile(new SmbFile(smbArchivePath + "/tgt_quote_trans_global_1_2015.zip", auth));
-		deleteSMBFile(new SmbFile(smbArchivePath + "/tgt_quote_trans_global_4_2015.zip", auth));
+
+		deleteSMBFile(new SmbFile(smbArchivePath
+				+ "/tgt_quote_trans_global_1_2015.zip", auth));
+		deleteSMBFile(new SmbFile(smbArchivePath
+				+ "/tgt_quote_trans_global_4_2015.zip", auth));
 
 		// Remove output folder on HDFS.
-					Path orderSummaryPath = new Path(dataHadoopWorkingPath + "/"
-							+ orderSummary);
-					Path orderDetailsPath = new Path(dataHadoopWorkingPath + "/"
-							+ orderDetail);
-					Path shipToPath = new Path(dataHadoopWorkingPath + "/"
-							+ shipToAddrLattice);
-					Path warrantyPath = new Path(dataHadoopWorkingPath + "/"
-							+ warrantyGlobal);
-					Path quotePath = new Path(dataHadoopWorkingPath + "/" + quoteTrans);
+		Path quotePath = new Path(dataHadoopWorkingPath + "/" + quoteTrans);
 
-					deleteHDFSFolder(orderSummaryPath);
-					deleteHDFSFolder(orderDetailsPath);
-					deleteHDFSFolder(shipToPath);
-					deleteHDFSFolder(warrantyPath);
-					deleteHDFSFolder(quotePath);
+		deleteHDFSFolder(quotePath);
 	}
 
 	@Test(groups = "functional")
 	public void testExecute() throws Exception {
 		ApplicationContext springContext = new ClassPathXmlApplicationContext(
-				"dellebi-properties-context.xml", "dellebi-camel-context.xml","dellebi-component-context.xml");
+				"dellebi-properties-context.xml", "dellebi-camel-context.xml",
+				"dellebi-component-context.xml");
 
 		// Wait for a while to let Camel process data.
 		try {
@@ -152,8 +120,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		}
 
 		// Process data using Cascading
-		DailyFlow dailyFlow = springContext
-				.getBean("dailyFlow", DailyFlow.class);
+		DailyFlow dailyFlow = springContext.getBean("dailyFlow",
+				DailyFlow.class);
 		dailyFlow.setDataHadoopInPath("/latticeengines/in");
 		dailyFlow.setDataHadoopWorkingPath("/latticeengines");
 		dailyFlow.setOrderDetail("order_detail");
@@ -163,7 +131,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		dailyFlow.setQuoteTrans("quote_trans");
 		dailyFlow.setMailReceiveList("llu@Lattice-Engines.com,jwilliams@lattice-engines.com,LYan@Lattice-Engines.com");
 		dailyFlow.doDailyFlow();
-		
+
 		try {
 			Thread.sleep(60000);
 		} catch (InterruptedException e) {
@@ -171,31 +139,20 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(URI.create(dataHadoopRootPath), conf);
-		Path orderSummaryPath = new Path(dataHadoopWorkingPath + "/"
-				+ orderSummary);
-		Path orderDetailPath = new Path(dataHadoopWorkingPath + "/"
-				+ orderDetail);
-		Path shipToAddrLatticePath = new Path(dataHadoopWorkingPath + "/"
-				+ shipToAddrLattice);
-		Path warrantyGlobalPath = new Path(dataHadoopWorkingPath + "/"
-				+ warrantyGlobal);
 		Path quoteTransPath = new Path(dataHadoopWorkingPath + "/" + quoteTrans);
 
-		Assert.assertEquals(fs.exists(orderSummaryPath), true);
-		Assert.assertEquals(fs.exists(orderDetailPath), true);
-		Assert.assertEquals(fs.exists(shipToAddrLatticePath), true);
-		Assert.assertEquals(fs.exists(warrantyGlobalPath), true);
 		Assert.assertEquals(fs.exists(quoteTransPath), true);
-		
-		SqoopDataService sqoopDataService = springContext.getBean("sqoopDataService", SqoopDataService.class);
-		
+
+		SqoopDataService sqoopDataService = springContext.getBean(
+				"sqoopDataService", SqoopDataService.class);
+
 		sqoopDataService.export();
-		
+
 		try {
 			Thread.sleep(60000);
 		} catch (InterruptedException e) {
 		}
-		
+
 		Assert.assertEquals(fs.exists(quoteTransPath), false);
 	}
 
@@ -235,12 +192,11 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 			fs.delete(path, true);
 		}
 	}
-	
+
 	private void deleteSMBFile(SmbFile smbFile) throws Exception {
-		
+
 		if (smbFile.canWrite()) {
 			smbFile.delete();
 		}
 	}
 }
-
