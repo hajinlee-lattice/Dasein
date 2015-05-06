@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.log4j.Logger;
 
@@ -22,7 +24,7 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
     public ScrubQuoteFunction(Fields fieldDeclaration) {
         super(2, fieldDeclaration);
     }
-    private static final Logger LOGGER = Logger.getLogger(ScrubQuoteFunction.class);
+    private static final Log log = LogFactory.getLog(ScrubQuoteFunction.class);
     
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
@@ -58,8 +60,8 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
                 date = formatterOld.parse(s);
                 s = formatterNew.format(date);
             } catch (ParseException e) {
-                LOGGER.error("Failed to convert " + s + " to Date."); 
-                LOGGER.error("Failed!", e);
+            	log.error("Failed to convert " + s + " to Date."); 
+            	log.error("Failed!", e);
             }
             
         }else{

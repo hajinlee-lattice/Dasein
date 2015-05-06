@@ -19,7 +19,7 @@ public class DailyJob  extends QuartzJobBean  {
     private void process() {
 
     	log.info("Start to process files from inbox.");      
-        
+    	        
         // Process data using Cascading 
         // Note Camel scans input folder intermittently so it archive and unzip data continuously if there's new data incomes.
         // But Cascading does it's job once when it be called.  So there's only time Casadading processes data and new data incomes after that,

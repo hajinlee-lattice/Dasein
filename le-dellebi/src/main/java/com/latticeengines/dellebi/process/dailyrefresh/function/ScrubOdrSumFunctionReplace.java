@@ -4,7 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -18,7 +19,7 @@ import cascading.tuple.TupleEntry;
 public class ScrubOdrSumFunctionReplace extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 7208027092973311661L;
-    private static final Logger LOGGER = Logger.getLogger(ScrubOdrSumFunctionReplace.class);
+    private static final Log log = LogFactory.getLog(ScrubOdrSumFunctionReplace.class);
 
     public ScrubOdrSumFunctionReplace(Fields fieldDeclaration) {
         super(2, fieldDeclaration);
@@ -74,8 +75,8 @@ public class ScrubOdrSumFunctionReplace extends BaseOperation implements Functio
                 date = formatterOld.parse(s);
                 s = formatterNew.format(date);
             } catch (ParseException e) {
-                LOGGER.error("Failed to convert " + s + " to Date."); 
-                LOGGER.error("Failed!", e);
+                log.error("Failed to convert " + s + " to Date."); 
+                log.error("Failed!", e);
             }
             
         }else{
