@@ -35,6 +35,9 @@ public class SqoopDataService {
     
     @Value("${dellebi.customer}")
     private String customer;
+    
+    @Value("${dellebi.quotetrans.storeprocedure")
+    private String quote_sp;
       
     @Autowired
     private HadoopFileSystemOperations hadoopfilesystemoperations;
@@ -47,6 +50,7 @@ public class SqoopDataService {
     	int rc = 1;
     	String sourceDir = dataHadoopRootPath + dataHadoopWorkingPath + "/" + quotetrans;
        	String columns = "QuoteNumber,Date,CustomerID,Product,RepBadge,Quantity,Amount,QuoteFileName";
+       	String sqlStr = "exec "+quote_sp;
        	log.info("Start export HDFS files " + sourceDir);
 
        	sqoopSyncJobService = new DellEBI_SqoopSyncJobService();
@@ -59,6 +63,11 @@ public class SqoopDataService {
        	catch (Exception e)
        	{
        		log.error("Exception: Export files "+ sourceDir +" to SQL server failed");
+       	}
+       	
+       	if (rc == 0){
+       		log.info("Begin to execute the Store Procedure: " + quote_sp);
+       		rc = sqoopSyncJobService.eval(sqlStr, 1, uri);
        	}
        	
        	if (rc == 0){

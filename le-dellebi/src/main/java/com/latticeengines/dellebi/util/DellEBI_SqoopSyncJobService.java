@@ -57,5 +57,16 @@ public class DellEBI_SqoopSyncJobService {
         return rc;
     }
 
-	
+    public int eval(String sql, int numMappers, String jdbcUrl) {
+    	int rc = 1;
+        List<String> cmds = new ArrayList<>();
+        cmds.add("eval");
+        cmds.add("--connect");
+        cmds.add(jdbcUrl);
+        cmds.add("--query");
+        cmds.add(sql);
+        rc = LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration());
+        
+        return rc;
+    }
 }
