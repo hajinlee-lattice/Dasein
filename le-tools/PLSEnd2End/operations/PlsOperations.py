@@ -208,8 +208,22 @@ def runScoringGroups(tenant,load_groups):
     #load_groups = ["LoadCRMData", "LoadMapData", "PropDataMatch", "BulkScoring_PushToScoringDB"];
     return TestHelpers.runLoadGroups(dlc, params, load_groups);
     
-def runPushToBulkScoring(tenant):
-    load_groups = ["LoadCRMData", "LoadMapData", "PropDataMatch", "BulkScoring_PushToScoringDB"];   
+def runPushToBulkScoring(tenant,app=None): 
+    print app  
+    if app == PLSEnvironments.pls_marketing_app_ELQ:
+        load_groups = ["LoadMapDataForModeling",
+                       "LoadCRMDataForModeling",
+                       "ModelBuild_PropDataMatch",
+                       "BulkScoring_PushToScoringDB"]            
+    elif app==PLSEnvironments.pls_marketing_app_MKTO:
+        load_groups = ["LoadMAPDataForModeling_ActivityRecord_NewLead",
+                       "LoadMAPDataForModeling_LeadRecord",
+                       "LoadCRMDataForModeling",
+                       "ModelBuild_PropDataMatch",
+                       "BulkScoring_PushToScoringDB"]
+    else:
+        load_groups = ["LoadCRMData", "LoadMapData", "PropDataMatch", "BulkScoring_PushToScoringDB"];
+        
     return runScoringGroups(tenant, load_groups);
     
 def runPushToHourlyScoring(tenant):
@@ -228,8 +242,8 @@ def runHourlyDanteProcess(tenant):
     load_groups = ["LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
     return runScoringGroups(tenant, load_groups);
 
-def runBulkScoring(tenant):
-    assert runPushToBulkScoring(tenant);
+def runBulkScoring(tenant,app=None):
+    assert runPushToBulkScoring(tenant,app);
     assert waitForLeadInputQueue(tenant, cycle_times=100);
     assert runEndBulkScoring(tenant);
     

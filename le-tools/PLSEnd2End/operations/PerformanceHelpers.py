@@ -9,10 +9,13 @@ import time
 import base64
 import random
 import string
+from selenium import webdriver
 
 from Properties import PLSEnvironments
+from operations.TestHelpers import JamsRunner
 from operations.TestRunner import SessionRunner
 from operations.TestHelpers import DLCRunner
+from operations import PlsOperations
 
 test_connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest;
 dl_connection_string = PLSEnvironments.SQL_conn_dataloader;
@@ -129,40 +132,100 @@ class PerformanceData(SessionRunner):
         self.sequence = getSequence();
     def recordDanteData(self,test_Name,record_number,groupName):
         dllaunchData = self.getLaunchData(groupName);
-        dlDTData =self.getDanteData_dataloader(dllaunchData.get("launchid"));
-        dtData = self.getDanteData(dlDTData.get("starttime"));
-                 
+        if -1==dllaunchData:
+            return 0;
+        print "record Dante Data, launch data: " 
+        print dllaunchData.get("launchid");
+        dlDTDatas =self.getDanteData_dataloader(dllaunchData.get("launchid"));
+        if 0==len(dlDTDatas):
+            print "failed to get dante data from dataloader";
+            return 0;
+        dlDTData = dlDTDatas[0]
+        print "record Dante Data, Dataloader data:"
+        print dlDTData
+        dtDatas = self.getDanteData(dlDTData.get("starttime"));
+        if 0 ==len(dlDatas):
+            print "failed to get dante data from dante";
+            return 0;
+        dlData= dlDTDatas[0]
+        print "record Dante Date, Dante: "
+        print dlData         
         print self.performanceDataRecord(sequence=self.sequence,testingName=test_Name,loadgroupName=groupName,
-                                   serviceName=pd_connection_string,recordNumber=record_number,
+                                   serviceName=pls_connection_string,recordNumber=record_number,
                                    dl_launch_begin_date=dllaunchData.get("validatestart"),dl_launch_end_date=dllaunchData.get("launchend"),dl_launch_duration_time=dllaunchData.get("dl_launch_duration_time"),
                                    dl_begin_date=dlDTData.get("starttime"),dl_end_date=dlDTData.get("endtime"),dl_duration_time=dlDTData.get("dl_duration_time"),
                                    begin_date=dtData.get("starttime"),end_date=dtData.get("endtime"),duration_time=dtData.get("duration"),actuall_number=dtData.get("num_rows"))
     def recordBardInData(self,test_Name,record_number,groupName):
         dllaunchData = self.getLaunchData(groupName);
-        dlBIData =self.getBardInData_dataloader(dllaunchData.get("launchid"));
-        biData = self.getBardInData(dlBIData.get("queryname"),dllaunchData.get("launchid"));
-                
+        if -1==dllaunchData:
+            return 0;
+        print "record BardIn Data, launch data: " 
+        print dllaunchData.get("launchid");
+        dlBIDatas =self.getBardInData_dataloader(dllaunchData.get("launchid"));
+        if 0==len(dlBIDatas):
+            print "failed to get BardIn data from dataloader";
+            return 0;
+        dlBIData = dlBIDatas[0]
+        print "record BardIn Data, Dataloader BardIn: "
+        print dlBIData.get("queryname")
+        biDatas = self.getBardInData(dlBIData.get("queryname"),dllaunchData.get("launchid"));
+        if 0 ==len(biDatas):
+            print "failed to get BardIn data from BardService";
+            return 0;
+        biData = biDatas[0]
+        print "record BardIn Data, bardin data:"
+        print biData;        
         print self.performanceDataRecord(sequence=self.sequence,testingName=test_Name,loadgroupName=groupName,
-                                   serviceName=pd_connection_string,recordNumber=record_number,
+                                   serviceName=pls_connection_string,recordNumber=record_number,
                                    dl_launch_begin_date=dllaunchData.get("validatestart"),dl_launch_end_date=dllaunchData.get("launchend"),dl_launch_duration_time=dllaunchData.get("dl_launch_duration_time"),
                                    dl_begin_date=dlBIData.get("starttime"),dl_end_date=dlBIData.get("endtime"),dl_duration_time=dlBIData.get("dl_duration_time"),
                                    begin_date=biData.get("starttime"),end_date=biData.get("endtime"),duration_time=biData.get("duration"),QueryName=dlBIData.get("queryname"),actuall_number=biData.get("total"))
     def recordLeadScoringData(self,test_Name,record_number):
         dllaunchData = self.getLaunchData("CreateAnalyticPlay");
-        dlLDData =self.getLeadScoringData_dataloader(dllaunchData.get("launchid"));
-        ldData = self.getLeadScoringData(dlLDData.get("commandid"));
-                
+        if -1==dllaunchData:
+            return 0;
+        print "record LeadScoring Data, launch data: " 
+        print dllaunchData.get("launchid");
+        dlLDDatas =self.getLeadScoringData_dataloader(dllaunchData.get("launchid"));
+        if 0==len(dlLDDatas):
+            print "failed to get leadScoring data from dataloader";
+            return 0;
+        dlLDData=dlLDDatas[0];
+        print "record LeadScoring Data, dataloader Lead Scoring:"
+        print dlLDData.get("commandid")
+        ldDatas = self.getLeadScoringData(dlLDData.get("commandid"));
+        if 0 ==len(ldDatas):
+            print "failed to get LeadScoring data from LeadScoring service";
+            return 0;
+        ldData = ldDatas[0]
+        print "record LeadScoring Data, leadScoring data:"
+        print ldData;        
         print self.performanceDataRecord(sequence=self.sequence,testingName=test_Name,loadgroupName="CreateAnalyticPlay",
-                                   serviceName=pd_connection_string,recordNumber=record_number,
+                                   serviceName=ld_connection_string,recordNumber=record_number,
                                    dl_launch_begin_date=dllaunchData.get("validatestart"),dl_launch_end_date=dllaunchData.get("launchend"),dl_launch_duration_time=dllaunchData.get("dl_launch_duration_time"),
                                    dl_begin_date=dlLDData.get("starttime"),dl_end_date=dlLDData.get("endtime"),dl_duration_time=dlLDData.get("dl_duration_time"),
                                    begin_date=ldData.get("starttime"),end_date=ldData.get("endtime"),duration_time=ldData.get("duration"))    
-    def recordPDMatchData(self,test_Name,record_number):
-        dllaunchData = self.getLaunchData("PropDataMatch");
-        dlPDData =self.getPDMatchData_dataloader(dllaunchData.get("launchid"));
-        pdData = self.getPDMatchData(dlPDData[0]);
-                
-        print self.performanceDataRecord(sequence=self.sequence,testingName=test_Name,loadgroupName="PropDataMatch",
+    def recordPDMatchData(self,test_Name,record_number,pdMatchName):
+        dllaunchData = self.getLaunchData(pdMatchName);
+        if -1==dllaunchData:
+            return 0;
+        print "record PDMatch Data, launch data: " 
+        print dllaunchData.get("launchid");
+        dlPDDatas =self.getPDMatchData_dataloader(dllaunchData.get("launchid"));
+        if 0==len(dlPDDatas):
+            print "failed to get PDMatch data from dataloader";
+            return 0;
+        print "record PDMatch Data, dataloader PDMatch: " 
+        dlPDData=dlPDDatas[0]
+        print dlPDData.get("commandid");
+        pdDatas = self.getPDMatchData(dlPDData.get("commandid"));
+        if 0 ==len(pdDatas):
+            print "failed to get PDMatch data from PropDataMatchService";
+            return 0;
+        pdData = pdDatas[0] 
+        print "record PDMatch Data, pdMatch :"
+        print pdData;      
+        print self.performanceDataRecord(sequence=self.sequence,testingName=test_Name,loadgroupName=pdMatchName,
                                    serviceName=pd_connection_string,recordNumber=record_number,
                                    dl_launch_begin_date=dllaunchData.get("validatestart"),dl_launch_end_date=dllaunchData.get("launchend"),dl_launch_duration_time=dllaunchData.get("dl_launch_duration_time"),
                                    dl_begin_date=dlPDData.get("starttime"),dl_end_date=dlPDData.get("endtime"),dl_duration_time=dlPDData.get("dl_duration_time"),
@@ -173,7 +236,7 @@ class PerformanceData(SessionRunner):
                 " from (select last_modification_date from [%s].[dbo].[LeadCache] where datediff(s,last_modification_date,'%s')<0) t" % (PLSEnvironments.pls_db_Dante,starttime)
 #         print query
         result = self.getQuery(pls_connection_string, query);
-        return result[0];
+        return result;
     def getPDMatchData(self,commandid):
         query = "SELECT command.CommandID,convert(varchar(19),MIN(command.CreateTime),120) AS StartTime,convert(varchar(19),lhs.End_Date,120) AS EndTime,SUM(rhs.Num_Rows) AS Num_Rows," + \
                 "DateDiff(s, MIN(command.CreateTime), lhs.End_Date) AS Duration,lhs.Root_Operation_UID " + \
@@ -185,15 +248,16 @@ class PerformanceData(SessionRunner):
                 " GROUP BY lhs.Contract_External_ID, lhs.Create_Date,lhs.End_Date,lhs.Last_Execution_Date,lhs.Processing_State,lhs.Root_Operation_UID, " + \
                 " command.CommandID,systemStatus.Root_Operation_UID,systemStatus.AvgBlockProcessingTime,lhs.Target_Tables " + \
                 " ORDER BY lhs.Create_Date DESC, DateDiff(minute, lhs.Create_Date, lhs.End_Date) DESC ";
-#         query = "select @@servername"
+
+#         print query;
         result = self.getQuery(pd_connection_string, query);
-        return result[0];
+        return result;
     def getLeadScoringData(self,commandid):
         query = "SELECT [CommandId],convert(varchar(19),[BeginTime],120) as StartTime,convert(varchar(19),[EndTime],120) as EndTime,datediff(s,[BeginTime],[EndTime]) as duration " + \
                 " FROM [LeadScoringDB].[dbo].[LeadScoringResult] where commandid=%s " % (commandid)
 #         print query;
         result = self.getQuery(ld_connection_string, query);
-        return result[0];
+        return result;
     def getBardInData(self,queryName,launchid):
         query = "SELECT top 1 [LeadInputQueue_ID],[LEDeployment_ID],[Table_Name],[Total],[Lower],[Status],convert(varchar(19),[Populated],120) as StartTime,convert(varchar(19),[Consumed],120) as EndTime " + \
                 " ,datediff(s,[Populated],[Consumed]) as duration " + \
@@ -201,13 +265,13 @@ class PerformanceData(SessionRunner):
                 " order by LeadInputQueue_ID desc "
 #         print query
         result = self.getQuery(pls_connection_string, query);
-        return result[0];
+        return result;
         
     def getPDMatchData_dataloader(self,launchid):
         query = "SELECT [CommandId],convert(varchar(19),[CreateTime],120) as job_createtime,convert(varchar(19),[StartTime],120) as StartTime,convert(varchar(19),[EndTime],120) as EndTime,datediff(s,[CreateTime],[EndTime]) as [dl_duration_time] " + \
               " FROM [DataLoader].[dbo].[LaunchPDMatches] where [LaunchId]=%s" % (launchid)
         result = self.getQuery(dl_connection_string, query);
-        return result[0];
+        return result;
     def getLeadScoringData_dataloader(self,launchid):
         query = "SELECT [LeadScoringId],[LaunchId],[LeadScoringCommandId] as commandid,[LeadInputTable] " + \
                 ",convert(varchar(19),[CreateTime],120) as job_createtime,convert(varchar(19),[StartTime],120) as StartTime,convert(varchar(19),[EndTime],120) as EndTime " + \
@@ -215,18 +279,18 @@ class PerformanceData(SessionRunner):
                 " FROM [DataLoader].[dbo].[LaunchLeadScorings] where launchid=%s" % (launchid)
 #         print query;
         result = self.getQuery(dl_connection_string, query);
-        return result[0];
+        return result;
     def getBardInData_dataloader(self,launchid):
         query = "SELECT [BardId],[LaunchId],[QueryName],[CreateTime],convert(varchar(19), case when [StartTime] is null then [CreateTime] else starttime end, 120) as starttime " + \
                 ",convert(varchar(19),[EndTime],120) as EndTime,datediff(s,case when [StartTime] is null then [CreateTime] else starttime end,[EndTime]) as dl_duration_time " + \
                 " FROM [DataLoader].[dbo].[LaunchLSSBardIns] where launchid = %s" % (launchid)
         result = self.getQuery(dl_connection_string, query);
-        return result[0];
+        return result;
     def getDanteData_dataloader(self,launchid):
         query = "select convert(varchar(19),min(starttime),120) as starttime,convert(varchar(19),max(endtime),120) as endtime, datediff(s,min(starttime),max(endtime)) as dl_duration_time " + \
                 " FROM [DataLoader].[dbo].[LaunchQueries] where launchid =%s" % (launchid)
         result = self.getQuery(dl_connection_string, query);
-        return result[0];
+        return result;
         
     def getLaunchData(self,groupName):
         query = "SELECT top 1 l.[LaunchId],l.[TenantId],convert(varchar(19),l.[CreateTime],120) as group_createtime,convert(varchar(19),l.[ValidateStart],120) as ValidateStart,convert(varchar(19),l.[ValidateEnd],120) as ValidateEnd,convert(varchar(19),l.[GenerateBCPStart],120) as GenerateBCPStart,convert(varchar(19),l.[GenerateBCPEnd],120) as GenerateBCPEnd " + \
@@ -235,19 +299,26 @@ class PerformanceData(SessionRunner):
             " where l.tenantid=t.tenantid and t.name='%s' and l.groupname='%s' "  % (self.tenantName,groupName) + \
             "order by launchid desc";
 #         print query;
-        result = self.getQuery(dl_connection_string, query);
-        return result[0];
+        result = self.getQuery(dl_connection_string, query);  
+#         print result;
+        if 0 == len(result):
+            print "========>there is no data be found for conn: %s" % dl_connection_string;
+            print ""
+            print "========>the query is: %s" % query;
+            return -1;
+        else: 
+            return result[0];
         
     def performanceDataRecord(self,sequence,testingName, loadgroupName,serviceName,recordNumber,
                               dl_launch_begin_date=None,dl_launch_end_date=None,dl_launch_duration_time=0,
                               dl_begin_date=None,dl_end_date=None,dl_duration_time=0,
-                              begin_date=None,end_date=None,duration_time=0,actuall_number=0,
+                              begin_date=None,end_date=None,duration_time=0,actuall_number=-1,
                               QueryName=None,job_name=None,pls_version=PLSEnvironments.pls_version):
         query = "INSERT INTO [BasicDataForIntegrationTest].[dbo].[performance_time_cost]" + \
                "([sequence],[maps],[testing_name],[LoadGroup_name],[service_name],[record_number],[dl_launch_begin_date],[dl_launch_end_date],[dl_launch_duration_time]" + \
                ",[dl_begin_date],[dl_end_date],[dl_duration_time],[begin_date],[end_date],[duration_time],[QueryName],[job_name],[pls_version],[tenant_name],[actuall_number]) " + \
                "VALUES(%d,'%s','%s','%s','%s',%d,'%s','%s',%d,'%s','%s',%d,'%s','%s',%d,'%s','%s','%s','%s',%d) " % (sequence,self.app,testingName,loadgroupName,serviceName,recordNumber,dl_launch_begin_date or '1900-01-01',dl_launch_end_date or '1900-01-01',dl_launch_duration_time or 0,dl_begin_date or '1900-01-01',dl_end_date or '1900-01-01',dl_duration_time or 0,begin_date or '1900-01-01',end_date or '1900-01-01',duration_time or 0,QueryName,job_name,pls_version,self.tenantName,actuall_number)
-        print query
+#         print query
         return self.execQuery(test_connection_string, query);
     
     def prepareModelBulkData(self,model_number,from_date):
@@ -266,4 +337,147 @@ class PerformanceData(SessionRunner):
         print "GEN_Model_Bulk_DataSet"
         print dlc.execBulkProc(connection_string, query_map);
         print dlc.execBulkProc(connection_string, query_crm);
+    def prepareHourlyData(self,model_number,loop):
+        # Wait for the leads to be scored
+        dlc = SessionRunner()
+        connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest; 
+            
+        if(self.app == PLSEnvironments.pls_marketing_app_ELQ):
+            query_map="exec [PLS_ELQ_ELQ_Performance].[dbo].[GEN_HourlyScoring] '%s', '%s'" % (model_number,loop);
+            query_crm="exec [PLS_ELQ_SFDC_Performance].[dbo].[GEN_HourlyScoring] '%s', '%s'" % (model_number,loop);
+        elif(self.app == PLSEnvironments.pls_marketing_app_MKTO):
+            query_map="exec [PLS_MKTO_MKTO_Performance].[dbo].[GEN_HourlyScoring] '%s', '%s'" % (model_number,loop);
+            query_crm="exec [PLS_MKTO_SFDC_Performance].[dbo].[GEN_HourlyScoring] '%s', '%s'" % (model_number,loop);
+#         print self.connection_string;
+#         print query;
+        print "GEN_HourlyScoring"
+        print dlc.execBulkProc(connection_string, query_map);
+        print dlc.execBulkProc(connection_string, query_crm);
         
+class PerformanceTest(SessionRunner):
+
+    def __init__(self,marketting_app,tenant_name=None, bard_admin=None, host=PLSEnvironments.pls_test_server, logfile=None, exception=False):
+        super(PerformanceTest, self).__init__(host, logfile)
+        self.exception = exception
+        self.app = marketting_app;
+        self.tenantName = tenant_name
+        self.bardAdmin = bard_admin
+        
+    def PerformanceModelingTest(self,testName,data_number):        
+        pd = PerformanceData(tenant_name=self.tenantName, marketting_app=self.app);
+        pd.prepareModelBulkData(data_number,'1900-01-01')
+           
+        editPerformanceRefreshDataSources(self.tenantName, self.app); 
+                    
+        PlsOperations.runModelingLoadGroups(self.tenantName, self.app);
+        PlsOperations.updateModelingServiceSettings(self.bardAdmin);        
+        PlsOperations.activateModel(self.bardAdmin,self.tenantName);
+        
+        pd.recordPDMatchData(testName,data_number,"ModelBuild_PropDataMatch");
+        pd.recordLeadScoringData(testName,data_number); 
+
+    def PerformanceBulkTest(self,testName,data_number):
+        
+        pd = PerformanceData(tenant_name=self.tenantName, marketting_app=self.app);
+        pd.prepareModelBulkData(data_number,'1900-01-01')
+          
+        # Step 4 - Run LoadGroups and activate Model
+        editPerformanceRefreshDataSources(self.tenantName, self.app); 
+                 
+        PlsOperations.runBulkScoring(self.tenantName,self.app);
+        
+        print "start collect the data ......"
+           
+        print "get PDMatch Data"     
+        pd.recordPDMatchData(testName,data_number,"ModelBuild_PropDataMatch");        
+        print "get BardIn Data"
+        pd.recordBardInData(testName, data_number, "BulkScoring_PushToScoringDB");
+        print "get contact dante data"
+        pd.recordDanteData(testName, data_number, "PushDanteContactsAndAnalyticAttributesToDante")
+        print "get lead dante data"
+        pd.recordDanteData(testName, data_number, "PushDanteLeadsAndAnalyticAttributesToDante") 
+        
+    def PerformanceHourlyTest(self,testName,data_number,loop):
+        
+        pd = PerformanceData(tenant_name=self.tenantName, marketting_app=self.app);
+        pd.prepareHourlyData(data_number,loop)
+        
+        # Step 4 - Run LoadGroups and activate Model
+        editPerformanceRefreshDataSources(self.tenantName, self.app); 
+                 
+        PlsOperations.runHourlyScoring(self.tenantName);
+        
+        print "start collect the data ......"
+        
+        print "get PDMatch Data"      
+        pd.recordPDMatchData(testName,data_number,"PropDataMatch");        
+        print "get BardIn Data"
+        pd.recordBardInData(testName, data_number, "PushToScoringDB");
+        print "get contact dante data"
+        pd.recordDanteData(testName, data_number, "PushDanteContactsAndAnalyticAttributesToDante")
+        print "get lead dante data"
+        pd.recordDanteData(testName, data_number, "PushDanteLeadsAndAnalyticAttributesToDante")
+class VisiDBRollBack(SessionRunner):
+    def __init__(self, dl_server=PLSEnvironments.dl_server, logfile=None, exception=False):
+        super(VisiDBRollBack, self).__init__(dl_server, logfile);
+        self.exception = exception;
+        self.dl_server=dl_server;
+        self.dlUI = webdriver.Firefox();
+        
+    def dlLogin(self, tenant_name):
+        self.dlUI.get(self.dl_server);
+        time.sleep(15);
+        self.dlUI.find_element_by_id("text_email_login").clear();
+        self.dlUI.find_element_by_id("text_email_login").send_keys(PLSEnvironments.dl_server_user);
+        self.dlUI.find_element_by_id("text_password_login").clear();
+        self.dlUI.find_element_by_id("text_password_login").send_keys(PLSEnvironments.dl_server_pwd);
+        self.dlUI.find_element_by_xpath("//input[@value='Sign In']").click();
+        time.sleep(30);
+        
+        self.dlUI.find_element_by_xpath("//li[@id='li_account']/span").click();
+        self.dlUI.find_element_by_id("li_changetenant").click();
+        
+        time.sleep(30);
+        tenants = self.dlUI.find_elements_by_xpath("//ul[@id='ul_account_changetenant']/li");
+        
+        count=0;
+        tenantExist=False;
+        while count < len(tenants):
+            tenantName=tenants[count].find_element_by_xpath("label/span").text;
+            if tenant_name == tenantName[0:tenantName.find("(")].strip():
+                tenants[count].find_element_by_xpath("label/input").click();
+                tenantExist=True;
+                break;
+            count += 1;
+        if tenantExist:
+            self.dlUI.find_element_by_xpath("//button[@type='button']").click();
+        
+        time.sleep(30);
+        self.dlUI.find_element_by_id("div_mainmenu_visidb").click();
+        time.sleep(60);
+        
+    def dlGetRevision(self, tenant_name):
+        self.dlLogin(tenant_name);       
+#         revisionid = self.dlUI.find_element_by_id("revisionid_visidbstudio").get_attribute("value");
+        self.dlUI.find_element_by_xpath("//ul[@id='toolbar_visidbstudio']/li[3]").click();
+        rev_path = "//table[@id='table_revisions_visidbstudio']/tbody/tr[@class='']";
+        time.sleep(30);
+        revisionid = self.dlUI.find_element_by_xpath(rev_path).get_attribute("rid");        
+        self.dlUI.close();
+        return revisionid
+        
+    def dlRollBack(self,tenant_name,revisionid):
+        self.dlLogin(tenant_name);
+        self.dlUI.find_element_by_xpath("//ul[@id='toolbar_visidbstudio']/li[3]").click();
+        rev_path = "//table[@id='table_revisions_visidbstudio']/tbody/tr[@rid='%s']" % revisionid
+        time.sleep(30);
+        self.dlUI.find_element_by_xpath(rev_path).click();        
+        self.dlUI.find_element_by_xpath("//ul[@id='toolstrip_revisionmanagement_visidbstudio']/li[2]").click();
+        
+        self.dlUI.switch_to_alert().accept();
+        self.dlUI.close();
+
+
+
+    
+    
