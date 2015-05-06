@@ -2,6 +2,8 @@ package com.latticeengines.pls.provisioning;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,8 @@ import com.latticeengines.security.exposed.service.UserService;
 @Component
 public class PLSComponentManager {
 
+    private static final Log LOGGER = LogFactory.getLog(PLSComponentManager.class);
+
     @Autowired
     private TenantService tenantService;
 
@@ -28,8 +32,13 @@ public class PLSComponentManager {
 
         if (tenantService.hasTenantId(tenant.getId())) {
             tenantService.updateTenant(tenant);
+            LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
         } else {
-            tenantService.discardTenant(tenant);
+            try {
+                tenantService.discardTenant(tenant);
+            } catch (Exception e) {
+                // ignore
+            }
             tenantService.registerTenant(tenant);
         }
 
@@ -47,9 +56,10 @@ public class PLSComponentManager {
 
     public void discardTenant(Tenant tenant) {
         List<User> users = userService.getUsers(tenant.getId());
-
-        for (User user: users) {
-            userService.deleteUser(tenant.getId(), user.getUsername());
+        if (users != null) {
+            for (User user : users) {
+                userService.deleteUser(tenant.getId(), user.getUsername());
+            }
         }
 
         if (tenantService.hasTenantId(tenant.getId())) {
