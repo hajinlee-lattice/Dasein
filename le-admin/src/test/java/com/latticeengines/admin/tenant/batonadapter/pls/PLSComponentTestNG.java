@@ -63,7 +63,7 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
             state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "PLS").state;
             numOfRetries--;
             Thread.sleep(1000L);
-        } while (!state.equals(BootstrapState.State.OK) && numOfRetries > 0);
+        } while (state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
 
         Assert.assertEquals(state, BootstrapState.State.OK);
 
