@@ -141,7 +141,7 @@ public class FlowDefinition {
     public FlowDef getQuoteDailyFlow() {
 
         Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/"  + quoteTrans + dataInputFileType);
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dataHadoopRootPath + dataHadoopWorkingPath + "/" + quoteTrans,SinkMode.UPDATE);
+        Tap outTapFile = new Hfs(new TextDelimited(false, ","), dataHadoopRootPath + dataHadoopWorkingPath + "/" + quoteTrans,SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;

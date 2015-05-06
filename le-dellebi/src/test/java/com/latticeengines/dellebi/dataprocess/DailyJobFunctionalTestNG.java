@@ -26,6 +26,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import com.latticeengines.dellebi.flowdef.DailyFlow;
+import com.latticeengines.dellebi.util.SqoopDataService;
 
 @ContextConfiguration(locations = { "classpath:dellebi-properties-context.xml" })
 public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
@@ -162,7 +163,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		dailyFlow.setQuoteTrans("quote_trans");
 		dailyFlow.setMailReceiveList("llu@Lattice-Engines.com,jwilliams@lattice-engines.com,LYan@Lattice-Engines.com");
 		dailyFlow.doDailyFlow();
-
+		
 		try {
 			Thread.sleep(60000);
 		} catch (InterruptedException e) {
@@ -185,6 +186,17 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		Assert.assertEquals(fs.exists(shipToAddrLatticePath), true);
 		Assert.assertEquals(fs.exists(warrantyGlobalPath), true);
 		Assert.assertEquals(fs.exists(quoteTransPath), true);
+		
+		SqoopDataService sqoopDataService = springContext.getBean("sqoopDataService", SqoopDataService.class);
+		
+		sqoopDataService.export();
+		
+		try {
+			Thread.sleep(60000);
+		} catch (InterruptedException e) {
+		}
+		
+		Assert.assertEquals(fs.exists(quoteTransPath), false);
 	}
 
 	private void smbPut(String remoteUrl, String localFilePath) {

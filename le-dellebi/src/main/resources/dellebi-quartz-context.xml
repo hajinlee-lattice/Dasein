@@ -26,6 +26,7 @@
 		<property name="jobDataMap">
         <map>
             <entry key="dailyFlow" value-ref="dailyFlow" />
+            <entry key="sqoopDataService" value-ref="sqoopDataService" />
         </map>
     </property>
 
@@ -34,7 +35,7 @@
 	<bean id="dellebiManagerCronTrigger"
 		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="dellebiManagerJob" />
-		<property name="cronExpression" value="0 0/1 * * * ?" />
+		<property name="cronExpression" value="0 0 16 * * ?" />
 	</bean>
 
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">

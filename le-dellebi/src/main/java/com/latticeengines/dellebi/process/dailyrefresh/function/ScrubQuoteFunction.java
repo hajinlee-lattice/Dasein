@@ -32,7 +32,7 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         MultiInputSplit mis = (MultiInputSplit) hfp.getReporter().getInputSplit();
         FileSplit fs = (FileSplit) mis.getWrappedInputSplit();
         String fileName = fs.getPath().getName();
-        
+               
         String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
 
         Tuple result = new Tuple();
@@ -40,9 +40,9 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         result.add(quoteCreationDate);
         result.add(argument.getString("SLDT_CUST_NUM_VAL"));
         result.add(argument.getString("ITM_NUM_VAL"));
-        result.add(argument.getString("REVN_USD_AMT"));
-        result.add(argument.getString("SYS_QTY"));
         result.add(argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR"));
+        result.add(argument.getString("SYS_QTY"));
+        result.add(argument.getString("REVN_USD_AMT"));
         result.add(fileName);
 
         functionCall.getOutputCollector().add(result);

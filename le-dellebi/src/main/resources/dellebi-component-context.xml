@@ -12,7 +12,8 @@
            http://www.springframework.org/schema/util
            http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://camel.apache.org/schema/spring
-		   http://camel.apache.org/schema/spring/camel-spring.xsd">
+	   http://camel.apache.org/schema/spring/camel-spring.xsd">
+
 	<bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow">
 		<constructor-arg>
 			<util:list list-class="java.util.ArrayList">
@@ -32,5 +33,7 @@
 		class="com.latticeengines.dellebi.util.NormalFileSystemOperations" />
 
 	<bean id="mail" class="com.latticeengines.dellebi.util.MailSender" />
+
+	<bean id="sqoopDataService" class="com.latticeengines.dellebi.util.SqoopDataService" />
 
 </beans>
