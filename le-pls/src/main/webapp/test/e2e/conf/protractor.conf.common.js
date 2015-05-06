@@ -12,7 +12,8 @@ var Config = function() {
                 //specBasePath + '/predictors_spec.js',
                 //specBasePath + '/thresholdexplorer_spec.js',
                 //specBasePath + '/leadsample_spec.js',
-                specBasePath + '/usermgmt_spec.js'
+                specBasePath + '/usermgmt_spec.js',
+                specBasePath + '/multiplemodel_spec.js'
             ],
 
             params: {
