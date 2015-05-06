@@ -31,11 +31,18 @@ public class ComponentOrchestrator {
 
     public ComponentOrchestrator(List<LatticeComponent> components) {
         this.components = components;
-        postConstruct();
+        registerAll();
     }
 
     @PostConstruct
     public void postConstruct() {
+        serviceNames = new HashSet<>();
+        for (LatticeComponent component : components) {
+            serviceNames.add(component.getName());
+        }
+    }
+
+    public void registerAll() {
         Set<String> registered = batonService.getRegisteredServices();
         serviceNames = new HashSet<>();
         for (LatticeComponent component : components) {

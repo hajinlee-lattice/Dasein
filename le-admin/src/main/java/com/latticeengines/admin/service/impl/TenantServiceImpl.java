@@ -115,7 +115,10 @@ public class TenantServiceImpl implements TenantService {
         BootstrapState state =  BootstrapState.createInitialState();
         for (String serviceName : components) {
             BootstrapState newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
-            state = mergeBootstrapStates(state, newState, serviceName);
+            if (newState != null) {
+                // null means the tenant was provisioned without this component
+                state = mergeBootstrapStates(state, newState, serviceName);
+            }
         }
         return state;
     }

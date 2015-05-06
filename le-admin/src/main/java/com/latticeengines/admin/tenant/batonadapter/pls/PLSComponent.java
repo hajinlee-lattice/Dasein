@@ -1,8 +1,10 @@
 package com.latticeengines.admin.tenant.batonadapter.pls;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
@@ -14,6 +16,9 @@ public class PLSComponent extends LatticeComponent {
 
     @Value("${admin.pls.dryrun}")
     private boolean dryrun;
+
+    @Autowired
+    private TenantService tenantService;
 
     private LatticeComponentInstaller installer = new PLSInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new PLSUpgrader();
@@ -29,6 +34,7 @@ public class PLSComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
+        ((PLSInstaller) installer).setTenantService(tenantService);
         return installer;
     }
 
