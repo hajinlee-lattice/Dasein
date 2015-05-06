@@ -139,17 +139,50 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     }
 
     protected void createTenant(String contractId, String tenantId, boolean refreshContract) {
+        CustomerSpaceProperties props = new CustomerSpaceProperties();
+        props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
+        props.displayName = "Tenant for testing";
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
+
+        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
+        TenantInfo tenantInfo = new TenantInfo(
+                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
+
+        TenantRegistration reg = new TenantRegistration();
+        reg.setSpaceInfo(spaceInfo);
+        reg.setTenantInfo(tenantInfo);
+        reg.setContractInfo(contractInfo);
+
+        createTenant(contractId, tenantId, refreshContract, reg);
+    }
+
+    protected void createTenant (
+            String contractId, String tenantId,
+            boolean refreshContract, TenantRegistration tenantRegistration) {
         try {
             if (ContractLifecycleManager.exists(contractId)) {
                 if (refreshContract) {
                     ContractLifecycleManager.delete(contractId);
                 }
-            } else {
-                ContractLifecycleManager.create(contractId, new ContractInfo());
             }
         } catch (Exception e) {
             // ignore
         }
+
+        try {
+            ContractLifecycleManager.create(contractId, new ContractInfo());
+        } catch (Exception e) {
+            //ignore
+        }
+
+        boolean exception = false;
+        try {
+            Assert.assertTrue(ContractLifecycleManager.exists(contractId));
+        } catch (Exception e) {
+            exception = true;
+        }
+
+        Assert.assertFalse(exception);
 
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
@@ -166,7 +199,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         reg.setContractInfo(contractInfo);
 
         String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
-        Boolean created = restTemplate.postForObject(url, reg, Boolean.class);
+        Boolean created = restTemplate.postForObject(url, tenantRegistration, Boolean.class);
         Assert.assertTrue(created);
     }
     
