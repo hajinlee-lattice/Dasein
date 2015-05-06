@@ -61,10 +61,55 @@ angular.module('mainApp.config.services.ConfigService', [
         return deferred.promise;
     };
     
+    this.GetCurrentTopology = function () {
+        var deferred = $q.defer();
+        var tenant = BrowserStorageUtility.getClientSession().Tenant.Identifier;
+        
+        var credentialUrl = "/pls/config/topology?tenantId=" + tenant;
+        var result;
+        $http({
+            method: "GET", 
+            url: credentialUrl
+        })
+        .success(function(data, status, headers, config) {
+            if (status === 200) {
+                result = {
+                    success: true,
+                    resultObj: data,
+                    resultErrors: null
+                };
+            } else {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: data.errorMsg
+                };
+            }
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var errorMessage;
+            if (data != null && data !== "") {
+                errorMessage = data.errorMsg;
+            } else {
+                errorMessage = ResourceUtility.getString("SYSTEM_ERROR");
+            }
+            
+            result = {
+                success: false,
+                resultObj: null,
+                resultErrors: errorMessage
+            };
+            deferred.resolve(result);
+        });
+        
+        return deferred.promise;
+    };
+    
     this.GetCurrentCredentials = function (topologyType, isProduction) {
         isProduction = typeof isProduction !== 'undefined' ? isProduction : true;
         var deferred = $q.defer();
-        var test = BrowserStorageUtility.getClientSession().Tenant;
         var tenant = BrowserStorageUtility.getClientSession().Tenant.Identifier;
         
         var credentialUrl = "/pls/credentials/" + topologyType + "?tenantId=" + tenant;

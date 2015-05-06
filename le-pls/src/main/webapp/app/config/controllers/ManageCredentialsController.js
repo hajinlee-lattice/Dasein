@@ -46,6 +46,16 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     $scope.mapSaveInProgress = false;
     
     $scope.loading = true;
+    $scope.showError = false;
+    $scope.errorMessage = "";
+    
+    $scope.closeErrorClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        
+        $scope.showError = false;
+    };
     
     function Credentials (url, securitytoken, orgid, password, username, company) {
         this.Url = url || null;
@@ -57,13 +67,22 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     }
     
     //TODO:pierce this will have to be changed once I can actually check existing credentials
-    $scope.loading = false;
     $scope.crmSandboxCredentials = new Credentials();
     $scope.crmProductionCredentials = new Credentials();
     $scope.mapCredentials = new Credentials();
     $scope.isMarketo = true;
     
-    ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
+    ConfigService.GetCurrentTopology().then(function(result) {
+        $scope.loading = false;
+        if (result.success === true) {
+            
+        } else {
+            $scope.showError = true;
+            $scope.errorMessage = result.resultErrors;
+        }
+    });
+    
+    /*ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
         if (result != null && result.success === true) {
             var returned = result.resultObj;
             $scope.crmProductionCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
@@ -86,7 +105,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
             $scope.mapCredentials = new Credentials(returned.Url, null, null, returned.Password, returned.UserName, null);
             $scope.mapComplete = true;
         }
-    });
+    });*/
     
     $scope.crmProductionSaveClicked = function () {
         $scope.crmProductionError = "";
