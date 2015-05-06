@@ -15,13 +15,14 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 public class PLSComponentDeploymentTestNG extends PLSComponentTestNG {
 
     @Test(groups = "deployment", dependsOnMethods = "testInstallation")
-    public void installTestTenants() {
+    public void installTestTenants() throws Exception {
         createTestTenant("Tenant1", "Tenant 1", "MARKETO");
         createTestTenant("Tenant2", "Tenant 2", "ELOQUA");
         createCommonTenant();
     }
 
-    private void createTestTenant(String tenantId, String tenantName, String topology) {
+    private void createTestTenant(String tenantId, String tenantName, String topology)
+    throws Exception{
         loginAD();
 
         CustomerSpaceProperties props = new CustomerSpaceProperties();
