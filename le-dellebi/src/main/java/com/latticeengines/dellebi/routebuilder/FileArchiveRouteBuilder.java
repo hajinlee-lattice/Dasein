@@ -32,7 +32,7 @@ public class FileArchiveRouteBuilder extends RouteBuilder {
 
         try{
             from(camelDataIncomePath)
-            .filter(header("CamelFileName").regex(inputFileRegex))
+            .filter(header("CamelFileName").regex("tgt_(ship_to_addr_lattice|order_detail|lat_order_summary|warranty_global|quote_trans_global).+(.zip)"))
             .process(new Processor() {
             public void process(Exchange exchange) throws Exception {
                 log.info("Received Dell EBI file: " + exchange.getIn().getHeader("CamelFileName"));
