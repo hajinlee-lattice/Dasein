@@ -1,7 +1,10 @@
 package com.latticeengines.domain.exposed.admin;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -194,6 +197,108 @@ public class SerializableDocumentDirectoryUnitTestNG {
         DocumentDirectory metaDir = sDir.getMetadataAsDirectory();
         SerializableDocumentDirectory metaSDir = new SerializableDocumentDirectory(metaDir);
         Assert.assertEquals(objectMapper.valueToTree(metaSDir), objectMapper.readTree(expectedMetadataJson));
+    }
+
+    @Test(groups = "unit")
+    public void testGetOptionalFields() throws JsonProcessingException {
+        //==================================================
+        // main usage
+        //==================================================
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));
+        configDir.add("/Config1", "option1");
+        configDir.add("/Config2", "otherOption1");
+
+        DocumentDirectory metaDir = new DocumentDirectory(new Path("/root"));
+
+        SerializableDocumentDirectory.Metadata metadata = new SerializableDocumentDirectory.Metadata();
+        metadata.setType("options");
+        metadata.setOptions(Arrays.asList("option1", "option2", "option3"));
+        metaDir.add("/Config1", metadata.toString());
+
+        metadata = new SerializableDocumentDirectory.Metadata();
+        metadata.setType("options");
+        metadata.setOptions(Arrays.asList("otherOption1", "otherOption2"));
+        metaDir.add("/Config2", metadata.toString());
+
+
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
+        sDir.applyMetadata(metaDir);
+
+        Assert.assertEquals(sDir.getNodes().size(), 2);
+
+        for (SerializableDocumentDirectory.Node node : sDir.getNodes()) {
+            if (node.getNode().equals("Config1")) {
+                metadata = node.getMetadata();
+                Assert.assertNotNull(metadata);
+                Assert.assertEquals(metadata.getType(), "options");
+                Assert.assertEquals(metadata.getOptions().size(), 3);
+            } else if (node.getNode().equals("Config2")) {
+                metadata = node.getMetadata();
+                Assert.assertNotNull(metadata);
+                Assert.assertEquals(metadata.getType(), "options");
+                Assert.assertEquals(metadata.getOptions().size(), 2);
+            }
+        }
+
+        List<OptionalConfigurationField> optionalFields = sDir.findOptionalFields();
+
+        Assert.assertEquals(optionalFields.size(), 2);
+        for (OptionalConfigurationField field : optionalFields) {
+            if (field.getNode().equals("/Config1")) {
+                Assert.assertEquals(field.getOptions().size(), 3);
+            } else if (field.getNode().equals("/Config2")) {
+                Assert.assertEquals(field.getOptions().size(), 2);
+            }
+        }
+
+        //==================================================
+        // invalid option
+        //==================================================
+        configDir = new DocumentDirectory(new Path("/root"));
+        configDir.add("/Config", "option1");
+
+        metaDir = new DocumentDirectory(new Path("/root"));
+        metadata = new SerializableDocumentDirectory.Metadata();
+        metadata.setType("options");
+        metadata.setOptions(Arrays.asList("option1", "option2", "option3"));
+        metaDir.add("/Config", metadata.toString());
+
+        sDir = new SerializableDocumentDirectory(configDir);
+        sDir.applyMetadata(metaDir);
+
+        Collection<SerializableDocumentDirectory.Node> nodes = sDir.getNodes();
+        for (SerializableDocumentDirectory.Node node: nodes) {
+            node.setData("option4");
+        }
+
+        optionalFields = sDir.findOptionalFields();
+        Assert.assertEquals(optionalFields.size(), 0);
+
+        //==================================================
+        // child node
+        //==================================================
+        configDir = new DocumentDirectory(new Path("/root"));
+        configDir.add("/Parent", "");
+        configDir.add("/Parent/Child1", "string");
+        configDir.add("/Parent/Child2", "option1");
+
+        metaDir = new DocumentDirectory(new Path("/root"));
+        metadata = new SerializableDocumentDirectory.Metadata();
+        metadata.setType("options");
+        metadata.setOptions(Arrays.asList("option1", "option2", "option3"));
+        metaDir.add("/Parent", "");
+        metaDir.add("/Parent/Child2", metadata.toString());
+
+        sDir = new SerializableDocumentDirectory(configDir);
+        sDir.applyMetadata(metaDir);
+
+        optionalFields = sDir.findOptionalFields();
+        Assert.assertEquals(optionalFields.size(), 1);
+        for (OptionalConfigurationField field : optionalFields) {
+            if (field.getNode().equals("/Parent/Child2")) {
+                Assert.assertEquals(field.getOptions().size(), 3);
+            }
+        }
     }
 
     private static JsonNode removeDataVersion(ObjectNode oNode){

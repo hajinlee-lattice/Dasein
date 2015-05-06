@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,6 +25,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SerializableDocumentDirectory {
+    private static final Log LOGGER = LogFactory.getLog(SerializableDocumentDirectory.class);
 
     private String rootPath;
     private Collection<Node> nodes;
@@ -154,11 +158,24 @@ public class SerializableDocumentDirectory {
         }
     }
 
+    public List<OptionalConfigurationField> findOptionalFields() {
+        List<OptionalConfigurationField> optFields = new ArrayList<>();
+        if (this.getNodes() != null && !this.getNodes().isEmpty()) {
+            String parent = "";
+            for(Node node : this.getNodes()) {
+                optFields.addAll(node.findOptionalFields(parent));
+            }
+        }
+        return optFields;
+    }
+
     @Override
     public String toString() {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(this);
+            String string = mapper.writeValueAsString(this);
+            string.replace("\\\"", "\"");
+            return string;
         } catch (IOException e) {
             return "Failed to serialize " + super.toString();
         }
@@ -243,18 +260,22 @@ public class SerializableDocumentDirectory {
         public void setChildren(Collection<Node> children) { this.children = children; }
 
         public void applyMetadata(DocumentDirectory.Node metaNode) {
-            if (this.getData() == null || metaNode == null) return;
+            if (metaNode == null) return;
 
-            Metadata metadataProvided;
-            ObjectMapper mapper = new ObjectMapper();
+            if (this.getData() != null) {
+                Metadata metadataProvided = null;
+                ObjectMapper mapper = new ObjectMapper();
 
-            try {
-                metadataProvided = mapper.readValue(metaNode.getDocument().getData(), Metadata.class);
-            } catch (NullPointerException|IOException e) {
-                return;
+                try {
+                    metadataProvided = mapper.readValue(metaNode.getDocument().getData(), Metadata.class);
+                } catch (NullPointerException | IOException e) {
+                    //ignore
+                }
+
+                if (metadataProvided != null) {
+                    this.applySingleMetadata(metadataProvided);
+                }
             }
-
-            this.applySingleMetadata(metadataProvided);
 
             // apply metadata to children
             if (this.getChildren() != null) {
@@ -315,6 +336,28 @@ public class SerializableDocumentDirectory {
                 return "array";
             }
             return "string";
+        }
+
+
+        public List<OptionalConfigurationField> findOptionalFields(String parent) {
+            List<OptionalConfigurationField> optFields = new ArrayList<>();
+            if (this.getMetadata() != null && this.getMetadata().getType().equals("options")) {
+                if (this.getMetadata().validateData(this.getData())) {
+                    OptionalConfigurationField field = new OptionalConfigurationField();
+                    field.setNode(parent + "/" + this.getNode());
+                    field.setDefaultOption(this.getData());
+                    field.setOptions(new ArrayList<>(this.getMetadata().getOptions()));
+                    optFields.add(field);
+                } else {
+                    LOGGER.warn("Found an invalid optional configuration field at " + this.getNode());
+                }
+            }
+            if (this.getChildren() != null && !this.getChildren().isEmpty()) {
+                for (Node child : this.getChildren()) {
+                    optFields.addAll(child.findOptionalFields(parent + "/" + this.getNode()));
+                }
+            }
+            return optFields;
         }
 
     }
