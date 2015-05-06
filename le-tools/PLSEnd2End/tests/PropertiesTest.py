@@ -7,6 +7,7 @@ import unittest
 from Properties import PLSEnvironments
 from operations.TestHelpers import JamsRunner
 from operations.PerformanceHelpers import PerformanceData
+from operations.PerformanceHelpers import VisiDBRollBack
 
 
 class Test(unittest.TestCase):
@@ -36,6 +37,10 @@ class Test(unittest.TestCase):
         assert False, "failing on purpose, expecting to see this text..."
 
 
+    def testGetLaunchData(self):
+        pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
+        pd.getLaunchData("aa");
+        
     def testGetPDMatchData(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
         pd.recordPDMatchData("aa",123);
@@ -52,13 +57,24 @@ class Test(unittest.TestCase):
     def testGetDanteData(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
 #         pd.recordBardInData("aa",123,"BulkScoring_PushToScoringDB");
-        pd.recordDanteData("testGetDanteData",222,"PushDanteContactsAndAnalyticAttributesToDante");
+        pd.recordDanteData("testGetDanteData",222,"PushDanteContactsAndAnalyticAttributesToDantes");
     def testBasicTestPerformance(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
 #         pd.recordBardInData("aa",123,"BulkScoring_PushToScoringDB");
 #         pd.recordDanteData("testGetDanteData",222,"PushDanteContactsAndAnalyticAttributesToDante");
         print pd.prepareModelBulkData(10000,'1900-01-01')
 
+    def testVisiDBLogin(self):
+        visidb = VisiDBRollBack();
+        
+        visidb.dlLogin("BD2_ADEDTBDd710159nP27060n1542")
+        
+    def testVisiDBGetRevisionId(self):
+        visidb = VisiDBRollBack();        
+        print visidb.dlGetRevision("BD2_ADEDTBDd710159nP27060n1542")
+    def testVisiDBRollBack(self):
+        visidb = VisiDBRollBack();
+        visidb.dlRollBack("BD2_ADEDTBDd710159nP27060n1542",109);
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
