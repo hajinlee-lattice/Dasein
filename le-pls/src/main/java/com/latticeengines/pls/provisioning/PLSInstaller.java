@@ -33,6 +33,10 @@ public class PLSInstaller extends LatticeComponentInstaller {
         String camilleTenantId = space.getTenantId();
         String camilleContractId = space.getContractId();
         String camilleSpaceId = space.getSpaceId();
+
+        String PLSTenantId = String.format("%s.%s.%s", camilleContractId, camilleTenantId, camilleSpaceId);
+        LOGGER.info(String.format("Provisioning tenant %s", PLSTenantId));
+
         String tenantName, emailListInJson;
         List<String> adminEmails = new ArrayList<>();
         try {
@@ -57,12 +61,9 @@ public class PLSInstaller extends LatticeComponentInstaller {
                     "Cannot parse AdminEmails to a list of valid emails: " + emailListInJson, e);
         }
 
-        String PLSTenantId = String.format("%s.%s.%s", camilleContractId, camilleTenantId, camilleSpaceId);
         Tenant tenant = new Tenant();
         tenant.setId(PLSTenantId);
         tenant.setName(tenantName);
-
-        LOGGER.info(String.format("Provisioning tenant %s", PLSTenantId));
 
         componentManager.provisionTenant(tenant, adminEmails);
     }

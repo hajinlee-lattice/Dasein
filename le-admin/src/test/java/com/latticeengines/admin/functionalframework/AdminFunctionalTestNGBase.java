@@ -77,7 +77,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     }
     
     @BeforeClass(groups = {"functional", "deployment"})
-    public void setup() {
+    public void setup() throws Exception {
         loginAD();
 
         String podId = CamilleEnvironment.getPodId();
@@ -134,11 +134,13 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         restTemplate.delete(url, new HashMap<>());
     }
 
-    protected void createTenant(String contractId, String tenantId) {
+    protected void createTenant(
+            String contractId, String tenantId) throws Exception {
         createTenant(contractId, tenantId, true);
     }
 
-    protected void createTenant(String contractId, String tenantId, boolean refreshContract) {
+    protected void createTenant(
+            String contractId, String tenantId, boolean refreshContract) throws Exception {
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
         props.displayName = "Tenant for testing";
@@ -158,31 +160,18 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     protected void createTenant (
             String contractId, String tenantId,
-            boolean refreshContract, TenantRegistration tenantRegistration) {
-        try {
-            if (ContractLifecycleManager.exists(contractId)) {
-                if (refreshContract) {
-                    ContractLifecycleManager.delete(contractId);
-                }
+            boolean refreshContract, TenantRegistration tenantRegistration)
+            throws Exception
+    {
+
+        if (ContractLifecycleManager.exists(contractId)) {
+            if (refreshContract) {
+                ContractLifecycleManager.delete(contractId);
             }
-        } catch (Exception e) {
-            // ignore
         }
+        ContractLifecycleManager.create(contractId, new ContractInfo(new ContractProperties()));
 
-        try {
-            ContractLifecycleManager.create(contractId, new ContractInfo());
-        } catch (Exception e) {
-            //ignore
-        }
-
-        boolean exception = false;
-        try {
-            Assert.assertTrue(ContractLifecycleManager.exists(contractId));
-        } catch (Exception e) {
-            exception = true;
-        }
-
-        Assert.assertFalse(exception);
+        Assert.assertTrue(ContractLifecycleManager.exists(contractId));
 
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
