@@ -36,7 +36,7 @@ public class SqoopDataService {
     @Value("${dellebi.customer}")
     private String customer;
     
-    @Value("${dellebi.quotetrans.storeprocedure")
+    @Value("${dellebi.quotetrans.storeprocedure}")
     private String quote_sp;
       
     @Autowired
