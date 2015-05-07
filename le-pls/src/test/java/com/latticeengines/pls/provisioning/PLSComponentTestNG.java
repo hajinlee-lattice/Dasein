@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -88,6 +89,8 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         componentManager.discardTenant(tenant);
         Assert.assertFalse(tenantService.hasTenantId(tenant.getId()));
         Assert.assertFalse(userService.inTenant(tenant.getId(), testAdminUsername));
+
+        cleanupZK();
     }
 
     private void createTenantInZK() {
@@ -98,6 +101,24 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         TenantInfo tenantInfo = new TenantInfo(properties);
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(new CustomerSpaceProperties(), "");
         batonService.createTenant(contractId, tenantId, spaceID, contractInfo, tenantInfo, spaceInfo);
+    }
+
+    private void cleanupZK() {
+        // use Baton to create a tenant in ZK
+        batonService.deleteTenant(contractId, tenantId);
+        try {
+            if (ContractLifecycleManager.exists(contractId)) {
+                ContractLifecycleManager.delete(contractId);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+
+        try {
+            Assert.assertFalse(ContractLifecycleManager.exists(contractId));
+        } catch (Exception e) {
+            Assert.fail("Cannot verify the deletion of contract " + contractId);
+        }
     }
 
 
