@@ -1,5 +1,6 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class ComponentOrchestrator {
     @Autowired
     List<LatticeComponent> components;
 
-    private static Set<String> serviceNames;
+    private static Map<String, LatticeComponent> componentMap;
     private static BatonService batonService = new BatonServiceImpl();
 
     public ComponentOrchestrator() {}
@@ -36,24 +37,32 @@ public class ComponentOrchestrator {
 
     @PostConstruct
     public void postConstruct() {
-        serviceNames = new HashSet<>();
+        componentMap = new HashMap<>();
         for (LatticeComponent component : components) {
-            serviceNames.add(component.getName());
+            componentMap.put(component.getName(), component);
         }
     }
 
     public void registerAll() {
         Set<String> registered = batonService.getRegisteredServices();
-        serviceNames = new HashSet<>();
+        componentMap = new HashMap<>();
         for (LatticeComponent component : components) {
             if (!registered.contains(component.getName())) {
                 component.register();
             }
-            serviceNames.add(component.getName());
+            componentMap.put(component.getName(), component);
         }
     }
 
-    public Set<String> getServiceNames() { return serviceNames; }
+    public Set<String> getServiceNames() { return componentMap.keySet(); }
+
+    public LatticeComponent getComponent(String serviceName) {
+        if (componentMap.containsKey(serviceName)) {
+            return componentMap.get(serviceName);
+        } else {
+            return null;
+        }
+    }
 
     public void orchestrate(String contractId, String tenantId, String spaceId,
                             Map<String, Map<String, String>> properties) {

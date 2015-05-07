@@ -137,6 +137,16 @@ public abstract class LatticeComponent implements HasName, GraphNode {
         }
     }
 
+    public SerializableDocumentDirectory getSerializableDefaultConfiguration() {
+        DocumentDirectory confDir = batonService.getDefaultConfiguration(getName());
+        DocumentDirectory metaDir = batonService.getConfigurationSchema(getName());
+        confDir.makePathsLocal();
+        metaDir.makePathsLocal();
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(confDir);
+        sDir.applyMetadata(metaDir);
+        return sDir;
+    }
+
     @Override
     public List<? extends LatticeComponent> getChildren(){ return new ArrayList<>(dependencies); }
 
