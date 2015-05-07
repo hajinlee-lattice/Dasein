@@ -29,6 +29,7 @@ public class HadoopFileSystemOperations implements FileSystemOperations {
             FileSystem fs = FileSystem.get(URI.create(dataHadoopRootPath), conf);
             Path path = new Path(folderName);
             if (fs.exists(path)) {
+            	log.info("Deleting " + folderName);
                 fs.delete(path, true); // Delete existing Directory
             }
         } catch (Exception e) {
