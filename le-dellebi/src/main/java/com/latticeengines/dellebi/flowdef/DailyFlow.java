@@ -110,8 +110,8 @@ public class DailyFlow{
         	log.error("Seems there is corrupt data!", e);
         	mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed because of some reasons!","Seems there is corrupt data!" + e);
         } catch (Exception e) {
-        	log.warn("Failed!", e);
-            mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed because of some reasons!","Please check Dell EBI logs." + e);
+        	log.error("Failed!", e);
+            mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed because of some reasons!","Please check Dell EBI logs on "+ System.getProperty("DELLEBI_PROPDIR") + " environment " + e);
         }
     }
     
