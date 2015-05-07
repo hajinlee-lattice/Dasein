@@ -4,6 +4,10 @@
     xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-baton</artifactId>
+    <packaging>jar</packaging>
+    <name>le-${component-name}</name>
+
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-baton</artifactId>
