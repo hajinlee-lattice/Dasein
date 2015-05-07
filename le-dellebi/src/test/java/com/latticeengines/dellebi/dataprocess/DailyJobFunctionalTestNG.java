@@ -79,10 +79,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
 		try {
 			// Remove output folder on HDFS.
-
 			Path quotePath = new Path(dataHadoopWorkingPath + "/" + quoteTrans);
-
-//			deleteHDFSFolder(quotePath);
+			deleteHDFSFolder(quotePath);
 
 		} catch (Exception e) {
 			System.out.println("HDFS file not found");
@@ -103,7 +101,6 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
 		// Remove output folder on HDFS.
 		Path quotePath = new Path(dataHadoopWorkingPath + "/" + quoteTrans);
-
 		deleteHDFSFolder(quotePath);
 	}
 
