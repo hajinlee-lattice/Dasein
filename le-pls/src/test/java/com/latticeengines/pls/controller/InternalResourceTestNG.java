@@ -53,7 +53,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = {"functional", "deployment"})
     public void setup() throws Exception {
-        setupDbUsingDefaultTenantIds(true, true);
+        setUpMarketoEloquaTestEnvironment();
 
         tenant = new Tenant();
         tenant.setName("Internal Resource Test Tenant");

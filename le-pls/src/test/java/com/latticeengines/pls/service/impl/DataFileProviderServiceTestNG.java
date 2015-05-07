@@ -32,6 +32,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.DataFileProviderService;
+import com.latticeengines.pls.service.TenantService;
 
 public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
@@ -53,22 +54,26 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private DataFileProviderService dataFileProviderService;
 
+    @Autowired
+    private TenantService tenantService;
+
+
     private String modelId;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
 
-        setupDb("TENANT1", "TENANT2");
+        setupUsers();
 
-        Tenant tenant;
-        List<Tenant> tenants = tenantEntityMgr.findAll();
-        String tenantName = tenants.get(0).getName();
-        if (tenantName.equals("TENANT2")) {
-            tenant = tenants.get(0);
-        } else {
-            tenant = tenants.get(1);
-        }
+        Tenant tenant1 = new Tenant();
+        tenant1.setId("TENANT1");
+        tenant1.setName("TENANT1");
+        tenantService.discardTenant(tenant1);
+        tenantService.registerTenant(tenant1);
 
+        setupDbWithEloquaSMB("TENANT1", "TENANT1");
+
+        Tenant tenant = tenantEntityMgr.findByTenantId("TENANT1");
         setupSecurityContext(tenant);
 
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();

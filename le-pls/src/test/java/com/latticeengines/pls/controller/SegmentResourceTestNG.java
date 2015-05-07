@@ -14,21 +14,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.Segment;
-import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
 
-    private UserDocument adminDoc;
-    private UserDocument generalDoc;
-
     @SuppressWarnings("deprecation")
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        setupUsers();
-        setupDbUsingDefaultTenantIds(true, true);
-        adminDoc = loginAndAttachAdmin();
-        generalDoc = loginAndAttachGeneral();
+        setUpMarketoEloquaTestEnvironment();
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })
@@ -59,7 +52,7 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional", "deployment" })
     public void createSegmentNoEditPlsModelsRight() {
-        useSessionDoc(generalDoc);
+        switchToExternalUser();
     }
 
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" })

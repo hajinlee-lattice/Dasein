@@ -48,8 +48,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        setupUsers();
-        setupDbUsingDefaultTenantIds(true, true);
+        setUpMarketoEloquaTestEnvironment();
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })

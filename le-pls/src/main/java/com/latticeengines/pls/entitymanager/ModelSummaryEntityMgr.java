@@ -25,5 +25,6 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap);
 
+    ModelSummary retrieveByModelIdForInternalOperations(String modelId);
 
 }

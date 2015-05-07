@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -13,20 +12,13 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
-import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class TenentConfigResourceTestNG extends PlsFunctionalTestNGBase {
 
-    private Ticket ticket = null;
-
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        setupUsers();
-        ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-        String tenant1 = ticket.getTenants().get(0).getId();
-        String tenant2 = ticket.getTenants().get(1).getId();
-        setupDb(tenant1, tenant2);
+        setUpMarketoEloquaTestEnvironment();
 
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId",

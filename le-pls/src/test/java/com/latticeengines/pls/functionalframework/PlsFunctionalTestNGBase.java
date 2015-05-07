@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
+import com.latticeengines.pls.dao.ModelSummaryDao;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
@@ -91,6 +92,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
+
+    @Autowired
+    private ModelSummaryDao modelSummaryDao;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -339,108 +343,134 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         return summary;
     }
 
+    protected void setUpMarketoEloquaTestEnvironment() throws Exception{
+        setupUsers();
+        setupDbUsingDefaultTenantIds();
+    }
+
+    protected void setupDbUsingDefaultTenantIds() throws Exception {
+        setupDbUsingDefaultTenantIds(true, true);
+    }
+
     protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
         setupDbUsingDefaultTenantIds(useTenant1, useTenant2, true, true);
     }
 
     protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries, boolean createSegments) throws Exception {
-        setupUsers();
         String tenant1Id = useTenant1 ? testingTenants.get(0).getId() : null;
         String tenant1Name = useTenant1 ?  testingTenants.get(0).getName() : null;
         String tenant2Id = useTenant2 ? testingTenants.get(1).getId() : null;
         String tenant2Name = useTenant2 ? testingTenants.get(1).getName() : null;
-        setupDb(tenant1Id, tenant1Name, tenant2Id, tenant2Name, createSummaries, createSegments);
+        setupDbWithMarketoSMB(tenant1Id, tenant1Name, createSummaries, createSegments);
+        setupDbWithEloquaSMB(tenant2Id, tenant2Name, createSummaries, createSegments);
     }
 
-    protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
-        setupDb(tenant1Name, tenant1Name, tenant2Name, tenant2Name, true, true);
+    protected void setupDbWithMarketoSMB(String tenantId, String tenantName) throws Exception {
+        setupDbWithMarketoSMB(tenantId, tenantName, true, true);
     }
 
-    protected void setupDb(
-            String tenant1Id, String tenant1Name,
-            String tenant2Id, String tenant2Name,
-            boolean createSummaries, boolean createSegments) throws Exception {
-        keyValueEntityMgr.deleteAll();
-        tenantEntityMgr.deleteAll();
+    protected void setupDbWithMarketoSMB(String tenantId, String tenantName,
+                                         boolean createSummaries, boolean createSegments) throws Exception {
+        Tenant tenant = new Tenant();
+        tenant.setId(tenantId);
+        tenant.setName(tenantName);
+        if (tenantService.hasTenantId(tenantId)) {
+            tenantEntityMgr.delete(tenant);
+        }
+        tenantService.registerTenant(tenant);
 
-        if (tenant1Name != null && tenant1Id != null) {
-            Tenant tenant1 = new Tenant();
-            tenant1.setId(tenant1Id);
-            tenant1.setName(tenant1Name);
-            tenantEntityMgr.create(tenant1);
+        ModelSummary summary1 = null;
+        if (createSummaries) {
+            summary1 = getDetails(tenant, "marketo");
+            String[] tokens = summary1.getLookupId().split("\\|");
+            tokens[0] = tenantId;
+            tokens[1] = "Q_PLS_Modeling_" + tenantId;
+            summary1.setLookupId(String.format("%s|%s|%s", tokens));
 
-            ModelSummary summary1 = null;
-            if (createSummaries) {
-                summary1 = getDetails(tenant1, "marketo");
-                String[] tokens = summary1.getLookupId().split("\\|");
-                tokens[0] = tenant1Id;
-                tokens[1] = "Q_PLS_Modeling_" + tenant1Id;
-                summary1.setLookupId(String.format("%s|%s|%s", tokens));
-                modelSummaryEntityMgr.create(summary1);
+            String modelId = summary1.getId();
+            ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
+            if (summary != null) {
+                setupSecurityContext(summary);
+                modelSummaryEntityMgr.deleteByModelId(summary.getId());
             }
-            
-            if (createSummaries && createSegments) {
-                Segment segment1 = new Segment();
-                segment1.setModelId(summary1.getId());
-                segment1.setName("SMB");
-                segment1.setPriority(1);
-                segment1.setTenant(tenant1);
-                segmentEntityMgr.create(segment1);
-            }
-        
+            setupSecurityContext(tenant);
+            modelSummaryEntityMgr.create(summary1);
         }
 
-        if (tenant2Name != null && tenant2Id != null) {
-            Tenant tenant2 = new Tenant();
-            tenant2.setId(tenant2Id);
-            tenant2.setName(tenant2Name);
-            tenantEntityMgr.create(tenant2);
+        if (createSummaries && createSegments) {
+            Segment segment1 = new Segment();
+            segment1.setModelId(summary1.getId());
+            segment1.setName("SMB");
+            segment1.setPriority(1);
+            segment1.setTenant(tenant);
+            segmentEntityMgr.create(segment1);
+        }
+    }
 
-            ModelSummary summary2 = null;
-            if (createSummaries) {
-                summary2 = getDetails(tenant2, "eloqua");
-                Predictor s2p1 = new Predictor();
-                s2p1.setApprovedUsage("Model");
-                s2p1.setCategory("Construction");
-                s2p1.setName("LeadSource");
-                s2p1.setDisplayName("LeadSource");
-                s2p1.setFundamentalType("");
-                s2p1.setUncertaintyCoefficient(0.151911);
-                summary2.addPredictor(s2p1);
-                PredictorElement s2el1 = new PredictorElement();
-                s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
-                s2el1.setCorrelationSign(-1);
-                s2el1.setCount(311L);
-                s2el1.setLift(0.0);
-                s2el1.setLowerInclusive(0.0);
-                s2el1.setUpperExclusive(10.0);
-                s2el1.setUncertaintyCoefficient(0.00313);
-                s2el1.setVisible(true);
-                s2p1.addPredictorElement(s2el1);
+    protected void setupDbWithEloquaSMB(String tenantId, String tenantName) throws Exception {
+        setupDbWithEloquaSMB(tenantId, tenantName, true, true);
+    }
 
-                PredictorElement s2el2 = new PredictorElement();
-                s2el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
-                s2el2.setCorrelationSign(1);
-                s2el2.setCount(704L);
-                s2el2.setLift(1.3884292375950742);
-                s2el2.setLowerInclusive(10.0);
-                s2el2.setUpperExclusive(1000.0);
-                s2el2.setUncertaintyCoefficient(0.000499);
-                s2el2.setVisible(true);
-                s2p1.addPredictorElement(s2el2);
+    protected void setupDbWithEloquaSMB(String tenantId, String tenantName,
+                                         boolean createSummaries, boolean createSegments) throws Exception {
+        Tenant tenant = new Tenant();
+        tenant.setId(tenantId);
+        tenant.setName(tenantName);
+        if (tenantService.hasTenantId(tenantId)) {
+            tenantEntityMgr.delete(tenant);
+        }
+        tenantService.registerTenant(tenant);
 
-                modelSummaryEntityMgr.create(summary2);
+        ModelSummary summary2 = null;
+        if (createSummaries) {
+            summary2 = getDetails(tenant, "eloqua");
+            Predictor s2p1 = new Predictor();
+            s2p1.setApprovedUsage("Model");
+            s2p1.setCategory("Construction");
+            s2p1.setName("LeadSource");
+            s2p1.setDisplayName("LeadSource");
+            s2p1.setFundamentalType("");
+            s2p1.setUncertaintyCoefficient(0.151911);
+            summary2.addPredictor(s2p1);
+            PredictorElement s2el1 = new PredictorElement();
+            s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
+            s2el1.setCorrelationSign(-1);
+            s2el1.setCount(311L);
+            s2el1.setLift(0.0);
+            s2el1.setLowerInclusive(0.0);
+            s2el1.setUpperExclusive(10.0);
+            s2el1.setUncertaintyCoefficient(0.00313);
+            s2el1.setVisible(true);
+            s2p1.addPredictorElement(s2el1);
+
+            PredictorElement s2el2 = new PredictorElement();
+            s2el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
+            s2el2.setCorrelationSign(1);
+            s2el2.setCount(704L);
+            s2el2.setLift(1.3884292375950742);
+            s2el2.setLowerInclusive(10.0);
+            s2el2.setUpperExclusive(1000.0);
+            s2el2.setUncertaintyCoefficient(0.000499);
+            s2el2.setVisible(true);
+            s2p1.addPredictorElement(s2el2);
+
+            String modelId = summary2.getId();
+            ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
+            if (summary != null) {
+                setupSecurityContext(summary);
+                modelSummaryEntityMgr.deleteByModelId(summary.getId());
             }
-            
-            if (createSummaries && createSegments) {
-                Segment segment2 = new Segment();
-                segment2.setModelId(summary2.getId());
-                segment2.setName("SMB");
-                segment2.setPriority(1);
-                segment2.setTenant(tenant2);
-                segmentEntityMgr.create(segment2);
-            }
+            setupSecurityContext(tenant);
+            modelSummaryEntityMgr.create(summary2);
+        }
 
+        if (createSummaries && createSegments) {
+            Segment segment2 = new Segment();
+            segment2.setModelId(summary2.getId());
+            segment2.setName("SMB");
+            segment2.setPriority(1);
+            segment2.setTenant(tenant);
+            segmentEntityMgr.create(segment2);
         }
     }
 
@@ -547,26 +577,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     private void setTestingTenants(){
-        Tenant tenant1 = new Tenant();
-        tenant1.setId("TopologyDev.TopologyDev.Production");
-        tenant1.setName("Tenant for topology development");
-        tenantService.discardTenant(tenant1);
-
-        tenant1 = new Tenant();
-        tenant1.setId("TopologyDev.Marketo.Production");
-        tenant1.setName("Topology - Marketo");
-        tenantService.discardTenant(tenant1);
-
-        tenant1 = new Tenant();
-        tenant1.setId("Topology.Marketo.Production");
-        tenant1.setName("Topology - Marketo (001)");
-        tenantService.discardTenant(tenant1);
-
-        tenant1 = new Tenant();
-        tenant1.setId("TopoloyDev.Marketo.Production");
-        tenant1.setName("Topology develop - Marketo");
-        tenantService.discardTenant(tenant1);
-
         if (testingTenants == null || testingTenants.isEmpty()) {
             List<String> subTenantIds = Arrays.asList("Tenant1", "Tenant2");
             testingTenants = new ArrayList<>();
@@ -599,8 +609,10 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
 
-    protected void setupSecurityContext(ModelSummary summary) {
-        setupSecurityContext(summary.getTenant());
+    protected void setupSecurityContext(ModelSummary summary) { setupSecurityContext(summary.getTenant()); }
+
+    protected void setupSecurityContext(Segment segment) {
+        setupSecurityContext(segment.getTenant());
     }
 
     protected void setupSecurityContext(Tenant t) {

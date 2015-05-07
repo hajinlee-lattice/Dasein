@@ -25,7 +25,9 @@ public class PLSComponentManagerDeploymentTestNG extends PlsFunctionalTestNGBase
     private UserService userService;
 
     @Test(groups= {"deployment"})
-    public void installCommonTestTenant() {
+    public void installCommonTestTenant() throws Exception {
+        setUpMarketoEloquaTestEnvironment();
+
         Tenant tenant = createTestTenant();
         List<String> emails = Collections.singletonList("bnguyen@lattice-engines.com");
         componentManager.provisionTenant(tenant, emails);

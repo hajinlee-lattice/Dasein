@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -16,6 +17,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TenantService;
 
 public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
@@ -27,13 +29,17 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private TenantService tenantService;
     
     private Tenant tenant1;
     private Tenant tenant2;
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        setupDb("TENANT1", "TENANT2");
+        setupDbWithMarketoSMB("TENANT1", "TENANT1");
+        setupDbWithEloquaSMB("TENANT2", "TENANT2");
         segmentEntityMgr.deleteAll();
         
         tenant1 = tenantEntityMgr.findByTenantId("TENANT1");
@@ -57,6 +63,12 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         segment2.setPriority(2);
         segment2.setTenant(tenant2);
         segmentEntityMgr.create(segment2);
+    }
+
+    @AfterClass(groups = "functional")
+    public void teardown() throws Exception {
+        tenantService.discardTenant(tenant1);
+        tenantService.discardTenant(tenant2);
     }
     
     @Test(groups = "functional")

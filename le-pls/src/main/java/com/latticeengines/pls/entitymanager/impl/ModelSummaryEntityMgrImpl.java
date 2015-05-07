@@ -270,6 +270,15 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
     }
 
     @Override
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public ModelSummary retrieveByModelIdForInternalOperations(String modelId) {
+        ModelSummary summary = modelSummaryDao.findByModelId(modelId);
+        if (summary != null) inflateDetails(summary);
+        if (summary != null) inflatePredictors(summary);
+        return summary;
+    }
+
+    @Override
     @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findValidByModelId(String modelId) {
         return findByModelId(modelId, false, true, true);

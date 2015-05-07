@@ -17,10 +17,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        setupUsers();
-        String tenant1 = testingTenants.get(0).getId();
-        String tenant2 = testingTenants.get(1).getId();
-        setupDb(tenant1, tenant2);
+        setUpMarketoEloquaTestEnvironment();
 
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId",

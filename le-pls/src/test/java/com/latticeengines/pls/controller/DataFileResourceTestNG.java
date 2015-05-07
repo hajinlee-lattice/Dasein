@@ -29,7 +29,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -53,9 +52,6 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     private Configuration yarnConfiguration;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -67,13 +63,13 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
         Tenant tenant1 = new Tenant();
         tenant1.setId("TENANT1");
-        tenant1.setName("Tenant 1");
+        tenant1.setName("TENANT1");
         tenantService.discardTenant(tenant1);
         tenantService.registerTenant(tenant1);
         userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, "TENANT1",
                 SUPER_ADMIN_USERNAME);
 
-        setupDb("TENANT2", "TENANT1");
+        setupDbWithEloquaSMB("TENANT1", "TENANT1");
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestingTenant.getId());
         String dir = modelingServiceHdfsBaseDir
@@ -95,7 +91,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     @AfterClass(groups = { "functional", "deployment" })
     public void teardown() throws Exception {
         userService.resignAccessLevel("TENANT1", SUPER_ADMIN_USERNAME);
-        setupDbUsingDefaultTenantIds(true, true);
+        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
+        tenantService.discardTenant(tenant1);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
