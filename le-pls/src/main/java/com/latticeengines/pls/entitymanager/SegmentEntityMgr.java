@@ -11,4 +11,9 @@ public interface SegmentEntityMgr extends BaseEntityMgr<Segment> {
 
     Segment findByName(String segmentName);
 
+    Segment findByModelId(String modelId);
+
+    void deleteByModelId(String modelId);
+
+    Segment retrieveByModelIdForInternalOperations(String modelId);
 }

@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.pls.dao.SegmentDao;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
@@ -41,5 +43,27 @@ public class SegmentEntityMgrImpl extends BasePLSEntityMgrImpl<Segment> implemen
         return segmentDao.findByName(segmentName);
     }
 
+    @Override
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Segment findByModelId(String modelId) {
+        return segmentDao.findByModelId(modelId);
+    }
+
+    @Override
+    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
+    public void deleteByModelId(String modelId) {
+        Segment segment = findByModelId(modelId);
+
+        if (segment == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        super.delete(segment);
+    }
+
+    @Override
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public Segment retrieveByModelIdForInternalOperations(String modelId) {
+        return segmentDao.findByModelId(modelId);
+    }
 
 }

@@ -33,4 +33,19 @@ public class SegmentDaoImpl extends BaseDaoImpl<Segment> implements SegmentDao {
         return (Segment) list.get(0);
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Segment findByModelId(String modelId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Segment> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where model_id = :modelid", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("modelid", modelId);
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (Segment) list.get(0);
+    }
+
 }

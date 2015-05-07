@@ -403,6 +403,14 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             segment1.setName("SMB");
             segment1.setPriority(1);
             segment1.setTenant(tenant);
+
+            String modelId = segment1.getModelId();
+            Segment segment = segmentEntityMgr.retrieveByModelIdForInternalOperations(modelId);
+            if (segment != null) {
+                setupSecurityContext(segment);
+                segmentEntityMgr.deleteByModelId(segment.getModelId());
+            }
+            setupSecurityContext(tenant);
             segmentEntityMgr.create(segment1);
         }
     }
@@ -470,6 +478,14 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             segment2.setName("SMB");
             segment2.setPriority(1);
             segment2.setTenant(tenant);
+
+            String modelId = segment2.getModelId();
+            Segment segment = segmentEntityMgr.retrieveByModelIdForInternalOperations(modelId);
+            if (segment != null) {
+                setupSecurityContext(segment);
+                segmentEntityMgr.deleteByModelId(segment.getModelId());
+            }
+            setupSecurityContext(tenant);
             segmentEntityMgr.create(segment2);
         }
     }
