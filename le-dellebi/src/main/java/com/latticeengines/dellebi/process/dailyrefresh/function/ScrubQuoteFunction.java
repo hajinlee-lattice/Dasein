@@ -34,6 +34,9 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         MultiInputSplit mis = (MultiInputSplit) hfp.getReporter().getInputSplit();
         FileSplit fs = (FileSplit) mis.getWrappedInputSplit();
         String fileName = fs.getPath().getName();
+        
+       System.out.println("Lillian in quote function!");
+       System.out.println(fileName);
                
         String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
 
