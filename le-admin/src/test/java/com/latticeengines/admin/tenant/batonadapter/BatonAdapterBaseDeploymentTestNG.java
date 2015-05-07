@@ -2,8 +2,6 @@ package com.latticeengines.admin.tenant.batonadapter;
 
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.AfterClass;
@@ -25,7 +23,6 @@ import junit.framework.Assert;
  */
 public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(BatonAdapterBaseDeploymentTestNG.class);
     protected String contractId, tenantId, serviceName;
 
     @Value("${pls.api.hostport}")

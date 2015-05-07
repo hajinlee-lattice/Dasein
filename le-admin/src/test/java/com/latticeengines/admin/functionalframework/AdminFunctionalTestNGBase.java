@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -54,7 +52,6 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static final String ADTesterUsername = "testuser1";
     protected static final String ADTesterPassword = "Lattice1";
     protected static final String TestTenantId = "TestTenant";
-    private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
     protected static final BatonService batonService = new BatonServiceImpl();
 
     @Value("${admin.test.contract}")
