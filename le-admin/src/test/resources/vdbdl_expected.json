@@ -31,7 +31,8 @@
       "Children": [
         {
           "Node": "CreateNewVisiDB",
-          "Data": "true"
+          "Data": "true",
+          "Metadata": { "Type": "boolean" }
         },
         {
           "Node": "ServerName",
