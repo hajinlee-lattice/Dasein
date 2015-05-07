@@ -1,6 +1,7 @@
 package com.latticeengines.admin.tenant.batonadapter.template;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.TenantService;
@@ -34,6 +35,8 @@ public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         SerializableDocumentDirectory resultDir =
                 tenantService.getTenantServiceConfig(contractId, tenantId, DLTemplateComponent.componentName);
+        
+        Assert.assertNotNull(resultDir);
 
     }
 

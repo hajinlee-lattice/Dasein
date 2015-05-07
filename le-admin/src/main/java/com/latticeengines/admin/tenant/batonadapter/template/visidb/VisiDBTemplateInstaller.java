@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+@SuppressWarnings("restriction")
 public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
     public VisiDBTemplateInstaller() { super(VisiDBTemplateComponent.componentName); }
