@@ -190,6 +190,8 @@ angular.module('mainApp.config.services.ConfigService', [
             var errorMessage;
             if (data == null || data === "") {
                 errorMessage = ResourceUtility.getString("SYSTEM_ERROR");
+            } else if (data.errorCode === "LEDP_18030") {
+                errorMessage = ResourceUtility.getString("VALIDATE_CREDENTIALS_FAILURE");
             } else {
                 errorMessage = data.errorMsg;
             }

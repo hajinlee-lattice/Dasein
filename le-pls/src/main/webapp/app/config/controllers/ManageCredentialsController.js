@@ -66,27 +66,37 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
         this.Company = company || null;
     }
     
-    //TODO:pierce this will have to be changed once I can actually check existing credentials
-    $scope.crmSandboxCredentials = new Credentials();
-    $scope.crmProductionCredentials = new Credentials();
-    $scope.mapCredentials = new Credentials();
-    $scope.isMarketo = true;
-    
     ConfigService.GetCurrentTopology().then(function(result) {
         $scope.loading = false;
         if (result.success === true) {
-            
+            if (typeof result.resultObj === "string" && result.resultObj.toLowerCase() === "eloqua") {
+                $scope.isMarketo = false;
+            } else {
+                $scope.isMarketo = true;
+            }
+            var mapType = $scope.isMarketo ? "marketo" : "eloqua";
+            ConfigService.GetCurrentCredentials(mapType).then(function(result) {
+                if (result != null && result.success === true) {
+                    var returned = result.resultObj;
+                    $scope.mapCredentials = new Credentials(returned.Url, returned.SecurityToken, returned.OrgId, returned.Password, returned.UserName, returned.Company);
+                    $scope.mapComplete = true;
+                } else {
+                    $scope.mapCredentials = new Credentials();
+                }
+            });
         } else {
             $scope.showError = true;
             $scope.errorMessage = result.resultErrors;
         }
     });
     
-    /*ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
+    ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
         if (result != null && result.success === true) {
             var returned = result.resultObj;
             $scope.crmProductionCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
             $scope.crmProductionComplete = true;
+        } else {
+            $scope.crmProductionCredentials = new Credentials();
         }
     });
     
@@ -95,17 +105,10 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
             var returned = result.resultObj;
             $scope.crmSandboxCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
             $scope.crmSandboxComplete = true;
+        } else {
+            $scope.crmSandboxCredentials = new Credentials();
         }
     });
-    
-    ConfigService.GetCurrentCredentials("marketo").then(function(result) {
-        if (result != null && result.success === true) {
-            $scope.isMarketo = true;
-            var returned = result.resultObj;
-            $scope.mapCredentials = new Credentials(returned.Url, null, null, returned.Password, returned.UserName, null);
-            $scope.mapComplete = true;
-        }
-    });*/
     
     $scope.crmProductionSaveClicked = function () {
         $scope.crmProductionError = "";

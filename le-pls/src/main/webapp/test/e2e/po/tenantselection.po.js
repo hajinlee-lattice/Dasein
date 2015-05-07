@@ -6,7 +6,7 @@ var Tenants = function() {
     };
 
     function selectTenantByName(name) {
-        element(by.css('select option[value="'+ name + '"]')).click()
+        element(by.css('select option[value="'+ name + '"]')).click();
     }
 
     this.selectTenantByIndex = function(index) {
