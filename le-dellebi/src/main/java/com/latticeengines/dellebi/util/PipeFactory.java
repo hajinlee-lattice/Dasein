@@ -152,6 +152,8 @@ public class PipeFactory {
         		.append(new Fields("SYS_QTY"))
         		.append(new Fields("REVN_USD_AMT"))
         		.append(new Fields("fileName"));
+        
+        System.out.println("Lillian in pipe factory!");
 
         docPipe = new Pipe("copy");
         docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments), Fields.RESULTS);
