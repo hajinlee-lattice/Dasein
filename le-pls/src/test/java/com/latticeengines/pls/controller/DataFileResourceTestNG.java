@@ -28,22 +28,15 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.service.UserService;
 
 public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFileResourceTestNG.class);
-
-    private Ticket ticket = null;
-
-    @Autowired
-    private GlobalAuthenticationService globalAuthenticationService;
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;

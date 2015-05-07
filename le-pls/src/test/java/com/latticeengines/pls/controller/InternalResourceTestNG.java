@@ -69,7 +69,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test(groups = "functional")
-    public void update() throws Exception {
+    public void update() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
@@ -80,12 +80,12 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         String restAPIHostPort = getRestAPIHostPort();
         for (ModelSummary modelSummary : modelSummaries) {
             String url = String.format("%s/pls/internal/modelsummaries/%s", restAPIHostPort, modelSummary.getId());
-            HttpEntity<AttributeMap> requestEntity = new HttpEntity<AttributeMap>(attrMap);
+            HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
             ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
                 ResponseDocument.class);
             ResponseDocument responseDoc = response.getBody();
             assertTrue(responseDoc.isSuccess());
-            Map<String, Object> result = (Map) ((ResponseDocument) response.getBody()).getResult();
+            Map<String, Object> result = (Map) response.getBody().getResult();
             assertTrue((boolean) result.get("Exists"));
         }
 
@@ -99,7 +99,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test(groups = "functional")
-    public void updateNotExists() throws Exception {
+    public void updateNotExists() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
@@ -107,12 +107,12 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         attrMap.put("Status", "UpdateAsActive");
         String restAPIHostPort = getRestAPIHostPort();
         String url = String.format("%s/pls/internal/modelsummaries/%s", restAPIHostPort, "xyz");
-        HttpEntity<AttributeMap> requestEntity = new HttpEntity<AttributeMap>(attrMap);
+        HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
         ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
             ResponseDocument.class);
         ResponseDocument responseDoc = response.getBody();
         assertFalse(responseDoc.isSuccess());
-        Map<String, Object> result = (Map) ((ResponseDocument) response.getBody()).getResult();
+        Map<String, Object> result = (Map) response.getBody().getResult();
         assertFalse((boolean) result.get("Exists"));
     }
 

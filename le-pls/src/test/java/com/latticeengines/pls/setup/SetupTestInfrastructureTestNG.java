@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -56,6 +57,7 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
                     UserRegistration commonUserReg = getUserRegistration(EXTERNAL_USER_USERNAME, EXTERNAL_USER_USERNAME, "General", "User", generalPasswordHash);
                     String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", commonUserReg, String.class);
                     ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+                    Assert.assertNotNull(response);
                     String pwd = response.getResult().getPassword(); 
                     if (pwd != null) {
                         System.out.println("New password = " + pwd);
@@ -115,6 +117,5 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "infrastructure")
     public void dummy() {
-
     }
 }

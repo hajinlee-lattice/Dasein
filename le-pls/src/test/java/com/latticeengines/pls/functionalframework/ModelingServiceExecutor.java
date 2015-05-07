@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -83,9 +84,9 @@ public class ModelingServiceExecutor {
         config.setCustomer(builder.getCustomer());
         config.setTable(builder.getTable());
         config.setMetadataTable(builder.getMetadataTable());
-        config.setKeyCols(Arrays.<String> asList(new String[] { builder.getKeyColumn() }));
+        config.setKeyCols(Collections.singletonList(builder.getKeyColumn()));
         AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/load", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for load: %s", appId));
         waitForAppId(appId);
@@ -101,7 +102,7 @@ public class ModelingServiceExecutor {
         samplingConfig.setCustomer(builder.getCustomer());
         samplingConfig.setTable(builder.getTable());
         AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/createSamples",
-                samplingConfig, AppSubmission.class, new Object[] {});
+                samplingConfig, AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for sampling: %s", appId));
         waitForAppId(appId);
@@ -112,11 +113,11 @@ public class ModelingServiceExecutor {
         config.setCustomer(builder.getCustomer());
         config.setTable(builder.getTable());
         config.setMetadataTable(builder.getMetadataTable());
-        config.setExcludeColumnList(Arrays.<String>asList(builder.getProfileExcludeList()));
+        config.setExcludeColumnList(Arrays.asList(builder.getProfileExcludeList()));
         config.setSamplePrefix("all");
-        config.setTargets(Arrays.<String>asList(builder.getTargets()));
+        config.setTargets(Arrays.asList(builder.getTargets()));
         AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/profile", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for profile: %s", appId));
         waitForAppId(appId);
@@ -130,7 +131,7 @@ public class ModelingServiceExecutor {
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Random Forest against all");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
+        modelDef.addAlgorithms(Collections.singletonList((Algorithm) randomForestAlgorithm));
 
         Model model = new Model();
         model.setModelDefinition(modelDef);
@@ -138,7 +139,7 @@ public class ModelingServiceExecutor {
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
-        model.setKeyCols(Arrays.<String> asList(new String[] { builder.getKeyColumn() }));
+        model.setKeyCols(Arrays.asList(new String[]{builder.getKeyColumn()}));
         model.setDataFormat("avro");
         
         AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
@@ -146,14 +147,14 @@ public class ModelingServiceExecutor {
         model.setFeaturesList(targetAndFeatures.getValue());
         
         AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/submit", model,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for modeling: %s", appId));
         waitForAppId(appId);
     }
     
     private void waitForAppId(String appId) throws Exception {
-        JobStatus status = null;
+        JobStatus status;
         int maxTries = 60;
         int i = 0;
         do {
@@ -178,8 +179,8 @@ public class ModelingServiceExecutor {
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
         StringList features = restTemplate.postForObject(modelingServiceHostPort + "/rest/features", model,
-                StringList.class, new Object[] {});
-        return new AbstractMap.SimpleEntry<>(Arrays.<String>asList(builder.getTargets()), features.getElements());
+                StringList.class);
+        return new AbstractMap.SimpleEntry<>(Arrays.asList(builder.getTargets()), features.getElements());
     }
 
 

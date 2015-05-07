@@ -57,7 +57,7 @@ public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
         MetricsAspect.log = newLog;
 
         origSummaryEntityMgr = modelSummaryResource.getModelSummaryEntityMgr();
-        final List<String> logs = new ArrayList<String>();
+        final List<String> logs = new ArrayList<>();
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {

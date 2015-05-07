@@ -29,6 +29,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         try {
             camille.delete(path);
         } catch (Exception ex) {
+            // ignore
         }
         CustomerSpaceProperties properties = new CustomerSpaceProperties();
         properties.topology = "sfdc";

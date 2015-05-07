@@ -302,7 +302,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         }
         
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.INACTIVE);
-        modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);;
+        modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);
         
     }
 

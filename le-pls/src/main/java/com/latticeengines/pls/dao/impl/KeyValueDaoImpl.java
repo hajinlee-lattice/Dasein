@@ -25,7 +25,6 @@ public class KeyValueDaoImpl extends BaseDaoImpl<KeyValue> implements KeyValueDa
         Class<KeyValue> entityClz = getEntityClass();
         String queryStr = String.format("from %s where tenantId = '%s'", entityClz.getSimpleName(), tenantId);
         Query query = session.createQuery(queryStr);
-        List<KeyValue> list = query.list();
-        return list;
+        return query.list();
     }
 }

@@ -57,8 +57,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         String queryStr = String.format("from %s where status != :statusId", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());
-        List<ModelSummary> list = query.list();
-        return list;
+        return query.list();
     }
 
     @SuppressWarnings("rawtypes")

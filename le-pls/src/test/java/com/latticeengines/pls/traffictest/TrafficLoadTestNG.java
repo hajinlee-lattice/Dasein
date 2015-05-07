@@ -340,10 +340,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
         @Override
         public boolean hasError(ClientHttpResponse response) throws IOException {
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return false;
-            }
-            return true;
+            return response.getStatusCode() != HttpStatus.OK;
         }
 
         @Override

@@ -99,9 +99,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         .metadataContents(metadataContents) //
         .modelName(modelName);
 
-        ModelingServiceExecutor executor = new ModelingServiceExecutor(bldr);
-        
-        return executor;
+        return new ModelingServiceExecutor(bldr);
     }
 
     
@@ -115,7 +113,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         executor.runPipeline();
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "runPipeline" })
     public void checkModels() throws InterruptedException {
         UserDocument doc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);

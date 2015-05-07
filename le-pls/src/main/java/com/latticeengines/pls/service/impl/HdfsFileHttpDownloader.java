@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -19,9 +17,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 
 public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
-
-    @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(HdfsFileHttpDownloader.class);
     
     private String modelId;
     private Configuration yarnConfiguration;
@@ -58,7 +53,6 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String getFilePath() throws Exception {
 
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        String tenantId = summary.getTenant().getId();
         String lookupId = summary.getLookupId();
         String tokens[] = lookupId.split("\\|");
 

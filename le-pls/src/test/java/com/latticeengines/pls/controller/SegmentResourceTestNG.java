@@ -18,7 +18,6 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
 
-    @SuppressWarnings("deprecation")
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         setUpMarketoEloquaTestEnvironment();

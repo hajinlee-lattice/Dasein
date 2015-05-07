@@ -19,7 +19,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
@@ -102,7 +101,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     }
 
     @Test(groups = { "functional", "deployment" })
-    public void validateNewUser() throws JsonProcessingException {
+    public void validateNewUser() {
         // Conflict with a user in the same tenant
         testConflictingUserInTenant();
         testConflictingUserOutsideTenant();
@@ -184,8 +183,10 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testDeleteUserSuccess(AccessLevel.EXTERNAL_USER);
     }
-
-    @Test(groups = { "functional", "deployment" })
+    
+    
+    @SuppressWarnings("rawtypes")
+	@Test(groups = { "functional", "deployment" })
     public void deleteUserWithShortEmail() {
         String shortEmail = "a@b.c";
         makeSureUserDoesNotExist(shortEmail);
@@ -269,7 +270,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
     }
 
-    private void testDeleteUserSuccess(AccessLevel accessLevel) {
+    @SuppressWarnings("rawtypes")
+	private void testDeleteUserSuccess(AccessLevel accessLevel) {
         User user = createTestUser(accessLevel);
 
         HttpHeaders headers = new HttpHeaders();
@@ -388,7 +390,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     }
 
     @SuppressWarnings("rawtypes")
-    protected void testChangePassword(AccessLevel accessLevel) {
+    private void testChangePassword(AccessLevel accessLevel) {
         User user = createTestUser(accessLevel);
         UserDocument doc = loginAndAttach(user.getUsername());
         useSessionDoc(doc);

@@ -264,7 +264,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
 
     @SuppressWarnings("rawtypes")
-    public void assertCreateModelSummariesSuccess() throws IOException {
+    private void assertCreateModelSummariesSuccess() throws IOException {
         InputStream ins = getClass().getClassLoader().getResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         assertNotNull(ins, "Testing json file is missing");
         ModelSummary modelSummary = modelSummaryParser.parse("", new String(IOUtils.toByteArray(ins)));

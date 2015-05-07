@@ -385,7 +385,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             String[] tokens = summary1.getLookupId().split("\\|");
             tokens[0] = tenantId;
             tokens[1] = "Q_PLS_Modeling_" + tenantId;
-            summary1.setLookupId(String.format("%s|%s|%s", tokens));
+            summary1.setLookupId(String.format("%s|%s|%s", tokens[0], tokens[1], tokens[2]));
 
             String modelId = summary1.getId();
             ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
