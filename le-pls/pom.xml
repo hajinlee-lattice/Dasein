@@ -13,6 +13,7 @@
         <le.domain.version>1.0.32-SNAPSHOT</le.domain.version>
         <le.camille.version>1.0.32-SNAPSHOT</le.camille.version>
         <le.security.version>1.0.32-SNAPSHOT</le.security.version>
+        <le.baton.version>1.0.32-SNAPSHOT</le.baton.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <globalauth.base.url>https://bodcdevvcus209.dev.lattice.local/test</globalauth.base.url>
@@ -307,6 +308,26 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-baton</artifactId>
+            <version>${le.baton.version}</version>
+            <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <classifier>intf</classifier>
@@ -337,11 +358,6 @@
             <version>1.0.1.Final</version>
         </dependency>
         <!-- for the use of hibernate annotation -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
