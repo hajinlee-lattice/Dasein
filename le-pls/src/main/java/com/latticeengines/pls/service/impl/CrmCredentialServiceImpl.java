@@ -223,7 +223,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         parameters.add("client_id", "3MVG9fMtCkV6eLhdjB5FspKNuLjXBEL0Qe1dDCYZTL.z0kfLUbkW4Tj0XV_x395LX7F_1XOjoaQ==");
         parameters.add("client_secret", "129111989871209262");
         parameters.add("username", crmCredential.getUserName());
-        parameters.add("password", crmCredential.getPassword() + crmCredential.getSecurityToken());
+        String password = crmCredential.getPassword();
+        if (!StringUtils.isEmpty(crmCredential.getSecurityToken())) {
+            password += crmCredential.getSecurityToken();
+        }
+        parameters.add("password", password);
         parameters.add("format", "json");
         RestTemplate restTemplate = new RestTemplate();
         String result = restTemplate.postForObject(url, parameters, String.class);
