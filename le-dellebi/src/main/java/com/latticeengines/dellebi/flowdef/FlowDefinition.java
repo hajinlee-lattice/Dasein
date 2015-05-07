@@ -140,6 +140,8 @@ public class FlowDefinition {
     @Bean
     public FlowDef getQuoteDailyFlow() {
 
+    	log.info("Initial quote daily flow definition!");
+    	
         Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/"  + quoteTrans + dataInputFileType);
         Tap outTapFile = new Hfs(new TextDelimited(false, ","), dataHadoopRootPath + dataHadoopWorkingPath + "/" + quoteTrans,SinkMode.UPDATE);
 
