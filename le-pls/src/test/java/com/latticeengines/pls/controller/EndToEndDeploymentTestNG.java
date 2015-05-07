@@ -57,8 +57,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = "deployment", enabled = true)
     public void setup() throws Exception {
-        setupUsers();
-        setupDbUsingDefaultTenantIds(true, true, false, false);
+        setUpMarketoEloquaTestEnvironment();
         tenantToAttach = testingTenants.get(1);
         tenant = tenantToAttach.getId();
     }
