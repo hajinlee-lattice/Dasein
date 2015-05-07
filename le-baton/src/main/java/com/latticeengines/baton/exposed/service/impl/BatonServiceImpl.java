@@ -279,6 +279,9 @@ public class BatonServiceImpl implements BatonService {
             try {
                 List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries
                         = TenantLifecycleManager.getAll(contractId);
+                if (contractInfo == null) {
+                    contractInfo = ContractLifecycleManager.getInfo(contractId);
+                }
                 return constructTenantDocsWithDefaultSpaceId(tenantEntries, contractId, contractInfo);
             } catch (Exception e) {
                 log.error(String.format("Error retrieving tenants in contract %s.", contractId), e);
