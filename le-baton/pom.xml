@@ -6,7 +6,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-baton</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.32-SNAPSHOT</version>
     <name>le-${component-name}</name>
 
     <properties>
@@ -102,17 +101,4 @@
             <version>1.1.2</version>
         </dependency>
     </dependencies>
-
-    <distributionManagement>
-        <repository>
-            <id>deployment</id>
-            <name>Releases</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>deployment</id>
-            <name>Snapshots</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
