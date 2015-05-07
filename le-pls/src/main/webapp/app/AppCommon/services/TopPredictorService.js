@@ -567,7 +567,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
 
         //DP-932 
-        if (!doOtherBucket && nullBucket != null && toReturn.elementList.length == 2) {
+        if (isContinuous && nullBucket != null && toReturn.elementList.length == 2) {
         	toReturn.elementList[0].name = "Available";
         }
         
