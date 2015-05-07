@@ -4,7 +4,6 @@
 
     <artifactId>le-camille</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.32-SNAPSHOT</version>
     <name>le-${component-name}</name>
 
     <properties>
