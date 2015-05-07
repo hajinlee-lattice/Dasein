@@ -103,6 +103,7 @@ public class DailyFlow{
                 } else if ("QuoteTransDailyFlow".equals(item.getName()) && (fileSystem.listFileNumber(dataHadoopInPath + "/" + quoteTrans) != 0)) {
                 	log.info("Cascading starts to process quote files!");
                 	flowConnector.connect(item).complete();
+                	log.info("Cascading finished to process quote files!");
                     fileSystem.cleanFolder(dataHadoopInPath + "/" + quoteTrans);
                 }
             }
