@@ -12,9 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -299,27 +297,5 @@ public class SerializableDocumentDirectoryUnitTestNG {
                 Assert.assertEquals(field.getOptions().size(), 3);
             }
         }
-    }
-
-    private static JsonNode removeDataVersion(ObjectNode oNode){
-        ObjectMapper mapper = new ObjectMapper();
-        if (oNode.has("Version")) oNode.remove("Version");
-        if (oNode.has("Children")) {
-            ArrayNode newChildren = new ArrayNode(mapper.getNodeFactory());
-            for (JsonNode child : oNode.get("Children")) {
-                ObjectNode childNode = mapper.valueToTree(child);
-                newChildren.add(removeDataVersion(childNode));
-            }
-            oNode.put("Children", newChildren);
-        }
-        if (oNode.has("Nodes")) {
-            ArrayNode newChildren = new ArrayNode(mapper.getNodeFactory());
-            for (JsonNode child : oNode.get("Nodes")) {
-                ObjectNode childNode = mapper.valueToTree(child);
-                newChildren.add(removeDataVersion(childNode));
-            }
-            oNode.put("Nodes", newChildren);
-        }
-        return oNode;
     }
 }
