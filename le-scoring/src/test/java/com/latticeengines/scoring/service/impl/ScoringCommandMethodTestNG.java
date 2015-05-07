@@ -8,21 +8,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.service.impl.PagerDutyTestUtils;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
-import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringCommandLogService;
-import com.latticeengines.scoring.service.ScoringStepProcessor;
-import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -36,22 +30,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
     private ScoringCommandLogService scoringCommandLogService;
 
     @Autowired
-    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
-
-    @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-
-    @Autowired
-    private ScoringStepYarnProcessor scoringStepYarnProcessor;
-
-    @Autowired
-    private ScoringStepProcessor scoringStepFinishProcessor;
-
-    @Autowired
-    private JobService jobService;
-
-    @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
 
     @Autowired
     private MetadataService metadataService;
@@ -59,16 +38,11 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
 
-    @Autowired
-    private DbCreds scoringCreds;
-
     @Value("${scoring.test.table}")
     private String testInputTable;
 
     @Value("${scoring.output.table.sample}")
     private String testOutputTable;
-
-    private String appTimeLineWebAppAddress = "";
 
     private static final double cleanUpInterval = 0.000001;
 
@@ -81,16 +55,10 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         scoringManager = new ScoringManagerServiceImpl();
+        scoringManager.setCustomerBaseDir(customerBaseDir);
+        scoringManager.setEnableCleanHdfs(true);
         scoringManager.setCleanUpInterval(cleanUpInterval);
-        scoringManager.setScoringCommandEntityMgr(scoringCommandEntityMgr);
-        scoringManager.setScoringCommandResultEntityMgr(scoringCommandResultEntityMgr);
-        scoringManager.setScoringCommandStateEntityMgr(scoringCommandStateEntityMgr);
-        scoringManager.setScoringCommandLogService(scoringCommandLogService);
-        scoringManager.setSqoopSyncJobService(sqoopSyncJobService);
-        scoringManager.setMetadataService(metadataService);
-        scoringManager.setScoringCreds(scoringCreds);
-        scoringManager.setScoringJdbcTemplate(scoringJdbcTemplate);
-        scoringManager.setEnableCleanHdfs(false);
+        scoringManager.init(applicationContext);
     }
 
     @Test(groups = "functional")
@@ -144,9 +112,8 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringCommandLogService.log(scoringCommand, "message.  #%#$%%^$%^$%^$%^");
         scoringCommandLogService.log(scoringCommand, "another message.  #%#$%%^$%^$%^$%^ 12344       .");
 
-        ScoringProcessorCallable callable = new ScoringProcessorCallable(scoringCommand, scoringCommandEntityMgr,
-                scoringCommandLogService, scoringCommandStateEntityMgr, scoringStepYarnProcessor,
-                scoringStepFinishProcessor, jobService, yarnConfiguration, appTimeLineWebAppAddress);
+        ScoringProcessorCallable callable = new ScoringProcessorCallable();
+        callable.setScoringCommand(scoringCommand);
         String failedAppId = "application_1415144508340_0729";
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed(failedAppId));
 

@@ -11,20 +11,6 @@
             value="com.latticeengines.scoring.service.impl.ScoringManagerServiceImpl" />
         <property name="jobDataAsMap">
             <map>
-                <entry key="scoringProcessorExecutor" value-ref="scoringJobTaskExecutor" />
-                <entry key="scoringCommandEntityMgr" value-ref="scoringCommandEntityMgr" />
-                <entry key="scoringCommandLogService" value-ref="scoringCommandLogService" />
-                <entry key="scoringCommandStateEntityMgr" value-ref="scoringCommandStateEntityMgr" />
-                <entry key="scoringCommandResultEntityMgr" value-ref="scoringCommandResultEntityMgr" />
-                <entry key="scoringStepYarnProcessor" value-ref="scoringStepYarnProcessor" />
-                <entry key="scoringStepFinishProcessor" value-ref="scoringStepFinishProcessor" />
-                <entry key="jobService" value-ref="jobService" />
-                <entry key="metadataService" value-ref="metadataService" />
-                <entry key="sqoopSyncJobService" value-ref="sqoopSyncJobService" />
-                <entry key="yarnConfiguration" value-ref="yarnConfiguration" />
-                <entry key="appTimeLineWebAppAddress" value="${dataplatform.yarn.timeline-service.webapp.address}" />
-                <entry key="scoringJdbcTemplate" value-ref="scoringJdbcTemplate" />
-                <entry key="scoringCreds" value-ref="scoringCreds" />
                 <entry key="customerBaseDir" value="${dataplatform.customer.basedir}" />
                 <entry key="cleanUpInterval" value="#{T(java.lang.Double).parseDouble(${scoring.cleanup.timeinternval})}" />
                 <entry key="enableCleanHdfs" value="#{T(java.lang.Boolean).parseBoolean(${scoring.cleanup.enableCleanHdfs})}" />
@@ -45,6 +31,8 @@
                 <ref bean="scoringManagerCronTrigger" />
             </list>
         </property>
+        <property name="applicationContextSchedulerContextKey">
+            <value>applicationContext</value>
+        </property>
     </bean>
-
 </beans>

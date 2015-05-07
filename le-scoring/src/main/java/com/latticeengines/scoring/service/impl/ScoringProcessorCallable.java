@@ -10,6 +10,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -27,6 +31,8 @@ import com.latticeengines.scoring.service.ScoringCommandLogService;
 import com.latticeengines.scoring.service.ScoringStepProcessor;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
+@Component("scoringProcessor")
+@Scope("prototype")
 public class ScoringProcessorCallable implements Callable<Long> {
 
     private static final int SUCCESS = 0;
@@ -34,21 +40,28 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
     private ScoringCommand scoringCommand;
 
+    @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
+    @Autowired
     private ScoringCommandLogService scoringCommandLogService;
 
+    @Autowired
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
+    @Autowired
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
+    @Autowired
     private ScoringStepProcessor scoringStepFinishProcessor;
 
+    @Autowired
     private JobService jobService;
 
     @SuppressWarnings("unused")
     private Configuration yarnConfiguration;
 
+    @Value("${dataplatform.yarn.timeline-service.webapp.address}")
     private String appTimeLineWebAppAddress;
 
     private static final Log log = LogFactory.getLog(ScoringProcessorCallable.class);
@@ -56,21 +69,8 @@ public class ScoringProcessorCallable implements Callable<Long> {
     public ScoringProcessorCallable() {
     }
 
-    public ScoringProcessorCallable(ScoringCommand scoringCommand, ScoringCommandEntityMgr scoringCommandEntityMgr,
-            ScoringCommandLogService scoringCommandLogService,
-            ScoringCommandStateEntityMgr scoringCommandStateEntityMgr,
-            ScoringStepYarnProcessor scoringStepYarnProcessor, ScoringStepProcessor scoringStepFinishProcessor,
-            JobService jobService, Configuration yarnConfiguration,
-            String appTimeLineWebAppAddress) {
+    public void setScoringCommand(ScoringCommand scoringCommand) {
         this.scoringCommand = scoringCommand;
-        this.scoringCommandEntityMgr = scoringCommandEntityMgr;
-        this.scoringCommandLogService = scoringCommandLogService;
-        this.scoringCommandStateEntityMgr = scoringCommandStateEntityMgr;
-        this.scoringStepYarnProcessor = scoringStepYarnProcessor;
-        this.scoringStepFinishProcessor = scoringStepFinishProcessor;
-        this.jobService = jobService;
-        this.yarnConfiguration = yarnConfiguration;
-        this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
     }
 
     @Override
