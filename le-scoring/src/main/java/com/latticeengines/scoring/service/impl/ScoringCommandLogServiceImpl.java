@@ -95,8 +95,4 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
         return scoringCommandLogEntityMgr.findByScoringCommand(scoringCommand);
     }
 
-    @Override
-    public void delete(ScoringCommandLog scoringCommandLog) {
-        scoringCommandLogEntityMgr.delete(scoringCommandLog);
-    }
 }

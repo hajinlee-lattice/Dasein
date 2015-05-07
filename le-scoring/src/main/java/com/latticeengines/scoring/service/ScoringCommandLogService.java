@@ -26,5 +26,4 @@ public interface ScoringCommandLogService {
 
     void logException(ScoringCommand scoringCommand, String message, Exception e);
 
-    void delete(ScoringCommandLog scoringCommandLog);
 }

@@ -12,7 +12,7 @@ import com.latticeengines.scoring.dao.ScoringCommandLogDao;
 
 public class ScoringCommandLogDaoImpl extends BaseDaoImpl<ScoringCommandLog> implements ScoringCommandLogDao {
 
-    public ScoringCommandLogDaoImpl(){
+    public ScoringCommandLogDaoImpl() {
         super();
     }
 
@@ -32,4 +32,11 @@ public class ScoringCommandLogDaoImpl extends BaseDaoImpl<ScoringCommandLog> imp
         return logs;
     }
 
+    @Override
+    public void delete(ScoringCommand scoringCommand) {
+        Session session = getSessionFactory().getCurrentSession();
+        String hqlDelete = "delete " + ScoringCommandLog.class.getSimpleName()
+                + " scl where scl.scoringCommand = :scoringCommand";
+        session.createQuery(hqlDelete).setEntity("scoringCommand", scoringCommand).executeUpdate();
+    }
 }

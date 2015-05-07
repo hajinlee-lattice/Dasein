@@ -5,7 +5,6 @@ import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
@@ -45,5 +44,13 @@ public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState>
                 .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY) //
                 .list();
         return states;
+    }
+
+    @Override
+    public void delete(ScoringCommand scoringCommand) {
+        Session session = getSessionFactory().getCurrentSession();
+        String hqlDelete = "delete " + ScoringCommandState.class.getSimpleName()
+                + " scs where scs.scoringCommand = :scoringCommand";
+        session.createQuery(hqlDelete).setEntity("scoringCommand", scoringCommand).executeUpdate();
     }
 }

@@ -10,4 +10,6 @@ public interface ScoringCommandLogDao extends BaseDao<ScoringCommandLog> {
 
     List<ScoringCommandLog> findByScoringCommand(ScoringCommand scoringCommand);
 
+    void delete(ScoringCommand scoringCommand);
+
 }

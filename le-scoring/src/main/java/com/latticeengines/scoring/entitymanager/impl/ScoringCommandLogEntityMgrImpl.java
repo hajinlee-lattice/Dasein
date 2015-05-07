@@ -33,4 +33,10 @@ public class ScoringCommandLogEntityMgrImpl extends BaseScoringEntityMgrImpl<Sco
     public List<ScoringCommandLog> findByScoringCommand(ScoringCommand scoringCommand) {
         return scoringCommandLogDao.findByScoringCommand(scoringCommand);
     }
+
+    @Override
+    @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
+    public void delete(ScoringCommand scoringCommand) {
+        scoringCommandLogDao.delete(scoringCommand);
+    }
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.entitymanager.impl;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -9,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.scoring.dao.ScoringCommandDao;
+import com.latticeengines.scoring.dao.ScoringCommandLogDao;
+import com.latticeengines.scoring.dao.ScoringCommandStateDao;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 
 @Component("scoringCommandEntityMgr")
@@ -20,6 +23,12 @@ public class ScoringCommandEntityMgrImpl extends BaseScoringEntityMgrImpl<Scorin
 
     @Autowired
     private ScoringCommandDao scoringCommandDao;
+
+    @Autowired
+    private ScoringCommandStateDao scoringCommandStateDao;
+
+    @Autowired
+    private ScoringCommandLogDao scoringCommandLogDao;
 
     @Override
     public BaseDao<ScoringCommand> getDao() {
@@ -36,5 +45,13 @@ public class ScoringCommandEntityMgrImpl extends BaseScoringEntityMgrImpl<Scorin
     @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
     public List<ScoringCommand> getConsumed() {
         return scoringCommandDao.getConsumed();
+    }
+
+    @Override
+    @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
+    public void delete(ScoringCommand scoringCommand) {
+        scoringCommandStateDao.delete(scoringCommand);
+        scoringCommandLogDao.delete(scoringCommand);
+        scoringCommandDao.delete(scoringCommand);
     }
 }

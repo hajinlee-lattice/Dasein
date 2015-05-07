@@ -25,13 +25,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
-import com.latticeengines.domain.exposed.scoring.ScoringCommandLog;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
-import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
-import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
-import com.latticeengines.scoring.service.ScoringCommandLogService;
 import com.latticeengines.scoring.service.ScoringManagerService;
 
 @DisallowConcurrentExecution
@@ -43,10 +39,6 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     private AsyncTaskExecutor scoringProcessorExecutor;
 
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
-
-    private ScoringCommandLogService scoringCommandLogService;
-
-    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
@@ -67,8 +59,6 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     public void init(ApplicationContext appCtx) {
         scoringProcessorExecutor = (AsyncTaskExecutor)appCtx.getBean("scoringProcessorExecutor");
         scoringCommandEntityMgr = (ScoringCommandEntityMgr)appCtx.getBean("scoringCommandEntityMgr");
-        scoringCommandLogService = (ScoringCommandLogService) appCtx.getBean("scoringCommandLogService");
-        scoringCommandStateEntityMgr = (ScoringCommandStateEntityMgr) appCtx.getBean("scoringCommandStateEntityMgr");
         scoringCommandResultEntityMgr = (ScoringCommandResultEntityMgr) appCtx.getBean("scoringCommandResultEntityMgr");
         metadataService = (MetadataService) appCtx.getBean("metadataService");
         scoringJdbcTemplate = (JdbcTemplate) appCtx.getBean("scoringJdbcTemplate");
@@ -114,12 +104,6 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         for (ScoringCommand scoringCommand : consumedCommands) {
             if (scoringCommand.getConsumed() != null && scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < System.currentTimeMillis()) {
                 metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
-                for (ScoringCommandState scoringCommandState : scoringCommandStateEntityMgr.findByScoringCommand(scoringCommand)) {
-                    scoringCommandStateEntityMgr.delete(scoringCommandState);
-                }
-                for (ScoringCommandLog scoringCommandLog : scoringCommandLogService.findByScoringCommand(scoringCommand)) {
-                    scoringCommandLogService.delete(scoringCommandLog);
-                }
                 if (enableCleanHdfs)
                     cleanHdfs(scoringCommand);
                 scoringCommandEntityMgr.delete(scoringCommand);

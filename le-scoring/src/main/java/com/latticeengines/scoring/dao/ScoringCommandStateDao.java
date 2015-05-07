@@ -14,4 +14,6 @@ public interface ScoringCommandStateDao extends BaseDao<ScoringCommandState> {
 
     List<ScoringCommandState> findByScoringCommand(ScoringCommand scoringCommand);
 
+    void delete(ScoringCommand scoringCommand);
+
 }

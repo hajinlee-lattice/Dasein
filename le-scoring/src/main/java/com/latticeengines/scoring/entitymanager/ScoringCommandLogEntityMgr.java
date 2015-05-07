@@ -9,4 +9,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandLog;
 public interface ScoringCommandLogEntityMgr extends BaseEntityMgr<ScoringCommandLog>{
 
     List<ScoringCommandLog> findByScoringCommand(ScoringCommand scoringCommand);
+
+    void delete(ScoringCommand scoringCommand);
 }

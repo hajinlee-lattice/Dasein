@@ -15,4 +15,6 @@ public interface ScoringCommandStateEntityMgr extends BaseEntityMgr<ScoringComma
     List<ScoringCommandState> findByScoringCommand(ScoringCommand scoringCommand);
 
     ScoringCommandState findLastStateByScoringCommand(ScoringCommand scoringCommand);
+
+    void delete(ScoringCommand scoringCommand);
 }

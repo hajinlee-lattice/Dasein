@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.service.impl;
 
 import java.sql.Timestamp;
+
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,9 +13,12 @@ import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.PagerDutyTestUtils;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
+import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringCommandLogService;
 
@@ -25,6 +29,9 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
+
+    @Autowired
+    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
     @Autowired
     private ScoringCommandLogService scoringCommandLogService;
@@ -74,15 +81,27 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, inputTable, testInputTable);
         scoringCommand.setStatus(ScoringCommandStatus.POPULATED);
         scoringCommandEntityMgr.update(scoringCommand);
+        scoringCommand = scoringCommandEntityMgr.findAll().get(0);
+        ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.LOAD_DATA);
+        scoringCommandStateEntityMgr.create(scoringCommandState);
         scoringManager.cleanTables();
         assertEquals(scoringCommandEntityMgr.findAll().size(), 1);
+        assertEquals(scoringCommandStateEntityMgr.findAll().size(), 1);
         assertEquals(metadataService.showTable(scoringJdbcTemplate, inputTable).get(0), inputTable);
 
+        scoringCommand = scoringCommandEntityMgr.findAll().get(0);
+        scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.SCORE_DATA);
+        scoringCommandStateEntityMgr.create(scoringCommandState);
+        scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        scoringCommandStateEntityMgr.create(scoringCommandState);
+        scoringCommandLogService.log(scoringCommand, "some logs");
         ScoringCommandResult scoringCommandResult = new ScoringCommandResult("Nutanix", ScoringCommandStatus.NEW,
                 outputTable, 100, new Timestamp(System.currentTimeMillis()));
         scoringCommandResultEntityMgr.create(scoringCommandResult);
         scoringManager.cleanTables();
         assertEquals(scoringCommandResultEntityMgr.findAll().size(), 1);
+        assertEquals(scoringCommandLogService.findByScoringCommand(scoringCommand).size(), 1);
+        assertEquals(scoringCommandStateEntityMgr.findAll().size(), 3);
 
         metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, outputTable, testOutputTable);
         assertEquals(metadataService.showTable(scoringJdbcTemplate, outputTable).get(0), outputTable);
@@ -96,6 +115,8 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         Thread.sleep(4000);
         scoringManager.cleanTables();
 
+        assertEquals(scoringCommandStateEntityMgr.findAll().size(), 0);
+        assertEquals(scoringCommandLogService.findByScoringCommand(scoringCommand).size(), 0);
         assertNull(scoringCommandEntityMgr.findByKey(scoringCommand));
         assertNull(scoringCommandResultEntityMgr.findByKey(scoringCommandResult));
         assertEquals(metadataService.showTable(scoringJdbcTemplate, inputTable).size(), 0);
