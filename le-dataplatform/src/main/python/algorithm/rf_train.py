@@ -30,18 +30,11 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
 def writeModel(schema, modelDir, clf):
     estimators = clf.estimators_
     importances = clf.feature_importances_
-    classes = clf.classes_
-
-    numClasses = len(classes)
     numInputs = len(importances)
     numTrees = len(estimators)
 
     fo = open(modelDir + "rf_model.txt", "w")
-    fo.write("RandomForestClassifier\n")
-    fo.write("LEDP Random Forest Classifier Model\n")
-    fo.write("classification\n")
-    fo.write("binarySplit\n")
-    fo.write(str(numInputs) + "\n")
+    fo.write("Column Name, Feature Importance\n")
 
     features = {}
     
@@ -52,13 +45,6 @@ def writeModel(schema, modelDir, clf):
     for i in features:
         fo.write("%s, %f\n" % (i[0], i[1]))
         
-    fo.write(str(numClasses) + "\n")
-
-    for i in range(0, numClasses):
-        fo.write(str(classes[i]) + "\n")
-
-    fo.write(str(numTrees) + "\n")
-
     fo.close()
 
     for i in range(0, numTrees):
