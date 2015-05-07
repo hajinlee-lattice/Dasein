@@ -1,7 +1,6 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "AdminEmails", "Data": [ "rswarts@lattice-engines.com" ] },
-    { "Node": "TenantName", "Data": "LPA 2.0 Tenant" }
+    { "Node": "AdminEmails", "Data": [ "rswarts@lattice-engines.com" ] }
   ]
 }

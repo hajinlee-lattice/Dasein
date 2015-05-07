@@ -169,9 +169,6 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
         node.getDocument().setData("[\"" + testAdminUsername + "\"]");
 
-        node = confDir.get(new Path("/TenantName"));
-        node.getDocument().setData(TestContractId + " " + tenantName);
-
         // send to bootstrapper message queue
         super.bootstrap(contractId, tenantId, serviceName, confDir);
     }
@@ -213,9 +210,6 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         // modify the default config
         DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
         node.getDocument().setData("[\"" + testAdminUsername + "\"]");
-
-        node = confDir.get(new Path("/TenantName"));
-        node.getDocument().setData("Lattice Internal Test Tenant");
 
         // send to bootstrapper message queue
         super.bootstrap(contractId, tenantId, serviceName, confDir);

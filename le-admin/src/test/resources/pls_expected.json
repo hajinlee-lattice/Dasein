@@ -5,7 +5,6 @@
       "Node":"AdminEmails",
       "Data": "[\"rswarts@lattice-engines.com\"]",
       "Metadata" : {"Type":"array"}
-    },
-    { "Node": "TenantName", "Data": "LPA 2.0 Tenant" }
+    }
   ]
 }
