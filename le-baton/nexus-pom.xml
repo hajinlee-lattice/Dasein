@@ -12,6 +12,7 @@
         <groupId>com.latticeengines</groupId>
         <artifactId>le-baton</artifactId>
         <version>1.0.32-SNAPSHOT</version>
+        <relativePath>.</relativePath>
     </parent>
 
     <distributionManagement>
