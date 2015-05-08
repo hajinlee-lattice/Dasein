@@ -156,7 +156,7 @@ public class PipeFactory {
         		.append(new Fields("fileName"));
 
         docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction2(outputScrubArguments), Fields.RESULTS);
+        docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments), Fields.RESULTS);
         return docPipe;
     }
 }
