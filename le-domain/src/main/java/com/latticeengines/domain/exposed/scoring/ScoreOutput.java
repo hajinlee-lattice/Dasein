@@ -1,54 +1,69 @@
 package com.latticeengines.domain.exposed.scoring;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import java.io.Serializable;
 
-import com.latticeengines.domain.exposed.dataplatform.HasId;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "ScoreOutput")
-public class ScoreOutput implements HasId<String>{
+public class ScoreOutput{
 
-    private String leadId;
-
-    private String requestId;
-
-    private int score;
-
-    private String bucketDisplayName;
-
-    private String modelGUID;
-
-    private float rawScore;
-
-    private float probability;
-
-    private float lift;
- 
-    private int percentile;
-
-    @Id
-    @Column(name = "LeadID", nullable = true)
-    public String getId(){
-        return leadId;
-    }
-
-    public void setId(String leadId){
-        this.leadId = leadId;
-    }
+    @EmbeddedId
+    private ScoreOutputPK scoreOutputPK;
 
     @Column(name = "Request_ID", nullable = false)
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
+    private String requestId;
 
     @Column(name = "Score", nullable = true)
+    private int score;
+
+    @Column(name = "Bucket_Display_Name", nullable = true)
+    private String bucketDisplayName;
+
+    @Column(name = "RawScore", nullable = true)
+    private float rawScore;
+
+    @Column(name = "Probability", nullable = true)
+    private float probability;
+
+    @Column(name = "Lift", nullable = true)
+    private float lift;
+ 
+    @Column(name = "Percentile", nullable = true)
+    private int percentile;
+    
+
+     
+    public ScoreOutputPK getPK() {
+        return scoreOutputPK;
+    }
+    
+    public void setScoreOutputPK(ScoreOutputPK scoreOutputPK){
+        this.scoreOutputPK = scoreOutputPK;
+    }
+    
+    @Embeddable
+    public static class ScoreOutputPK implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+        @Column(name = "LeadID", nullable = true)
+        String leadId;
+
+        @Column(name = "Play_Display_Name", nullable = true)
+        String modelGUID;
+        
+        public ScoreOutputPK () {}
+        
+        public ScoreOutputPK (String leadId, String modelGUID) {
+            this.leadId = leadId;
+            this.modelGUID = modelGUID;
+        }
+    }
+
     public int getScore(){
         return this.score;
     }
@@ -57,7 +72,6 @@ public class ScoreOutput implements HasId<String>{
         this.score = score;
     }
 
-    @Column(name = "Bucket_Display_Name", nullable = true)
     public String getBucketDisplayName(){
         return this.bucketDisplayName;
     }
@@ -66,16 +80,6 @@ public class ScoreOutput implements HasId<String>{
         this.bucketDisplayName = bucketDisplayName;
     }
 
-    @Column(name = "Play_Display_Name", nullable = true)
-    public String getModelGUID(){
-        return this.modelGUID;
-    }
-    
-    public void setModelGUID(String modelGUID){
-        this.modelGUID = modelGUID;
-    }
-
-    @Column(name = "RawScore", nullable = true)
     public float getRawScore(){
         return this.rawScore;
     }
@@ -84,7 +88,6 @@ public class ScoreOutput implements HasId<String>{
         this.rawScore = rawScore;
     }
 
-    @Column(name = "Probability", nullable = true)
     public float getProbability(){
         return this.probability;
     }
@@ -93,7 +96,6 @@ public class ScoreOutput implements HasId<String>{
         this.probability = probability;
     }
 
-    @Column(name = "Lift", nullable = true)
     public float getLift(){
         return this.lift;
     }
@@ -102,7 +104,6 @@ public class ScoreOutput implements HasId<String>{
         this.lift = lift;
     }
 
-    @Column(name = "Percentile", nullable = true)
     public int getPercentile(){
         return this.percentile;
     }
