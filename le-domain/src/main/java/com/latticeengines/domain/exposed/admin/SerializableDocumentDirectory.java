@@ -491,7 +491,9 @@ public class SerializableDocumentDirectory {
                     for (JsonNode thisMetaNode : metaNodes) {
                         if (thisMetaNode.isObject() && thisMetaNode.has("Node") &&
                                 thisMetaNode.get("Node").asText().equals(docNode.getNode())){
-                            metadata = mapper.treeToValue(thisMetaNode.get("Data"), Metadata.class);
+                            if (thisMetaNode.has("Data")) {
+                                metadata = mapper.treeToValue(thisMetaNode.get("Data"), Metadata.class);
+                            }
                             metaNode = thisMetaNode;
                             break;
                         }
