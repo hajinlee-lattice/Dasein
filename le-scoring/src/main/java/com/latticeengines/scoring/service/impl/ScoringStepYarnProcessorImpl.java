@@ -114,7 +114,6 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private ApplicationId load(String customer, ScoringCommand scoringCommand) {
         String table = scoringCommand.getTableName();
         String targetDir = customerBaseDir + "/" + customer + "/scoring/" + table + "/data";
-
         ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, scoringCreds,
                 LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList(LeadID), "", 4);
         return appId;
@@ -171,12 +170,16 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         }
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
         String targetTable = createNewTable(customer, scoringCommand);
-
+        //targetTable = "TestLeadsTable";
         DateTime dt = new DateTime(DateTimeZone.UTC);
         ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
                 targetTable, 0, new Timestamp(dt.getMillis()));
         scoringCommandResultEntityMgr.create(result);
 
+//         scoringCreds.setDb("ScoringDB_buildmachine");
+//         scoringCreds.setDBType("SQLServer");
+//         scoringCreds.setHost("10.41.1.250");
+//         scoringCreds.setPort(1433);
         String sourceDir = customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName() + "/data";
         ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, customer, 4);
 
@@ -184,14 +187,10 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     }
 
     private String createNewTable(String customer, ScoringCommand scoringCommand) {
-        // scoringCreds.setDb("ScoringDB_buildmachine");
-        // scoringCreds.setDBType("SQLServer");
-        // scoringCreds.setHost("10.41.1.250");
-        // scoringCreds.setPort(1433);
-        // DataSource dataSource = new
-        // DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine",
-        // "root", "welcome");
-        // scoringJdbcTemplate.setDataSource(dataSource);
+//         DataSource dataSource = new
+//         DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine",
+//         "root", "welcome");
+//         scoringJdbcTemplate.setDataSource(dataSource);
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
         metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
         return newTable;

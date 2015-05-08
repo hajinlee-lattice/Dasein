@@ -149,7 +149,6 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
     @Override
     public int run(String[] args) throws Exception {
         JobConf jobConf = new JobConf(getConf(), getClass());
-
         Job job = new Job(jobConf);
 
         Properties properties = new Properties();
