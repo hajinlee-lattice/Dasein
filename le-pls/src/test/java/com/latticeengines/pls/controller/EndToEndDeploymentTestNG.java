@@ -59,6 +59,9 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
         setUpMarketoEloquaTestEnvironment();
         tenantToAttach = testingTenants.get(1);
+        if (tenantToAttach.getName().contains("Tenant 1")) {
+            tenantToAttach = testingTenants.get(0);
+        }
         tenant = tenantToAttach.getId();
     }
     

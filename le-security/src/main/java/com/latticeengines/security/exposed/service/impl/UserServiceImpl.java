@@ -187,8 +187,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByEmail(String email) {
-        return globalUserManagementService.getUserByEmail(email);
+    public User findByEmail(String email) { return globalUserManagementService.getUserByEmail(email); }
+
+    @Override
+    public User findByUsername(String username) {
+        return globalUserManagementService.getUserByUsername(username);
     }
 
     /**

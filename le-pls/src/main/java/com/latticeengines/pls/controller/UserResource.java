@@ -31,6 +31,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
+import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.pls.service.impl.EmailUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.exception.LoginException;
@@ -59,6 +61,12 @@ public class UserResource {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TenantService tenantService;
+
+    @Autowired
+    private EmailUtils emailUtils;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -112,13 +120,15 @@ public class UserResource {
         user.setUsername(user.getUsername().toLowerCase());
         userReg.getCredentials().setUsername(user.getUsername().toLowerCase());
 
+        Tenant tenant;
         String tenantId;
         String loginUsername;
         AccessLevel loginLevel;
         try {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = sessionService.retrieve(ticket);
-            tenantId = session.getTenant().getId();
+            tenant = session.getTenant();
+            tenantId = tenant.getId();
             loginUsername = session.getEmailAddress();
             loginLevel = AccessLevel.valueOf(session.getAccessLevel());
         } catch (LedpException e) {
@@ -170,6 +180,12 @@ public class UserResource {
             response.setResult(result);
             LOGGER.info(String.format("%s registered %s as a new user in tenant %s",
                     loginUsername, user.getUsername(), tenantId));
+
+            if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
+                emailUtils.sendNewExternalUserEmail(user, tempPass);
+            } else {
+                emailUtils.sendNewInternalUserEmail(tenant, user, tempPass);
+            }
         }
         return response;
     }
@@ -241,7 +257,8 @@ public class UserResource {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = sessionService.retrieve(ticket);
             tenantId = session.getTenant().getId();
-            currentLevel = AccessLevel.valueOf(session.getAccessLevel());
+            AccessLevel level = userService.getAccessLevel(tenantId, username);
+            currentLevel = level == null ? null : AccessLevel.valueOf(session.getAccessLevel());
             loginUsername = session.getEmailAddress();
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
@@ -258,6 +275,15 @@ public class UserResource {
                 userService.assignAccessLevel(targetLevel, tenantId, username);
                 LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s",
                         loginUsername, targetLevel.name(), username, tenantId));
+
+                User user = userService.findByUsername(username);
+                Tenant tenant = tenantService.findByTenantId(tenantId);
+
+                if (currentLevel == null && tenant != null && user != null
+                        && !targetLevel.equals(AccessLevel.EXTERNAL_ADMIN)
+                        && !targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
+                    emailUtils.sendExistingInternalUserEmail(tenant, user);
+                }
             } else {
                 response.setStatus(403);
                 return SimpleBooleanResponse.getFailResponse(

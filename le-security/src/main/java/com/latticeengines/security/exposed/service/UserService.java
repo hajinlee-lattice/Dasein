@@ -15,6 +15,8 @@ public interface UserService {
 
     User findByEmail(String email);
 
+    User findByUsername(String username);
+
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username);
 
     boolean resignAccessLevel(String tenantId, String username);
