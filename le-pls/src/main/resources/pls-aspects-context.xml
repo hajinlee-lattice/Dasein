@@ -16,7 +16,4 @@
 
     <bean id="multiTenancyAspect" class="com.latticeengines.pls.entitymanager.impl.MultiTenantEntityMgrAspect" />
     
-    <bean id="metricsAspect" class="com.latticeengines.pls.monitor.MetricsAspect" />
-
-	
 </beans>

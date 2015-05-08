@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.monitor.metrics.MetricsAspect;
 import com.latticeengines.pls.controller.ModelSummaryResource;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;

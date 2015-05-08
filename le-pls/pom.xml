@@ -14,6 +14,7 @@
         <le.camille.version>1.0.32-SNAPSHOT</le.camille.version>
         <le.security.version>1.0.32-SNAPSHOT</le.security.version>
         <le.baton.version>1.0.32-SNAPSHOT</le.baton.version>
+        <le.monitor.version>1.0.32-SNAPSHOT</le.monitor.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <globalauth.base.url>https://bodcdevvcus209.dev.lattice.local/test</globalauth.base.url>
@@ -331,6 +332,11 @@
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
