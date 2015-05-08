@@ -11,7 +11,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public class PagerDutyServiceTestNG extends MonitorFunctionalTestNGBase {
+public class PagerDutyServiceTestNG { //extends MonitorFunctionalTestNGBase {
 
     @Autowired
     PagerDutyServiceImpl pagerDutyService;

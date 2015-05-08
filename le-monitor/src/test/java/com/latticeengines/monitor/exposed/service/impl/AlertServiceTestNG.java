@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public class AlertServiceTestNG extends MonitorFunctionalTestNGBase{
+public class AlertServiceTestNG { // extends MonitorFunctionalTestNGBase{
 
     @Autowired
     AlertServiceImpl alertService;
@@ -24,37 +24,38 @@ public class AlertServiceTestNG extends MonitorFunctionalTestNGBase{
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerOneDetail() throws ClientProtocolException, IOException, ParseException {
-    	boolean flag = true;
-    	try {
-	        alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG", new BasicNameValuePair("testmetric",
-	                "testvalue"));
-    	} catch (LedpException e) {
-    		flag = false;
-    	}
-    	AlertTestUtils.confirmAlertIncident(flag);
+        boolean flag = true;
+        try {
+            alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
+                    new BasicNameValuePair("testmetric", "testvalue"));
+        } catch (LedpException e) {
+            flag = false;
+        }
+        AlertTestUtils.confirmAlertIncident(flag);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerNoDetail() throws ClientProtocolException, IOException, ParseException {
-    	boolean flag = true;
-    	try {
-	        alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG");
-    	} catch (LedpException e) {
-    		flag = false;
-    	}
-    	AlertTestUtils.confirmAlertIncident(flag);
+        boolean flag = true;
+        try {
+            alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG");
+        } catch (LedpException e) {
+            flag = false;
+        }
+        AlertTestUtils.confirmAlertIncident(flag);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerMultipleDetail() throws ClientProtocolException, IOException, ParseException {
-    	boolean flag = true;
-    	try {
-	        alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG", new BasicNameValuePair("testmetric",
-	                "testvalue"), new BasicNameValuePair("anothertestmetric", "anothertestvalue"));
-    	} catch (LedpException e) {
-    		flag = false;
-    	}
-    	AlertTestUtils.confirmAlertIncident(flag);
+        boolean flag = true;
+        try {
+            alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
+                    new BasicNameValuePair("testmetric", "testvalue"), new BasicNameValuePair("anothertestmetric",
+                            "anothertestvalue"));
+        } catch (LedpException e) {
+            flag = false;
+        }
+        AlertTestUtils.confirmAlertIncident(flag);
     }
 
 }

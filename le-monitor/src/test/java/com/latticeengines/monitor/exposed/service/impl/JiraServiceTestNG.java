@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public class JiraServiceTestNG extends MonitorFunctionalTestNGBase {
+public class JiraServiceTestNG { //extends MonitorFunctionalTestNGBase {
 
 	@Autowired
 	JiraServiceImpl JiraService;
