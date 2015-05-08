@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import javax.annotation.PostConstruct;
@@ -44,6 +45,9 @@ public class EmailUtils {
     @Value("${security.emailsettings.useSSL}")
     private boolean EMAIL_USESSL;
 
+    @Value("${security.emailsettings.useSTARTTLS}")
+    private boolean EMAIL_USESTARTTLS;
+
     @Value("${pls.api.hostport}")
     private String hostport;
 
@@ -56,6 +60,7 @@ public class EmailUtils {
         emailsettings.setPassword(EMAIL_PASSWORD);
         emailsettings.setPort(EMAIL_PORT);
         emailsettings.setUseSSL(EMAIL_USESSL);
+        emailsettings.setUseSTARTTLS(EMAIL_USESTARTTLS);
     }
 
     public void sendNewInternalUserEmail(Tenant tenant, User user, String password) {
@@ -77,7 +82,7 @@ public class EmailUtils {
 
             emailService.sendHtmlEmail("Welcome to Lead Prioritization", htmlTemplate,
                     Collections.singleton(user.getEmail()), emailsettings);
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("Failed to send new internal user email: " + e.getMessage());
         }
     }
@@ -99,7 +104,7 @@ public class EmailUtils {
 
             emailService.sendHtmlEmail("Welcome to Lattice Lead Prioritization", htmlTemplate,
                     Collections.singleton(user.getEmail()), emailsettings);
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("Failed to send new external user email: " + e.getMessage());
         }
     }
@@ -116,8 +121,8 @@ public class EmailUtils {
 
             emailService.sendHtmlEmail("Welcome to Lattice Lead Prioritization", htmlTemplate,
                     Collections.singleton(user.getEmail()), emailsettings);
-        } catch (Exception e) {
-            log.error("Failed to send new external user email: " + e.getMessage());
+        } catch (IOException e) {
+            log.error("Failed to send existing external user email: " + e.getMessage());
         }
     }
 

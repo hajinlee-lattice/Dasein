@@ -42,6 +42,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${security.emailsettings.useSSL}")
     private boolean EMAIL_USESSL;
 
+    @Value("${security.emailsettings.useSTARTTLS}")
+    private boolean EMAIL_USESTARTTLS;
+
     @PostConstruct
     private void setupDefaultEmailSettings() {
         emailsettings = new EmailSettings();
@@ -51,6 +54,7 @@ public class EmailServiceImpl implements EmailService {
         emailsettings.setPassword(EMAIL_PASSWORD);
         emailsettings.setPort(EMAIL_PORT);
         emailsettings.setUseSSL(EMAIL_USESSL);
+        emailsettings.setUseSTARTTLS(EMAIL_USESTARTTLS);
     }
 
     @Override
@@ -63,11 +67,7 @@ public class EmailServiceImpl implements EmailService {
                                 EmailSettings emailSettings) {
         try {
             Email email = new SimpleEmail();
-            email.setHostName(emailSettings.getServer());
-            email.setSmtpPort(emailSettings.getPort());
-            email.setAuthenticator(new DefaultAuthenticator(emailSettings.getUsername(), emailSettings.getPassword()));
-            email.setSSLOnConnect(emailSettings.isUseSSL());
-            email.setFrom(emailSettings.getFrom());
+            applySettings(email, emailSettings);
             email.setSubject(subject);
             email.setMsg(content);
             for (String recipient : recipients) {
@@ -113,11 +113,7 @@ public class EmailServiceImpl implements EmailService {
             email.setHtmlMsg(htmlTemplate);
             email.setTextMsg(alternativeMsg);
 
-            email.setHostName(emailSettings.getServer());
-            email.setSmtpPort(emailSettings.getPort());
-            email.setAuthenticator(new DefaultAuthenticator(emailSettings.getUsername(), emailSettings.getPassword()));
-            email.setSSLOnConnect(emailSettings.isUseSSL());
-            email.setFrom(emailSettings.getFrom());
+            applySettings(email, emailSettings);
 
             email.send();
         } catch (EmailException e) {
@@ -137,6 +133,14 @@ public class EmailServiceImpl implements EmailService {
         } catch (EmailException e) {
             throw new LedpException(LedpCode.LEDP_19000, "Error sending an html email", e);
         }
+    }
 
+    private void applySettings(Email email, EmailSettings emailSettings) throws EmailException {
+        email.setHostName(emailSettings.getServer());
+        email.setSmtpPort(emailSettings.getPort());
+        email.setAuthenticator(new DefaultAuthenticator(emailSettings.getUsername(), emailSettings.getPassword()));
+        email.setSSLOnConnect(emailSettings.isUseSSL());
+        email.setStartTLSEnabled(emailSettings.isUseSTARTTLS());
+        email.setFrom(emailSettings.getFrom());
     }
 }
