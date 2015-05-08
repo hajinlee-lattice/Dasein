@@ -257,8 +257,7 @@ public class UserResource {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = sessionService.retrieve(ticket);
             tenantId = session.getTenant().getId();
-            AccessLevel level = userService.getAccessLevel(tenantId, username);
-            currentLevel = level == null ? null : AccessLevel.valueOf(session.getAccessLevel());
+            currentLevel = AccessLevel.valueOf(session.getAccessLevel());
             loginUsername = session.getEmailAddress();
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
@@ -272,6 +271,8 @@ public class UserResource {
             // using access level if it is provided
             AccessLevel targetLevel = AccessLevel.valueOf(data.getAccessLevel());
             if (userService.isSuperior(currentLevel, targetLevel)) {
+                boolean newUser = !userService.inTenant(tenantId, username);
+
                 userService.assignAccessLevel(targetLevel, tenantId, username);
                 LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s",
                         loginUsername, targetLevel.name(), username, tenantId));
@@ -279,7 +280,7 @@ public class UserResource {
                 User user = userService.findByUsername(username);
                 Tenant tenant = tenantService.findByTenantId(tenantId);
 
-                if (currentLevel == null && tenant != null && user != null
+                if (newUser && tenant != null && user != null
                         && !targetLevel.equals(AccessLevel.EXTERNAL_ADMIN)
                         && !targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                     emailUtils.sendExistingInternalUserEmail(tenant, user);
