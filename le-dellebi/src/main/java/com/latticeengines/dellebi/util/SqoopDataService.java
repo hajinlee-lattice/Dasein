@@ -72,7 +72,7 @@ public class SqoopDataService {
        	
        	if (rc == 0){
        		log.info("Remove the exported HDFS file" + sourceDir);
-//        	hadoopfilesystemoperations.cleanFolder(sourceDir);
+         	hadoopfilesystemoperations.cleanFolder(sourceDir);
        	}  
        	else {
        		log.error("Export files "+ sourceDir +" to SQL server failed");
