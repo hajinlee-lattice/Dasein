@@ -34,5 +34,6 @@
         <module>le-pls</module>
         <module>le-dellebi</module>
         <module>le-job</module>
+        <module>le-monitor</module>
     </modules>
 </project>
