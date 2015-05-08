@@ -1,15 +1,19 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "Tenant", "Data": "test_tenant" },
+    { "Node": "DLUrl", "Data": "http://bodcdevvint207.dev.lattice.local:8081" },
     { "Node": "TenantAlias", "Data": "ht" },
-    { "Node": "DMDeployment", "Data": "DMDeployment"},
-    { "Node": "ContractExternalID", "Data": "ContractExternalID"},
     { "Node": "VisiDB", 
       "Children" : [
         { "Node": "CreateNewVisiDB", "Data": true },
         { "Node": "VisiDBName", "Data": "test_tenant"},
-        { "Node": "ServerName", "Data": "bodcdevvint187.dev.lattice.local" }
+        { "Node": "ServerName", "Data": "bodcdevvint207.dev.lattice.local" },
+        { "Node": "VisiDBFileDirectory", "Data": ""},
+        { "Node": "CacheLimit", "Data": 8192},
+        { "Node": "CaseSensitive", "Data": false},
+        { "Node": "DiskspaceLimit", "Data": 0},
+        { "Node": "PermanentStoreOption", "Data": "Master"},
+        { "Node": "PermanentStorePath", "Data": ""}
       ]
     },
     { "Node": "DL", 

@@ -2,10 +2,6 @@
   "RootPath": "/",
   "Nodes": [
     {
-      "Node": "ContractExternalID",
-      "Data": "ContractExternalID"
-    },
-    {
       "Node": "DL",
       "Children": [
         {
@@ -15,12 +11,15 @@
       ]
     },
     {
-      "Node": "DMDeployment",
-      "Data": "DMDeployment"
-    },
-    {
-      "Node": "Tenant",
-      "Data": "test_tenant"
+      "Node": "DLUrl",
+      "Data": "http://bodcdevvint207.dev.lattice.local:8081",
+      "Metadata": {
+        "Type": "options",
+        "Options": [
+          "http://bodcdevvint207.dev.lattice.local:8081",
+          "https://bodcdevvint187.dev.lattice.local:8080"
+        ]
+      }
     },
     {
       "Node": "TenantAlias",
@@ -30,13 +29,48 @@
       "Node": "VisiDB",
       "Children": [
         {
+          "Node": "CacheLimit",
+          "Data": "8192",
+          "Metadata": {
+            "Type": "number"
+          }
+        },
+        {
+          "Node": "CaseSensitive",
+          "Data": "false",
+          "Metadata": {
+            "Type": "boolean"
+          }
+        },
+        {
           "Node": "CreateNewVisiDB",
           "Data": "true",
-          "Metadata": { "Type": "boolean" }
+          "Metadata": {
+            "Type": "boolean"
+          }
+        },
+        {
+          "Node": "DiskspaceLimit",
+          "Data": "0",
+          "Metadata": {
+            "Type": "number"
+          }
+        },
+        {
+          "Node": "PermanentStoreOption",
+          "Data": "Master"
+        },
+        {
+          "Node": "PermanentStorePath",
+          "Data": ""
         },
         {
           "Node": "ServerName",
-          "Data": "bodcdevvint187.dev.lattice.local"
+          "Data": "bodcdevvint207.dev.lattice.local"
+        },
+        {
+          "Node": "VisiDBFileDirectory",
+          "Data": ""
         },
         {
           "Node": "VisiDBName",

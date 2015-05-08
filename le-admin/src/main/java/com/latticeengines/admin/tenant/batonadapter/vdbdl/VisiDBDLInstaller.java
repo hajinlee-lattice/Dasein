@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -25,7 +26,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
     private static final Log log = LogFactory.getLog(VisiDBDLInstaller.class);
 
-    private String dlUrl;
+    private TenantService tenantService;
 
     private static final int SUCCESS = 3;
 
@@ -33,17 +34,20 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         super(VisiDBDLComponent.componentName);
     }
 
-    protected void setDLUrl(String dlUrl) {
-        this.dlUrl = dlUrl;
+    private String dlUrl;
+
+    public void setTenantService(TenantService tenantService) {
+        this.tenantService = tenantService;
     }
 
     @Override
     public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
-        String tenant = getData(configDir, "Tenant");
-        String tenantAlias = getData(configDir, "TenantAlias");
-        String dmDeployment = getData(configDir, "DMDeployment");
-        String contractExternalID = getData(configDir, "ContractExternalID");
+        String dmDeployment = space.getTenantId();
+        String contractExternalID = space.getContractId();
+        String tenant = tenantService.getTenant(contractExternalID, dmDeployment).getTenantInfo().properties.displayName;
 
+        dlUrl = getData(configDir, "DLUrl");
+        String tenantAlias = getData(configDir, "TenantAlias");
         String createNewVisiDB = getChild(configDir, "VisiDB", "CreateNewVisiDB").getDocument().getData();
         String visiDBName = getChild(configDir, "VisiDB", "VisiDBName").getDocument().getData();
         String visiDBServerName = "ServerName=" + getChild(configDir, "VisiDB", "ServerName").getDocument().getData();
@@ -54,8 +58,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         headers.add(new BasicNameValuePair("Content-Type", "application/json"));
         headers.add(new BasicNameValuePair("Accept", "application/json"));
 
-        GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant, tenantAlias, dmDeployment, contractExternalID,
-                visiDBName, visiDBServerName);
+        GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant);
         Map<String, Object> response = getTenantInfo(getRequest, headers);
 
         int status = response.get("Status") == null ? -1 : (Integer) response.get("Status");
@@ -73,8 +76,9 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
             if (status != SUCCESS) {
                 throw new LedpException(LedpCode.LEDP_18032);
             }
+            log.info("Tenant " + tenant + " has been successfully created in VisiDB/Dataloader");
         } else if (errorMessage == null && status == SUCCESS) {
-            log.info("Tenant is already in VisiDB/Dataloader");
+            log.info("Tenant " + tenant + " is already in VisiDB/Dataloader");
         } else {
             throw new LedpException(LedpCode.LEDP_18032, new String[] { errorMessage });
         }

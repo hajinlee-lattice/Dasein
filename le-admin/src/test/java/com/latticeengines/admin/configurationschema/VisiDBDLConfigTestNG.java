@@ -42,8 +42,8 @@ public class VisiDBDLConfigTestNG extends ConfigurationSchemaTestNGBase {
     public void getDefaultConfiguration() throws IOException {
         DocumentDirectory dir = batonService.getDefaultConfiguration(this.component.getName());
 
-        String tenant = dir.get("/DMDeployment").getDocument().getData();
-        Assert.assertEquals(tenant, "DMDeployment");
+        String tenant = dir.get("/DLUrl").getDocument().getData();
+        Assert.assertEquals(tenant, "http://bodcdevvint207.dev.lattice.local:8081");
 
         String visiDBName = dir.get("/VisiDB").getChild("VisiDBName").getDocument().getData();
         Assert.assertEquals(visiDBName, "test_tenant");
