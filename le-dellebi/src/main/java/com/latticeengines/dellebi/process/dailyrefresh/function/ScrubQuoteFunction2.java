@@ -30,15 +30,15 @@ public class ScrubQuoteFunction2 extends BaseOperation implements Function {
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry argument = functionCall.getArguments();
         
-        HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;
+        /*HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;
         MultiInputSplit mis = (MultiInputSplit) hfp.getReporter().getInputSplit();
         FileSplit fs = (FileSplit) mis.getWrappedInputSplit();
         String fileName = fs.getPath().getName();
+        */
 
         log.info("Quote function 2."); 
         log.info("Inserted value: " + argument.getString("#QTE_NUM_VAL") + " Badge: "+
-        		argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR") +
-        		" fileName "+fileName); 
+        		argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR")); 
                
        // String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
 
@@ -50,7 +50,7 @@ public class ScrubQuoteFunction2 extends BaseOperation implements Function {
         result.add(argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR"));
         result.add(argument.getString("SYS_QTY"));
         result.add(argument.getString("REVN_USD_AMT"));
-        //result.add(fileName);
+        result.add("test file name");
 
         functionCall.getOutputCollector().add(result);
 
