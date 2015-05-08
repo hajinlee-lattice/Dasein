@@ -146,12 +146,12 @@ class PerformanceData(SessionRunner):
         print "record Dante Data, Dataloader data:"
         print dlDTData
         dtDatas = self.getDanteData(dlDTData.get("starttime"));
-        if 0 ==len(dlDatas):
+        if 0 ==len(dtDatas):
             print "failed to get dante data from dante";
             return 0;
-        dlData= dlDTDatas[0]
+        dtData= dtDatas[0]
         print "record Dante Date, Dante: "
-        print dlData         
+        print dtData         
         print self.performanceDataRecord(sequence=self.sequence,testingName=test_Name,loadgroupName=groupName,
                                    serviceName=pls_connection_string,recordNumber=record_number,
                                    dl_launch_begin_date=dllaunchData.get("validatestart"),dl_launch_end_date=dllaunchData.get("launchend"),dl_launch_duration_time=dllaunchData.get("dl_launch_duration_time"),
@@ -500,13 +500,14 @@ class VisiDBRollBack(SessionRunner):
     
     def attachVisidbDb(self,tenant_name):
         dlc = DLCRunner(host=self.dlc_host, dlc_path=self.dlc_path)
+        dfd = "%s\%s\%s.vdb" % (PLSEnvironments.visidb_data_folder,tenant_name,tenant_name)
         params = {"-s": self.dl_server,
                   "-u": self.dl_user,
                   "-p": self.dl_pwd,
                   "-dc": self.visidb_conn,
                   "-dn": tenant_name,
                   "-cl": "4096",
-                  "-dfd": "D:\VisiDBData\BD_ADEDTBDd70064747nG26263627r1\BD_ADEDTBDd70064747nG26263627r1.vdb"
+                  "-dfd": dfd
                  }
         command = "Attach Visidb DataBase"
        

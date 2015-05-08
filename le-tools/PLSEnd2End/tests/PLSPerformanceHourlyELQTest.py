@@ -18,18 +18,18 @@ class Test(unittest.TestCase):
     
     def setUp(self):
         print "start a new test......"
-        global revisionId
         visidb = VisiDBRollBack();        
-        revisionId = visidb.dlGetRevision(tenantName)
-        print revisionId
+        visidb.bakVisidbDB(tenantName)
       
     def tearDown(self):
         print "end the test......"
         visidb = VisiDBRollBack();        
-        visidb.dlRollBack(tenantName,revisionId);
+        visidb.copyBackVisidbDB(tenantName)
         
-    def testPerformanceHourlyEloqua_10K(self):
-        pt.PerformanceHourlyTest("testPerformanceHourlyEloqua_10K",10000,"first")
+    def testPerformanceHourlyEloqua_1K3k5k(self):
+        pt.PerformanceHourlyTest("testPerformanceHourlyEloqua_1K3k5k",1000,"first")
+        pt.PerformanceHourlyTest("testPerformanceHourlyEloqua_1K3k5k",3000,"second")
+        pt.PerformanceHourlyTest("testPerformanceHourlyEloqua_1K3k5k",5000,"Third")
     
         
 if __name__ == "__main__":
