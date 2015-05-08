@@ -645,7 +645,7 @@ public class ModelingServiceImpl implements ModelingService {
                 }
             }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_11004, new String[] { table });
+            throw new LedpException(LedpCode.LEDP_11004, e, new String[] { table });
         }
         return lb.toString();
     }
