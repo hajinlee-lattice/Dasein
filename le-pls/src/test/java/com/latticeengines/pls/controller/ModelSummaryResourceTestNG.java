@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
 /**
@@ -46,10 +47,23 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
+    @Autowired
+    private TenantService tenantService;
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         setUpMarketoEloquaTestEnvironment();
+
+        String tenantId = "CommonTestContract.TestTenant.Production";
+        if (!tenantService.hasTenantId(tenantId)) {
+            Tenant tenant = new Tenant();
+            tenant.setId(tenantId);
+            String tenantName = "Lattice Internal Test Tenant";
+            tenant.setName(tenantName);
+            tenantService.registerTenant(tenant);
+        }
     }
+
 
     @BeforeMethod(groups = { "functional", "deployment" })
     public void beforeMethod() {
