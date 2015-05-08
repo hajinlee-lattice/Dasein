@@ -161,6 +161,6 @@ class env(object):
 
 
 if __name__ == '__main__':
-#     CleanUp()
+    CleanUp()
 #     InitialClear()
-    unitTest()
+#     unitTest()
