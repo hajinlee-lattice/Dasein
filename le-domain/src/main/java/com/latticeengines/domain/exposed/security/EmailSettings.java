@@ -9,6 +9,7 @@ public class EmailSettings {
     private String password;
     private int port;
     private String server;
+    private boolean useSTARTTLS;
     private boolean useSSL;
     private String username;
 
@@ -53,6 +54,12 @@ public class EmailSettings {
     public void setUseSSL(boolean useSSL) {
         this.useSSL = useSSL;
     }
+
+    @JsonProperty("UseSTARTTLS")
+    public boolean isUseSTARTTLS() { return useSTARTTLS; }
+
+    @JsonProperty("UseSTARTTLS")
+    public void setUseSTARTTLS(boolean useSTARTTLS) { this.useSTARTTLS = useSTARTTLS; }
 
     @JsonProperty("Username")
     public String getUsername() {
