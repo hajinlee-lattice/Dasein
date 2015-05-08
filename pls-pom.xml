@@ -19,9 +19,10 @@
         <module>le-domain</module>
         <module>le-parent</module>
         <module>le-db</module>
+        <module>le-security</module>
+        <module>le-monitor</module>
         <module>le-camille</module>
         <module>le-baton</module>
-        <module>le-security</module>
         <module>le-pls</module>
     </modules>
 </project>
