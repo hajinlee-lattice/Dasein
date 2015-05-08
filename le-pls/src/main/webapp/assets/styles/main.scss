@@ -24,6 +24,7 @@
 #mainView {
   overflow:auto;
   padding-bottom: 28px;
+  overflow: visible;
 }
 
 .local-error {
@@ -62,7 +63,7 @@ a#back-to-summary-link:hover {
     background: white;
     width: 350px;
     text-align: left;
-    box-shadow: 
+    box-shadow:
     0 0 0 1px #CDCDCD,
     0 0 0 4px hsl(0, 0%, 90%);
     border-radius: 1px;
@@ -160,7 +161,7 @@ Model list title
 }
 
 .model-title h2:hover {
-    background: transparent;      
+    background: transparent;
 }
 
 .model-title h2.model-name-editable {
@@ -547,4 +548,4 @@ Spinner
     box-shadow: -0.11em -0.83em 0 -0.4em #428bca, -0.11em -0.83em 0 -0.42em #428bca, -0.11em -0.83em 0 -0.44em #428bca, -0.11em -0.83em 0 -0.46em #428bca, -0.11em -0.83em 0 -0.477em #428bca;
   }
 }
-//END: Style overrides 
+//END: Style overrides
