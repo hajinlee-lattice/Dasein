@@ -11,13 +11,11 @@ import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 
-import com.latticeengines.dellebi.dataprocess.DailyJob;
-import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrDtlFunction;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrDtlFunctionReplace;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrSumFunction;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrSumFunctionReplace;
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubQuoteFunction;
+import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubQuoteFunction2;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubShipAddrFunction;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubWarFunction;
 
@@ -158,7 +156,7 @@ public class PipeFactory {
         		.append(new Fields("fileName"));
 
         docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments), Fields.RESULTS);
+        docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction2(outputScrubArguments), Fields.RESULTS);
         return docPipe;
     }
 }
