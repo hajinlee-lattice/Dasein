@@ -17,4 +17,5 @@
     
  
     <import resource="classpath:dataplatform-context.xml"/>
+    <import resource="classpath:monitor-aspects-context.xml"/>
 </beans>
