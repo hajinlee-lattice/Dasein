@@ -15,7 +15,7 @@ import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrDtlFunct
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrDtlFunctionReplace;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrSumFunction;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrSumFunctionReplace;
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubQuoteFunction2;
+import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubQuoteFunction;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubShipAddrFunction;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubWarFunction;
 
