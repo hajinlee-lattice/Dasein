@@ -8,7 +8,10 @@
     { "Node": "Config5",
       "Children" : [
         { "Node" : "Config5.1", "Data": "value5.1" },
-        { "Node" : "Config5.2", "Data": "value5.2" }
+        {
+          "Node": "Config5.2",
+          "Data": "http://bodcdevvint207.dev.lattice.local:8081"
+        }
       ]
     }
   ]

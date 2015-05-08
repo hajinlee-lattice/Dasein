@@ -1,6 +1,20 @@
 {
   "RootPath": "/whatever",
   "Nodes": [
-    { "Node": "Config1", "Data": {"Type": "options", "Options": [1, 2, 3]} }
+    { "Node": "Config1", "Data": {"Type": "options", "Options": [1, 2, 3]} },
+    { "Node": "Config5",
+      "Children" : [
+        {
+          "Node": "Config5.2",
+          "Data": {
+            "Type": "options",
+            "Options": [
+              "http://bodcdevvint207.dev.lattice.local:8081",
+              "https://bodcdevvint187.dev.lattice.local:8080"
+            ]
+          }
+        }
+      ]
+    }
   ]
 }
