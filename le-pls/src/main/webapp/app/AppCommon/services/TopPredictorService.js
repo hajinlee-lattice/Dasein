@@ -142,7 +142,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
             var predictor = totalPredictors[x];
             if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) && 
-                this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
+                this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads) &&
+                (this.ShowBasedOnTags(predictor, true) || this.ShowBasedOnTags(predictor, false))) {
                 
                 var displayPredictor = {
                   name: predictor.Name,
