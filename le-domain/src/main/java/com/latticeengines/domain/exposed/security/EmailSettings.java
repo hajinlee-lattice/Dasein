@@ -51,9 +51,7 @@ public class EmailSettings {
     public boolean isUseSSL() { return useSSL; }
 
     @JsonProperty("UseSSL")
-    public void setUseSSL(boolean useSSL) {
-        this.useSSL = useSSL;
-    }
+    public void setUseSSL(boolean useSSL) { this.useSSL = useSSL; }
 
     @JsonProperty("UseSTARTTLS")
     public boolean isUseSTARTTLS() { return useSTARTTLS; }
