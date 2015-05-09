@@ -1,6 +1,6 @@
 package com.latticeengines.pls.provisioning;
 
-import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
+import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 

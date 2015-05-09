@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
-import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
+import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
