@@ -168,7 +168,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
             var percentTotal = (element.Count / totalLeads) * 100;
             if (attributeValue != null && 
-                (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") && 
+                (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE" || 
+                		attributeValue === "") && 
                 percentTotal >= 99.5) {
                 toReturn = false;
                 break;
