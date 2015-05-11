@@ -62,7 +62,6 @@
                                     <includes>
                                         <include>${functional.classes.include}</include>
                                         <exclude>${functional.classes.exclude}</exclude>
-                                        <include>${deployment.classes.include}</include>
                                     </includes>
                                     <groups>${functional.groups}</groups>
                                 </configuration>
