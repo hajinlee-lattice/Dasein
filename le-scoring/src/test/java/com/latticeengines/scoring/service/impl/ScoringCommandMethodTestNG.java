@@ -10,7 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.dataplatform.service.impl.PagerDutyTestUtils;
+import com.latticeengines.monitor.alerts.service.impl.PagerDutyTestUtils;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;

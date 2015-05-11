@@ -14,6 +14,7 @@
         <le.dataplatform.version>1.0.32-SNAPSHOT</le.dataplatform.version>
         <le.db.version>1.0.32-SNAPSHOT</le.db.version>
         <le.domain.version>1.0.32-SNAPSHOT</le.domain.version>
+        <le.monitor.version>1.0.32-SNAPSHOT</le.monitor.version>
     </properties>
 
     <parent>
@@ -194,6 +195,13 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
             <version>${le.dataplatform.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
