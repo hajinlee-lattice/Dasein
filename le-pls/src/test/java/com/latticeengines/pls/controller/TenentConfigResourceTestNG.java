@@ -35,7 +35,7 @@ public class TenentConfigResourceTestNG extends PlsFunctionalTestNGBase {
         SpaceLifecycleManager.create("contractId", "tenantId", "spaceId", spaceInfo);
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterClass(groups = { "deployment" })
     public void afterClass() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId",
