@@ -188,14 +188,22 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     };
 
     $scope.backToSummaryClicked = function () {
+        clearSelectedCategory();
         $scope.backToSummaryView = false;
         $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
         $scope.drawSummaryChart();
     };
     
+    function clearSelectedCategory () {
+        TopPredictorService.ClearCategoryClasses($scope.externalCategories);
+        TopPredictorService.ClearCategoryClasses($scope.internalCategories);
+    }
+    
     $scope.categoryClicked = function (category) {
         clearTimeout(showAttributeTimeout);
         var categoryList = TopPredictorService.GetAttributesByCategory(data, category.name, category.color, 50);
+        clearSelectedCategory();
+        category.activeClass = "active";
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
         var prefix = categoryList.length >= 50 ? ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER_PREFIX") : "";

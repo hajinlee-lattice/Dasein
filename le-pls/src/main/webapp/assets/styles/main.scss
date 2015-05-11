@@ -139,6 +139,12 @@ a#back-to-summary-link:hover {
     margin-top: -13px;
 }
 
+.attributes a.active {
+    color: #747474;
+    background: #e1eefd;
+    border-top: #ddd solid 1px;
+}
+
 .label-primary {
   background: #e96339;
 }

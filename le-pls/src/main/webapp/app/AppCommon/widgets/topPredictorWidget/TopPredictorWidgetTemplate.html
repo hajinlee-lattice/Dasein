@@ -15,7 +15,7 @@
                 <h4>{{externalPredictorTotal}}</h4>
                 <ul>    
                     <li data-ng-repeat="category in externalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
-                        <a href="#" data-ng-bind-html="generateCategoryLabel(category)"></a>
+                        <a href="#" class="{{category.activeClass}}" data-ng-bind-html="generateCategoryLabel(category)"></a>
                     </li>
                 </ul>
             </div>

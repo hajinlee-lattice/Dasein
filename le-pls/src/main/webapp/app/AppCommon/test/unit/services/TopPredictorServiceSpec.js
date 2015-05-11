@@ -88,7 +88,8 @@ describe('TopPredictorServiceSpec Tests', function () {
         var testCategory = {
             name: "Technologies",
             count: 0,
-            color: "#4bd1bb"
+            color: "#4bd1bb",
+            activeClass: ""
         };
 
         var expected = {
@@ -97,7 +98,8 @@ describe('TopPredictorServiceSpec Tests', function () {
             categories: [{
                 name: "Technologies",
                 count: 58,
-                color: "#4bd1bb"
+                color: "#4bd1bb",
+                activeClass: ""
             }]
         };
         it('should return 58 as the total for Technologies attribute-value in the test modelSummary', function () {
