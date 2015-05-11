@@ -107,6 +107,8 @@ public class SerializableDocumentDirectory {
             DocumentDirectory.Node node = iter.next();
             if (node.getDocument() != null && !node.getDocument().getData().equals("")) {
                 result.put(node.getPath().toString(), node.getDocument().getData());
+            } else {
+                result.put(node.getPath().toString(), "");
             }
         }
 
