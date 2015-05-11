@@ -3,10 +3,11 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.services.SessionService',
     'mainApp.appCommon.services.ModelSummaryValidationService'
 ])
-.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService, ModelSummaryValidationService) {
+.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService) {
 
     this.GetAllModels = function (isValidOnly) {
             var deferred = $q.defer();
@@ -44,7 +45,7 @@ angular.module('mainApp.models.services.ModelService', [
                             return {
                                 Id          : rawObj.Id,
                                 DisplayName : rawObj.Name,
-                                CreatedDate : new Date(rawObj.ConstructionTime).toLocaleDateString(),
+                                CreatedDate : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
                                 Status      : rawObj.Status
                             };}
                     );

@@ -232,4 +232,8 @@ angular.module('mainApp.appCommon.utilities.DateTimeFormatUtility', [])
         return dateObj.toUTCString();
     };
     
+    this.FormatShortDate = function (dateString) {
+        return dateFormat(new Date(dateString), "m/d/yyyy");
+    };
+    
 });

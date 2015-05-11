@@ -239,6 +239,7 @@ module.exports = function (grunt) {
                         '<%= pls.app %>/app/AppCommon/vendor/CryptoJS.js',
                         '<%= pls.app %>/app/AppCommon/vendor/bootstrap.js',
                         '<%= pls.app %>/app/AppCommon/vendor/alasql.js',
+                        '<%= pls.app %>/app/AppCommon/vendor/date.format.js',
                         '<%= pls.app %>/app/AppCommon/directives/ngEnterDirective.js',
                         '<%= pls.app %>/app/AppCommon/utilities/ExceptionOverrideUtility.js',
                         '<%= pls.app %>/app/AppCommon/utilities/URLUtility.js',
