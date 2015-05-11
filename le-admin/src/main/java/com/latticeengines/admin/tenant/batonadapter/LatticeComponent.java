@@ -67,10 +67,15 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     }
 
     protected boolean uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson) {
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, this.getName());
+    }
+
+    public static boolean
+    uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson, String serviceName) {
         String podId = CamilleEnvironment.getPodId();
         Camille camille = CamilleEnvironment.getCamille();
 
-        Path defaultRootPath = PathBuilder.buildServiceDefaultConfigPath(podId, this.getName());
+        Path defaultRootPath = PathBuilder.buildServiceDefaultConfigPath(podId, serviceName);
         // deserialize and upload configuration json
         DocumentDirectory dir = LatticeComponent.constructConfigDirectory(defaultJson, metadataJson);
         try {
@@ -81,7 +86,7 @@ public abstract class LatticeComponent implements HasName, GraphNode {
         batonService.loadDirectory(dir, defaultRootPath);
 
         // deserialize and upload metadata json
-        Path metadataRootPath = PathBuilder.buildServiceConfigSchemaPath(podId, this.getName());
+        Path metadataRootPath = PathBuilder.buildServiceConfigSchemaPath(podId, serviceName);
         dir = LatticeComponent.constructMetadataDirectory(defaultJson, metadataJson);
         try {
             camille.delete(metadataRootPath);

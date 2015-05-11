@@ -1,0 +1,10 @@
+{
+  "RootPath": "/",
+  "Nodes": [
+	{ "Node": "DL_Address", "Data": "an address" },
+	{ "Node": "SFDC_OrgId", "Data": "" },
+	{ "Node": "SFDC_OrgId_Sandbox", "Data": "" },
+	{ "Node": "Product", "Data": "LPA" },
+	{ "Node": "Topology", "Data": "MARKETO" }
+  ]
+}

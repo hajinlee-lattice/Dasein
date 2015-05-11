@@ -1,0 +1,7 @@
+{
+  "RootPath": "/",
+  "Nodes": [
+	{ "Node": "Product", "Data": {"Type": "options", "Options": ["LPA"] } },
+	{ "Node": "Topology", "Data": {"Type": "options", "Options": ["MARKETO", "ELOQUA", "SFDC"] } }
+  ]
+}

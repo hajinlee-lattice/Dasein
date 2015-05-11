@@ -8,12 +8,15 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -43,6 +46,14 @@ public class TenantServiceImpl implements TenantService {
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public TenantServiceImpl() {
+    }
+
+    @PostConstruct
+    protected void uploadDefaultSpaceConfigAndSchemaByJson() {
+        String defaultJson = "space_default.json";
+        String metadataJson = "space_metadata.json";
+        String serviceName = "SpaceConfiguration";
+        LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
     }
 
     @Override
@@ -135,6 +146,11 @@ public class TenantServiceImpl implements TenantService {
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadata(metaDir);
         return rawDir;
+    }
+
+    @Override
+    public SerializableDocumentDirectory getDefaultSpaceConfig() {
+        return tenantEntityMgr.getDefaultSpaceConfig();
     }
 
     private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {

@@ -65,6 +65,13 @@ public class TenantResource {
         return new ArrayList<>(tenantService.getTenants(parsedContractId));
     }
 
+    @RequestMapping(value = "/default", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get default space configuration")
+    public SerializableDocumentDirectory getDefaultSpaceConfig() {
+        return tenantService.getDefaultSpaceConfig();
+    }
+
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")

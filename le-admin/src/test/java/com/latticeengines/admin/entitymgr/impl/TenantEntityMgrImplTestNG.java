@@ -43,4 +43,10 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
         assertNotNull(dir.getDocumentDirectory());
     }
 
+    @Test(groups = "functional")
+    public void getDefaultSpaceConfig() {
+        SerializableDocumentDirectory dir = tenantEntityMgr.getDefaultSpaceConfig();
+        assertNotNull(dir.getDocumentDirectory());
+    }
+
 }
