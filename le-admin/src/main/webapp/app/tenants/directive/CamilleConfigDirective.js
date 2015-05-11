@@ -71,12 +71,6 @@ app.directive('configEntry', function(){
                     $scope.inputType = "text";
                 }
             }
-            if ($scope.config.Node === "DL_Password") {
-                console.log("DL_Password");
-                console.log($scope.type);
-                console.log($scope.isInput);
-                console.log($scope.inputType);
-            }
 
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
             if ($scope.isBoolean) $scope.config.Data = ($scope.config.Data === "true" || $scope.config.Data === true);

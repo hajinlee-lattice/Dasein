@@ -116,6 +116,12 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
         }).success(function(data){
             if (data !== null && data.hasOwnProperty("RootPath")) {
                 data.Component = service;
+                if (data.Component === "Dante") {
+                    data = {
+                        Component: "Dante",
+                        Invisible: true
+                    };
+                }
                 result.resultObj = data;
             } else {
                 result.success = false;
@@ -156,6 +162,13 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
                         data.Nodes.push(node);
                 }
             });
+
+            if (data.Component === "Dante") {
+                data = {
+                    Component: "Dante",
+                    Message: "Dante does not need any configuration"
+                };
+            }
 
             result.resultObj = data;
 
