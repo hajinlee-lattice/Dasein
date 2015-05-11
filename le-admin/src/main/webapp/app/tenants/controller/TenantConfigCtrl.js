@@ -73,7 +73,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                 $scope.services = result.resultObj;
                 $scope.defaultConfigScaned = 0;
                 _.each($scope.services, function(service){
-                    TenantService.GetServiceDefaultConfig(service).then(
+                    ServiceService.GetServiceDefaultConfig(service).then(
                         function(result){
                             $scope.defaultConfigScaned += 1;
                             if (result.success) {

@@ -42,4 +42,37 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
         return defer.promise;
     };
 
+    this.GetServiceDefaultConfig = function(service) {
+        var defer = $q.defer();
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'GET',
+            url: '/admin/services/' + service + '/default'
+        }).success(function(data){
+            if (data !== null && data.hasOwnProperty("RootPath")) {
+                data.Component = service;
+                if (data.Component === "Dante") {
+                    data = {
+                        Component: "Dante",
+                        Invisible: true
+                    };
+                }
+                result.resultObj = data;
+            } else {
+                result.success = false;
+                result.errMsg = "Could not load default configuration.";
+            }
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+        });
+
+        return defer.promise;
+    };
+
 });
