@@ -1,4 +1,4 @@
-package com.latticeengines.monitor.exposed.service.impl;
+package com.latticeengines.monitor.alerts.service.impl;
 
 import static org.testng.Assert.assertTrue;
 

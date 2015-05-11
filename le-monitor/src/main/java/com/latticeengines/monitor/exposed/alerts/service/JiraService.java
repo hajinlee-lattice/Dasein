@@ -1,4 +1,4 @@
-package com.latticeengines.monitor.exposed.service;
+package com.latticeengines.monitor.exposed.alerts.service;
 
 import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;

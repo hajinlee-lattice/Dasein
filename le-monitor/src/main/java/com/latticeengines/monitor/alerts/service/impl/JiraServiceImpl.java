@@ -1,13 +1,13 @@
-package com.latticeengines.monitor.exposed.service.impl;
-
+package com.latticeengines.monitor.alerts.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,36 +21,36 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.monitor.exposed.service.JiraService;
+import com.latticeengines.monitor.exposed.alerts.service.JiraService;
 
-@Component("JiraService")
+@Component("jiraService")
 public class JiraServiceImpl implements JiraService {
-	
-	private final static Log log = LogFactory.getLog(JiraServiceImpl.class.getName());
-	
+
+    private final static Log log = LogFactory.getLog(JiraServiceImpl.class.getName());
+
     private static List<BasicNameValuePair> headers = new ArrayList<BasicNameValuePair>();
     static {
         headers.add(new BasicNameValuePair("Content-type", "application/json"));
-        headers.add(new BasicNameValuePair("Authorization","Basic amlyYVJFU1RBUEk6UEAkJHcwcmQx"));
+        headers.add(new BasicNameValuePair("Authorization", "Basic amlyYVJFU1RBUEk6UEAkJHcwcmQx"));
     }
 
     public void triggerEvent(String description, String clientUrl, BasicNameValuePair... details) {
         triggerEvent(description, clientUrl, Arrays.asList(details));
     }
-    
-	public void triggerEvent(String description, String clientUrl, Iterable<? extends BasicNameValuePair> details) {
-        
-        JSONObject obj=new JSONObject();
-        LinkedHashMap fieldsMap = new LinkedHashMap();
-        LinkedHashMap projectMap = new LinkedHashMap();
-        LinkedHashMap issuetypeMap = new LinkedHashMap();
-        LinkedHashMap priorityMap = new LinkedHashMap();
-        LinkedHashMap componentsMap = new LinkedHashMap();
-        LinkedHashMap customfield_11503Map = new LinkedHashMap();
-        LinkedHashMap customfield_10249Map = new LinkedHashMap();
-        LinkedHashMap customfield_11900Map = new LinkedHashMap();
-        LinkedList<LinkedHashMap> customfield_10249List = new LinkedList<LinkedHashMap>();
-        LinkedList<LinkedHashMap> componentsList = new LinkedList<LinkedHashMap>();
+
+    public void triggerEvent(String description, String clientUrl, Iterable<? extends BasicNameValuePair> details) {
+
+        JSONObject obj = new JSONObject();
+        Map<String, Object> fieldsMap = new HashMap<>();
+        Map<String, Object> projectMap = new HashMap<>();
+        Map<String, Object> issuetypeMap = new HashMap<>();
+        Map<String, Object> priorityMap = new HashMap<>();
+        Map<String, Object> componentsMap = new HashMap<>();
+        Map<String, Object> customfield_11503Map = new HashMap<>();
+        Map<String, Object> customfield_10249Map = new HashMap<>();
+        Map<String, Object> customfield_11900Map = new HashMap<>();
+        LinkedList<Map<String, Object>> customfield_10249List = new LinkedList<Map<String, Object>>();
+        LinkedList<Map<String, Object>> componentsList = new LinkedList<Map<String, Object>>();
         projectMap.put("id", "12300");
         fieldsMap.put("project", projectMap);
         fieldsMap.put("summary", description);
@@ -76,34 +76,34 @@ public class JiraServiceImpl implements JiraService {
         }
         fieldsMap.put("description", descriptions.toString());
         obj.put("fields", fieldsMap);
-              
+
         String response = "";
         JSONObject resultObj = null;
         try {
-	        // response should look like this - {"id":"IDNumber","key":"TECHOPS-someNumber","self":"https://solutions.lattice-engines.com/rest/api/2/issue/IDNumber"}
-	        response = HttpClientWithOptionalRetryUtils.sendPostRequest(
-	                "https://solutions.lattice-engines.com/rest/api/2/issue/", true, headers, obj.toString());
-	        JSONParser parser = new JSONParser();
-			log.info("Here is the feedback from the Jira server:");
-			log.info(response);
-			resultObj = (JSONObject) parser.parse(response);
-        } catch (ClientProtocolException e1){
-			log.error(e1.getMessage());
-			e1.printStackTrace();
-        	throw new LedpException(LedpCode.LEDP_18003, e1);
+            // response should look like this -
+            // {"id":"IDNumber","key":"TECHOPS-someNumber","self":"https://solutions.lattice-engines.com/rest/api/2/issue/IDNumber"}
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(
+                    "https://solutions.lattice-engines.com/rest/api/2/issue/", true, headers, obj.toString());
+            JSONParser parser = new JSONParser();
+            log.info("Here is the feedback from the Jira server:");
+            log.info(response);
+            resultObj = (JSONObject) parser.parse(response);
+        } catch (ClientProtocolException e1) {
+            log.error(e1.getMessage());
+            e1.printStackTrace();
+            throw new LedpException(LedpCode.LEDP_18003, e1);
         } catch (IOException e2) {
-			log.error(e2.getMessage());
-			e2.printStackTrace();
-        	throw new LedpException(LedpCode.LEDP_18004, e2);
-		} catch (ParseException e3) {
-			log.error(e3.getMessage());
-			e3.printStackTrace();
-			throw new LedpException(LedpCode.LEDP_18005, e3);
-		}
+            log.error(e2.getMessage());
+            e2.printStackTrace();
+            throw new LedpException(LedpCode.LEDP_18004, e2);
+        } catch (ParseException e3) {
+            log.error(e3.getMessage());
+            e3.printStackTrace();
+            throw new LedpException(LedpCode.LEDP_18005, e3);
+        }
 
         if (!resultObj.get("self").toString().contains(resultObj.get("id").toString())) {
-        	throw new LedpException(LedpCode.LEDP_18002);
+            throw new LedpException(LedpCode.LEDP_18002);
         }
-	}
+    }
 }
-
