@@ -1,6 +1,7 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "ConfigFilePath", "Data": "/test/test.txt" }
+    { "Node": "ConfigFilePath", "Data": "/test/test.txt" },
+    { "Node": "Zero", "Data": 0 }
   ]
 }

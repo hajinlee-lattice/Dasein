@@ -21,4 +21,7 @@ public class DanteConfigTestNG extends ConfigurationSchemaTestNGBase {
 
     @Test(groups = "unit")
     public void testUnitMainFlow() { runUnitMainFlow(); }
+
+    @Test(groups = "functional")
+    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
 }
