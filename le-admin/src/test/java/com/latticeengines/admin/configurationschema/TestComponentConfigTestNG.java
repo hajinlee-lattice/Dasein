@@ -65,6 +65,9 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
             Assert.assertTrue(node.asText().equals("string1")
                     || node.asText().equals("string2"));
         }
+
+        int zero = Integer.valueOf(dir.getChild("ZeroNumber").getDocument().getData());
+        Assert.assertEquals(zero, 0);
     }
 
     private static class Properties {

@@ -7,10 +7,11 @@
     { "Node": "Config4", "Data": true},
     { "Node": "Config5",
       "Children" : [
-        { "Node" : "Config5.1", "Data": "value5.1" },
-        { "Node" : "Config5.2", "Data": "value5.2" }
+        { "Node" : "Config5_1", "Data": "value5.1" },
+        { "Node" : "Config5_2", "Data": "" }
       ]
     },
-    { "Node": "Config6", "Data": ["string1", "string2"]}
+    { "Node": "Config6", "Data": ["string1", "string2"]},
+    { "Node": "ZeroNumber", "Data": 0}
   ]
 }
