@@ -10,6 +10,7 @@ import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
@@ -45,8 +46,9 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void getDefaultSpaceConfig() {
-        SerializableDocumentDirectory dir = tenantEntityMgr.getDefaultSpaceConfig();
-        assertNotNull(dir.getDocumentDirectory());
+        SpaceConfiguration dir = tenantEntityMgr.getDefaultSpaceConfig();
+        assertNotNull(dir);
+        assertNotNull(dir.toDocumentDirectory());
+        assertNotNull(dir.toSerializableDocumentDirectory());
     }
-
 }

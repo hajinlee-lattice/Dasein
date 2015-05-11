@@ -12,6 +12,7 @@ public class TenantRegistration {
     private ContractInfo contractInfo;
     private TenantInfo tenantInfo;
     private CustomerSpaceInfo spaceInfo;
+    private SpaceConfiguration spaceConfig;
     private List<SerializableDocumentDirectory> configDirectories;
 
     @JsonProperty("ContractInfo")
@@ -36,6 +37,14 @@ public class TenantRegistration {
     @JsonProperty("CustomerSpaceInfo")
     public void setSpaceInfo(CustomerSpaceInfo spaceInfo) {
         this.spaceInfo = spaceInfo;
+    }
+
+    @JsonProperty("SpaceConfig")
+    public SpaceConfiguration getSpaceConfig() { return spaceConfig; }
+
+    @JsonProperty("SpaceConfig")
+    public void setSpaceConfig(SpaceConfiguration spaceConfig) {
+        this.spaceConfig = spaceConfig;
     }
 
     @JsonProperty("ConfigDirectories")

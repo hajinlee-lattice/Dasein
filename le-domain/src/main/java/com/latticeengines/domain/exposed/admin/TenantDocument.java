@@ -13,6 +13,7 @@ public class TenantDocument {
     private TenantInfo tenantInfo;
     private CustomerSpaceInfo spaceInfo;
     private CustomerSpace space;
+    private SpaceConfiguration spaceConfig;
     private BootstrapState bootstrapState;
 
     @JsonProperty("CustomerSpace")
@@ -20,6 +21,12 @@ public class TenantDocument {
 
     @JsonProperty("CustomerSpace")
     public void setSpace(CustomerSpace space1) { this.space = space1; }
+
+    @JsonProperty("SpaceConfiguration")
+    public SpaceConfiguration getSpaceConfig() { return spaceConfig; }
+
+    @JsonProperty("SpaceConfiguration")
+    public void setSpaceConfig(SpaceConfiguration spaceConfig) { this.spaceConfig = spaceConfig; }
 
     @JsonProperty("ContractInfo")
     public ContractInfo getContractInfo() { return contractInfo; }

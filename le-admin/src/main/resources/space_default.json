@@ -1,10 +1,10 @@
 {
   "RootPath": "/",
   "Nodes": [
-	{ "Node": "DL_Address", "Data": "an address" },
+	{ "Node": "DL_Address", "Data": "http://bodcdevvint207.dev.lattice.local:8081" },
 	{ "Node": "SFDC_OrgId", "Data": "" },
 	{ "Node": "SFDC_OrgId_Sandbox", "Data": "" },
-	{ "Node": "Product", "Data": "LPA" },
-	{ "Node": "Topology", "Data": "MARKETO" }
+	{ "Node": "Product", "Data": "Lead Prioritization" },
+	{ "Node": "Topology", "Data": "Marketo" }
   ]
 }

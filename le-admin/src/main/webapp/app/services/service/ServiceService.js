@@ -35,7 +35,7 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
                 SessionUtility.handleAJAXError(err, status);
             });
         } else {
-            result.resultObj = data;
+            result.resultObj = this.registeredServices;
             defer.resolve(result);
         }
 

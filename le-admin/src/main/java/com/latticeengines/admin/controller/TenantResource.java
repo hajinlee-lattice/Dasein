@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -65,10 +68,10 @@ public class TenantResource {
         return new ArrayList<>(tenantService.getTenants(parsedContractId));
     }
 
-    @RequestMapping(value = "/default", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/defaultspaceconfig", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get default space configuration")
-    public SerializableDocumentDirectory getDefaultSpaceConfig() {
+    public SpaceConfiguration getDefaultSpaceConfig() {
         return tenantService.getDefaultSpaceConfig();
     }
 
@@ -87,6 +90,7 @@ public class TenantResource {
         return tenantService.getTenant(contractId, tenantId);
     }
 
+
     @RequestMapping(value = "/{tenantId}/services/{serviceName}",
             method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -96,13 +100,6 @@ public class TenantResource {
         return tenantService.getTenantServiceConfig(contractId, tenantId, serviceName);
     }
 
-    @RequestMapping(value = "/services/", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get list of services belong to a tenant")
-    public List<String> getServices() {
-        return new ArrayList<>();
-    }
-
     @RequestMapping(value = "/{tenantId}/services/{serviceName}/state",
             method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -110,5 +107,27 @@ public class TenantResource {
     public BootstrapState getServiceState(@RequestParam(value = "contractId") String contractId, //
             @PathVariable String tenantId, @PathVariable String serviceName) {
         return tenantService.getTenantServiceState(contractId, tenantId, serviceName);
+    }
+
+    @RequestMapping(value = "/topologies", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of available topologies")
+    public List<String> getTopologies() {
+        List<String> topologies = new ArrayList<>();
+        for (CRMTopology topology: CRMTopology.values()) {
+            topologies.add(topology.getName());
+        }
+        return topologies;
+    }
+
+    @RequestMapping(value = "/products", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of available products")
+    public List<String> getProducts() {
+        List<String> products = new ArrayList<>();
+        for (LatticeProduct product: LatticeProduct.values()) {
+            products.add(product.getName());
+        }
+        return products;
     }
 }

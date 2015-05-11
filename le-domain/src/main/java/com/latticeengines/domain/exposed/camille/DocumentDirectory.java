@@ -116,6 +116,7 @@ public class DocumentDirectory implements Serializable {
 
     public Node add(String path, String data, boolean pathIsAbsolute, boolean withParent) {
         Path relativePath = new Path(path);
+        if (data == null) data = "";
         if (pathIsAbsolute) {
             return add(relativePath, new Document(data), withParent);
         } else {

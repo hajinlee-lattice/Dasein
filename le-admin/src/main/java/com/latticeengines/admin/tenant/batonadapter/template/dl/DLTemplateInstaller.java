@@ -1,11 +1,10 @@
 package com.latticeengines.admin.tenant.batonadapter.template.dl;
 
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+
 
 public class DLTemplateInstaller extends LatticeComponentInstaller {
 
@@ -13,6 +12,6 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
 
     @Override
     public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 }

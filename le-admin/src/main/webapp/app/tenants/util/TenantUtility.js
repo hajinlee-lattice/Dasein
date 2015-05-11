@@ -30,7 +30,7 @@ app.service('TenantUtility', function(_){
         return data;
     };
 
-    function constructTenantRegistration(components, tenantId, contractId, infos, featureFlags) {
+    function constructTenantRegistration(components, tenantId, contractId, infos, spaceConfig, featureFlags) {
         var result = {};
         result.ConfigDirectories = _.map(components,
             function(component){
@@ -39,6 +39,8 @@ app.service('TenantUtility', function(_){
                 };
                 if (component.hasOwnProperty("Nodes")) {
                     componentConfig.Nodes = cleanupConfigData(component.Nodes);
+                } else {
+                    componentConfig.Nodes = [];
                 }
                 return componentConfig;
             });
@@ -79,6 +81,8 @@ app.service('TenantUtility', function(_){
         } else {
             result.ContractInfo = { properties: {} };
         }
+
+        result.SpaceConfig = spaceConfig;
 
         return result;
     }

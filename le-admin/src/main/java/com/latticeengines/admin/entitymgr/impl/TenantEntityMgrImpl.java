@@ -13,6 +13,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -70,13 +71,13 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     }
 
     @Override
-    public SerializableDocumentDirectory getDefaultSpaceConfig() {
+    public SpaceConfiguration getDefaultSpaceConfig() {
         DocumentDirectory dir = batonService.getDefaultConfiguration("SpaceConfiguration");
         if (dir != null) {
             SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(dir);
             DocumentDirectory metaDir = batonService.getConfigurationSchema("SpaceConfiguration");
             sDir.applyMetadata(metaDir);
-            return sDir;
+            return new SpaceConfiguration(SerializableDocumentDirectory.deserialize(sDir));
         }
         return null;
     }

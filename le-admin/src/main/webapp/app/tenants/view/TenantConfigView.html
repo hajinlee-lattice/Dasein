@@ -41,42 +41,54 @@
                 </div>
             </form>
             <br>
-            <h4>Space Info</h4>
-            <form ng-if="!readonly" class="row form-inline">
-                <div class="col col-md-4 col-sm-4 col-xs-6">
-                    <label class="control-label">
-                        Product
-                    </label>
-                    <select class="form-control"
-                            ng-options="option for option in availableProducts"
-                            ng-model="spaceInfo.properties.product">
-                    </select>
+            <h4>Space Configuration</h4>
+            <form ng-if="!readonly">
+                <div class="row form-inline">
+                    <div class="col col-md-4 col-sm-4 col-xs-6">
+                        <label class="control-label">
+                            Product
+                        </label>
+                        <select class="form-control"
+                                ng-options="option for option in availableProducts"
+                                ng-model="spaceConfig.Product">
+                        </select>
+                    </div>
+                    <div class="col col-md-4 col-sm-4 col-xs-6">
+                        <label class="control-label">
+                            CRM Topology
+                        </label>
+                        <select class="form-control"
+                                ng-options="option for option in availableTopologies"
+                                ng-model="spaceConfig.Topology">
+                        </select>
+                    </div>
                 </div>
-                <div class="col col-md-4 col-sm-4 col-xs-6">
-                    <label class="control-label">
-                        CRM Topology
-                    </label>
-                    <select class="form-control"
-                            ng-options="option for option in availableTopologies"
-                            ng-model="spaceInfo.properties.topology">
-                    </select>
+                <div class="row form-inline">
+                    <div class="col col-md-12 col-sm-12 col-xs-12">
+                        <label class="control-label">
+                            Data Loader URL
+                        </label>
+                        <select class="form-control"
+                                ng-options="option for option in availableDLAddresses"
+                                ng-model="spaceConfig.DL_Address">
+                        </select>
+                    </div>
                 </div>
             </form>
             <form ng-if="readonly" class="row form-inline">
                 <div class="col col-md-4 col-sm-4 col-xs-6">
-                    Product: <strong>{{ spaceInfo.properties.product }}</strong>
+                    Product: <strong>{{ spaceConfig.Product }}</strong>
                 </div>
                 <div class="col col-md-4 col-sm-4 col-xs-6">
-                    Topology: <strong>{{ spaceInfo.properties.topology }}</strong>
+                    Topology: <strong>{{ spaceConfig.Topology }}</strong>
+                </div>
+                <div class="col col-md-12 col-sm-12 col-xs-12">
+                    Data Loader URL: <strong>{{ spaceConfig.DL_Address }}</strong>
                 </div>
             </form>
             <br>
-            <div class="panel panel-default tenant-info-panel">
-                <div class="panel-heading">Feature flags</div>
-                <div class="panel-body">
-                    <feature-flag flag="featureFlags.Dante" name="Dante" readonly="readonly"></feature-flag>
-                </div>
-            </div>
+            <h4>Feature Flags</h4>
+            <feature-flag flag="featureFlags.Dante" name="Dante" readonly="readonly"></feature-flag>
         </div>
     </div>
     <div ng-show="loading">

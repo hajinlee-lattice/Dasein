@@ -50,7 +50,7 @@ describe('TenantUtility tests', function (){
         // use empty infos
         //========================================
         var tenantReg =
-            tenantUtility.constructTenantRegistration([component], "tenantId", "contractId", {}, featureFlags);
+            tenantUtility.constructTenantRegistration([component], "tenantId", "contractId", {}, {},  featureFlags);
 
         expect(tenantReg.hasOwnProperty("CustomerSpaceInfo")).toBe(true);
         expect(tenantReg.hasOwnProperty("TenantInfo")).toBe(true);
@@ -60,6 +60,7 @@ describe('TenantUtility tests', function (){
         expect(configDirs.length).toEqual(1);
 
         var spaceInfo = tenantReg.CustomerSpaceInfo;
+        console.log(spaceInfo);
         var parsedFlags = JSON.parse(spaceInfo.featureFlags);
         expect(parsedFlags.Feature1).toBe(true);
         expect(parsedFlags.Feature2).toBe(false);
@@ -78,7 +79,7 @@ describe('TenantUtility tests', function (){
         };
 
         tenantReg = tenantUtility.constructTenantRegistration(
-            [component], "tenantId", "contractId", {CustomerSpaceInfo: CustomerSpaceInfo}, featureFlags);
+            [component], "tenantId", "contractId", {CustomerSpaceInfo: CustomerSpaceInfo}, {}, featureFlags);
 
         expect(tenantReg.hasOwnProperty("CustomerSpaceInfo")).toBe(true);
         expect(tenantReg.hasOwnProperty("TenantInfo")).toBe(true);

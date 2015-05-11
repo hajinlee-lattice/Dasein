@@ -37,8 +37,12 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     //==================================================
     // system-wise options
     //==================================================
-    $scope.availableProducts = ["LPA"];
-    $scope.availableTopologies = ["MARKETO", "ELOQUA"];
+    $scope.availableProducts = ["Lead Prioritization"];
+    $scope.availableTopologies = ["Marketo", "Eloqua", "SFDC"];
+    $scope.availableDLAddresses = [
+        "http://bodcdevvint207.dev.lattice.local:8081",
+        "https://bodcdevvint187.dev.lattice.local:8080"
+    ];
     $scope.services = [];
 
     $scope.accordion = _.map($scope.services, function(){
@@ -68,6 +72,15 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
             }
         };
 
+        TenantService.GetDefaultSpaceConfiguration().then( function(result) {
+            if (result.success) {
+                $scope.spaceConfig = result.resultObj;
+            } else {
+                console.log("Getting default space configuration error");
+                $state.go("TENANT.LIST");
+            }
+        });
+
         ServiceService.GetRegisteredServices().then( function(result) {
             if (result.success) {
                 $scope.services = result.resultObj;
@@ -86,6 +99,9 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                         }
                     );
                 });
+            } else {
+                console.log("Getting registered service error");
+                $state.go("TENANT.LIST");
             }
         });
 
@@ -95,6 +111,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                 $scope.spaceInfo = result1.resultObj.CustomerSpaceInfo;
                 $scope.contractInfo = result1.resultObj.ContractInfo;
                 $scope.tenantInfo = result1.resultObj.TenantInfo;
+                $scope.spaceConfig = result1.resultObj.SpaceConfiguration;
 
                 try {
                     $scope.featureFlags = JSON.parse($scope.spaceInfo.featureFlags);
@@ -117,6 +134,9 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                                 }
                             );
                         });
+                    } else {
+                        console.log("Getting registered service error");
+                        $state.go("TENANT.LIST");
                     }
                 });
             }
@@ -135,15 +155,18 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     }
 
     $scope.onSaveClick = function(){
-        var infos = {CustomerSpaceInfo: $scope.spaceInfo, TenantInfo: $scope.tenantInfo};
+        var infos = {
+            CustomerSpaceInfo: $scope.spaceInfo,
+            TenantInfo: $scope.tenantInfo
+        };
 
         $scope.tenantRegisration =
             TenantUtility.constructTenantRegistration($scope.components,
-                $scope.tenantId, $scope.contractId, infos, $scope.featureFlags);
+                $scope.tenantId, $scope.contractId, infos, $scope.spaceConfig, $scope.featureFlags);
 
         $modal.open({
             template: '<div class="modal-header">' +
-            '<h3 class="modal-title">Data to be saved.</h3></div>' +
+            '<h3 class="modal-title">About to bootstrap a new tenant.</h3></div>' +
             '<div class="modal-body">' +
             '<p ng-hide="showErrorMsg">Are you sure to start bootstrapping tenant {{ tenantId }}?</p>' +
             '<p class="text-danger" ng-show="showErrorMsg">{{ errorMsg }}</p>' +

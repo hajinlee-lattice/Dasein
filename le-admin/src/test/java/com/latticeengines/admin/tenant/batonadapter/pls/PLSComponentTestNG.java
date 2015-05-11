@@ -16,7 +16,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -128,30 +130,34 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
     @Test(groups = {"deployment", "functional"})
     public void installTestTenants() throws Exception {
-        createTestTenant("Tenant1", "Tenant 1", "MARKETO");
-        createTestTenant("Tenant2", "Tenant 2", "ELOQUA");
+        createTestTenant("Tenant1", "Tenant 1", CRMTopology.MARKETO);
+        createTestTenant("Tenant2", "Tenant 2", CRMTopology.ELOQUA);
         createCommonTenant();
     }
 
-    private void createTestTenant(String tenantId, String tenantName, String topology)
+    private void createTestTenant(String tenantId, String tenantName, CRMTopology topology)
             throws Exception{
         loginAD();
 
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = "PLS Test tenant";
         props.displayName = TestContractId + " " + tenantName;
-        props.topology = topology;
+        props.topology = topology.name();
         props.product = "LPA";
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
 
         ContractInfo contractInfo = new ContractInfo(new ContractProperties());
         TenantInfo tenantInfo = new TenantInfo(
                 new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
+        SpaceConfiguration spaceConfig = new SpaceConfiguration();
+        spaceConfig.setTopology(topology);
+
 
         TenantRegistration reg = new TenantRegistration();
         reg.setSpaceInfo(spaceInfo);
         reg.setTenantInfo(tenantInfo);
         reg.setContractInfo(contractInfo);
+        reg.setSpaceConfig(spaceConfig);
 
         try {
             deleteTenant(contractId, tenantId);
@@ -190,10 +196,13 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         TenantInfo tenantInfo = new TenantInfo(
                 new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
 
+        SpaceConfiguration spaceConfig = tenantService.getDefaultSpaceConfig();
+
         TenantRegistration reg = new TenantRegistration();
         reg.setSpaceInfo(spaceInfo);
         reg.setTenantInfo(tenantInfo);
         reg.setContractInfo(contractInfo);
+        reg.setSpaceConfig(spaceConfig);
 
         try {
             deleteTenant(contractId, tenantId);

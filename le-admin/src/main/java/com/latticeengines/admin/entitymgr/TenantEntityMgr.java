@@ -3,6 +3,7 @@ package com.latticeengines.admin.entitymgr;
 import java.util.Collection;
 
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
@@ -24,5 +25,5 @@ public interface TenantEntityMgr {
     
     SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName);
 
-    SerializableDocumentDirectory getDefaultSpaceConfig();
+    SpaceConfiguration getDefaultSpaceConfig();
 }

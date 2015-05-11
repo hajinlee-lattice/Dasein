@@ -4,8 +4,10 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public interface TenantService {
@@ -26,5 +28,9 @@ public interface TenantService {
     
     SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName);
 
-    SerializableDocumentDirectory getDefaultSpaceConfig();
+    SpaceConfiguration getDefaultSpaceConfig();
+
+    DocumentDirectory getSpaceConfigSchema();
+
+    boolean setupSpaceConfiguration(String contractId, String tenantId, SpaceConfiguration spaceConfig);
 }

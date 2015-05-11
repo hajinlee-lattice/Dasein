@@ -4,13 +4,13 @@ var app = angular.module("app.tenants.service.TenantService", [
     "app.tenants.util.TenantUtility"
 ]);
 
-app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtility){
+app.service('TenantService', function($q, $http, $interval, _, TenantUtility, SessionUtility){
 
     this.CreateTenant = function(tenantId, contractId, tenantRegisration) {
         var defer = $q.defer();
 
         var result = {
-            success: true,
+            success: false,
             resultObj: [],
             errMsg: null
         };
@@ -20,12 +20,11 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
             url: '/admin/tenants/' + tenantId + '?contractId=' + contractId,
             data: tenantRegisration
         }).success(function(data) {
-            if (data !== "true" && data !== true) {
-                result.success = false;
-            }
+            result.success = (data === "true" || data === true);
             defer.resolve(result);
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
+            result.errMsg = err;
         });
 
         return defer.promise;
@@ -169,5 +168,44 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
     }
 
     this.GetTenantServiceStatus = GetTenantServiceStatus;
+
+    this.defaultSpaceConfiguration = null;
+
+    function cacheDefaultSpaceConfiguration(config) {
+        //noinspection JSPotentiallyInvalidUsageOfThis
+        this.defaultSpaceConfiguration = config;
+        $interval(function(){
+            //noinspection JSPotentiallyInvalidUsageOfThis
+            this.defaultSpaceConfiguration = null;
+        }, 60000);
+    }
+
+    this.GetDefaultSpaceConfiguration = function() {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        if (this.defaultSpaceConfiguration === null) {
+            $http({
+                method: 'GET',
+                url: '/admin/tenants/defaultspaceconfig'
+            }).success(function (data) {
+                cacheDefaultSpaceConfiguration(data);
+                result.resultObj = data;
+                defer.resolve(result);
+            }).error(function (err, status) {
+                SessionUtility.handleAJAXError(err, status);
+            });
+        } else {
+            result.resultObj = this.defaultSpaceConfiguration;
+            defer.resolve(result);
+        }
+
+        return defer.promise;
+    };
 });
 

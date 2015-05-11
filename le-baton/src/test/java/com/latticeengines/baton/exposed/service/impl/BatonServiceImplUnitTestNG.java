@@ -69,5 +69,7 @@ public class BatonServiceImplUnitTestNG {
         assertEquals(tenant.getSpace().getTenantId(), "TENANT1");
         assertEquals(tenant.getTenantInfo().properties.description, "Test tenant");
         assertEquals(tenant.getTenantInfo().properties.displayName, "Tenant for testing");
+
+        assertNotNull(tenant.getSpaceConfig());
     }
 }

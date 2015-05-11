@@ -1,10 +1,10 @@
 {
   "RootPath": "/",
   "Nodes": [
-	{ "Node": "DL_Address", "Data": "an address" },
-	{ "Node": "Product", "Data": "LPA", "Metadata": {"Type": "options", "Options": ["LPA"] } },
+	{ "Node": "DL_Address", "Data": "http://bodcdevvint207.dev.lattice.local:8081" },
+	{ "Node": "Product", "Data": "Lead Prioritization", "Metadata": {"Type": "options", "Options": ["Lead Prioritization"] } },
 	{ "Node": "SFDC_OrgId", "Data": "" },
 	{ "Node": "SFDC_OrgId_Sandbox", "Data": "" },
-	{ "Node": "Topology", "Data": "MARKETO", "Metadata": {"Type": "options", "Options": ["MARKETO", "ELOQUA", "SFDC"] } }
+	{ "Node": "Topology", "Data": "Marketo", "Metadata": {"Type": "options", "Options": ["Marketo"] } }
   ]
 }

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -23,11 +24,13 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -59,6 +62,9 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Value("${admin.api.hostport}")
     private String hostPort;
+
+    @Autowired
+    private TenantService tenantService;
 
     protected RestTemplate restTemplate = new RestTemplate();
     protected RestTemplate magicRestTemplate = new RestTemplate();
@@ -147,10 +153,13 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         TenantInfo tenantInfo = new TenantInfo(
                 new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
 
+        SpaceConfiguration spaceConfig = tenantService.getDefaultSpaceConfig();
+
         TenantRegistration reg = new TenantRegistration();
         reg.setSpaceInfo(spaceInfo);
         reg.setTenantInfo(tenantInfo);
         reg.setContractInfo(contractInfo);
+        reg.setSpaceConfig(spaceConfig);
 
         createTenant(contractId, tenantId, refreshContract, reg);
     }
@@ -169,20 +178,6 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         ContractLifecycleManager.create(contractId, new ContractInfo(new ContractProperties()));
 
         Assert.assertTrue(ContractLifecycleManager.exists(contractId));
-
-        CustomerSpaceProperties props = new CustomerSpaceProperties();
-        props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
-        props.displayName = "Tenant for testing";
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
-
-        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
-        TenantInfo tenantInfo = new TenantInfo(
-                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
-
-        TenantRegistration reg = new TenantRegistration();
-        reg.setSpaceInfo(spaceInfo);
-        reg.setTenantInfo(tenantInfo);
-        reg.setContractInfo(contractInfo);
 
         String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
         Boolean created = restTemplate.postForObject(url, tenantRegistration, Boolean.class);

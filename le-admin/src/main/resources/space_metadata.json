@@ -1,7 +1,7 @@
 {
   "RootPath": "/",
   "Nodes": [
-	{ "Node": "Product", "Data": {"Type": "options", "Options": ["LPA"] } },
-	{ "Node": "Topology", "Data": {"Type": "options", "Options": ["MARKETO", "ELOQUA", "SFDC"] } }
+	{ "Node": "Product", "Data": {"Type": "options", "Options": ["Lead Prioritization"] } },
+	{ "Node": "Topology", "Data": {"Type": "options", "Options": ["Marketo"] } }
   ]
 }

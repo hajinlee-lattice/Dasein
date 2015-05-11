@@ -57,8 +57,8 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
             },
             columns: [
                 {field: "TenantId", title: "Tenant ID"},
-                {field: "DisplayName", title: "Customer Name"},
                 {field: "ContractId", title: "Contract ID"},
+                {field: "DisplayName", title: "Tenant Name"},
                 {field: "CreatedDate", title: "Created Date", format: "{0:yyyy-MMM-dd }"},
                 {field: "LastModifiedDate", title: "Last Modified Date", format: "{0:yyyy-MMM-dd }", width: 150},
                 "Product",
@@ -102,8 +102,7 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
             controller: function($scope, $modalInstance, _, tenants, TenantUtility){
                 $scope.tenants = tenants;
 
-                $scope.productOptions = ["LPA 2.0"];
-                $scope.tenantInfo = { product: "LPA 2.0" };
+                $scope.tenantInfo = {};
                 $scope.isValid = true;
 
                 $scope.validateTenantInfo = function(){

@@ -25,6 +25,7 @@ import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -186,6 +187,14 @@ public class BatonServiceImpl implements BatonService {
                 log.error("Could not get the info of the default space for tenant " + tenantId);
             }
 
+            try {
+                DocumentDirectory spaceConfigDir = getSpaceConfiguration(contractId, tenantId);
+                SpaceConfiguration spaceConfig = new SpaceConfiguration(spaceConfigDir);
+                doc.setSpaceConfig(spaceConfig);
+            } catch (Exception e) {
+                log.error("Could not get the space configuration directory for tenant " + tenantId);
+            }
+
             String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
 
             try {
@@ -278,6 +287,13 @@ public class BatonServiceImpl implements BatonService {
         }
     }
 
+    private DocumentDirectory getSpaceConfiguration(String contractId, String tenantId) {
+        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID)
+                .append(new Path("/SpaceConfiguration"));
+        return CamilleEnvironment.getCamille().getDirectory(spaceConfigPath);
+    }
+
     public Collection<TenantDocument> getTenants(String contractId, ContractInfo contractInfo) {
         List<TenantDocument> tenantDocs = new ArrayList<>();
         if (contractId != null) {
@@ -312,7 +328,6 @@ public class BatonServiceImpl implements BatonService {
         return tenantDocs;
     }
 
-
     private List<TenantDocument> constructTenantDocsWithDefaultSpaceId(
             List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries,
             String contractId, ContractInfo contractInfo) {
@@ -320,25 +335,34 @@ public class BatonServiceImpl implements BatonService {
 
         List<TenantDocument> docs = new ArrayList<>();
         for (Map.Entry<String, TenantInfo> tenantEntry :  tenantEntries) {
-            TenantDocument doc = new TenantDocument();
-
             String tenantId = tenantEntry.getKey();
             String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
 
-            CustomerSpace space =  new CustomerSpace(contractId, tenantId, spaceId);
-            CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
             try {
-                spaceInfo = SpaceLifecycleManager.getInfo(contractId, tenantId, spaceId);
+                TenantDocument doc = new TenantDocument();
+
+                DocumentDirectory spaceConfigDir = getSpaceConfiguration(contractId, tenantId);
+                SpaceConfiguration spaceConfig = null;
+                try {
+                    spaceConfig = new SpaceConfiguration(spaceConfigDir);
+                } catch (Exception e) {
+                    // ignore
+                }
+
+                CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
+                CustomerSpaceInfo spaceInfo = SpaceLifecycleManager.getInfo(contractId, tenantId, spaceId);
+
+                doc.setSpace(space);
+                doc.setSpaceConfig(spaceConfig);
+                doc.setTenantInfo(tenantEntry.getValue());
+                doc.setContractInfo(contractInfo);
+                doc.setSpaceInfo(spaceInfo);
+                docs.add(doc);
             } catch (Exception e) {
-                log.error(String.format("Error retrieving space info for contract %s, tenant %s, and space %s.",
+                log.error(String.format(
+                        "Error constructing tenant document for contract %s, tenant %s, and space %s.",
                         contractId, tenantId, spaceId), e);
             }
-
-            doc.setSpace(space);
-            doc.setTenantInfo(tenantEntry.getValue());
-            doc.setContractInfo(contractInfo);
-            doc.setSpaceInfo(spaceInfo);
-            docs.add(doc);
         }
 
         return docs;

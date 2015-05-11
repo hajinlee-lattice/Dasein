@@ -19,11 +19,18 @@ import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -54,16 +61,20 @@ public class TenantServiceImpl implements TenantService {
         String metadataJson = "space_metadata.json";
         String serviceName = "SpaceConfiguration";
         LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
+        modifySpaceConfigSchema();
     }
 
     @Override
     public boolean createTenant(final String contractId, final String tenantId, TenantRegistration tenantRegistration) {
-        ContractInfo contractInfo = tenantRegistration.getContractInfo();
-        TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
+        final ContractInfo contractInfo = tenantRegistration.getContractInfo();
+        final TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
+        final SpaceConfiguration spaceConfig = tenantRegistration.getSpaceConfig();
 
         boolean tenantCreationSuccess =
                 tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo, spaceInfo);
+
+        tenantCreationSuccess = tenantCreationSuccess && setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
         if (!tenantCreationSuccess) {
             tenantEntityMgr.deleteTenant(contractId, tenantId);
@@ -149,9 +160,25 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public SerializableDocumentDirectory getDefaultSpaceConfig() {
-        return tenantEntityMgr.getDefaultSpaceConfig();
+    public SpaceConfiguration getDefaultSpaceConfig() { return tenantEntityMgr.getDefaultSpaceConfig(); }
+
+    @Override
+    public DocumentDirectory getSpaceConfigSchema() {
+        return batonService.getConfigurationSchema("SpaceConfiguration");
     }
+
+    @Override
+    public boolean setupSpaceConfiguration(String contractId, String tenantId, SpaceConfiguration spaceConfig) {
+        return setupSpaceConfiguration(contractId, tenantId, spaceConfig.toDocumentDirectory());
+    }
+
+    private boolean setupSpaceConfiguration(String contractId, String tenantId, DocumentDirectory spaceConfig) {
+        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID)
+                .append(new Path("/SpaceConfiguration"));
+        return batonService.loadDirectory(spaceConfig, spaceConfigPath);
+    }
+
 
     private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {
         if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR))
@@ -162,5 +189,16 @@ public class TenantServiceImpl implements TenantService {
             return BootstrapState.createInitialState();
 
         return BootstrapState.constructOKState(state2.installedVersion);
+    }
+
+    private void modifySpaceConfigSchema() {
+        // modify options for topology
+        DocumentDirectory metadir = getSpaceConfigSchema();
+        DocumentDirectory.Node topologyNode = metadir.getChild("Topology");
+        Document document = topologyNode.getDocument();
+        document.setData(JsonUtils.serialize(CRMTopology.values()));
+        topologyNode.setDocument(document);
+        Path schemaPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(), "SpaceConfiguration");
+        batonService.loadDirectory(metadir, schemaPath);
     }
 }
