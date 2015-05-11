@@ -12,7 +12,7 @@ public class JiraServiceTestNG {
     @Autowired
     JiraServiceImpl JiraService;
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTriggerOneDetail() {
         boolean flag = true;
         try {
@@ -24,7 +24,7 @@ public class JiraServiceTestNG {
         JiraTestUtils.confirmJiraIncident(flag);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTriggerNoDetail() {
         boolean flag = true;
         try {
@@ -35,7 +35,7 @@ public class JiraServiceTestNG {
         JiraTestUtils.confirmJiraIncident(flag);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTriggerMultipleDetail() {
         boolean flag = true;
         try {
