@@ -2,7 +2,11 @@
     "RootPath": "/",
     "Nodes": 
     [
-      { "Node": "DLUrl", "Data": {"Type": "options", "Options": ["http://bodcdevvint207.dev.lattice.local:8081", "https://bodcdevvint187.dev.lattice.local:8080"]}}
-      
+      { "Node": "DLUrl", "Data": {"Type": "options", "Options": ["http://bodcdevvint207.dev.lattice.local:8081", "https://bodcdevvint187.dev.lattice.local:8080"]}},
+      { "Node": "VisiDB", 
+        "Children" : [
+            { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207.dev.lattice.local", "bodcdevvint187.dev.lattice.local"]}}
+         ]
+      }
     ]
 }
