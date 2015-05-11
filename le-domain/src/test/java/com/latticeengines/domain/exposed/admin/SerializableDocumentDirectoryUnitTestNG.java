@@ -129,6 +129,29 @@ public class SerializableDocumentDirectoryUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testPasswordType() throws JsonProcessingException {
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/"));
+        configDir.add("/prop", "password");
+        SerializableDocumentDirectory serializedConfigDir = new SerializableDocumentDirectory(configDir);
+
+        DocumentDirectory metaDir = new DocumentDirectory(new Path("/"));
+        metaDir.add("/prop", "{\"Type\":\"password\"}");
+
+        serializedConfigDir.applyMetadata(metaDir);
+        boolean seenTheNode = false;
+        for (SerializableDocumentDirectory.Node node: serializedConfigDir.getNodes()) {
+            if (node.getNode().equals("prop")) {
+                seenTheNode = true;
+                Assert.assertEquals(node.getData(), "password");
+                SerializableDocumentDirectory.Metadata metadata = node.getMetadata();
+                Assert.assertNotNull(metadata);
+                Assert.assertEquals(metadata.getType(), "password");
+            }
+        }
+        Assert.assertTrue(seenTheNode);
+    }
+
+    @Test(groups = "unit")
     public void testDeserialize() throws JsonProcessingException {
         DocumentDirectory configDir = new DocumentDirectory(new Path("/"));
         configDir.add("/prop", "/var/logs");

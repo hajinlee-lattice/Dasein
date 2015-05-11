@@ -12,7 +12,8 @@
     },
     {
       "Node": "DL_Password",
-      "Data": "adm1nDLpr0d"
+      "Data": "adm1nDLpr0d",
+      "Metadata": {"Type":"password"}
     },
     {
       "Node": "DL_URL",

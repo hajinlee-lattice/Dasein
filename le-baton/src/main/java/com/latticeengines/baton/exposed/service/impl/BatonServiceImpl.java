@@ -52,6 +52,11 @@ public class BatonServiceImpl implements BatonService {
     public boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
                                 ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo spaceInfo) {
         try {
+            Camille camille = CamilleEnvironment.getCamille();
+            Path contractsPath = PathBuilder.buildContractsPath(CamilleEnvironment.getPodId());
+            if (!camille.exists(contractsPath)) {
+                camille.create(contractsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
             if (!ContractLifecycleManager.exists(contractId)) {
                 log.info(String.format("Creating contract %s", contractId));
                 // XXX For now

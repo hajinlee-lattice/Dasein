@@ -1,49 +1,15 @@
 var app = angular.module("app.tenants.directive.CamilleConfigDirective", [
     'app.tenants.service.TenantService',
     "app.tenants.util.TenantUtility",
+    "app.tenants.util.CamilleConfigUtility",
     "app.core.util.RecursionCompiler",
     "app.core.directive.FileDownloaderDirective",
+    "app.tenants.directive.ObjectEntryDirective",
     "app.tenants.directive.ListEntryDirective",
     'ui.bootstrap',
     'ui.router',
     'ngSanitize'
 ]);
-
-app.service('CamilleConfigUtility', function(){
-    this.getDataType = function(config) {
-        var data = config.Data;
-        if (config.hasOwnProperty("Metadata")) {
-            return config.Metadata.Type;
-        } else if (typeof data === "number") {
-            return "number";
-        } else if (typeof data === "boolean") {
-            return "boolean";
-        } else if (typeof data === "object") {
-            return "object";
-        } else if (Object.prototype.toString.call( data ) === '[object Array]') {
-            return "array";
-        } else {
-            return "string";
-        }
-    };
-    this.isInput = function(type) {
-        switch (type) {
-            case "boolean":
-            case "options":
-            case "object":
-            case "array":
-                return false;
-            default:
-                return true;
-        }
-    };
-    this.isBoolean = function(type) { return type === "boolean"; };
-    this.isSelect = function(type) { return type === "options"; };
-    this.isObject = function(type) { return type === "object"; };
-    this.isList = function(type) { return type === "array"; };
-    this.isPath = function(type) { return type === "path"; };
-
-});
 
 app.directive('componentsConfig', function(){
     return {
@@ -82,45 +48,6 @@ app.directive('camilleConfig', function(RecursionCompiler, TenantUtility){
     };
 });
 
-app.directive('objectEntry', function(){
-    return {
-        restrict: 'AE',
-        templateUrl: 'app/tenants/view/ObjectEntryView.html',
-        scope: {key: '=', value : '=', json: '=', isValid: '=', updater: '&'},
-        controller: function($scope, CamilleConfigUtility){
-            $scope.isObject = false;
-            $scope.type = CamilleConfigUtility.getDataType($scope.value);
-            $scope.isInput = CamilleConfigUtility.isInput($scope.type);
-            if ($scope.isInput) {
-                if ($scope.type === "number") {
-                    $scope.inputType = "number";
-                } else {
-                    $scope.inputType = "text";
-                }
-            }
-            $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
-
-            $scope.validateInput = function() {
-                if ($scope.configform.$dirty && $scope.configform.$invalid) {
-                    $scope.showError = true;
-                    $scope.isValid.valid = false;
-                    if ($scope.configform.$error.required) {
-                        $scope.errorMsg = "cannot be empty.";
-                    }
-                    if ($scope.configform.$error.number) {
-                        $scope.errorMsg = "must be a number.";
-                    }
-                } else {
-                    $scope.showError = false;
-                    $scope.isValid.valid = true;
-                    $scope.errorMsg = "no error";
-                    $scope.updater();
-                }
-            };
-        }
-    };
-});
-
 app.directive('configEntry', function(){
     return {
         restrict: 'AE',
@@ -135,12 +62,20 @@ app.directive('configEntry', function(){
 
             $scope.isInput = CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
             if ($scope.isInput) {
-                if ($scope.type === "number") {
+                if (CamilleConfigUtility.isNumber($scope.type)) {
                     $scope.inputType = "number";
                     $scope.config.Data = parseFloat($scope.config.Data);
+                } else if (CamilleConfigUtility.isPassword($scope.type)) {
+                    $scope.inputType = "password";
                 } else {
                     $scope.inputType = "text";
                 }
+            }
+            if ($scope.config.Node === "DL_Password") {
+                console.log("DL_Password");
+                console.log($scope.type);
+                console.log($scope.isInput);
+                console.log($scope.inputType);
             }
 
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);

@@ -402,6 +402,7 @@ public class SerializableDocumentDirectory {
                 case "path":
                     return isPath(data);
                 case "string":
+                case "password":
                     return true;
                 default:
                     return false;

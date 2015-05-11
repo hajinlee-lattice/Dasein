@@ -2,6 +2,6 @@
 	"RootPath": "/",
 	"Nodes": 
 	[
-		
+	  { "Node": "DL_Password", "Data": {"Type": "password"} }
 	]
 }
