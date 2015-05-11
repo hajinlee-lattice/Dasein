@@ -370,13 +370,13 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         // connectionString);
         propDataJobService.eval("SELECT TOP 0 ID AS ID1, * INTO " + tableName + " FROM " + targetRawTable
                 + ";ALTER TABLE " + tableName + " DROP COLUMN ID1", assignedQueue, getJobName()
-                + "-uploadRawDataCreateTable", 1, connectionString);
+                + "-uploadRawDataCreateTable", connectionString);
         log.info("Uploading today's data, targetTable=" + tableName + " connectionUrl=" + connectionString);
         
         propDataJobService.exportData(tableName, todayIncrementalPath, creds, assignedQueue, getJobName()
                 + "-uploadRawDataExportData", numMappers);
         propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
-                + "-uploadRawDataMergeTable", 1, connectionString);
+                + "-uploadRawDataMergeTable", connectionString);
         log.info("Finished uploading today's raw data=" + todayIncrementalPath);
 
     }
@@ -385,7 +385,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         String tableName = getTableName(date);
 
-        propDataJobService.eval("DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable", 1,
+        propDataJobService.eval("DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
                 getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
     }
 
@@ -397,7 +397,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     void swapTargetTables(String assignedQueue) {
         List<String> sqls = buildSqls(targetTable);
-        propDataJobService.eval(StringUtils.join(sqls, ";"), assignedQueue, getJobName() + "-swapTables", 1,
+        propDataJobService.eval(StringUtils.join(sqls, ";"), assignedQueue, getJobName() + "-swapTables",
                 getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
     }
 
