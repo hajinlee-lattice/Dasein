@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +24,6 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
-import com.latticeengines.dataplatform.service.impl.AlertServiceImpl;
-import com.latticeengines.dataplatform.service.impl.PagerDutyTestUtils;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -32,6 +32,8 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
+import com.latticeengines.monitor.alerts.service.impl.BaseAlertServiceImpl;
+import com.latticeengines.monitor.alerts.service.impl.PagerDutyTestUtils;
 
 public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -68,8 +70,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     @Autowired
     private DebugProcessorImpl debugProcessorImpl;
 
-    @Autowired
-    private AlertServiceImpl alertService;
+    @Resource(name="modelingAlertService")
+    private BaseAlertServiceImpl alertService;
 
     @Value("${dataplatform.yarn.resourcemanager.webapp.address}")
     private String resourceManagerWebAppAddress;

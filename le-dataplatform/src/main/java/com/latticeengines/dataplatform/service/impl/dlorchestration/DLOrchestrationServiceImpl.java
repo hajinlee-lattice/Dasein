@@ -21,7 +21,6 @@ import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.AlertService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.DLOrchestrationService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
@@ -29,6 +28,7 @@ import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcesso
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
+import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 @DisallowConcurrentExecution
 @Component("dlOrchestrationJob")
