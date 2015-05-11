@@ -62,7 +62,7 @@
         },
         {
           "Node": "PermanentStorePath",
-          "Data": ""
+          "Data": "some path"
         },
         {
           "Node": "ServerName",

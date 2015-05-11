@@ -13,7 +13,7 @@
         { "Node": "CaseSensitive", "Data": false},
         { "Node": "DiskspaceLimit", "Data": 0},
         { "Node": "PermanentStoreOption", "Data": "Master"},
-        { "Node": "PermanentStorePath", "Data": ""}
+        { "Node": "PermanentStorePath", "Data": "some path"}
       ]
     },
     { "Node": "DL", 
