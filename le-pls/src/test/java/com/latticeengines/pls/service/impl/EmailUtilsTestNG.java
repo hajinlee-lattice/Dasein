@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -13,6 +14,12 @@ public class EmailUtilsTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private EmailUtils emailUtils;
+
+    @Value("${pls.test.internalemail}")
+    private boolean testInternalEmail;
+
+    @Value("${pls.test.externalemail}")
+    private boolean testExternalEmail;
 
     @Test(groups = {"functional", "deployment"})
     public void testSendEmails() throws Exception {
@@ -27,11 +34,15 @@ public class EmailUtilsTestNG extends PlsFunctionalTestNGBase {
         user.setLastName("Song");
         String password = "temp_password";
 
-        Assert.assertTrue(emailUtils.sendNewInternalUserEmail(tenant, user, password));
-        Assert.assertTrue(emailUtils.sendExistingInternalUserEmail(tenant, user));
+        if (testInternalEmail) {
+            Assert.assertTrue(emailUtils.sendNewInternalUserEmail(tenant, user, password));
+            Assert.assertTrue(emailUtils.sendExistingInternalUserEmail(tenant, user));
+        }
 
         user.setEmail("yintaosong@gmail.com");
         user.setUsername(user.getEmail());
-        Assert.assertTrue(emailUtils.sendNewExternalUserEmail(user, password));
+        if (testExternalEmail) {
+            Assert.assertTrue(emailUtils.sendNewExternalUserEmail(user, password));
+        }
     }
 }
