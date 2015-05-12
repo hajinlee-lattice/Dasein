@@ -199,10 +199,28 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         TopPredictorService.ClearCategoryClasses($scope.internalCategories);
     }
     
+    function highlightSelectedCategory (category) {
+        clearSelectedCategory();
+        
+        for (var i = 0; i < $scope.externalCategories.length; i++) {
+            if ($scope.externalCategories[i].name === category.name) {
+                $scope.externalCategories[i].activeClass = "active";
+                break;
+            }
+        }
+        
+        for (var x = 0; x < $scope.internalCategories.length; x++) {
+            if ($scope.internalCategories[x].name === category.name) {
+                $scope.internalCategories[x].activeClass = "active";
+                break;
+            }
+        }
+    }
+    
     $scope.categoryClicked = function (category) {
         clearTimeout(showAttributeTimeout);
         var categoryList = TopPredictorService.GetAttributesByCategory(data, category.name, category.color, 50);
-        clearSelectedCategory();
+        highlightSelectedCategory(category);
         category.activeClass = "active";
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
