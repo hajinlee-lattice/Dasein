@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
@@ -23,6 +25,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     public TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public void registerTenant(Tenant tenant) {
@@ -61,6 +66,9 @@ public class TenantServiceImpl implements TenantService {
             }
         }
         try {
+            for (User user : userService.getUsers(tenant.getId())){
+                userService.deleteUser(tenant.getId(), user.getUsername());
+            }
             globalTenantManagementService.discardTenant(tenant);
         } catch (LedpException e) {
             log.warn("Error discarding tenant with GA.", e);
