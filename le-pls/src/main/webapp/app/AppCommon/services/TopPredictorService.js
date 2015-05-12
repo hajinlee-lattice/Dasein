@@ -378,17 +378,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
         }
         
-        totalAttributes.Predictors = totalAttributes.sort(this.SortByPredictivePower);
         this.CalculateAttributeSize(totalAttributes, numLargeCategories, numMediumCategories);
-        
-        // Within each category, sort by size
-        for (var i = 0; i < topCategories.length; i++) {
-            category = topCategories[i];
-            category.children = category.children.sort(this.SortBySize);
-            for (var z = 0; z < category.children.length; z++) {
-                category.size += category.children[z].size;
-            }
-        }
         
         // Then sort the categories by the total size of their top attributes
         topCategories = topCategories.sort(this.SortBySize);
