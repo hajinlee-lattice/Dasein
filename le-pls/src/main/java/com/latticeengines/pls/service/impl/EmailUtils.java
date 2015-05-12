@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
