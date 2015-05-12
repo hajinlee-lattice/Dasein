@@ -66,7 +66,7 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         bootstrap(confDir);
 
         // wait a while, then test your installation
-        int numOfRetries = 10;
+        int numOfRetries = 30;
         BootstrapState state;
         do {
             state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "PLS");
@@ -142,8 +142,6 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = "PLS Test tenant";
         props.displayName = TestContractId + " " + tenantName;
-        props.topology = topology.name();
-        props.product = "LPA";
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
 
         ContractInfo contractInfo = new ContractInfo(new ContractProperties());
@@ -151,7 +149,6 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
                 new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
         SpaceConfiguration spaceConfig = new SpaceConfiguration();
         spaceConfig.setTopology(topology);
-
 
         TenantRegistration reg = new TenantRegistration();
         reg.setSpaceInfo(spaceInfo);
@@ -188,8 +185,6 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = "PLS Test tenant";
         props.displayName = "Lattice Internal Test Tenant";
-        props.topology = "MARKETO";
-        props.product = "LPA";
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
 
         ContractInfo contractInfo = new ContractInfo(new ContractProperties());

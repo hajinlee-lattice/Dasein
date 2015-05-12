@@ -26,8 +26,10 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     public String getTopology(String tenantId) {
         try {
             Camille camille = CamilleEnvironment.getCamille();
-            Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId",
-                    "spaceId").append(new Path("/SpaceConfiguration/Topology"));
+            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+            Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                    customerSpace.getContractId(), customerSpace.getTenantId(),
+                    customerSpace.getSpaceId()).append(new Path("/SpaceConfiguration/Topology"));
             return camille.get(path).getData();
         } catch (Exception ex) {
             log.error("Can not get tenant's topology", ex);
