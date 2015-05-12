@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
@@ -24,7 +25,7 @@ public class EmailUtils {
     @Value("${pls.api.hostport}")
     private String hostport;
 
-    public void sendNewInternalUserEmail(Tenant tenant, User user, String password) {
+    public boolean sendNewInternalUserEmail(Tenant tenant, User user, String password) {
         try {
             String htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream("com/latticeengines/pls/service/new_user.html"));
@@ -44,12 +45,14 @@ public class EmailUtils {
             emailService.sendSimpleEmail("Welcome to Lead Prioritization",
                     htmlTemplate, "text/html; charset=utf-8",
                     Collections.singleton(user.getEmail()));
-        } catch (Exception e) {
-            log.error("Failed to send new internal user email to " + user.getEmail() + e.getMessage());
+            return true;
+        } catch (IOException e) {
+            log.error("Failed to send new internal user email to " + user.getEmail() + " " + e.getMessage());
+            return false;
         }
     }
 
-    public void sendNewExternalUserEmail(User user, String password) {
+    public boolean sendNewExternalUserEmail(User user, String password) {
         try {
             String htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream("com/latticeengines/pls/service/new_user.html"));
@@ -67,12 +70,14 @@ public class EmailUtils {
             emailService.sendSimpleEmail("Welcome to Lattice Lead Prioritization",
                     htmlTemplate, "text/html; charset=utf-8",
                     Collections.singleton(user.getEmail()));
-        } catch (Exception e) {
-            log.error("Failed to send new external user email to " + user.getEmail() + e.getMessage());
+            return true;
+        } catch (IOException e) {
+            log.error("Failed to send new external user email to " + user.getEmail() + " " + e.getMessage());
+            return false;
         }
     }
 
-    public void sendExistingInternalUserEmail(Tenant tenant, User user) {
+    public boolean sendExistingInternalUserEmail(Tenant tenant, User user) {
         try {
             String htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream("com/latticeengines/pls/service/old_user.html"));
@@ -84,9 +89,10 @@ public class EmailUtils {
             emailService.sendSimpleEmail("Welcome to Lattice Lead Prioritization",
                     htmlTemplate, "text/html; charset=utf-8",
                     Collections.singleton(user.getEmail()));
-
-        } catch (Exception e) {
-            log.error("Failed to send existing external user email to " + user.getEmail() + e.getMessage());
+            return true;
+        } catch (IOException e) {
+            log.error("Failed to send existing external user email to " + user.getEmail() + " " + e.getMessage());
+            return false;
         }
     }
 
