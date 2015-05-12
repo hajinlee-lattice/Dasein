@@ -9,7 +9,6 @@ import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
@@ -81,7 +80,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private Message applySettings(final EmailSettings emailSettings) throws AddressException, MessagingException {
+    private Message applySettings(final EmailSettings emailSettings) throws MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.starttls.enable", emailSettings.isUseSTARTTLS());
         props.put("mail.smtp.host", emailSettings.getServer());
