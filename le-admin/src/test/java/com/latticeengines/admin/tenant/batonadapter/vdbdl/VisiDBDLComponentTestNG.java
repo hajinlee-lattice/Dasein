@@ -39,8 +39,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
     private String tenant;
 
-    private String tenantAlias;
-
     private String createNewVisiDB;
 
     private String visiDBName;
@@ -49,10 +47,10 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     @Override
     public void setup() throws Exception {
         super.setup();
-        tenantAlias = tenantId;
         createNewVisiDB = "true";
         visiDBName = "TestVisiDB";
         tenant = tenantService.getTenant(contractId, tenantId).getTenantInfo().properties.displayName;
+        tenantService.getTenant(contractId, tenantId).getSpaceConfig().setDlAddress(dlUrl);
     }
 
     @Test(groups = "deployment")
@@ -65,11 +63,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         confDir.makePathsLocal();
 
         // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/TenantAlias"));
-        node.getDocument().setData(tenantAlias);
-        node = confDir.get(new Path("/DLUrl"));
-        node.getDocument().setData(dlUrl);
-        node = confDir.get(new Path("/VisiDB"));
+        DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
         node.getChild("CreateNewVisiDB").getDocument().setData(createNewVisiDB);
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("VisiDBName").getDocument().setData(visiDBName);
@@ -105,11 +99,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         confDir.makePathsLocal();
 
         // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/TenantAlias"));
-        node.getDocument().setData(tenantAlias);
-        node = confDir.get(new Path("/DLUrl"));
-        node.getDocument().setData(dlUrl);
-        node = confDir.get(new Path("/VisiDB"));
+        DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
         node.getChild("CreateNewVisiDB").getDocument().setData(createNewVisiDB);
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("VisiDBName").getDocument().setData(visiDBName);
@@ -136,7 +126,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         for (SerializableDocumentDirectory.Node sNode : sDir.getNodes()) {
             if (sNode.getNode().equals("TenantAlias")) {
-                Assert.assertEquals(sNode.getData(), tenantAlias);
+                Assert.assertEquals(sNode.getData(), "");
             }
         }
 

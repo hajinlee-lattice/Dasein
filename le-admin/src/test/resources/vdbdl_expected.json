@@ -11,19 +11,8 @@
       ]
     },
     {
-      "Node": "DLUrl",
-      "Data": "http://bodcdevvint207.dev.lattice.local:8081",
-      "Metadata": {
-        "Type": "options",
-        "Options": [
-          "http://bodcdevvint207.dev.lattice.local:8081",
-          "https://bodcdevvint187.dev.lattice.local:8080"
-        ]
-      }
-    },
-    {
       "Node": "TenantAlias",
-      "Data": "ht"
+      "Data": ""
     },
     {
       "Node": "VisiDB",

@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -49,9 +50,11 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
     public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
         String dmDeployment = space.getTenantId();
         String contractExternalID = space.getContractId();
-        String tenant = tenantService.getTenant(contractExternalID, dmDeployment).getTenantInfo().properties.displayName;
 
-        dlUrl = getData(configDir, "DLUrl");
+        TenantDocument tenantDoc = tenantService.getTenant(contractExternalID, dmDeployment);
+        String tenant = tenantDoc.getTenantInfo().properties.displayName;
+        dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
+
         String tenantAlias = getData(configDir, "TenantAlias");
         String createNewVisiDB = getChild(configDir, "VisiDB", "CreateNewVisiDB").getDocument().getData();
         String caseSensitive = getChild(configDir, "VisiDB", "CaseSensitive").getDocument().getData();

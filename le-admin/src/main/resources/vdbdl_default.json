@@ -1,8 +1,7 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "DLUrl", "Data": "http://bodcdevvint207.dev.lattice.local:8081" },
-    { "Node": "TenantAlias", "Data": "ht" },
+    { "Node": "TenantAlias", "Data": "" },
     { "Node": "VisiDB", 
       "Children" : [
         { "Node": "CreateNewVisiDB", "Data": true },
