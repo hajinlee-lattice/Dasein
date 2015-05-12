@@ -10,18 +10,20 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 
 import com.google.gson.Gson;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 
@@ -203,8 +205,8 @@ public class ScoringMapperPredictUtil {
 				JSONObject range = (JSONObject) calibrationRanges.get(i);
 				Double lowerBoundObj = (Double) range.get(CALIBRATION_MINIMUMSCORE);
 				Double upperBoundObj = (Double) range.get(CALIBRATION_MAXIMUMSCORE);
-				float lowerBound = lowerBoundObj != null? (lowerBoundObj).floatValue() : Float.MIN_VALUE;
-				float upperBound = upperBoundObj != null? (upperBoundObj).floatValue() : Float.MAX_VALUE;
+				Float lowerBound = lowerBoundObj != null? (lowerBoundObj).floatValue() : null;
+				Float upperBound = upperBoundObj != null? (upperBoundObj).floatValue() : null;
 				if (betweenBounds(score, lowerBound, upperBound)) {
 					Double probabilityObj = (Double) range.get(CALIBRATION_PROBABILITY);
 					probability = probabilityObj != null ? (float) probabilityObj.floatValue() : null;
@@ -234,8 +236,8 @@ public class ScoringMapperPredictUtil {
 				}
 				Double lowerBoundObj = (Double) range.get(BUCKETS_MINIMUMSCORE);
 				Double upperBoundObj = (Double) range.get(BUCKETS_MAXIMUMSCORE);
-				float lowerBound = lowerBoundObj != null? (lowerBoundObj).floatValue() : Float.MIN_VALUE;
-				float upperBound = upperBoundObj != null? (upperBoundObj).floatValue() : Float.MAX_VALUE;
+				Float lowerBound = lowerBoundObj != null? (lowerBoundObj).floatValue() : null;
+				Float upperBound = upperBoundObj != null? (upperBoundObj).floatValue() : null;
 				if (value != null && betweenBounds(value, lowerBound, upperBound)) {
 					bucket = (String) range.get(BUCKETS_NAME);
 					break;
@@ -257,8 +259,8 @@ public class ScoringMapperPredictUtil {
 				JSONObject range = (JSONObject) percentileRanges.get(i);
 				Double lowerBoundObj = (Double) range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
 				Double upperBoundObj = (Double) range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
-				float min = lowerBoundObj != null ? lowerBoundObj.floatValue() : Float.MIN_VALUE;
-				float max = upperBoundObj != null ? upperBoundObj.floatValue() : Float.MAX_VALUE;
+				Float min = lowerBoundObj != null ? lowerBoundObj.floatValue() : null;
+				Float max = upperBoundObj != null ? upperBoundObj.floatValue() : null;
 				Integer percent = ((Long) range.get(PERCENTILE_BUCKETS_PERCENTILE)).intValue();
 				if (max > topPercentileMaxScore) {
 					topPercentileMaxScore = max;
@@ -281,8 +283,8 @@ public class ScoringMapperPredictUtil {
 					JSONObject range = (JSONObject) percentileRanges.get(i);
 					Double lowerBoundObj = (Double) range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
 					Double upperBoundObj = (Double) range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
-					float min = lowerBoundObj != null ? lowerBoundObj.floatValue() : Float.MIN_VALUE;
-					float max = upperBoundObj != null ? upperBoundObj.floatValue() : Float.MAX_VALUE;
+					Float min = lowerBoundObj != null ? lowerBoundObj.floatValue() : Float.MIN_VALUE;
+					Float max = upperBoundObj != null ? upperBoundObj.floatValue() : null;
 					Integer percent = ((Long) range.get(PERCENTILE_BUCKETS_PERCENTILE)).intValue();
 					if (betweenBounds(score, min, max)) {
 						percentile = percent;
@@ -312,7 +314,7 @@ public class ScoringMapperPredictUtil {
     
 	public static void main(String[] args) throws Exception {
 		
-		/*
+		
 		String local = "/Users/ygao/Downloads/text.avro";
 
 		String hdfs = "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/test" + "/test.avro";
@@ -320,9 +322,9 @@ public class ScoringMapperPredictUtil {
 		for (GenericRecord ele : list) {
 			System.out.println(ele.toString());
 		}
-		*/
 		
 		
+		/*
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
         
         Path p = new Path(absolutePath + "87ecf8cd-fe45-45f7-89d1-612235631fc1");
@@ -334,6 +336,7 @@ public class ScoringMapperPredictUtil {
         	JSONObject model = models.get(key);
         	getResult("87ecf8cd-fe45-45f7-89d1-612235631fc1", model, 0.0042960797f);
         }
+        */
 	}
 	
 }
