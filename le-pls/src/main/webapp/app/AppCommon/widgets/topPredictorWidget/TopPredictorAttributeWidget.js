@@ -10,9 +10,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         $scope.attributeName = data.name;
         $scope.attributeFullDescription = data.description;
         $scope.attributeDescription = data.description;
+        /* no longer needed, truncation happens further down.
         if ($scope.attributeDescription != null && $scope.attributeDescription.length > 110) {
-            $scope.attributeDescription = $scope.attributeDescription.substring(0, 110) + "...";
+            $scope.attributeDescription = $scope.attributeDescription.substring(0, 110) + "&hellip;";
         }
+        */
         $scope.attributeColor = data.color;
 
         var chartData = data.elementList;
@@ -64,6 +66,25 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             }
 
             hoverElem.show();
+
+            /* 
+                this code truncates the description.  It's a bit hacky,
+                but there is no real good way of doing it.  The opacity
+                changes are there to hide the box until the next frame to
+                avoid HTML reflow when description gets adjusted.
+            */
+            hoverElem[0].style.opacity = 0;
+
+            setTimeout(function() {
+                var p = $('.attribute-hover-header p')[0],
+                    pH = p.offsetHeight;
+
+                if (pH > 28) { // determine > 2 lines, line-height 14.
+                    $(p).addClass('truncate_2lines');
+                }
+
+                hoverElem[0].style.opacity = 1;
+            },0);
         }
         setHoverPosition($scope.mouseX, chartHeight);
 

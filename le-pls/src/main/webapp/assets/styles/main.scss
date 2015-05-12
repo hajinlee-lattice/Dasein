@@ -76,10 +76,28 @@ a#back-to-summary-link:hover {
 .attribute-hover p {
     font-size: 12px;
     line-height: 14px;
+    overflow: hidden;
+}
+
+.attribute-hover p.truncate_2lines {
+    height: 2.4em;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.attribute-hover p.truncate_2lines:after {
+    content: '...';
+    position: absolute;
+    display: block;
+    bottom: 0em;
+    right: .5em;
+    width: 1.5em;
+    text-align: left;
+    background: #fff;
 }
 
 .attribute-hover h4 {
-    height: 15px;
+    height: 1.2em;
     padding-left: 6px;
     margin: 0;
     display: inline-block;
