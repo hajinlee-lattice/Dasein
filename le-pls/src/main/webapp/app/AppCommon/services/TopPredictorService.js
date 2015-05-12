@@ -422,7 +422,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var toReturn = {
             name: predictor.DisplayName,
             color: attributeColor,
-            description: predictor.Description,
+            description: predictor.Description || "",
             elementList: []
         };
         
