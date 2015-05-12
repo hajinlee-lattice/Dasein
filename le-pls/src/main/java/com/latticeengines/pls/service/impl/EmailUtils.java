@@ -45,7 +45,7 @@ public class EmailUtils {
                     htmlTemplate, "text/html; charset=utf-8",
                     Collections.singleton(user.getEmail()));
         } catch (Exception e) {
-            log.error("Failed to send new internal user email: " + e.getMessage());
+            log.error("Failed to send new internal user email to " + user.getEmail() + e.getMessage());
         }
     }
 
@@ -68,7 +68,7 @@ public class EmailUtils {
                     htmlTemplate, "text/html; charset=utf-8",
                     Collections.singleton(user.getEmail()));
         } catch (Exception e) {
-            log.error("Failed to send new external user email: " + e.getMessage());
+            log.error("Failed to send new external user email to " + user.getEmail() + e.getMessage());
         }
     }
 
@@ -86,7 +86,7 @@ public class EmailUtils {
                     Collections.singleton(user.getEmail()));
 
         } catch (Exception e) {
-            log.error("Failed to send existing external user email: " + e.getMessage());
+            log.error("Failed to send existing external user email to " + user.getEmail() + e.getMessage());
         }
     }
 

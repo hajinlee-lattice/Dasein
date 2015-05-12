@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -79,9 +78,6 @@ public class EmailServiceImpl implements EmailService {
     private void applySettings(Email email, EmailSettings emailSettings) throws EmailException {
         email.setHostName(emailSettings.getServer());
         email.setSmtpPort(emailSettings.getPort());
-        if (emailSettings.getPort() != 25) {
-            email.setAuthenticator(new DefaultAuthenticator(emailSettings.getUsername(), emailSettings.getPassword()));
-        }
         email.setSSLOnConnect(emailSettings.isUseSSL());
         email.setStartTLSEnabled(emailSettings.isUseSTARTTLS());
         email.setFrom(emailSettings.getFrom());
