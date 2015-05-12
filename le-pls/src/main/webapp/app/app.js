@@ -15,14 +15,23 @@ var mainApp = angular.module('mainApp', [
 
 .controller('MainController', function ($scope, $http, $rootScope, $compile, BrowserStorageUtility, ResourceUtility,
     EvergageUtility, ResourceStringsService, HelpService, LoginService, SessionService, ConfigService) {
+    $scope.showFooter = true;
+    
+    // Handle when the copyright footer should be shown
+    $scope.$on("ShowFooterEvent", function (event, data) {
+        $scope.showFooter = data;
+        if ($scope.showFooter === true) {
+            $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
+            $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
+        }
+    });
     
     ResourceStringsService.GetResourceStrings().then(function(result) {
-        
         var previousSession = BrowserStorageUtility.getClientSession();
         if (previousSession != null) {
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
-            
+            $scope.showFooter = false;
             // Create the Login View
             $http.get('./app/login/views/LoginView.html').success(function (html) {
                 var scope = $rootScope.$new();

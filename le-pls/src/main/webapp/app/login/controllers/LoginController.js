@@ -36,6 +36,14 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.forgotPasswordUsername = "";
     $scope.forgotPasswordErrorMessage = "";
     
+    // Initialize Evergage as an anonymous user
+    EvergageUtility.Initialize({
+        userID: null, 
+        title: null,
+        datasetPrefix: "pls",
+        company: null
+    });
+    
     // Controller methods
     $scope.loginClick = function () {
         $scope.showLoginError = false;
@@ -112,6 +120,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.getWidgetConfigDoc = function () {
         ConfigService.GetWidgetConfigDocument().then(function(result) {
             $("body").removeClass("login-body");
+            $rootScope.$broadcast("ShowFooterEvent", true);
             $http.get('./app/core/views/MainView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 scope.directToPassword = $scope.directToPassword || false;

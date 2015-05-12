@@ -20,7 +20,7 @@
             <div data-ng-view class="container"></div>
         </div>
     </div>
-    <div class="footer">
+    <div class="footer" data-ng-show="showFooter">
         © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}
     </div>
     
