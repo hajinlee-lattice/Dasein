@@ -87,18 +87,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                 $scope.$parent.Error.ShowError = false;
                 $scope.$emit('download-start');
 
-                $http({
-                    method: 'GET',
-                    url: $attrs.url,
-                }).success(function(data){
-                    result.Success = data.Success;
-                    deferred.resolve(result);
-                }).error(function(data, status){
-                    SessionService.HandleResponseErrors(data, status);
-                    result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
-                    deferred.resolve(result);
-                });
-
                 $http.get($attrs.url).then(function (response) {
                     if ($attrs.filetype === "application/json") {
                         $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(JSON.stringify(response.data)))));
