@@ -3,11 +3,15 @@ package com.latticeengines.admin.functionalframework;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;
@@ -27,13 +31,19 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -52,10 +62,13 @@ import com.latticeengines.security.exposed.Constants;
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
 public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
+    private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
+
     protected static final String ADTesterUsername = "testuser1";
     protected static final String ADTesterPassword = "Lattice1";
     protected static final String TestTenantId = "TestTenant";
     protected static final BatonService batonService = new BatonServiceImpl();
+    private static boolean ZKIsClean = false;
 
     @Value("${admin.test.contract}")
     protected String TestContractId;
@@ -78,9 +91,126 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected String getRestHostPort() {
         return hostPort;
     }
-    
+
+    protected void cleanupZK() {
+        if (ZKIsClean) return;
+
+        log.info("Checking the sanity of contracts and tenants in ZK.");
+
+        boolean ZKHasIssues = false;
+
+        try {
+            for (TenantDocument tenantDocument: batonService.getTenants(null)) {
+                if (tenantDocument.getContractInfo() == null ||
+                        tenantDocument.getTenantInfo() == null ||
+                        tenantDocument.getSpaceInfo() == null ||
+                        tenantDocument.getSpaceConfig() == null) {
+                    ZKHasIssues = true;
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            ZKHasIssues = true;
+        }
+
+        if (ZKHasIssues) {
+            log.info("Cleaning up bad contracts and tenants in ZK");
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            boolean contractsExist = false;
+            try {
+                contractsExist = camille.exists(PathBuilder.buildContractsPath(podId));
+            } catch (Exception e) {
+                log.warn("Getting Contracts node error.");
+            }
+
+            if (contractsExist) {
+                List<AbstractMap.SimpleEntry<Document, Path>> contractDocs = new ArrayList<>();
+                try {
+                    contractDocs = camille.getChildren(PathBuilder.buildContractsPath(podId));
+                } catch (Exception e) {
+                    log.warn("Getting Contract Documents error.");
+                }
+
+                for (AbstractMap.SimpleEntry<Document, Path> entry: contractDocs) {
+                    String contractId = entry.getValue().getSuffix();
+                    ContractInfo contractInfo = null;
+                    try {
+                        contractInfo = ContractLifecycleManager.getInfo(contractId);
+                    } catch (Exception e) {
+                        log.warn("Found a bad contract: " + contractId + ". Deleting it ...");
+                        try {
+                            ContractLifecycleManager.delete(contractId);
+                        } catch (Exception e2) {
+                            // ignore
+                        }
+                    }
+
+                    if (contractInfo != null) {
+                        boolean tenantsExist = false;
+                        try {
+                            tenantsExist = camille.exists(PathBuilder.buildTenantsPath(podId, contractId));
+                        } catch (Exception e) {
+                            log.warn(String.format("Getting Tenants node for contract %s error.", contractId));
+                        }
+                        if (tenantsExist) {
+                            List<AbstractMap.SimpleEntry<Document, Path>> tenantDocs = new ArrayList<>();
+                            try {
+                                tenantDocs = camille.getChildren(PathBuilder.buildTenantsPath(podId, contractId));
+                            } catch (Exception e) {
+                                log.warn(String.format(
+                                        "Getting Tenant Documents for contract %s error.", contractId));
+                            }
+
+                            for (AbstractMap.SimpleEntry<Document, Path> tenantEntry: tenantDocs) {
+                                String tenantId = tenantEntry.getValue().getSuffix();
+
+                                try {
+                                    TenantDocument tenantDocument = batonService.getTenant(contractId, tenantId);
+                                    if (tenantDocument.getContractInfo() == null ||
+                                            tenantDocument.getTenantInfo() == null ||
+                                            tenantDocument.getSpaceInfo() == null ||
+                                            tenantDocument.getSpaceConfig() == null) {
+                                        throw new Exception("Tenant: " + contractId + "-"
+                                                + tenantId + " does not have a fully valid TenantDocument.");
+                                    }
+                                } catch (Exception e) {
+                                    log.warn("Found a bad tenant: " + contractId + "-" + tenantId + ". Deleting it ...");
+                                    try {
+                                        TenantLifecycleManager.delete(contractId, tenantId);
+                                    } catch (Exception e2) {
+                                        // ignore
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+        ZKHasIssues = false;
+        try {
+            for (TenantDocument tenantDocument: batonService.getTenants(null)) {
+                Assert.assertNotNull(tenantDocument.getContractInfo());
+                Assert.assertNotNull(tenantDocument.getTenantInfo());
+                Assert.assertNotNull(tenantDocument.getSpaceInfo());
+                Assert.assertNotNull(tenantDocument.getSpaceConfig());
+            }
+        } catch (Exception e) {
+            ZKHasIssues = true;
+        }
+
+        Assert.assertFalse(ZKHasIssues);
+
+        ZKIsClean = true;
+    }
+
     @BeforeClass(groups = {"functional", "deployment"})
     public void setup() throws Exception {
+        cleanupZK();
         loginAD();
 
         String podId = CamilleEnvironment.getPodId();

@@ -35,6 +35,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
         tenantId = serviceName + "Tenant";
 
         loginAD();
+        cleanupZK();
         try {
             deleteTenant(contractId, tenantId);
         } catch (Exception e) {

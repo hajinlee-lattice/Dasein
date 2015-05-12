@@ -45,8 +45,8 @@ public class PLSComponentManager {
         incrementTenantName(tenant);
 
         if (tenantService.hasTenantId(tenant.getId())) {
-            tenantService.updateTenant(tenant);
             LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
+            tenantService.updateTenant(tenant);
         } else {
             try {
                 tenantService.discardTenant(tenant);
