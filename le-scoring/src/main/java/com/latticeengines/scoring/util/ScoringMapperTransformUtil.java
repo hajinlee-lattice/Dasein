@@ -42,7 +42,7 @@ public class ScoringMapperTransformUtil {
     private static final String MODEL_SCRIPT = "Script";
     private static final String SCORING_SCRIPT_NAME = "scoringengine.py";
     
-    public static void parseModelFiles(HashMap<String, JSONObject> models, Path path, HashMap<String, Integer> modelNumberMap) {
+    public static void parseModelFiles(HashMap<String, JSONObject> models, Path path) {
 		try {
 			log.info("come to the parseModelFiles function");
 	        FileReader reader;
@@ -56,7 +56,6 @@ public class ScoringMapperTransformUtil {
             writeScoringScript(modelID, (JSONObject)jsonObject.get(MODEL));
             log.info("length is " + models.size());
             log.info("modelName is " + jsonObject.get("Name"));
-            modelNumberMap.put(modelID, 0);
 		} catch (FileNotFoundException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
