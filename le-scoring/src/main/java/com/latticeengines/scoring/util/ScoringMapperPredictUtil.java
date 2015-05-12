@@ -212,15 +212,15 @@ public class ScoringMapperPredictUtil {
 				float upperBound = upperBoundObj != null? (upperBoundObj).floatValue() : Float.MAX_VALUE;
 				if (betweenBounds(score, lowerBound, upperBound)) {
 					Double probabilityObj = (Double) range.get(CALIBRATION_PROBABILITY);
-					probability = (float) probabilityObj.floatValue();
+					probability = probabilityObj != null ? (float) probabilityObj.floatValue() : null;
 					break;
 				}
 			}
 		}
 		
 		Double averageProbabilityObj = (Double) model.get(AVERAGE_PROBABILITY);
-		Float averageProbability = averageProbabilityObj.floatValue();
-		Float lift = averageProbability != null && averageProbability != 0 ? probability/averageProbability : null;
+		Float averageProbability = averageProbabilityObj != null ? averageProbabilityObj.floatValue() : null;
+		Float lift = averageProbability != null && averageProbability != 0 ? (float)probability/averageProbability : null;
 		
 		// perform bucketing 
 		String bucket = null;
@@ -233,7 +233,7 @@ public class ScoringMapperPredictUtil {
 				if (value == null) {
 					value = score;
 				}
-				// TODO need to Float check with Haitao/Ron about uncalibration
+				// "0 - Probability, 1 - Lift"
 				if (((Long)range.get(BUCKETS_TYPE)).intValue() == 1) {
 					value = lift;
 				}
@@ -316,6 +316,8 @@ public class ScoringMapperPredictUtil {
     private static Configuration yarnConfiguration;
     
 	public static void main(String[] args) throws Exception {
+		
+		/*
 		String local = "/Users/ygao/Downloads/text.avro";
 
 		String hdfs = "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/test" + "/test.avro";
@@ -323,30 +325,20 @@ public class ScoringMapperPredictUtil {
 		for (GenericRecord ele : list) {
 			System.out.println(ele.toString());
 		}
-		//HdfsUtils.copyLocalToHdfs(yarnConfiguration, local, hdfs);
+		*/
 		
-		/*
+		
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
-        HashMap<String, Integer> modelNumberMap = new HashMap<String, Integer>();
         
         Path p = new Path(absolutePath + "87ecf8cd-fe45-45f7-89d1-612235631fc1");
         ScoringMapperTransformUtil.parseModelFiles(models, p);
         //evaluate(models, modelNumberMap, THRESHOLD);
-		log.info("python " + absolutePath + "test2.py " + "87ecf8cd-fe45-45f7-89d1-612235631fc1");
-		Process p1 = Runtime.getRuntime().exec("python " + absolutePath + "test2.py " + "87ecf8cd-fe45-45f7-89d1-612235631fc1");
-		BufferedReader in = new BufferedReader(new InputStreamReader(p1.getInputStream()));
-		BufferedReader err = new BufferedReader(new InputStreamReader(p1.getErrorStream()));
-		String line = null;
-		while (( line = in.readLine()) != null ) {
-			System.out.println(line);
-		}
-		in.close();
-		while (( line = err.readLine()) != null ) {
-			System.out.println(line);
-		}
-		err.close();
-		p1.waitFor();
-		log.info("come to the evaluate function");*/
+        Set<String> keys = models.keySet(); 
+        for (String key : keys) {
+        
+        	JSONObject model = models.get(key);
+        	getResult("87ecf8cd-fe45-45f7-89d1-612235631fc1", model, 0.0042960797f);
+        }
 	}
 	
 }
