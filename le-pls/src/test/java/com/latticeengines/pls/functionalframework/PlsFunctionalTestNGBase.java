@@ -46,8 +46,6 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
-import com.latticeengines.pls.dao.ModelSummaryDao;
-import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
@@ -94,13 +92,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
-    private ModelSummaryDao modelSummaryDao;
-
-    @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
-    private KeyValueEntityMgr keyValueEntityMgr;
     
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
@@ -246,21 +238,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         public void setAuthValue(String headerValue) {
             this.headerValue = headerValue;
         }
-    }
-
-    @Deprecated
-    protected UserDocument loginAndAttachAdmin() {
-        return loginAndAttach(adminUsername, adminPassword);
-    }
-
-    @Deprecated
-    protected UserDocument loginAndAttachAdmin(Tenant tenant) {
-        return loginAndAttach(SUPER_ADMIN_USERNAME, generalPassword, tenant);
-    }
-
-    @Deprecated
-    protected UserDocument loginAndAttachGeneral() {
-        return loginAndAttach(EXTERNAL_USER_USERNAME, generalPassword);
     }
 
     protected UserDocument loginAndAttach(AccessLevel level, Tenant tenant) {

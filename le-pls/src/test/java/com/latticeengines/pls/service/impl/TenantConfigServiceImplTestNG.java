@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -10,6 +11,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
@@ -36,6 +38,13 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
 
         SpaceLifecycleManager.create("contractId", "tenantId", "spaceId", spaceInfo);
+
+        path = path.append(new Path("/SpaceConfiguration"));
+        camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        path = path.append(new Path("/Topology"));
+        camille.create(path, new Document("sfdc"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
     }
 
     @AfterClass(groups = { "functional" })
@@ -48,7 +57,6 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void getCredential() {
-
         String topology = configService.getTopology("contractId.tenantId.spaceId");
         Assert.assertEquals(topology, "sfdc");
     }
