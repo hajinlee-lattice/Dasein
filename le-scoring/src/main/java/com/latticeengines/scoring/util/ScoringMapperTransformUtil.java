@@ -35,7 +35,8 @@ public class ScoringMapperTransformUtil {
     //private static final int THRESHOLD = 10000;
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
-    private static final String LEAD_RECORD_MODEL_ID_COLUMN = "ModelID";
+    private static final String LEAD_RECORD_MODEL_ID_COLUMN = "Play_Display_Name";
+    private static final String LEAD_RECORD_REQUEST_ID_COLUMN = "Request_ID";
     private static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
     private static final String MODEL = "Model";
     private static final String MODEL_COMPRESSED_SUPPORT_Files = "CompressedSupportFiles";
@@ -145,7 +146,7 @@ public class ScoringMapperTransformUtil {
 		}
 	}
     
-    public static void manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, String record) {
+    public static void  manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, Integer> leadNumber, String[] requestID, String record) {
     	JSONParser jsonParser = new JSONParser();
     	JSONObject leadJsonObject = null;
 		try {
@@ -154,7 +155,7 @@ public class ScoringMapperTransformUtil {
 			e.printStackTrace();
 		}
     	String modelID = identifyModelID(leadJsonObject, models);
-    	String formattedRecord = transformToJsonString(leadJsonObject, models, modelID);
+    	String formattedRecord = transformToJsonString(leadJsonObject, models, leadNumber, requestID, modelID);
     	if (leadInputRecordMap.containsKey(modelID)) {
     		leadInputRecordMap.get(modelID).add(formattedRecord);
     	} else {
@@ -162,7 +163,6 @@ public class ScoringMapperTransformUtil {
     		leadInput.add(formattedRecord);
     		leadInputRecordMap.put(modelID, leadInput);
     	}
-    	
     }
     
     private static String identifyModelID(JSONObject leadJsonObject, HashMap<String, JSONObject> models) {
@@ -176,7 +176,6 @@ public class ScoringMapperTransformUtil {
     	for (String ID : modelIDSet) {
     		if (modelIDVal.contains(ID)) {
     			modelID = ID;
-    			//log.info("Find the model " + ID);
     			break;
     		}
     	}
@@ -186,7 +185,7 @@ public class ScoringMapperTransformUtil {
     	return modelID;
     }
     
-    public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models, String modelID) {
+    public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models, HashMap<String, Integer> leadNumber, String[] requestID, String modelID) {
     	
     	String formattedRecord = null;
 		//get the metadata from the specific model json file
@@ -196,11 +195,27 @@ public class ScoringMapperTransformUtil {
 		// parse the avro file since it is in json format
 		//TODO unify with Haitao about the name of the columnID and the type
 		JSONObject jsonObj = new JSONObject();
-		String columnID = (String) leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
-		//log.info("The lead comlumn id is " + columnID);
+		String leadID = (String) leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
+		if (!leadNumber.containsKey(leadID)) {
+			leadNumber.put(leadID, 1);
+		} else {
+			int i = leadNumber.get(leadID);
+			leadNumber.put(leadID, ++i);
+		}
+		//log.info("The lead id is " + leadID);
+		//String currentRequestID = (String) leadJsonObject.get(LEAD_RECORD_REQUEST_ID_COLUMN);
+		String currentRequestID = "default";
+		//log.info("The lead id is " + currentRequestID);
+		if (requestID[0] == null) {
+			requestID[0] = currentRequestID;
+		} else {
+			if (requestID[0] != currentRequestID) {
+				new Exception("requestID does not match");
+			}
+		}
 		JSONArray jsonArray = new JSONArray();  
 		jsonObj.put("value", jsonArray); 
-		jsonObj.put("key", columnID); 
+		jsonObj.put("key", leadID);
 		
 		Set<String> keySet = leadJsonObject.keySet();
 		for (int i = 0; i < metadata.size(); i++) {
@@ -222,13 +237,19 @@ public class ScoringMapperTransformUtil {
     }
     
     public static void writeToLeadInputFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, int threshold) {
-    	Set<String> modelIDs = leadInputRecordMap.keySet();
+    	if (leadInputRecordMap == null) {
+    		new Exception("leadInputRecordMap is null");
+    	}
+     	Set<String> modelIDs = leadInputRecordMap.keySet();
     	for (String modelID : modelIDs) {
     		writeToLeadInputFile(leadInputRecordMap.get(modelID), modelID, threshold);
     	}
     }
     
     private static void writeToLeadInputFile(ArrayList<String> leadInputRecords, String modelID, int threshold) {
+    	log.info("debugging writeToLeadInputFile");
+    	log.info("for model " + modelID + ", there are " + leadInputRecords.size() + " leads");
+    	
     	int indexOfFile = 0;
     	int count = 0;
     	//create an intial input stream

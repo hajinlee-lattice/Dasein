@@ -20,7 +20,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -48,12 +47,14 @@ public class ScoringMapperPredictUtil {
 	private static final String PERCENTILE_BUCKETS_MINIMUMSCORE = "MinimumScore";
 	private static final String PERCENTILE_BUCKETS_MAXIMUMSCORE = "MaximumScore";
     private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
+    private static final String MODEL_PREFIX = "ms__";
     
     // TODO debugging purposes
 	private static final String absolutePath = "/Users/ygao/test/e2e/";
     private static final int THRESHOLD = 10000;
 	
-	public static void evaluate(HashMap<String, JSONObject> models, HashMap<String, ArrayList<String>> leadInputRecordMap, String outputPath, int threshold) {
+	public static ArrayList<ModelEvaluationResult> evaluate(HashMap<String, JSONObject> models, HashMap<String, ArrayList<String>> leadInputRecordMap, String[] requestID, String outputPath, int threshold) {
+		ArrayList<ModelEvaluationResult> resultList= null;
 		// spawn python 
 		Set<String> modelIDs = models.keySet();
 		StringBuilder sb = new StringBuilder();
@@ -71,7 +72,6 @@ public class ScoringMapperPredictUtil {
 		try {
 			p = Runtime.getRuntime().exec("python " + "scoring.py " + sb.toString());
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -88,22 +88,60 @@ public class ScoringMapperPredictUtil {
 			}
 			err.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		try {
 			p.waitFor();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		log.info("come to the evaluate function");
-		readScoreFiles(leadInputRecordMap, models, outputPath, threshold);
+		resultList = readScoreFiles(leadInputRecordMap, models, requestID, outputPath, threshold);
+		return resultList;
 	}
 	
-	private static void readScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, String outputPath, int threshold) {
+
+	public static void writeToOutputFile(ArrayList<ModelEvaluationResult> resultList, Configuration yarnConfiguration, String outputPath)
+	{
+		log.info("in the function of writeToOutputFILE");
+		if (resultList == null) {
+			new Exception("resultList is null");
+		}
+		if (yarnConfiguration == null) {
+			new Exception("yarnConfiguration is null");
+		}
+		String fileName = "/Users/ygao/Downloads/text.avro";
+		File outputFile = new File(fileName);
+  		DatumWriter<ModelEvaluationResult> userDatumWriter = new SpecificDatumWriter<ModelEvaluationResult>();
+        DataFileWriter<ModelEvaluationResult> dataFileWriter = new DataFileWriter<ModelEvaluationResult>(userDatumWriter);
+          
+		Gson gson = new Gson();
+		for (int i = 0; i < resultList.size(); i++) {
+			ModelEvaluationResult result = resultList.get(i);
+        	String json = gson.toJson(result);
+        	System.out.println(json);
+            try {
+            	if (i == 0)
+            		dataFileWriter.create(result.getSchema(), outputFile);
+	            dataFileWriter.append(result);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}        	
+		}
+        try {
+			dataFileWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        try {
+			HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/test.avro");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static ArrayList<ModelEvaluationResult> readScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, String[] requestID, String outputPath, int threshold) {
 		log.info("come to the readScoreFiles function");
 		Set<String> modelIDs = leadInputRecordMap.keySet();
 		// list of HashMap<leadID: score>
@@ -112,29 +150,22 @@ public class ScoringMapperPredictUtil {
 			log.info("id is " + id);
 			// key: leadID, value: raw score
 			HashMap<String, Float> scores = new HashMap<String, Float>();
-			// key: leadID, value: manipulated scores (raw, probability, etc)
-			//HashMap<String, ModelEvaluationResult> results = new HashMap<String, ModelEvaluationResult>();
 			int value = leadInputRecordMap.get(id).size();
 			JSONObject model = models.get(id);
 			int remain = value/threshold;
-			int i = 0;
-			do {
+			for (int i = 0; i <= remain; i++) {
 				readScoreFile(id, i, scores);
-				i++;
-			} 
-			while (i < remain);
+			}
 			Set<String> keySet = scores.keySet();
 			for (String key : keySet) {
-				ModelEvaluationResult result = getResult(id, model, scores.get(key));
+				ModelEvaluationResult result = getResult(id, key, requestID[0], model, scores.get(key));
 				resultList.add(result);
-				//results.put(key, result);
 			}
 		}
-		writeToOutputFile(resultList, outputPath);
+		return resultList;
 	}
 	
 	private static void readScoreFile(String modelID, int index, HashMap<String, Float> scores) {
-		log.info("come to the readScoreFile function");
 		//TODO change it to relative path
 		//String fileName = absolutePath + modelID + SCORING_OUTPUT_PREFIX + index + ".txt";
 		String fileName = modelID + SCORING_OUTPUT_PREFIX + index + ".txt";
@@ -156,46 +187,7 @@ public class ScoringMapperPredictUtil {
 		}
 	}
 	
-
-	private static void writeToOutputFile(ArrayList<ModelEvaluationResult> resultList, String outputPath)
-	{
-		log.info("in the function of writeToOutputFILE");
-		String fileName = "/Users/ygao/Downloads/text.avro";
-		File outputFile = new File(fileName);
-  		DatumWriter<ModelEvaluationResult> userDatumWriter = new 
-  SpecificDatumWriter<ModelEvaluationResult>();
-          DataFileWriter<ModelEvaluationResult> dataFileWriter = new 
-  DataFileWriter<ModelEvaluationResult>(userDatumWriter);
-          
-		Gson gson = new Gson();
-		for (int i = 0; i < resultList.size(); i++) {
-			ModelEvaluationResult result = resultList.get(i);
-        	String json = gson.toJson(result);
-        	System.out.println(json);
-            try {
-            	if (i == 0)
-            		dataFileWriter.create(result.getSchema(), outputFile);
-	            dataFileWriter.append(result);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}        	
-		}
-        try {
-			dataFileWriter.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        try {
-			HdfsUtils.copyLocalToHdfs(new Configuration(), "/Users/ygao/Downloads/text.avro", outputPath + "/test.avro");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private static ModelEvaluationResult getResult(String modelID, JSONObject model, float score) {		
+	private static ModelEvaluationResult getResult(String modelID, String leadID, String requestID, JSONObject model, float score) {		
 		Float probability = null;
 		
 		// perform calibration
@@ -296,7 +288,7 @@ public class ScoringMapperPredictUtil {
 		}
 		
 		Integer integerScore = (int) (probability != null ? Math.round(probability * 100) : Math.round(score * 100));
-		ModelEvaluationResult result = new ModelEvaluationResult(bucket, lift, modelID, percentile, probability, score, integerScore);
+		ModelEvaluationResult result = new ModelEvaluationResult(leadID, bucket, lift, MODEL_PREFIX+modelID, percentile, probability, score, requestID, integerScore);
 		log.info("result is " + result);
 		return result;
 		
@@ -307,23 +299,18 @@ public class ScoringMapperPredictUtil {
         return (lowerInclusive == null || value >= lowerInclusive) && 
             (upperExclusive == null || value < upperExclusive);
     }
-   
-	
-    @Autowired
-    private static Configuration yarnConfiguration;
     
 	public static void main(String[] args) throws Exception {
 		
 		
 		String local = "/Users/ygao/Downloads/text.avro";
 
-		String hdfs = "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/test" + "/test.avro";
+		String hdfs = "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/test/output" + "/test.avro";
 		List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(hdfs));
 		for (GenericRecord ele : list) {
 			System.out.println(ele.toString());
 		}
-		
-		
+				
 		/*
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
         
