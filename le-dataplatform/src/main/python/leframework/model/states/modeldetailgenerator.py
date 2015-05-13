@@ -36,7 +36,8 @@ class ModelDetailGenerator(State):
             result["RocScore"] = self.mediator.rocscore
 
         result["ConstructionTime"] = self.now()
-
+        result["TemplateVersion"] = mediator.templateVersion
+        
         # Add Result to Mediator
         self.mediator.modeldetails = result
 

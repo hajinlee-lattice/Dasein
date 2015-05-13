@@ -139,6 +139,7 @@ class LearningExecutor(Executor):
             mediator.depivoted = parser.isDepivoted()
             mediator.provenanceProperties = parser.getProvenanceProperties()
             mediator.metadata = params["metadata"]
+            mediator.templateVersion = parser.templateVersion
             stateMachine.run()
         else:
             logger.warn("Generated classifier is null.")

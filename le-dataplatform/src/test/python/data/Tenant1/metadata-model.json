@@ -190,7 +190,8 @@
     "Company: Company",
     "LastName: LastName",
     "FirstName: FirstName",
-    "SpamIndicator: SpamIndicator"
+    "SpamIndicator: SpamIndicator",
+    "Template_Version: v1.0"
   ],
   "training_data": "/user/s-analytics/customers/Tenant1/data/Q_PLS_Modeling_Tenant1/samples/s100Training-r-00000.avro",
   "test_data": "/user/s-analytics/customers/Tenant1/data/Q_PLS_Modeling_Tenant1/samples/s100Test-r-00000.avro",

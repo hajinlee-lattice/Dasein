@@ -38,7 +38,7 @@ class ArgumentParser(object):
 
         self.fields = dataSchema["fields"]
         self.features = self.metadataSchema["features"]
-        (self.target, self.readouts, self.samples) = self.extractTargets()
+        (self.target, self.readouts, self.samples, self.templateVersion) = self.extractTargets()
         self.keys = self.metadataSchema["key_columns"]
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
@@ -69,7 +69,9 @@ class ArgumentParser(object):
         lastNameKey = "LastName".lower()
         firstNameKey = "FirstName".lower()
         spamIndicatorKey = "SpamIndicator".lower()
+        templateVersionKey = "Template_Version".lower()
 
+        templateVersion = None
         target = None; readouts = []; samples = dict()
         for sTarget in specifiedTargets:
             pair = sTarget.split(":")
@@ -95,6 +97,8 @@ class ArgumentParser(object):
                 elif key == spamIndicatorKey:
                     if columnExists(value): samples[spamIndicatorKey] = value
                     else: logWarning(value, "spamindicator")
+                elif key == templateVersionKey:
+                    templateVersion = value
                 else: logWarning(value, "unspecified")
             # Legacy
             elif len(pair) == 1:
@@ -102,7 +106,7 @@ class ArgumentParser(object):
                 if columnExists(value): target = value
                 else: logWarning(value, "target")
 
-        return target, readouts, samples
+        return target, readouts, samples, templateVersion
 
     def __parseProperties(self, name):
         element = {}

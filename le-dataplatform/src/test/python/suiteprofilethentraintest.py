@@ -251,6 +251,10 @@ class SuiteTenant1ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         self.assertEqual(reduce(lambda acc, e: acc + (1 if len(e["Company"]) == 0 else 0), bottomSample, 0), 0)
         self.assertEqual(reduce(lambda acc, e: acc + (0 if isinstance(e["Score"], int) else 1), bottomSample, 0), 0)
         self.assertEqual(len(set([e["Company"] for e in bottomSample])), 10)
+        
+        #Check for Model details
+        templateVersion = summary["ModelDetails"]["TemplateVersion"]
+        self.assertEqual(templateVersion, "v1.0")
 
     @classmethod
     def getSubDir(cls):
