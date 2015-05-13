@@ -21,7 +21,7 @@ public class EmailUtilsTestNG extends PlsFunctionalTestNGBase {
     @Value("${pls.test.externalemail}")
     private boolean testExternalEmail;
 
-    @Test(groups = {"functional", "deployment"})
+    @Test(groups = "deployment")
     public void testSendEmails() throws Exception {
         Tenant tenant = new Tenant();
         tenant.setId("Email_Tenant");
