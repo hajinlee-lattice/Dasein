@@ -4,7 +4,6 @@
 	<!-- <groupId>com.latticeengines.monitor</groupId> -->
 	<artifactId>le-monitor</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.32-SNAPSHOT</version>
 	<name>le-${component-name}</name>
 	<url>http://maven.apache.org</url>
 
