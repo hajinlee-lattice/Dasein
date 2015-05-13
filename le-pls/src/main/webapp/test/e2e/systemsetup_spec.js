@@ -19,7 +19,7 @@ describe('system setup tests', function () {
         expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
-        systemSetup.waitForEloquaCredentials();
+        systemSetup.waitForSfdcCredentials();
 
         loginPage.logout();
         browser.driver.sleep(20000);
