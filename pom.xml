@@ -25,6 +25,7 @@
         <module>le-eai</module>
         <module>le-camille</module>
         <module>le-baton</module>
+        <module>le-monitor</module>
         <module>le-api</module>
         <module>le-perf</module>
         <module>le-web</module>
@@ -34,6 +35,5 @@
         <module>le-pls</module>
         <module>le-dellebi</module>
         <module>le-job</module>
-        <module>le-monitor</module>
     </modules>
 </project>
