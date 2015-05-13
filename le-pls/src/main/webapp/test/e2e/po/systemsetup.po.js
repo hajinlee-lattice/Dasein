@@ -92,7 +92,6 @@ var SystemSetup = function() {
     this.waitForEloquaCredentials = function() {
         browser.driver.wait(element(by.css('.js-eloqua-form input.js-user-name')).isPresent(), 10000,
             "Eloqua crendentials form should show up within 10 sec.");
-        browser.driver.sleep(20000);
     };
 };
 
