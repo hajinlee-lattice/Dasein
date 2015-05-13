@@ -48,7 +48,7 @@ var Login = function() {
         isLoginPage().then(function(ispresent){
             if (!ispresent) {
                 userDropdown.toggleDropdown();
-                browser.wait(function(){
+                browser.driver.wait(function(){
                     return userDropdown.signout.isPresent();
                 }, 10000, 'dropdown menu should appear with in 10 sec.');
                 userDropdown.signout.click();
@@ -62,9 +62,9 @@ var Login = function() {
 
     this.assertLoggedIn = function(expected) {
         if (expected) {
-            expect(element(by.css('div.page-title')).isDisplayed()).toBe(true);
+            expect(element(by.css('div.page-title')).isPresent()).toBe(true);
         } else {
-            expect(element(by.id('loginMainView')).isDisplayed()).toBe(true);
+            expect(element(by.id('loginMainView')).isPresent()).toBe(true);
         }
     };
 

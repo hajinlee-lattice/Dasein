@@ -16,7 +16,7 @@ describe('system setup tests', function () {
         // Select System Setup Tab
         //==================================================
         userDropdown.toggleDropdown();
-        expect(userDropdown.SystemSetupLink.isDisplayed()).toBe(true);
+        expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
 
@@ -35,7 +35,7 @@ describe('system setup tests', function () {
         userDropdown.toggleDropdown();
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        systemSetup.waitForEloquaCredentials();
 
         //==================================================
         // Enter Eloqua Credentials
@@ -57,7 +57,7 @@ describe('system setup tests', function () {
         userDropdown.toggleDropdown();
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        systemSetup.waitForEloquaCredentials();
 
         //==================================================
         // Enter Eloqua Credentials
@@ -80,15 +80,15 @@ describe('system setup tests', function () {
         userDropdown.toggleDropdown();
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        systemSetup.waitForSfdcCredentials();
 
         //==================================================
         // Enter SFDC Sandbox Credentials
         //==================================================
         element(by.css('a[href="#formSandbox"]')).click();
+        systemSetup.waitForSfdcSandboxCredentials();
         systemSetup.enterBadSfdcSandboxCredentials();
         expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("Credentials are invalid.");
-
         loginPage.logout();
     });
 
@@ -104,15 +104,15 @@ describe('system setup tests', function () {
         userDropdown.toggleDropdown();
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        systemSetup.waitForSfdcCredentials();
 
         //==================================================
         // Enter SFDC Sandbox Credentials
         //==================================================
         element(by.css('a[href="#formSandbox"]')).click();
+        systemSetup.waitForSfdcSandboxCredentials();
         systemSetup.enterValidSfdcSandboxCredentials();
         expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
-
         loginPage.logout();
     });
 
@@ -128,7 +128,7 @@ describe('system setup tests', function () {
         userDropdown.toggleDropdown();
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        systemSetup.waitForSfdcCredentials();
 
         //==================================================
         // Enter SFDC Production Credentials
@@ -151,7 +151,7 @@ describe('system setup tests', function () {
         userDropdown.toggleDropdown();
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        systemSetup.waitForSfdcCredentials();
 
         //==================================================
         // Enter SFDC Production Credentials

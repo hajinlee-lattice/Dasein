@@ -2,7 +2,7 @@
 
 var SystemSetup = function() {
     this.enterValidSfdcProductionCredentials = function() {
-        element(by.css('.js-crm-production-edit-button')).click();
+        //element(by.css('.js-crm-production-edit-button')).click();
         element(by.model('crmProductionCredentials.UserName')).clear();
         element(by.model('crmProductionCredentials.UserName')).sendKeys("apeters-widgettech@lattice-engines.com");
         element(by.model('crmProductionCredentials.Password')).clear();
@@ -15,7 +15,7 @@ var SystemSetup = function() {
     };
     
     this.enterBadSfdcProductionCredentials = function() {
-        element(by.css('.js-crm-production-edit-button')).click();
+        //element(by.css('.js-crm-production-edit-button')).click();
         element(by.model('crmProductionCredentials.UserName')).clear();
         element(by.model('crmProductionCredentials.UserName')).sendKeys("nope");
         element(by.model('crmProductionCredentials.Password')).clear();
@@ -26,9 +26,14 @@ var SystemSetup = function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
     };
+
+    this.waitForSfdcSandboxCredentials = function() {
+        browser.driver.wait(element(by.model('crmSandboxCredentials.UserName')).isPresent(), 5000,
+            "SFDC sandbox crendentials form should show up within 5 sec.");
+    };
     
     this.enterValidSfdcSandboxCredentials = function() {
-        element(by.css('.js-crm-sandbox-edit-button')).click();
+        //element(by.css('.js-crm-sandbox-edit-button')).click();
         element(by.model('crmSandboxCredentials.UserName')).clear();
         element(by.model('crmSandboxCredentials.UserName')).sendKeys("apeters-widgettech@lattice-engines.com");
         element(by.model('crmSandboxCredentials.Password')).clear();
@@ -41,7 +46,7 @@ var SystemSetup = function() {
     };
     
     this.enterBadSfdcSandboxCredentials = function() {
-        element(by.css('.js-crm-sandbox-edit-button')).click();
+        //element(by.css('.js-crm-sandbox-edit-button')).click();
         element(by.model('crmSandboxCredentials.UserName')).clear();
         element(by.model('crmSandboxCredentials.UserName')).sendKeys("nope");
         element(by.model('crmSandboxCredentials.Password')).clear();
@@ -52,8 +57,14 @@ var SystemSetup = function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
     };
-    
+
+    this.waitForSfdcCredentials = function() {
+        browser.driver.wait(element(by.css('a[href="#formSandbox"]')).isPresent(), 10000,
+            "SFDC crendentials form should show up within 10 sec.");
+    };
+
     this.enterValidEloquaCredentials = function() {
+        //element(by.css('.js-eloqua-edit-button')).click();
         element(by.css('.js-eloqua-form input.js-user-name')).clear();
         element(by.css('.js-eloqua-form input.js-user-name')).sendKeys("Matt.Sable");
         element(by.css('.js-eloqua-form input.js-password')).clear();
@@ -62,9 +73,11 @@ var SystemSetup = function() {
         element(by.css('.js-eloqua-form input.js-company')).sendKeys("TechnologyPartnerLatticeEngines");
         element(by.css('.js-eloqua-save-button')).click();
         browser.waitForAngular();
+        browser.driver.sleep(1000);
     };
     
     this.enterBadEloquaCredentials = function() {
+        //element(by.css('.js-eloqua-edit-button')).click();
         element(by.css('.js-eloqua-form input.js-user-name')).clear();
         element(by.css('.js-eloqua-form input.js-user-name')).sendKeys("nope");
         element(by.css('.js-eloqua-form input.js-password')).clear();
@@ -73,8 +86,13 @@ var SystemSetup = function() {
         element(by.css('.js-eloqua-form input.js-company')).sendKeys("nope");
         element(by.css('.js-eloqua-save-button')).click();
         browser.waitForAngular();
+        browser.driver.sleep(1000);
     };
 
+    this.waitForEloquaCredentials = function() {
+        browser.driver.wait(element(by.css('.js-eloqua-form input.js-user-name')).isPresent(), 10000,
+            "Eloqua crendentials form should show up within 10 sec.");
+    };
 };
 
 module.exports = new SystemSetup();
