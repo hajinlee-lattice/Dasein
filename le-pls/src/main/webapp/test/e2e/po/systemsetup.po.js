@@ -2,6 +2,7 @@
 
 var SystemSetup = function() {
     this.enterValidSfdcProductionCredentials = function() {
+        element(by.css('.js-crm-production-edit-button')).click();
         element(by.model('crmProductionCredentials.UserName')).clear();
         element(by.model('crmProductionCredentials.UserName')).sendKeys("apeters-widgettech@lattice-engines.com");
         element(by.model('crmProductionCredentials.Password')).clear();
@@ -10,9 +11,11 @@ var SystemSetup = function() {
         element(by.model('crmProductionCredentials.SecurityToken')).sendKeys("oIogZVEFGbL3n0qiAp6F66TC");
         element(by.css('.js-crm-production-save-button')).click();
         browser.waitForAngular();
+        browser.driver.sleep(1000);
     };
     
     this.enterBadSfdcProductionCredentials = function() {
+        element(by.css('.js-crm-production-edit-button')).click();
         element(by.model('crmProductionCredentials.UserName')).clear();
         element(by.model('crmProductionCredentials.UserName')).sendKeys("nope");
         element(by.model('crmProductionCredentials.Password')).clear();
@@ -21,9 +24,11 @@ var SystemSetup = function() {
         element(by.model('crmProductionCredentials.SecurityToken')).sendKeys("nope");
         element(by.css('.js-crm-production-save-button')).click();
         browser.waitForAngular();
+        browser.driver.sleep(1000);
     };
     
     this.enterValidSfdcSandboxCredentials = function() {
+        element(by.css('.js-crm-sandbox-edit-button')).click();
         element(by.model('crmSandboxCredentials.UserName')).clear();
         element(by.model('crmSandboxCredentials.UserName')).sendKeys("apeters-widgettech@lattice-engines.com");
         element(by.model('crmSandboxCredentials.Password')).clear();
@@ -32,9 +37,11 @@ var SystemSetup = function() {
         element(by.model('crmSandboxCredentials.SecurityToken')).sendKeys("oIogZVEFGbL3n0qiAp6F66TC");
         element(by.css('.js-crm-sandbox-save-button')).click();
         browser.waitForAngular();
+        browser.driver.sleep(1000);
     };
     
     this.enterBadSfdcSandboxCredentials = function() {
+        element(by.css('.js-crm-sandbox-edit-button')).click();
         element(by.model('crmSandboxCredentials.UserName')).clear();
         element(by.model('crmSandboxCredentials.UserName')).sendKeys("nope");
         element(by.model('crmSandboxCredentials.Password')).clear();
@@ -43,6 +50,7 @@ var SystemSetup = function() {
         element(by.model('crmSandboxCredentials.SecurityToken')).sendKeys("nope");
         element(by.css('.js-crm-sandbox-save-button')).click();
         browser.waitForAngular();
+        browser.driver.sleep(1000);
     };
     
     this.enterValidEloquaCredentials = function() {
