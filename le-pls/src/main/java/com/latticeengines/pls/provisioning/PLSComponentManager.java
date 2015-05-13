@@ -40,7 +40,7 @@ public class PLSComponentManager {
     @Autowired
     private TenantConfigService tenantConfigService;
 
-    public void provisionTenant(Tenant tenant, List<String> adminEmails) {
+    public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails) {
 
         incrementTenantName(tenant);
 
@@ -51,7 +51,7 @@ public class PLSComponentManager {
             tenantService.registerTenant(tenant);
         }
 
-        for (String email : adminEmails) {
+        for (String email : superAdminEmails) {
             User user = userService.findByEmail(email);
             if (user == null) {
                 UserRegistration uReg = createAdminUserRegistration(email);
@@ -59,6 +59,16 @@ public class PLSComponentManager {
                 user = userService.findByEmail(email);
             }
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), user.getUsername());
+        }
+
+        for (String email : internalAdminEmails) {
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                UserRegistration uReg = createAdminUserRegistration(email);
+                userService.createUser(uReg);
+                user = userService.findByEmail(email);
+            }
+            userService.assignAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant.getId(), user.getUsername());
         }
 
     }
@@ -76,16 +86,33 @@ public class PLSComponentManager {
         String tenantName = tenantDocument.getTenantInfo().properties.displayName;
 
         String emailListInJson;
-        List<String> adminEmails = new ArrayList<>();
         try {
-            emailListInJson = configDir.get("/AdminEmails").getDocument().getData();
+            emailListInJson = configDir.get("/SuperAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
             throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
         }
+        List<String> superAdminEmails = parseEmails(emailListInJson);
+
+        try {
+            emailListInJson = configDir.get("/LatticeAdminEmails").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
+        }
+        List<String> internalAdminEmails = parseEmails(emailListInJson);
+
+        Tenant tenant = new Tenant();
+        tenant.setId(PLSTenantId);
+        tenant.setName(tenantName);
+
+        provisionTenant(tenant, superAdminEmails, internalAdminEmails);
+    }
+
+    private static List<String> parseEmails(String emailsInJson) {
+        List<String> adminEmails = new ArrayList<>();
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            String unescaped = StringEscapeUtils.unescapeJava(emailListInJson);
+            String unescaped = StringEscapeUtils.unescapeJava(emailsInJson);
             JsonNode aNode = mapper.readTree(unescaped);
             if (!aNode.isArray()) {
                 throw new IOException("AdminEmails suppose to be a list of strings");
@@ -95,14 +122,10 @@ public class PLSComponentManager {
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18028,
-                    "Cannot parse AdminEmails to a list of valid emails: " + emailListInJson, e);
+                    "Cannot parse AdminEmails to a list of valid emails: " + emailsInJson, e);
         }
 
-        Tenant tenant = new Tenant();
-        tenant.setId(PLSTenantId);
-        tenant.setName(tenantName);
-
-        provisionTenant(tenant, adminEmails);
+        return adminEmails;
     }
 
     public void discardTenant(Tenant tenant) {

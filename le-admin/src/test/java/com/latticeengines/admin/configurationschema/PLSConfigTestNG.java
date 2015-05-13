@@ -44,7 +44,7 @@ public class PLSConfigTestNG extends ConfigurationSchemaTestNGBase {
     public void testConfig4() throws IOException {
         DocumentDirectory dir = batonService.getDefaultConfiguration(this.component.getName());
 
-        String adminEmails = dir.get("/AdminEmails").getDocument().getData();
+        String adminEmails = dir.get("/SuperAdminEmails").getDocument().getData();
         ObjectMapper mapper = new ObjectMapper();
         JsonNode aNode = mapper.readTree(adminEmails);
         if (!aNode.isArray()) {

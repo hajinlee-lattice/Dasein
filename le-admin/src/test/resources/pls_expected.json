@@ -2,7 +2,12 @@
   "RootPath": "/",
   "Nodes": [
     {
-      "Node":"AdminEmails",
+    "Node":"LatticeAdminEmails",
+    "Data": "[\"tsanghavi@lattice-engines.com\"]",
+    "Metadata" : {"Type":"array"}
+    },
+    {
+      "Node":"SuperAdminEmails",
       "Data": "[\"rswarts@lattice-engines.com\"]",
       "Metadata" : {"Type":"array"}
     }

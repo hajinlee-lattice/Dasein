@@ -1,7 +1,6 @@
 package com.latticeengines.pls.provisioning;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,21 +27,26 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
     @Test(groups= {"functional"})
     public void testProvisionTenant() {
         Tenant tenant = createTestTenant();
-        List<String> emails = Arrays.asList("ysong@lattice-engines.com", "bnguyen@lattice-engines.com");
-        componentManager.provisionTenant(tenant, emails);
+        List<String> superAdmins = Collections.singletonList("bnguyen@lattice-engines.com");
+        List<String> latticeAdmins = Collections.singletonList("ysong@lattice-engines.com");
+        componentManager.provisionTenant(tenant, superAdmins, latticeAdmins);
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 
         Tenant newTenant = tenantService.findByTenantId(tenant.getId());
         Assert.assertEquals(newTenant.getName(), tenant.getName());
 
-        for (String email : emails) {
+        for (String email : superAdmins) {
             AccessLevel level = userService.getAccessLevel(tenant.getId(), email);
             Assert.assertEquals(level, AccessLevel.SUPER_ADMIN);
+        }
+        for (String email : latticeAdmins) {
+            AccessLevel level = userService.getAccessLevel(tenant.getId(), email);
+            Assert.assertEquals(level, AccessLevel.INTERNAL_ADMIN);
         }
 
         tenant = createTestTenant();
         tenant.setName("new name");
-        componentManager.provisionTenant(tenant, new ArrayList<String>());
+        componentManager.provisionTenant(tenant, Collections.<String>emptyList(), Collections.<String>emptyList());
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 
         newTenant = tenantService.findByTenantId(tenant.getId());
@@ -51,7 +55,10 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
         componentManager.discardTenant(tenant);
         Assert.assertFalse(tenantService.hasTenantId(tenant.getId()));
 
-        for (String email : emails) {
+        for (String email : superAdmins) {
+            Assert.assertFalse(userService.inTenant(tenant.getId(), email));
+        }
+        for (String email : latticeAdmins) {
             Assert.assertFalse(userService.inTenant(tenant.getId(), email));
         }
     }

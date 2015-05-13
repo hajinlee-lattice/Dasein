@@ -59,8 +59,11 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         confDir.makePathsLocal();
 
         // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
+        DocumentDirectory.Node node = confDir.get(new Path("/SuperAdminEmails"));
         node.getDocument().setData("[\"" + testAdminUsername + "\"]");
+
+        node = confDir.get(new Path("/LatticeAdminEmails"));
+        node.getDocument().setData("[ ]");
 
         // send to bootstrapper message queue
         bootstrap(confDir);
@@ -94,8 +97,11 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         confDir.makePathsLocal();
 
         // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
+        DocumentDirectory.Node node = confDir.get(new Path("/SuperAdminEmails"));
         node.getDocument().setData("[\"" + testAdminUsername + "\"]");
+
+        node = confDir.get(new Path("/LatticeAdminEmails"));
+        node.getDocument().setData("[ ]");
 
         // send to bootstrapper message queue
         bootstrap(confDir);
@@ -169,8 +175,11 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         confDir.makePathsLocal();
 
         // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
+        DocumentDirectory.Node node = confDir.get(new Path("/SuperAdminEmails"));
         node.getDocument().setData("[\"" + testAdminUsername + "\"]");
+
+        node = confDir.get(new Path("/LatticeAdminEmails"));
+        node.getDocument().setData("[ ]");
 
         // send to bootstrapper message queue
         super.bootstrap(contractId, tenantId, serviceName, confDir);
@@ -212,8 +221,11 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         confDir.makePathsLocal();
 
         // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
+        DocumentDirectory.Node node = confDir.get(new Path("/SuperAdminEmails"));
         node.getDocument().setData("[\"" + testAdminUsername + "\"]");
+
+        node = confDir.get(new Path("/LatticeAdminEmails"));
+        node.getDocument().setData("[ ]");
 
         // send to bootstrapper message queue
         super.bootstrap(contractId, tenantId, serviceName, confDir);
