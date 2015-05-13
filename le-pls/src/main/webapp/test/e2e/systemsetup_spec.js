@@ -49,126 +49,126 @@ describe('system setup tests', function () {
         browser.driver.sleep(20000);
     });
 
-    //it('should validate that you can enter Eloqua credentials', function () {
-    //    //==================================================
-    //    // Login
-    //    //==================================================
-    //    loginPage.loginAsSuperAdmin();
-    //
-    //    //==================================================
-    //    // Select System Setup Tab
-    //    //==================================================
-    //    userDropdown.toggleDropdown();
-    //    userDropdown.SystemSetupLink.click();
-    //    browser.waitForAngular();
-    //    systemSetup.waitForEloquaCredentials();
-    //
-    //    //==================================================
-    //    // Enter Eloqua Credentials
-    //    //==================================================
-    //    systemSetup.enterValidEloquaCredentials();
-    //    expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("");
-    //
-    //    browser.driver.sleep(20000);
-    //    loginPage.logout();
-    //});
-    //
-    //it('should validate that entering invalid SFDC sandbox credentials will fail', function () {
-    //    //==================================================
-    //    // Login
-    //    //==================================================
-    //    loginPage.loginAsSuperAdmin();
-    //
-    //    //==================================================
-    //    // Select System Setup Tab
-    //    //==================================================
-    //    userDropdown.toggleDropdown();
-    //    userDropdown.SystemSetupLink.click();
-    //    browser.waitForAngular();
-    //    systemSetup.waitForSfdcCredentials();
-    //
-    //    //==================================================
-    //    // Enter SFDC Sandbox Credentials
-    //    //==================================================
-    //    element(by.css('a[href="#formSandbox"]')).click();
-    //    systemSetup.waitForSfdcSandboxCredentials();
-    //    systemSetup.enterBadSfdcSandboxCredentials();
-    //    expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("Credentials are invalid.");
-    //    browser.driver.sleep(20000);
-    //    loginPage.logout();
-    //});
-    //
-    //it('should validate that you can enter SFDC sandbox credentials', function () {
-    //    //==================================================
-    //    // Login
-    //    //==================================================
-    //    loginPage.loginAsSuperAdmin();
-    //
-    //    //==================================================
-    //    // Select System Setup Tab
-    //    //==================================================
-    //    userDropdown.toggleDropdown();
-    //    userDropdown.SystemSetupLink.click();
-    //    browser.waitForAngular();
-    //    systemSetup.waitForSfdcCredentials();
-    //
-    //    //==================================================
-    //    // Enter SFDC Sandbox Credentials
-    //    //==================================================
-    //    element(by.css('a[href="#formSandbox"]')).click();
-    //    systemSetup.waitForSfdcSandboxCredentials();
-    //    systemSetup.enterValidSfdcSandboxCredentials();
-    //    expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
-    //    browser.driver.sleep(20000);
-    //    loginPage.logout();
-    //});
-    //
-    //it('should validate that entering invalid SFDC production credentials will fail', function () {
-    //    //==================================================
-    //    // Login
-    //    //==================================================
-    //    loginPage.loginAsSuperAdmin();
-    //
-    //    //==================================================
-    //    // Select System Setup Tab
-    //    //==================================================
-    //    userDropdown.toggleDropdown();
-    //    userDropdown.SystemSetupLink.click();
-    //    browser.waitForAngular();
-    //    systemSetup.waitForSfdcCredentials();
-    //
-    //    //==================================================
-    //    // Enter SFDC Production Credentials
-    //    //==================================================
-    //    systemSetup.enterBadSfdcProductionCredentials();
-    //    expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("Credentials are invalid.");
-    //
-    //    browser.driver.sleep(20000);
-    //    loginPage.logout();
-    //});
-    //
-    //it('should validate that you can enter SFDC production credentials', function () {
-    //    //==================================================
-    //    // Login
-    //    //==================================================
-    //    loginPage.loginAsSuperAdmin();
-    //
-    //    //==================================================
-    //    // Select System Setup Tab
-    //    //==================================================
-    //    userDropdown.toggleDropdown();
-    //    userDropdown.SystemSetupLink.click();
-    //    browser.waitForAngular();
-    //    systemSetup.waitForSfdcCredentials();
-    //
-    //    //==================================================
-    //    // Enter SFDC Production Credentials
-    //    //==================================================
-    //    systemSetup.enterValidSfdcProductionCredentials();
-    //    expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("");
-    //
-    //    browser.driver.sleep(20000);
-    //    loginPage.logout();
-    //});
+    it('should validate that you can enter Eloqua credentials', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForEloquaCredentials();
+
+        //==================================================
+        // Enter Eloqua Credentials
+        //==================================================
+        systemSetup.enterValidEloquaCredentials();
+        expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("");
+
+        loginPage.logout();
+        browser.driver.sleep(20000);
+    });
+
+    it('should validate that entering invalid SFDC sandbox credentials will fail', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForSfdcCredentials();
+
+        //==================================================
+        // Enter SFDC Sandbox Credentials
+        //==================================================
+        element(by.css('a[href="#formSandbox"]')).click();
+        systemSetup.waitForSfdcSandboxCredentials();
+        systemSetup.enterBadSfdcSandboxCredentials();
+        expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("Credentials are invalid.");
+        loginPage.logout();
+        browser.driver.sleep(20000);
+    });
+
+    it('should validate that you can enter SFDC sandbox credentials', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForSfdcCredentials();
+
+        //==================================================
+        // Enter SFDC Sandbox Credentials
+        //==================================================
+        element(by.css('a[href="#formSandbox"]')).click();
+        systemSetup.waitForSfdcSandboxCredentials();
+        systemSetup.enterValidSfdcSandboxCredentials();
+        expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
+        loginPage.logout();
+        browser.driver.sleep(20000);
+    });
+
+    it('should validate that entering invalid SFDC production credentials will fail', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForSfdcCredentials();
+
+        //==================================================
+        // Enter SFDC Production Credentials
+        //==================================================
+        systemSetup.enterBadSfdcProductionCredentials();
+        expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("Credentials are invalid.");
+
+        loginPage.logout();
+        browser.driver.sleep(20000);
+    });
+
+    it('should validate that you can enter SFDC production credentials', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForSfdcCredentials();
+
+        //==================================================
+        // Enter SFDC Production Credentials
+        //==================================================
+        systemSetup.enterValidSfdcProductionCredentials();
+        expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("");
+
+        loginPage.logout();
+        browser.driver.sleep(20000);
+    });
 
 });
