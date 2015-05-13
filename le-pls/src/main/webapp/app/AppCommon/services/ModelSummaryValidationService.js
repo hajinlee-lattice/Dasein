@@ -138,7 +138,7 @@ angular.module('mainApp.appCommon.services.ModelSummaryValidationService', [
                     //Tags
                     if (!predictor.hasOwnProperty("Tags"))
                         PushErrorWithOffset(errors, "VALIDATION_ERROR_PREDICTOR_TAGS_MISSING", i);
-                    else if (!Array.isArray(predictor.Tags))
+                    else if (predictor.Tags != null && !Array.isArray(predictor.Tags))
                         PushErrorWithOffset(errors, "VALIDATION_ERROR_PREDICTOR_TAGS_UNEXPECTED", i);
 
                     //DataType
