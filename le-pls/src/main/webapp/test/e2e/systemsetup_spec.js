@@ -12,11 +12,11 @@ describe('system setup tests', function () {
         //==================================================
         loginPage.loginAsSuperAdmin();
 
-        ////==================================================
-        //// Select System Setup Tab
-        ////==================================================
-        //userDropdown.toggleDropdown();
-        //expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
         //userDropdown.SystemSetupLink.click();
         //browser.waitForAngular();
         //systemSetup.waitForEloquaCredentials();
