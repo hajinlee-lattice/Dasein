@@ -43,6 +43,7 @@ describe('system setup tests', function () {
         systemSetup.enterBadEloquaCredentials();
         expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("Credentials are invalid.");
         loginPage.logout();
+        browser.driver.sleep(5000);
     }, 10000);
 
     it('should validate that you can enter Eloqua credentials', function () {
@@ -66,6 +67,7 @@ describe('system setup tests', function () {
         expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("");
 
         loginPage.logout();
+        browser.driver.sleep(5000);
     });
 
     it('should validate that entering invalid SFDC sandbox credentials will fail', function () {
@@ -90,6 +92,7 @@ describe('system setup tests', function () {
         systemSetup.enterBadSfdcSandboxCredentials();
         expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("Credentials are invalid.");
         loginPage.logout();
+        browser.driver.sleep(5000);
     });
 
     it('should validate that you can enter SFDC sandbox credentials', function () {
@@ -114,6 +117,7 @@ describe('system setup tests', function () {
         systemSetup.enterValidSfdcSandboxCredentials();
         expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
         loginPage.logout();
+        browser.driver.sleep(5000);
     });
 
     it('should validate that entering invalid SFDC production credentials will fail', function () {
@@ -137,6 +141,7 @@ describe('system setup tests', function () {
         expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("Credentials are invalid.");
 
         loginPage.logout();
+        browser.driver.sleep(5000);
     });
 
     it('should validate that you can enter SFDC production credentials', function () {
@@ -160,6 +165,7 @@ describe('system setup tests', function () {
         expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("");
 
         loginPage.logout();
+        browser.driver.sleep(5000);
     });
 
 });
