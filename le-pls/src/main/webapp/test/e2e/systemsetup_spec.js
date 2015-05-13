@@ -25,29 +25,29 @@ describe('system setup tests', function () {
         browser.driver.sleep(20000);
     });
 
-    it('should validate that entering invalid Eloqua credentials will fail', function () {
-        //==================================================
-        // Login
-        //==================================================
-        loginPage.loginAsSuperAdmin();
-
-        //==================================================
-        // Select System Setup Tab
-        //==================================================
-        userDropdown.toggleDropdown();
-        userDropdown.SystemSetupLink.click();
-        browser.waitForAngular();
-        systemSetup.waitForEloquaCredentials();
-
-        //==================================================
-        // Enter Eloqua Credentials
-        //==================================================
-        systemSetup.enterBadEloquaCredentials();
-        expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("Credentials are invalid.");
-
-        loginPage.logout();
-        browser.driver.sleep(20000);
-    });
+    //it('should validate that entering invalid Eloqua credentials will fail', function () {
+    //    //==================================================
+    //    // Login
+    //    //==================================================
+    //    loginPage.loginAsSuperAdmin();
+    //
+    //    //==================================================
+    //    // Select System Setup Tab
+    //    //==================================================
+    //    userDropdown.toggleDropdown();
+    //    userDropdown.SystemSetupLink.click();
+    //    browser.waitForAngular();
+    //    systemSetup.waitForEloquaCredentials();
+    //
+    //    //==================================================
+    //    // Enter Eloqua Credentials
+    //    //==================================================
+    //    systemSetup.enterBadEloquaCredentials();
+    //    expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("Credentials are invalid.");
+    //
+    //    loginPage.logout();
+    //    browser.driver.sleep(20000);
+    //});
 
     //it('should validate that you can enter Eloqua credentials', function () {
     //    //==================================================
