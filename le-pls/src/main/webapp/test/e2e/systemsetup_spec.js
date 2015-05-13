@@ -17,12 +17,12 @@ describe('system setup tests', function () {
         //==================================================
         userDropdown.toggleDropdown();
         expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
-        //userDropdown.SystemSetupLink.click();
-        //browser.waitForAngular();
-        //systemSetup.waitForEloquaCredentials();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForEloquaCredentials();
 
         loginPage.logout();
-        browser.driver.sleep(5000);
+        browser.driver.sleep(15000);
     });
 
     //it('should validate that entering invalid Eloqua credentials will fail', function () {
