@@ -20,6 +20,8 @@ import org.apache.hadoop.yarn.util.resource.Resources;
 
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
+//20150513 This class will be removed in PLS 2.0.
+@Deprecated
 public class LedpFairScheduler extends FairScheduler {
     private static final Log log = LogFactory.getLog(LedpFairScheduler.class);
     private static final ResourceCalculator resourceCalculator = new DefaultResourceCalculator();
