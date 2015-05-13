@@ -1,6 +1,15 @@
 package com.latticeengines.pls.service.impl;
 
+import java.io.IOException;
 import java.util.Collections;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -41,9 +50,13 @@ public class EmailUtils {
             htmlTemplate = htmlTemplate.replace("{{paragraphs}}", paragraphs);
             htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
 
-            emailService.sendSimpleEmail("Welcome to Lead Prioritization",
-                    htmlTemplate, "text/html; charset=utf-8",
-                    Collections.singleton(user.getEmail()));
+            Multipart mp = new MimeMultipart();
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlTemplate, "text/html");
+            mp.addBodyPart(htmlPart);
+            appendImagesToMultipart(mp);
+
+            emailService.sendMultiPartEmail("Welcome to Lead Prioritization", mp, Collections.singleton(user.getEmail()));
             return true;
         } catch (Exception e) {
             log.error("Failed to send new internal user email to " + user.getEmail() + " " + e.getMessage());
@@ -66,8 +79,13 @@ public class EmailUtils {
             htmlTemplate = htmlTemplate.replace("{{paragraphs}}", paragraphs);
             htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
 
-            emailService.sendSimpleEmail("Welcome to Lattice Lead Prioritization",
-                    htmlTemplate, "text/html; charset=utf-8",
+            Multipart mp = new MimeMultipart();
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlTemplate, "text/html");
+            mp.addBodyPart(htmlPart);
+            appendImagesToMultipart(mp);
+
+            emailService.sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp,
                     Collections.singleton(user.getEmail()));
             return true;
         } catch (Exception e) {
@@ -85,14 +103,37 @@ public class EmailUtils {
             htmlTemplate = htmlTemplate.replace("{{tenantname}}",tenant.getName());
             htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
 
-            emailService.sendSimpleEmail("Welcome to Lattice Lead Prioritization",
-                    htmlTemplate, "text/html; charset=utf-8",
+            Multipart mp = new MimeMultipart();
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlTemplate, "text/html");
+            mp.addBodyPart(htmlPart);
+            appendImagesToMultipart(mp);
+
+            emailService.sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp,
                     Collections.singleton(user.getEmail()));
             return true;
         } catch (Exception e) {
             log.error("Failed to send existing external user email to " + user.getEmail() + " " + e.getMessage());
             return false;
         }
+    }
+
+    private void appendImagesToMultipart(Multipart mp) throws IOException, MessagingException {
+        MimeBodyPart logoPart = new MimeBodyPart();
+        DataSource fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("com/latticeengines/pls/service/email_logo.jpg"), "image/jpeg");
+        logoPart.setDisposition(MimeBodyPart.INLINE);
+        logoPart.setDataHandler(new DataHandler(fds));
+        logoPart.setHeader("Content-ID", "<logo>");
+        mp.addBodyPart(logoPart);
+
+        logoPart = new MimeBodyPart();
+        fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("com/latticeengines/pls/service/email_banner.jpg"), "image/jpeg");
+        logoPart.setDisposition(MimeBodyPart.INLINE);
+        logoPart.setDataHandler(new DataHandler(fds));
+        logoPart.setHeader("Content-ID", "<banner>");
+        mp.addBodyPart(logoPart);
     }
 
 }

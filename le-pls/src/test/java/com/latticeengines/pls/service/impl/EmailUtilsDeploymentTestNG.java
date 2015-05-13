@@ -10,7 +10,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 import junit.framework.Assert;
 
-public class EmailUtilsTestNG extends PlsFunctionalTestNGBase {
+public class EmailUtilsDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private EmailUtils emailUtils;
