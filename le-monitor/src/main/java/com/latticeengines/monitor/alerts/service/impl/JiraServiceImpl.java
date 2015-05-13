@@ -38,7 +38,8 @@ public class JiraServiceImpl implements JiraService {
         triggerEvent(description, clientUrl, Arrays.asList(details));
     }
 
-    public void triggerEvent(String description, String clientUrl, Iterable<? extends BasicNameValuePair> details) {
+    @SuppressWarnings("unchecked")
+	public void triggerEvent(String description, String clientUrl, Iterable<? extends BasicNameValuePair> details) {
 
         JSONObject obj = new JSONObject();
         Map<String, Object> fieldsMap = new HashMap<>();

@@ -149,7 +149,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         return null;
     }
 
-    private Map<String, Object> convertToMap(String response) {
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> convertToMap(String response) {
         Map<String, Object> map = new HashMap<>();
         try {
             map = new ObjectMapper().readValue(response, Map.class);
