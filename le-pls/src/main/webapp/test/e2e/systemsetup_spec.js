@@ -21,8 +21,8 @@ describe('system setup tests', function () {
         browser.waitForAngular();
         systemSetup.waitForEloquaCredentials();
 
-        browser.driver.sleep(20000);
         loginPage.logout();
+        browser.driver.sleep(20000);
     });
 
     it('should validate that entering invalid Eloqua credentials will fail', function () {
@@ -44,8 +44,9 @@ describe('system setup tests', function () {
         //==================================================
         systemSetup.enterBadEloquaCredentials();
         expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("Credentials are invalid.");
-        browser.driver.sleep(20000);
+
         loginPage.logout();
+        browser.driver.sleep(20000);
     });
 
     //it('should validate that you can enter Eloqua credentials', function () {
