@@ -27,9 +27,9 @@ public class ScrubOdrSumFunctionReplace extends BaseOperation implements Functio
 
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry argument = functionCall.getArguments();
-        String srcLclChnlCd= scrub(argument.getString("SRC_LCL_CHNL_CD"));
-        String refLclChnlCd= scrub(argument.getString("REF_LCL_CHNL_CD"));
-        
+        String srcLclChnlCd = scrub(argument.getString("SRC_LCL_CHNL_CD"));
+        String refLclChnlCd = scrub(argument.getString("REF_LCL_CHNL_CD"));
+
         String cnclDate = convertDatetimeToDate(argument.getString("CNCL_DT"));
         String invDate = convertDatetimeToDate(argument.getString("INV_DT"));
         String ordDate = convertDatetimeToDate(argument.getString("ORD_DT"));
@@ -39,7 +39,7 @@ public class ScrubOdrSumFunctionReplace extends BaseOperation implements Functio
         String shipByDate = convertDatetimeToDate(argument.getString("SHIP_BY_DT"));
         String prfOfDlvrDate = convertDatetimeToDate(argument.getString("PRF_OF_DLVR_DT"));
         String estdBusDlvrDate = convertDatetimeToDate(argument.getString("ESTD_BUS_DLVR_DT"));
-                
+
         Tuple result = new Tuple();
 
         result.add(srcLclChnlCd);
@@ -65,9 +65,9 @@ public class ScrubOdrSumFunctionReplace extends BaseOperation implements Functio
         }
         return returnString;
     }
-    
+
     private String convertDatetimeToDate(String s) {
-        if (s != null && !s.isEmpty() && s.trim().length()>10){
+        if (s != null && !s.isEmpty() && s.trim().length() > 10) {
             SimpleDateFormat formatterOld = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
             SimpleDateFormat formatterNew = new SimpleDateFormat("yyyy-MM-dd");
             Date date;
@@ -75,11 +75,11 @@ public class ScrubOdrSumFunctionReplace extends BaseOperation implements Functio
                 date = formatterOld.parse(s);
                 s = formatterNew.format(date);
             } catch (ParseException e) {
-                log.error("Failed to convert " + s + " to Date."); 
+                log.error("Failed to convert " + s + " to Date.");
                 log.error("Failed!", e);
             }
-            
-        }else{
+
+        } else {
             return "";
         }
         return s;

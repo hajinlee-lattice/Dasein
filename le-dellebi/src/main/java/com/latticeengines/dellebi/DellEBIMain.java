@@ -14,8 +14,7 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import com.latticeengines.dellebi.dataprocess.DailyJob;
 
-
-public class DellEBIMain { 
+public class DellEBIMain {
 
     private static final Logger LOGGER = Logger.getLogger(DellEBIMain.class);
 
@@ -28,17 +27,17 @@ public class DellEBIMain {
         String dellebi_propdir = args[0];
         System.setProperty("DELLEBI_PROPDIR", dellebi_propdir);
 
-        LOGGER.info("DellEBI main starts.");  
+        LOGGER.info("DellEBI main starts.");
 
         /******************** Start daily refresh with Quartz **************************/
 
-        LOGGER.info("DellEBI daily refresh starts."); 
+        LOGGER.info("DellEBI daily refresh starts.");
 
         JobDetail dailyRefreshJob = JobBuilder.newJob(DailyJob.class).withIdentity("job1", "group1").build();
 
         // Execute daily refresh on Monday to Friday on 4 PM.
         Trigger dailyRefreshTrigger = TriggerBuilder.newTrigger().withIdentity("trigger1", "group1")
-             .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 13 ? * MON-FRI")).build();
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 13 ? * MON-FRI")).build();
 
         // Schedule the job.
 

@@ -7,7 +7,6 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.FileSplit;
-import org.apache.log4j.Logger;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
@@ -24,21 +23,21 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
     public ScrubQuoteFunction(Fields fieldDeclaration) {
         super(2, fieldDeclaration);
     }
+
     private static final Log log = LogFactory.getLog(ScrubQuoteFunction.class);
-    
+
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry argument = functionCall.getArguments();
-        
+
         HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;
         MultiInputSplit mis = (MultiInputSplit) hfp.getReporter().getInputSplit();
         FileSplit fs = (FileSplit) mis.getWrappedInputSplit();
         String fileName = fs.getPath().getName();
 
-        log.info("Inserted value: " + argument.getString("#QTE_NUM_VAL") + " Badge: "+
-        		argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR") +
-        		" fileName "+fileName); 
-               
+        log.info("Inserted value: " + argument.getString("#QTE_NUM_VAL") + " Badge: "
+                + argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR") + " fileName " + fileName);
+
         String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
 
         Tuple result = new Tuple();
@@ -54,9 +53,9 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         functionCall.getOutputCollector().add(result);
 
     }
-    
+
     private String convertDatetimeToDate(String s) {
-        if (s != null && !s.isEmpty() && s.trim().length()>10){
+        if (s != null && !s.isEmpty() && s.trim().length() > 10) {
             SimpleDateFormat formatterOld = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
             SimpleDateFormat formatterNew = new SimpleDateFormat("yyyy-MM-dd");
             Date date;
@@ -64,11 +63,11 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
                 date = formatterOld.parse(s);
                 s = formatterNew.format(date);
             } catch (ParseException e) {
-            	log.error("Failed to convert " + s + " to Date."); 
-            	log.error("Failed!", e);
+                log.error("Failed to convert " + s + " to Date.");
+                log.error("Failed!", e);
             }
-            
-        }else{
+
+        } else {
             return "";
         }
         return s;

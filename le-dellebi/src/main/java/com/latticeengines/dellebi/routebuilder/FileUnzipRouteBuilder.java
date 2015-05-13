@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.StringWriter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 
@@ -17,10 +14,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.dataformat.zipfile.ZipFileDataFormat;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
-
-import com.latticeengines.dellebi.flowdef.DailyFlow;
 
 public class FileUnzipRouteBuilder extends RouteBuilder {
 
@@ -28,7 +24,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
 
     @Value("${dellebi.camelunzipoutputpath}")
     private String camelUnzipOutputPath;
-    
+
     @Value("${dellebi.cameldataincomepathnormal}")
     private String camelDataIncomePathNormal;
 
@@ -42,7 +38,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
     private String warrantyGlobal;
     @Value("${dellebi.quotetrans}")
     private String quoteTrans;
-    
+
     @Value("${dellebi.quoteheaders}")
     private String quoteHeaders;
 
@@ -85,9 +81,11 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                                 if (smbFile.canWrite()) {
                                     smbFile.delete();
                                 }
-                            }else{
-                            	File zipFile = new File(camelDataIncomePathNormal + exchange.getIn().getHeader("CamelFileName").toString().substring(0, fileName.indexOf(".txt")) + "zip");
-                            	zipFile.delete();
+                            } else {
+                                File zipFile = new File(camelDataIncomePathNormal
+                                        + exchange.getIn().getHeader("CamelFileName").toString()
+                                                .substring(0, fileName.indexOf(".txt")) + "zip");
+                                zipFile.delete();
                             }
                         }
                     }
@@ -111,9 +109,11 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                                 if (smbFile.canWrite()) {
                                     smbFile.delete();
                                 }
-                            }else{
-                            	File zipFile = new File(camelDataIncomePathNormal + exchange.getIn().getHeader("CamelFileName").toString().substring(0, fileName.indexOf(".txt")) + "zip");
-                            	zipFile.delete();
+                            } else {
+                                File zipFile = new File(camelDataIncomePathNormal
+                                        + exchange.getIn().getHeader("CamelFileName").toString()
+                                                .substring(0, fileName.indexOf(".txt")) + "zip");
+                                zipFile.delete();
                             }
                         }
                     }
@@ -137,9 +137,11 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                                 if (smbFile.canWrite()) {
                                     smbFile.delete();
                                 }
-                            }else{
-                            	File zipFile = new File(camelDataIncomePathNormal + exchange.getIn().getHeader("CamelFileName").toString().substring(0, fileName.indexOf(".txt")) + "zip");
-                            	zipFile.delete();
+                            } else {
+                                File zipFile = new File(camelDataIncomePathNormal
+                                        + exchange.getIn().getHeader("CamelFileName").toString()
+                                                .substring(0, fileName.indexOf(".txt")) + "zip");
+                                zipFile.delete();
                             }
                         }
                     }
@@ -163,9 +165,12 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                                 if (smbFile.canWrite()) {
                                     smbFile.delete();
                                 }
-                            }else{
-                            	File zipFile = new File(camelDataIncomePathNormal + "/" + exchange.getIn().getHeader("CamelFileName").toString().substring(0, fileName.indexOf(".txt")) + "zip");
-                            	zipFile.delete();
+                            } else {
+                                File zipFile = new File(camelDataIncomePathNormal
+                                        + "/"
+                                        + exchange.getIn().getHeader("CamelFileName").toString()
+                                                .substring(0, fileName.indexOf(".txt")) + "zip");
+                                zipFile.delete();
                             }
                         }
                     }
@@ -176,17 +181,17 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                 .streaming()
                 .to("mock:processZipEntry")
                 .process(new Processor() {
-							public void process(Exchange exchange) throws Exception {
-								
-								Message in = exchange.getIn();
-								
-								StringWriter writer = new StringWriter();
-								IOUtils.copy(exchange.getIn().getBody(InputStream.class), writer);
-								String theString = writer.toString();
-								
-								in.setBody(quoteHeaders + "\n" + theString);
-							}
-						})
+                    public void process(Exchange exchange) throws Exception {
+
+                        Message in = exchange.getIn();
+
+                        StringWriter writer = new StringWriter();
+                        IOUtils.copy(exchange.getIn().getBody(InputStream.class), writer);
+                        String theString = writer.toString();
+
+                        in.setBody(quoteHeaders + "\n" + theString);
+                    }
+                })
                 .to(camelUnzipOutputPath + "/" + quoteTrans + "/")
                 .process(new Processor() {
                     public void process(Exchange exchange) throws Exception {
@@ -201,15 +206,16 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                                 if (smbFile.canWrite()) {
                                     smbFile.delete();
                                 }
-                            }else{
-                            	File zipFile = new File(camelDataIncomePathNormal + "/" +  exchange.getIn().getHeader("CamelFileName").toString().substring(0, fileName.indexOf(".txt")) + "zip");
-                            	zipFile.delete();
+                            } else {
+                                File zipFile = new File(camelDataIncomePathNormal
+                                        + "/"
+                                        + exchange.getIn().getHeader("CamelFileName").toString()
+                                                .substring(0, fileName.indexOf(".txt")) + "zip");
+                                zipFile.delete();
                             }
                         }
                     }
-                })
-                .endChoice()
-                .when(header("CamelFileName").startsWith("tgt_warranty_global")).split(new ZipSplitter())
+                }).endChoice().when(header("CamelFileName").startsWith("tgt_warranty_global")).split(new ZipSplitter())
                 .streaming().to("mock:processZipEntry").to(camelUnzipOutputPath + "/" + warrantyGlobal + "/")
                 .process(new Processor() {
                     public void process(Exchange exchange) throws Exception {
@@ -223,9 +229,11 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                                 if (smbFile.canWrite()) {
                                     smbFile.delete();
                                 }
-                            }else{
-                            	File zipFile = new File(camelDataIncomePathNormal + exchange.getIn().getHeader("CamelFileName").toString().substring(0, fileName.indexOf(".txt")) + "zip");
-                            	zipFile.delete();
+                            } else {
+                                File zipFile = new File(camelDataIncomePathNormal
+                                        + exchange.getIn().getHeader("CamelFileName").toString()
+                                                .substring(0, fileName.indexOf(".txt")) + "zip");
+                                zipFile.delete();
                             }
                         }
                     }

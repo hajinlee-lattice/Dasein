@@ -7,12 +7,10 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class NormalFileSystemOperations implements FileSystemOperations {
 
-	private static final Log log = LogFactory.getLog(NormalFileSystemOperations.class);
+    private static final Log log = LogFactory.getLog(NormalFileSystemOperations.class);
 
     @Override
     public void cleanFolder(String folderName) {
@@ -20,8 +18,8 @@ public class NormalFileSystemOperations implements FileSystemOperations {
         try {
             FileUtils.cleanDirectory(folder);
         } catch (IOException e) {
-        	log.warn("Cannot clean folder!");
-        	log.warn("Failed!", e);
+            log.warn("Cannot clean folder!");
+            log.warn("Failed!", e);
         }
     }
 
@@ -34,7 +32,7 @@ public class NormalFileSystemOperations implements FileSystemOperations {
             public boolean accept(File dir, String name) {
                 String lowercaseName = name.toLowerCase();
                 if (lowercaseName.endsWith(".txt")) {
-                	log.info("Cascading found txt file " + lowercaseName + " and starts to process it.");
+                    log.info("Cascading found txt file " + lowercaseName + " and starts to process it.");
                     return true;
                 } else {
                     return false;

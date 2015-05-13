@@ -27,7 +27,7 @@ public class ScrubWarFunction extends BaseOperation implements Function {
 
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry inputargument = functionCall.getArguments();
-        
+
         HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;
         MultiInputSplit mis = (MultiInputSplit) hfp.getReporter().getInputSplit();
         FileSplit fs = (FileSplit) mis.getWrappedInputSplit();

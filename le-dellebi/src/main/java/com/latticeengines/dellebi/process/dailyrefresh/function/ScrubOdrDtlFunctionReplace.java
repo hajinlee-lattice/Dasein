@@ -20,7 +20,7 @@ public class ScrubOdrDtlFunctionReplace extends BaseOperation implements Functio
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry argument = functionCall.getArguments();
         String svcTagId = scrub(argument.getString("SVC_TAG_ID"));
-        String srcBuId= argument.getString("SRC_BU_ID");
+        String srcBuId = argument.getString("SRC_BU_ID");
         Tuple result = new Tuple();
 
         result.add(svcTagId);

@@ -14,7 +14,6 @@ import com.cloudera.sqoop.util.OptionsFileUtil;
 @SuppressWarnings("deprecation")
 public class LedpSqoop extends Sqoop {
 
-    
     private SqoopTool tool;
     private SqoopOptions options;
     private String[] childPrgmArgs;

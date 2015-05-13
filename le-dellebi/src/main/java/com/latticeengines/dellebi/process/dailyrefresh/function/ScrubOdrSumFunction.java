@@ -26,12 +26,12 @@ public class ScrubOdrSumFunction extends BaseOperation implements Function {
     }
 
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
-        
+
         HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;
         MultiInputSplit mis = (MultiInputSplit) hfp.getReporter().getInputSplit();
         FileSplit fs = (FileSplit) mis.getWrappedInputSplit();
         String fileName = fs.getPath().getName();
-        
+
         TupleEntry argument = functionCall.getArguments();
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");

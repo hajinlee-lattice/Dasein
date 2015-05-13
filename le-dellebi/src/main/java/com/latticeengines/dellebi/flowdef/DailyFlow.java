@@ -6,13 +6,8 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.stereotype.Component;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
@@ -25,10 +20,10 @@ import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
 import com.latticeengines.dellebi.util.NormalFileSystemOperations;
 
-public class DailyFlow{
+public class DailyFlow {
 
     private static final Log log = LogFactory.getLog(DailyFlow.class);
-    
+
     @Value("${dellebi.datahadoopinpath}")
     private String dataHadoopInPath;
 
@@ -42,109 +37,116 @@ public class DailyFlow{
     private String warrantyGlobal;
     @Value("${dellebi.quotetrans}")
     private String quoteTrans;
-    
+
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
-    
+
     @Value("${dellebi.mailreceivelist}")
     private String mailReceiveList;
-    
+
     @Autowired
     private HadoopFileSystemOperations hadoopfilesystemoperations;
-    
+
     @Autowired
     private NormalFileSystemOperations normalfilesystemoperations;
-    
+
     @Autowired
     private MailSender mailSender;
-    
+
     private ArrayList<FlowDef> flowList;
-    
-    public DailyFlow(ArrayList<FlowDef> flowList){
-    	this.flowList = flowList;
+
+    public DailyFlow(ArrayList<FlowDef> flowList) {
+        this.flowList = flowList;
     }
 
-    public void doDailyFlow() {  	
-        
-    	log.info("All daily refresh files arrive!");
-    	log.info("Start process data on HDFS!");
-        
+    public void doDailyFlow() {
+
+        log.info("All daily refresh files arrive!");
+        log.info("Start process data on HDFS!");
+
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
         FlowConnector flowConnector = new Hadoop2MR1FlowConnector(properties);
 
         log.info("Start to process income files.");
-        
+
         FileSystemOperations fileSystem = null;
 
-        if(System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")){        	
+        if (System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
             fileSystem = normalfilesystemoperations;
-        }else{
+        } else {
             fileSystem = hadoopfilesystemoperations;
         }
-        
+
         try {
             for (Iterator<FlowDef> flow = flowList.iterator(); flow.hasNext();) {
                 FlowDef item = flow.next();
-                
-                if ("OrderSumDailyFlow".equals(item.getName()) && (fileSystem.listFileNumber(dataHadoopInPath + "/" + orderSummary) != 0)) {
+
+                if ("OrderSumDailyFlow".equals(item.getName())
+                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + orderSummary) != 0)) {
                     flowConnector.connect(item).complete();
-                    //Remove .txt file after cascading processes data.
+                    // Remove .txt file after cascading processes data.
                     fileSystem.cleanFolder(dataHadoopInPath + "/" + orderSummary);
-                } else if ("OrderDetailDailyFlow".equals(item.getName()) && (fileSystem.listFileNumber(dataHadoopInPath + "/" + orderDetail) != 0)) {
+                } else if ("OrderDetailDailyFlow".equals(item.getName())
+                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + orderDetail) != 0)) {
                     flowConnector.connect(item).complete();
                     fileSystem.cleanFolder(dataHadoopInPath + "/" + orderDetail);
-                } else if ("ShipDailyFlow".equals(item.getName()) && (fileSystem.listFileNumber(dataHadoopInPath + "/" + shipToAddrLattice) != 0)) {
+                } else if ("ShipDailyFlow".equals(item.getName())
+                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + shipToAddrLattice) != 0)) {
                     flowConnector.connect(item).complete();
                     fileSystem.cleanFolder(dataHadoopInPath + "/" + shipToAddrLattice);
-                } else if ("WarrantyDailyFlow".equals(item.getName()) && (fileSystem.listFileNumber(dataHadoopInPath + "/" + warrantyGlobal) != 0)) {
+                } else if ("WarrantyDailyFlow".equals(item.getName())
+                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + warrantyGlobal) != 0)) {
                     flowConnector.connect(item).complete();
                     fileSystem.cleanFolder(dataHadoopInPath + "/" + warrantyGlobal);
-                } else if ("QuoteTransDailyFlow".equals(item.getName()) && (fileSystem.listFileNumber(dataHadoopInPath + "/" + quoteTrans) != 0)) {
-                	log.info("Cascading starts to process quote files!");
-                	flowConnector.connect(item).complete();
-                	log.info("Cascading finished to process quote files!");
+                } else if ("QuoteTransDailyFlow".equals(item.getName())
+                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + quoteTrans) != 0)) {
+                    log.info("Cascading starts to process quote files!");
+                    flowConnector.connect(item).complete();
+                    log.info("Cascading finished to process quote files!");
                     fileSystem.cleanFolder(dataHadoopInPath + "/" + quoteTrans);
                 }
             }
-        } catch(PlannerException e){
-        	log.error("Seems there is corrupt data!", e);
-        	mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed because of some reasons!","Seems there is corrupt data!" + e);
+        } catch (PlannerException e) {
+            log.error("Seems there is corrupt data!", e);
+            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed because of some reasons!",
+                    "Seems there is corrupt data!" + e);
         } catch (Exception e) {
-        	log.error("Failed!", e);
-            mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed because of some reasons!","Please check Dell EBI logs on "+ System.getProperty("DELLEBI_PROPDIR") + " environment " + e);
+            log.error("Failed!", e);
+            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed because of some reasons!",
+                    "Please check Dell EBI logs on " + System.getProperty("DELLEBI_PROPDIR") + " environment " + e);
         }
     }
-    
-    public void setDataHadoopInPath(String s){
+
+    public void setDataHadoopInPath(String s) {
         this.dataHadoopInPath = s;
     }
-    
-    public void setOrderSummary(String s){
+
+    public void setOrderSummary(String s) {
         this.orderSummary = s;
     }
-    
-    public void setOrderDetail(String s){
+
+    public void setOrderDetail(String s) {
         this.orderDetail = s;
     }
-    
-    public void setShipToAddrLattice(String s){
+
+    public void setShipToAddrLattice(String s) {
         this.shipToAddrLattice = s;
     }
-    
-    public void setWarrantyGlobal(String s){
+
+    public void setWarrantyGlobal(String s) {
         this.warrantyGlobal = s;
     }
-    
-    public void setQuoteTrans(String s){
+
+    public void setQuoteTrans(String s) {
         this.quoteTrans = s;
     }
-    
-    public void setDataHadoopWorkingPath(String s){
+
+    public void setDataHadoopWorkingPath(String s) {
         this.dataHadoopWorkingPath = s;
     }
-    
-    public void setMailReceiveList(String s){
-    	this.mailReceiveList = s;
+
+    public void setMailReceiveList(String s) {
+        this.mailReceiveList = s;
     }
 }

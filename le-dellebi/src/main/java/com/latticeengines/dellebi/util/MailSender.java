@@ -1,19 +1,21 @@
 package com.latticeengines.dellebi.util;
 
-import java.util.*;
+import java.util.Properties;
 
-import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.latticeengines.dellebi.flowdef.DailyFlow;
-
 public class MailSender {
 
-	private static final Log log = LogFactory.getLog(MailSender.class);
+    private static final Log log = LogFactory.getLog(MailSender.class);
 
     @Value("${dellebi.mailhost}")
     private String mailHost;
