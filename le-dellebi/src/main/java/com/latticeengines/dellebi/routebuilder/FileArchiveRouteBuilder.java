@@ -41,7 +41,7 @@ public class FileArchiveRouteBuilder extends RouteBuilder {
 										+ exchange.getIn().getHeader(
 												"CamelFileName"));
 	
-								mailSender.sendEmail(mailReceiveList,"New Dell EBI files arrive!","Received Dell EBI file: "+ exchange.getIn().getHeader("CamelFileName"));
+								mailSender.sendEmail(mailReceiveList,"New Dell EBI files arrive!","Received Dell EBI file: "+ exchange.getIn().getHeader("CamelFileName") + " in " + System.getProperty("DELLEBI_PROPDIR") + " environment.");
 							}
 						})
 						.multicast()
