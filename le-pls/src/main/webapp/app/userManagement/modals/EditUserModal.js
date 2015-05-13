@@ -55,7 +55,7 @@ app.controller('EditUserController', function ($scope, $rootScope, _, ResourceUt
     $scope.editUserErrorMessage = "";
     $scope.showEditUserError = false;
     
-    $scope.targetLevel = {AccessLevel: RightsUtility.accessLevel.EXTERNAL_USER.name};
+    $scope.targetLevel = {AccessLevel: userLevel.name};
 
     $scope.editUserClick = function ($event) {
         if ($event != null) {
