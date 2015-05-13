@@ -22,7 +22,7 @@ describe('system setup tests', function () {
 
         loginPage.logout();
     });
-    
+
     it('should validate that entering invalid Eloqua credentials will fail', function () {
         //==================================================
         // Login
@@ -36,16 +36,15 @@ describe('system setup tests', function () {
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        
+
         //==================================================
         // Enter Eloqua Credentials
         //==================================================
         systemSetup.enterBadEloquaCredentials();
         expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("Credentials are invalid.");
-
         loginPage.logout();
-    });
-    
+    }, 10000);
+
     it('should validate that you can enter Eloqua credentials', function () {
         //==================================================
         // Login
@@ -59,7 +58,7 @@ describe('system setup tests', function () {
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        
+
         //==================================================
         // Enter Eloqua Credentials
         //==================================================
@@ -68,7 +67,7 @@ describe('system setup tests', function () {
 
         loginPage.logout();
     });
-    
+
     it('should validate that entering invalid SFDC sandbox credentials will fail', function () {
         //==================================================
         // Login
@@ -82,7 +81,7 @@ describe('system setup tests', function () {
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        
+
         //==================================================
         // Enter SFDC Sandbox Credentials
         //==================================================
@@ -92,7 +91,7 @@ describe('system setup tests', function () {
 
         loginPage.logout();
     });
-    
+
     it('should validate that you can enter SFDC sandbox credentials', function () {
         //==================================================
         // Login
@@ -106,7 +105,7 @@ describe('system setup tests', function () {
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        
+
         //==================================================
         // Enter SFDC Sandbox Credentials
         //==================================================
@@ -116,7 +115,7 @@ describe('system setup tests', function () {
 
         loginPage.logout();
     });
-    
+
     it('should validate that entering invalid SFDC production credentials will fail', function () {
         //==================================================
         // Login
@@ -130,7 +129,7 @@ describe('system setup tests', function () {
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        
+
         //==================================================
         // Enter SFDC Production Credentials
         //==================================================
@@ -139,7 +138,7 @@ describe('system setup tests', function () {
 
         loginPage.logout();
     });
-    
+
     it('should validate that you can enter SFDC production credentials', function () {
         //==================================================
         // Login
@@ -153,7 +152,7 @@ describe('system setup tests', function () {
         userDropdown.SystemSetupLink.click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        
+
         //==================================================
         // Enter SFDC Production Credentials
         //==================================================

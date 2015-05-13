@@ -166,7 +166,8 @@ angular.module('mainApp.config.services.ConfigService', [
         $http({
             method: "POST", 
             url: credentialUrl,
-            data: JSON.stringify(apiObj)
+            data: JSON.stringify(apiObj),
+            timeout: 10000
         })
         .success(function(data, status, headers, config) {
             if (status === 200) {
@@ -188,7 +189,9 @@ angular.module('mainApp.config.services.ConfigService', [
         .error(function(data, status, headers, config) {
             SessionService.HandleResponseErrors(data, status);
             var errorMessage;
-            if (data == null || data === "") {
+            if (status === 0) {
+                errorMessage = ResourceUtility.getString("VALIDATE_CREDENTIALS_TIMEOUT");
+            } else if (data == null || data === "") {
                 errorMessage = ResourceUtility.getString("SYSTEM_ERROR");
             } else if (data.errorCode === "LEDP_18030") {
                 errorMessage = ResourceUtility.getString("VALIDATE_CREDENTIALS_FAILURE");
