@@ -167,7 +167,7 @@ angular.module('mainApp.config.services.ConfigService', [
             method: "POST", 
             url: credentialUrl,
             data: JSON.stringify(apiObj),
-            timeout: 10000
+            timeout: 60000
         })
         .success(function(data, status, headers, config) {
             if (status === 200) {
