@@ -138,7 +138,6 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     public void installTestTenants() throws Exception {
         createTestTenant("Tenant1", "Tenant 1", CRMTopology.MARKETO);
         createTestTenant("Tenant2", "Tenant 2", CRMTopology.ELOQUA);
-        createCommonTenant();
     }
 
     private void createTestTenant(String tenantId, String tenantName, CRMTopology topology)
@@ -155,52 +154,6 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
                 new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
         SpaceConfiguration spaceConfig = new SpaceConfiguration();
         spaceConfig.setTopology(topology);
-
-        TenantRegistration reg = new TenantRegistration();
-        reg.setSpaceInfo(spaceInfo);
-        reg.setTenantInfo(tenantInfo);
-        reg.setContractInfo(contractInfo);
-        reg.setSpaceConfig(spaceConfig);
-
-        try {
-            deleteTenant(contractId, tenantId);
-        } catch (Exception e) {
-            //ignore
-        }
-        createTenant(contractId, tenantId, false, reg);
-
-        String testAdminUsername = "bnguyen@lattice-engines.com";
-
-        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
-        confDir.makePathsLocal();
-
-        // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/SuperAdminEmails"));
-        node.getDocument().setData("[\"" + testAdminUsername + "\"]");
-
-        node = confDir.get(new Path("/LatticeAdminEmails"));
-        node.getDocument().setData("[ ]");
-
-        // send to bootstrapper message queue
-        super.bootstrap(contractId, tenantId, serviceName, confDir);
-    }
-
-    private void createCommonTenant() throws Exception {
-
-        String contractId = "CommonTestContract";
-        String tenantId = "TestTenant";
-        loginAD();
-
-        CustomerSpaceProperties props = new CustomerSpaceProperties();
-        props.description = "PLS Test tenant";
-        props.displayName = "Lattice Internal Test Tenant";
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
-
-        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
-        TenantInfo tenantInfo = new TenantInfo(
-                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
-
-        SpaceConfiguration spaceConfig = tenantService.getDefaultSpaceConfig();
 
         TenantRegistration reg = new TenantRegistration();
         reg.setSpaceInfo(spaceInfo);
