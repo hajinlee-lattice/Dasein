@@ -8,15 +8,15 @@ package com.latticeengines.scoring.util;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class ModelEvaluationResult extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ModelEvaluationResult\",\"fields\":[{\"name\":\"LeadID\",\"type\":[\"string\",\"null\"],\"columnName\":\"LeadID\",\"sqlType\":\"12\"},{\"name\":\"Bucket_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Bucket_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Lift\",\"type\":[\"float\",\"null\"],\"columnName\":\"Lift\",\"sqlType\":\"7\"},{\"name\":\"Play_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Play_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Percentile\",\"type\":[\"int\",\"null\"],\"columnName\":\"Percentile\",\"sqlType\":\"4\"},{\"name\":\"Probability\",\"type\":[\"float\",\"null\"],\"columnName\":\"Probability\",\"sqlType\":\"7\"},{\"name\":\"RawScore\",\"type\":[\"float\",\"null\"],\"columnName\":\"RawScore\",\"sqlType\":\"7\"},{\"name\":\"Request_ID\",\"type\":[\"string\",\"null\"],\"columnName\":\"Request_ID\",\"sqlType\":\"12\"},{\"name\":\"Score\",\"type\":[\"int\",\"null\"],\"columnName\":\"Score\",\"sqlType\":\"4\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ModelEvaluationResult\",\"fields\":[{\"name\":\"LeadID\",\"type\":[\"string\",\"null\"],\"columnName\":\"LeadID\",\"sqlType\":\"12\"},{\"name\":\"Bucket_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Bucket_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Lift\",\"type\":[\"double\",\"null\"],\"columnName\":\"Lift\",\"sqlType\":\"7\"},{\"name\":\"Play_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Play_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Percentile\",\"type\":[\"int\",\"null\"],\"columnName\":\"Percentile\",\"sqlType\":\"4\"},{\"name\":\"Probability\",\"type\":[\"double\",\"null\"],\"columnName\":\"Probability\",\"sqlType\":\"7\"},{\"name\":\"RawScore\",\"type\":[\"double\",\"null\"],\"columnName\":\"RawScore\",\"sqlType\":\"7\"},{\"name\":\"Request_ID\",\"type\":[\"string\",\"null\"],\"columnName\":\"Request_ID\",\"sqlType\":\"12\"},{\"name\":\"Score\",\"type\":[\"int\",\"null\"],\"columnName\":\"Score\",\"sqlType\":\"4\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   @Deprecated public java.lang.String LeadID;
   @Deprecated public java.lang.String Bucket_Display_Name;
-  @Deprecated public java.lang.Float Lift;
+  @Deprecated public java.lang.Double Lift;
   @Deprecated public java.lang.String Play_Display_Name;
   @Deprecated public java.lang.Integer Percentile;
-  @Deprecated public java.lang.Float Probability;
-  @Deprecated public java.lang.Float RawScore;
+  @Deprecated public java.lang.Double Probability;
+  @Deprecated public java.lang.Double RawScore;
   @Deprecated public java.lang.String Request_ID;
   @Deprecated public java.lang.Integer Score;
 
@@ -28,7 +28,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   /**
    * All-args constructor.
    */
-  public ModelEvaluationResult(java.lang.String LeadID, java.lang.String Bucket_Display_Name, java.lang.Float Lift, java.lang.String Play_Display_Name, java.lang.Integer Percentile, java.lang.Float Probability, java.lang.Float RawScore, java.lang.String Request_ID, java.lang.Integer Score) {
+  public ModelEvaluationResult(java.lang.String LeadID, java.lang.String Bucket_Display_Name, java.lang.Double Lift, java.lang.String Play_Display_Name, java.lang.Integer Percentile, java.lang.Double Probability, java.lang.Double RawScore, java.lang.String Request_ID, java.lang.Integer Score) {
     this.LeadID = LeadID;
     this.Bucket_Display_Name = Bucket_Display_Name;
     this.Lift = Lift;
@@ -62,11 +62,11 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     switch (field$) {
     case 0: LeadID = (java.lang.String)value$; break;
     case 1: Bucket_Display_Name = (java.lang.String)value$; break;
-    case 2: Lift = (java.lang.Float)value$; break;
+    case 2: Lift = (java.lang.Double)value$; break;
     case 3: Play_Display_Name = (java.lang.String)value$; break;
     case 4: Percentile = (java.lang.Integer)value$; break;
-    case 5: Probability = (java.lang.Float)value$; break;
-    case 6: RawScore = (java.lang.Float)value$; break;
+    case 5: Probability = (java.lang.Double)value$; break;
+    case 6: RawScore = (java.lang.Double)value$; break;
     case 7: Request_ID = (java.lang.String)value$; break;
     case 8: Score = (java.lang.Integer)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
@@ -106,7 +106,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   /**
    * Gets the value of the 'Lift' field.
    */
-  public java.lang.Float getLift() {
+  public java.lang.Double getLift() {
     return Lift;
   }
 
@@ -114,7 +114,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
    * Sets the value of the 'Lift' field.
    * @param value the value to set.
    */
-  public void setLift(java.lang.Float value) {
+  public void setLift(java.lang.Double value) {
     this.Lift = value;
   }
 
@@ -151,7 +151,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   /**
    * Gets the value of the 'Probability' field.
    */
-  public java.lang.Float getProbability() {
+  public java.lang.Double getProbability() {
     return Probability;
   }
 
@@ -159,14 +159,14 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
    * Sets the value of the 'Probability' field.
    * @param value the value to set.
    */
-  public void setProbability(java.lang.Float value) {
+  public void setProbability(java.lang.Double value) {
     this.Probability = value;
   }
 
   /**
    * Gets the value of the 'RawScore' field.
    */
-  public java.lang.Float getRawScore() {
+  public java.lang.Double getRawScore() {
     return RawScore;
   }
 
@@ -174,7 +174,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
    * Sets the value of the 'RawScore' field.
    * @param value the value to set.
    */
-  public void setRawScore(java.lang.Float value) {
+  public void setRawScore(java.lang.Double value) {
     this.RawScore = value;
   }
 
@@ -231,11 +231,11 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
 
     private java.lang.String LeadID;
     private java.lang.String Bucket_Display_Name;
-    private java.lang.Float Lift;
+    private java.lang.Double Lift;
     private java.lang.String Play_Display_Name;
     private java.lang.Integer Percentile;
-    private java.lang.Float Probability;
-    private java.lang.Float RawScore;
+    private java.lang.Double Probability;
+    private java.lang.Double RawScore;
     private java.lang.String Request_ID;
     private java.lang.Integer Score;
 
@@ -341,12 +341,12 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     }
 
     /** Gets the value of the 'Lift' field */
-    public java.lang.Float getLift() {
+    public java.lang.Double getLift() {
       return Lift;
     }
     
     /** Sets the value of the 'Lift' field */
-    public ModelEvaluationResult.Builder setLift(java.lang.Float value) {
+    public ModelEvaluationResult.Builder setLift(java.lang.Double value) {
       validate(fields()[2], value);
       this.Lift = value;
       fieldSetFlags()[2] = true;
@@ -416,12 +416,12 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     }
 
     /** Gets the value of the 'Probability' field */
-    public java.lang.Float getProbability() {
+    public java.lang.Double getProbability() {
       return Probability;
     }
     
     /** Sets the value of the 'Probability' field */
-    public ModelEvaluationResult.Builder setProbability(java.lang.Float value) {
+    public ModelEvaluationResult.Builder setProbability(java.lang.Double value) {
       validate(fields()[5], value);
       this.Probability = value;
       fieldSetFlags()[5] = true;
@@ -441,12 +441,12 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     }
 
     /** Gets the value of the 'RawScore' field */
-    public java.lang.Float getRawScore() {
+    public java.lang.Double getRawScore() {
       return RawScore;
     }
     
     /** Sets the value of the 'RawScore' field */
-    public ModelEvaluationResult.Builder setRawScore(java.lang.Float value) {
+    public ModelEvaluationResult.Builder setRawScore(java.lang.Double value) {
       validate(fields()[6], value);
       this.RawScore = value;
       fieldSetFlags()[6] = true;
@@ -521,11 +521,11 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
         ModelEvaluationResult record = new ModelEvaluationResult();
         record.LeadID = fieldSetFlags()[0] ? this.LeadID : (java.lang.String) defaultValue(fields()[0]);
         record.Bucket_Display_Name = fieldSetFlags()[1] ? this.Bucket_Display_Name : (java.lang.String) defaultValue(fields()[1]);
-        record.Lift = fieldSetFlags()[2] ? this.Lift : (java.lang.Float) defaultValue(fields()[2]);
+        record.Lift = fieldSetFlags()[2] ? this.Lift : (java.lang.Double) defaultValue(fields()[2]);
         record.Play_Display_Name = fieldSetFlags()[3] ? this.Play_Display_Name : (java.lang.String) defaultValue(fields()[3]);
         record.Percentile = fieldSetFlags()[4] ? this.Percentile : (java.lang.Integer) defaultValue(fields()[4]);
-        record.Probability = fieldSetFlags()[5] ? this.Probability : (java.lang.Float) defaultValue(fields()[5]);
-        record.RawScore = fieldSetFlags()[6] ? this.RawScore : (java.lang.Float) defaultValue(fields()[6]);
+        record.Probability = fieldSetFlags()[5] ? this.Probability : (java.lang.Double) defaultValue(fields()[5]);
+        record.RawScore = fieldSetFlags()[6] ? this.RawScore : (java.lang.Double) defaultValue(fields()[6]);
         record.Request_ID = fieldSetFlags()[7] ? this.Request_ID : (java.lang.String) defaultValue(fields()[7]);
         record.Score = fieldSetFlags()[8] ? this.Score : (java.lang.Integer) defaultValue(fields()[8]);
         return record;

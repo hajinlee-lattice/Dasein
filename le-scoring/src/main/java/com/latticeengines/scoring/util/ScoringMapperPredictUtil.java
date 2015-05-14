@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -47,13 +48,12 @@ public class ScoringMapperPredictUtil {
 	private static final String PERCENTILE_BUCKETS_MINIMUMSCORE = "MinimumScore";
 	private static final String PERCENTILE_BUCKETS_MAXIMUMSCORE = "MaximumScore";
     private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
-    private static final String MODEL_PREFIX = "ms__";
     
     // TODO debugging purposes
 	private static final String absolutePath = "/Users/ygao/test/e2e/";
     private static final int THRESHOLD = 10000;
 	
-	public static ArrayList<ModelEvaluationResult> evaluate(HashMap<String, JSONObject> models, HashMap<String, ArrayList<String>> leadInputRecordMap, String[] requestID, String outputPath, int threshold) {
+	public static ArrayList<ModelEvaluationResult> evaluate(HashMap<String, JSONObject> models, HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, String> modelIdMap, String[] requestID, String outputPath, int threshold) {
 		ArrayList<ModelEvaluationResult> resultList= null;
 		// spawn python 
 		Set<String> modelIDs = models.keySet();
@@ -62,7 +62,7 @@ public class ScoringMapperPredictUtil {
 			sb.append(modelID +" ");
 		} 
 		//Process p = Runtime.getRuntime().exec("python /Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/test2.py " + sb.toString());
-		log.info("python " + "scoring.py " + sb.toString());
+		log.info("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
 		File pyFile = new File("scoring.py");
 		if (!pyFile.exists()) {
 			new Exception("scoring.py does not exist!");
@@ -97,7 +97,7 @@ public class ScoringMapperPredictUtil {
 			e.printStackTrace();
 		}
 		
-		resultList = readScoreFiles(leadInputRecordMap, models, requestID, outputPath, threshold);
+		resultList = readScoreFiles(leadInputRecordMap, models, modelIdMap, requestID, outputPath, threshold);
 		return resultList;
 	}
 	
@@ -111,7 +111,8 @@ public class ScoringMapperPredictUtil {
 		if (yarnConfiguration == null) {
 			new Exception("yarnConfiguration is null");
 		}
-		String fileName = "/Users/ygao/Downloads/text.avro";
+		String name = UUID.randomUUID() + ".avro";
+		String fileName = "/Users/ygao/Downloads/" + name;
 		File outputFile = new File(fileName);
   		DatumWriter<ModelEvaluationResult> userDatumWriter = new SpecificDatumWriter<ModelEvaluationResult>();
         DataFileWriter<ModelEvaluationResult> dataFileWriter = new DataFileWriter<ModelEvaluationResult>(userDatumWriter);
@@ -135,13 +136,13 @@ public class ScoringMapperPredictUtil {
 			e.printStackTrace();
 		}
         try {
-			HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/test.avro");
+			HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/" + name);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private static ArrayList<ModelEvaluationResult> readScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, String[] requestID, String outputPath, int threshold) {
+	private static ArrayList<ModelEvaluationResult> readScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, String[] requestID, String outputPath, int threshold) {
 		log.info("come to the readScoreFiles function");
 		Set<String> modelIDs = leadInputRecordMap.keySet();
 		// list of HashMap<leadID: score>
@@ -149,7 +150,7 @@ public class ScoringMapperPredictUtil {
 		for(String id: modelIDs) {
 			log.info("id is " + id);
 			// key: leadID, value: raw score
-			HashMap<String, Float> scores = new HashMap<String, Float>();
+			HashMap<String, Double> scores = new HashMap<String, Double>();
 			int value = leadInputRecordMap.get(id).size();
 			JSONObject model = models.get(id);
 			int remain = value/threshold;
@@ -158,14 +159,14 @@ public class ScoringMapperPredictUtil {
 			}
 			Set<String> keySet = scores.keySet();
 			for (String key : keySet) {
-				ModelEvaluationResult result = getResult(id, key, requestID[0], model, scores.get(key));
+				ModelEvaluationResult result = getResult(modelIdMap, id, key, requestID[0], model, scores.get(key));
 				resultList.add(result);
 			}
 		}
 		return resultList;
 	}
 	
-	private static void readScoreFile(String modelID, int index, HashMap<String, Float> scores) {
+	private static void readScoreFile(String modelID, int index, HashMap<String, Double> scores) {
 		//TODO change it to relative path
 		//String fileName = absolutePath + modelID + SCORING_OUTPUT_PREFIX + index + ".txt";
 		String fileName = modelID + SCORING_OUTPUT_PREFIX + index + ".txt";
@@ -180,45 +181,42 @@ public class ScoringMapperPredictUtil {
 				if (splitLine.length != 2) {
 					new Exception ("Scoring output file in incorrect format");
 				}
-				scores.put(splitLine[0], Float.parseFloat(splitLine[1]));
+				scores.put(splitLine[0], Double.parseDouble(splitLine[1]));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private static ModelEvaluationResult getResult(String modelID, String leadID, String requestID, JSONObject model, float score) {		
-		Float probability = null;
+	private static ModelEvaluationResult getResult(HashMap<String, String> modelIdMap, String modelID, String leadID, String requestID, JSONObject model, double score) {		
+		Double probability = null;
 		
 		// perform calibration
 		JSONArray calibrationRanges = (JSONArray) model.get(CALIBRATION);
 		if (calibrationRanges != null) {
 			for (int i = 0; i < calibrationRanges.size(); i++) {
 				JSONObject range = (JSONObject) calibrationRanges.get(i);
-				Double lowerBoundObj = (Double) range.get(CALIBRATION_MINIMUMSCORE);
-				Double upperBoundObj = (Double) range.get(CALIBRATION_MAXIMUMSCORE);
-				Float lowerBound = lowerBoundObj != null? (lowerBoundObj).floatValue() : null;
-				Float upperBound = upperBoundObj != null? (upperBoundObj).floatValue() : null;
+				Double lowerBound = (Double) range.get(CALIBRATION_MINIMUMSCORE);
+				Double upperBound = (Double) range.get(CALIBRATION_MAXIMUMSCORE);
 				if (betweenBounds(score, lowerBound, upperBound)) {
 					Double probabilityObj = (Double) range.get(CALIBRATION_PROBABILITY);
-					probability = probabilityObj != null ? (float) probabilityObj.floatValue() : null;
+					probability = probabilityObj != null ? (Double) probabilityObj.doubleValue() : null;
 					break;
 				}
 			}
 		}
 		
-		Double averageProbabilityObj = (Double) model.get(AVERAGE_PROBABILITY);
-		Float averageProbability = averageProbabilityObj != null ? averageProbabilityObj.floatValue() : null;
-		Float lift = averageProbability != null && averageProbability != 0 ? (float)probability/averageProbability : null;
+		Double averageProbability = (Double) model.get(AVERAGE_PROBABILITY);
+		Double lift = averageProbability != null && averageProbability != 0 ? (double)probability/averageProbability : null;
 		
 		// perform bucketing 
 		String bucket = null;
 		JSONArray bucketRanges = (JSONArray) model.get(BUCKETS);
 		if (bucketRanges != null) {
 			for (int i = 0; i < bucketRanges.size(); i++) {
-				Float value = probability;
+				Double value = probability;
 				JSONObject range = (JSONObject) bucketRanges.get(i);
-				// TODO need to Float check with Haitao/Ron about uncalibration
+				// TODO need to Double check with Haitao/Ron about uncalibration
 				if (value == null) {
 					value = score;
 				}
@@ -226,10 +224,8 @@ public class ScoringMapperPredictUtil {
 				if (((Long)range.get(BUCKETS_TYPE)).intValue() == 1) {
 					value = lift;
 				}
-				Double lowerBoundObj = (Double) range.get(BUCKETS_MINIMUMSCORE);
-				Double upperBoundObj = (Double) range.get(BUCKETS_MAXIMUMSCORE);
-				Float lowerBound = lowerBoundObj != null? (lowerBoundObj).floatValue() : null;
-				Float upperBound = upperBoundObj != null? (upperBoundObj).floatValue() : null;
+				Double lowerBound = (Double) range.get(BUCKETS_MINIMUMSCORE);
+				Double upperBound = (Double) range.get(BUCKETS_MAXIMUMSCORE);
 				if (value != null && betweenBounds(value, lowerBound, upperBound)) {
 					bucket = (String) range.get(BUCKETS_NAME);
 					break;
@@ -241,18 +237,16 @@ public class ScoringMapperPredictUtil {
 		Integer percentile = null;
 		JSONArray percentileRanges = (JSONArray) model.get(PERCENTILE_BUCKETS);
 		if (percentileRanges != null) {
-			float topPercentileMaxScore = (float) 0.0;
-			float bottomPercentileMinScore = (float) 1.0;
+			Double topPercentileMaxScore = (Double) 0.0;
+			Double bottomPercentileMinScore = (Double) 1.0;
 			Integer topPercentile = 100;
 			Integer bottomPercentile = 1;
 			boolean foundTopPercentileMaxScore = false;
 			boolean foundbottomPercentileMinScore = false;
 			for (int i = 0; i < percentileRanges.size(); i++) {
 				JSONObject range = (JSONObject) percentileRanges.get(i);
-				Double lowerBoundObj = (Double) range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
-				Double upperBoundObj = (Double) range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
-				Float min = lowerBoundObj != null ? lowerBoundObj.floatValue() : null;
-				Float max = upperBoundObj != null ? upperBoundObj.floatValue() : null;
+				Double min = (Double) range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
+				Double max = (Double) range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
 				Integer percent = ((Long) range.get(PERCENTILE_BUCKETS_PERCENTILE)).intValue();
 				if (max > topPercentileMaxScore) {
 					topPercentileMaxScore = max;
@@ -273,10 +267,8 @@ public class ScoringMapperPredictUtil {
 			} else {
 				for (int i = 0; i < percentileRanges.size(); i++) {
 					JSONObject range = (JSONObject) percentileRanges.get(i);
-					Double lowerBoundObj = (Double) range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
-					Double upperBoundObj = (Double) range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
-					Float min = lowerBoundObj != null ? lowerBoundObj.floatValue() : Float.MIN_VALUE;
-					Float max = upperBoundObj != null ? upperBoundObj.floatValue() : null;
+					Double min = (Double) range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
+					Double max = (Double) range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
 					Integer percent = ((Long) range.get(PERCENTILE_BUCKETS_PERCENTILE)).intValue();
 					if (betweenBounds(score, min, max)) {
 						percentile = percent;
@@ -288,13 +280,14 @@ public class ScoringMapperPredictUtil {
 		}
 		
 		Integer integerScore = (int) (probability != null ? Math.round(probability * 100) : Math.round(score * 100));
-		ModelEvaluationResult result = new ModelEvaluationResult(leadID, bucket, lift, MODEL_PREFIX+modelID, percentile, probability, score, requestID, integerScore);
+		String modelName = modelIdMap.get(modelID);
+		ModelEvaluationResult result = new ModelEvaluationResult(leadID, bucket, lift, modelName, percentile, probability, score, requestID, integerScore);
 		log.info("result is " + result);
 		return result;
 		
 	}
 	
-    private static boolean betweenBounds(float value, Float lowerInclusive, Float upperExclusive)
+    private static boolean betweenBounds(double value, Double lowerInclusive, Double upperExclusive)
     {
         return (lowerInclusive == null || value >= lowerInclusive) && 
             (upperExclusive == null || value < upperExclusive);
@@ -305,23 +298,27 @@ public class ScoringMapperPredictUtil {
 		
 		String local = "/Users/ygao/Downloads/text.avro";
 
-		String hdfs = "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/test/output" + "/test.avro";
+		String hdfs = "/user/s-analytics/customers/Nutanix/scoring/TestLeadsTable/scores" + "/abf66a5c-073c-4fc3-9556-656bf94a42f8.avro";
 		List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(hdfs));
 		for (GenericRecord ele : list) {
 			System.out.println(ele.toString());
 		}
-				
+		
+		
 		/*
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
+        HashMap<String, String> modelIdMap = new HashMap<String, String>();
+        modelIdMap.put("79f95119-cc68-447f-92de-9de8d58dcb1d", "ms__79f95119-cc68-447f-92de-9de8d58dcb1d-Visi");
         
-        Path p = new Path(absolutePath + "87ecf8cd-fe45-45f7-89d1-612235631fc1");
+        Path p = new Path(absolutePath + "2_model.json");
         ScoringMapperTransformUtil.parseModelFiles(models, p);
         //evaluate(models, modelNumberMap, THRESHOLD);
         Set<String> keys = models.keySet(); 
         for (String key : keys) {
         
         	JSONObject model = models.get(key);
-        	getResult("87ecf8cd-fe45-45f7-89d1-612235631fc1", model, 0.0042960797f);
+        	//String modelID, String leadID, String requestID, JSONObject model, double score
+        	getResult(modelIdMap, "79f95119-cc68-447f-92de-9de8d58dcb1d", "69", "Default", model, 0.925557050408);
         }
         */
 	}

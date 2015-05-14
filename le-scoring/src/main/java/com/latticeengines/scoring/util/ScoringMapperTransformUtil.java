@@ -35,7 +35,7 @@ public class ScoringMapperTransformUtil {
     //private static final int THRESHOLD = 10000;
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
-    private static final String LEAD_RECORD_MODEL_ID_COLUMN = "Play_Display_Name";
+    private static final String LEAD_RECORD_MODEL_ID_COLUMN = "ModelingID";
     private static final String LEAD_RECORD_REQUEST_ID_COLUMN = "Request_ID";
     private static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
     private static final String MODEL = "Model";
@@ -146,7 +146,7 @@ public class ScoringMapperTransformUtil {
 		}
 	}
     
-    public static void  manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, Integer> leadNumber, String[] requestID, String record) {
+    public static void  manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, HashMap<String, Integer> leadNumber, String[] requestID, String record) {
     	JSONParser jsonParser = new JSONParser();
     	JSONObject leadJsonObject = null;
 		try {
@@ -154,7 +154,8 @@ public class ScoringMapperTransformUtil {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-    	String modelID = identifyModelID(leadJsonObject, models);
+    	String modelID = identifyModelID(leadJsonObject, models, modelIdMap);
+    	log.info("after identifying, the modelID is " + modelID);
     	String formattedRecord = transformToJsonString(leadJsonObject, models, leadNumber, requestID, modelID);
     	if (leadInputRecordMap.containsKey(modelID)) {
     		leadInputRecordMap.get(modelID).add(formattedRecord);
@@ -165,30 +166,49 @@ public class ScoringMapperTransformUtil {
     	}
     }
     
-    private static String identifyModelID(JSONObject leadJsonObject, HashMap<String, JSONObject> models) {
+    private static String identifyModelID(JSONObject leadJsonObject, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap) {
     	
 		// TODO unify this with Haitao about the columnName of ModelID, and also the type of the ModelID
-		//String modelIDVal= (String) leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN);
+		String modelIDVal= (String) leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN);
+		log.info("the modelVal is " + modelIDVal);
 		//debugging
-		String modelIDVal= "87ecf8cd-fe45-45f7-89d1-612235631fc1";
+		//String modelIDVal= "87ecf8cd-fe45-45f7-89d1-612235631fc1";
 		String modelID = null;
     	Set<String> modelIDSet = models.keySet();
+
     	for (String ID : modelIDSet) {
     		if (modelIDVal.contains(ID)) {
+    			log.info("the current modelID is " + ID);
     			modelID = ID;
+    			log.info("modelID is found! " + modelID);
     			break;
     		}
     	}
     	if (modelID == null) {
+    		log.info("what??");
     		new Exception("ModelID in avro files do not match any of the models");
+    	}
+    	//update the mapping from model GUID to model name
+    	if (!modelIdMap.containsKey(modelID)) {
+    		modelIdMap.put(modelID, modelIDVal);
     	}
     	return modelID;
     }
     
     public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models, HashMap<String, Integer> leadNumber, String[] requestID, String modelID) {
+    	log.info("Come to the transformToJsonString and the modelID is " + modelID);
     	
     	String formattedRecord = null;
 		//get the metadata from the specific model json file
+    	
+    	if (models == null) {
+    		log.info("model is null");
+    	} else if (models.get(modelID) == null) {
+    		log.info("models.get(modelID) is null");
+    	} else if (models.get(modelID).get(INPUT_COLUMN_METADATA) == null) {
+    		log.info("models.get(modelID).get(INPUT_COLUMN_METADATA) is null");
+    	}
+    	
 		JSONArray metadata = (JSONArray) models.get(modelID).get(INPUT_COLUMN_METADATA);
 		//log.info("metadata is " + metadata.toString());
 		
@@ -204,7 +224,7 @@ public class ScoringMapperTransformUtil {
 		}
 		//log.info("The lead id is " + leadID);
 		//String currentRequestID = (String) leadJsonObject.get(LEAD_RECORD_REQUEST_ID_COLUMN);
-		String currentRequestID = "default";
+		String currentRequestID = "Default";
 		//log.info("The lead id is " + currentRequestID);
 		if (requestID[0] == null) {
 			requestID[0] = currentRequestID;
