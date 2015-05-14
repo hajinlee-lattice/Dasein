@@ -97,7 +97,6 @@
                 </plugins>
             </build>
         </profile>
-
         <profile>
             <id>load</id>
             <build>
@@ -332,7 +331,6 @@
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <classifier>intf</classifier>
-            <exclusions></exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -429,13 +427,13 @@
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>1.4.7</version>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.5.3</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
-            <artifactId>javax.mail-api</artifactId>
-            <version>1.5.3</version>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
         </dependency>
     </dependencies>
 
