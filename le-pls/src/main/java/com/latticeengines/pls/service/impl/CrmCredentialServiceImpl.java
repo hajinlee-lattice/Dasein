@@ -229,9 +229,9 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         }
         parameters.add("password", password);
         parameters.add("format", "json");
-        RestTemplate restTemplate = new RestTemplate();
-        String result = restTemplate.postForObject(url, parameters, String.class);
         try {
+            RestTemplate restTemplate = new RestTemplate();
+            String result = restTemplate.postForObject(url, parameters, String.class);
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
 
@@ -240,7 +240,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             String[] tokens = id.split("/");
             return tokens[tokens.length - 2];
         } catch (Exception ex) {
-            throw new LedpException(LedpCode.LEDP_18029, ex);
+            throw new LedpException(LedpCode.LEDP_18030, ex);
         }
     }
 
