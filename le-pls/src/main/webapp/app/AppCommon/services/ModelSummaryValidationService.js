@@ -156,7 +156,7 @@ angular.module('mainApp.appCommon.services.ModelSummaryValidationService', [
                     //ApprovedUsage
                     if (!predictor.hasOwnProperty("ApprovedUsage"))
                         PushErrorWithOffset(errors, "VALIDATION_ERROR_PREDICTOR_APPROVED_USAGE_MISSING", i);
-                    else if (!Array.isArray(predictor.ApprovedUsage))
+                    else if (predictor.ApprovedUsage != null && !Array.isArray(predictor.ApprovedUsage))
                         PushErrorWithOffset(errors, "VALIDATION_ERROR_PREDICTOR_APPROVED_USAGE_UNEXPECTED", i);
 
                     //FundamentalType
