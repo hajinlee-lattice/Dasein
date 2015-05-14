@@ -81,6 +81,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             avoid HTML reflow when description gets adjusted.
         */
         hoverElem[0].style.opacity = 0;
+        hoverElem.show();
 
         setTimeout(function() {
             var description = $('.attribute-hover-header p')[0],
@@ -91,7 +92,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             }
 
             hoverElem[0].style.opacity = 1;
-            hoverElem.show();
         }, 0);
     }
 
