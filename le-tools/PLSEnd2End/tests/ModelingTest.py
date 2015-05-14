@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         marketting_app = PLSEnvironments.pls_marketing_app_ELQ
         
         # Step 4 - Run LoadGroups and activate Model  
-        PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
+#         PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
         PlsOperations.activateModel(bardAdminTool,pls_bard);
         print "for jams configurations"
@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
         bardAdminTool = PLSEnvironments.pls_bardAdminTool_2
         
         # Step 4 - Run LoadGroups and activate Model  
-        PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
+#         PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
         PlsOperations.activateModel(bardAdminTool,pls_bard);
         print "for jams configurations"

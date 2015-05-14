@@ -26,9 +26,10 @@ class Test(unittest.TestCase):
         visidb = VisiDBRollBack();        
         visidb.copyBackVisidbDB(tenantName)
     
-    def testPerformanceHourlyMKTO_10K(self):        
-        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_10K",10000,"first")  
-        
+    def testPerformanceHourlyMKTO_1K3k5k(self): 
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_1K3k5k",1000,"first")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_1K3k5k",3000,"second")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_1K3k5k",5000,"Third")
     
         
 if __name__ == "__main__":
