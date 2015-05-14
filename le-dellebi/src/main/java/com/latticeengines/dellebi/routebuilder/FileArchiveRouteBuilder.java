@@ -24,6 +24,9 @@ public class FileArchiveRouteBuilder extends RouteBuilder {
 
     @Value("${dellebi.inputfileregex}")
     private String inputFileRegex;
+    
+    @Value("${dellebi.env}")
+    private String env;
 
     @Autowired
     private MailSender mailSender;
@@ -40,7 +43,7 @@ public class FileArchiveRouteBuilder extends RouteBuilder {
 
                             mailSender.sendEmail(mailReceiveList, "New Dell EBI files arrive!",
                                     "Received Dell EBI file: " + exchange.getIn().getHeader("CamelFileName") + " in "
-                                            + System.getProperty("DELLEBI_PROPDIR") + " environment.");
+                                            + env + " environment.");
                         }
                     }).multicast().stopOnException().to(camelDataArchivePath, "direct:files").endChoice().otherwise()
                     .stop().end();
