@@ -5,6 +5,7 @@
 	{ "Node": "SFDC_OrgId", "Data": "" },
 	{ "Node": "SFDC_OrgId_Sandbox", "Data": "" },
 	{ "Node": "Product", "Data": "Lead Prioritization" },
-	{ "Node": "Topology", "Data": "Marketo" }
+	{ "Node": "Topology", "Data": "Marketo" },
+	{ "Node": "Template_Path", "Data": "/etc/template" }
   ]
 }

@@ -41,8 +41,9 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     $scope.availableTopologies = ["Marketo", "Eloqua", "SFDC"];
     $scope.availableDLAddresses = [
         "http://bodcdevvint207.dev.lattice.local:8081",
-        "https://bodcdevvint187.dev.lattice.local:8080"
+        "http://bodcdevvint187.dev.lattice.local:8081"
     ];
+    $scope.availableTemplatePath = ["/etc/template"];
     $scope.services = [];
 
     $scope.accordion = _.map($scope.services, function(){

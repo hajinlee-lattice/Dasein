@@ -15,7 +15,7 @@ public class DLTemplateComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new DLTemplateUpgrader();
     public static final String componentName = "DLTemplate";
 
-    @Value("${admin.tpl.dryrun}")
+    @Value("${admin.dl.tpl.dryrun}")
     private boolean dryrun;
 
     @Override

@@ -77,6 +77,17 @@
                         </select>
                     </div>
                 </div>
+                <div class="row form-inline">
+                    <div class="col col-md-12 col-sm-12 col-xs-12">
+                        <label class="control-label">
+                            Template Path
+                        </label>
+                        <select class="form-control"
+                                ng-options="option for option in availableTemplatePath"
+                                ng-model="spaceConfig.Template_Path">
+                        </select>
+                    </div>
+                </div>
             </form>
             <form ng-if="readonly" class="row form-inline">
                 <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
@@ -90,6 +101,9 @@
                 <div class="col col-md-12 col-sm-12 col-xs-12 readonly-config-entry">
                     <span class="node">Data Loader URL</span> :
                     {{ spaceConfig.DL_Address }}
+                </div>
+                <div class="col col-md-12 col-sm-12 col-xs-12">
+                    VisiDB/Data Template Path: <strong>{{ spaceConfig.Template_Path }}</strong>
                 </div>
             </form>
             <br>

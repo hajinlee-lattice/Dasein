@@ -1,8 +1,10 @@
 package com.latticeengines.admin.tenant.batonadapter.template.visidb;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
@@ -15,7 +17,10 @@ public class VisiDBTemplateComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBTemplateUpgrader();
     public static final String componentName = "VisiDBTemplate";
 
-    @Value("${admin.tpl.dryrun}")
+    @Autowired
+    private TenantService tenantService;
+
+    @Value("${admin.vdb.tpl.dryrun}")
     private boolean dryrun;
 
     @Override
@@ -31,6 +36,7 @@ public class VisiDBTemplateComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
+        ((VisiDBTemplateInstaller)installer).setTenantService(tenantService);
         return installer;
     }
 

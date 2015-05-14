@@ -1,10 +1,41 @@
 {
   "RootPath": "/",
   "Nodes": [
-	{ "Node": "DL_Address", "Data": "http://bodcdevvint207.dev.lattice.local:8081" },
-	{ "Node": "Product", "Data": "Lead Prioritization", "Metadata": {"Type": "options", "Options": ["Lead Prioritization"] } },
-	{ "Node": "SFDC_OrgId", "Data": "" },
-	{ "Node": "SFDC_OrgId_Sandbox", "Data": "" },
-	{ "Node": "Topology", "Data": "Marketo", "Metadata": {"Type": "options", "Options": ["Marketo"] } }
+    {
+      "Node": "DL_Address",
+      "Data": "http://bodcdevvint207.dev.lattice.local:8081"
+    },
+    {
+      "Node": "Product",
+      "Data": "Lead Prioritization",
+      "Metadata": {
+        "Type": "options",
+        "Options": [
+          "Lead Prioritization"
+        ]
+      }
+    },
+    {
+      "Node": "SFDC_OrgId",
+      "Data": ""
+    },
+    {
+      "Node": "SFDC_OrgId_Sandbox",
+      "Data": ""
+    },
+    {
+      "Node": "Template_Path",
+      "Data": "/etc/template"
+    },
+    {
+      "Node": "Topology",
+      "Data": "Marketo",
+      "Metadata": {
+        "Type": "options",
+        "Options": [
+          "Marketo"
+        ]
+      }
+    }
   ]
 }

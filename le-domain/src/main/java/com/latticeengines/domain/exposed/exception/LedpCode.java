@@ -100,6 +100,7 @@ public enum LedpCode {
     LEDP_18033("Can not get topology."), //
     LEDP_18034("Can not get tenant document from Camille."), //
     LEDP_18035("Can not config system, ErrorMessage={0}."), //
+    LEDP_18036("Can not install VisiDB Template"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email.");

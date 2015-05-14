@@ -1,8 +1,15 @@
 package com.latticeengines.baton.exposed.camille;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.message.BasicNameValuePair;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
@@ -83,5 +90,18 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
     public List<Node> getChildren(DocumentDirectory configDir, String field){
         Node node = configDir.get("/" + field);
         return node.getChildren();
+    }
+
+    public JsonNode convertToJsonNode(String response) throws JsonProcessingException, IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readTree(response);
+    }
+
+    public List<BasicNameValuePair> getHeaders(){
+        List<BasicNameValuePair> headers = new ArrayList<>();
+        headers.add(new BasicNameValuePair("MagicAuthentication", "Security through obscurity!"));
+        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
+        headers.add(new BasicNameValuePair("Accept", "application/json"));
+        return headers;
     }
 }

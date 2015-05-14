@@ -6,13 +6,13 @@
       "Children" : [
         { "Node": "CreateNewVisiDB", "Data": true },
         { "Node": "VisiDBName", "Data": "test_tenant"},
-        { "Node": "ServerName", "Data": "bodcdevvint207.dev.lattice.local" },
+        { "Node": "ServerName", "Data": "bodcdevvint207" },
         { "Node": "VisiDBFileDirectory", "Data": ""},
         { "Node": "CacheLimit", "Data": 8192},
         { "Node": "CaseSensitive", "Data": false},
         { "Node": "DiskspaceLimit", "Data": 0},
         { "Node": "PermanentStoreOption", "Data": "Master"},
-        { "Node": "PermanentStorePath", "Data": "some path"}
+        { "Node": "PermanentStorePath", "Data": ""}
       ]
     },
     { "Node": "DL", 

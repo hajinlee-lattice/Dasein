@@ -51,16 +51,23 @@
         },
         {
           "Node": "PermanentStorePath",
-          "Data": "some path"
-        },
-        {
-          "Node": "ServerName",
-          "Data": "bodcdevvint207.dev.lattice.local",
+          "Data": "",
           "Metadata": {
             "Type": "options",
             "Options": [
-              "bodcdevvint207.dev.lattice.local",
-              "bodcdevvint187.dev.lattice.local"
+              "",
+              "\\\\prodstorage\\visidb\\PermStore\\"
+            ]
+          }
+        },
+        {
+          "Node": "ServerName",
+          "Data": "bodcdevvint207",
+          "Metadata": {
+            "Type": "options",
+            "Options": [
+              "bodcdevvint207",
+              "bodcdevvint187"
             ]
           }
         },

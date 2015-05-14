@@ -15,6 +15,7 @@ public class SpaceConfiguration {
     private LatticeProduct product = LatticeProduct.LPA;
     private CRMTopology topology = CRMTopology.MARKETO;
     private String dlAddress;
+    private String templatePath;
 
     public SpaceConfiguration() {}
 
@@ -36,6 +37,9 @@ public class SpaceConfiguration {
             if (node.getPath().toString().equals("/Topology")) {
                 this.topology = CRMTopology.fromName(node.getDocument().getData());
             }
+            if (node.getPath().toString().equals("/Template_Path")) {
+                this.templatePath = node.getDocument().getData();
+            }
         }
 
     }
@@ -45,6 +49,7 @@ public class SpaceConfiguration {
         dir.add("/DL_Address", this.dlAddress);
         dir.add("/Product", this.product.getName());
         dir.add("/Topology", this.topology.getName());
+        dir.add("/Template_Path", this.templatePath);
         return dir;
     }
 
@@ -70,4 +75,10 @@ public class SpaceConfiguration {
 
     @JsonProperty("Topology")
     public void setTopology(CRMTopology topology) { this.topology = topology; }
+
+    @JsonProperty("Template_Path")
+    public String getTemplatePath() { return templatePath; }
+
+    @JsonProperty("Template_Path")
+    public void setTemplatePath(String templatePath) { this.templatePath = templatePath; }
 }

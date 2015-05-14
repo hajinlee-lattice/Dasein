@@ -1,18 +1,15 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
@@ -54,10 +51,10 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     }
 
     @Test(groups = "deployment")
-    public void testInstallation() throws InterruptedException {
-        Map<String, Object> response = deleteVisiDBDLTenant(tenant);
-        Assert.assertEquals((Integer) response.get("Status"), new Integer(5));
-        Assert.assertTrue(((String) response.get("ErrorMessage")).contains("does not exist"));
+    public void testInstallation() throws InterruptedException, ClientProtocolException, IOException {
+        JsonNode response = deleteVisiDBDLTenant(tenant);
+        Assert.assertEquals(response.get("Status").asInt(), 5);
+        Assert.assertTrue(response.get("ErrorMessage").asText().contains("does not exist"));
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -88,7 +85,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
         response = deleteVisiDBDLTenant(tenant);
-        Assert.assertEquals((Integer) response.get("Status"), new Integer(3));
+        Assert.assertEquals(response.get("Status").asInt(), 3);
 
     }
 
@@ -132,32 +129,13 @@ public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
     }
 
-    private Map<String, Object> deleteVisiDBDLTenant(String tenant) {
-        try {
-            DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
-            String jsonStr = JsonUtils.serialize(request);
-            List<BasicNameValuePair> headers = new ArrayList<>();
-            headers.add(new BasicNameValuePair("MagicAuthentication", "Security through obscurity!"));
-            headers.add(new BasicNameValuePair("Content-Type", "application/json"));
-            headers.add(new BasicNameValuePair("Accept", "application/json"));
-            String response = HttpClientWithOptionalRetryUtils.sendPostRequest("http://10.41.1.207:8081"
-                    + "/DLRestService/DeleteDLTenant", false, headers, jsonStr);
-            return convertToMap(response);
-        } catch (Exception e) {
-            Assert.fail("could not encode the username");
-        }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-	private Map<String, Object> convertToMap(String response) {
-        Map<String, Object> map = new HashMap<>();
-        try {
-            map = new ObjectMapper().readValue(response, Map.class);
-        } catch (Exception e) {
-            Assert.fail("could not read the response to map");
-        }
-        return map;
+    private JsonNode deleteVisiDBDLTenant(String tenant) throws ClientProtocolException, IOException {
+        DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
+        String jsonStr = JsonUtils.serialize(request);
+        VisiDBDLInstaller installer = new VisiDBDLInstaller();
+        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
+                false, installer.getHeaders(), jsonStr);
+        return installer.convertToJsonNode(response);
     }
 
     @Override

@@ -4,7 +4,8 @@
     [
       { "Node": "VisiDB", 
         "Children" : [
-            { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207.dev.lattice.local", "bodcdevvint187.dev.lattice.local"]}}
+            { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"]}},
+            { "Node": "PermanentStorePath", "Data": {"Type": "options", "Options": ["", "\\\\prodstorage\\visidb\\PermStore\\"]}}
          ]
       }
     ]
