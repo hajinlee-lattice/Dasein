@@ -65,39 +65,22 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @Test(groups = { "functional", "deployment" })
     public void registerUser() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.INTERNAL_USER);
-        testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
         testRegisterUserSuccess(AccessLevel.SUPER_ADMIN);
 
         switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.INTERNAL_USER);
         testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
         testRegisterUserFail(AccessLevel.SUPER_ADMIN);
 
         switchToAccessLevel(AccessLevel.INTERNAL_USER);
         testRegisterUserFail(AccessLevel.EXTERNAL_USER);
-        testRegisterUserFail(AccessLevel.EXTERNAL_ADMIN);
         testRegisterUserFail(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
 
         switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
         testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
         testRegisterUserFail(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
 
         switchToAccessLevel(AccessLevel.EXTERNAL_USER);
         testRegisterUserFail(AccessLevel.EXTERNAL_USER);
-        testRegisterUserFail(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
     }
 
     @Test(groups = { "functional", "deployment" })
