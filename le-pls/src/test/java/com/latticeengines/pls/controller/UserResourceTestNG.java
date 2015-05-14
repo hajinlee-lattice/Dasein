@@ -62,7 +62,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "deployment" })
     public void registerUser() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testRegisterUserSuccess(AccessLevel.SUPER_ADMIN);
