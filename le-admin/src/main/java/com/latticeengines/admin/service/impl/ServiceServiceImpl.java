@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -19,6 +21,8 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Autowired
     private ServiceEntityMgr serviceEntityMgr;
+
+    private static BatonService batonService = new BatonServiceImpl();
 
     public ServiceServiceImpl() {
     }
@@ -45,6 +49,14 @@ public class ServiceServiceImpl implements ServiceService {
             LatticeComponent component = orchestrator.getComponent(serviceName);
             SerializableDocumentDirectory confDir = component.getSerializableDefaultConfiguration();
             return confDir.findSelectableFields();
+        } else if (serviceName.equals("SpaceConfiguration")) {
+            DocumentDirectory confDir = batonService.getDefaultConfiguration("SpaceConfiguration");
+            DocumentDirectory metaDir = batonService.getConfigurationSchema("SpaceConfiguration");
+            confDir.makePathsLocal();
+            metaDir.makePathsLocal();
+            SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(confDir);
+            sDir.applyMetadata(metaDir);
+            return sDir.findSelectableFields();
         } else {
             return new ArrayList<>();
         }

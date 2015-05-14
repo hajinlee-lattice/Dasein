@@ -1,5 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +12,12 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
@@ -38,7 +43,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
-
+    private final Log log = LogFactory.getLog(TenantServiceImpl.class);
     private final BatonService batonService = new BatonServiceImpl();
 
     @Autowired
@@ -196,9 +201,24 @@ public class TenantServiceImpl implements TenantService {
         DocumentDirectory metadir = getSpaceConfigSchema();
         DocumentDirectory.Node topologyNode = metadir.getChild("Topology");
         Document document = topologyNode.getDocument();
-        document.setData(JsonUtils.serialize(CRMTopology.values()));
-        topologyNode.setDocument(document);
-        Path schemaPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(), "SpaceConfiguration");
-        batonService.loadDirectory(metadir, schemaPath);
+        ObjectMapper objectMapper = new ObjectMapper();
+        SerializableDocumentDirectory.Metadata metadata = null;
+        try {
+            metadata = objectMapper.readValue(document.getData(), SerializableDocumentDirectory.Metadata.class);
+        } catch (IOException e) {
+            log.error("Could not parse the topology metadate node to a metadata object");
+            //ignore
+        }
+        if (metadata != null) {
+            Collection<String> options = new ArrayList<>();
+            for (CRMTopology topology : CRMTopology.values()) {
+                options.add(topology.getName());
+            }
+            metadata.setOptions(options);
+            document.setData(JsonUtils.serialize(metadata));
+            topologyNode.setDocument(document);
+            Path schemaPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(), "SpaceConfiguration");
+            batonService.loadDirectory(metadir, schemaPath);
+        }
     }
 }

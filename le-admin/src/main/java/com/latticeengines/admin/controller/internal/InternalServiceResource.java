@@ -2,6 +2,8 @@ package com.latticeengines.admin.controller.internal;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +28,9 @@ public class InternalServiceResource extends InternalResourceBase {
     @RequestMapping(value = "{serviceName}/options", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
-    public List<SelectableConfigurationField> getServiceOptionalConfigs(@PathVariable String serviceName) {
+    public List<SelectableConfigurationField> getServiceOptionalConfigs(@PathVariable String serviceName,
+                                                                        HttpServletRequest request) {
+        checkHeader(request);
         return serviceService.getSelectableConfigurationFields(serviceName);
     }
 
