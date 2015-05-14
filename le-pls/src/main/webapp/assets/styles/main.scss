@@ -29,7 +29,7 @@
 
 .local-error {
   border-radius: 4px;
-}
+} 
 
 .tab-contents > .tab-pane {
   display: none;
@@ -39,7 +39,12 @@
 }
 
 #topPredictorAttributeHover {
-    position: absolute;
+    position: fixed;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
 }
 
 a#back-to-summary-link:hover {
@@ -59,7 +64,6 @@ a#back-to-summary-link:hover {
 }
 
 .attribute-hover > div {
-    position: absolute;
     background: white;
     width: 350px;
     text-align: left;
