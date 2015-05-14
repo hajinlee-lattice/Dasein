@@ -59,7 +59,7 @@ var SystemSetup = function() {
     };
 
     this.waitForSfdcCredentials = function() {
-        browser.driver.wait(element(by.css('a[href="#formSandbox"]')).isPresent(), 10000,
+        browser.driver.wait(element(by.css('a[href="#formProduction"]')).isPresent(), 10000,
             "SFDC crendentials form should show up within 10 sec.");
     };
 
@@ -91,6 +91,37 @@ var SystemSetup = function() {
 
     this.waitForEloquaCredentials = function() {
         browser.driver.wait(element(by.css('.js-eloqua-form input.js-user-name')).isPresent(), 10000,
+            "Eloqua crendentials form should show up within 10 sec.");
+    };
+
+    this.enterValidMarketoCredentials = function() {
+        var formMT = element.all(by.css('div.formMT')).first();
+        formMT.element(by.model('mapCredentials.UserName')).clear();
+        formMT.element(by.model('mapCredentials.UserName')).sendKeys("latticeenginessandbox1_9026948050BD016F376AE6");
+        formMT.element(by.model('mapCredentials.Password')).clear();
+        formMT.element(by.model('mapCredentials.Password')).sendKeys("41802295835604145500BBDD0011770133777863CA58");
+        formMT.element(by.model('mapCredentials.Url')).clear();
+        formMT.element(by.model('mapCredentials.Url')).sendKeys("a url");
+        element(by.css('.js-marketo-save-button')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+    };
+
+    this.enterBadMarketoCredentials = function() {
+        var formMT = element.all(by.css('div.formMT')).first();
+        formMT.element(by.model('mapCredentials.UserName')).clear();
+        formMT.element(by.model('mapCredentials.UserName')).sendKeys("nope");
+        formMT.element(by.model('mapCredentials.Password')).clear();
+        formMT.element(by.model('mapCredentials.Password')).sendKeys("nope");
+        formMT.element(by.model('mapCredentials.Url')).clear();
+        formMT.element(by.model('mapCredentials.Url')).sendKeys("nope");
+        element(by.css('.js-marketo-save-button')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+    };
+
+    this.waitForMarketoCredentials = function() {
+        browser.driver.wait(element(by.css('div.formMT')).isPresent(), 10000,
             "Eloqua crendentials form should show up within 10 sec.");
     };
 };

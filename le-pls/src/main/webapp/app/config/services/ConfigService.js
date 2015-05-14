@@ -191,12 +191,11 @@ angular.module('mainApp.config.services.ConfigService', [
             var errorMessage;
             if (status === 0) {
                 errorMessage = ResourceUtility.getString("VALIDATE_CREDENTIALS_TIMEOUT");
-            } else if (data == null || data === "") {
-                errorMessage = ResourceUtility.getString("SYSTEM_ERROR");
-            } else if (data.errorCode === "LEDP_18030") {
+            } else if ( data.errorCode === "LEDP_18030" ) {
                 errorMessage = ResourceUtility.getString("VALIDATE_CREDENTIALS_FAILURE");
             } else {
-                errorMessage = data.errorMsg;
+                errorMessage = ResourceUtility.getString("SYSTEM_ERROR");
+                console.error(data.errorMsg);
             }
             result = {
                 success: false,

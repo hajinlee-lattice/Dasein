@@ -52,7 +52,7 @@ var Login = function() {
                     return userDropdown.signout.isPresent();
                 }, 10000, 'dropdown menu should appear with in 10 sec.');
                 userDropdown.signout.click();
-                browser.driver.sleep(3000);
+                browser.driver.sleep(10000);
             }
         });
 
