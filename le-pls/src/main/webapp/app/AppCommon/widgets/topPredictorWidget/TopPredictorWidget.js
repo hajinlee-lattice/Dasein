@@ -90,19 +90,23 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             var arc = d3.svg.arc()
                 .startAngle(function(d) { 
                     // if first category, make start angle larger for more gutter
+                    var gutter = null;
+
                     if (d.depth === 2) {
-                        var children = d.parent.children,
-                            gutter = children[0].name == d.name ? gutterWidth : 0; 
+                        var children = d.parent.children;
+                        gutter = children[0].name == d.name ? gutterWidth : 0;
                     }
 
                     return d.x + (gutter || 0);
                 })
                 .endAngle(function(d) {
                     // if last category, make end angle shorter for more gutter
+                    var gutter = null;
+
                     if (d.depth === 2) {
                         var children = d.parent.children,
-                            child = children[children.length - 1],
-                            gutter = child && child.name == d.name ? gutterWidth * 2 : 0; 
+                            child = children[children.length - 1];
+                        gutter = child && child.name == d.name ? gutterWidth * 2 : 0;
                     }
 
                     return d.x + d.dx - (gutter || 0);
