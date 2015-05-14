@@ -62,7 +62,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
     }
 
-    @Test(groups = { "deployment" })
+    @Test(groups = { "functional", "deployment" })
     public void registerUser() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testRegisterUserSuccess(AccessLevel.SUPER_ADMIN);
@@ -166,8 +166,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testDeleteUserSuccess(AccessLevel.EXTERNAL_USER);
     }
-    
-    
+
+
     @SuppressWarnings("rawtypes")
 	@Test(groups = { "functional", "deployment" })
     public void deleteUserWithShortEmail() {
