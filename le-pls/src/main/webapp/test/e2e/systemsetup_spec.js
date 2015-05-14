@@ -8,7 +8,7 @@ describe('system setup tests', function () {
 
     afterEach(function(){
         loginPage.logout();
-        browser.driver.sleep(5000);
+        browser.driver.sleep(10000);
     });
 
     it('should validate that you can go to the System Setup page', function () {
@@ -109,8 +109,6 @@ describe('system setup tests', function () {
         //==================================================
         // Enter Valid SFDC Sandbox Credentials
         //==================================================
-        element(by.css('a[href="#formSandbox"]')).click();
-        systemSetup.waitForSfdcSandboxCredentials();
         systemSetup.enterValidSfdcSandboxCredentials();
         expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
     });
