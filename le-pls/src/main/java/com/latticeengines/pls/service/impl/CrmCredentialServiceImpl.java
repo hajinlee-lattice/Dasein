@@ -269,9 +269,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     @Override
     public void removeCredentials(String crmType, String tenantId, Boolean isProduction) {
-
         try {
-
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
 
             Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
@@ -280,6 +278,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
             Camille camille = CamilleEnvironment.getCamille();
             if (camille.exists(docPath)) camille.delete(docPath);
+            log.info(String.format("Removing %s.%s credentials from tenant %s.", crmType,
+                    isProduction ? "Production" : "Sandbox", tenantId));
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18031, ex);
         }

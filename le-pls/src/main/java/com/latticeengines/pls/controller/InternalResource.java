@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,10 +11,16 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,17 +29,21 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.api.Status;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -40,6 +51,7 @@ import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
@@ -71,6 +83,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Value("${pls.test.contract}")
     protected String contractId;
+
+    @Value("${pls.api.hostport}")
+    private String hostPort;
 
     @RequestMapping(value = "/modelsummaries/{modelId}",
         method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -242,24 +257,63 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset the testing environment for protracter tests.")
-    public SimpleBooleanResponse createTestTenant(HttpServletRequest request) {
+    public SimpleBooleanResponse createTestTenant(HttpServletRequest request) throws IOException {
         checkHeader(request);
         LOGGER.info("Cleaning up test tenants through internal API");
+
+        final String tenant1Id = contractId + "PLSContract.Tenant1.Production";
+        final String tenant2Id = contractId + "PLSContract.Tenant2.Production";
+
+        //==================================================
+        // Upload modelsummary if necessary
+        //==================================================
+        RestTemplate restTemplate = new RestTemplate();
+        Credentials creds = new Credentials();
+        creds.setUsername("pls-super-admin-tester@test.lattice-engines.com");
+        creds.setPassword(DigestUtils.sha256Hex("admin"));
+        final LoginDocument loginDoc = restTemplate.postForObject(hostPort + "/pls/login", creds, LoginDocument.class);
+        ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
+            @Override
+            public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution execution)
+                    throws IOException {
+                HttpRequestWrapper requestWrapper = new HttpRequestWrapper(httpRequest);
+                requestWrapper.getHeaders().add(Constants.AUTHORIZATION, loginDoc.getData());
+
+                return execution.execute(requestWrapper, bytes);
+            }
+        };
+        restTemplate.setInterceptors(Collections.singletonList(interceptor));
+        for (Tenant tenant: loginDoc.getResult().getTenants()) {
+            if (tenant.getId().equals(tenant1Id) || tenant.getId().equals(tenant2Id)) {
+                restTemplate.postForObject(hostPort + "/pls/attach", tenant, UserDocument.class);
+                List response = restTemplate.getForObject(hostPort + "/pls/modelsummaries/", List.class);
+                while (response.size() < 2) {
+                    InputStream ins = getClass().getClassLoader()
+                            .getResourceAsStream("com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
+                    ModelSummary data = new ModelSummary();
+                    Tenant fakeTenant = new Tenant();
+                    fakeTenant.setId("FAKE_TENANT");
+                    fakeTenant.setName("Fake Tenant");
+                    fakeTenant.setPid(-1L);
+                    data.setTenant(fakeTenant);
+                    data.setRawFile(new String(IOUtils.toByteArray(ins)));
+                    restTemplate.postForObject(hostPort + "/pls/modelsummaries?raw=true", data, ModelSummary.class);
+                    response = restTemplate.getForObject(hostPort + "/pls/modelsummaries/", List.class);
+                }
+            }
+        }
 
         //==================================================
         // Cleanup stored credentials
         //==================================================
-        String tenantId = contractId + ".Tenant1.Production";
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenantId, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenantId, false);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenantId, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenantId, true);
-
-        tenantId = contractId + ".Tenant2.Production";
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenantId, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenantId, false);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenantId, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenantId, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, false);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant1Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant1Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant2Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant2Id, false);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant2Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant2Id, true);
 
         return SimpleBooleanResponse.getSuccessResponse();
     }
