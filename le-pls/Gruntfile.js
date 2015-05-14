@@ -153,7 +153,8 @@ module.exports = function (grunt) {
                     '!<%= pls.app %>/app/AppCommon/test/**/*.js'
                 ],
                 options: {
-                    eqnull: true
+                    eqnull: true,
+                    sub: true
                 }
             }
         },
