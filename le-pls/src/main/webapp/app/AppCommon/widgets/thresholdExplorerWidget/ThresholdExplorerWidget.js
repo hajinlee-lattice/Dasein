@@ -12,7 +12,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
     }
 
     var data = modelSummary.ThresholdChartData;
-    var targetSet = false;
+    var targetSet = true;
     //==================================================
     // Specify Dimensions
     //==================================================
