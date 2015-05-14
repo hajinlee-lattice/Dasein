@@ -142,25 +142,4 @@ describe('system setup tests', function () {
         expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("");
     });
 
-    it('should validate that entering invalid SFDC production credentials will fail', function () {
-        //==================================================
-        // Login
-        //==================================================
-        loginPage.loginAsSuperAdmin();
-
-        //==================================================
-        // Select System Setup Tab
-        //==================================================
-        userDropdown.toggleDropdown();
-        userDropdown.SystemSetupLink.click();
-        browser.waitForAngular();
-        systemSetup.waitForSfdcCredentials();
-
-        //==================================================
-        // Enter SFDC Production Credentials
-        //==================================================
-        systemSetup.enterBadSfdcProductionCredentials();
-        expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("Credentials are invalid.");
-    });
-
 });
