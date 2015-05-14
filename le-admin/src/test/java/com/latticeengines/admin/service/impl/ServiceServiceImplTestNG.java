@@ -1,13 +1,12 @@
 package com.latticeengines.admin.service.impl;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
+import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 
 public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
@@ -17,18 +16,18 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testGetSelectableFields() throws Exception {
-        List<SelectableConfigurationField> fields = serviceService.getSelectableConfigurationFields("TestComponent");
-        Assert.assertEquals(fields.size(), 1);
+        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields("TestComponent");
+        Assert.assertEquals(doc.getNodes().size(), 1);
 
-        SelectableConfigurationField field = fields.get(0);
+        SelectableConfigurationField field = doc.getNodes().get(0);
         Assert.assertEquals(field.getOptions().size(), 3);
         Assert.assertEquals(field.getDefaultOption(), "1");
     }
 
     @Test(groups = "functional")
     public void testGetSelectableFieldsFromNonExistingComponent() throws Exception {
-        List<SelectableConfigurationField> fields = serviceService.getSelectableConfigurationFields("NotExist");
-        Assert.assertTrue(fields.isEmpty());
+        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields("NotExist");
+        Assert.assertTrue(doc.getNodes().isEmpty());
     }
 
 }
