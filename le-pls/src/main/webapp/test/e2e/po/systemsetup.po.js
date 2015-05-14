@@ -101,7 +101,7 @@ var SystemSetup = function() {
         formMT.element(by.model('mapCredentials.Password')).clear();
         formMT.element(by.model('mapCredentials.Password')).sendKeys("41802295835604145500BBDD0011770133777863CA58");
         formMT.element(by.model('mapCredentials.Url')).clear();
-        formMT.element(by.model('mapCredentials.Url')).sendKeys("a url");
+        formMT.element(by.model('mapCredentials.Url')).sendKeys("https://na-sj02.marketo.com/soap/mktows/2_0");
         element(by.css('.js-marketo-save-button')).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);

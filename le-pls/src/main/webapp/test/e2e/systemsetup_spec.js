@@ -77,11 +77,11 @@ describe('system setup tests', function () {
         systemSetup.enterBadMarketoCredentials();
         expect(element.all(by.css('.formMT .alert-danger')).first().getText()).toBe("Credentials are invalid.");
 
-        ////==================================================
-        //// Enter Valid Marketo Credentials
-        ////==================================================
-        //systemSetup.enterValidMarketoCredentials();
-        //expect(element.all(by.css('.formMT .alert-danger')).first().getText()).toBe("");
+        //==================================================
+        // Enter Valid Marketo Credentials
+        //==================================================
+        systemSetup.enterValidMarketoCredentials();
+        expect(element.all(by.css('.formMT .alert-danger')).first().getText()).toBe("");
     });
 
     it('should validate that you can enter SFDC sandbox credentials', function () {
