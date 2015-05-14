@@ -27,11 +27,14 @@ public class DailyJob extends QuartzJobBean {
         // time Casadading processes data and new data incomes after that,
         // Cascading processes it next day.
         dailyFlow.doDailyFlow();
-
-        sqoopDataService.export();
-
-        // Send notifications to inform Daily refresh is done.
-        log.info("EBI daily refresh just finished successfully.");
+        
+        if (dailyFlow.getReturnCode() == 0){
+        	sqoopDataService.export();
+        	log.info("EBI daily refresh just finished successfully.");
+        }else{
+        	log.error("EBI daily refresh just failed with return code: " + dailyFlow.getReturnCode());
+        }
+        
     }
 
     @Override
