@@ -167,18 +167,46 @@
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
-            <scope>runtime</scope>
+            <scope>runtime</scope><exclusions>
+            <exclusion>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+            </exclusion>
+        </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
-            <classifier>intf</classifier>
+            <classifier>intf</classifier><exclusions>
+            <exclusion>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+            </exclusion>
+        </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -186,6 +214,14 @@
             <version>${le.camille.version}</version>
             <classifier>intf</classifier>
             <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -207,6 +243,14 @@
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
@@ -220,10 +264,19 @@
                 </exclusion>
             </exclusions>
         </dependency>
-	<dependency>
+	    <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${le.db.version}</version><exclusions>
+            <exclusion>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+            </exclusion>
+        </exclusions>
         </dependency>
         <dependency>
             <groupId>com.mangofactory</groupId>
