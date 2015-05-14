@@ -93,6 +93,8 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
         if (this[propStorageKeyName]) {
             if (data != null) {
                 data.Timestamp = new Date().getTime() + this.CacheTimeout;
+            } else {
+                $.jStorage.deleteKey(this[propStorageKeyName]);
             }
             $.jStorage.set(this[propStorageKeyName], data);
             this[propStorageObjName] = data;
@@ -120,13 +122,12 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     //and possibly reset system cache
     this.clear = function(keepAuthentication) {
         keepAuthentication = typeof keepAuthentication === 'boolean' ? keepAuthentication : false;
-        if(!keepAuthentication) {
-           this.setClientSession(null);
-        }
-        this.setLoginDocument(null);
-        this.setSessionDocument(null);
-        this.setCurrentTab(null);
-        this.setConfigDocument(null);
-        this.setWidgetConfigDocument(null);
+        var clientSession;
+
+        if (keepAuthentication) clientSession = this.getClientSession();
+
+        $.jStorage.flush();
+
+        if (keepAuthentication) this.setClientSession(clientSession);
     };
 });
