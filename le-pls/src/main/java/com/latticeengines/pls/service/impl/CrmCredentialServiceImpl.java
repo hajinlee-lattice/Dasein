@@ -267,6 +267,24 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         }
     }
 
+    @Override
+    public void removeCredentials(String crmType, String tenantId, Boolean isProduction) {
+
+        try {
+
+            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+
+            Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                    customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId());
+            docPath = addExtraPath(crmType, docPath, isProduction);
+
+            Camille camille = CamilleEnvironment.getCamille();
+            if (camille.exists(docPath)) camille.delete(docPath);
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_18031, ex);
+        }
+    }
+
     private Path addExtraPath(String crmType, Path docPath, Boolean isProduction) {
         docPath = docPath.append(crmType);
         if (crmType.equalsIgnoreCase(CrmConstants.CRM_SFDC)) {

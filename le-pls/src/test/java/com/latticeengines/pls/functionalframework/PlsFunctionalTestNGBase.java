@@ -116,6 +116,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected String contractId;
 
     protected RestTemplate restTemplate = new RestTemplate();
+    protected RestTemplate magicRestTemplate = new RestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
             "");
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(

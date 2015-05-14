@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +37,8 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
+import com.latticeengines.pls.service.CrmConstants;
+import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
@@ -62,6 +65,12 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CrmCredentialService crmCredentialService;
+
+    @Value("${pls.test.contract}")
+    protected String contractId;
 
     @RequestMapping(value = "/modelsummaries/{modelId}",
         method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -229,6 +238,31 @@ public class InternalResource extends InternalResourceBase {
         return SimpleBooleanResponse.getSuccessResponse();
     }
 
+
+    @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset the testing environment for protracter tests.")
+    public SimpleBooleanResponse createTestTenant(HttpServletRequest request) {
+        checkHeader(request);
+        LOGGER.info("Cleaning up test tenants through internal API");
+
+        //==================================================
+        // Cleanup stored credentials
+        //==================================================
+        String tenantId = contractId + ".Tenant1.Production";
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenantId, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenantId, false);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenantId, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenantId, true);
+
+        tenantId = contractId + ".Tenant2.Production";
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenantId, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenantId, false);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenantId, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenantId, true);
+
+        return SimpleBooleanResponse.getSuccessResponse();
+    }
 
     @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
     @ResponseBody

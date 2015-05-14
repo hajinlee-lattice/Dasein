@@ -28,6 +28,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         try {
             camille.delete(path);
         } catch (Exception ex) {
+            //  ignore
         }
         camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
     }

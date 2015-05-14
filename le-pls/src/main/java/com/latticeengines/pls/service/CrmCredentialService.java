@@ -8,4 +8,6 @@ public interface CrmCredentialService {
 
     CrmCredential getCredential(String crmType, String tenantId, Boolean isProduction);
 
+    void removeCredentials(String crmType, String tenantId, Boolean isProduction);
+
 }
