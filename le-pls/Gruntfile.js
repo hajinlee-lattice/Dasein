@@ -394,14 +394,11 @@ module.exports = function (grunt) {
         },
 
         http: {
-            cleanupUsers: {
+            resetTenants: {
                 options: {
-                    //url:     '<%= testenv.url %>/pls/internal/users?namepattern=LE_%5B0-9a-zA-Z%5D%7B5%7D%40e2e.test.com',
-                    //method:  'DELETE',
-                    //headers: {"MagicAuthentication": "Security through obscurity!"}
-                    url:     '<%= testenv.url %>',
-                    method:  'GET'
-                    //headers: {"MagicAuthentication": "Security through obscurity!"}
+                    url:     '<%= testenv.url %>/pls/internal/testtenants',
+                    method:  'PUT',
+                    headers: {"MagicAuthentication": "Security through obscurity!"}
                 }
             }
 
@@ -592,30 +589,30 @@ module.exports = function (grunt) {
 
     var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
     grunt.registerTask('e2eChrome', e2eChromeText, [
-        'http:cleanupUsers',
+        'http:resetTenants',
         'protractor:chrome',
-        'http:cleanupUsers'
+        'http:resetTenants'
     ]);
 
     var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
     grunt.registerTask('e2eFirefox', e2eFirefoxText, [
-        'http:cleanupUsers',
+        'http:resetTenants',
         'protractor:firefox',
-        'http:cleanupUsers'
+        'http:resetTenants'
     ]);
 
     var e2eInternetExplorerText = 'Runs selenium end to end (protractor) unit tests on Internet Explorer';
     grunt.registerTask('e2eInternetExplorer', e2eInternetExplorerText, [
-        'http:cleanupUsers',
+        'http:resetTenants',
         'protractor:internetexplorer',
-        'http:cleanupUsers'
+        'http:resetTenants'
     ]);
 
     var e2eSafariText = 'Runs selenium end to end (protractor) unit tests on Safari';
     grunt.registerTask('e2eSafari', e2eSafariText, [
-        'http:cleanupUsers',
+        'http:resetTenants',
         'protractor:safari',
-        'http:cleanupUsers'
+        'http:resetTenants'
     ]);
 
     var e2eMacText = 'Runs selenium end to end (protractor) Mac tests';
@@ -627,9 +624,9 @@ module.exports = function (grunt) {
 
     var e2eWinText = 'Runs selenium end to end (protractor) Windows tests';
     grunt.registerTask('e2eWin', e2eWinText, [
-        'http:cleanupUsers',
+        'http:resetTenants',
         'concurrent:windows',
-        'http:cleanupUsers'
+        'http:resetTenants'
     ]);
 
     var lintText = 'Checks all JavaScript code for possible errors. This should be run before a checkin if you aren\'t using grunt sentry';
@@ -656,10 +653,10 @@ module.exports = function (grunt) {
 
     var e2eChromeCcText = 'Runs selenium end to end (protractor) unit tests on Chrome with code coverage';
     grunt.registerTask('e2eChromeCc', e2eChromeCcText, [
-        'http:cleanupUsers',
+        'http:resetTenants',
         'protractor_coverage:chrome',
         'makeReport',
-        'http:cleanupUsers'
+        'http:resetTenants'
     ]);
     
     var instrumentJsText = 'Instrument javascript code for code coverage';
