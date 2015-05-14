@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 
 @DisallowConcurrentExecution
@@ -23,10 +25,32 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
     private ModelSummaryParser modelSummaryParser;
 
     @Override
-    public void resolveNameIdConflict(ModelSummary modelSummary, String tenantId) {
+    public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
+        ModelSummary modelSummary = modelSummaryParser.parse("", rawModelSummary);
+        modelSummary.setUploaded(true);
+
+        return createModelSummary(modelSummary, tenantId);
+    }
+
+    @Override
+    public ModelSummary createModelSummary(ModelSummary modelSummary, String tenantId) {
+        resolveNameIdConflict(modelSummary, tenantId);
+
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        modelSummary.setTenant(tenant);
+
+        modelSummaryEntityMgr.create(modelSummary);
+
+        return modelSummary;
+    }
+
+    private void resolveNameIdConflict(ModelSummary modelSummary, String tenantId) {
         List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getAll();
         List<String> existingNames = new ArrayList<>();
         List<String> existingIds = new ArrayList<>();
@@ -47,16 +71,17 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
         if (version > 0) {
             log.info(String.format(
-                "Change model name from \"%s\" to \"%s\" to avoid conflicts.",
-                modelSummary.getName(), possibleName
+                    "Change model name from \"%s\" to \"%s\" to avoid conflicts.",
+                    modelSummary.getName(), possibleName
             ));
             log.info(String.format(
-                "Change model id from \"%s\" to \"%s\" to avoid conflicts.",
-                modelSummary.getId(), possibleId
+                    "Change model id from \"%s\" to \"%s\" to avoid conflicts.",
+                    modelSummary.getId(), possibleId
             ));
         }
 
         modelSummary.setId(possibleId);
         modelSummary.setName(possibleName);
     }
+
 }

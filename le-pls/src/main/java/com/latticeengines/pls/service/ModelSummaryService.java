@@ -4,6 +4,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 
 public interface ModelSummaryService {
 
-    void resolveNameIdConflict(ModelSummary modelSummary, String tenantId);
+    ModelSummary createModelSummary(String rawModelSummary, String tenantId);
+
+    ModelSummary createModelSummary(ModelSummary modelSummary, String tenantId);
 
 }

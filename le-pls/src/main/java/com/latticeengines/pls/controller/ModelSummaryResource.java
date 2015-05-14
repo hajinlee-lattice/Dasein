@@ -20,9 +20,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 import com.wordnik.swagger.annotations.Api;
@@ -38,16 +36,11 @@ public class ModelSummaryResource {
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
     private SessionService sessionService;
 
     @Autowired
     private ModelSummaryService modelSummaryService;
 
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -65,7 +58,7 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Get list of model summary ids available to the user")
     public List<ModelSummary> getModelSummaries(@RequestParam(value="selection", required=false) String selection) {
 
-        List<ModelSummary> summaries = null;
+        List<ModelSummary> summaries;
         if (selection != null && selection.equalsIgnoreCase("all")) {
             summaries = modelSummaryEntityMgr.findAll();
         } else {
@@ -85,24 +78,16 @@ public class ModelSummaryResource {
     @PreAuthorize("hasRole('Create_PLS_Models')")
     public ModelSummary createModelSummary(@RequestBody ModelSummary modelSummary,
             @RequestParam(value = "raw", required = false) boolean usingRaw, HttpServletRequest request) {
-        if (usingRaw) {
-            modelSummary = modelSummaryParser.parse("", modelSummary.getRawFile());
-            modelSummary.setUploaded(true);
-        }
-
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        if (tenant == null) { 
-            return null; 
+        if (tenant == null) {
+            return null;
         }
 
-        modelSummaryService.resolveNameIdConflict(modelSummary, tenant.getId());
-
-        tenant = tenantEntityMgr.findByTenantId(tenant.getId());
-        modelSummary.setTenant(tenant);
-
-        modelSummaryEntityMgr.create(modelSummary);
-
-        return modelSummary;
+        if (usingRaw) {
+            return modelSummaryService.createModelSummary(modelSummary.getRawFile(), tenant.getId());
+        } else {
+            return modelSummaryService.createModelSummary(modelSummary, tenant.getId());
+        }
     }
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
