@@ -29,7 +29,7 @@ public class TenentConfigResourceTestNG extends PlsFunctionalTestNGBase {
             // ignore
         }
         CustomerSpaceProperties properties = new CustomerSpaceProperties();
-        properties.topology = "sfdc";
+        properties.topology = "SFDC";
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
 
         SpaceLifecycleManager.create("contractId", "tenantId", "spaceId", spaceInfo);
@@ -47,7 +47,7 @@ public class TenentConfigResourceTestNG extends PlsFunctionalTestNGBase {
     public void getSfdcTopology() {
         String topology = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/config/topology?tenantId=contractId.tenantId.spaceId", String.class);
-        Assert.assertEquals(topology, "sfdc");
+        Assert.assertEquals(topology, "SFDC");
     }
 
 }

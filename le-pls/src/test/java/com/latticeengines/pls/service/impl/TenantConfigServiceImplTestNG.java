@@ -34,7 +34,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
             // ignore
         }
         CustomerSpaceProperties properties = new CustomerSpaceProperties();
-        properties.topology = "sfdc";
+        properties.topology = "SFDC";
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
 
         SpaceLifecycleManager.create("contractId", "tenantId", "spaceId", spaceInfo);
@@ -43,7 +43,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         path = path.append(new Path("/Topology"));
-        camille.create(path, new Document("sfdc"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        camille.create(path, new Document("SFDC"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
     }
 
@@ -58,7 +58,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void getCredential() {
         String topology = configService.getTopology("contractId.tenantId.spaceId");
-        Assert.assertEquals(topology, "sfdc");
+        Assert.assertEquals(topology, "SFDC");
     }
 
 }
