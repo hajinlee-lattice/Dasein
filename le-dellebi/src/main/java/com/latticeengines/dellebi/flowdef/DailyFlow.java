@@ -54,6 +54,8 @@ public class DailyFlow {
     private MailSender mailSender;
 
     private ArrayList<FlowDef> flowList;
+    
+    private int returnCode = 0;
 
     public DailyFlow(ArrayList<FlowDef> flowList) {
         this.flowList = flowList;
@@ -111,11 +113,15 @@ public class DailyFlow {
             log.error("Seems there is corrupt data!", e);
             mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed because of some reasons!",
                     "Seems there is corrupt data!" + e);
+            returnCode = 1;
         } catch (Exception e) {
             log.error("Failed!", e);
             mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed because of some reasons!",
                     "Please check Dell EBI logs on " + System.getProperty("DELLEBI_PROPDIR") + " environment " + e);
+            returnCode = 2;
         }
+        
+        returnCode = 0;
     }
 
     public void setDataHadoopInPath(String s) {
@@ -148,5 +154,9 @@ public class DailyFlow {
 
     public void setMailReceiveList(String s) {
         this.mailReceiveList = s;
+    }
+    
+    public int getReturnCode(){
+    	return returnCode;
     }
 }
