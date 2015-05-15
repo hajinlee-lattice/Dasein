@@ -3,7 +3,14 @@
   "Nodes": [
     {
       "Node": "DL_Address",
-      "Data": "http://bodcdevvint207.dev.lattice.local:8081"
+      "Data": "http://bodcdevvint207.dev.lattice.local:8081",
+      "Metadata": {
+        "Type": "options",
+        "Options": [
+          "http://bodcdevvint207.dev.lattice.local:8081",
+          "http://bodcdevvint187.dev.lattice.local:8081"
+        ]
+      }
     },
     {
       "Node": "Product",
@@ -16,16 +23,14 @@
       }
     },
     {
-      "Node": "SFDC_OrgId",
-      "Data": ""
-    },
-    {
-      "Node": "SFDC_OrgId_Sandbox",
-      "Data": ""
-    },
-    {
       "Node": "Template_Path",
-      "Data": "/etc/template"
+      "Data": "/etc/template",
+      "Metadata": {
+        "Type": "options",
+        "Options": [
+          "/etc/template"
+        ]
+      }
     },
     {
       "Node": "Topology",
