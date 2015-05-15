@@ -21,7 +21,7 @@ import junit.framework.Assert;
  * we also register the testing component's installer,
  * in case it has not been registered already by ServiceServiceImpl
  */
-public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTestNGBase {
+public abstract class BatonAdapterDeploymentTestNGBase extends AdminFunctionalTestNGBase {
 
     protected String contractId, tenantId, serviceName;
 

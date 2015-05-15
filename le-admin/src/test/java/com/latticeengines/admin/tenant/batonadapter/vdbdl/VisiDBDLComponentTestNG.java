@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
-public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
+public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;

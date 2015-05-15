@@ -5,12 +5,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
-public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
+public class TemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;

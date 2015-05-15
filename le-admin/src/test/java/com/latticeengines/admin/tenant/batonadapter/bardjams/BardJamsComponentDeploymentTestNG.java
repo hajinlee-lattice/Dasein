@@ -2,10 +2,10 @@ package com.latticeengines.admin.tenant.batonadapter.bardjams;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
-public class BardJamsComponentDeploymentTestNG extends BatonAdapterBaseDeploymentTestNG {
+public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testInstallation() {

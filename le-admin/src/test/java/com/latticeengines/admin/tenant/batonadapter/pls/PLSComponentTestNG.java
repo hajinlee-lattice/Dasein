@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
+public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;
