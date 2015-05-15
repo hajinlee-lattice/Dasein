@@ -355,7 +355,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
             boolean thisIsOK = state != null && state.state.equals(BootstrapState.State.OK);
             if (!thisIsOK && state != null) {
                 msg.append(String.format(
-                        "The bootstrap state of %s is not OK, but rather %s.\n", serviceName, state.state));
+                        "The bootstrap state of %s is not OK, but rather %s : %s.\n",
+                        serviceName, state.state, state.errorMessage));
             }
             allOK = allOK && thisIsOK;
         }
