@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.bardjams;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -83,13 +84,13 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
         BardJamsTenant tenant = new BardJamsTenant();
 
         String tenantId = getData(configDir, "Tenant");
-        if (tenantId == null) {
+        if (StringUtils.isEmpty(tenantId)) {
             tenantId = space.getTenantId();
         }
         tenant.setTenant(tenantId);
         tenant.setTenantType(getData(configDir, "TenantType"));
         String dlTenantName = getData(configDir, "DL_TenantName");
-        if (dlTenantName == null) {
+        if (StringUtils.isEmpty(dlTenantName)) {
             dlTenantName = tenantId;
         }
         tenant.setDlTenantName(dlTenantName);
