@@ -8,7 +8,7 @@ describe('system setup tests', function () {
 
     afterEach(function(){
         loginPage.logout();
-        browser.driver.sleep(15000);
+        browser.driver.sleep(30000);
     });
 
     it('should validate that you can go to the System Setup page', function () {
