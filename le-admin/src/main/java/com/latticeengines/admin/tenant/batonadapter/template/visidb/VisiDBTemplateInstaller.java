@@ -12,12 +12,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.InstallVisiDBTemplateRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -31,7 +31,9 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
     private TenantService tenantService;
 
-    private String dlUrl;
+    private static final String marketoTemplate = "Template_MKTO.specs";
+
+    private static final String eloquaTemplate = "Template_ELQ.specs";
 
     public VisiDBTemplateInstaller() {
         super(VisiDBTemplateComponent.componentName);
@@ -48,23 +50,19 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
         TenantDocument tenantDoc = tenantService.getTenant(contractExternalID, dmDeployment);
         String tenant = tenantDoc.getTenantInfo().properties.displayName;
-        dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
+        String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
         String templatePath = tenantDoc.getSpaceConfig().getTemplatePath();
         CRMTopology topology = tenantDoc.getSpaceConfig().getTopology();
-        if (topology.equals(CRMTopology.MARKETO)) {
-            if (new File(templatePath, "Template_MKTO.specs").exists()) {
-                System.out.println("exists!!!!!");
-            }
-        }
+        File visiDBTemplate = getTemplateFile(topology, templatePath);
 
         try {
-            File visiDBTemplate = new File(templatePath + "/Template_MKTO.specs");
-            tenant = "haitao_test_tenant";
             String str = IOUtils.toString(new InputStreamReader(new FileInputStream(visiDBTemplate)));
             InstallVisiDBTemplateRequest request = new InstallVisiDBTemplateRequest(tenant, str);
-            JsonNode response = installVisiDBTemplate(request, getHeaders());
-            if (response.get("Status").asInt() == 3) {
-                log.info("Succeeded!!!!!");
+            DLRestResult response = installVisiDBTemplate(request, getHeaders(), dlUrl);
+            if (response != null && response.getStatus() == 3) {
+                log.info("Template " + topology.name() + " has successfully been installed!");
+            } else {
+                throw new LedpException(LedpCode.LEDP_18036, new String[] { response.getErrorMessage() });
             }
         } catch (FileNotFoundException e) {
             throw new LedpException(LedpCode.LEDP_18023, e);
@@ -73,11 +71,29 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         }
     }
 
-    public JsonNode installVisiDBTemplate(InstallVisiDBTemplateRequest request, List<BasicNameValuePair> headers)
-            throws IOException {
+    private File getTemplateFile(CRMTopology topology, String templatePath) {
+        if (topology.equals(CRMTopology.MARKETO)) {
+            return getFile(templatePath, marketoTemplate);
+        } else if (topology.equals(CRMTopology.ELOQUA)) {
+            return getFile(templatePath, eloquaTemplate);
+        } else {
+            throw new LedpException(LedpCode.LEDP_18037, new String[] { topology.name() });
+        }
+    }
+
+    public File getFile(String templatePath, String templateFileName) {
+        if (new File(templatePath, templateFileName).exists()) {
+            return new File(templatePath + "/" + templateFileName);
+        } else {
+            throw new LedpException(LedpCode.LEDP_18023);
+        }
+    }
+
+    public DLRestResult installVisiDBTemplate(InstallVisiDBTemplateRequest request, List<BasicNameValuePair> headers,
+            String dlUrl) throws IOException {
         String jsonStr = JsonUtils.serialize(request);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl
                 + "/DLRestService/InstallVisiDBStructureFile_Sync", false, headers, jsonStr);
-        return convertToJsonNode(response);
+        return JsonUtils.deserialize(response, DLRestResult.class);
     }
 }

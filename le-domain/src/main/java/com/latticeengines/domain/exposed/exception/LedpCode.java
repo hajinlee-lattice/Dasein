@@ -96,11 +96,12 @@ public enum LedpCode {
     LEDP_18029("Can not find Org Id."), //
     LEDP_18030("Can not verify CRM credential."), //
     LEDP_18031("Can not get CRM credential."), //
-    LEDP_18032("Provision VisiDB/DL failed."), //
+    LEDP_18032("Provision VisiDB/DL Failed: {0}."), //
     LEDP_18033("Can not get topology."), //
     LEDP_18034("Can not get tenant document from Camille."), //
     LEDP_18035("Can not config system, ErrorMessage={0}."), //
-    LEDP_18036("Can not install VisiDB Template"), //
+    LEDP_18036("Install VisiDB Template Failed: {0}"), //
+    LEDP_18037("Template {0} is not supported."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email.");

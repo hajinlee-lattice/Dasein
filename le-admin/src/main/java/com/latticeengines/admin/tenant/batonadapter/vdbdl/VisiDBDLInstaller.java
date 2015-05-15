@@ -8,12 +8,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
+import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -29,8 +29,6 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
     private static final int SUCCESS = 3;
 
-    private static final int EMPTY_STATUS = 0;
-
     private static final int MASTER = 1;
 
     private static final int STANDALONE = 0;
@@ -38,8 +36,6 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
     public VisiDBDLInstaller() {
         super(VisiDBDLComponent.componentName);
     }
-
-    private String dlUrl;
 
     public void setTenantService(TenantService tenantService) {
         this.tenantService = tenantService;
@@ -52,7 +48,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
         TenantDocument tenantDoc = tenantService.getTenant(contractExternalID, dmDeployment);
         String tenant = tenantDoc.getTenantInfo().properties.displayName;
-        dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
+        String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
 
         String tenantAlias = getData(configDir, "TenantAlias");
         String createNewVisiDB = getChild(configDir, "VisiDB", "CreateNewVisiDB").getDocument().getData();
@@ -78,14 +74,11 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
         GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant);
         try {
-            JsonNode response = getTenantInfo(getRequest, getHeaders());
-            int status = response.get("Status").asInt();
-            String errorMessage = response.get("ErrorMessage").asText();
+            DLRestResult response = getTenantInfo(getRequest, getHeaders(), dlUrl);
+            int status = response.getStatus();
+            String errorMessage = response.getErrorMessage();
 
-            if (status == EMPTY_STATUS) {
-                throw new LedpException(LedpCode.LEDP_18032, new String[] { "Status is null" });
-            }
-            if (!StringUtils.isEmpty(errorMessage) && errorMessage.contains("does not exist")) {
+            if (status != SUCCESS && !StringUtils.isEmpty(errorMessage) && errorMessage.contains("does not exist")) {
                 CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, dmDeployment,
                         contractExternalID);
                 builder.tenantAlias(tenantAlias).ownerEmail(ownerEmail).visiDBName(visiDBName)
@@ -95,14 +88,14 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         .diskspaceLimit(Integer.parseInt(diskspaceLimit)).permanentStoreOption(permStoreOpt)
                         .permanentStorePath(permanentStorePath);
                 CreateVisiDBDLRequest postRequest = builder.build();
-                response = createTenant(postRequest, getHeaders());
-                status = response.get("Status").asInt();
+                response = createTenant(postRequest, getHeaders(), dlUrl);
+                status = response.getStatus();
                 if (status != SUCCESS) {
-                    throw new LedpException(LedpCode.LEDP_18032, new String[] { response.get("ErrorMessage").asText() });
+                    throw new LedpException(LedpCode.LEDP_18032, new String[] { response.getErrorMessage() });
                 }
                 log.info("Tenant " + tenant + " has been successfully created in VisiDB/Dataloader");
             } else if (StringUtils.isEmpty(errorMessage) && status == SUCCESS) {
-                log.info("Tenant " + tenant + " is already in VisiDB/Dataloader");
+                log.info("Tenant " + tenant + " has already been installed in VisiDB/Dataloader");
             } else {
                 throw new LedpException(LedpCode.LEDP_18032, new String[] { errorMessage });
             }
@@ -111,19 +104,19 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         }
     }
 
-    public JsonNode getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers) throws IOException {
+    public DLRestResult getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers, String dlUrl) throws IOException {
         String jsonString = JsonUtils.serialize(getRequest);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/GetDLTenantSettings",
                 true, getHeaders(), jsonString);
-        return convertToJsonNode(response);
+        return JsonUtils.deserialize(response, DLRestResult.class);
     }
 
-    public JsonNode createTenant(CreateVisiDBDLRequest postRequest, List<BasicNameValuePair> headers)
+    public DLRestResult createTenant(CreateVisiDBDLRequest postRequest, List<BasicNameValuePair> headers, String dlUrl)
             throws IOException {
         String jsonString = JsonUtils.serialize(postRequest);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/CreateDLTenant",
                 false, headers, jsonString);
-        return convertToJsonNode(response);
+        return JsonUtils.deserialize(response, DLRestResult.class);
     }
 
 }

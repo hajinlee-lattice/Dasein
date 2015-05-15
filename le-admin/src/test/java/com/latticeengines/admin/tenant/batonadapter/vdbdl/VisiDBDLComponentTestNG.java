@@ -10,11 +10,11 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -57,9 +57,9 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException, ClientProtocolException, IOException {
-        JsonNode response = deleteVisiDBDLTenant(tenant);
-        Assert.assertEquals(response.get("Status").asInt(), 5);
-        Assert.assertTrue(response.get("ErrorMessage").asText().contains("does not exist"));
+        DLRestResult response = deleteVisiDBDLTenant(tenant);
+        Assert.assertEquals(response.getStatus(), 5);
+        Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -90,7 +90,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
         response = deleteVisiDBDLTenant(tenant);
-        Assert.assertEquals(response.get("Status").asInt(), 3);
+        Assert.assertEquals(response.getStatus(), 3);
 
     }
 
@@ -134,13 +134,13 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     }
 
-    public JsonNode deleteVisiDBDLTenant(String tenant) throws ClientProtocolException, IOException {
+    public DLRestResult deleteVisiDBDLTenant(String tenant) throws ClientProtocolException, IOException {
         DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
         String jsonStr = JsonUtils.serialize(request);
         VisiDBDLInstaller installer = new VisiDBDLInstaller();
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
                 false, installer.getHeaders(), jsonStr);
-        return installer.convertToJsonNode(response);
+        return JsonUtils.deserialize(response, DLRestResult.class);
     }
 
     @Override
