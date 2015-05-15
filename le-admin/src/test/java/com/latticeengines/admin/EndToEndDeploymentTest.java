@@ -9,8 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -44,9 +42,10 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
 
-    private final static Log log = LogFactory.getLog(EndToEndDeploymentTest.class);
     private final static String contractId = "EndToEndTestContract";
     private final static String[] tenantIds = new String[]{"EndToEndTenant", "EndToEndDefaultTenant"};
+    private final static String[] tenantNames =
+            new String[]{"Global Test Tenant", "Global Test Tenant Default"};
 
     @Autowired
     private TenantService tenantService;
@@ -172,7 +171,7 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
         TenantProperties tenantProperties = new TenantProperties();
         tenantProperties.description =
                 "First test tenant across all component provisioned by tenant console through deployment tests.";
-        tenantProperties.displayName = "Global Test Tenant 1";
+        tenantProperties.displayName = tenantNames[0];
         TenantInfo tenantInfo = new TenantInfo(tenantProperties);
 
         // SpaceInfo
@@ -245,7 +244,7 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
         // TenantInfo
         TenantProperties tenantProperties = new TenantProperties();
         tenantProperties.description = "A cross-component tenant with default configurations.";
-        tenantProperties.displayName = "Global Test Tenant Default";
+        tenantProperties.displayName = tenantNames[1];
         TenantInfo tenantInfo = new TenantInfo(tenantProperties);
 
         // SpaceInfo
@@ -357,13 +356,14 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
         Assert.assertTrue(allOK, msg.toString());
     }
 
-
+    @SuppressWarnings("unused")
     private void verifyJAMSTenantExists(int tenantIdx) {
         if (jamsSkipped) return;
 
         String tenantId = tenantIds[tenantIdx];
     }
 
+    @SuppressWarnings("unused")
     private void verifyPLSTenantExists(int tenantIdx) {
         if (plsSkipped) return;
 
@@ -376,18 +376,21 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
         Assert.assertFalse(users.isEmpty());
     }
 
+    @SuppressWarnings("unused")
     private void verifyVisiDBDLTenantExists(int tenantIdx) {
         if (vdbdlSkipped) return;
 
         final String tenantId = tenantIds[tenantIdx];
     }
 
+    @SuppressWarnings("unused")
     private void verifyVDBTplTenantExists(int tenantIdx) {
         if (vdbTplSkipped) return;
 
         final String tenantId = tenantIds[tenantIdx];
     }
 
+    @SuppressWarnings("unused")
     private void verifyDLTplTenantExists(int tenantIdx) {
         if (dlTplSkipped) return;
 
