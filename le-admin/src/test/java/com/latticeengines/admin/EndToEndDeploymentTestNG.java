@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -27,6 +28,7 @@ import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateCompon
 import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
@@ -40,6 +42,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
@@ -157,6 +160,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         //verifyDanteTenantExists(0);
 
         // verify important cross-component work flows
+        verifyPLSTenantKnowsTopology();
 
     }
 
@@ -212,6 +216,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         // SpaceConfiguration
         SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
         spaceConfiguration.setDlAddress(dlUrl);
+        spaceConfiguration.setTopology(CRMTopology.ELOQUA);
 
         // BARDJAMS
         SerializableDocumentDirectory jamsConfig =
@@ -418,10 +423,16 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         final String tenantId = tenantIds[tenantIdx];
 
         // check non-zero users
-        String PLSTenantId =
+        final String PLSTenantId =
                 String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         List<User> users  = userService.getUsers(PLSTenantId);
         Assert.assertFalse(users.isEmpty());
+
+        final String username = "bnguyen@lattice-engines.com";
+        final String password = "tahoe";
+
+        UserDocument userDoc = plsComponentTestNG.loginAndAttach(username, password, PLSTenantId);
+        Assert.assertNotNull(userDoc);
     }
 
     @SuppressWarnings("unused")
@@ -450,6 +461,19 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         if (danteSkipped) return;
 
         final String tenantId = tenantIds[tenantIdx];
+    }
+
+
+    private void verifyPLSTenantKnowsTopology() {
+        if (plsSkipped) return;
+
+        String tenantId = tenantIds[0];
+        String PLSTenantId =
+                String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        RestTemplate plsRestTemplate = plsComponentTestNG.plsRestTemplate;
+        String crmType = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
+                String.class);
+        Assert.assertEquals(crmType, CRMTopology.ELOQUA.name());
     }
     /**
      * ==================================================

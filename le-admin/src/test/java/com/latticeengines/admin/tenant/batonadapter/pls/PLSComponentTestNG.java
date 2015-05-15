@@ -8,6 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -44,6 +45,8 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
 
+    public RestTemplate plsRestTemplate = new RestTemplate();
+
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException {
         String testAdminUsername = "pls-installer-tester@lattice-engines.com";
@@ -55,8 +58,6 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         try {
             deletePLSAdminUser(testAdminUsername);
             deletePLSTestTenant(PLSTenantId);
-            // wait 5 sec for the GA to recover from an error
-            Thread.sleep(5000L);
         } catch (Exception e) {
             // ignore
         }
@@ -194,6 +195,10 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     public void deletePLSTestTenant(String tenantId) {
         try {
+            List tenants = magicRestTemplate.getForObject(getPlsHostPort() + "/pls/admin/tenants", List.class);
+            for (Object tenant: tenants) {
+                if (((Tenant) tenant).getId().equals(tenantId)) return;
+            }
             magicRestTemplate.delete(getPlsHostPort()
                     + String.format("/pls/admin/tenants/%s", tenantId));
         } catch (Exception e) {
@@ -206,10 +211,10 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         creds.setUsername(username);
         creds.setPassword(DigestUtils.sha256Hex(password));
 
-        LoginDocument doc = restTemplate.postForObject(getPlsHostPort() + "/pls/login", creds, LoginDocument.class);
+        LoginDocument doc = plsRestTemplate.postForObject(getPlsHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        plsRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
 
         List<Tenant> tenants = doc.getResult().getTenants();
 
@@ -225,7 +230,7 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         Assert.assertNotNull(tenant);
 
-        return restTemplate.postForObject(getPlsHostPort() + "/pls/attach", tenant, UserDocument.class);
+        return plsRestTemplate.postForObject(getPlsHostPort() + "/pls/attach", tenant, UserDocument.class);
     }
 
 }
