@@ -18,16 +18,19 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class ScrubQuoteFunction extends BaseOperation implements Function {
+public class ScrubQuoteFunction<Context> extends BaseOperation<Context> implements Function<Context> {
 
-    public ScrubQuoteFunction(Fields fieldDeclaration) {
+	private static final long serialVersionUID = 4333077483123704366L;
+
+	public ScrubQuoteFunction(Fields fieldDeclaration) {
         super(2, fieldDeclaration);
     }
 
     private static final Log log = LogFactory.getLog(ScrubQuoteFunction.class);
 
-    @Override
-    public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
+    @SuppressWarnings("rawtypes")
+	@Override
+    public void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall ) {
         TupleEntry argument = functionCall.getArguments();
 
         HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;
