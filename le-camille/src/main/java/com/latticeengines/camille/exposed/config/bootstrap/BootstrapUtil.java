@@ -68,10 +68,11 @@ public class BootstrapUtil {
                 log.warn("{}Another process already installed the initial configuration", logPrefix, e);
             } catch (Exception e) {
                 log.error("{}Unexpected failure occurred attempting to install initial configuration", logPrefix, e);
+                String stackTrace = ExceptionUtils.getStackTrace(e);
                 BootstrapStateUtil.setState(
                         serviceDirectoryPath,
                         BootstrapState.constructErrorState(executableVersion, -1,
-                                e.getMessage() + ": " + ExceptionUtils.getStackTrace(e)));
+                                e.getMessage() + ": " + stackTrace));
                 throw e;
             } finally {
                 lock.release();
@@ -171,10 +172,11 @@ public class BootstrapUtil {
             }
         } catch (Exception e) {
             log.error("{}Unexpected failure occurred attempting to upgrade configuration", logPrefix, e);
+            String stackTrace = ExceptionUtils.getStackTrace(e);
             BootstrapStateUtil.setState(
                     serviceDirectoryPath,
                     BootstrapState.constructErrorState(executableVersion, state.installedVersion, e.getMessage() + ": "
-                            + ExceptionUtils.getStackTrace(e)));
+                            + stackTrace));
             throw e;
         }
     }
