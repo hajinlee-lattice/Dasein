@@ -40,7 +40,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
+public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     private final static String contractId = "EndToEndTestContract";
     private final static String[] tenantIds = new String[]{"EndToEndTenant", "EndToEndDefaultTenant"};
@@ -99,6 +99,9 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
                 //ignore
             }
         }
+        // delete PLS tenant
+        deletePLSTenants();
+
         provisionEndToEndTestTenants();
     }
 

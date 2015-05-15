@@ -40,7 +40,7 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     @Autowired
     private TenantService tenantService;
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testInstallation() throws InterruptedException {
         String testAdminUsername = "pls-installer-tester@lattice-engines.com";
         String testAdminPassword = "admin";
