@@ -44,31 +44,46 @@ public class PLSComponentManager {
 
         incrementTenantName(tenant);
 
-        if (tenantService.hasTenantId(tenant.getId())) {
-            LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
-            tenantService.updateTenant(tenant);
-        } else {
-            tenantService.registerTenant(tenant);
+        try {
+            if (tenantService.hasTenantId(tenant.getId())) {
+                Tenant oldTenant = tenantService.findByTenantId(tenant.getId());
+                if (!oldTenant.getName().equals(tenant.getName())) {
+                    LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
+                    tenantService.updateTenant(tenant);
+                }
+            } else {
+                tenantService.registerTenant(tenant);
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Registering tenant " + tenant.getId() + " error.", e);
         }
 
         for (String email : superAdminEmails) {
-            User user = userService.findByEmail(email);
-            if (user == null) {
-                UserRegistration uReg = createAdminUserRegistration(email);
-                userService.createUser(uReg);
-                user = userService.findByEmail(email);
+            try {
+                User user = userService.findByEmail(email);
+                if (user == null) {
+                    UserRegistration uReg = createAdminUserRegistration(email);
+                    userService.createUser(uReg);
+                    user = userService.findByEmail(email);
+                }
+                userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), user.getUsername());
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, "Adding " + email + " as a SuperAdmin error.", e);
             }
-            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), user.getUsername());
         }
 
         for (String email : internalAdminEmails) {
-            User user = userService.findByEmail(email);
-            if (user == null) {
-                UserRegistration uReg = createAdminUserRegistration(email);
-                userService.createUser(uReg);
-                user = userService.findByEmail(email);
+            try {
+                User user = userService.findByEmail(email);
+                if (user == null) {
+                    UserRegistration uReg = createAdminUserRegistration(email);
+                    userService.createUser(uReg);
+                    user = userService.findByEmail(email);
+                }
+                userService.assignAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant.getId(), user.getUsername());
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, "Adding " + email + " as a LatticeAdmin error.", e);
             }
-            userService.assignAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant.getId(), user.getUsername());
         }
 
     }
