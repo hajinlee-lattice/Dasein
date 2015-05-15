@@ -17,7 +17,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "internal_service_resource", description = "REST service resource for internal operations")
 @RestController
-@RequestMapping(value = "/internal/service")
+@RequestMapping(value = "/internal/services")
 public class InternalServiceResource extends InternalResourceBase {
 
     @Autowired

@@ -55,12 +55,8 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         String PLSTenantId = String.format("%s.%s.%s",
                 contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
 
-        try {
-            deletePLSAdminUser(testAdminUsername);
-            deletePLSTestTenant(PLSTenantId);
-        } catch (Exception e) {
-            // ignore
-        }
+        deletePLSAdminUser(testAdminUsername);
+        deletePLSTestTenant(PLSTenantId);
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -76,7 +72,7 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         bootstrap(confDir);
 
         // wait a while, then test your installation
-        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, "PLS");
+        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
 
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
@@ -104,17 +100,12 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         bootstrap(confDir);
 
         // wait a while, then test your installation
-        int numOfRetries = 10;
-        BootstrapState.State state;
-        do {
-            state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "PLS").state;
-            numOfRetries--;
-            Thread.sleep(1000L);
-        } while (state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
+        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
 
-        Assert.assertEquals(state, BootstrapState.State.OK);
+        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
-        SerializableDocumentDirectory sDir = tenantService.getTenantServiceConfig(contractId, tenantId, "PLS");
+        SerializableDocumentDirectory sDir = tenantService.getTenantServiceConfig(contractId, tenantId,
+                PLSComponent.componentName);
 
         for (SerializableDocumentDirectory.Node sNode : sDir.getNodes()) {
             if (sNode.getNode().equals("AdminEmails")) {

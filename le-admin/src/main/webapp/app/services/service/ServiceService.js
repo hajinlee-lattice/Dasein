@@ -14,6 +14,15 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
         }, 60000);
     }
 
+    this.spaceConfigOptions = null;
+
+    function cacheSpaceConfigOptions(services) {
+        this.spaceConfigOptions = services;
+        $interval(function(){
+            this.spaceConfigOptions = null;
+        }, 60000);
+    }
+
     this.GetRegisteredServices = function() {
         var defer = $q.defer();
 
@@ -71,6 +80,34 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
         });
+
+        return defer.promise;
+    };
+
+    this.GetSpaceConfigOptions = function() {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        if (this.spaceConfigOptions === null) {
+            $http({
+                method: 'GET',
+                url: '/admin/internal/services/dropdown_options?component=SpaceConfiguration'
+            }).success(function (data) {
+                cacheSpaceConfigOptions(data);
+                result.resultObj = data;
+                defer.resolve(result);
+            }).error(function (err, status) {
+                SessionUtility.handleAJAXError(err, status);
+            });
+        } else {
+            result.resultObj = this.spaceConfigOptions;
+            defer.resolve(result);
+        }
 
         return defer.promise;
     };
