@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -371,4 +372,19 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         }
     }
 
+    protected BootstrapState waitUntilStateIsNotInitial(
+            String contractId, String tenantId, String serviceName) {
+        int numOfRetries = 30;
+        BootstrapState state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
+        while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0) {
+            numOfRetries--;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Waiting for component state update interrupted", e);
+            }
+            state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
+        }
+        return state;
+    }
 }
