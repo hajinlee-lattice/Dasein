@@ -112,7 +112,12 @@ public class PLSComponentManager {
         String PLSTenantId = String.format("%s.%s.%s", camilleContractId, camilleTenantId, camilleSpaceId);
         LOGGER.info(String.format("Provisioning tenant %s", PLSTenantId));
 
-        TenantDocument tenantDocument = tenantConfigService.getTenantDocument(PLSTenantId);
+        TenantDocument tenantDocument;
+        try {
+            tenantDocument = tenantConfigService.getTenantDocument(PLSTenantId);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Getting tenant document error.", e);
+        }
         String tenantName = tenantDocument.getTenantInfo().properties.displayName;
 
         String emailListInJson;
