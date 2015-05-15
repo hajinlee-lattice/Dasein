@@ -27,7 +27,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testGetSelectableFieldsFromNonExistingComponent() throws Exception {
         SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields("NotExist");
-//        Assert.assertTrue(doc.getNodes().isEmpty());
+        Assert.assertNull(doc);
     }
 
 }
