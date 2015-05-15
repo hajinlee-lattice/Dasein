@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -70,7 +71,7 @@ public class BootstrapUtil {
                 BootstrapStateUtil.setState(
                         serviceDirectoryPath,
                         BootstrapState.constructErrorState(executableVersion, -1,
-                                e.getMessage() + ": " + e.getStackTrace()));
+                                e.getMessage() + ": " + ExceptionUtils.getStackTrace(e)));
                 throw e;
             } finally {
                 lock.release();
@@ -173,7 +174,7 @@ public class BootstrapUtil {
             BootstrapStateUtil.setState(
                     serviceDirectoryPath,
                     BootstrapState.constructErrorState(executableVersion, state.installedVersion, e.getMessage() + ": "
-                            + e.getStackTrace()));
+                            + ExceptionUtils.getStackTrace(e)));
             throw e;
         }
     }
