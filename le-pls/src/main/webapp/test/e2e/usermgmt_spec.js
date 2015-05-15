@@ -68,7 +68,104 @@ describe('user management', function() {
         // Logout
         //==================================================
         loginPage.logout();
-        //browser.driver.sleep(1000);
+        browser.driver.sleep(1000);
+    });
+    
+    it('should be able to cancel adding a new user', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+        
+        //==================================================
+        // Select manage users tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.ManageUsersLink.click();
+        var expectedNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
+        browser.driver.sleep(500);
+        
+        //==================================================
+        // Open add new user modal and then click cancel
+        //==================================================
+        userManagement.AddNewUserLink.click();
+        expect(element(by.css('#add-user-modal')).isPresent()).toBe(true);
+        element(by.css('#add-user-btn-cancel')).click();
+        browser.driver.sleep(500);
+        var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
+        expect(expectedNumOfCurrentUsers).toEqual(actualNumOfCurrentUsers);
+        
+        
+        //==================================================
+        // Logout
+        //==================================================
+        loginPage.logout();
+        browser.driver.sleep(1000);
+    });
+    
+    it('should be able to cancel editing a user', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+        
+        //==================================================
+        // Select manage users tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.ManageUsersLink.click();
+        var expectedNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
+        browser.driver.sleep(500);
+        
+        //==================================================
+        // Open edit user modal and cancel editing the user
+        //==================================================
+        element.all(by.css('.js-edit-user-link')).first().click();
+        browser.driver.sleep(500);
+        expect(element(by.css('#edit-user-modal')).isDisplayed()).toBe(true);
+        element(by.css('#edit-user-btn-cancel')).click();
+        browser.driver.sleep(500);
+        expect(element(by.css('#edit-user-modal')).isPresent()).toBe(false);
+        
+        
+        //==================================================
+        // Logout
+        //==================================================
+        loginPage.logout();
+        browser.driver.sleep(1000);
+    });
+    
+    it('should be able to cancel deleting a user', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+        
+        //==================================================
+        // Select manage users tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.ManageUsersLink.click();
+        var expectedNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
+        browser.driver.sleep(500);
+        
+        //==================================================
+        // Find the first user, click the delete icon and then click No
+        //==================================================
+        element.all(by.css('.js-delete-user-link')).first().click();
+        browser.driver.sleep(500);
+        element(by.css('#delete-user-modal button.btn-secondary')).click();
+        browser.driver.sleep(500);
+        var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
+        expect(expectedNumOfCurrentUsers).toEqual(actualNumOfCurrentUsers);
+        expect(element(by.css('#delete-user-modal')).isPresent()).toBe(false);
+        
+        
+        //==================================================
+        // Logout
+        //==================================================
+        loginPage.logout();
+        browser.driver.sleep(1000);
     });
     
     //
