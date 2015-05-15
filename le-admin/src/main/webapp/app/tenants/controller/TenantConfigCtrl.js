@@ -38,13 +38,11 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     // system-wise options
     //==================================================
     $scope.availableProducts = ["Lead Prioritization"];
-    $scope.availableTopologies = ["Marketo", "Eloqua", "SFDC"];
-    $scope.availableDLAddresses = [
-        "http://bodcdevvint207.dev.lattice.local:8081",
-        "http://bodcdevvint187.dev.lattice.local:8081"
-    ];
+    $scope.availableTopologies = ["Marketo"];
+    $scope.availableDLAddresses = ["http://bodcdevvint207.dev.lattice.local:8081"];
     $scope.availableTemplatePath = ["/etc/template"];
     $scope.services = [];
+    updateSpaceConfigurationOptions();
 
     $scope.accordion = _.map($scope.services, function(){
         return { open: false, disabled: false };
@@ -266,6 +264,31 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
             );
         });
     }
+
+    function updateSpaceConfigurationOptions() {
+        ServiceService.GetSpaceConfigOptions().then(function(result){
+            if(result.success) {
+                var options = result.resultObj;
+                _.each(options.Nodes, function(node){
+                    switch (node.Node.substring(1)) {
+                        case "DL_Address":
+                            $scope.availableDLAddresses = node.Options;
+                            break;
+                        case "Product":
+                            $scope.availableProducts = node.Options;
+                            break;
+                        case "Topology":
+                            $scope.availableTopologies = node.Options();
+                            break;
+                        case "Template_Path":
+                            $scope.availableTemplatePath = node.Options();
+                            break;
+                    }
+                });
+            }
+        });
+    }
+
 });
 
 

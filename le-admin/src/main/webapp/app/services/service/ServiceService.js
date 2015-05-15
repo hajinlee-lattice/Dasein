@@ -96,7 +96,7 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
         if (this.spaceConfigOptions === null) {
             $http({
                 method: 'GET',
-                url: '/admin/internal/services/dropdown_options?component=SpaceConfiguration'
+                url: '/admin/services/dropdown_options?component=SpaceConfiguration'
             }).success(function (data) {
                 cacheSpaceConfigOptions(data);
                 result.resultObj = data;
