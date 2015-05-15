@@ -19,7 +19,7 @@ describe('user management', function() {
 
     superAdmin.testUserManagement();
     
-    it('should be able to add a new user and then delete the user', function () {
+    it('should be able to add a new user, modify the user and then delete the user', function () {
         //==================================================
         // Login
         //==================================================
@@ -41,6 +41,18 @@ describe('user management', function() {
         var testName = "0000" + userManagement.randomName(8);
         userManagement.createNewUser(testName);
         browser.driver.sleep(500);
+        
+        //==================================================
+        // Open edit user modal and edit the user
+        //==================================================
+        element.all(by.css('.js-edit-user-link')).first().click();
+        browser.driver.sleep(500);
+        expect(element(by.css('#edit-user-modal')).isDisplayed()).toBe(true);
+        element(by.css('#edit-user-btn-save')).click();
+        browser.driver.sleep(500);
+        element(by.css('#edit-user-btn-ok')).click();
+        browser.driver.sleep(500);
+        expect(element(by.css('#edit-user-modal')).isPresent()).toBe(false);
         
         //==================================================
         // Find the created user and delete him
