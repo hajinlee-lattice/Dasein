@@ -32,6 +32,7 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
         if ($event != null) {
             $event.preventDefault();
         }
+        
         AddUserModal.show($scope.users.map(function(u){ return u.Email; }));
     };
 

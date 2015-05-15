@@ -2,6 +2,8 @@
 
 var UserManagement = function() {
     var userDropdown = require('./userdropdown.po');
+    
+    this.AddNewUserLink = element(by.css('#usermgmt-btn-add-user'));
 
     this.randomName = function(n) {
         var text = "";
@@ -13,13 +15,24 @@ var UserManagement = function() {
         return text;
     };
 
-    this.assertManageUsersIsVisible = function(expected) {
+    this.assertManageUsersIsVisible = function (expected) {
         if (expected) {
             expect(userDropdown.ManageUsersLink.isDisplayed()).toBe(true);
         } else {
             expect(userDropdown.ManageUsersLink.isPresent()).toBe(false);
         }
 
+    };
+    
+    this.createNewUser = function (name) {
+        element(by.model('user.FirstName')).sendKeys(name);
+        element(by.model('user.LastName')).sendKeys(name);
+        element(by.model('user.Email')).sendKeys(name + "@gmail.com");
+        element(by.css('#add-user-btn-save')).click();
+        expect(element(by.css("#add-user-btn-ok")).isPresent()).toBe(true);
+        element(by.css('#add-user-btn-ok')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
     };
 };
 

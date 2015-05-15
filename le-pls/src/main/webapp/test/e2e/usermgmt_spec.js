@@ -1,37 +1,64 @@
 describe('user management', function() {
 
-    var ExternalUser = require('./po/externaluser.po');
-    var ExternalAdmin = require('./po/externaladmin.po');
-    var InternalUser = require('./po/internaluser.po');
-    var InternalAdmin = require('./po/internaladmin.po');
-    var SuperAdmin = require('./po/superadmin.po');
+    var externalUser = require('./po/externaluser.po');
+    var externalAdmin = require('./po/externaladmin.po');
+    var internalUser = require('./po/internaluser.po');
+    var internalAdmin = require('./po/internaladmin.po');
+    var superAdmin = require('./po/superadmin.po');
+    var userDropdown = require('./po/userdropdown.po');
+    var userManagement = require('./po/usermgmt.po');
+    var loginPage = require('./po/login.po');
 
-    ExternalUser.testUserManagement();
+    externalUser.testUserManagement();
 
-    ExternalAdmin.testUserManagement();
+    externalAdmin.testUserManagement();
 
-    InternalUser.testUserManagement();
+    internalUser.testUserManagement();
 
-    InternalAdmin.testUserManagement();
+    internalAdmin.testUserManagement();
 
-    SuperAdmin.testUserManagement();
-
-
-    //it('should verify user management is visible to admin users', function () {
-    //    loginPage.loginAsAdminToTenant(params.tenantIndex);
-    //    userDropdown.toggleDropdown(params.adminDisplayName);
-    //    expect(userDropdown.ManageUsersLink.isDisplayed()).toBe(true);
-    //}, 60000);
-    //
-    //
-    //it('should see user management page', function () {
-    //    // check existence of users table
-    //    userDropdown.ManageUsersLink.click();
-    //    expect(userManagement.UsersPanel.isDisplayed()).toBe(true);
-    //    element.all(by.repeater('user in data')).then(function(elements){
-    //        numOfUsers = elements.length;
-    //    });
-    //});
+    superAdmin.testUserManagement();
+    
+    it('should be able to add a new user and then delete the user', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+        
+        //==================================================
+        // Select manage users tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.ManageUsersLink.click();
+        var expectedNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
+        browser.driver.sleep(500);
+        
+        //==================================================
+        // Open add new user modal and add the user
+        //==================================================
+        userManagement.AddNewUserLink.click();
+        expect(element(by.css('#add-user-modal')).isPresent()).toBe(true);
+        var testName = "0000" + userManagement.randomName(8);
+        userManagement.createNewUser(testName);
+        browser.driver.sleep(500);
+        
+        //==================================================
+        // Find the created user and delete him
+        //==================================================
+        element.all(by.css('.js-delete-user-link')).first().click();
+        browser.driver.sleep(500);
+        element(by.css('#delete-user-modal button.btn-primary')).click();
+        browser.driver.sleep(500);
+        var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
+        expect(expectedNumOfCurrentUsers).toEqual(actualNumOfCurrentUsers);
+        
+        //==================================================
+        // Logout
+        //==================================================
+        loginPage.logout();
+        //browser.driver.sleep(1000);
+    });
+    
     //
     //it('should see add new user model', function () {
     //    // popup add user
@@ -48,7 +75,7 @@ describe('user management', function() {
     //    userManagement.getAddNewUserCancelButton().click();
     //    browser.waitForAngular();
     //    browser.driver.sleep(1000);
-    //    expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
+    //    ).toEqual(numOfUsers);
     //});
     //
     //it('should be able to canceling by clicking cross symbol', function () {
