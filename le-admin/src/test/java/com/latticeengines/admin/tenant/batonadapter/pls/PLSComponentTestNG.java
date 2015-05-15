@@ -10,6 +10,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,6 +40,8 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 @Component
 public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
+    private final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
+
     @Autowired
     private TenantService tenantService;
 
@@ -47,16 +50,21 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     public RestTemplate plsRestTemplate = new RestTemplate();
 
+    @AfterClass(groups = {"deployment", "functional"}, alwaysRun = true)
+    public void tearDown() throws Exception {
+        super.tearDown();
+        String PLSTenantId = String.format("%s.%s.%s",
+                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        deletePLSAdminUser(testAdminUsername);
+        deletePLSTestTenant(PLSTenantId);
+    }
+
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException {
-        String testAdminUsername = "pls-installer-tester@lattice-engines.com";
         String testAdminPassword = "admin";
 
         String PLSTenantId = String.format("%s.%s.%s",
                 contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-
-        deletePLSAdminUser(testAdminUsername);
-        deletePLSTestTenant(PLSTenantId);
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -77,9 +85,6 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
-
-        deletePLSAdminUser(testAdminUsername);
-        deletePLSTestTenant(PLSTenantId);
     }
 
     @Test(groups = "functional")

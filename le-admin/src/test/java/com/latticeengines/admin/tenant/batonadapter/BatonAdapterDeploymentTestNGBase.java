@@ -48,7 +48,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminFunctionalTe
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
     }
 
-    @AfterClass(groups = {"deployment", "functional"})
+    @AfterClass(groups = {"deployment", "functional"}, alwaysRun = true)
     public void tearDown() throws Exception {
         try {
             deleteTenant(contractId, tenantId);

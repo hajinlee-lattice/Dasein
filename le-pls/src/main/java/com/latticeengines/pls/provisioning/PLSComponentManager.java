@@ -47,13 +47,15 @@ public class PLSComponentManager {
             try {
                 tenantService.updateTenant(tenant);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, "Updating tenant " + tenant.getId() + " error.", e);
+                throw new LedpException(LedpCode.LEDP_18028, "Updating tenant " + tenant.getId()
+                        + " error. May because the tenant name already exists.", e);
             }
         } else {
             try {
                 tenantService.registerTenant(tenant);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, "Registrating tenant " + tenant.getId() + " error.", e);
+                throw new LedpException(LedpCode.LEDP_18028, "Registrating tenant " + tenant.getId()
+                        + " error. May because the tenant name already exists.", e);
             }
         }
 
