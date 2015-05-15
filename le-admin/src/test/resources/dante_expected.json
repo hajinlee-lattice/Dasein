@@ -1,7 +1,6 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "ConfigFilePath", "Data": "/test/test.txt", "Metadata": {"Type":"path"} },
     { "Node": "Zero", "Data": "0", "Metadata": {"Type":"number"} }
   ]
 }

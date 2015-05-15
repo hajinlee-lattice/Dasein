@@ -1,6 +1,2 @@
 {
-  "RootPath": "/whatever",
-  "Nodes": [
-    { "Node": "ConfigFilePath", "Data": {"Type": "path"} }
-  ]
 }
