@@ -42,18 +42,19 @@ public class PLSComponentManager {
 
     public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails) {
 
-        try {
-            if (tenantService.hasTenantId(tenant.getId())) {
-                Tenant oldTenant = tenantService.findByTenantId(tenant.getId());
-                if (!oldTenant.getName().equals(tenant.getName())) {
-                    LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
-                    tenantService.updateTenant(tenant);
-                }
-            } else {
-                tenantService.registerTenant(tenant);
+        if (tenantService.hasTenantId(tenant.getId())) {
+            LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
+            try {
+                tenantService.updateTenant(tenant);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, "Updating tenant " + tenant.getId() + " error.", e);
             }
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18028, "Registering tenant " + tenant.getId() + " error.", e);
+        } else {
+            try {
+                tenantService.registerTenant(tenant);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, "Registrating tenant " + tenant.getId() + " error.", e);
+            }
         }
 
         for (String email : superAdminEmails) {
