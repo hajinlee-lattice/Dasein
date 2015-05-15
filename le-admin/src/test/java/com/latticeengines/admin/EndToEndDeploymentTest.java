@@ -3,7 +3,14 @@ package com.latticeengines.admin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -16,7 +23,6 @@ import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
-import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
@@ -38,6 +44,7 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
 
+    private final static Log log = LogFactory.getLog(EndToEndDeploymentTest.class);
     private final static String contractId = "EndToEndTestContract";
     private final static String[] tenantIds = new String[]{"EndToEndTenant", "EndToEndDefaultTenant"};
 
@@ -118,6 +125,7 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
     @Test(groups = "deployment")
     public void verifyMainTestTenant() throws Exception {
         // verify exsistence of each component
+        verifyZKState(0);
         verifyJAMSTenantExists(0);
         verifyPLSTenantExists(0);
         verifyVisiDBDLTenantExists(0);
@@ -132,6 +140,7 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
     @Test(groups = "deployment")
     public void verifyDefaultTestTenant() throws Exception {
         // verify exsistence of each component
+        verifyZKState(1);
         verifyJAMSTenantExists(1);
         verifyPLSTenantExists(1);
         verifyVisiDBDLTenantExists(1);
@@ -288,7 +297,9 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
         reg.setSpaceConfig(spaceConfiguration);
         reg.setConfigDirectories(configDirs);
 
-        tenantService.createTenant(contractId, tenantId, null);
+        String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
+        boolean created = restTemplate.postForObject(url, reg, Boolean.class);
+        Assert.assertTrue(created);
     }
     /**
      * ==================================================
@@ -301,22 +312,62 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
      * BEGIN: Tenants verification methods
      * ==================================================
      */
+    private void verifyZKState(int tenantIdx) {
+        final String tenantId = tenantIds[tenantIdx];
+
+        ExecutorService executor = Executors.newFixedThreadPool(6);
+
+        List<Future<BootstrapState>> futures = new ArrayList<>();
+        List<String> serviceNames = new ArrayList<>(serviceService.getRegisteredServices());
+
+        for(String serviceName: serviceNames) {
+            final String component = serviceName;
+            Future<BootstrapState> future = executor.submit(new Callable<BootstrapState>() {
+                @Override
+                public BootstrapState call() throws Exception {
+                    // not ready for integration test with Dante
+                    if (component.equals("Dante")) return BootstrapState.constructOKState(1);
+                    return waitUntilStateIsNotInitial(contractId, tenantId, component);
+                }
+            });
+            futures.add(future);
+        }
+
+        boolean allOK = true;
+        StringBuilder msg = new StringBuilder();
+
+        for (int i = 0; i < serviceNames.size(); i++) {
+            Future<BootstrapState> result = futures.get(i);
+            String serviceName = serviceNames.get(i);
+            BootstrapState state = null;
+            try {
+                state = result.get();
+            } catch (InterruptedException|ExecutionException e) {
+                msg.append(String.format(
+                        "Could not successfully get the bootstrap state of %s \n", serviceName));
+            }
+            boolean thisIsOK = state != null && state.state.equals(BootstrapState.State.OK);
+            if (!thisIsOK && state != null) {
+                msg.append(String.format(
+                        "The bootstrap state of %s is not OK, but rather %s.\n", serviceName, state.state));
+            }
+            allOK = allOK && thisIsOK;
+        }
+
+        Assert.assertTrue(allOK, msg.toString());
+    }
+
+
     private void verifyJAMSTenantExists(int tenantIdx) {
         if (jamsSkipped) return;
 
         String tenantId = tenantIds[tenantIdx];
-        // check state in ZK
-        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, BardJamsComponent.componentName);
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
     }
 
     private void verifyPLSTenantExists(int tenantIdx) {
         if (plsSkipped) return;
 
-        String tenantId = tenantIds[tenantIdx];
-        // check state in ZK
-        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
+        final String tenantId = tenantIds[tenantIdx];
 
         // check non-zero users
         String PLSTenantId =
@@ -328,38 +379,26 @@ public class EndToEndDeploymentTest extends AdminFunctionalTestNGBase {
     private void verifyVisiDBDLTenantExists(int tenantIdx) {
         if (vdbdlSkipped) return;
 
-        String tenantId = tenantIds[tenantIdx];
-        // check state in ZK
-        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, VisiDBDLComponent.componentName);
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
+        final String tenantId = tenantIds[tenantIdx];
     }
 
     private void verifyVDBTplTenantExists(int tenantIdx) {
         if (vdbTplSkipped) return;
 
-        String tenantId = tenantIds[tenantIdx];
-        // check state in ZK
-        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, VisiDBTemplateComponent.componentName);
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
+        final String tenantId = tenantIds[tenantIdx];
     }
 
     private void verifyDLTplTenantExists(int tenantIdx) {
         if (dlTplSkipped) return;
 
-        String tenantId = tenantIds[tenantIdx];
-        // check state in ZK
-        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, DLTemplateComponent.componentName);
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
+        final String tenantId = tenantIds[tenantIdx];
     }
 
     @SuppressWarnings("unused")
     private void verifyDanteTenantExists(int tenantIdx) {
         if (danteSkipped) return;
 
-        String tenantId = tenantIds[tenantIdx];
-        // check state in ZK
-        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, DanteComponent.componentName);
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
+        final String tenantId = tenantIds[tenantIdx];
     }
     /**
      * ==================================================
