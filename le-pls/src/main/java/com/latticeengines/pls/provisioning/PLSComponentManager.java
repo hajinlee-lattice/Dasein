@@ -59,30 +59,46 @@ public class PLSComponentManager {
         }
 
         for (String email : superAdminEmails) {
+            User user;
             try {
-                User user = userService.findByEmail(email);
-                if (user == null) {
-                    UserRegistration uReg = createAdminUserRegistration(email);
-                    userService.createUser(uReg);
-                    user = userService.findByEmail(email);
-                }
-                userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), user.getUsername());
+                user = userService.findByEmail(email);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, "Adding " + email + " as a SuperAdmin error.", e);
+                throw new LedpException(LedpCode.LEDP_18028, "Finding users with email " + email + " error.", e);
+            }
+            if (user == null) {
+                UserRegistration uReg = createAdminUserRegistration(email, AccessLevel.SUPER_ADMIN);
+                try {
+                    userService.createUser(uReg);
+                } catch (Exception e) {
+                    throw new LedpException(LedpCode.LEDP_18028, "Adding new user " + email + " error.", e);
+                }
+            }
+            try {
+                userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), email);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, "Assigning SuperAdmin role to " + email + " error.", e);
             }
         }
 
         for (String email : internalAdminEmails) {
+            User user;
             try {
-                User user = userService.findByEmail(email);
-                if (user == null) {
-                    UserRegistration uReg = createAdminUserRegistration(email);
-                    userService.createUser(uReg);
-                    user = userService.findByEmail(email);
-                }
-                userService.assignAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant.getId(), user.getUsername());
+                user = userService.findByEmail(email);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, "Adding " + email + " as a LatticeAdmin error.", e);
+                throw new LedpException(LedpCode.LEDP_18028, "Finding users with email " + email + " error.", e);
+            }
+            if (user == null) {
+                UserRegistration uReg = createAdminUserRegistration(email, AccessLevel.INTERNAL_ADMIN);
+                try {
+                    userService.createUser(uReg);
+                } catch (Exception e) {
+                    throw new LedpException(LedpCode.LEDP_18028, "Adding new user " + email + " error.", e);
+                }
+            }
+            try {
+                userService.assignAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant.getId(), email);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, "Assigning LatticeAdmin role to " + email + " error.", e);
             }
         }
 
@@ -157,13 +173,13 @@ public class PLSComponentManager {
 
     }
 
-    private UserRegistration createAdminUserRegistration(String username) {
+    private UserRegistration createAdminUserRegistration(String username, AccessLevel accessLevel) {
         // construct User
         User adminUser = new User();
         adminUser.setUsername(username);
         adminUser.setFirstName("Super");
         adminUser.setLastName("Admin");
-        adminUser.setAccessLevel(AccessLevel.SUPER_ADMIN.name());
+        adminUser.setAccessLevel(accessLevel.name());
         adminUser.setActive(true);
         adminUser.setTitle("Lattice PLO");
         adminUser.setEmail(username);
