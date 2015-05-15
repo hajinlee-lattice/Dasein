@@ -143,24 +143,29 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     }
 
-//    @Test(groups = "deployment")
-//    public void verifyDefaultTestTenant() throws Exception {
-//        // verify exsistence of each component
-//        verifyZKState(1);
-//        verifyJAMSTenantExists(1);
-//        verifyPLSTenantExists(1);
-//        verifyVisiDBDLTenantExists(1);
-//        verifyVDBTplTenantExists(1);
-//        verifyDLTplTenantExists(1);
-//        //verifyDanteTenantExists(1);
-//
-//        // verify minimal cross-component work flows
-//
-//    }
+    @Test(groups = "deployment")
+    public void verifyDefaultTestTenant() throws Exception {
+        // verify exsistence of each component
+        verifyZKState(1);
+        verifyJAMSTenantExists(1);
+        verifyPLSTenantExists(1);
+        verifyVisiDBDLTenantExists(1);
+        verifyVDBTplTenantExists(1);
+        verifyDLTplTenantExists(1);
+        //verifyDanteTenantExists(1);
+
+        // verify minimal cross-component work flows
+
+    }
 
     private void provisionEndToEndTestTenants() {
         provisionEndToEndTestTenant1();
-//        provisionEndToEndTestTenant2();
+        try {
+            Thread.sleep(10000L);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+        provisionEndToEndTestTenant2();
     }
 
     /**
