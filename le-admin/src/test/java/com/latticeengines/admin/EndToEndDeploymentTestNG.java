@@ -22,6 +22,7 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
+import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
@@ -56,6 +57,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PLSComponentTestNG plsComponentTestNG;
+
     @Value("${pls.api.hostport}")
     private String plsHostPort;
 
@@ -87,7 +91,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         loginAD();
-
+        cleanupZK();
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
@@ -139,24 +143,24 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     }
 
-    @Test(groups = "deployment")
-    public void verifyDefaultTestTenant() throws Exception {
-        // verify exsistence of each component
-        verifyZKState(1);
-        verifyJAMSTenantExists(1);
-        verifyPLSTenantExists(1);
-        verifyVisiDBDLTenantExists(1);
-        verifyVDBTplTenantExists(1);
-        verifyDLTplTenantExists(1);
-        //verifyDanteTenantExists(1);
-
-        // verify minimal cross-component work flows
-
-    }
+//    @Test(groups = "deployment")
+//    public void verifyDefaultTestTenant() throws Exception {
+//        // verify exsistence of each component
+//        verifyZKState(1);
+//        verifyJAMSTenantExists(1);
+//        verifyPLSTenantExists(1);
+//        verifyVisiDBDLTenantExists(1);
+//        verifyVDBTplTenantExists(1);
+//        verifyDLTplTenantExists(1);
+//        //verifyDanteTenantExists(1);
+//
+//        // verify minimal cross-component work flows
+//
+//    }
 
     private void provisionEndToEndTestTenants() {
         provisionEndToEndTestTenant1();
-        provisionEndToEndTestTenant2();
+//        provisionEndToEndTestTenant2();
     }
 
     /**
@@ -426,11 +430,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         for (String tenantId: tenantIds) {
             String PLSTenantId = String.format("%s.%s.%s",
                     contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-            try {
-                magicRestTemplate.delete(plsHostPort + String.format("/pls/admin/tenants/%s", PLSTenantId));
-            } catch (Exception e) {
-                // ignore
-            }
+            plsComponentTestNG.deletePLSTestTenant(PLSTenantId);
         }
     }
     /**

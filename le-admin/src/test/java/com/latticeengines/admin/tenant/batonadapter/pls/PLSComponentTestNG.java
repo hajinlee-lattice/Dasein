@@ -9,6 +9,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -35,12 +36,13 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 
+@Component
 public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException {
         String testAdminUsername = "pls-installer-tester@lattice-engines.com";
         String testAdminPassword = "admin";
@@ -69,19 +71,9 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         bootstrap(confDir);
 
         // wait a while, then test your installation
-        int numOfRetries = 30;
-        BootstrapState state;
-        do {
-            state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "PLS");
-            numOfRetries--;
-            Thread.sleep(1000L);
-        } while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
+        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, "PLS");
 
-        if (!state.state.equals(BootstrapState.State.OK)) {
-            System.out.println(state.errorMessage);
-        }
-
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
+        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
 
@@ -201,12 +193,16 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         }
     }
 
-    private void deletePLSTestTenant(String tenantId) {
-        magicRestTemplate.delete(getPlsHostPort()
-                + String.format( "/pls/admin/tenants/%s", tenantId));
+    public void deletePLSTestTenant(String tenantId) {
+        try {
+            magicRestTemplate.delete(getPlsHostPort()
+                    + String.format("/pls/admin/tenants/%s", tenantId));
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
-    private UserDocument loginAndAttach(String username, String password, String tenantId) {
+    public UserDocument loginAndAttach(String username, String password, String tenantId) {
         Credentials creds = new Credentials();
         creds.setUsername(username);
         creds.setPassword(DigestUtils.sha256Hex(password));
@@ -230,8 +226,7 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         Assert.assertNotNull(tenant);
 
-        return restTemplate.postForObject(getPlsHostPort() + "/pls/attach", tenant,
-                UserDocument.class);
+        return restTemplate.postForObject(getPlsHostPort() + "/pls/attach", tenant, UserDocument.class);
     }
 
 }
