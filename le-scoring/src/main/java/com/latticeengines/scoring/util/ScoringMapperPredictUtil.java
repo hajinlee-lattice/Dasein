@@ -21,8 +21,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import com.google.gson.Gson;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
@@ -48,10 +46,6 @@ public class ScoringMapperPredictUtil {
 	private static final String PERCENTILE_BUCKETS_MINIMUMSCORE = "MinimumScore";
 	private static final String PERCENTILE_BUCKETS_MAXIMUMSCORE = "MaximumScore";
     private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
-    
-    // TODO debugging purposes
-	private static final String absolutePath = "/Users/ygao/test/e2e/";
-    private static final int THRESHOLD = 10000;
 	
 	public static ArrayList<ModelEvaluationResult> evaluate(HashMap<String, JSONObject> models, HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, String> modelIdMap, String[] requestID, String outputPath, int threshold) {
 		ArrayList<ModelEvaluationResult> resultList= null;
@@ -61,7 +55,7 @@ public class ScoringMapperPredictUtil {
 		for (String modelID : modelIDs) {
 			sb.append(modelID +" ");
 		} 
-		//Process p = Runtime.getRuntime().exec("python /Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/test2.py " + sb.toString());
+		
 		log.info("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
 		File pyFile = new File("scoring.py");
 		if (!pyFile.exists()) {
@@ -70,7 +64,7 @@ public class ScoringMapperPredictUtil {
 		
 		Process p = null;
 		try {
-			p = Runtime.getRuntime().exec("python " + "scoring.py " + sb.toString());
+			p = Runtime.getRuntime().exec("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -104,24 +98,19 @@ public class ScoringMapperPredictUtil {
 
 	public static void writeToOutputFile(ArrayList<ModelEvaluationResult> resultList, Configuration yarnConfiguration, String outputPath)
 	{
-		log.info("in the function of writeToOutputFILE");
 		if (resultList == null) {
 			new Exception("resultList is null");
 		}
 		if (yarnConfiguration == null) {
 			new Exception("yarnConfiguration is null");
 		}
-		String name = UUID.randomUUID() + ".avro";
-		String fileName = "/Users/ygao/Downloads/" + name;
+		String fileName = UUID.randomUUID() + ".avro";
 		File outputFile = new File(fileName);
   		DatumWriter<ModelEvaluationResult> userDatumWriter = new SpecificDatumWriter<ModelEvaluationResult>();
         DataFileWriter<ModelEvaluationResult> dataFileWriter = new DataFileWriter<ModelEvaluationResult>(userDatumWriter);
-          
-		Gson gson = new Gson();
+        
 		for (int i = 0; i < resultList.size(); i++) {
 			ModelEvaluationResult result = resultList.get(i);
-        	String json = gson.toJson(result);
-        	System.out.println(json);
             try {
             	if (i == 0)
             		dataFileWriter.create(result.getSchema(), outputFile);
@@ -136,14 +125,13 @@ public class ScoringMapperPredictUtil {
 			e.printStackTrace();
 		}
         try {
-			HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/" + name);
+			HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/" + fileName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	private static ArrayList<ModelEvaluationResult> readScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, String[] requestID, String outputPath, int threshold) {
-		log.info("come to the readScoreFiles function");
 		Set<String> modelIDs = leadInputRecordMap.keySet();
 		// list of HashMap<leadID: score>
 		ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
@@ -167,8 +155,6 @@ public class ScoringMapperPredictUtil {
 	}
 	
 	private static void readScoreFile(String modelID, int index, HashMap<String, Double> scores) {
-		//TODO change it to relative path
-		//String fileName = absolutePath + modelID + SCORING_OUTPUT_PREFIX + index + ".txt";
 		String fileName = modelID + SCORING_OUTPUT_PREFIX + index + ".txt";
 		File f = new File(fileName);
 		if (!f.exists()) {
@@ -294,33 +280,11 @@ public class ScoringMapperPredictUtil {
     }
     
 	public static void main(String[] args) throws Exception {
-		
-		
-		String local = "/Users/ygao/Downloads/text.avro";
 
-		String hdfs = "/user/s-analytics/customers/Nutanix/scoring/TestLeadsTable/scores" + "/abf66a5c-073c-4fc3-9556-656bf94a42f8.avro";
+		String hdfs = "/user/s-analytics/customers/Nutanix/scoring/TestLeadsTable/scores" + "/44c1d69a-88ad-4e3f-8710-d7c736c5d32a.avro";
 		List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(hdfs));
 		for (GenericRecord ele : list) {
 			System.out.println(ele.toString());
 		}
-		
-		
-		/*
-        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
-        HashMap<String, String> modelIdMap = new HashMap<String, String>();
-        modelIdMap.put("79f95119-cc68-447f-92de-9de8d58dcb1d", "ms__79f95119-cc68-447f-92de-9de8d58dcb1d-Visi");
-        
-        Path p = new Path(absolutePath + "2_model.json");
-        ScoringMapperTransformUtil.parseModelFiles(models, p);
-        //evaluate(models, modelNumberMap, THRESHOLD);
-        Set<String> keys = models.keySet(); 
-        for (String key : keys) {
-        
-        	JSONObject model = models.get(key);
-        	//String modelID, String leadID, String requestID, JSONObject model, double score
-        	getResult(modelIdMap, "79f95119-cc68-447f-92de-9de8d58dcb1d", "69", "Default", model, 0.925557050408);
-        }
-        */
 	}
-	
 }

@@ -15,7 +15,6 @@ public class ScoringMapperValidateUtil {
 	
 	public static void validate(JSONObject datatype, boolean datatypeFileProvided, HashMap<String, JSONObject> models)
 	{
-		//TODO create inner class to deal with failure type
 		if (!datatypeFileProvided) {
 			new Exception("datatype file is not provided");
 		}

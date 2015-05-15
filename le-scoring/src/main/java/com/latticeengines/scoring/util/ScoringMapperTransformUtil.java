@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -22,17 +23,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 
 public class ScoringMapperTransformUtil {
 	
 	private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
-
-	//TODO
-	private static final String absolutePath = "/Users/ygao/test/e2e/";
 	
-    //private static final int THRESHOLD = 10000;
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
     private static final String LEAD_RECORD_MODEL_ID_COLUMN = "ModelingID";
@@ -45,7 +41,6 @@ public class ScoringMapperTransformUtil {
     
     public static void parseModelFiles(HashMap<String, JSONObject> models, Path path) {
 		try {
-			log.info("come to the parseModelFiles function");
 	        FileReader reader;
 			reader = new FileReader(path.toString());
 	        JSONParser jsonParser = new JSONParser();
@@ -88,8 +83,6 @@ public class ScoringMapperTransformUtil {
     
 	public static void writeScoringScript(String modelID, JSONObject modelObject) {
 		String scriptContent = (String) modelObject.get(MODEL_SCRIPT);
-		//String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
-		//String fileName = absolutePath + modelID + SCORING_SCRIPT_NAME;
 		String fileName = modelID + SCORING_SCRIPT_NAME;
 		try {
 			File file = new File(fileName);
@@ -103,8 +96,6 @@ public class ScoringMapperTransformUtil {
 		JSONArray compressedSupportedFiles = (JSONArray) modelObject.get(MODEL_COMPRESSED_SUPPORT_Files);
 		for (int i = 0; i < compressedSupportedFiles.size(); i++) {
 			JSONObject compressedFile = (JSONObject) compressedSupportedFiles.get(i);
-			//String absolutePath = "/Users/ygao/Documents/workspace/ledp/le-dataplatform/src/test/python/";
-			//String compressedFileName = absolutePath + modelID + compressedFile.get("Key");
 			String compressedFileName = modelID + compressedFile.get("Key");
 			decodeBase64ThenDecompressToFile((String)compressedFile.get("Value"), compressedFileName);
 		}
@@ -116,7 +107,7 @@ public class ScoringMapperTransformUtil {
 		FileOutputStream stream;
 		try {
 			stream = new FileOutputStream(fileName);
-			GZIPInputStream gzis = 
+			InputStream gzis = 
 		    		new GZIPInputStream(new Base64InputStream(IOUtils.toInputStream(value)));
 			IOUtils.copy(gzis, stream);
 	        gzis.close();
@@ -168,24 +159,19 @@ public class ScoringMapperTransformUtil {
     
     private static String identifyModelID(JSONObject leadJsonObject, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap) {
     	
-		// TODO unify this with Haitao about the columnName of ModelID, and also the type of the ModelID
 		String modelIDVal= (String) leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN);
 		log.info("the modelVal is " + modelIDVal);
-		//debugging
-		//String modelIDVal= "87ecf8cd-fe45-45f7-89d1-612235631fc1";
 		String modelID = null;
     	Set<String> modelIDSet = models.keySet();
 
     	for (String ID : modelIDSet) {
     		if (modelIDVal.contains(ID)) {
-    			log.info("the current modelID is " + ID);
     			modelID = ID;
     			log.info("modelID is found! " + modelID);
     			break;
     		}
     	}
     	if (modelID == null) {
-    		log.info("what??");
     		new Exception("ModelID in avro files do not match any of the models");
     	}
     	//update the mapping from model GUID to model name
@@ -196,24 +182,19 @@ public class ScoringMapperTransformUtil {
     }
     
     public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models, HashMap<String, Integer> leadNumber, String[] requestID, String modelID) {
-    	log.info("Come to the transformToJsonString and the modelID is " + modelID);
-    	
     	String formattedRecord = null;
-		//get the metadata from the specific model json file
     	
     	if (models == null) {
-    		log.info("model is null");
+    		new Exception("model is null");
     	} else if (models.get(modelID) == null) {
-    		log.info("models.get(modelID) is null");
+    		new Exception("models.get(modelID) is null");
     	} else if (models.get(modelID).get(INPUT_COLUMN_METADATA) == null) {
-    		log.info("models.get(modelID).get(INPUT_COLUMN_METADATA) is null");
+    		new Exception("models.get(modelID).get(INPUT_COLUMN_METADATA) is null");
     	}
     	
 		JSONArray metadata = (JSONArray) models.get(modelID).get(INPUT_COLUMN_METADATA);
-		//log.info("metadata is " + metadata.toString());
 		
 		// parse the avro file since it is in json format
-		//TODO unify with Haitao about the name of the columnID and the type
 		JSONObject jsonObj = new JSONObject();
 		String leadID = (String) leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
 		if (!leadNumber.containsKey(leadID)) {
@@ -222,10 +203,8 @@ public class ScoringMapperTransformUtil {
 			int i = leadNumber.get(leadID);
 			leadNumber.put(leadID, ++i);
 		}
-		//log.info("The lead id is " + leadID);
 		//String currentRequestID = (String) leadJsonObject.get(LEAD_RECORD_REQUEST_ID_COLUMN);
 		String currentRequestID = "Default";
-		//log.info("The lead id is " + currentRequestID);
 		if (requestID[0] == null) {
 			requestID[0] = currentRequestID;
 		} else {
@@ -267,12 +246,10 @@ public class ScoringMapperTransformUtil {
     }
     
     private static void writeToLeadInputFile(ArrayList<String> leadInputRecords, String modelID, int threshold) {
-    	log.info("debugging writeToLeadInputFile");
     	log.info("for model " + modelID + ", there are " + leadInputRecords.size() + " leads");
     	
     	int indexOfFile = 0;
     	int count = 0;
-    	//create an intial input stream
     	try {
 	    	String leadInputFileName = modelID + "-" + indexOfFile;
 	    	log.info("Filename is " + leadInputFileName);
@@ -283,7 +260,6 @@ public class ScoringMapperTransformUtil {
 	    		count++;
 	    		bw.write(leadInputRecords.get(i));
 	    		if (count == threshold) {
-	    			// reach the point of writing the current bw to file
 	    			bw.flush();
 	    			bw.close();
 	    			count = 0;
