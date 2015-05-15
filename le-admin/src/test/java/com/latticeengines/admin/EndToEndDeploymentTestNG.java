@@ -340,7 +340,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         }
 
         boolean allOK = true;
-        StringBuilder msg = new StringBuilder();
+        StringBuilder msg = new StringBuilder("Problematic components are:\n");
 
         for (int i = 0; i < serviceNames.size(); i++) {
             Future<BootstrapState> result = futures.get(i);
