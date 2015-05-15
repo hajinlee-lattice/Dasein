@@ -328,8 +328,12 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
                 @Override
                 public BootstrapState call() throws Exception {
                     // not ready for integration test with Dante
-                    if (component.equals("Dante")) return BootstrapState.constructOKState(1);
-                    return waitUntilStateIsNotInitial(contractId, tenantId, component);
+                    if (component.toLowerCase().contains("dante") ||
+                            component.toLowerCase().contains("test")) {
+                        return BootstrapState.constructOKState(1);
+                    } else {
+                        return waitUntilStateIsNotInitial(contractId, tenantId, component);
+                    }
                 }
             });
             futures.add(future);
