@@ -130,7 +130,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      *
      * @throws Exception
      */
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment", alwaysRun = true)
     public void tearDown() throws Exception {
         for (String tenantId: tenantIds) {
             try {
