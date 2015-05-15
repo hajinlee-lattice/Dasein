@@ -31,7 +31,23 @@ class Test(unittest.TestCase):
         pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_1K3k5k",3000,"second")
         pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_1K3k5k",5000,"Third")
     
+    def testPerformanceHourlyMKTO_1K20k3k(self): 
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_1K20k3k",1000,"first")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_1K20k3k",20000,"second")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_1K20k3k",3000,"Third")
         
+    def testPerformanceHourlyMKTO_20K70k10k(self): 
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_20K70k10k",20000,"first")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_20K70k10k",70000,"second")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_20K70k10k",10000,"Third")
+        
+    def testPerformanceHourlyMKTO_50K50k6Times(self): 
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_50K50k6Times",50000,"first")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_50K50k6Times",50000,"2")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_50K50k6Times",50000,"3")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_50K50k6Times",50000,"4")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_50K50k6Times",50000,"5")
+        pt.PerformanceHourlyTest("testPerformanceHourlyMKTO_50K50k6Times",50000,"6")
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
