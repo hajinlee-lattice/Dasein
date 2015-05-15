@@ -22,6 +22,7 @@ import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
+import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponentDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
@@ -219,9 +220,16 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         spaceConfiguration.setTopology(CRMTopology.ELOQUA);
 
         // BARDJAMS
-        SerializableDocumentDirectory jamsConfig =
-                serviceService.getDefaultServiceConfig(BardJamsComponent.componentName);
+        SerializableDocumentDirectory jamsConfig = serviceService
+                .getDefaultServiceConfig(BardJamsComponent.componentName);
         jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
+
+        SerializableDocumentDirectory actualDirecory = new SerializableDocumentDirectory(
+                BardJamsComponentDeploymentTestNG.getOverrideProperties());
+        DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
+        actualDirecory.applyMetadata(metaDir);
+        actualDirecory.setRootPath("/" + BardJamsComponent.componentName);
+
 
         // PLS
         SerializableDocumentDirectory PLSconfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
@@ -264,7 +272,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
-        configDirs.add(jamsConfig);
+        configDirs.add(actualDirecory);
         configDirs.add(PLSconfig);
         configDirs.add(vdbdlConfig);
         configDirs.add(vdbTplConfig);

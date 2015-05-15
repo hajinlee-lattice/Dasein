@@ -2,16 +2,11 @@
 	"RootPath": "/",
 	"Nodes": 
 	[
-		{
-			"Node": "Tenant",
-			"Data": ""
-		},
 
 		{
 			"Node": "TenantType",
 			"Data": "P"
 		},
-
 		{
 			"Node": "DL_URL",
 			"Data": "https://dataloader-prod.lattice-engines.com/Dataloader_PLS"

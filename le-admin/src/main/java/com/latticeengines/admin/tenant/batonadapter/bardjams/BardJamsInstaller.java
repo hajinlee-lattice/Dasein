@@ -85,7 +85,7 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
 
         String tenantId = getData(configDir, "Tenant");
         if (StringUtils.isEmpty(tenantId)) {
-            tenantId = space.getTenantId();
+            tenantId = space.toString();
         }
         tenant.setTenant(tenantId);
         tenant.setTenantType(getData(configDir, "TenantType"));

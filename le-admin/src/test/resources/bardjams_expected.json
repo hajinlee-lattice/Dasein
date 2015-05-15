@@ -76,10 +76,6 @@
       "Data": "DataLoader\\\\DL TEST\\\\Scheduled Jobs"
     },
     {
-      "Node": "Tenant",
-      "Data": ""
-    },
-    {
       "Node": "TenantType",
       "Data": "P"
     },
