@@ -6,18 +6,22 @@ describe('system setup tests', function () {
     var userDropdown = require('./po/userdropdown.po');
     var systemSetup = require('./po/systemsetup.po');
 
+    beforeEach(function(){
+        loginPage.loginAsSuperAdmin();
+        loginPage.logout();
+        browser.driver.executeScript('window.localStorage.clear();');
+        browser.driver.sleep(10000);
+    });
+
     afterEach(function(){
         loginPage.logout();
-        browser.driver.sleep(30000);
+        browser.driver.sleep(20000);
     });
 
     it('should validate that you can go to the System Setup page', function () {
         //==================================================
         // Login
         //==================================================
-        loginPage.loginAsSuperAdmin();
-        loginPage.logout();
-        browser.driver.executeScript('window.localStorage.clear();');
         loginPage.loginAsSuperAdmin();
 
         //==================================================
