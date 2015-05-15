@@ -250,8 +250,7 @@ public class InternalResource extends InternalResourceBase {
     }
 
 
-    @SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset the testing environment for protracter tests.")
     public SimpleBooleanResponse createTestTenant(HttpServletRequest request) throws IOException {

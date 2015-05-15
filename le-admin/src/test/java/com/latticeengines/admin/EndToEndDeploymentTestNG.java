@@ -280,8 +280,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     /**
      * This is the tenant with default configuration
-     */
-    private void provisionEndToEndTestTenant2() {
+     */    
+    @SuppressWarnings("unused")
+	private void provisionEndToEndTestTenant2() {
         String tenantId = tenantIds[1];
 
         // TenantInfo
@@ -411,7 +412,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         String tenantId = tenantIds[tenantIdx];
     }
 
-    @SuppressWarnings("unused")
     private void verifyPLSTenantExists(int tenantIdx) {
         if (plsSkipped) return;
 
