@@ -3,19 +3,13 @@ package com.latticeengines.dellebi.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.LedpSqoop;
 
 public class DellEBI_SqoopSyncJobService {
 
-    private Configuration yarnConfiguration;
-
     protected static final int MAX_TRIES = 60;
     protected static final long APP_WAIT_TIME = 1000L;
-
-    private static final Log log = LogFactory.getLog(DellEBI_SqoopSyncJobService.class);
 
     public int exportData(String table, String sourceDir, String uri, String queue, String customer, int numMappers,
             String javaColumnTypeMappings) {
@@ -39,8 +33,6 @@ public class DellEBI_SqoopSyncJobService {
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
         cmds.add(table);
-        // cmds.add("--mapreduce-job-name");
-        // cmds.add(jobName);
         cmds.add("--export-dir");
         cmds.add(sourceDir);
         if (javaColumnTypeMappings != null) {

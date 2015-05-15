@@ -61,10 +61,11 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     private String smbInboxPath;
     @Value("${dellebi.smbarchivepath}")
     private String smbArchivePath;
+    
+    private ApplicationContext springContext = null;
 
     @BeforeMethod(groups = "functional")
     public void setUpBeforeMethod() throws Exception {
-        ApplicationContext springContext = new ClassPathXmlApplicationContext("dellebi-properties-context.xml");
 
         // Copy test files to remote test folder.
         smbPut(smbInboxPath, "./src/test/resources/tgt_quote_trans_global_1_2015.zip");
@@ -94,14 +95,11 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
         deleteSMBFile(new SmbFile(smbArchivePath + "/tgt_quote_trans_global_1_2015.zip", auth));
         deleteSMBFile(new SmbFile(smbArchivePath + "/tgt_quote_trans_global_4_2015.zip", auth));
 
-        // Remove output folder on HDFS.
-        Path quotePath = new Path(dataHadoopWorkingPath + "/" + quoteTrans);
-        // deleteHDFSFolder(quotePath);
     }
 
     @Test(groups = "functional")
     public void testExecute() throws Exception {
-        ApplicationContext springContext = new ClassPathXmlApplicationContext("dellebi-properties-context.xml",
+        springContext = new ClassPathXmlApplicationContext("dellebi-properties-context.xml",
                 "dellebi-camel-context.xml", "dellebi-component-context.xml");
 
         // Wait for a while to let Camel process data.
@@ -142,7 +140,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
         } catch (InterruptedException e) {
         }
 
-        // Assert.assertEquals(fs.exists(quoteTransPath), false);
+        Assert.assertEquals(fs.exists(quoteTransPath), false); 
     }
 
     private void smbPut(String remoteUrl, String localFilePath) {

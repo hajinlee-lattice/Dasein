@@ -55,7 +55,8 @@ public class FlowDefinition {
 
     private static final Log log = LogFactory.getLog(FlowDefinition.class);
 
-    @Bean
+    @SuppressWarnings("rawtypes")
+	@Bean
     public FlowDef getOrderSumDailyFlow() {
 
         Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/" + orderSummary
@@ -78,7 +79,8 @@ public class FlowDefinition {
         return flowDef_fileType;
     }
 
-    @Bean
+    @SuppressWarnings("rawtypes")
+	@Bean
     public FlowDef getOrderDetailDailyFlow() {
 
         Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/" + orderDetail
@@ -100,7 +102,8 @@ public class FlowDefinition {
         return flowDef_fileType;
     }
 
-    @Bean
+    @SuppressWarnings("rawtypes")
+	@Bean
     public FlowDef getShipDailyFlow() {
 
         Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/"
@@ -122,7 +125,8 @@ public class FlowDefinition {
         return flowDef_fileType;
     }
 
-    @Bean
+    @SuppressWarnings("rawtypes")
+	@Bean
     public FlowDef getWarrantyDailyFlow() {
 
         Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/"
@@ -144,7 +148,8 @@ public class FlowDefinition {
         return flowDef_fileType;
     }
 
-    @Bean
+    @SuppressWarnings("rawtypes")
+	@Bean
     public FlowDef getQuoteDailyFlow() {
 
         log.info("Initial quote daily flow definition!");

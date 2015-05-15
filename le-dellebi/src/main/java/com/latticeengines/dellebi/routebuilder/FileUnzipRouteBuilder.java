@@ -49,7 +49,6 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
     @Value("${dellebi.smbinboxpath}")
     private String smbInboxPath;
 
-    @SuppressWarnings("unchecked")
     public void configure() {
         // Unzip files to separated folders according to the file type.
         log.info("Unzipping files and put files to seperated file folders according to file type.");
