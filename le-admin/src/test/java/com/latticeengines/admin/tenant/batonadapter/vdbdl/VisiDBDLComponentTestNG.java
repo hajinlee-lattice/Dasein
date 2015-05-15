@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,10 +17,12 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
+@Component
 public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
@@ -47,7 +50,9 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         createNewVisiDB = "true";
         visiDBName = "TestVisiDB";
         tenant = tenantService.getTenant(contractId, tenantId).getTenantInfo().properties.displayName;
-        tenantService.getTenant(contractId, tenantId).getSpaceConfig().setDlAddress(dlUrl);
+        SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
+        spaceConfig.setDlAddress(dlUrl);
+        tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
     }
 
     @Test(groups = "deployment")
@@ -129,7 +134,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     }
 
-    private JsonNode deleteVisiDBDLTenant(String tenant) throws ClientProtocolException, IOException {
+    public JsonNode deleteVisiDBDLTenant(String tenant) throws ClientProtocolException, IOException {
         DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
         String jsonStr = JsonUtils.serialize(request);
         VisiDBDLInstaller installer = new VisiDBDLInstaller();

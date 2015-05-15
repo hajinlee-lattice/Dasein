@@ -26,10 +26,13 @@ import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
@@ -60,6 +63,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @Autowired
     private PLSComponentTestNG plsComponentTestNG;
 
+    @Autowired
+    private VisiDBDLComponentTestNG visiDBDLComponentTestNG;
+
     @Value("${pls.api.hostport}")
     private String plsHostPort;
 
@@ -80,6 +86,15 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     @Value("${admin.dl.tpl.dryrun}")
     private boolean dlTplSkipped;
+
+    @Value("${admin.test.dl.url}")
+    private String dlUrl;
+
+    @Value("${admin.test.vbservername}")
+    private String visiDBServerName;
+
+    @Value("${admin.test.dl.user}")
+    private String ownerEmail;
 
     /**
      * In setup, orchestrate 2 full tenant.
@@ -105,6 +120,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         }
         // delete PLS tenant
         deletePLSTenants();
+        deleteVisiDBDLTenants();
 
         provisionEndToEndTestTenants();
     }
@@ -126,6 +142,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
         // delete PLS tenant
         deletePLSTenants();
+        deleteVisiDBDLTenants();
     }
 
     @Test(groups = "deployment")
@@ -143,7 +160,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void verifyDefaultTestTenant() throws Exception {
         // verify exsistence of each component
         verifyZKState(1);
@@ -160,12 +177,12 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     private void provisionEndToEndTestTenants() {
         provisionEndToEndTestTenant1();
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-        provisionEndToEndTestTenant2();
+//        try {
+//            Thread.sleep(10000L);
+//        } catch (InterruptedException e) {
+//            // ignore
+//        }
+//        provisionEndToEndTestTenant2();
     }
 
     /**
@@ -194,6 +211,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
         // SpaceConfiguration
         SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
+        spaceConfiguration.setDlAddress(dlUrl);
 
         // BARDJAMS
         SerializableDocumentDirectory jamsConfig =
@@ -212,8 +230,21 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
         // VisiDBDL
-        SerializableDocumentDirectory vdbdlConfig =
-                serviceService.getDefaultServiceConfig(VisiDBDLComponent.componentName);
+        String createNewVisiDB = "true";
+        String visiDBName = "TestVisiDB";
+
+        DocumentDirectory confDir =
+                serviceService.getDefaultServiceConfig(VisiDBDLComponent.componentName).getDocumentDirectory();
+        confDir.makePathsLocal();
+        DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
+        node.getChild("CreateNewVisiDB").getDocument().setData(createNewVisiDB);
+        node = confDir.get(new Path("/VisiDB"));
+        node.getChild("VisiDBName").getDocument().setData(visiDBName);
+        node = confDir.get(new Path("/VisiDB"));
+        node.getChild("ServerName").getDocument().setData(visiDBServerName);
+        node = confDir.get(new Path("/DL"));
+        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
+        SerializableDocumentDirectory vdbdlConfig = new SerializableDocumentDirectory(confDir);
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 
         // VDB Template
@@ -436,6 +467,17 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
             String PLSTenantId = String.format("%s.%s.%s",
                     contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
             plsComponentTestNG.deletePLSTestTenant(PLSTenantId);
+        }
+    }
+
+    private void deleteVisiDBDLTenants() {
+        for (String tenantId: tenantIds) {
+            String tenant = tenantService.getTenant(contractId, tenantId).getTenantInfo().properties.displayName;
+            try {
+                visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
+            } catch (Exception e) {
+                // ignore
+            }
         }
     }
     /**
