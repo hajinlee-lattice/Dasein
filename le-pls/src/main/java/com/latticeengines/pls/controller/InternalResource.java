@@ -14,13 +14,9 @@ import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,10 +25,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.Status;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -40,7 +37,6 @@ import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -268,27 +264,30 @@ public class InternalResource extends InternalResourceBase {
         //==================================================
         // Upload modelsummary if necessary
         //==================================================
-        RestTemplate restTemplate = new RestTemplate();
         Credentials creds = new Credentials();
         creds.setUsername("pls-super-admin-tester@test.lattice-engines.com");
         creds.setPassword(DigestUtils.sha256Hex("admin"));
-        final LoginDocument loginDoc = restTemplate.postForObject(hostPort + "/pls/login", creds, LoginDocument.class);
-        ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
-            @Override
-            public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution execution)
-                    throws IOException {
-                HttpRequestWrapper requestWrapper = new HttpRequestWrapper(httpRequest);
-                requestWrapper.getHeaders().add(Constants.AUTHORIZATION, loginDoc.getData());
 
-                return execution.execute(requestWrapper, bytes);
-            }
-        };
-        restTemplate.setInterceptors(Collections.singletonList(interceptor));
+        List<BasicNameValuePair> headers = new ArrayList<>();
+        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
+        headers.add(new BasicNameValuePair("Accept", "application/json"));
+
+        String payload = JsonUtils.serialize(creds);
+        String loginDocAsString =
+                HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/login", true, headers, payload);
+        LoginDocument loginDoc = JsonUtils.deserialize(loginDocAsString, LoginDocument.class);
+
+        headers.add(new BasicNameValuePair(Constants.AUTHORIZATION, loginDoc.getData()));
+
         for (Tenant tenant: loginDoc.getResult().getTenants()) {
-            if (tenant.getId().equals(tenant1Id) || tenant.getId().equals(tenant2Id)) {
-                restTemplate.postForObject(hostPort + "/pls/attach", tenant, UserDocument.class);
-                List response = restTemplate.getForObject(hostPort + "/pls/modelsummaries/", List.class);
-                while (response.size() < 2) {
+            if (tenant.getId().equals(tenant2Id)) {
+                payload = JsonUtils.serialize(tenant);
+                HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/attach", true, headers, payload);
+                String response =
+                        HttpClientWithOptionalRetryUtils.sendGetRequest(hostPort + "pls/modelsummaries", true, headers);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jNode = mapper.readTree(response);
+                while (jNode.size() < 2) {
                     InputStream ins = getClass().getClassLoader()
                             .getResourceAsStream("com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
                     ModelSummary data = new ModelSummary();
@@ -298,8 +297,11 @@ public class InternalResource extends InternalResourceBase {
                     fakeTenant.setPid(-1L);
                     data.setTenant(fakeTenant);
                     data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                    restTemplate.postForObject(hostPort + "/pls/modelsummaries?raw=true", data, ModelSummary.class);
-                    response = restTemplate.getForObject(hostPort + "/pls/modelsummaries/", List.class);
+                    HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/modelsummaries?raw=true", true,
+                            headers, JsonUtils.serialize(data));
+                    response = HttpClientWithOptionalRetryUtils.sendGetRequest(hostPort + "pls/modelsummaries",
+                            true, headers);
+                    jNode = mapper.readTree(response);
                 }
             }
         }

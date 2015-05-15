@@ -197,7 +197,7 @@ public class UserServiceImpl implements UserService {
     /**
      *
      * @param tenantId
-     * @return all users in the tenant except admin:admin
+     * @return all users in the tenant
      */
     @Override
     public List<User> getUsers(String tenantId) {

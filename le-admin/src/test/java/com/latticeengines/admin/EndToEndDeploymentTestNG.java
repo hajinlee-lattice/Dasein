@@ -467,6 +467,12 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
             String PLSTenantId = String.format("%s.%s.%s",
                     contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
             plsComponentTestNG.deletePLSTestTenant(PLSTenantId);
+            try {
+                // let GA recover from error deletion
+                Thread.sleep(5000L);
+            } catch (Exception e) {
+                // ignore
+            }
         }
     }
 

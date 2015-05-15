@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.util.URIUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
@@ -35,12 +33,16 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
 @Component
 public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private GlobalUserManagementService globalUserManagementService;
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException {
@@ -51,8 +53,10 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
                 contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
 
         try {
-            deletePLSAdminUser(PLSTenantId, testAdminUsername);
+            deletePLSAdminUser(testAdminUsername);
             deletePLSTestTenant(PLSTenantId);
+            // wait 5 sec for the GA to recover from an error
+            Thread.sleep(5000L);
         } catch (Exception e) {
             // ignore
         }
@@ -77,7 +81,7 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
 
-        deletePLSAdminUser(PLSTenantId, testAdminUsername);
+        deletePLSAdminUser(testAdminUsername);
         deletePLSTestTenant(PLSTenantId);
     }
 
@@ -182,14 +186,9 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Override
     public String getExpectedJsonFile() { return "pls_expected.json"; }
 
-    private void deletePLSAdminUser(String username, String tenantId) {
-        try {
-            magicRestTemplate.delete(getPlsHostPort()
-                    + String.format(
-                    "/pls/internal/users?tenants=[\"%s\"]&namepattern=%s",
-                    URIUtil.encodeQuery(username), tenantId));
-        } catch (URIException e) {
-            Assert.fail("could not encode the username");
+    private void deletePLSAdminUser(String username) {
+        if (globalUserManagementService.getUserByUsername(username) != null) {
+            globalUserManagementService.deleteUser(username);
         }
     }
 
