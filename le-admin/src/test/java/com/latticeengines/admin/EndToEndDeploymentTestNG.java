@@ -100,7 +100,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private String ownerEmail;
 
     /**
-     * In setup, orchestrate 2 full tenant.
+     * In setup, orchestrate 2 full tenants.
      * The first one is the main testing tenant.
      * The second one uses only default configuration, to make sure default configuration can work out of box.
      *
