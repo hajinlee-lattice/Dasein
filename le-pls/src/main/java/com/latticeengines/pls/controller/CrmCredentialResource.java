@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.pls.service.CrmConfigService;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -24,6 +26,9 @@ public class CrmCredentialResource {
     @Autowired
     private CrmCredentialService crmCredentialService;
 
+    @Autowired
+    private CrmConfigService crmConfigService;
+
     @RequestMapping(value = "/{crmType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Verify CRM credential")
@@ -31,10 +36,18 @@ public class CrmCredentialResource {
     public CrmCredential verifyCredential(@PathVariable String crmType,
             @RequestParam(value = "tenantId") String tenantId,
             @RequestParam(value = "isProduction", required = false) Boolean isProduction,
+            @RequestParam(value = "verifyOnly", required = false) Boolean verifyOnly,
             @RequestBody CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = crmCredentialService.verifyCredential(crmType, tenantId, isProduction,
                 crmCredential);
+        
+        if (verifyOnly == null || verifyOnly == false) {
+            CrmConfig crmConfig = new CrmConfig();
+            crmConfig.setCrmCredential(crmCredential);
+            crmConfigService.config(crmType, tenantId, crmConfig);
+        }
+
         return newCrmCredential;
 
     }

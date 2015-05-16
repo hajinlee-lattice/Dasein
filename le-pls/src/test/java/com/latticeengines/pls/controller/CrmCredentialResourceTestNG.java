@@ -47,7 +47,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/sfdc?tenantId=contractId.tenantId.spaceId&isProduction=true", crmCredential,
+                + "/pls/credentials/sfdc?tenantId=contractId.tenantId.spaceId&isProduction=true&verifyOnly=true", crmCredential,
                 CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
         Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
@@ -70,7 +70,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setUserName("latticeenginessandbox1_9026948050BD016F376AE6");
         crmCredential.setPassword("41802295835604145500BBDD0011770133777863CA58");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/marketo?tenantId=contractId.tenantId.spaceId", crmCredential, CrmCredential.class);
+                + "/pls/credentials/marketo?tenantId=contractId.tenantId.spaceId&verifyOnly=true", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getUserName(), "latticeenginessandbox1_9026948050BD016F376AE6");
     }
 
@@ -92,7 +92,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setPassword("Lattice1");
         crmCredential.setCompany("TechnologyPartnerLatticeEngines");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/eloqua?tenantId=contractId.tenantId.spaceId", crmCredential, CrmCredential.class);
+                + "/pls/credentials/eloqua?tenantId=contractId.tenantId.spaceId&verifyOnly=true", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getUserName(), "Matt.Sable");
     }
 
