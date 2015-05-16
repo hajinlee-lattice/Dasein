@@ -108,8 +108,11 @@ public class TenantResource {
             @PathVariable String tenantId, @PathVariable String serviceName) {
         SerializableDocumentDirectory config = tenantService.getTenantServiceConfig(contractId, tenantId, serviceName);
         Path schemaPath = PathBuilder.buildServiceConfigSchemaPath(podId, serviceName);
+        String originalRootPath = config.getRootPath();
         config.setRootPath(schemaPath.toString());
-        return dynamicOptions.applyDynamicBinding(config);
+        config = dynamicOptions.applyDynamicBinding(config);
+        config.setRootPath(originalRootPath);
+        return config;
     }
 
     @RequestMapping(value = "/{tenantId}/services/{serviceName}/state",
