@@ -40,22 +40,22 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception ex) {
         }
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("tenantName", "tenantId");
-        parameters.put("tenantAlias", "tenantId");
+        parameters.put("tenantName", "contractId.tenantId.spaceId");
+        parameters.put("tenantAlias", "contractId.tenantId.spaceId");
         parameters.put("ownerEmail", "richard.liu@lattice-engines.com");
         parameters.put("visiDBLocation", "ServerName=127.0.0.1");
-        parameters.put("visiDBName", "tenantId");
+        parameters.put("visiDBName", "contractId.tenantId.spaceId");
         parameters.put("dmDeployment", "DMDeployment");
-        parameters.put("contractExternalID", "tenantId");
+        parameters.put("contractExternalID", "contractId.tenantId.spaceId");
         parameters.put("createNewVisiDB", "true");
 
         ((CrmConfigServiceImpl) crmService).excuteHttpRequest(url, parameters);
 
         url = dataLoaderUrl + "/InstallVisiDBStructureFile_Sync";
-        uploadFile(url, "tenantId", "Template_MKTO.specs");
+        uploadFile(url, "contractId.tenantId.spaceId", "Template_MKTO.specs");
 
         url = dataLoaderUrl + "/InstallConfigFile_Sync";
-        uploadFile(url, "tenantId", "Template_MKTO.config");
+        uploadFile(url, "contractId.tenantId.spaceId", "Template_MKTO.config");
 
     }
 
@@ -83,7 +83,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
     public void afterClass() throws Exception {
         String url = dataLoaderUrl + "/DeleteDLTenant";
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("tenantName", "tenantId");
+        parameters.put("tenantName", "contractId.tenantId.spaceId");
         parameters.put("deleteVisiDBOption", "3");
         ((CrmConfigServiceImpl) crmService).excuteHttpRequest(url, parameters);
     }
