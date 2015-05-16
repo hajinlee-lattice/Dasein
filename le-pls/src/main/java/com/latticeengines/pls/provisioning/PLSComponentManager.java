@@ -60,11 +60,12 @@ public class PLSComponentManager {
         }
 
         for (String email : superAdminEmails) {
-            User user;
+            User user = null;
             try {
-                user = findUserByEmailWithRetry(email);
+                user = userService.findByEmail(email);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, "Finding users with email " + email + " error.", e);
+                // ignore
+                // throw new LedpException(LedpCode.LEDP_18028, "Finding user with email " + email + " error.", e);
             }
             if (user == null) {
                 UserRegistration uReg = createAdminUserRegistration(email, AccessLevel.SUPER_ADMIN);
@@ -82,11 +83,12 @@ public class PLSComponentManager {
         }
 
         for (String email : internalAdminEmails) {
-            User user;
+            User user = null;
             try {
-                user = findUserByEmailWithRetry(email);
+                user = userService.findByEmail(email);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, "Finding users with email " + email + " error.", e);
+                // ignore
+                // throw new LedpException(LedpCode.LEDP_18028, "Finding user with email " + email + " error.", e);
             }
             if (user == null) {
                 UserRegistration uReg = createAdminUserRegistration(email, AccessLevel.INTERNAL_ADMIN);
@@ -175,24 +177,6 @@ public class PLSComponentManager {
 
         if (tenantService.hasTenantId(tenant.getId())) {
             tenantService.discardTenant(tenant);
-        }
-    }
-
-    private User findUserByEmailWithRetry(String email) {
-        final int MAX_RETRY = 10;
-        int numOfRetries = 0;
-        while (true) {
-            try {
-                return userService.findByEmail(email);
-            } catch (Exception e) {
-                if (numOfRetries >= MAX_RETRY) throw e;
-            }
-            try {
-                Thread.sleep(2000L);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-            numOfRetries++;
         }
     }
 
