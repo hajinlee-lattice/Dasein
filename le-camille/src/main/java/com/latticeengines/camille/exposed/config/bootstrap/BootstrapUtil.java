@@ -1,5 +1,7 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +28,8 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 
 public class BootstrapUtil {
+
+    private static String hostname = "unknown";
 
     public static void install(InstallerAdaptor installer, int executableVersion, Path serviceDirectoryPath,
             String logPrefix) throws Exception {
@@ -69,10 +73,11 @@ public class BootstrapUtil {
             } catch (Exception e) {
                 log.error("{}Unexpected failure occurred attempting to install initial configuration", logPrefix, e);
                 String stackTrace = ExceptionUtils.getStackTrace(e);
+                getHostName();
                 BootstrapStateUtil.setState(
                         serviceDirectoryPath,
                         BootstrapState.constructErrorState(executableVersion, -1,
-                                e.getMessage() + ": " + stackTrace));
+                                String.format("[%s] %s:: %s", hostname, e.getMessage(), stackTrace)));
                 throw e;
             } finally {
                 lock.release();
@@ -173,10 +178,11 @@ public class BootstrapUtil {
         } catch (Exception e) {
             log.error("{}Unexpected failure occurred attempting to upgrade configuration", logPrefix, e);
             String stackTrace = ExceptionUtils.getStackTrace(e);
+            getHostName();
             BootstrapStateUtil.setState(
                     serviceDirectoryPath,
-                    BootstrapState.constructErrorState(executableVersion, state.installedVersion, e.getMessage() + ": "
-                            + stackTrace));
+                    BootstrapState.constructErrorState(executableVersion, state.installedVersion,
+                            String.format("[%s] %s:: %s", hostname, e.getMessage(), stackTrace)));
             throw e;
         }
     }
@@ -333,6 +339,18 @@ public class BootstrapUtil {
         Path lockPath = root.append(PathConstants.BOOTSTRAP_LOCK);
         if (directory.get(lockPath) != null) {
             directory.delete(lockPath);
+        }
+    }
+
+    private static void getHostName() {
+        if (hostname == null || hostname.equals("unknown")) {
+            try {
+                InetAddress addr;
+                addr = InetAddress.getLocalHost();
+                hostname = addr.getHostName();
+            } catch (UnknownHostException ex) {
+                log.error("Hostname can not be resolved");
+            }
         }
     }
 

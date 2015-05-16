@@ -1,8 +1,6 @@
 package com.latticeengines.pls.provisioning;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +31,6 @@ public class PLSComponentManager {
 
     private static final Log LOGGER = LogFactory.getLog(PLSComponentManager.class);
 
-    private static String hostname = "unknown";
-
     @Autowired
     private TenantService tenantService;
 
@@ -44,34 +40,21 @@ public class PLSComponentManager {
     @Autowired
     private TenantConfigService tenantConfigService;
 
-    private void getHostName() {
-        if (hostname == null || hostname.equals("unknown")) {
-            try {
-                InetAddress addr;
-                addr = InetAddress.getLocalHost();
-                hostname = addr.getHostName();
-            } catch (UnknownHostException ex) {
-                LOGGER.error("Hostname can not be resolved");
-            }
-        }
-    }
-
     public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails) {
-        getHostName();
         if (tenantService.hasTenantId(tenant.getId())) {
-            LOGGER.info(String.format("[%s] Update instead of register during the provision of %s .", hostname, tenant.getId()));
+            LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
             try {
                 tenantService.updateTenant(tenant);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, String.format("[%s] Updating tenant %s error. " +
-                        "May because the tenant name already exists.", hostname, tenant.getId()), e);
+                throw new LedpException(LedpCode.LEDP_18028, String.format("Updating tenant %s error. " +
+                        "May because the tenant name already exists.", tenant.getId()), e);
             }
         } else {
             try {
                 tenantService.registerTenant(tenant);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, String.format("[%s] Registrating tenant %s error. " +
-                        "May because the tenant name already exists.", hostname, tenant.getId()), e);
+                throw new LedpException(LedpCode.LEDP_18028, String.format("Registrating tenant %s error. " +
+                        "May because the tenant name already exists.", tenant.getId()), e);
             }
         }
 
@@ -81,7 +64,7 @@ public class PLSComponentManager {
                 user = userService.findByEmail(email);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("[%s] Finding user with email %s error.", hostname, email), e);
+                        String.format("Finding user with email %s error.", email), e);
             }
             if (user == null) {
                 UserRegistration uReg = createAdminUserRegistration(email, AccessLevel.SUPER_ADMIN);
@@ -89,14 +72,14 @@ public class PLSComponentManager {
                     userService.createUser(uReg);
                 } catch (Exception e) {
                     throw new LedpException(LedpCode.LEDP_18028,
-                            String.format("[%s] Adding new user %s error.", hostname, email), e);
+                            String.format("Adding new user %s error.", email), e);
                 }
             }
             try {
                 userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), email);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("[%s] Assigning SuperAdmin role to %s error.", hostname, email), e);
+                        String.format("Assigning SuperAdmin role to %s error.", email), e);
             }
         }
 
@@ -106,7 +89,7 @@ public class PLSComponentManager {
                 user = userService.findByEmail(email);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("[%s] Finding user with email %s error.", hostname, email), e);
+                        String.format("Finding user with email %s error.",  email), e);
             }
             if (user == null) {
                 UserRegistration uReg = createAdminUserRegistration(email, AccessLevel.INTERNAL_ADMIN);
@@ -114,22 +97,20 @@ public class PLSComponentManager {
                     userService.createUser(uReg);
                 } catch (Exception e) {
                     throw new LedpException(LedpCode.LEDP_18028,
-                            String.format("[%s] Adding new user %s error.", hostname, email), e);
+                            String.format("Adding new user %s error.", email), e);
                 }
             }
             try {
                 userService.assignAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant.getId(), email);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("[%s] Assigning LatticeAdmin role to %s error.", hostname, email), e);
+                        String.format("Assigning LatticeAdmin role to %s error.", email), e);
             }
         }
 
     }
 
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
-        getHostName();
-
         // get tenant information
         String camilleTenantId = space.getTenantId();
         String camilleContractId = space.getContractId();
@@ -143,7 +124,7 @@ public class PLSComponentManager {
             tenantDocument = tenantConfigService.getTenantDocument(PLSTenantId);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18028,
-                    String.format("[%s] Getting tenant document error.", hostname), e);
+                    String.format("Getting tenant document error."), e);
         }
         String tenantName = tenantDocument.getTenantInfo().properties.displayName;
 
@@ -152,7 +133,7 @@ public class PLSComponentManager {
             emailListInJson = configDir.get("/SuperAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
             throw new LedpException(LedpCode.LEDP_18028,
-                    String.format("[%s] Cannot parse input configuration", hostname), e);
+                    String.format("Cannot parse input configuration"), e);
         }
         List<String> superAdminEmails = parseEmails(emailListInJson);
 
@@ -160,7 +141,7 @@ public class PLSComponentManager {
             emailListInJson = configDir.get("/LatticeAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
             throw new LedpException(LedpCode.LEDP_18028,
-                    String.format("[%s] Cannot parse input configuration", hostname), e);
+                    String.format("Cannot parse input configuration"), e);
         }
         List<String> internalAdminEmails = parseEmails(emailListInJson);
 
@@ -186,7 +167,7 @@ public class PLSComponentManager {
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18028, String.format(
-                    "[%s] Cannot parse AdminEmails to a list of valid emails: %s", hostname, emailsInJson), e);
+                    "Cannot parse AdminEmails to a list of valid emails: %s", emailsInJson), e);
         }
 
         return adminEmails;
