@@ -62,7 +62,7 @@ public class PLSComponentManager {
         for (String email : superAdminEmails) {
             User user;
             try {
-                user = userService.findByEmail(email);
+                user = findUserByEmailWithRetry(email);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028, "Finding users with email " + email + " error.", e);
             }
@@ -84,7 +84,7 @@ public class PLSComponentManager {
         for (String email : internalAdminEmails) {
             User user;
             try {
-                user = userService.findByEmail(email);
+                user = findUserByEmailWithRetry(email);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028, "Finding users with email " + email + " error.", e);
             }
@@ -176,7 +176,24 @@ public class PLSComponentManager {
         if (tenantService.hasTenantId(tenant.getId())) {
             tenantService.discardTenant(tenant);
         }
+    }
 
+    private User findUserByEmailWithRetry(String email) {
+        final int MAX_RETRY = 10;
+        int numOfRetries = 0;
+        while (true) {
+            try {
+                return userService.findByEmail(email);
+            } catch (Exception e) {
+                if (numOfRetries >= MAX_RETRY) throw e;
+            }
+            try {
+                Thread.sleep(2000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            numOfRetries++;
+        }
     }
 
     private UserRegistration createAdminUserRegistration(String username, AccessLevel accessLevel) {
