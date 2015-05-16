@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -62,10 +61,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     @PostConstruct
     public void postConstruct() {
-        Set<String> registered = batonService.getRegisteredServices();
-        if (!registered.contains(getName())) {
-            register();
-        }
+        boolean needToRegister = Boolean.valueOf(System.getProperty("com.latticeengines.registerBootstrappers"));
+        if (needToRegister && !batonService.getRegisteredServices().contains(getName())) register();
     }
 
     protected boolean uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson) {

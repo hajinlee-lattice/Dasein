@@ -56,10 +56,13 @@ public class TenantServiceImpl implements TenantService {
 
     @PostConstruct
     protected void uploadDefaultSpaceConfigAndSchemaByJson() {
-        String defaultJson = "space_default.json";
-        String metadataJson = "space_metadata.json";
-        String serviceName = "SpaceConfiguration";
-        LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
+        boolean needToRegister = Boolean.valueOf(System.getProperty("com.latticeengines.registerBootstrappers"));
+        if (needToRegister) {
+            String defaultJson = "space_default.json";
+            String metadataJson = "space_metadata.json";
+            String serviceName = "SpaceConfiguration";
+            LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
+        }
     }
 
     @Override
