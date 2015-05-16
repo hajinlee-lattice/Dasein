@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
@@ -44,6 +45,9 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private ServiceService serviceService;
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;

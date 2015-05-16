@@ -277,7 +277,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
             String contractId, String tenantId, boolean refreshContract) throws Exception {
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
-        props.displayName = "Tenant for testing";
+        props.displayName = contractId + "." + tenantId + ": Tenant for testing";
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
 
         ContractInfo contractInfo = new ContractInfo(new ContractProperties());
