@@ -103,21 +103,59 @@ describe('system setup tests', function () {
         systemSetup.waitForSfdcCredentials();
 
         //==================================================
+        // Enter Valid SFDC Sandbox Credentials
+        //==================================================
+        element(by.css('a[href="#formSandbox"]')).click();
+        systemSetup.waitForSfdcSandboxCredentials();
+        systemSetup.enterValidSfdcSandboxCredentials();
+        expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
+    });
+
+    it('should validate that bad SFDC sandbox credentials failed', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForSfdcCredentials();
+
+        //==================================================
         // Enter Bad SFDC Sandbox Credentials
         //==================================================
         element(by.css('a[href="#formSandbox"]')).click();
         systemSetup.waitForSfdcSandboxCredentials();
         systemSetup.enterBadSfdcSandboxCredentials();
         expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("Credentials are invalid.");
-
-        //==================================================
-        // Enter Valid SFDC Sandbox Credentials
-        //==================================================
-        systemSetup.enterValidSfdcSandboxCredentials();
-        expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
     });
 
     it('should validate that you can enter SFDC production credentials', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForSfdcCredentials();
+
+        //==================================================
+        // Enter Valid SFDC Production Credentials
+        //==================================================
+        systemSetup.enterValidSfdcProductionCredentials();
+        expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("");
+    });
+
+    it('should validate that bad SFDC production credentials failed', function () {
         //==================================================
         // Login
         //==================================================
@@ -136,12 +174,6 @@ describe('system setup tests', function () {
         //==================================================
         systemSetup.enterBadSfdcProductionCredentials();
         expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("Credentials are invalid.");
-
-        //==================================================
-        // Enter Valid SFDC Production Credentials
-        //==================================================
-        systemSetup.enterValidSfdcProductionCredentials();
-        expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("");
     });
 
 });
