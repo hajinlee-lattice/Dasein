@@ -452,7 +452,7 @@ public class SerializableDocumentDirectory {
 
         private String type;
         private Collection<String> options;
-        private Boolean autoBinded = null;
+        private Boolean dynamicOptions = null;
 
         private ObjectMapper mapper = new ObjectMapper();
         public Metadata() { }
@@ -469,11 +469,11 @@ public class SerializableDocumentDirectory {
         @JsonProperty("Options")
         public void setOptions(Collection<String> options) { this.options = options; }
 
-        @JsonProperty("AutoBinded")
-        public Boolean isAutoBinded() { return autoBinded; }
+        @JsonProperty("DynamicOptions")
+        public Boolean isDynamicOptions() { return dynamicOptions; }
 
-        @JsonProperty("AutoBinded")
-        public void setAutoBinded(Boolean autoBinded) { this.autoBinded = autoBinded; }
+        @JsonProperty("DynamicOptions")
+        public void setDynamicOptions(Boolean dynamicOptions) { this.dynamicOptions = dynamicOptions; }
 
         private boolean validateData(String data) {
             if (this.getType() == null) { return true; }

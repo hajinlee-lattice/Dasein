@@ -19,7 +19,8 @@
         "Type": "options",
         "Options": [
           "Lead Prioritization"
-        ]
+        ],
+        "DynamicOptions": true
       }
     },
     {
@@ -39,7 +40,8 @@
         "Type": "options",
         "Options": [
           "Marketo"
-        ]
+        ],
+        "DynamicOptions": true
       }
     }
   ]

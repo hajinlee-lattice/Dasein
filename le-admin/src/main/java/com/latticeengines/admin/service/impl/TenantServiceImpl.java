@@ -1,7 +1,5 @@
 package com.latticeengines.admin.service.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
@@ -26,14 +23,11 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -66,7 +60,6 @@ public class TenantServiceImpl implements TenantService {
         String metadataJson = "space_metadata.json";
         String serviceName = "SpaceConfiguration";
         LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
-        modifySpaceConfigSchema();
     }
 
     @Override
@@ -194,31 +187,5 @@ public class TenantServiceImpl implements TenantService {
             return BootstrapState.createInitialState();
 
         return BootstrapState.constructOKState(state2.installedVersion);
-    }
-
-    private void modifySpaceConfigSchema() {
-        // modify options for topology
-        DocumentDirectory metadir = getSpaceConfigSchema();
-        DocumentDirectory.Node topologyNode = metadir.getChild("Topology");
-        Document document = topologyNode.getDocument();
-        ObjectMapper objectMapper = new ObjectMapper();
-        SerializableDocumentDirectory.Metadata metadata = null;
-        try {
-            metadata = objectMapper.readValue(document.getData(), SerializableDocumentDirectory.Metadata.class);
-        } catch (IOException e) {
-            log.error("Could not parse the topology metadate node to a metadata object");
-            //ignore
-        }
-        if (metadata != null) {
-            Collection<String> options = new ArrayList<>();
-            for (CRMTopology topology : CRMTopology.values()) {
-                options.add(topology.getName());
-            }
-            metadata.setOptions(options);
-            document.setData(JsonUtils.serialize(metadata));
-            topologyNode.setDocument(document);
-            Path schemaPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(), "SpaceConfiguration");
-            batonService.loadDirectory(metadir, schemaPath);
-        }
     }
 }

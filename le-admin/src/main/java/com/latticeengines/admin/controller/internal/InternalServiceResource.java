@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.service.ServiceService;
+import com.latticeengines.admin.service.impl.DynamicOptions;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.wordnik.swagger.annotations.Api;
@@ -23,13 +24,16 @@ public class InternalServiceResource extends InternalResourceBase {
     @Autowired
     private ServiceService serviceService;
 
+    @Autowired
+    private DynamicOptions dynamicOptions;
+
     @RequestMapping(value = "dropdown_options", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
     public SelectableConfigurationDocument getServiceOptionalConfigs(
             @RequestParam(value = "component", required = false) String component, HttpServletRequest request) {
         checkHeader(request);
-        return serviceService.getSelectableConfigurationFields(component);
+        return dynamicOptions.applyDynamicBinding(serviceService.getSelectableConfigurationFields(component));
     }
 
 }

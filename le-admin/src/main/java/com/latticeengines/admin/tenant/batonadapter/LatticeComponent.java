@@ -35,6 +35,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     protected static BatonService batonService = new BatonServiceImpl();
 
+    public static final String spaceConfigNode = "SpaceConfiguration";
+
     public abstract boolean doRegistration();
 
     public abstract CustomerSpaceServiceInstaller getInstaller();
