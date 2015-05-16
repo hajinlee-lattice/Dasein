@@ -3,11 +3,6 @@ package com.latticeengines.admin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -149,36 +144,100 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         deleteVisiDBDLTenants();
     }
 
+    /**
+     * ==================================================
+     * BEGIN: Verify main test tenant
+     * ==================================================
+     */
+
+    //==================================================
+    // verify ZK states
+    //==================================================
+
     @Test(groups = "deployment")
-    public void verifyMainTestTenant() throws Exception {
-        // verify exsistence of each component
-        verifyZKState(0);
-        verifyJAMSTenantExists(0);
-        verifyPLSTenantExists(0);
-        verifyVisiDBDLTenantExists(0);
-        verifyVDBTplTenantExists(0);
-        verifyDLTplTenantExists(0);
-        //verifyDanteTenantExists(0);
-
-        // verify important cross-component work flows
-        verifyPLSTenantKnowsTopology();
-
+    public void verifyJAMSStateInMainTestTenant() throws Exception {
+        verifyZKState(0, BardJamsComponent.componentName);
     }
+
+    @Test(groups = "deployment")
+    public void verifyPLSStateInMainTestTenant() throws Exception {
+        verifyZKState(0, PLSComponent.componentName);
+    }
+
+    @Test(groups = "deployment")
+    public void verifyVisiDBDLStateInMainTestTenant() throws Exception {
+        verifyZKState(0, VisiDBDLComponent.componentName);
+    }
+
+    @Test(groups = "deployment")
+    public void verifyVDBTplStateInMainTestTenant() throws Exception {
+        verifyZKState(0, VisiDBTemplateComponent.componentName);
+    }
+
+    @Test(groups = "deployment")
+    public void verifyDLTplStateInMainTestTenant() throws Exception {
+        verifyZKState(0, DLTemplateComponent.componentName);
+    }
+
+    //==================================================
+    // verify tenant truly exists
+    //==================================================
+
+    @Test(groups = "deployment", dependsOnMethods = "verifyJAMSStateInMainTestTenant")
+    public void verifyJAMSMainTestTenantExists() throws Exception {
+        verifyJAMSTenantExists(0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "verifyPLSStateInMainTestTenant")
+    public void verifyPLSMainTestTenantExists() throws Exception {
+        verifyPLSTenantExists(0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "verifyVisiDBDLStateInMainTestTenant")
+    public void verifyVisiDBDLMainTestTenantExists() throws Exception {
+        verifyVisiDBDLTenantExists(0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "verifyVDBTplStateInMainTestTenant")
+    public void verifyVDBTplMainTestTenantExists() throws Exception {
+        verifyVDBTplTenantExists(0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "verifyDLTplStateInMainTestTenant")
+    public void verifyDLTplMainTestTenantExists() throws Exception {
+        verifyDLTplTenantExists(0);
+    }
+
+    //==================================================
+    // verify cross component workflows
+    //==================================================
+
+    @Test(groups = "deployment", dependsOnMethods = "verifyPLSMainTestTenantExists")
+    public void verifyPLSTenantKnowsTopologyInMainTestTenant() throws Exception {
+        verifyPLSTenantKnowsTopology();
+    }
+
+    /**
+     * ==================================================
+     * END: Verify main test tenant
+     * ==================================================
+     */
+
+    /**
+     * ==================================================
+     * BEGIN: Verify default configuration tenant
+     * ==================================================
+     */
 
     @Test(groups = "deployment", enabled = false)
     public void verifyDefaultTestTenant() throws Exception {
-        // verify exsistence of each component
-        verifyZKState(1);
-        verifyJAMSTenantExists(1);
-        verifyPLSTenantExists(1);
-        verifyVisiDBDLTenantExists(1);
-        verifyVDBTplTenantExists(1);
-        verifyDLTplTenantExists(1);
-        //verifyDanteTenantExists(1);
-
-        // verify minimal cross-component work flows
-
     }
+
+    /**
+     * ==================================================
+     * END: Verify default configuration tenant
+     * ==================================================
+     */
 
     private void provisionEndToEndTestTenants() {
         provisionEndToEndTestTenant1();
@@ -368,54 +427,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      * BEGIN: Tenants verification methods
      * ==================================================
      */
-    private void verifyZKState(int tenantIdx) {
+    private void verifyZKState(int tenantIdx, String component) {
         final String tenantId = tenantIds[tenantIdx];
-
-        ExecutorService executor = Executors.newFixedThreadPool(6);
-
-        List<Future<BootstrapState>> futures = new ArrayList<>();
-        List<String> serviceNames = new ArrayList<>(serviceService.getRegisteredServices());
-
-        for(String serviceName: serviceNames) {
-            final String component = serviceName;
-            Future<BootstrapState> future = executor.submit(new Callable<BootstrapState>() {
-                @Override
-                public BootstrapState call() throws Exception {
-                    // not ready for integration test with Dante
-                    if (component.toLowerCase().contains("dante") ||
-                            component.toLowerCase().contains("test")) {
-                        return BootstrapState.constructOKState(1);
-                    } else {
-                        return waitUntilStateIsNotInitial(contractId, tenantId, component);
-                    }
-                }
-            });
-            futures.add(future);
-        }
-
-        boolean allOK = true;
-        StringBuilder msg = new StringBuilder("Problematic components are:\n");
-
-        for (int i = 0; i < serviceNames.size(); i++) {
-            Future<BootstrapState> result = futures.get(i);
-            String serviceName = serviceNames.get(i);
-            BootstrapState state = null;
-            try {
-                state = result.get();
-            } catch (InterruptedException|ExecutionException e) {
-                msg.append(String.format(
-                        "Could not successfully get the bootstrap state of %s \n", serviceName));
-            }
-            boolean thisIsOK = state != null && state.state.equals(BootstrapState.State.OK);
-            if (!thisIsOK && state != null) {
-                msg.append(String.format(
-                        "The bootstrap state of %s is not OK, but rather %s : %s.\n",
-                        serviceName, state.state, state.errorMessage));
-            }
-            allOK = allOK && thisIsOK;
-        }
-
-        Assert.assertTrue(allOK, msg.toString());
+        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, component);
+        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
     }
 
     @SuppressWarnings("unused")
@@ -481,7 +496,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         RestTemplate plsRestTemplate = plsComponentTestNG.plsRestTemplate;
         String crmType = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
                 String.class);
-        Assert.assertEquals(crmType, CRMTopology.ELOQUA.name());
+        Assert.assertEquals(crmType.toLowerCase(), CRMTopology.ELOQUA.name().toLowerCase());
     }
     /**
      * ==================================================
