@@ -2,13 +2,13 @@ package com.latticeengines.domain.exposed.admin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class InstallVisiDBTemplateRequest {
+public class InstallTemplateRequest {
 
     private String tenantName;
     
     private String value;
 
-    public InstallVisiDBTemplateRequest(String tenantName, String value){
+    public InstallTemplateRequest(String tenantName, String value){
         this.tenantName = tenantName;
         this.value = value;
     }

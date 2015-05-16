@@ -1,11 +1,16 @@
 package com.latticeengines.admin.tenant.batonadapter.template.visidb;
 
+import java.util.Collections;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
@@ -20,8 +25,16 @@ public class VisiDBTemplateComponent extends LatticeComponent {
     @Autowired
     private TenantService tenantService;
 
+    @Autowired
+    private VisiDBDLComponent visiDBDLComponent;
+
     @Value("${admin.vdb.tpl.dryrun}")
     private boolean dryrun;
+
+    @PostConstruct
+    public void setDependencies(){
+        dependencies = Collections.singleton(visiDBDLComponent);
+    }
 
     @Override
     public String getName() {
@@ -50,13 +63,11 @@ public class VisiDBTemplateComponent extends LatticeComponent {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
     @Override
     public boolean doRegistration() {
         String defaultJson = "vdb_tpl_default.json";
         String metadataJson = "vdb_tpl_metadata.json";
         return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
     }
-
-
 }

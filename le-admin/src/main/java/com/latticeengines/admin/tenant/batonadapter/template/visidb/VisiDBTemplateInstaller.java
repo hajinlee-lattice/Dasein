@@ -18,7 +18,7 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.DLRestResult;
-import com.latticeengines.domain.exposed.admin.InstallVisiDBTemplateRequest;
+import com.latticeengines.domain.exposed.admin.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -35,6 +35,8 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
     private static final String eloquaTemplate = "Template_ELQ.specs";
 
+    private static final int SUCCESS = 3;
+
     public VisiDBTemplateInstaller() {
         super(VisiDBTemplateComponent.componentName);
     }
@@ -49,7 +51,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         String contractExternalID = space.getContractId();
 
         TenantDocument tenantDoc = tenantService.getTenant(contractExternalID, dmDeployment);
-        String tenant = tenantDoc.getTenantInfo().properties.displayName;
+        String tenant = space.toString();
         String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
         String templatePath = tenantDoc.getSpaceConfig().getTemplatePath();
         CRMTopology topology = tenantDoc.getSpaceConfig().getTopology();
@@ -57,9 +59,9 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
         try {
             String str = IOUtils.toString(new InputStreamReader(new FileInputStream(visiDBTemplate)));
-            InstallVisiDBTemplateRequest request = new InstallVisiDBTemplateRequest(tenant, str);
+            InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
             DLRestResult response = installVisiDBTemplate(request, getHeaders(), dlUrl);
-            if (response != null && response.getStatus() == 3) {
+            if (response != null && response.getStatus() == SUCCESS) {
                 log.info("Template " + topology.name() + " has successfully been installed!");
             } else {
                 throw new LedpException(LedpCode.LEDP_18036, new String[] { response.getErrorMessage() });
@@ -89,7 +91,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         }
     }
 
-    public DLRestResult installVisiDBTemplate(InstallVisiDBTemplateRequest request, List<BasicNameValuePair> headers,
+    public DLRestResult installVisiDBTemplate(InstallTemplateRequest request, List<BasicNameValuePair> headers,
             String dlUrl) throws IOException {
         String jsonStr = JsonUtils.serialize(request);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl

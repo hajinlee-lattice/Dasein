@@ -47,7 +47,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String contractExternalID = space.getContractId();
 
         TenantDocument tenantDoc = tenantService.getTenant(contractExternalID, dmDeployment);
-        String tenant = tenantDoc.getTenantInfo().properties.displayName;
+        String tenant = space.toString();
         String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
 
         String tenantAlias = getData(configDir, "TenantAlias");
