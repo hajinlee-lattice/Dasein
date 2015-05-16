@@ -510,8 +510,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     private void deleteVisiDBDLTenants() {
         for (String tenantId: tenantIds) {
-            String tenant = tenantService.getTenant(contractId, tenantId).getTenantInfo().properties.displayName;
             try {
+                String tenant = tenantService.getTenant(contractId, tenantId).getTenantInfo().properties.displayName;
                 visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
             } catch (Exception e) {
                 // ignore
