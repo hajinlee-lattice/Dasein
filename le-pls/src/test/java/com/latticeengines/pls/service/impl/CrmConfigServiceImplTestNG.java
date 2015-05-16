@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.admin.InstallVisiDBTemplateRequest;
+import com.latticeengines.domain.exposed.admin.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -63,7 +63,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
         ClassPathResource resource = new ClassPathResource(fileName);
         String value = IOUtils.toString(resource.getURL());
-        InstallVisiDBTemplateRequest request = new InstallVisiDBTemplateRequest(tenantId, value);
+        InstallTemplateRequest request = new InstallTemplateRequest(tenantId, value);
 
         String jsonStr = JsonUtils.serialize(request);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, getHeaders(), jsonStr);
