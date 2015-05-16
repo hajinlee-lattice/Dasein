@@ -1,12 +1,15 @@
 package com.latticeengines.domain.exposed.admin;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Stack;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
@@ -205,6 +208,82 @@ public class SerializableDocumentDirectory {
     @JsonProperty("Nodes")
     public void setNodes(Collection<Node> nodes) { this.nodes = nodes; }
 
+    @JsonIgnore
+    public Iterator<Node> getBreathFirstIterator() {
+        return new BreathFirstIterator(this.getNodes());
+    }
+
+    @JsonIgnore
+    public Iterator<Node> getDepthFirstIterator() {
+        return new DepthFirstIterator(this.getNodes());
+    }
+
+    public static class BreathFirstIterator implements Iterator<Node> {
+
+        private Queue<Node> queue = new ArrayDeque<>();
+
+        public BreathFirstIterator(Collection<Node> roots) {
+            if (roots != null) {
+                for (Node root: roots) {
+                    root.path = new Path("/" + root.getNode());
+                    queue.add(root);
+                }
+            }
+        }
+
+        @Override
+        public void remove() { throw new UnsupportedOperationException(); }
+
+        @Override
+        public Node next() {
+            Node front = queue.poll();
+            Path rootPath = front.path;
+            if (front.getChildren() != null) {
+                for (Node child: front.getChildren()) {
+                    child.path = rootPath.append(child.getNode());
+                    queue.add(child);
+                }
+            }
+            return front;
+        }
+
+        @Override
+        public boolean hasNext() { return !queue.isEmpty(); }
+    }
+
+    public static class DepthFirstIterator implements Iterator<Node> {
+
+        private Stack<Node> stack = new Stack<>();
+
+        public DepthFirstIterator(Collection<Node> roots) {
+            if (roots != null) {
+                for (Node root: roots) {
+                    root.path = new Path("/" + root.getNode());
+                    stack.push(root);
+                }
+            }
+        }
+
+        @Override
+        public void remove() { throw new UnsupportedOperationException(); }
+
+        @Override
+        public Node next() {
+            Node front = stack.pop();
+            Path rootPath = front.path;
+            if (front.getChildren() != null) {
+                for (Node child: front.getChildren()) {
+                    child.path = rootPath.append(child.getNode());
+                    stack.push(child);
+                }
+            }
+            return front;
+        }
+
+        @Override
+        public boolean hasNext() { return !stack.isEmpty(); }
+    }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Node {
 
@@ -213,6 +292,9 @@ public class SerializableDocumentDirectory {
         private Metadata metadata;
         private int version = -1;
         private Collection<Node> children;
+
+        @JsonIgnore
+        public Path path;
 
         public Node() { }
 

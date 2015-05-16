@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
@@ -337,5 +340,72 @@ public class SerializableDocumentDirectoryUnitTestNG {
                 Assert.assertEquals(field.getOptions().size(), 3);
             }
         }
+    }
+
+    @Test(groups = "unit")
+    public void testIteratorOfEmptyDirectory() {
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
+        Iterator<SerializableDocumentDirectory.Node> iter = sDir.getBreathFirstIterator();
+        Assert.assertFalse(iter.hasNext());
+        iter = sDir.getDepthFirstIterator();
+        Assert.assertFalse(iter.hasNext());
+    }
+
+    @Test(groups = "unit")
+    public void testBreathFirstIterator() {
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));
+        configDir.add("/Config1", "value1");
+        configDir.add("/Config2", "");
+        configDir.add("/Config2/Config2.1", "value2.1");
+        configDir.add("/Config2/Config2.2", "value2.2");
+        configDir.add("/Config3", "value3");
+
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
+        Iterator<SerializableDocumentDirectory.Node> iter = sDir.getBreathFirstIterator();
+
+        Assert.assertTrue(iter.hasNext());
+        Set<Path> seenPathes = new HashSet<>();
+        while(iter.hasNext()) {
+            SerializableDocumentDirectory.Node node = iter.next();
+            if (node.path.toString().contains("Config2.")) {
+                Assert.assertTrue(seenPathes.contains(new Path("/Config1")));
+                Assert.assertTrue(seenPathes.contains(new Path("/Config2")));
+                Assert.assertTrue(seenPathes.contains(new Path("/Config3")));
+            }
+            seenPathes.add(node.path);
+        }
+
+        Assert.assertEquals(seenPathes.size(), 5);
+    }
+
+    @Test(groups = "unit")
+    public void testDepthFirstIterator() {
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));
+        configDir.add("/Config1", "value1");
+        configDir.add("/Config2", "");
+        configDir.add("/Config2/Config2.1", "value2.1");
+        configDir.add("/Config2/Config2.2", "value2.2");
+        configDir.add("/Config3", "value3");
+
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
+        Iterator<SerializableDocumentDirectory.Node> iter = sDir.getDepthFirstIterator();
+
+        Assert.assertTrue(iter.hasNext());
+        Set<Path> seenPathes = new HashSet<>();
+        while(iter.hasNext()) {
+            SerializableDocumentDirectory.Node node = iter.next();
+            if (node.path.equals(new Path("/Config1")) || node.path.equals(new Path("/Config3"))) {
+                if (seenPathes.contains(new Path("/Config2"))) {
+                    Assert.assertTrue(seenPathes.contains(new Path("/Config2/Config2.1")));
+                    Assert.assertTrue(seenPathes.contains(new Path("/Config2/Config2.2")));
+                }
+            } else if (node.path.toString().contains("Config2.")) {
+                Assert.assertTrue(seenPathes.contains(new Path("/Config2")));
+            }
+            seenPathes.add(node.path);
+        }
+
+        Assert.assertEquals(seenPathes.size(), 5);
     }
 }
