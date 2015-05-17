@@ -46,8 +46,9 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
         // this is an example of using SubdirectoryOptionsProvider
         Path zkPath = new Path(PLSComponent.componentName, "Directory");
         if (!optionMap.containsKey(zkPath)) {
+            // avoid duplicated instantiation: each SubdirectoryOptionsProvider has a long polling watcher thread
             java.nio.file.Path filePath = FileSystems.getDefault().getPath(mountRoot, plsFolder);
-            OptionsProvider plsProvider = new SubdirectoryOptionsProvider(filePath.toString());
+            OptionsProvider plsProvider = new SubdirectoryOptionsProvider(filePath);
             register(zkPath, plsProvider);
         }
 
