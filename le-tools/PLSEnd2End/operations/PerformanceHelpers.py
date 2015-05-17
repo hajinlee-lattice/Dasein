@@ -94,7 +94,7 @@ def editPerformanceRefreshDataSources(tenant, marketting_app,host=PLSEnvironment
             params["-g"] = "LoadMAPDataForModeling"
             params["-rn"] = "ELQ_Contact"
             params["-cn"] = "performance_ELQ_ELQ_DataProvider";
-            print "Updating Refresh Data SourceELQ_Contact for performance_ELQ_ELQ_DataProvider"
+            print "Updating Refresh Data Source ELQ_Contact for performance_ELQ_ELQ_DataProvider"
             dlc.runDLCcommand(command, params)
             #print dlc.getStatus()
             
@@ -113,7 +113,59 @@ def editPerformanceRefreshDataSources(tenant, marketting_app,host=PLSEnvironment
         else:
             print "!!![%s] MARKETTING UP IS NOT SUPPORTED!!!" % marketting_app
 
+def editHourlyPerformanceRefreshDataSources(tenant, marketting_app,host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
+                               dl_server=PLSEnvironments.dl_server,
+                               user=PLSEnvironments.dl_server_user,
+                               password=PLSEnvironments.dl_server_pwd):
 
+        dlc = DLCRunner(host=host, dlc_path=dlc_path)
+        command = "Edit Refresh Data Source"
+        params = {"-s": dl_server,
+                  "-u": user,
+                  "-p": password,
+                  "-t": tenant,
+                  "-f": "@recordcount(2000000)"
+                 }
+    
+        #LoadCRMDataForModeling
+        rds_list = ["SFDC_User", "SFDC_Contact", "SFDC_Lead", "SFDC_Opportunity", "SFDC_OpportunityContactRole"]
+        for rds in rds_list:
+            params["-g"] = "LoadCRMData"
+            params["-rn"] = rds
+            params["-cn"] = "performance_SFDC_DataProvider"
+            print "Updating Refresh Data Source %s for performance_SFDC_DataProvider" % rds
+            dlc.runDLCcommand(command, params)
+            #dlc.getStatus()
+    
+        #LoadMAPDataForModeling
+        if marketting_app == "ELQ":            
+            params["-cn"] = "performance_ELQ_ELQ_DataProvider";
+            rds_dict = {"LoadMAPData_ModLeads":"ELQ_Contact",
+                        "LoadMAPData_NewLeads":"ELQ_Contact"}
+            for lg in rds_dict:
+                params["-g"] = lg
+                params["-rn"] = rds_dict[lg]
+                print "Updating Refresh Data Source ELQ_Contact for performance_ELQ_ELQ_DataProvider"
+                dlc.runDLCcommand(command, params)
+            #print dlc.getStatus()
+            
+    
+        #"LoadMAPDataForModeling_ActivityRecord_OtherThanNewLead": "ActivityRecord_OtherThanNewLead",
+        elif marketting_app == "MKTO":
+            params["-cn"] = "performance_MKTO_MKTO_DataProvider"
+            rds_dict = {"LoadMAPData_ActivityRecord_MissingActivity": "ActivityRecord_MissingActivity",
+                        "LoadMAPData_ActivityRecord_NewLead": "ActivityRecord_NewLead",
+                        "LoadMAPData_ActivityRecord_RecentActivity":"ActivityRecord_RecentActivity",
+#                         "LoadMAPData_ActivityRecord_RecentActivity_Ext":"",
+                        "LoadMAPData_LeadRecord":"LeadRecord"}
+            for lg in rds_dict:
+                params["-g"] = lg
+                params["-rn"] = rds_dict[lg]
+                print "Updating Refresh Data Source %s for performance_Marketo_Data_Provider" % rds_dict[lg]
+                dlc.runDLCcommand(command, params)
+                #dlc.getStatus()
+        else:
+            print "!!![%s] MARKETTING UP IS NOT SUPPORTED!!!" % marketting_app
 
 def getSequence(): 
         dlc = SessionRunner()  
@@ -405,7 +457,7 @@ class PerformanceTest(SessionRunner):
         pd.prepareHourlyData(data_number,loop)
         
         # Step 4 - Run LoadGroups and activate Model
-        editPerformanceRefreshDataSources(self.tenantName, self.app); 
+        editHourlyPerformanceRefreshDataSources(self.tenantName, self.app); 
                  
         PlsOperations.runHourlyScoring(self.tenantName);
         
