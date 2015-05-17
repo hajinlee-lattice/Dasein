@@ -116,6 +116,9 @@
         <h2 class="text-center">Loading tenant configuration ...</h2>
     </div>
     <div ng-if="!loading">
+        <button class="btn btn-primary" ng-if="new" ng-disabled="!isValid.valid" ng-click="onSaveClick()">SAVE</button>
+        <button class="btn btn-primary" ng-if="!new" ng-click="onDeleteClick()"><i class="fa fa-trash-o"></i> DELETE</button>
+        <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages below.</p>
         <components-config data="components" readonly="readonly" is-valid="isValid"></components-config>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages above.</p>
         <button class="btn btn-primary" ng-if="new" ng-disabled="!isValid.valid" ng-click="onSaveClick()">SAVE</button>

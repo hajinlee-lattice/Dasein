@@ -15,17 +15,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.service.impl.DynamicOptions;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -36,13 +33,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('Platform Operations')")
 public class TenantResource {
 
-    private static final String podId = CamilleEnvironment.getPodId();
-
     @Autowired
     private TenantService tenantService;
 
     @Autowired
-    private DynamicOptions dynamicOptions;
+    private DynamicOptionsService dynamicOptionsService;
 
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -107,11 +102,8 @@ public class TenantResource {
     public SerializableDocumentDirectory getServiceConfig(@RequestParam(value = "contractId") String contractId, //
             @PathVariable String tenantId, @PathVariable String serviceName) {
         SerializableDocumentDirectory config = tenantService.getTenantServiceConfig(contractId, tenantId, serviceName);
-        Path schemaPath = PathBuilder.buildServiceConfigSchemaPath(podId, serviceName);
-        String originalRootPath = config.getRootPath();
-        config.setRootPath(schemaPath.toString());
-        config = dynamicOptions.applyDynamicBinding(config);
-        config.setRootPath(originalRootPath);
+        config.setRootPath("/" + serviceName);
+        config = dynamicOptionsService.bind(config);
         return config;
     }
 

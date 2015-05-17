@@ -1,10 +1,8 @@
-package com.latticeengines.admin.service.impl;
+package com.latticeengines.admin.dynamicopts.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -14,51 +12,28 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
-import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
-public class DynamicOptionsTestNG extends AbstractTestNGSpringContextTests {
+public class DynamicOptionsServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private DynamicOptions dynamicOptions;
-
-    @Test(groups = "functional")
-    public void checkTopologyOptions() {
-        Path topologyPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(),
-                LatticeComponent.spaceConfigNode);
-        topologyPath = topologyPath.append(new Path("/Topology"));
-        Set<String> topologyOptions = new HashSet<>(dynamicOptions.getOpitions(topologyPath));
-        Assert.assertEquals(topologyOptions, new HashSet<>(CRMTopology.getNames()));
-    }
-
-    @Test(groups = "functional")
-    public void checkProductOptions() {
-        Path topologyPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(),
-                LatticeComponent.spaceConfigNode);
-        topologyPath = topologyPath.append(new Path("/Product"));
-        Set<String> topologyOptions = new HashSet<>(dynamicOptions.getOpitions(topologyPath));
-        Assert.assertEquals(topologyOptions, new HashSet<>(LatticeProduct.getNames()));
-    }
+    private DynamicOptionsService dynamicOptionsService;
 
     @Test(groups = "functional")
     public void testDynamicBindingOnSerializableDocumentDirectory() {
         Map<String, String> flatDir = new HashMap<>();
         flatDir.put("/Topology", "Marketo");
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(flatDir);
-        Path rootPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(),
-                LatticeComponent.spaceConfigNode);
-        sDir.setRootPath(rootPath.toString());
+        sDir.setRootPath("/" + LatticeComponent.spaceConfigNode);
 
-        dynamicOptions.applyDynamicBinding(sDir);
+        dynamicOptionsService.bind(sDir);
 
         for (SerializableDocumentDirectory.Node node: sDir.getNodes()){
             Assert.assertEquals(node.getData(), "Marketo");
@@ -84,7 +59,7 @@ public class DynamicOptionsTestNG extends AbstractTestNGSpringContextTests {
         doc.setComponent(LatticeComponent.spaceConfigNode);
         doc.setNodes(Collections.singletonList(field));
 
-        dynamicOptions.applyDynamicBinding(doc);
+        dynamicOptionsService.bind(doc);
 
         for (SelectableConfigurationField node: doc.getNodes()){
             if (node.getNode().equals("/Topology")) {

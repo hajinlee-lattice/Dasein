@@ -66,7 +66,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         };
         $scope.tenantInfo = {
             properties: {
-                displayName: "Test LPA tenant",
+                displayName: "LPA 2.0 tenant",
                 description: "A LPA tenant under the contract " + $scope.contractId
             }
         };
@@ -278,10 +278,10 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                             $scope.availableProducts = node.Options;
                             break;
                         case "Topology":
-                            $scope.availableTopologies = node.Options();
+                            $scope.availableTopologies = node.Options;
                             break;
                         case "Template_Path":
-                            $scope.availableTemplatePath = node.Options();
+                            $scope.availableTemplatePath = node.Options;
                             break;
                     }
                 });

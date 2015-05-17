@@ -2,6 +2,8 @@ package com.latticeengines.admin.functionalframework;
 
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -19,6 +21,11 @@ public class TestLatticeComponent extends LatticeComponent {
     public TestLatticeComponent() { }
 
     public TestLatticeComponent(boolean dryrun) { this.dryrun = dryrun; }
+
+    @PostConstruct
+    public void postConstruct() {
+        if (!batonService.getRegisteredServices().contains(getName())) register();
+    }
 
     @Override
     public boolean doRegistration() {

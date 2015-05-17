@@ -188,11 +188,13 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
             globalUserManagementService.deleteUser(username);
         }
     }
-
-    public void deletePLSTestTenant(String tenantId) {
+    
+    
+    @SuppressWarnings("unchecked")
+	public void deletePLSTestTenant(String tenantId) {
         try {
-            List tenants = magicRestTemplate.getForObject(getPlsHostPort() + "/pls/admin/tenants", List.class);
-            for (Object tenant: tenants) {
+            List<Tenant> tenants = magicRestTemplate.getForObject(getPlsHostPort() + "/pls/admin/tenants", List.class);
+            for (Tenant tenant: tenants) {
                 if (((Tenant) tenant).getId().equals(tenantId)) return;
             }
             magicRestTemplate.delete(getPlsHostPort()

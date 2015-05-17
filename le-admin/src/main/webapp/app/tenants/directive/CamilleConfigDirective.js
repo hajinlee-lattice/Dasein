@@ -94,7 +94,18 @@ app.directive('configEntry', function(){
                 $scope.listData = $scope.listData.substring(1);
             }
 
-            if ($scope.isSelect) { $scope.options = $scope.config.Metadata.Options; }
+            if ($scope.isSelect) {
+                $scope.options = $scope.config.Metadata.Options;
+                if ($scope.options.length == 0) {
+                    $scope.showError = true;
+                    $scope.isValid.valid = false;
+                    $scope.errorMsg = "no available choices.";
+                } else if ($scope.options.indexOf($scope.config.Data) == -1) {
+                    $scope.showError = true;
+                    $scope.isValid.valid = false;
+                    $scope.errorMsg = "not a valid choice.";
+                }
+            }
 
             $scope.isPath = CamilleConfigUtility.isPath($scope.type);
             if ($scope.isPath) {
@@ -112,6 +123,9 @@ app.directive('configEntry', function(){
                     }
                     if ($scope.configform.$error.number) {
                         $scope.errorMsg = "must be a number.";
+                    }
+                    if ($scope.isSelect && $scope.options.indexOf($scope.config.Data) == -1) {
+                        $scope.errorMsg = "not a valid choice.";
                     }
                 } else {
                     $scope.showError = false;

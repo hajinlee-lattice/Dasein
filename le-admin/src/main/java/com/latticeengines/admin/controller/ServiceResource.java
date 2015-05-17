@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.service.ServiceService;
-import com.latticeengines.admin.service.impl.DynamicOptions;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.wordnik.swagger.annotations.Api;
@@ -29,7 +29,7 @@ public class ServiceResource {
     private ServiceService serviceService;
 
     @Autowired
-    private DynamicOptions dynamicOptions;
+    private DynamicOptionsService dynamicOptionsService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -42,7 +42,9 @@ public class ServiceResource {
     @ResponseBody
     @ApiOperation(value = "Get default config for a service")
     public SerializableDocumentDirectory getServiceDefaultConfig(@PathVariable String serviceName) {
-        return serviceService.getDefaultServiceConfig(serviceName);
+        SerializableDocumentDirectory dir = serviceService.getDefaultServiceConfig(serviceName);
+        dir.setRootPath("/" + serviceName);
+        return dynamicOptionsService.bind(dir);
     }
 
     @RequestMapping(value = "dropdown_options", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -50,6 +52,6 @@ public class ServiceResource {
     @ApiOperation(value = "Get all configuration fields that are the type of option")
     public SelectableConfigurationDocument getServiceOptionalConfigs(
             @RequestParam(value = "component", required = false) String component) {
-        return dynamicOptions.applyDynamicBinding(serviceService.getSelectableConfigurationFields(component));
+        return dynamicOptionsService.bind(serviceService.getSelectableConfigurationFields(component));
     }
 }

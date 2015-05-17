@@ -10,8 +10,6 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +35,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
-    private final Log log = LogFactory.getLog(TenantServiceImpl.class);
     private final BatonService batonService = new BatonServiceImpl();
 
     @Autowired
