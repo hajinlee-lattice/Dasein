@@ -21,8 +21,9 @@ import com.latticeengines.pls.service.CrmConstants;
 @Component("crmConfigService")
 @Lazy(value = true)
 public class CrmConfigServiceImpl implements CrmConfigService {
-
-    private static final Log log = LogFactory.getLog(CrmConfigServiceImpl.class);
+	
+	@SuppressWarnings("unused")
+	private static final Log log = LogFactory.getLog(CrmConfigServiceImpl.class);
 
     @Value("${pls.dataloader.rest.api}")
     private String dataLoaderUrl;

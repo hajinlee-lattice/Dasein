@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.WatchEvent;
+import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -115,10 +116,9 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
                 if (dir == null) continue;
 
                 for (WatchEvent<?> event : key.pollEvents()) {
-                    WatchEvent.Kind kind = event.kind();
-
-                    // Context for directory entry event is the file name of entry
+            		// Context for directory entry event is the file name of entry
                     WatchEvent<Path> watchEvent = cast(event);
+                    Kind<?> kind = event.kind();
 
                     Path child = dir.resolve(watchEvent.context());
                     Path relativePath = path.relativize(child);
