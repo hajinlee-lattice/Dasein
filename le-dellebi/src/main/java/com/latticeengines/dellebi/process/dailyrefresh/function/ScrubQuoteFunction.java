@@ -39,9 +39,6 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         FileSplit fs = (FileSplit) mis.getWrappedInputSplit();
         String fileName = fs.getPath().getName();
 
-        log.info("Inserted value: " + argument.getString("#QTE_NUM_VAL") + " Badge: "
-                + argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR") + " fileName " + fileName);
-
         String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
 
         Tuple result = new Tuple();
