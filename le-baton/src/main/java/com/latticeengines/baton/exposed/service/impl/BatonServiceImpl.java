@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,6 +114,9 @@ public class BatonServiceImpl implements BatonService {
             Camille c = CamilleEnvironment.getCamille();
             // convert paths to relative to parent
             sourceDir.makePathsLocal();
+            if (!c.exists(absoluteRootPath)) {
+                c.create(absoluteRootPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
             c.upsertDirectory(absoluteRootPath, sourceDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         } catch (Exception e) {
@@ -128,6 +132,7 @@ public class BatonServiceImpl implements BatonService {
     public boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
             Map<String, String> properties) {
         CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
+        if (properties == null) { properties = new HashMap<>(); }
         try {
             log.info("Bootstrapping service " + serviceName + " in space " + space);
             ServiceWarden.commandBootstrap(serviceName, space, properties);
