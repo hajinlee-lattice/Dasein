@@ -45,9 +45,9 @@
             </form>
             <br>
             <h4>Space Configuration</h4>
-            <form ng-if="!readonly">
+            <form ng-if="!readonly" class="space-config">
                 <div class="row form-inline">
-                    <div class="col col-md-4 col-sm-4 col-xs-6">
+                    <div class="col col-md-12 col-sm-12 col-xs-12">
                         <label class="control-label">
                             Product
                         </label>
@@ -56,7 +56,7 @@
                                 ng-model="spaceConfig.Product">
                         </select>
                     </div>
-                    <div class="col col-md-4 col-sm-4 col-xs-6">
+                    <div class="col col-md-12 col-sm-12 col-xs-12">
                         <label class="control-label">
                             CRM Topology
                         </label>
@@ -65,8 +65,6 @@
                                 ng-model="spaceConfig.Topology">
                         </select>
                     </div>
-                </div>
-                <div class="row form-inline">
                     <div class="col col-md-12 col-sm-12 col-xs-12">
                         <label class="control-label">
                             Data Loader URL
@@ -76,8 +74,6 @@
                                 ng-model="spaceConfig.DL_Address">
                         </select>
                     </div>
-                </div>
-                <div class="row form-inline">
                     <div class="col col-md-12 col-sm-12 col-xs-12">
                         <label class="control-label">
                             Template Path
@@ -103,7 +99,7 @@
                     {{ spaceConfig.DL_Address }}
                 </div>
                 <div class="col col-md-12 col-sm-12 col-xs-12">
-                    VisiDB/Data Template Path: <strong>{{ spaceConfig.Template_Path }}</strong>
+                    <span class="node">VisiDB/Data Template Path</span> : <strong>{{ spaceConfig.Template_Path }}</strong>
                 </div>
             </form>
             <br>
@@ -118,10 +114,14 @@
     <div ng-if="!loading">
         <button class="btn btn-primary" ng-if="new" ng-disabled="!isValid.valid" ng-click="onSaveClick()">SAVE</button>
         <button class="btn btn-primary" ng-if="!new" ng-click="onDeleteClick()"><i class="fa fa-trash-o"></i> DELETE</button>
+        <br/>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages below.</p>
+        <br/>
         <components-config data="components" readonly="readonly" is-valid="isValid"></components-config>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages above.</p>
         <button class="btn btn-primary" ng-if="new" ng-disabled="!isValid.valid" ng-click="onSaveClick()">SAVE</button>
         <button class="btn btn-primary" ng-if="!new" ng-click="onDeleteClick()"><i class="fa fa-trash-o"></i> DELETE</button>
+        <br/>
+        <br/>
     </div>
 </div>

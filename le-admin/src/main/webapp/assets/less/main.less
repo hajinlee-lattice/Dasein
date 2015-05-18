@@ -132,7 +132,7 @@ nav {
 
 .tenant-config {
   .form-control {
-    width: 50%;
+    width: 45%;
     margin: 0 10px;
   }
   .component-status {
@@ -150,8 +150,21 @@ nav {
   .alert {
     height: 10px;
   }
-  b, label.control-label {
+  b {
     font-size: 10pt;
+  }
+
+  label.control-label {
+    font-size: 10pt;
+    width: 200px;
+  }
+
+}
+
+.space-config, .tenant-info {
+  label.control-label {
+    font-size: 10pt;
+    width: 150px;
   }
 }
 
@@ -162,6 +175,21 @@ nav {
     color: @default;
     font-size: 10pt;
   }
+}
+
+table.readonly-table {
+  width: 100%;
+
+  .node {
+    font-weight: bold;
+    color: @default;
+    font-size: 10pt;
+  }
+
+  td.readonly-label {
+    width: 200px;
+  }
+
 }
 
 .list-entry-form {

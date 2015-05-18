@@ -1,11 +1,13 @@
-<p class="readonly-config-entry" ng-if="readonly && !isObject">
-    <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
-    <span class="node">{{ config.Node }}</span> :
-    <span ng-show="!isList">{{ config.Data }}</span>
-    <span ng-show="isList">{{ listData }}</span>
-    <file-downloader ng-if="isPath" url="{{ fileurl }}" filename="{{ filename }}" filetype="text/plain" error="downloadError" ></file-downloader>
-    <span ng-if="downloadError" class="text-danger">Download failed.</span>
-</p>
+<table class="readonly-table" ng-if="readonly && !isObject">
+    <td class="readonly-label">
+        <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
+        <span class="node">{{ config.Node }} :</span>
+    </td>
+    <td>
+        <span ng-show="!isList">{{ config.Data }}</span>
+        <span ng-show="isList">{{ listData }}</span>
+    </td>
+</table>
 
 <form name="configform" ng-hide="isObject || isList" class="form-inline" ng-class='{"has-error": showError}' novalidate>
     <div ng-if="!readonly">
