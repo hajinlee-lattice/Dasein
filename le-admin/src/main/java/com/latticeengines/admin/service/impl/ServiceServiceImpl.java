@@ -10,9 +10,15 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
+import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("serviceService")
 public class ServiceServiceImpl implements ServiceService {
@@ -68,5 +74,21 @@ public class ServiceServiceImpl implements ServiceService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Boolean patchOptions(String serviceName, SelectableConfigurationField field) {
+        try {
+            SerializableDocumentDirectory conf = getDefaultServiceConfig(serviceName);
+            field.patch(conf);
+            DocumentDirectory dir = conf.getMetadataAsDirectory();
+            Path schemaPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(), serviceName);
+            dir.makePathsLocal();
+            return batonService.loadDirectory(dir, schemaPath);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_19101, String.format(
+                    "Failed to patch options for node %s in component %s", field.getNode(), serviceName), e);
+        }
+
     }
 }
