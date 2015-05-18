@@ -143,7 +143,9 @@ public class SerializableDocumentDirectory {
 
     public static DocumentDirectory deserialize(SerializableDocumentDirectory serializedDir) {
         DocumentDirectory dir = new DocumentDirectory();
-        deserializeNodes(dir, serializedDir.getNodes(), "");
+        if (serializedDir.getNodes() != null) {
+            deserializeNodes(dir, serializedDir.getNodes(), "");
+        }
         dir.makePathsAbsolute(new Path(serializedDir.getRootPath()));
         return dir;
     }

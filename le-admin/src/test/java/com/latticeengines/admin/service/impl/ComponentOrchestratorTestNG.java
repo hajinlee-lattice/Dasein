@@ -122,6 +122,20 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
         Assert.assertEquals(state.state, BootstrapState.State.ERROR);
     }
 
+    @Test(groups = "functional")
+    public void emptyNodesShouldSuccess() throws Exception {
+        tenantService.bootstrap(TestContractId, TestTenantId, "Component1", new HashMap<String, String>());
+        int numOfRetries = 40;
+        BootstrapState state;
+        do {
+            state = tenantService.getTenantServiceState(TestContractId, TestTenantId, "Component1");
+            numOfRetries--;
+            Thread.sleep(500L);
+        } while(numOfRetries > 0 && !state.state.equals(BootstrapState.State.OK));
+        Assert.assertNotNull(state);
+        Assert.assertEquals(state.state, BootstrapState.State.OK);
+    }
+
 
     @Test(groups = "functional")
     public void orchestrationWithDependencies() throws Exception {
