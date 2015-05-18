@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SerializableDocumentDirectory {
+public class SerializableDocumentDirectory implements Iterable<SerializableDocumentDirectory.Node> {
     private static final Log LOGGER = LogFactory.getLog(SerializableDocumentDirectory.class);
 
     private String rootPath;
@@ -220,6 +220,8 @@ public class SerializableDocumentDirectory {
         return new DepthFirstIterator(this.getNodes());
     }
 
+    public Iterator<Node> iterator() { return new DepthFirstIterator(this.getNodes()); }
+
     public static class BreathFirstIterator implements Iterator<Node> {
 
         private Queue<Node> queue = new ArrayDeque<>();
@@ -285,6 +287,17 @@ public class SerializableDocumentDirectory {
         @Override
         public boolean hasNext() { return !stack.isEmpty(); }
     }
+
+    public Node getNodeAtPath(Path path) {
+        for (Node node: this) {
+            if (node.path.equals(path)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    public Node getNodeAtPath(String path) { return getNodeAtPath(new Path(path)); }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Node {
