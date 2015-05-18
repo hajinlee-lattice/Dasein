@@ -12,7 +12,6 @@
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
         <le.dataflow.version>1.0.32-SNAPSHOT</le.dataflow.version>
-        <le.dellebi.version>1.0.32-SNAPSHOT</le.dellebi.version>
         <avro.version>1.7.7</avro.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <le.db.version>1.0.32-SNAPSHOT</le.db.version>
@@ -397,33 +396,6 @@
                 <exclusion>
                     <groupId>org.apache.avro</groupId>
                     <artifactId>avro-mapred</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-dellebi</artifactId>
-            <version>${le.dellebi.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>cascading</groupId>
-                    <artifactId>cascading-local</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.avro</groupId>
-                    <artifactId>avro-mapred</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jetty</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jetty-util</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

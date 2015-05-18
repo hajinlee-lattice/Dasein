@@ -10,23 +10,7 @@
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
       http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
 
-    <hdp:configuration id="hadoopConfiguration">
-        dfs.client.failover.proxy.provider.${dataplatform.dfs.nameservices}=${dataplatform.dfs.client.failover.proxy.provider}
-        dfs.nameservices=${dataplatform.dfs.nameservices}
-        dfs.ha.namenodes.${dataplatform.dfs.nameservices}=nn1,nn2
-        dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn1=${dfs.namenode.rpc-address.nn1}
-        dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn2=${dfs.namenode.rpc-address.nn2}
-        fs.defaultFS=${dataplatform.fs.defaultFS}
-        yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
-        yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
-        mapred.job.tracker=${dataplatform.mapred.job.tracker}
-        yarn.app.mapreduce.am.resource.cpu-vcores=1
-        mapreduce.map.memory.mb=${dataplatform.container.mapreduce.memory}
-        mapreduce.reduce.memory.mb=${dataplatform.container.mapreduce.memory}
-        mapreduce.map.cpu.vcores=${dataplatform.container.map.virtualcores}
-        mapreduce.reduce.cpu.vcores=${dataplatform.container.reduce.virtualcores}
-        mapreduce.job.queuename=Priority0.MapReduce.0
-    </hdp:configuration>
+    <import resource="classpath:dataplatform-mr-config-context.xml"/>
 
     <!-- Configures the sampling job. -->
     <hdp:job id="samplingJob" number-reducers="1"
