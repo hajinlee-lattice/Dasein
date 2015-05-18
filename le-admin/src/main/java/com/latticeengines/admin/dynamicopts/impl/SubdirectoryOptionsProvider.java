@@ -38,13 +38,8 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
     private Thread watcherThread;
 
     public SubdirectoryOptionsProvider(Path path) {
-        if (!Files.isDirectory(path, NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("Path " + path + " is not a folder");
-        }
-
         this.path = path;
         this.options = readSubdirectories();
-
         startWatcherThread();
     }
 
@@ -167,8 +162,7 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
                     startWatching();
                     watcher.close();
                 } catch (IOException|InterruptedException e) {
-                    options.clear();
-                    options.addAll(readSubdirectories());
+                    // ignore
                 }
             }
         });
