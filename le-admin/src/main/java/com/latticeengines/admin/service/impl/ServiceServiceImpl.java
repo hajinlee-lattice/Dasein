@@ -80,6 +80,8 @@ public class ServiceServiceImpl implements ServiceService {
     public Boolean patchOptions(String serviceName, SelectableConfigurationField field) {
         try {
             SerializableDocumentDirectory conf = getDefaultServiceConfig(serviceName);
+            DocumentDirectory metaDir = getConfigurationSchema(serviceName);
+            conf.applyMetadata(metaDir);
             field.patch(conf);
             DocumentDirectory dir = conf.getMetadataAsDirectory();
             Path schemaPath = PathBuilder.buildServiceConfigSchemaPath(CamilleEnvironment.getPodId(), serviceName);

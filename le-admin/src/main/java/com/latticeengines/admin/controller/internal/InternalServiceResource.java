@@ -14,6 +14,8 @@ import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -33,9 +35,13 @@ public class InternalServiceResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
     public SelectableConfigurationDocument getServiceOptionalConfigs(
-            @RequestParam(value = "component", required = false) String component, HttpServletRequest request) {
+            @RequestParam(value = "component") String component, HttpServletRequest request) {
         checkHeader(request);
-        return dynamicOptionsService.bind(serviceService.getSelectableConfigurationFields(component));
+        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields(component);
+        if (doc == null) {
+            throw new LedpException(LedpCode.LEDP_19102, new String[]{component});
+        }
+        return dynamicOptionsService.bind(doc);
     }
 
     @RequestMapping(value = "options", method = RequestMethod.PUT, headers = "Accept=application/json")

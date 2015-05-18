@@ -166,11 +166,15 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
     }
 
     public List<SelectableConfigurationField> findSelectableFields() {
+        return findSelectableFields(false);
+    }
+
+    public List<SelectableConfigurationField> findSelectableFields(boolean includeDynamicOptions) {
         List<SelectableConfigurationField> optFields = new ArrayList<>();
         if (this.getNodes() != null && !this.getNodes().isEmpty()) {
             String parent = "";
             for(Node node : this.getNodes()) {
-                optFields.addAll(node.findSelectableFields(parent));
+                optFields.addAll(node.findSelectableFields(parent, includeDynamicOptions));
             }
         }
         return optFields;
@@ -438,9 +442,11 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
 
 
-        public List<SelectableConfigurationField> findSelectableFields(String parent) {
+        public List<SelectableConfigurationField> findSelectableFields(String parent, boolean includeDynamicOptions) {
             List<SelectableConfigurationField> optFields = new ArrayList<>();
-            if (this.getMetadata() != null && this.getMetadata().getType().equals("options")) {
+            Metadata metadata = this.getMetadata();
+            if (metadata != null && metadata.getType().equals("options") &&
+                    (includeDynamicOptions || metadata.isDynamicOptions() == null || !metadata.isDynamicOptions())) {
                 if (this.getMetadata().validateData(this.getData())) {
                     SelectableConfigurationField field = new SelectableConfigurationField();
                     field.setNode(parent + "/" + this.getNode());
@@ -453,7 +459,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             }
             if (this.getChildren() != null && !this.getChildren().isEmpty()) {
                 for (Node child : this.getChildren()) {
-                    optFields.addAll(child.findSelectableFields(parent + "/" + this.getNode()));
+                    optFields.addAll(child.findSelectableFields(parent + "/" + this.getNode(), includeDynamicOptions));
                 }
             }
             return optFields;

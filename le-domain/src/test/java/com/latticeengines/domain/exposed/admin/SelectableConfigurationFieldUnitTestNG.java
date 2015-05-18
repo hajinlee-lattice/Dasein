@@ -30,7 +30,7 @@ public class SelectableConfigurationFieldUnitTestNG {
     @Test(groups = "unit")
     public void testPatch() {
         SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("prop");
+        field.setNode("/prop");
         field.setOptions(Arrays.asList("option1", "option2", "option3", "option4"));
         field.patch(dir);
 
@@ -41,7 +41,7 @@ public class SelectableConfigurationFieldUnitTestNG {
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testPatchNonExistingNode() {
         SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("nope");
+        field.setNode("/nope");
         field.setOptions(Arrays.asList("option1", "option2", "option3", "option4"));
         field.patch(dir);
     }
@@ -49,7 +49,7 @@ public class SelectableConfigurationFieldUnitTestNG {
     @Test(groups = "unit")
     public void testPatchWithNullOptions() {
         SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("prop");
+        field.setNode("/prop");
         field.patch(dir);
 
         SerializableDocumentDirectory.Node node = dir.getNodeAtPath("/prop");
@@ -59,7 +59,7 @@ public class SelectableConfigurationFieldUnitTestNG {
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testPatchDyanmicOptions() {
         SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("dynamic");
+        field.setNode("/dynamic");
         field.setOptions(Arrays.asList("option1", "option2", "option3", "option4"));
         field.patch(dir);
     }

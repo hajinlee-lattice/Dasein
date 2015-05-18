@@ -408,4 +408,26 @@ public class SerializableDocumentDirectoryUnitTestNG {
 
         Assert.assertEquals(seenPathes.size(), 5);
     }
+
+    @Test(groups = "unit")
+    public void testApplyMetadata() {
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));
+        configDir.add("/Config1", "option1");
+        configDir.add("/Config2", "");
+        configDir.add("/Config2/Config2.1", "option21");
+        configDir.add("/Config2/Config2.2", "option22");
+
+        DocumentDirectory metaDir = new DocumentDirectory(new Path("/root"));
+        metaDir.add("/Config1", "{\"Type\":\"options\",\"Options\":[\"option1\",\"option2\",\"option3\"]}");
+        metaDir.add("/Config2", "");
+        metaDir.add("/Config2/Config2.1", "{\"Type\":\"options\",\"Options\":[\"option21\",\"option22\",\"option23\"]}");
+        metaDir.add("/Config2/Config2.2", "{\"Type\":\"options\",\"Options\":[],\"DynamicOptions\":true}");
+
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
+        sDir.applyMetadata(metaDir);
+
+        SerializableDocumentDirectory.Node node = sDir.getNodeAtPath("/Config2/Config2.1");
+        Assert.assertNotNull(node.getMetadata());
+        Assert.assertEquals(node.getMetadata().getOptions().size(), 3);
+    }
 }

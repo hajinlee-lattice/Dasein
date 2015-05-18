@@ -39,7 +39,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
         doc.setComponent("TestComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("nonode");
+        field.setNode("/nonode");
         field.setOptions(Arrays.asList("1","2"));
 
         SerializableDocumentDirectory conf = serviceService.getDefaultServiceConfig("TestComponent");
@@ -53,7 +53,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
         doc.setComponent("NoComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("Config1");
+        field.setNode("/Config1");
         field.setOptions(Arrays.asList("1","2"));
 
         SerializableDocumentDirectory conf = serviceService.getDefaultServiceConfig("TestComponent");
@@ -68,7 +68,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
         doc.setComponent("TestComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("Config1");
+        field.setNode("/Config1");
         field.setOptions(Arrays.asList("1","2"));
 
         SerializableDocumentDirectory conf = serviceService.getDefaultServiceConfig("TestComponent");

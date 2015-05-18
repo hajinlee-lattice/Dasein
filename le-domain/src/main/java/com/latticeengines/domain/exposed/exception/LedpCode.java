@@ -107,7 +107,8 @@ public enum LedpCode {
     LEDP_19000("Failed to send an email."),
 
     // le-admin 19101-19999
-    LEDP_19101("Service service error.");
+    LEDP_19101("Service service error."),
+    LEDP_19102("Service component {0} is not registered.");
 
     private String message;
 
