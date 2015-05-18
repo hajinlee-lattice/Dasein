@@ -34,23 +34,6 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNull(doc);
     }
 
-    @Test(groups = "functional")
-    public void testPathOptions() throws Exception {
-        SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
-        doc.setComponent("TestComponent");
-        SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("Config1");
-        field.setOptions(Arrays.asList("1","2"));
-
-        SerializableDocumentDirectory conf = serviceService.getDefaultServiceConfig("TestComponent");
-        Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 3);
-
-        Assert.assertTrue(serviceService.patchOptions("TestComponent", field));
-        conf = serviceService.getDefaultServiceConfig("TestComponent");
-
-        Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 2);
-    }
-
     @Test(groups = "functional", expectedExceptions = LedpException.class)
     public void testPathOptionsToNonExistingNode() throws Exception {
         SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
@@ -77,6 +60,24 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 3);
 
         serviceService.patchOptions("NoComponent", field);
+    }
+
+    @Test(groups = "functional",
+            dependsOnMethods = {"testPathOptionsToNonExistingService", "testPathOptionsToNonExistingNode"})
+    public void testPathOptions() throws Exception {
+        SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
+        doc.setComponent("TestComponent");
+        SelectableConfigurationField field = new SelectableConfigurationField();
+        field.setNode("Config1");
+        field.setOptions(Arrays.asList("1","2"));
+
+        SerializableDocumentDirectory conf = serviceService.getDefaultServiceConfig("TestComponent");
+        Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 3);
+
+        Assert.assertTrue(serviceService.patchOptions("TestComponent", field));
+        conf = serviceService.getDefaultServiceConfig("TestComponent");
+
+        Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 2);
     }
 
 }
