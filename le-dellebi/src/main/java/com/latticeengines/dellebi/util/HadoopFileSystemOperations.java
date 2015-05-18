@@ -42,7 +42,7 @@ public class HadoopFileSystemOperations implements FileSystemOperations {
             FileStatus[] status = fs.listStatus(path);
             for (FileStatus s : status) {
                 String name = s.getPath().getName();
-                if (name.contains(".txt")) {
+                if (name.endsWith(".txt")) {
                     log.info("Cascading found txt file: " + name + " and starts to process it.");
                     fileNumber++;
                 }
