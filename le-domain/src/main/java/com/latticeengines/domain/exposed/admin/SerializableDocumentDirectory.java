@@ -472,14 +472,7 @@ public class SerializableDocumentDirectory {
         public void setOptions(Collection<String> options) { this.options = options; }
 
         @JsonProperty("DynamicOptions")
-        public Boolean isDynamicOptions() {
-            if (dynamicOptions != null) {
-                return dynamicOptions;
-            } else {
-                return false;
-            }
-        }
-
+        public Boolean isDynamicOptions() { return dynamicOptions; }
 
         @JsonProperty("DynamicOptions")
         public void setDynamicOptions(Boolean dynamicOptions) { this.dynamicOptions = dynamicOptions; }
@@ -496,7 +489,11 @@ public class SerializableDocumentDirectory {
                 case "array":
                     return true; // isArray(data);
                 case "options":
-                    return this.isDynamicOptions() || this.getOptions().contains(data);
+                    if (this.dynamicOptions != null) {
+                        return this.isDynamicOptions() || this.getOptions().contains(data);
+                    } else {
+                        return this.getOptions().contains(data);
+                    }
                 case "email":
                     return emailValidator.isValid(data);
                 case "path":
