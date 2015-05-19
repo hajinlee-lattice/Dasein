@@ -17,20 +17,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
-import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
-import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
-import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
-import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
-import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -125,73 +116,6 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
             }
         }
 
-    }
-
-    @Test(groups = {"deployment", "functional"})
-    public void provisionPLSTestTenants() throws Exception {
-        createTestTenant("Tenant1", "Tenant 1", CRMTopology.MARKETO);
-        createTestTenant("Tenant2", "Tenant 2", CRMTopology.ELOQUA);
-    }
-
-    private void createTestTenant(String tenantId, String tenantName, CRMTopology topology)
-            throws Exception{
-        loginAD();
-
-        CustomerSpaceProperties props = new CustomerSpaceProperties();
-        props.description = "PLS Test tenant";
-        props.displayName = TestContractId + " " + tenantName;
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
-
-        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
-        TenantInfo tenantInfo = new TenantInfo(
-                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
-        SpaceConfiguration spaceConfig = new SpaceConfiguration();
-        spaceConfig.setTopology(topology);
-        spaceConfig.setDlAddress("http://bodcdevvint187.dev.lattice.local:8081");
-
-        TenantRegistration reg = new TenantRegistration();
-        reg.setSpaceInfo(spaceInfo);
-        reg.setTenantInfo(tenantInfo);
-        reg.setContractInfo(contractInfo);
-        reg.setSpaceConfig(spaceConfig);
-
-        try {
-            deleteTenant(contractId, tenantId);
-        } catch (Exception e) {
-            //ignore
-        }
-        createTenant(contractId, tenantId, false, reg);
-
-        String testAdminUsername = "bnguyen@lattice-engines.com";
-
-        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
-        confDir.makePathsLocal();
-
-        // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/SuperAdminEmails"));
-        node.getDocument().setData("[\"" + testAdminUsername + "\"]");
-
-        node = confDir.get(new Path("/LatticeAdminEmails"));
-        node.getDocument().setData("[ ]");
-
-        // send to bootstrapper message queue
-        super.bootstrap(contractId, tenantId, serviceName, confDir);
-
-        // ==================================================
-        // provision the corresponding tenant in VDB/DL
-        // ==================================================
-//        confDir = batonService.getDefaultConfiguration(VisiDBDLComponent.componentName);
-//        confDir.makePathsLocal();
-//        // modify the default config
-//        node = confDir.get(new Path("/VisiDB"));
-//        node.getChild("CreateNewVisiDB").getDocument().setData("true");
-//        node = confDir.get(new Path("/VisiDB"));
-//        node.getChild("VisiDBName").getDocument().setData("TestVisiDB");
-//        node = confDir.get(new Path("/VisiDB"));
-//        node.getChild("ServerName").getDocument().setData(visiDBServerName);
-//        node = confDir.get(new Path("/DL"));
-//        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-//        super.bootstrap(contractId, tenantId, VisiDBDLComponent.componentName, confDir);
     }
 
     @Override

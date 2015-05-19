@@ -15,7 +15,7 @@ public interface ServiceService {
 
     DocumentDirectory getConfigurationSchema(String serviceName);
 
-    SelectableConfigurationDocument getSelectableConfigurationFields(String serviceName);
+    SelectableConfigurationDocument getSelectableConfigurationFields(String serviceName, boolean includeDynamicOpts);
 
     Boolean patchOptions(String serviceName, SelectableConfigurationField field);
 }

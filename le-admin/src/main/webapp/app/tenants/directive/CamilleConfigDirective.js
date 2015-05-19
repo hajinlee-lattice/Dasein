@@ -96,14 +96,16 @@ app.directive('configEntry', function(){
 
             if ($scope.isSelect) {
                 $scope.options = $scope.config.Metadata.Options;
-                if ($scope.options.length === 0) {
-                    $scope.showError = true;
-                    $scope.isValid.valid = false;
-                    $scope.errorMsg = "no available choices.";
-                } else if ($scope.options.indexOf($scope.config.Data) == -1) {
-                    $scope.showError = true;
-                    $scope.isValid.valid = false;
-                    $scope.errorMsg = "not a valid choice.";
+                if (!$scope.readonly) {
+                    if ($scope.options.length === 0) {
+                        $scope.showError = true;
+                        $scope.isValid.valid = false;
+                        $scope.errorMsg = "no available choices.";
+                    } else if ($scope.options.indexOf($scope.config.Data) == -1) {
+                        $scope.showError = true;
+                        $scope.isValid.valid = false;
+                        $scope.errorMsg = "not a valid choice.";
+                    }
                 }
             }
 

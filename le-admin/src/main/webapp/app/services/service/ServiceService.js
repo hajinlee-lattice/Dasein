@@ -96,7 +96,7 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
         if (this.spaceConfigOptions === null) {
             $http({
                 method: 'GET',
-                url: '/admin/services/SpaceConfiguration/options'
+                url: '/admin/services/SpaceConfiguration/options?include_dynamic_opts=true'
             }).success(function (data) {
                 cacheSpaceConfigOptions(data);
                 result.resultObj = data;

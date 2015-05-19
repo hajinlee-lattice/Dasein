@@ -48,14 +48,14 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public SelectableConfigurationDocument getSelectableConfigurationFields(String serviceName) {
+    public SelectableConfigurationDocument getSelectableConfigurationFields(String serviceName, boolean includeDynamicOpts) {
         if (getRegisteredServices().contains(serviceName)) {
             LatticeComponent component = orchestrator.getComponent(serviceName);
             SerializableDocumentDirectory confDir = component.getSerializableDefaultConfiguration();
 
             SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
             doc.setComponent(serviceName);
-            doc.setNodes(confDir.findSelectableFields());
+            doc.setNodes(confDir.findSelectableFields(includeDynamicOpts));
 
             return doc;
         } else if (serviceName.equals("SpaceConfiguration")) {
@@ -68,7 +68,7 @@ public class ServiceServiceImpl implements ServiceService {
 
             SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
             doc.setComponent(serviceName);
-            doc.setNodes(sDir.findSelectableFields());
+            doc.setNodes(sDir.findSelectableFields(includeDynamicOpts));
 
             return doc;
         } else {
