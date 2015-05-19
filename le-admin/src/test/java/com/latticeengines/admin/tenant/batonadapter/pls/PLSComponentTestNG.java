@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -18,7 +17,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
-import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -214,7 +212,7 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         try {
             List<Tenant> tenants = magicRestTemplate.getForObject(getPlsHostPort() + "/pls/admin/tenants", List.class);
             for (Tenant tenant: tenants) {
-                if (((Tenant) tenant).getId().equals(tenantId)) return;
+                if (tenant.getId().equals(tenantId)) return;
             }
             magicRestTemplate.delete(getPlsHostPort()
                     + String.format("/pls/admin/tenants/%s", tenantId));
