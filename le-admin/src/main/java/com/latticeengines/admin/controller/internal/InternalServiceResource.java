@@ -37,7 +37,7 @@ public class InternalServiceResource extends InternalResourceBase {
     public SelectableConfigurationDocument getServiceOptionalConfigs(
             @RequestParam(value = "component") String component, HttpServletRequest request) {
         checkHeader(request);
-        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields(component);
+        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields(component, false);
         if (doc == null) {
             throw new LedpException(LedpCode.LEDP_19102, new String[]{component});
         }
