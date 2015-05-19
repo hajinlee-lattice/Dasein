@@ -43,6 +43,7 @@ import cascading.util.NullNotEquivalentComparator;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class AvroRead {
 
@@ -64,7 +65,7 @@ public class AvroRead {
         Schema contactSchema = AvroUtils.getSchema(new Configuration(), new Path(contact));
 
         Properties properties = new Properties();
-        properties.put("mapred.job.queue.name", "Priority0.MapReduce.0");
+        properties.put("mapred.job.queue.name", LedpQueueAssigner.getMRQueueNameForSubmission());
         AppProps.setApplicationJarClass(properties, AvroRead.class);
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
         //FlowConnector flowConnector = new LocalFlowConnector();

@@ -14,6 +14,7 @@
         <cascading.version>2.5.0</cascading.version>
         <le.common.version>1.0.32-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.32-SNAPSHOT</le.domain.version>
+        <le.scheduler.version>1.0.32-SNAPSHOT</le.scheduler.version>
     </properties>
 
     <repositories>
@@ -164,6 +165,11 @@
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scheduler</artifactId>
+            <version>${le.scheduler.version}</version>
         </dependency>
     </dependencies>
 
