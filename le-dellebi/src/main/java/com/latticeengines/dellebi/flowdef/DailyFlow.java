@@ -95,7 +95,7 @@ public class DailyFlow {
                     log.info("Cascading starts to process quote files!");
                     flowConnector.connect(item).complete();
                     log.info("Cascading finished to process quote files!");
-                    if (hadoopfilesystemoperations.isExistWithReturnValue(dataHadoopInPath + "/" + quoteTrans + "/_SUCCESS") == true){
+                    if (hadoopfilesystemoperations.isExist(dataHadoopInPath + "/" + quoteTrans + "/_SUCCESS") == true){
                     	hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + quoteTrans);
                     }else{
                     	log.info("Cascading is processing data.");
