@@ -25,7 +25,7 @@ public class ServiceResourceTestNG extends AdminFunctionalTestNGBase {
     public void testUpdateOptions() {
         String url = getRestHostPort() + String.format("/admin/services/%s/options", testLatticeComponent.getName());
         SelectableConfigurationField field = new SelectableConfigurationField();
-        field.setNode("Config1");
+        field.setNode("/Config1");
         field.setOptions(Arrays.asList("1", "2"));
 
         HttpHeaders headers = new HttpHeaders();
