@@ -65,12 +65,11 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
         }).success(function(data){
             if (data !== null && data.hasOwnProperty("RootPath")) {
                 data.Component = service;
-                if (data.Component === "Dante") {
-                    data = {
-                        Component: "Dante",
-                        Invisible: true
-                    };
+
+                if (!data.hasOwnProperty("Nodes") || data.Nodes.length === 0) {
+                    data.Message = data.Component + " does not need any configuration";
                 }
+
                 result.resultObj = data;
             } else {
                 result.success = false;

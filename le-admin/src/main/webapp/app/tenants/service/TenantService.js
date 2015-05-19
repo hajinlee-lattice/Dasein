@@ -129,13 +129,6 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
                 }
             });
 
-            if (data.Component === "Dante") {
-                data = {
-                    Component: "Dante",
-                    Message: "Dante does not need any configuration"
-                };
-            }
-
             result.resultObj = data;
 
             defer.resolve(result);
