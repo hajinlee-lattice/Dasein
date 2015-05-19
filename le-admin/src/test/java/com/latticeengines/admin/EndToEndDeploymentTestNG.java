@@ -219,10 +219,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      * ==================================================
      */
 
-    // This is a work round, because @AfterClass is not called if tests failed
-    @Test(groups = "deployment")
-    public void deleteTenants() throws Exception { tearDown(); }
-
     /**
      * ==================================================
      * BEGIN: Tenants creation methods
