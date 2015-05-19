@@ -102,7 +102,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                         if (exchange.getIn().getHeader("CamelFileName").toString() != "") {
                             log.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
                                     + ".zip");
-                            if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
+                            if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local111")) {
                                 SmbFile smbFile = new SmbFile(fileName.substring(0, fileName.indexOf(".txt")) + ".zip",
                                         finalAuth);
                                 if (smbFile.canWrite()) {
