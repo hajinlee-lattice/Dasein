@@ -160,25 +160,23 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     //==================================================
 
     @Test(groups = "deployment")
-    public void verifyZKStatesInMainTestTenant() {
-        verifyZKState(0);
-    }
+    public void verifyZKStatesInMainTestTenant() { verifyZKState(0); }
 
     //==================================================
     // verify tenant truly exists
     //==================================================
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyJAMSStateInMainTestTenant")
+    @Test(groups = "deployment")
     public void verifyJAMSMainTestTenantExists() throws Exception {
         verifyJAMSTenantExists(0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyPLSStateInMainTestTenant")
+    @Test(groups = "deployment")
     public void verifyPLSMainTestTenantExists() throws Exception {
         verifyPLSTenantExists(0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyVisiDBDLStateInMainTestTenant")
+    @Test(groups = "deployment")
     public void verifyVisiDBDLMainTestTenantExists() throws Exception {
         verifyVisiDBDLTenantExists(0);
     }
