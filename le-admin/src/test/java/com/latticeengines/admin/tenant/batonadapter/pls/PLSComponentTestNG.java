@@ -44,12 +44,6 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     private final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
 
-    @Value("${admin.test.vbservername}")
-    private String visiDBServerName;
-
-    @Value("${admin.test.dl.user}")
-    private String ownerEmail;
-
     @Autowired
     private TenantService tenantService;
 
@@ -188,18 +182,18 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         // ==================================================
         // provision the corresponding tenant in VDB/DL
         // ==================================================
-        confDir = batonService.getDefaultConfiguration(VisiDBDLComponent.componentName);
-        confDir.makePathsLocal();
-        // modify the default config
-        node = confDir.get(new Path("/VisiDB"));
-        node.getChild("CreateNewVisiDB").getDocument().setData("true");
-        node = confDir.get(new Path("/VisiDB"));
-        node.getChild("VisiDBName").getDocument().setData("TestVisiDB");
-        node = confDir.get(new Path("/VisiDB"));
-        node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node = confDir.get(new Path("/DL"));
-        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        super.bootstrap(contractId, tenantId, VisiDBDLComponent.componentName, confDir);
+//        confDir = batonService.getDefaultConfiguration(VisiDBDLComponent.componentName);
+//        confDir.makePathsLocal();
+//        // modify the default config
+//        node = confDir.get(new Path("/VisiDB"));
+//        node.getChild("CreateNewVisiDB").getDocument().setData("true");
+//        node = confDir.get(new Path("/VisiDB"));
+//        node.getChild("VisiDBName").getDocument().setData("TestVisiDB");
+//        node = confDir.get(new Path("/VisiDB"));
+//        node.getChild("ServerName").getDocument().setData(visiDBServerName);
+//        node = confDir.get(new Path("/DL"));
+//        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
+//        super.bootstrap(contractId, tenantId, VisiDBDLComponent.componentName, confDir);
     }
 
     @Override
