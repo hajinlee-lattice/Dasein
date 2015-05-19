@@ -3,6 +3,11 @@ package com.latticeengines.admin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -155,18 +160,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     //==================================================
 
     @Test(groups = "deployment")
-    public void verifyJAMSStateInMainTestTenant() throws Exception {
-        verifyZKState(0, BardJamsComponent.componentName);
-    }
-
-    @Test(groups = "deployment")
-    public void verifyPLSStateInMainTestTenant() throws Exception {
-        verifyZKState(0, PLSComponent.componentName);
-    }
-
-    @Test(groups = "deployment")
-    public void verifyVisiDBDLStateInMainTestTenant() throws Exception {
-        verifyZKState(0, VisiDBDLComponent.componentName);
+    public void verifyZKStatesInMainTestTenant() {
+        verifyZKState(0);
     }
 
     //==================================================
@@ -210,8 +205,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      */
 
     @Test(groups = "deployment", enabled = false)
-    public void verifyDefaultTestTenant() throws Exception {
-    }
+    public void verifyDefaultTestTenant() {}
 
     /**
      * ==================================================
@@ -404,10 +398,54 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      * BEGIN: Tenants verification methods
      * ==================================================
      */
-    private void verifyZKState(int tenantIdx, String component) {
+    private void verifyZKState(int tenantIdx) {
         final String tenantId = tenantIds[tenantIdx];
-        BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, component);
-        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
+
+        ExecutorService executor = Executors.newFixedThreadPool(6);
+
+        List<Future<BootstrapState>> futures = new ArrayList<>();
+        List<String> serviceNames = new ArrayList<>(serviceService.getRegisteredServices());
+
+        for (String serviceName : serviceNames) {
+            final String component = serviceName;
+            Future<BootstrapState> future = executor.submit(new Callable<BootstrapState>() {
+                @Override
+                public BootstrapState call() throws Exception {
+                    // not ready for integration test with Dante
+                    if (component.toLowerCase().contains("dante") ||
+                            component.toLowerCase().contains("test")) {
+                        return BootstrapState.constructOKState(1);
+                    } else {
+                        return waitUntilStateIsNotInitial(contractId, tenantId, component);
+                    }
+                }
+            });
+            futures.add(future);
+        }
+
+        boolean allOK = true;
+        StringBuilder msg = new StringBuilder("Problematic components are:\n");
+
+        for (int i = 0; i < serviceNames.size(); i++) {
+            Future<BootstrapState> result = futures.get(i);
+            String serviceName = serviceNames.get(i);
+            BootstrapState state = null;
+            try {
+                state = result.get();
+            } catch (InterruptedException|ExecutionException e) {
+                msg.append(String.format(
+                        "Could not successfully get the bootstrap state of %s \n", serviceName));
+            }
+            boolean thisIsOK = state != null && state.state.equals(BootstrapState.State.OK);
+            if (!thisIsOK && state != null) {
+                msg.append(String.format(
+                        "The bootstrap state of %s is not OK, but rather %s : %s.\n",
+                        serviceName, state.state, state.errorMessage));
+            }
+            allOK = allOK && thisIsOK;
+        }
+
+        Assert.assertTrue(allOK, msg.toString());
     }
 
     @SuppressWarnings("unused")
