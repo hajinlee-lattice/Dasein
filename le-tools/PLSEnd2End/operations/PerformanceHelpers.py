@@ -322,7 +322,7 @@ class PerformanceData(SessionRunner):
         return result;
         
     def getPDMatchData_dataloader(self,launchid):
-        query = "SELECT [CommandId],convert(varchar(19),[CreateTime],120) as job_createtime,convert(varchar(19),[StartTime],120) as StartTime,convert(varchar(19),[EndTime],120) as EndTime,datediff(s,[CreateTime],[EndTime]) as [dl_duration_time] " + \
+        query = "SELECT [CommandId],convert(varchar(19),[CreateTime],120) as job_createtime,convert(varchar(19),[StartTime],120) as StartTime,convert(varchar(19),[EndTime],120) as EndTime,datediff(s,[StartTime],[EndTime]) as [dl_duration_time] " + \
               " FROM [DataLoader].[dbo].[LaunchPDMatches] where [LaunchId]=%s" % (launchid)
         result = self.getQuery(dl_connection_string, query);
         return result;
@@ -460,6 +460,7 @@ class PerformanceTest(SessionRunner):
         editHourlyPerformanceRefreshDataSources(self.tenantName, self.app); 
                  
         PlsOperations.runHourlyScoring(self.tenantName);
+        PlsOperations.runHourlyDanteProcess(self.tenantName);
         
         print "start collect the data ......"
         
