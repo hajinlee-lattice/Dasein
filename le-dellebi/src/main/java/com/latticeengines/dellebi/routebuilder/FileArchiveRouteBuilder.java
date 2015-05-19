@@ -44,7 +44,7 @@ public class FileArchiveRouteBuilder extends RouteBuilder {
 
     public void configure() {
     	
-    	hadoopfilesystemoperations.isExist(dataHadoopInpath + "/" + quoteTrans);
+    	hadoopfilesystemoperations.isExistWithoutReturnValue(dataHadoopInpath + "/" + quoteTrans);
 
         try {
             from(camelDataIncomePath)
