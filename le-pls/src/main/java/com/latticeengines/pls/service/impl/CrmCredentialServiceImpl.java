@@ -10,6 +10,7 @@ import org.apache.zookeeper.ZooDefs;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -39,14 +40,15 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private static final Log log = LogFactory.getLog(CrmCredentialServiceImpl.class);
 
-    @Value("${pls.dataloader.rest.api}")
-    private String dataLoaderUrl;
     @Value("${pls.dataloader.sfdc.login.url}")
     private String sfdcLoginUrl;
     @Value("${pls.dataloader.marketo.login.url}")
     private String marketoLoginUrl;
     @Value("${pls.dataloader.eloqua.login.url}")
     private String eloquaLoginUrl;
+
+    @Autowired
+    TenantConfigServiceImpl tenantConfigService;
 
     @Override
     public CrmCredential verifyCredential(String crmType, String tenantId, Boolean isProduction,
@@ -70,7 +72,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         String orgId = getSfdcOrgId(crmCredential);
         newCrmCredential.setOrgId(orgId);
         crmCredential.setOrgId(orgId);
-        verifySfdcFromDataLoader(crmType, crmCredential);
+        verifySfdcFromDataLoader(crmType, crmCredential, tenantConfigService.getDLRestServiceAddress(tenantId));
         writeToZooKeeper(crmType, tenantId, isProduction, crmCredential, true);
 
         return newCrmCredential;
@@ -79,7 +81,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     private CrmCredential updateMarketoConfig(String crmType, String tenantId, CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        verifyMarketoFromDataLoader(crmType, crmCredential);
+        verifyMarketoFromDataLoader(crmType, crmCredential, tenantConfigService.getDLRestServiceAddress(tenantId));
         writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
         return newCrmCredential;
@@ -88,16 +90,16 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private CrmCredential updateEloquaConfig(String crmType, String tenantId, CrmCredential crmCredential) {
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        verifyEloquaFromDataLoader(crmType, crmCredential);
+        verifyEloquaFromDataLoader(crmType, crmCredential, tenantConfigService.getDLRestServiceAddress(tenantId));
         writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
         return newCrmCredential;
 
     }
 
-    private void verifyEloquaFromDataLoader(String crmType, CrmCredential crmCredential) {
+    private void verifyEloquaFromDataLoader(String crmType, CrmCredential crmCredential, String DLUrl) {
 
-        String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
+        String url = DLUrl + "/ValidateExternalAPICredentials";
         Map<String, String> parameters = new HashMap<>();
         parameters.put("company", crmCredential.getCompany());
         if (StringUtils.isEmpty(crmCredential.getUrl())) {
@@ -108,8 +110,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     }
 
-    private void verifyMarketoFromDataLoader(String crmType, CrmCredential crmCredential) {
-        String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
+    private void verifyMarketoFromDataLoader(String crmType, CrmCredential crmCredential, String DLUrl) {
+        String url = DLUrl + "/ValidateExternalAPICredentials";
 
         Map<String, String> parameters = new HashMap<>();
         if (StringUtils.isEmpty(crmCredential.getUrl())) {
@@ -119,8 +121,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         excuteHttpRequest(url, parameters);
     }
 
-    private void verifySfdcFromDataLoader(String crmType, CrmCredential crmCredential) {
-        String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
+    private void verifySfdcFromDataLoader(String crmType, CrmCredential crmCredential, String DLUrl) {
+        String url = DLUrl + "/ValidateExternalAPICredentials";
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("token", crmCredential.getSecurityToken());
@@ -157,10 +159,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         JSONObject jsonObject = (JSONObject) jsonParser.parse(status);
         JSONArray jsonArray = (JSONArray) jsonObject.get("Value");
         JSONObject result = (JSONObject) jsonArray.get(0);
-        if ("Effective".equals(result.get("Key")) && "true".equals(result.get("Value"))) {
-            return true;
-        }
-        return false;
+        return "Effective".equals(result.get("Key")) && "true".equals(result.get("Value"));
     }
 
     private void writeToZooKeeper(String crmType, String tenantId, Boolean isProduction, CrmCredential crmCredential,

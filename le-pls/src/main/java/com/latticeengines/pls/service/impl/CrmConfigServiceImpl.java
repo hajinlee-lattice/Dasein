@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -25,14 +26,15 @@ public class CrmConfigServiceImpl implements CrmConfigService {
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(CrmConfigServiceImpl.class);
 
-    @Value("${pls.dataloader.rest.api}")
-    private String dataLoaderUrl;
     @Value("${pls.dataloader.sfdc.login.url}")
     private String sfdcLoginUrl;
     @Value("${pls.dataloader.marketo.login.url}")
     private String marketoLoginUrl;
     @Value("${pls.dataloader.eloqua.login.url}")
     private String eloquaLoginUrl;
+
+    @Autowired
+    TenantConfigServiceImpl tenantConfigService;
 
     @Override
     public void config(String crmType, String tenantId, CrmConfig crmConfig) {
@@ -47,12 +49,11 @@ public class CrmConfigServiceImpl implements CrmConfigService {
             eloquaConfig(crmType, tenantId, crmConfig);
             break;
         }
-
     }
 
     private void eloquaConfig(String crmType, String tenantId, CrmConfig crmConfig) {
 
-        String url = dataLoaderUrl + "/UpdateDataProvider";
+        String url = tenantConfigService.getDLRestServiceAddress(tenantId) + "/UpdateDataProvider";
         Map<String, Object> parameters = new HashMap<>();
         Map<String, String> values = new HashMap<>();
         values.put("URL", eloquaLoginUrl);
@@ -75,7 +76,7 @@ public class CrmConfigServiceImpl implements CrmConfigService {
     }
 
     private void marketoConfig(String crmType, String tenantId, CrmConfig crmConfig) {
-        String url = dataLoaderUrl + "/UpdateDataProvider";
+        String url = tenantConfigService.getDLRestServiceAddress(tenantId) + "/UpdateDataProvider";
 
         Map<String, Object> parameters = new HashMap<>();
         Map<String, String> values = new HashMap<>();
@@ -91,7 +92,7 @@ public class CrmConfigServiceImpl implements CrmConfigService {
     }
 
     private void sfdcConfig(String crmType, String tenantId, CrmConfig crmConfig) {
-        String url = dataLoaderUrl + "/UpdateDataProvider";
+        String url = tenantConfigService.getDLRestServiceAddress(tenantId) + "/UpdateDataProvider";
 
         Map<String, Object> parameters = new HashMap<>();
         Map<String, String> values = new HashMap<>();
@@ -137,7 +138,7 @@ public class CrmConfigServiceImpl implements CrmConfigService {
             return true;
         }
         Boolean isSuccessful = (Boolean)jsonObject.get("Success");
-        if (isSuccessful != null && isSuccessful == true) {
+        if (isSuccessful != null && isSuccessful) {
             return true;
         }
         String errorMsg = (String) jsonObject.get("ErrorMessage");

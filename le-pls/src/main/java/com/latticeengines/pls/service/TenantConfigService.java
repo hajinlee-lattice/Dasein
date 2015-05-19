@@ -6,5 +6,7 @@ public interface TenantConfigService {
 
     String getTopology(String tenantId);
 
+    String getDLRestServiceAddress(String tenantId);
+
     TenantDocument getTenantDocument(String tenantId);
 }

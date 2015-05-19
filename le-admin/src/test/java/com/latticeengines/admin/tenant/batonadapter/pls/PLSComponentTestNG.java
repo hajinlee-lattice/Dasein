@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -41,6 +43,12 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     private final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
+
+    @Value("${admin.test.vbservername}")
+    private String visiDBServerName;
+
+    @Value("${admin.test.dl.user}")
+    private String ownerEmail;
 
     @Autowired
     private TenantService tenantService;
@@ -128,7 +136,7 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     }
 
     @Test(groups = {"deployment", "functional"})
-    public void installTestTenants() throws Exception {
+    public void provisionPLSTestTenants() throws Exception {
         createTestTenant("Tenant1", "Tenant 1", CRMTopology.MARKETO);
         createTestTenant("Tenant2", "Tenant 2", CRMTopology.ELOQUA);
     }
@@ -147,6 +155,7 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
                 new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
         SpaceConfiguration spaceConfig = new SpaceConfiguration();
         spaceConfig.setTopology(topology);
+        spaceConfig.setDlAddress("http://bodcdevvint187.dev.lattice.local:8081");
 
         TenantRegistration reg = new TenantRegistration();
         reg.setSpaceInfo(spaceInfo);
@@ -175,6 +184,22 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         // send to bootstrapper message queue
         super.bootstrap(contractId, tenantId, serviceName, confDir);
+
+        // ==================================================
+        // provision the corresponding tenant in VDB/DL
+        // ==================================================
+        confDir = batonService.getDefaultConfiguration(VisiDBDLComponent.componentName);
+        confDir.makePathsLocal();
+        // modify the default config
+        node = confDir.get(new Path("/VisiDB"));
+        node.getChild("CreateNewVisiDB").getDocument().setData("true");
+        node = confDir.get(new Path("/VisiDB"));
+        node.getChild("VisiDBName").getDocument().setData("TestVisiDB");
+        node = confDir.get(new Path("/VisiDB"));
+        node.getChild("ServerName").getDocument().setData(visiDBServerName);
+        node = confDir.get(new Path("/DL"));
+        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
+        super.bootstrap(contractId, tenantId, VisiDBDLComponent.componentName, confDir);
     }
 
     @Override
