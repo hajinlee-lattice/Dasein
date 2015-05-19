@@ -50,7 +50,7 @@ public class SqoopDataService {
 		String queue = null;
 		int rc = 1;
 		String sourceDir = dataHadoopRootPath + dataHadoopWorkingPath + "/"
-				+ quotetrans;
+				+ quotetrans + "/_SUCCESS";
 		String columns = "QuoteNumber,Date,CustomerID,Product,RepBadge,Quantity,Amount,QuoteFileName";
 		String sqlStr = "exec " + quote_sp;
 
