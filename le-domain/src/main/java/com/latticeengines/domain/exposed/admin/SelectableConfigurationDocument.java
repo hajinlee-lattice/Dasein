@@ -32,20 +32,19 @@ public class SelectableConfigurationDocument {
         this.component = component;
     }
 
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void patch(SerializableDocumentDirectory sDir) {
-        Map<String, Exception> failedNodes = new HashMap<>();
+        Map<String, String> failedNodes = new HashMap<>();
         for (SelectableConfigurationField field: nodes) {
             try {
                 field.patch(sDir);
             } catch (Exception e) {
-                failedNodes.put(field.getNode(), e);
+                failedNodes.put(field.getNode(), e.getMessage());
             }
         }
         if (!failedNodes.isEmpty()) {
             StringBuilder builder = new StringBuilder("Patching options for the following nodes failed:\t\n ");
-            for (Map.Entry<String, Exception> entry: failedNodes.entrySet()) {
-                builder.append(String.format("%s: %s\t\n", entry.getKey(), entry.getValue().getMessage()));
+            for (Map.Entry<String, String> entry: failedNodes.entrySet()) {
+                builder.append(String.format("%s: %s\t\n", entry.getKey(), entry.getValue()));
             }
             throw new IllegalArgumentException(builder.toString());
         }
