@@ -83,8 +83,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Test(groups = "functional")
     public void testInstallationFunctional() throws InterruptedException, ClientProtocolException, IOException {
-        DLRestResult response = deleteVisiDBDLTenant(tenant);
-        Assert.assertEquals(response.getStatus(), 5);
         bootstrap(constructVisiDBDLInstaller(visiDBName));
 
         // wait a while, then test your installation
@@ -98,8 +96,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
                 Assert.assertEquals(sNode.getData(), "");
             }
         }
-        response = deleteVisiDBDLTenant(tenant);
-        Assert.assertEquals(response.getStatus(), 3);
     }
 
     public DLRestResult deleteVisiDBDLTenant(String tenant) throws ClientProtocolException, IOException {
