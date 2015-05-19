@@ -174,7 +174,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dellebi</artifactId>
             <version>${le.dellebi.version}</version>
-            <classifier>shaded</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
