@@ -13,5 +13,7 @@ public class DanteInstaller extends LatticeComponentInstaller {
     public DanteInstaller() { super(DanteComponent.componentName); }
 
     @Override
-    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {}
+    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
+        throw new RuntimeException("An intented exception for the purpose of testing.");
+    }
 }

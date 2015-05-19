@@ -20,7 +20,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testGetSelectableFields() throws Exception {
-        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields("TestComponent");
+        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields("TestComponent", true);
         Assert.assertEquals(doc.getNodes().size(), 1);
 
         SelectableConfigurationField field = doc.getNodes().get(0);
@@ -30,7 +30,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testGetSelectableFieldsFromNonExistingComponent() throws Exception {
-        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields("NotExist");
+        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields("NotExist", true);
         Assert.assertNull(doc);
     }
 
