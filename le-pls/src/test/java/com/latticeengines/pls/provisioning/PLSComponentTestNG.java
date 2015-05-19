@@ -123,15 +123,9 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
 
 
     private void bootstrap() {
-        DocumentDirectory confDir = batonService.getDefaultConfiguration(serviceName);
-        confDir.makePathsLocal();
-
-        // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/SuperAdminEmails"));
-        node.getDocument().setData("[\"" + testAdminUsername + "\"]");
-        node = confDir.get(new Path("/LatticeAdminEmails"));
-        node.getDocument().setData("[ ]");
-
+        DocumentDirectory confDir = new DocumentDirectory(new Path("/"));
+        confDir.add("/SuperAdminEmails", "[\"" + testAdminUsername + "\"]");
+        confDir.add("/LatticeAdminEmails", "[ ]");
         batonService.bootstrap(contractId, tenantId, spaceID, serviceName,
                 new SerializableDocumentDirectory(confDir).flatten());
     }
