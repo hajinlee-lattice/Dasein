@@ -2,7 +2,6 @@ package com.latticeengines.dellebi.routebuilder;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,9 +17,10 @@ public class FileArchiveRouteBuilder extends RouteBuilder {
 
     @Value("${dellebi.cameldataincomepath}")
     private String camelDataIncomePath;
+
     @Value("${dellebi.cameldataarchivepath}")
     private String camelDataArchivePath;
-    
+
     @Value("${dellebi.datahadoopinpath}")
     private String dataHadoopInpath;
 
@@ -29,39 +29,54 @@ public class FileArchiveRouteBuilder extends RouteBuilder {
 
     @Value("${dellebi.inputfileregex}")
     private String inputFileRegex;
-    
+
     @Value("${dellebi.env}")
     private String env;
-    
+
     @Value("${dellebi.quotetrans}")
     private String quoteTrans;
 
     @Autowired
     private MailSender mailSender;
-    
+
     @Autowired
     private HadoopFileSystemOperations hadoopfilesystemoperations;
 
     public void configure() {
-    	
-    	hadoopfilesystemoperations.isExistWithoutReturnValue(dataHadoopInpath + "/" + quoteTrans);
-
         try {
             from(camelDataIncomePath)
-                    .choice()
-                    .when(PredicateBuilder.and(header("CamelFileName").startsWith("tgt_quote_trans_global"), 
-                    		method(hadoopfilesystemoperations,
-                    				"getIfNotExist")))
                     .process(new Processor() {
                         public void process(Exchange exchange) throws Exception {
-                            log.info("Received Dell EBI file: " + exchange.getIn().getHeader("CamelFileName"));
+                            while (hadoopfilesystemoperations
+                                    .isExistWithTXTFile(dataHadoopInpath + "/"
+                                            + quoteTrans)) {
+                                try {
+                                    Thread.sleep(6000);
+                                } catch (InterruptedException e) {
+                                }
+                            }
+                        }
+                    })
+                    .choice()
+                    .when(header("CamelFileName").startsWith(
+                            "tgt_quote_trans_global"))
+                    .process(new Processor() {
+                        public void process(Exchange exchange) throws Exception {
+                            log.info("Received Dell EBI file: "
+                                    + exchange.getIn().getHeader(
+                                            "CamelFileName"));
 
-                            mailSender.sendEmail(mailReceiveList, "New Dell EBI files arrive!",
-                                    "Received Dell EBI file: " + exchange.getIn().getHeader("CamelFileName") + " in "
+                            mailSender.sendEmail(
+                                    mailReceiveList,
+                                    "New Dell EBI files arrive!",
+                                    "Received Dell EBI file: "
+                                            + exchange.getIn().getHeader(
+                                                    "CamelFileName") + " in "
                                             + env + " environment.");
                         }
-                    }).multicast().stopOnException().to(camelDataArchivePath, "direct:files").endChoice().otherwise()
-                    .stop().end();
+                    }).multicast().stopOnException()
+                    .to(camelDataArchivePath, "direct:files").endChoice()
+                    .otherwise().stop().end();
         } catch (Exception e) {
             log.info("File archiving failed!");
         }

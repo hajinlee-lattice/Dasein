@@ -124,6 +124,28 @@ public boolean isExistWithOpenFileName(String folderName) {
     return false;
 }
 
+public boolean isExistWithTXTFile(String folderName) {
+
+    try {
+        Configuration conf = new Configuration();
+        FileSystem fs = FileSystem.get(URI.create(dataHadoopRootPath), conf);
+        Path path = new Path(folderName);
+        if(fs.exists(path)){
+        	FileStatus[] fileStatus = fs.listStatus(path);
+            
+            for(FileStatus status:fileStatus ){
+            	if(status.getPath().getName().contains(".txt")){
+            		return true;
+            	}
+            }
+        }          
+    } catch (Exception e) {
+        log.warn("Failed to check if " + folderName + "exists or not.", e);
+    }
+
+    return false;
+}
+
     public void removeFile(String fileName) {
 
         try {
