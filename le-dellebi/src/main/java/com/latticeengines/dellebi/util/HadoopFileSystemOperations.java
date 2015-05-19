@@ -70,7 +70,7 @@ public class HadoopFileSystemOperations{
         }
     }
 
-    public void isExist(String folderName) {
+    public void isExistWithoutReturnValue(String folderName) {
     	
     	boolean isExist = false;
         try {
@@ -86,7 +86,7 @@ public class HadoopFileSystemOperations{
         ifFolderExist = isExist;
     }
     
-public boolean isExistWithReturnValue(String folderName) {
+public boolean isExist(String folderName) {
     	
     	boolean isExist = false;
         try {
@@ -142,7 +142,7 @@ public boolean isExistWithOpenFileName(String folderName) {
     
     public Boolean ifReadyToProcessData(){
     	if(listFileNumber(dataHadoopInPath + "/" + quoteTrans) != 0
-    			&& isExistWithReturnValue(dataHadoopWorkingPath + "/" + quoteTrans) != true
+    			&& isExist(dataHadoopWorkingPath + "/" + quoteTrans) != true
     			&& isExistWithOpenFileName(dataHadoopInPath + "/" + quoteTrans) != true){
     		return true;
     	}
