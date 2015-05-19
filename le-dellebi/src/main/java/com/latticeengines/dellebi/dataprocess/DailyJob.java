@@ -31,6 +31,8 @@ public class DailyJob extends QuartzJobBean {
         if (dailyFlow.getReturnCode() == 0){
         	sqoopDataService.export();
         	log.info("EBI daily refresh just finished successfully.");
+        }else if (dailyFlow.getReturnCode() == 3){
+        	log.warn("Skip Sqoop exporting this time.");
         }else{
         	log.error("EBI daily refresh just failed with return code: " + dailyFlow.getReturnCode());
         }
