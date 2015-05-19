@@ -144,9 +144,10 @@ public boolean isExistWithOpenFileName(String folderName) {
     	if(listFileNumber(dataHadoopInPath + "/" + quoteTrans) != 0
     			&& isExist(dataHadoopWorkingPath + "/" + quoteTrans) != true
     			&& isExistWithOpenFileName(dataHadoopInPath + "/" + quoteTrans) != true){
+    		log.info("Cascading meets the conditions to process data from in folder on HDFS.");
     		return true;
     	}
-    	
+    	log.info("Cascading doesn't meet the conditions to process data from in folder on HDFS.");
     	return false;
     }
 }
