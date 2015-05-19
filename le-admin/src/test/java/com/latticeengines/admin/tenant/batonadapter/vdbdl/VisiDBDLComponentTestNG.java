@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -31,7 +32,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Value("${admin.test.dl.url}")
     private String dlUrl;
 
-    @Value("${admin.test.vbservername}")
+    @Value("${admin.test.vdbservername}")
     private String visiDBServerName;
 
     @Value("${admin.test.dl.user}")
@@ -39,20 +40,31 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     private String tenant;
 
-    private String createNewVisiDB;
-
     private String visiDBName;
 
     @BeforeClass(groups = { "deployment", "functional" })
     @Override
     public void setup() throws Exception {
         super.setup();
-        createNewVisiDB = "true";
         visiDBName = "TestVisiDB";
-        tenant = tenantService.getTenant(contractId, tenantId).getTenantInfo().properties.displayName;
+        tenant = String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
+    }
+
+    public DocumentDirectory constructVisiDBDLInstaller(String visiDBName){
+        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
+        confDir.makePathsLocal();
+        // modify the default config
+        DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
+        node = confDir.get(new Path("/VisiDB"));
+        node.getChild("VisiDBName").getDocument().setData(visiDBName);
+        node = confDir.get(new Path("/VisiDB"));
+        node.getChild("ServerName").getDocument().setData(visiDBServerName);
+        node = confDir.get(new Path("/DL"));
+        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
+        return confDir;
     }
 
     @Test(groups = "deployment")
@@ -61,77 +73,33 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
 
-        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
-        confDir.makePathsLocal();
-
-        // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
-        node.getChild("CreateNewVisiDB").getDocument().setData(createNewVisiDB);
-        node = confDir.get(new Path("/VisiDB"));
-        node.getChild("VisiDBName").getDocument().setData(visiDBName);
-        node = confDir.get(new Path("/VisiDB"));
-        node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node = confDir.get(new Path("/DL"));
-        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-
-        bootstrap(confDir);
-
-        int numOfRetries = 10;
-        BootstrapState state;
-        do {
-            state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "VisiDBDL");
-            numOfRetries--;
-            Thread.sleep(1000L);
-        } while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
-
-        if (!state.state.equals(BootstrapState.State.OK)) {
-            System.out.println(state.errorMessage);
-        }
+        bootstrap(constructVisiDBDLInstaller(visiDBName));
+        BootstrapState state = waitForSuccess(getServiceName());
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
         response = deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);
-
     }
 
     @Test(groups = "functional")
-    public void testInstallationFunctional() throws InterruptedException {
-
-        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
-        confDir.makePathsLocal();
-
-        // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
-        node.getChild("CreateNewVisiDB").getDocument().setData(createNewVisiDB);
-        node = confDir.get(new Path("/VisiDB"));
-        node.getChild("VisiDBName").getDocument().setData(visiDBName);
-        node = confDir.get(new Path("/VisiDB"));
-        node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node = confDir.get(new Path("/DL"));
-        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-
-        // send to bootstrapper message queue
-        bootstrap(confDir);
+    public void testInstallationFunctional() throws InterruptedException, ClientProtocolException, IOException {
+        DLRestResult response = deleteVisiDBDLTenant(tenant);
+        Assert.assertEquals(response.getStatus(), 5);
+        bootstrap(constructVisiDBDLInstaller(visiDBName));
 
         // wait a while, then test your installation
-        int numOfRetries = 10;
-        BootstrapState.State state;
-        do {
-            state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "VisiDBDL").state;
-            numOfRetries--;
-            Thread.sleep(1000L);
-        } while (state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
+        BootstrapState state = waitForSuccess(getServiceName());
+        Assert.assertEquals(state.state, BootstrapState.State.OK);
 
-        Assert.assertEquals(state, BootstrapState.State.OK);
-
-        SerializableDocumentDirectory sDir = tenantService.getTenantServiceConfig(contractId, tenantId, "VisiDBDL");
+        SerializableDocumentDirectory sDir = tenantService.getTenantServiceConfig(contractId, tenantId, getServiceName());
 
         for (SerializableDocumentDirectory.Node sNode : sDir.getNodes()) {
             if (sNode.getNode().equals("TenantAlias")) {
                 Assert.assertEquals(sNode.getData(), "");
             }
         }
-
+        response = deleteVisiDBDLTenant(tenant);
+        Assert.assertEquals(response.getStatus(), 3);
     }
 
     public DLRestResult deleteVisiDBDLTenant(String tenant) throws ClientProtocolException, IOException {
@@ -144,7 +112,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     }
 
     @Override
-    protected String getServiceName() {
+    public String getServiceName() {
         return VisiDBDLComponent.componentName;
     }
 

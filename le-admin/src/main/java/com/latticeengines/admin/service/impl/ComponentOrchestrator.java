@@ -43,6 +43,10 @@ public class ComponentOrchestrator {
         }
     }
 
+    public List<LatticeComponent> getComponents(){
+        return components;
+    }
+
     public void registerAll() {
         Set<String> registered = batonService.getRegisteredServices();
         componentMap = new HashMap<>();

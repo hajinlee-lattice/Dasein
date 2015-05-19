@@ -12,6 +12,7 @@ import com.latticeengines.admin.configurationschema.ConfigurationSchemaTestNGBas
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.security.exposed.Constants;
 
 import junit.framework.Assert;
@@ -85,4 +86,19 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminFunctionalTe
     protected abstract String getExpectedJsonFile();
 
     protected String getPlsHostPort() { return plsHostPort; }
+
+    public BootstrapState waitForSuccess(String componentName) throws InterruptedException{
+        int numOfRetries = 10;
+        BootstrapState state;
+        do {
+            state = batonService.getTenantServiceBootstrapState(contractId, tenantId, componentName);
+            numOfRetries--;
+            Thread.sleep(1000L);
+        } while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
+
+        if (!state.state.equals(BootstrapState.State.OK)) {
+            System.out.println(state.errorMessage);
+        }
+        return state;
+    }
 }

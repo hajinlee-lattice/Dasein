@@ -89,7 +89,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @Value("${admin.test.dl.url}")
     private String dlUrl;
 
-    @Value("${admin.test.vbservername}")
+    @Value("${admin.test.vdbservername}")
     private String visiDBServerName;
 
     @Value("${admin.test.dl.user}")
@@ -169,16 +169,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         verifyZKState(0, VisiDBDLComponent.componentName);
     }
 
-    @Test(groups = "deployment")
-    public void verifyVDBTplStateInMainTestTenant() throws Exception {
-        verifyZKState(0, VisiDBTemplateComponent.componentName);
-    }
-
-    @Test(groups = "deployment")
-    public void verifyDLTplStateInMainTestTenant() throws Exception {
-        verifyZKState(0, DLTemplateComponent.componentName);
-    }
-
     //==================================================
     // verify tenant truly exists
     //==================================================
@@ -196,16 +186,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = "verifyVisiDBDLStateInMainTestTenant")
     public void verifyVisiDBDLMainTestTenantExists() throws Exception {
         verifyVisiDBDLTenantExists(0);
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "verifyVDBTplStateInMainTestTenant")
-    public void verifyVDBTplMainTestTenantExists() throws Exception {
-        verifyVDBTplTenantExists(0);
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "verifyDLTplStateInMainTestTenant")
-    public void verifyDLTplMainTestTenantExists() throws Exception {
-        verifyDLTplTenantExists(0);
     }
 
     //==================================================
@@ -302,15 +282,11 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
         // VisiDBDL
-        String createNewVisiDB = "true";
         String visiDBName = "TestVisiDB";
-
         DocumentDirectory confDir =
                 serviceService.getDefaultServiceConfig(VisiDBDLComponent.componentName).getDocumentDirectory();
         confDir.makePathsLocal();
         DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
-        node.getChild("CreateNewVisiDB").getDocument().setData(createNewVisiDB);
-        node = confDir.get(new Path("/VisiDB"));
         node.getChild("VisiDBName").getDocument().setData(visiDBName);
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
@@ -526,7 +502,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private void deleteVisiDBDLTenants() {
         for (String tenantId: tenantIds) {
             try {
-                String tenant = tenantService.getTenant(contractId, tenantId).getTenantInfo().properties.displayName;
+                String tenant =  String.format("%s.%s.%s",
+                        contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
                 visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
             } catch (Exception e) {
                 // ignore

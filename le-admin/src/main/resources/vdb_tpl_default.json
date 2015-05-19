@@ -1,8 +1,5 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "Tenant", "Data": "haitao_test_tenant" },
-    { "Node": "VisiDBStructureFilePath", "Data":""},
-    { "Node": "DLStructureFilePath", "Data":""}
   ]
 }

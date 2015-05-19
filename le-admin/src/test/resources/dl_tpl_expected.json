@@ -1,25 +1,3 @@
 {
-  "RootPath": "/",
-  "Nodes": [
-    { "Node": "Config1", "Data": "1", "Metadata": {"Type":"options","Options":["1","2","3"]}},
-    { "Node": "Config2", "Data": "{\"property1\":\"value1\",\"property2\":\"value2\"}", "Metadata": {"Type": "object"}},
-    { "Node": "Config3", "Data": "string"},
-    { "Node": "Config4", "Data": "true", "Metadata": {"Type": "boolean"}},
-    { "Node": "Config5",
-      "Children" : [
-        { "Node" : "Config5.1", "Data": "value5.1"},
-        {
-          "Node": "Config5.2",
-          "Data": "http://bodcdevvint207.dev.lattice.local:8081",
-          "Metadata": {
-            "Type": "options",
-            "Options": [
-              "http://bodcdevvint207.dev.lattice.local:8081",
-              "https://bodcdevvint187.dev.lattice.local:8080"
-            ]
-          }
-        }
-      ]
-    }
-  ]
+  "RootPath": "/"
 }

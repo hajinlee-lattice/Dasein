@@ -63,7 +63,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String ownerEmail = getChild(configDir, "DL", "OwnerEmail").getDocument().getData();
 
         if (StringUtils.isEmpty(tenantAlias)) {
-            tenantAlias = tenant;
+            tenantAlias = dmDeployment;
         }
         int permStoreOpt = MASTER;
         if (permanentStoreOption.toLowerCase().equals("master")) {

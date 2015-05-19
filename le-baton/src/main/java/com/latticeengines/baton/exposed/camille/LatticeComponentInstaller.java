@@ -92,11 +92,6 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
         return node.getChildren();
     }
 
-    public JsonNode convertToJsonNode(String response) throws JsonProcessingException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readTree(response);
-    }
-
     public List<BasicNameValuePair> getHeaders(){
         List<BasicNameValuePair> headers = new ArrayList<>();
         headers.add(new BasicNameValuePair("MagicAuthentication", "Security through obscurity!"));
