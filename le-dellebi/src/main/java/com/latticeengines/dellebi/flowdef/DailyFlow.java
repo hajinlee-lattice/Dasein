@@ -15,10 +15,8 @@ import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
 import cascading.flow.planner.PlannerException;
 import cascading.property.AppProps;
 
-import com.latticeengines.dellebi.util.FileSystemOperations;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
-import com.latticeengines.dellebi.util.NormalFileSystemOperations;
 
 public class DailyFlow {
 
@@ -26,6 +24,8 @@ public class DailyFlow {
 
     @Value("${dellebi.datahadoopinpath}")
     private String dataHadoopInPath;
+    @Value("${dellebi.datahadooprootpath}")
+    private String dataHadoopRootPath;
 
     @Value("${dellebi.ordersummary}")
     private String orderSummary;
@@ -46,9 +46,6 @@ public class DailyFlow {
 
     @Autowired
     private HadoopFileSystemOperations hadoopfilesystemoperations;
-
-    @Autowired
-    private NormalFileSystemOperations normalfilesystemoperations;
 
     @Autowired
     private MailSender mailSender;
@@ -72,41 +69,38 @@ public class DailyFlow {
 
         log.info("Start to process income files.");
 
-        FileSystemOperations fileSystem = null;
-
-        if (System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
-            fileSystem = normalfilesystemoperations;
-        } else {
-            fileSystem = hadoopfilesystemoperations;
-        }
-
         try {
             for (Iterator<FlowDef> flow = flowList.iterator(); flow.hasNext();) {
                 FlowDef item = flow.next();
 
                 if ("OrderSumDailyFlow".equals(item.getName())
-                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + orderSummary) != 0)) {
+                        && (hadoopfilesystemoperations.listFileNumber(dataHadoopInPath + "/" + orderSummary) != 0)) {
                     flowConnector.connect(item).complete();
                     // Remove .txt file after cascading processes data.
-                    fileSystem.cleanFolder(dataHadoopInPath + "/" + orderSummary);
+                    hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + orderSummary);
                 } else if ("OrderDetailDailyFlow".equals(item.getName())
-                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + orderDetail) != 0)) {
+                        && (hadoopfilesystemoperations.listFileNumber(dataHadoopInPath + "/" + orderDetail) != 0)) {
                     flowConnector.connect(item).complete();
-                    fileSystem.cleanFolder(dataHadoopInPath + "/" + orderDetail);
+                    hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + orderDetail);
                 } else if ("ShipDailyFlow".equals(item.getName())
-                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + shipToAddrLattice) != 0)) {
+                        && (hadoopfilesystemoperations.listFileNumber(dataHadoopInPath + "/" + shipToAddrLattice) != 0)) {
                     flowConnector.connect(item).complete();
-                    fileSystem.cleanFolder(dataHadoopInPath + "/" + shipToAddrLattice);
+                    hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + shipToAddrLattice);
                 } else if ("WarrantyDailyFlow".equals(item.getName())
-                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + warrantyGlobal) != 0)) {
+                        && (hadoopfilesystemoperations.listFileNumber(dataHadoopInPath + "/" + warrantyGlobal) != 0)) {
                     flowConnector.connect(item).complete();
-                    fileSystem.cleanFolder(dataHadoopInPath + "/" + warrantyGlobal);
+                    hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + warrantyGlobal);
                 } else if ("QuoteTransDailyFlow".equals(item.getName())
-                        && (fileSystem.listFileNumber(dataHadoopInPath + "/" + quoteTrans) != 0)) {
+                        && hadoopfilesystemoperations.ifReadyToProcessData() == true) {
                     log.info("Cascading starts to process quote files!");
                     flowConnector.connect(item).complete();
                     log.info("Cascading finished to process quote files!");
-                    fileSystem.cleanFolder(dataHadoopInPath + "/" + quoteTrans);
+                    if (hadoopfilesystemoperations.isExistWithReturnValue(dataHadoopInPath + "/" + quoteTrans + "/_SUCCESS") == true){
+                    	hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + quoteTrans);
+                    }else{
+                    	log.info("Cascading is processing data.");
+                    	returnCode = 3;
+                    }
                 }
             }
         } catch (PlannerException e) {
