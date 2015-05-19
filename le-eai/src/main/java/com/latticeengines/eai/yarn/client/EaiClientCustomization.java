@@ -76,41 +76,4 @@ public class EaiClientCustomization extends DefaultYarnClientCustomization {
         return hdfsEntries;
     }
 
-//    @Override
-//    public void validate(Properties appMasterProperties, Properties containerProperties) {
-//        String metadata = containerProperties.getProperty(ContainerProperty.METADATA.name());
-//        JSONParser parser = new JSONParser();
-//        JSONArray objArr = null;
-//        try {
-//            objArr = (JSONArray) parser.parse(metadata);
-//        } catch (ParseException e) {
-//            log.error("Cannot create JSONArray Object from the metadata file");
-//            log.error(e.getMessage());
-//        }
-//        List<Table> tables = new ArrayList<>();
-//        for (Object obj : objArr.toArray()) {
-//            tables.add(JsonUtils.deserialize(obj.toString(), Table.class));
-//        }
-//
-//        for (Table table : tables) {
-//            String name = table.getName();
-//            if (StringUtils.isEmpty(name)) {
-//                throw new LedpException(LedpCode.LEDP_10006);
-//            }
-//            List<Attribute> attributes = table.getAttributes();
-//            if (attributes == null || attributes.size() == 0) {
-//                throw new LedpException(LedpCode.LEDP_17000);
-//            }
-//            for (Attribute attribute : attributes) {
-//                if (StringUtils.isEmpty(attribute.getName())) {
-//                    throw new LedpException(LedpCode.LEDP_10006);
-//                }
-//            }
-//        }
-//
-//        String targetPath = containerProperties.getProperty(EaiContainerProperty.TARGET_PATH.name());
-//        if (StringUtils.isEmpty(targetPath)) {
-//            throw new LedpException(LedpCode.LEDP_10003);
-//        }
-//    }
 }
