@@ -129,7 +129,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      *
      * @throws Exception
      */
-    @AfterClass(groups = "deployment", alwaysRun = true)
+    @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         for (String tenantId: tenantIds) {
             try {
@@ -219,6 +219,16 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      * ==================================================
      */
 
+    // This is a work round, because @AfterClass is not called if tests failed
+    @Test(groups = "deployment")
+    public void deleteTenants() throws Exception { tearDown(); }
+
+    /**
+     * ==================================================
+     * BEGIN: Tenants creation methods
+     * ==================================================
+     */
+
     private void provisionEndToEndTestTenants() {
         provisionEndToEndTestTenant1();
 //        try {
@@ -229,11 +239,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 //        provisionEndToEndTestTenant2();
     }
 
-    /**
-     * ==================================================
-     * BEGIN: Tenants creation methods
-     * ==================================================
-     */
     /**
      * This is the main testing tenant
      */
