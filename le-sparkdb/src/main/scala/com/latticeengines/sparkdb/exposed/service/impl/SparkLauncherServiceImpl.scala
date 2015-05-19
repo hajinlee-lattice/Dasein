@@ -23,13 +23,13 @@ class SparkLauncherServiceImpl extends SparkLauncherService {
         "--name", appName, //
         "--queue", queue, //
         "--driver-memory", "1024m", //
-        "--addJars", getListOfDependencyJars(s"$ws/ledp/le-sparkdb/target/dependency"), //
-        "--jar", s"file:$ws/ledp/le-sparkdb/target/le-sparkdb-1.0.3-SNAPSHOT.jar")
+        //"--addJars", getListOfDependencyJars(s"$ws/ledp/le-sparkdb/target/dependency"), //
+        "--jar", s"file:$ws/ledp/le-sparkdb/target/le-sparkdb-1.0.32-SNAPSHOT-shaded.jar")
     System.setProperty("SPARK_YARN_MODE", "true")
     System.setProperty("spark.driver.extraJavaOptions", "-XX:PermSize=128m -XX:MaxPermSize=128m -Dsun.io.serialization.extendedDebugInfo=true")
     val sparkConf = new SparkConf()
     val args = new ClientArguments(params, sparkConf)
-    new Client(args, conf, sparkConf).runApp()
+    new Client(args, conf, sparkConf).submitApplication()
   }
   
   private def getListOfDependencyJars(baseDir: String): String = {
