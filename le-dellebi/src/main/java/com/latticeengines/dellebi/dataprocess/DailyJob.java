@@ -4,11 +4,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.DisallowConcurrentExecution;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.util.SqoopDataService;
 
+@DisallowConcurrentExecution
 public class DailyJob extends QuartzJobBean {
 
     private DailyFlow dailyFlow;
