@@ -65,7 +65,7 @@ public class AvroRead {
         Schema contactSchema = AvroUtils.getSchema(new Configuration(), new Path(contact));
 
         Properties properties = new Properties();
-        properties.put("mapred.job.queue.name", LedpQueueAssigner.getMRQueueNameForSubmission());
+        properties.put("mapred.job.queue.name", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         AppProps.setApplicationJarClass(properties, AvroRead.class);
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
         //FlowConnector flowConnector = new LocalFlowConnector();
