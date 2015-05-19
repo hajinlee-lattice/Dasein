@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
     def testPerformanceModelingMKTO_60K(self):        
         pt.PerformanceModelingTest("testPerformanceModelingMKTO_60K",60000)
         
-    def testPerformanceModelingMKTO_6400K(self):        
+    def testPerformanceModelingMKTO_640K(self):        
         pt.PerformanceModelingTest("testPerformanceModelingMKTO_640K",640000)
         
     def testPerformanceModelingMKTO_1000K(self):        
