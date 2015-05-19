@@ -41,7 +41,7 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     public RestTemplate plsRestTemplate = new RestTemplate();
 
-    @AfterClass(groups = {"deployment", "functional"}, alwaysRun = true)
+    @AfterClass(groups = {"deployment", "functional"})
     public void tearDown() throws Exception {
         super.tearDown();
         String PLSTenantId = String.format("%s.%s.%s",
@@ -131,15 +131,9 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     }
     
     
-    @SuppressWarnings("unchecked")
-	public void deletePLSTestTenant(String tenantId) {
+    public void deletePLSTestTenant(String tenantId) {
         try {
-            List<Tenant> tenants = magicRestTemplate.getForObject(getPlsHostPort() + "/pls/admin/tenants", List.class);
-            for (Tenant tenant: tenants) {
-                if (tenant.getId().equals(tenantId)) return;
-            }
-            magicRestTemplate.delete(getPlsHostPort()
-                    + String.format("/pls/admin/tenants/%s", tenantId));
+            magicRestTemplate.delete(getPlsHostPort() + String.format("/pls/admin/tenants/%s", tenantId));
         } catch (Exception e) {
             // ignore
         }
