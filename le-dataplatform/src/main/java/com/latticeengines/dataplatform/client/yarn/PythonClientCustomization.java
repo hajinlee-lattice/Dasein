@@ -88,57 +88,6 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         return copyEntries;
     }
 
-    /**
-    @Override
-    public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
-        Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = super.getHdfsEntries(containerProperties);
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                "/app/dataplatform/scripts/*", //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.ARCHIVE, //
-                LocalResourceVisibility.PUBLIC, //
-                "/app/dataplatform/scripts/leframework.tar.gz", //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                "/datascientist/modelpredictorextraction.py", //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                containerProperties.getProperty(PythonContainerProperty.TRAINING.name()), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                containerProperties.getProperty(PythonContainerProperty.TEST.name()), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                containerProperties.getProperty(PythonContainerProperty.SCHEMA.name()), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                containerProperties.getProperty(PythonContainerProperty.DATAPROFILE.name()), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                containerProperties.getProperty(PythonContainerProperty.CONFIGMETADATA.name()), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                containerProperties.getProperty(PythonContainerProperty.PYTHONSCRIPT.name()), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                containerProperties.getProperty(PythonContainerProperty.PYTHONPIPELINESCRIPT.name()), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.ARCHIVE, //
-                LocalResourceVisibility.PUBLIC, //
-                containerProperties.getProperty(PythonContainerProperty.PYTHONPIPELINELIBFQDN.name()), //
-                false));
-        return hdfsEntries;
-    }**/
-
     @Override
     public void validate(Properties appMasterProperties, Properties containerProperties) {
         String metadata = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
@@ -189,15 +138,5 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             }
         }
     }
-
-    /**
-    @Override
-    public Map<String, String> setEnvironment(Map<String, String> environment, Properties containerPropertie) {
-        environment.put("SHDP_HD_FSWEB", webHdfs);
-        environment.put("PYTHONIOENCODING", "UTF-8");
-        environment.put("PYTHONPATH",
-                ".:leframework.tar.gz:" + containerPropertie.get(PythonContainerProperty.PYTHONPIPELINELIB.name()));
-        return environment;
-    }**/
 
 }
