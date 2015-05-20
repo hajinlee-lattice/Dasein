@@ -49,7 +49,7 @@ class AssemblyServiceImplTestNG extends SparkDbFunctionalTestNGBase {
 
     val resultRdd = sqc.parquetFile("/tmp/result/part-r-00000.snappy.parquet")
 
-    resultRdd.registerAsTable("Result")
+    resultRdd.registerTempTable("Result")
     
     val count = sqc.sql("SELECT * FROM Result").collect().count(p=>true)
     
