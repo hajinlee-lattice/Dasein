@@ -115,7 +115,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.positiveEventFailThreshold = builder.positiveEventFailThreshold;
         this.positiveEventWarnThreshold = builder.positiveEventWarnThreshold;
         this.metadataService = builder.metadataService;
-        
+
         assert(modelCommand != null);
         assert(yarnConfiguration != null);
         assert(modelingJobService != null);
@@ -136,7 +136,7 @@ public class ModelCommandCallable implements Callable<Long> {
         assert(positiveEventFailThreshold != -1);
         assert(positiveEventWarnThreshold != -1);
         assert(metadataService != null);
-        
+
     }
 
     @Override
@@ -208,7 +208,9 @@ public class ModelCommandCallable implements Callable<Long> {
                     modelCommand.getEventTable());
             modelCommandLogService.log(modelCommand, "Data Size: " + readableFileSize(dataSize) + " Row count: "
                     + rowSize + " Column count: " + columnSize);
-        } else { // modelCommand IN_PROGRESS
+        } else if (modelCommand.getModelCommandStep().equals(ModelCommandStep.RETRIEVE_METADATA)) {
+            // Still in progress retrieving metadata, do nothing.
+        } else { // modelCommand is in a yarn step and is IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
                     modelCommand.getModelCommandStep());
             int successCount = 0;
@@ -233,8 +235,8 @@ public class ModelCommandCallable implements Callable<Long> {
                 }
             }
 
-            if (successCount == commandStates.size()) { // All jobs succeeded,
-                                                        // move on to next step
+            if (successCount > 0 && successCount == commandStates.size()) {
+                // At least one and all jobs succeeded, move on to next step.
                 handleAllJobsSucceeded();
             } else if (jobFailed) {
                 handleJobFailed(failedYarnApplicationIds);
@@ -423,10 +425,10 @@ public class ModelCommandCallable implements Callable<Long> {
         }
 
     }
-    
+
 
     public static class Builder {
-        
+
         ModelCommand modelCommand;
         Configuration yarnConfiguration;
         ModelingJobService modelingJobService;
@@ -447,105 +449,105 @@ public class ModelCommandCallable implements Callable<Long> {
         int positiveEventFailThreshold;
         int positiveEventWarnThreshold;
         MetadataService metadataService;
-        
+
         public Builder() {
         }
-        
+
         public Builder modelCommand(ModelCommand modelCommand) {
             this.modelCommand = modelCommand;
             return this;
         }
-        
+
         public Builder yarnConfiguration(Configuration yarnConfiguration) {
             this.yarnConfiguration = yarnConfiguration;
             return this;
         }
-        
+
         public Builder modelingJobService(ModelingJobService modelingJobService) {
             this.modelingJobService = modelingJobService;
             return this;
         }
-        
+
         public Builder modelCommandEntityMgr(ModelCommandEntityMgr modelCommandEntityMgr) {
             this.modelCommandEntityMgr = modelCommandEntityMgr;
             return this;
         }
-        
+
         public Builder modelCommandStateEntityMgr(ModelCommandStateEntityMgr modelCommandStateEntityMgr) {
             this.modelCommandStateEntityMgr = modelCommandStateEntityMgr;
             return this;
         }
-        
+
         public Builder modelStepYarnProcessor(ModelStepYarnProcessor modelStepYarnProcessor) {
             this.modelStepYarnProcessor = modelStepYarnProcessor;
             return this;
         }
-        
+
         public Builder modelCommandLogService(ModelCommandLogService modelCommandLogService) {
             this.modelCommandLogService = modelCommandLogService;
             return this;
         }
-        
+
         public Builder modelCommandResultEntityMgr(ModelCommandResultEntityMgr modelCommandResultEntityMgr) {
             this.modelCommandResultEntityMgr = modelCommandResultEntityMgr;
             return this;
         }
-        
+
         public Builder modelStepFinishProcessor(ModelStepProcessor modelStepFinishProcessor) {
             this.modelStepFinishProcessor = modelStepFinishProcessor;
             return this;
         }
-        
+
         public Builder modelStepOutputResultsProcessor(ModelStepProcessor modelStepOutputResultsProcessor) {
             this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
             return this;
         }
-        
+
         public Builder modelStepRetrieveMetadataProcessor(ModelStepProcessor modelStepRetrieveMetadataProcessor) {
             this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
             return this;
         }
-        
+
         public Builder debugProcessorImpl(DebugProcessorImpl debugProcessorImpl) {
             this.debugProcessorImpl = debugProcessorImpl;
             return this;
         }
-        
+
         public Builder alertService(AlertService alertService) {
             this.alertService = alertService;
             return this;
         }
-        
+
         public Builder resourceManagerWebAppAddress(String resourceManagerWebAppAddress) {
             this.resourceManagerWebAppAddress = resourceManagerWebAppAddress;
             return this;
         }
-        
+
         public Builder appTimeLineWebAppAddress(String appTimeLineWebAppAddress) {
             this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
             return this;
         }
-        
+
         public Builder rowFailThreshold(int rowFailThreshold) {
             this.rowFailThreshold = rowFailThreshold;
             return this;
         }
-        
+
         public Builder rowWarnThreshold(int rowWarnThreshold) {
             this.rowWarnThreshold = rowWarnThreshold;
             return this;
         }
-        
+
         public Builder positiveEventFailThreshold(int positiveEventFailThreshold) {
             this.positiveEventFailThreshold = positiveEventFailThreshold;
             return this;
         }
-        
+
         public Builder positiveEventWarnThreshold(int positiveEventWarnThreshold) {
             this.positiveEventWarnThreshold = positiveEventWarnThreshold;
             return this;
         }
-        
+
         public Builder metadataService(MetadataService metadataService) {
             this.metadataService = metadataService;
             return this;
