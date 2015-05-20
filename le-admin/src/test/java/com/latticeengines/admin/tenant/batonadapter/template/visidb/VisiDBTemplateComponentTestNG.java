@@ -83,9 +83,12 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
 
         installVisiDBTemplate();
-        BootstrapState state = waitForSuccess(getServiceName());
+        // verify parent component
+        BootstrapState state = waitForSuccess(VisiDBTemplateComponent.componentName);
+        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
+        state = waitForSuccess(getServiceName());
+        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
         response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
