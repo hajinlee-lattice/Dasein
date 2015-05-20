@@ -90,7 +90,7 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
 
         state = waitForSuccess(getServiceName());
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
-        response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
+        response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
 

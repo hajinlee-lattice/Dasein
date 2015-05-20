@@ -102,7 +102,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
 //        Assert.assertEquals(new File(permStore).list().length, 1);
 //        Assert.assertEquals(new File(dataStore + "/" + tenant).list().length, 3);
-        response = deleteVisiDBDLTenantWithRetry(tenant);
+        response = deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
 

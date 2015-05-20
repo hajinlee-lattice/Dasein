@@ -17,7 +17,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
-import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
 import com.latticeengines.domain.exposed.admin.DLRestResult;
@@ -92,7 +91,7 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
         state = waitForSuccess(getServiceName());
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
-        response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
+        response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
 
