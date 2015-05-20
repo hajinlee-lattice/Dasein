@@ -8,11 +8,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -23,6 +23,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import static java.nio.file.StandardCopyOption.*;
+
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 
 public class ScoringMapperTransformUtil {
@@ -31,13 +34,16 @@ public class ScoringMapperTransformUtil {
 	
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
-    private static final String LEAD_RECORD_MODEL_ID_COLUMN = "ModelingID";
-    private static final String LEAD_RECORD_REQUEST_ID_COLUMN = "Request_ID";
+    private static final String LEAD_RECORD_MODEL_ID_COLUMN = "model_ID";
+    private static final String LEAD_RECORD_REQUEST_ID_COLUMN = "request_ID";
     private static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
     private static final String MODEL = "Model";
     private static final String MODEL_COMPRESSED_SUPPORT_Files = "CompressedSupportFiles";
     private static final String MODEL_SCRIPT = "Script";
     private static final String SCORING_SCRIPT_NAME = "scoringengine.py";
+    
+    // debug for the e2e
+    private static final String absolutePath = "/Users/ygao/test/e2e/";
     
     public static void parseModelFiles(HashMap<String, JSONObject> models, Path path) {
 		try {
@@ -45,7 +51,8 @@ public class ScoringMapperTransformUtil {
 			reader = new FileReader(path.toString());
 	        JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-            // use the GUID to identify a model
+            // use the GUID to identify a model.  It is a contact that when mapper localizes the model, it changes its name to be the 
+            // modelGUID
             String modelID = path.getName();
             models.put(modelID, jsonObject);
             decodeSupportedFiles(modelID, (JSONObject)jsonObject.get(MODEL));
@@ -65,10 +72,9 @@ public class ScoringMapperTransformUtil {
     
     public static JSONObject parseDatatypeFile(Path path) {
     	JSONObject datatypeObject = null;
-    	String fileName = path.getName();
     	String content = null;
 		try {
-			content = FileUtils.readFileToString(new File(fileName));
+			content = FileUtils.readFileToString(new File(path.toString()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -83,10 +89,19 @@ public class ScoringMapperTransformUtil {
     
 	public static void writeScoringScript(String modelID, JSONObject modelObject) {
 		String scriptContent = (String) modelObject.get(MODEL_SCRIPT);
+		
+		// debug for the e2e
 		String fileName = modelID + SCORING_SCRIPT_NAME;
+		//String fileName = absolutePath + modelID + SCORING_SCRIPT_NAME;
+		log.info("fileName is " + fileName);
 		try {
 			File file = new File(fileName);
 			FileUtils.writeStringToFile(file, scriptContent);
+			
+			File dest = new File(absolutePath+fileName);
+			log.info("Trying to write scoring script file to e2e folder, and the fileName is " + fileName);
+			Files.copy(file.toPath(), dest.toPath(), REPLACE_EXISTING);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -96,7 +111,11 @@ public class ScoringMapperTransformUtil {
 		JSONArray compressedSupportedFiles = (JSONArray) modelObject.get(MODEL_COMPRESSED_SUPPORT_Files);
 		for (int i = 0; i < compressedSupportedFiles.size(); i++) {
 			JSONObject compressedFile = (JSONObject) compressedSupportedFiles.get(i);
+
+			// debug for the e2e
 			String compressedFileName = modelID + compressedFile.get("Key");
+			//String compressedFileName = absolutePath + modelID + compressedFile.get("Key");
+			log.info("compressedFileName is " + compressedFileName);
 			decodeBase64ThenDecompressToFile((String)compressedFile.get("Value"), compressedFileName);
 		}
 		
@@ -112,6 +131,13 @@ public class ScoringMapperTransformUtil {
 			IOUtils.copy(gzis, stream);
 	        gzis.close();
 	        stream.close();
+			// debug for the e2e
+			File dest = new File(absolutePath+fileName);
+			File file = new File(fileName);
+			log.info("Trying to decompress file to e2e folder, and the fileName is " + fileName);
+			log.info("Trying to decompress file to e2e folder, and the dest is " + dest);
+			Files.copy(file.toPath(), dest.toPath(), REPLACE_EXISTING);
+	        
 	    } catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -147,6 +173,11 @@ public class ScoringMapperTransformUtil {
 		}
     	String modelID = identifyModelID(leadJsonObject, models, modelIdMap);
     	log.info("after identifying, the modelID is " + modelID);
+    	
+    	// debug for the e2e
+    	String leadID = (String)leadJsonObject.get("LeadID");
+    	//if (!leadID.equals("1006549")) return;
+    	
     	String formattedRecord = transformToJsonString(leadJsonObject, models, leadNumber, requestID, modelID);
     	if (leadInputRecordMap.containsKey(modelID)) {
     		leadInputRecordMap.get(modelID).add(formattedRecord);
@@ -227,11 +258,20 @@ public class ScoringMapperTransformUtil {
 			String key = (String) obj.get("Name");
 			columnObj.put("Key", key);
 			type = (Long) obj.get("ValueType") == 0 ? "Float" : "String";
-			String typeAndValue = type + "|\'" + leadJsonObject.get(key) + "\'";
+			// should treat sqoop null as empty
+			String typeAndValue = "";
+			if (leadJsonObject.get(key) != null) {
+				String value = leadJsonObject.get(key).toString();
+				typeAndValue = String.format("%s|\'%s\'", type, value);
+			} else {
+				typeAndValue = String.format("%s|", type);
+			}
 			serializedValueAndTypeObj.put(LEAD_SERIALIZE_TYPE_KEY, typeAndValue);		
 			jsonArray.add(columnObj);
 		}
 		formattedRecord = jsonObj.toString() + "\n";
+		// debug for the e2e
+		log.info("The formattedRecord is " + formattedRecord);
 		return formattedRecord;
     }
     
@@ -251,7 +291,9 @@ public class ScoringMapperTransformUtil {
     	int indexOfFile = 0;
     	int count = 0;
     	try {
-	    	String leadInputFileName = modelID + "-" + indexOfFile;
+			// debug for the e2e
+    		String leadInputFileName = modelID + "-" + indexOfFile;
+	    	//String leadInputFileName = absolutePath + modelID + "-" + indexOfFile;
 	    	log.info("Filename is " + leadInputFileName);
 			File file = new File(leadInputFileName);
 			BufferedWriter bw = null;
@@ -264,7 +306,12 @@ public class ScoringMapperTransformUtil {
 	    			bw.close();
 	    			count = 0;
 	    			indexOfFile++;
+	    			// debug for the e2e
+	    			File dest = new File(absolutePath+leadInputFileName);
+	    			Files.copy(file.toPath(), dest.toPath(), REPLACE_EXISTING);
+	    			
 	    			leadInputFileName = modelID + "-" + indexOfFile;
+	    			//leadInputFileName = absolutePath + modelID + "-" + indexOfFile;
 	    	    	log.info("Filename is " + leadInputFileName);
 	    			file = new File(leadInputFileName);
 	    			bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
@@ -273,10 +320,38 @@ public class ScoringMapperTransformUtil {
 	    	if (count != 0) {
 				bw.flush();
 				bw.close();
+				// debug for the e2e
+    			File dest = new File(absolutePath+leadInputFileName);
+    			Files.copy(file.toPath(), dest.toPath(), REPLACE_EXISTING);
 	    	}
     	} catch (IOException e) {
 			e.printStackTrace();
 		}
     }
+    
+	public static void main(String[] args) throws Exception {
+		String type = "Float";
+		String value = "123.00";
+		
+		String typeAndValue = type + "|\'" + value + "\'";
+		String trpeAndValue2 = String.format("%s|\'%s\'", type, value);
+		if (typeAndValue.equals(trpeAndValue2)) {
+			System.out.println("jaja");
+		}
+		
+		
+//		HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
+//		ArrayList<String> records1 = new ArrayList<String>();
+//		records1.add("value11\n");
+//		records1.add("value12\n");
+//		records1.add("value13\n");
+//		leadInputRecordMap.put("model1", records1);
+//		ArrayList<String> records2 = new ArrayList<String>();
+//		records2.add("value21\n");
+//		records2.add("value22\n");
+//		records2.add("value23\n");
+//		leadInputRecordMap.put("model2", records2);
+//		writeToLeadInputFiles(leadInputRecordMap, 2);
+	}
 	
 }

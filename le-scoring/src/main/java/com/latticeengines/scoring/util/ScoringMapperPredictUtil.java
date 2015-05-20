@@ -281,7 +281,7 @@ public class ScoringMapperPredictUtil {
     
 	public static void main(String[] args) throws Exception {
 
-		String hdfs = "/user/s-analytics/customers/Nutanix/scoring/TestLeadsTable/scores" + "/44c1d69a-88ad-4e3f-8710-d7c736c5d32a.avro";
+		String hdfs = "/user/s-analytics/customers/Nutanix/scoring/DLSimLeads_3caa9570ba534b098d14ec9d73d3b850/data" + "/part-m-00003.avro";
 		List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(hdfs));
 		for (GenericRecord ele : list) {
 			System.out.println(ele.toString());
