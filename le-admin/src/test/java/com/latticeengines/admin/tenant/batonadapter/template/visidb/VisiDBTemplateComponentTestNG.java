@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
 import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -84,7 +85,7 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
 
         installVisiDBTemplate();
         // verify parent component, for debugging purpose
-        BootstrapState state = waitForSuccess(VisiDBTemplateComponent.componentName);
+        BootstrapState state = waitForSuccess(VisiDBDLComponent.componentName);
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
         state = waitForSuccess(getServiceName());
