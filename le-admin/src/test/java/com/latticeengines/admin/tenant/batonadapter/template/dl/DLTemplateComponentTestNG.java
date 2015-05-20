@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
+import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
 import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -83,7 +84,11 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
 
         installDLTemplate();
-        BootstrapState state = waitForSuccess(getServiceName());
+        // verify parent component, for debugging purpose
+        BootstrapState state = waitForSuccess(VisiDBTemplateComponent.componentName);
+        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
+
+        state = waitForSuccess(getServiceName());
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
         response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
