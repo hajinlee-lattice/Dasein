@@ -17,7 +17,8 @@
     },
     { "Node": "DL", 
       "Children" : [
-        { "Node": "OwnerEmail", "Data": "richard.liu@lattice-engines.com" }
+        { "Node": "OwnerEmail", "Data": "richard.liu@lattice-engines.com" },
+        { "Node": "DataStorePath", "Data": "" }
       ]
     }
   ]

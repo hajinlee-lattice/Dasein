@@ -1,5 +1,6 @@
 package com.latticeengines.admin;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -94,11 +96,17 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @Value("${admin.test.dl.url}")
     private String dlUrl;
 
-    @Value("${admin.test.vdbservername}")
+    @Value("${admin.test.vdb.servername}")
     private String visiDBServerName;
+
+    @Value("${admin.test.vdb.permstore}")
+    private String permStore;
 
     @Value("${admin.test.dl.user}")
     private String ownerEmail;
+
+    @Value("${admin.test.dl.datastore}")
+    private String dataStore;
 
     /**
      * In setup, orchestrate 2 full tenants.
@@ -125,7 +133,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         // delete PLS tenant
         deletePLSTenants();
         deleteVisiDBDLTenants();
-
         provisionEndToEndTestTenants();
     }
 
@@ -275,6 +282,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
         // VisiDBDL
+        Assert.assertEquals(new File(permStore).list().length, 0);
+        Assert.assertEquals(new File(dataStore).list().length, 0);
         String visiDBName = "TestVisiDB";
         DocumentDirectory confDir =
                 serviceService.getDefaultServiceConfig(VisiDBDLComponent.componentName).getDocumentDirectory();
@@ -283,8 +292,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         node.getChild("VisiDBName").getDocument().setData(visiDBName);
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
+        node.getChild("PermanentStorePath").getDocument().setData(permStore);
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
+        node.getChild("DataStorePath").getDocument().setData(dataStore);
         SerializableDocumentDirectory vdbdlConfig = new SerializableDocumentDirectory(confDir);
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 
@@ -476,6 +487,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         if (vdbdlSkipped) return;
 
         final String tenantId = tenantIds[tenantIdx];
+        Assert.assertEquals(new File(permStore).list().length, 1);
+        Assert.assertEquals(new File(dataStore + "/" + tenantId).list().length, 3);
     }
 
     @SuppressWarnings("unused")
@@ -539,9 +552,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private void deleteVisiDBDLTenants() {
         for (String tenantId: tenantIds) {
             try {
-                String tenant =  String.format("%s.%s.%s",
-                        contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+                String tenant =  tenantId;
                 visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
+                FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
+                FileUtils.deleteDirectory(new File(dataStore + "/" + tenantId));
             } catch (Exception e) {
                 // ignore
             }

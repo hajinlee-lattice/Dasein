@@ -1,12 +1,16 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -18,7 +22,6 @@ import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -32,11 +35,17 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Value("${admin.test.dl.url}")
     private String dlUrl;
 
-    @Value("${admin.test.vdbservername}")
+    @Value("${admin.test.vdb.servername}")
     private String visiDBServerName;
+
+    @Value("${admin.test.vdb.permstore}")
+    private String permStore;
 
     @Value("${admin.test.dl.user}")
     private String ownerEmail;
+
+    @Value("${admin.test.dl.datastore}")
+    private String dataStore;
 
     private String tenant;
 
@@ -47,23 +56,34 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     public void setup() throws Exception {
         super.setup();
         visiDBName = "TestVisiDB";
-        tenant = String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        tenant = tenantId;
         SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
+        FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
+        FileUtils.deleteDirectory(new File(dataStore + "/" + tenant));
     }
 
-    public DocumentDirectory constructVisiDBDLInstaller(String visiDBName){
+    @AfterClass(groups = {"deployment", "functional"})
+    @Override
+    public void tearDown() throws Exception {
+        FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
+        FileUtils.deleteDirectory(new File(dataStore + "/" + tenant));
+        super.tearDown();
+    }
+
+    public DocumentDirectory constructVisiDBDLInstaller(String visiDBName) {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
         // modify the default config
         DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("VisiDBName").getDocument().setData(visiDBName);
-        node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
+        node.getChild("PermanentStorePath").getDocument().setData(permStore);
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
+        node.getChild("DataStorePath").getDocument().setData(dataStore);
         return confDir;
     }
 
@@ -73,10 +93,15 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
 
+        Assert.assertEquals(new File(permStore).list().length, 0);
+        Assert.assertEquals(new File(dataStore).list().length, 0);
+
         bootstrap(constructVisiDBDLInstaller(visiDBName));
         BootstrapState state = waitForSuccess(getServiceName());
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
+        Assert.assertEquals(new File(permStore).list().length, 1);
+        Assert.assertEquals(new File(dataStore + "/" + tenant).list().length, 3);
         response = deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
@@ -89,7 +114,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         BootstrapState state = waitForSuccess(getServiceName());
         Assert.assertEquals(state.state, BootstrapState.State.OK);
 
-        SerializableDocumentDirectory sDir = tenantService.getTenantServiceConfig(contractId, tenantId, getServiceName());
+        SerializableDocumentDirectory sDir = tenantService.getTenantServiceConfig(contractId, tenantId,
+                getServiceName());
 
         for (SerializableDocumentDirectory.Node sNode : sDir.getNodes()) {
             if (sNode.getNode().equals("TenantAlias")) {

@@ -51,7 +51,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         String contractExternalID = space.getContractId();
 
         TenantDocument tenantDoc = tenantService.getTenant(contractExternalID, dmDeployment);
-        String tenant = space.toString();
+        String tenant = dmDeployment;
         String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
         String templatePath = tenantDoc.getSpaceConfig().getTemplatePath();
         CRMTopology topology = tenantDoc.getSpaceConfig().getTopology();

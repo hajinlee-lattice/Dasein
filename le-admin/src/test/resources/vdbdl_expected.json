@@ -5,6 +5,10 @@
       "Node": "DL",
       "Children": [
         {
+          "Node": "DataStorePath",
+          "Data": ""
+        },
+        {
           "Node": "OwnerEmail",
           "Data": "richard.liu@lattice-engines.com"
         }
@@ -51,14 +55,7 @@
         },
         {
           "Node": "PermanentStorePath",
-          "Data": "",
-          "Metadata": {
-            "Type": "options",
-            "Options": [
-              "",
-              "\\\\prodstorage\\visidb\\PermStore\\"
-            ]
-          }
+          "Data": ""
         },
         {
           "Node": "ServerName",

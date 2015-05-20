@@ -45,7 +45,7 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
     public void setup() throws Exception {
         super.setup();
         visiDBName = "TestVisiDB";
-        tenant = String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        tenant = tenantId;
         SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
