@@ -1,6 +1,5 @@
 package com.latticeengines.admin;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -99,13 +97,13 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @Value("${admin.test.vdb.servername}")
     private String visiDBServerName;
 
-    @Value("${admin.test.vdb.permstore}")
+    @Value("${admin.vdb.permstore}")
     private String permStore;
 
     @Value("${admin.test.dl.user}")
     private String ownerEmail;
 
-    @Value("${admin.test.dl.datastore}")
+    @Value("${admin.dl.datastore}")
     private String dataStore;
 
     /**
@@ -550,10 +548,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private void deleteVisiDBDLTenants() {
         for (String tenantId: tenantIds) {
             try {
-                String tenant =  tenantId;
-                visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
-                FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
-                FileUtils.deleteDirectory(new File(dataStore + "/" + tenantId));
+                visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenantId);
+                // this cannot delete the files on web server
+//                FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
+//                FileUtils.deleteDirectory(new File(dataStore + "/" + tenantId));
             } catch (Exception e) {
                 // ignore
             }

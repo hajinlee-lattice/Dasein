@@ -37,13 +37,13 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Value("${admin.test.vdb.servername}")
     private String visiDBServerName;
 
-    @Value("${admin.test.vdb.permstore}")
+    @Value("${admin.vdb.permstore}")
     private String permStore;
 
     @Value("${admin.test.dl.user}")
     private String ownerEmail;
 
-    @Value("${admin.test.dl.datastore}")
+    @Value("${admin.dl.datastore}")
     private String dataStore;
 
     private String tenant;
