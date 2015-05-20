@@ -47,7 +47,7 @@ public class ScoringMapperPredictUtil {
 	private static final String PERCENTILE_BUCKETS_MAXIMUMSCORE = "MaximumScore";
     private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
 	
-	public static ArrayList<ModelEvaluationResult> evaluate(HashMap<String, JSONObject> models, HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, String> modelIdMap, String[] requestID, String outputPath, int threshold) {
+	public static ArrayList<ModelEvaluationResult> evaluate(HashMap<String, JSONObject> models, HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, String> modelIdMap, String outputPath, int threshold) {
 		ArrayList<ModelEvaluationResult> resultList= null;
 		// spawn python 
 		Set<String> modelIDs = models.keySet();
@@ -91,7 +91,7 @@ public class ScoringMapperPredictUtil {
 			e.printStackTrace();
 		}
 		
-		resultList = readScoreFiles(leadInputRecordMap, models, modelIdMap, requestID, outputPath, threshold);
+		resultList = readScoreFiles(leadInputRecordMap, models, modelIdMap, outputPath, threshold);
 		return resultList;
 	}
 	
@@ -131,7 +131,7 @@ public class ScoringMapperPredictUtil {
 		}
 	}
 	
-	private static ArrayList<ModelEvaluationResult> readScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, String[] requestID, String outputPath, int threshold) {
+	private static ArrayList<ModelEvaluationResult> readScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, String outputPath, int threshold) {
 		Set<String> modelIDs = leadInputRecordMap.keySet();
 		// list of HashMap<leadID: score>
 		ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
@@ -147,7 +147,7 @@ public class ScoringMapperPredictUtil {
 			}
 			Set<String> keySet = scores.keySet();
 			for (String key : keySet) {
-				ModelEvaluationResult result = getResult(modelIdMap, id, key, requestID[0], model, scores.get(key));
+				ModelEvaluationResult result = getResult(modelIdMap, id, key, model, scores.get(key));
 				resultList.add(result);
 			}
 		}
@@ -174,7 +174,7 @@ public class ScoringMapperPredictUtil {
 		}
 	}
 	
-	private static ModelEvaluationResult getResult(HashMap<String, String> modelIdMap, String modelID, String leadID, String requestID, JSONObject model, double score) {		
+	private static ModelEvaluationResult getResult(HashMap<String, String> modelIdMap, String modelID, String leadID, JSONObject model, double score) {		
 		Double probability = null;
 		
 		// perform calibration
@@ -267,7 +267,7 @@ public class ScoringMapperPredictUtil {
 		
 		Integer integerScore = (int) (probability != null ? Math.round(probability * 100) : Math.round(score * 100));
 		String modelName = modelIdMap.get(modelID);
-		ModelEvaluationResult result = new ModelEvaluationResult(leadID, bucket, lift, modelName, percentile, probability, score, requestID, integerScore);
+		ModelEvaluationResult result = new ModelEvaluationResult(leadID, bucket, lift, modelName, percentile, probability, score, integerScore);
 		log.info("result is " + result);
 		return result;
 		

@@ -163,7 +163,7 @@ public class ScoringMapperTransformUtil {
 		}
 	}
     
-    public static void  manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, HashMap<String, Integer> leadNumber, String[] requestID, String record) {
+    public static void  manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, HashMap<String, Integer> leadNumber, String record) {
     	JSONParser jsonParser = new JSONParser();
     	JSONObject leadJsonObject = null;
 		try {
@@ -178,7 +178,7 @@ public class ScoringMapperTransformUtil {
     	String leadID = (String)leadJsonObject.get("LeadID");
     	//if (!leadID.equals("1006549")) return;
     	
-    	String formattedRecord = transformToJsonString(leadJsonObject, models, leadNumber, requestID, modelID);
+    	String formattedRecord = transformToJsonString(leadJsonObject, models, leadNumber, modelID);
     	if (leadInputRecordMap.containsKey(modelID)) {
     		leadInputRecordMap.get(modelID).add(formattedRecord);
     	} else {
@@ -212,7 +212,7 @@ public class ScoringMapperTransformUtil {
     	return modelID;
     }
     
-    public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models, HashMap<String, Integer> leadNumber, String[] requestID, String modelID) {
+    public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models, HashMap<String, Integer> leadNumber, String modelID) {
     	String formattedRecord = null;
     	
     	if (models == null) {
@@ -234,15 +234,7 @@ public class ScoringMapperTransformUtil {
 			int i = leadNumber.get(leadID);
 			leadNumber.put(leadID, ++i);
 		}
-		//String currentRequestID = (String) leadJsonObject.get(LEAD_RECORD_REQUEST_ID_COLUMN);
-		String currentRequestID = "Default";
-		if (requestID[0] == null) {
-			requestID[0] = currentRequestID;
-		} else {
-			if (requestID[0] != currentRequestID) {
-				new Exception("requestID does not match");
-			}
-		}
+
 		JSONArray jsonArray = new JSONArray();  
 		jsonObj.put("value", jsonArray); 
 		jsonObj.put("key", leadID);

@@ -8,16 +8,15 @@ package com.latticeengines.scoring.util;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class ModelEvaluationResult extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ModelEvaluationResult\",\"fields\":[{\"name\":\"LeadID\",\"type\":[\"string\",\"null\"],\"columnName\":\"LeadID\",\"sqlType\":\"12\"},{\"name\":\"Bucket_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Bucket_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Lift\",\"type\":[\"double\",\"null\"],\"columnName\":\"Lift\",\"sqlType\":\"7\"},{\"name\":\"Play_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Play_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Percentile\",\"type\":[\"int\",\"null\"],\"columnName\":\"Percentile\",\"sqlType\":\"4\"},{\"name\":\"Probability\",\"type\":[\"double\",\"null\"],\"columnName\":\"Probability\",\"sqlType\":\"7\"},{\"name\":\"RawScore\",\"type\":[\"double\",\"null\"],\"columnName\":\"RawScore\",\"sqlType\":\"7\"},{\"name\":\"Request_ID\",\"type\":[\"string\",\"null\"],\"columnName\":\"Request_ID\",\"sqlType\":\"12\"},{\"name\":\"Score\",\"type\":[\"int\",\"null\"],\"columnName\":\"Score\",\"sqlType\":\"4\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ModelEvaluationResult\",\"fields\":[{\"name\":\"LeadID\",\"type\":[\"string\",\"null\"],\"columnName\":\"LeadID\",\"sqlType\":\"12\"},{\"name\":\"Bucket_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Bucket_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Lift\",\"type\":[\"double\",\"null\"],\"columnName\":\"Lift\",\"sqlType\":\"7\"},{\"name\":\"Play_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Play_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Percentile\",\"type\":[\"int\",\"null\"],\"columnName\":\"Percentile\",\"sqlType\":\"4\"},{\"name\":\"Probability\",\"type\":[\"double\",\"null\"],\"columnName\":\"Probability\",\"sqlType\":\"7\"},{\"name\":\"RawScore\",\"type\":[\"double\",\"null\"],\"columnName\":\"RawScore\",\"sqlType\":\"7\"},{\"name\":\"Score\",\"type\":[\"int\",\"null\"],\"columnName\":\"Score\",\"sqlType\":\"4\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
-  @Deprecated public java.lang.String LeadID;
-  @Deprecated public java.lang.String Bucket_Display_Name;
+  @Deprecated public java.lang.CharSequence LeadID;
+  @Deprecated public java.lang.CharSequence Bucket_Display_Name;
   @Deprecated public java.lang.Double Lift;
-  @Deprecated public java.lang.String Play_Display_Name;
+  @Deprecated public java.lang.CharSequence Play_Display_Name;
   @Deprecated public java.lang.Integer Percentile;
   @Deprecated public java.lang.Double Probability;
   @Deprecated public java.lang.Double RawScore;
-  @Deprecated public java.lang.String Request_ID;
   @Deprecated public java.lang.Integer Score;
 
   /**
@@ -28,7 +27,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   /**
    * All-args constructor.
    */
-  public ModelEvaluationResult(java.lang.String LeadID, java.lang.String Bucket_Display_Name, java.lang.Double Lift, java.lang.String Play_Display_Name, java.lang.Integer Percentile, java.lang.Double Probability, java.lang.Double RawScore, java.lang.String Request_ID, java.lang.Integer Score) {
+  public ModelEvaluationResult(java.lang.CharSequence LeadID, java.lang.CharSequence Bucket_Display_Name, java.lang.Double Lift, java.lang.CharSequence Play_Display_Name, java.lang.Integer Percentile, java.lang.Double Probability, java.lang.Double RawScore, java.lang.Integer Score) {
     this.LeadID = LeadID;
     this.Bucket_Display_Name = Bucket_Display_Name;
     this.Lift = Lift;
@@ -36,7 +35,6 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     this.Percentile = Percentile;
     this.Probability = Probability;
     this.RawScore = RawScore;
-    this.Request_ID = Request_ID;
     this.Score = Score;
   }
 
@@ -51,8 +49,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     case 4: return Percentile;
     case 5: return Probability;
     case 6: return RawScore;
-    case 7: return Request_ID;
-    case 8: return Score;
+    case 7: return Score;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -60,15 +57,14 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: LeadID = (java.lang.String)value$; break;
-    case 1: Bucket_Display_Name = (java.lang.String)value$; break;
+    case 0: LeadID = (java.lang.CharSequence)value$; break;
+    case 1: Bucket_Display_Name = (java.lang.CharSequence)value$; break;
     case 2: Lift = (java.lang.Double)value$; break;
-    case 3: Play_Display_Name = (java.lang.String)value$; break;
+    case 3: Play_Display_Name = (java.lang.CharSequence)value$; break;
     case 4: Percentile = (java.lang.Integer)value$; break;
     case 5: Probability = (java.lang.Double)value$; break;
     case 6: RawScore = (java.lang.Double)value$; break;
-    case 7: Request_ID = (java.lang.String)value$; break;
-    case 8: Score = (java.lang.Integer)value$; break;
+    case 7: Score = (java.lang.Integer)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -76,7 +72,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   /**
    * Gets the value of the 'LeadID' field.
    */
-  public java.lang.String getLeadID() {
+  public java.lang.CharSequence getLeadID() {
     return LeadID;
   }
 
@@ -84,14 +80,14 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
    * Sets the value of the 'LeadID' field.
    * @param value the value to set.
    */
-  public void setLeadID(java.lang.String value) {
+  public void setLeadID(java.lang.CharSequence value) {
     this.LeadID = value;
   }
 
   /**
    * Gets the value of the 'Bucket_Display_Name' field.
    */
-  public java.lang.String getBucketDisplayName() {
+  public java.lang.CharSequence getBucketDisplayName() {
     return Bucket_Display_Name;
   }
 
@@ -99,7 +95,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
    * Sets the value of the 'Bucket_Display_Name' field.
    * @param value the value to set.
    */
-  public void setBucketDisplayName(java.lang.String value) {
+  public void setBucketDisplayName(java.lang.CharSequence value) {
     this.Bucket_Display_Name = value;
   }
 
@@ -121,7 +117,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   /**
    * Gets the value of the 'Play_Display_Name' field.
    */
-  public java.lang.String getPlayDisplayName() {
+  public java.lang.CharSequence getPlayDisplayName() {
     return Play_Display_Name;
   }
 
@@ -129,7 +125,7 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
    * Sets the value of the 'Play_Display_Name' field.
    * @param value the value to set.
    */
-  public void setPlayDisplayName(java.lang.String value) {
+  public void setPlayDisplayName(java.lang.CharSequence value) {
     this.Play_Display_Name = value;
   }
 
@@ -179,21 +175,6 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   }
 
   /**
-   * Gets the value of the 'Request_ID' field.
-   */
-  public java.lang.String getRequestID() {
-    return Request_ID;
-  }
-
-  /**
-   * Sets the value of the 'Request_ID' field.
-   * @param value the value to set.
-   */
-  public void setRequestID(java.lang.String value) {
-    this.Request_ID = value;
-  }
-
-  /**
    * Gets the value of the 'Score' field.
    */
   public java.lang.Integer getScore() {
@@ -229,14 +210,13 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<ModelEvaluationResult>
     implements org.apache.avro.data.RecordBuilder<ModelEvaluationResult> {
 
-    private java.lang.String LeadID;
-    private java.lang.String Bucket_Display_Name;
+    private java.lang.CharSequence LeadID;
+    private java.lang.CharSequence Bucket_Display_Name;
     private java.lang.Double Lift;
-    private java.lang.String Play_Display_Name;
+    private java.lang.CharSequence Play_Display_Name;
     private java.lang.Integer Percentile;
     private java.lang.Double Probability;
     private java.lang.Double RawScore;
-    private java.lang.String Request_ID;
     private java.lang.Integer Score;
 
     /** Creates a new Builder */
@@ -280,23 +260,19 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
         this.RawScore = data().deepCopy(fields()[6].schema(), other.RawScore);
         fieldSetFlags()[6] = true;
       }
-      if (isValidValue(fields()[7], other.Request_ID)) {
-        this.Request_ID = data().deepCopy(fields()[7].schema(), other.Request_ID);
+      if (isValidValue(fields()[7], other.Score)) {
+        this.Score = data().deepCopy(fields()[7].schema(), other.Score);
         fieldSetFlags()[7] = true;
-      }
-      if (isValidValue(fields()[8], other.Score)) {
-        this.Score = data().deepCopy(fields()[8].schema(), other.Score);
-        fieldSetFlags()[8] = true;
       }
     }
 
     /** Gets the value of the 'LeadID' field */
-    public java.lang.String getLeadID() {
+    public java.lang.CharSequence getLeadID() {
       return LeadID;
     }
     
     /** Sets the value of the 'LeadID' field */
-    public ModelEvaluationResult.Builder setLeadID(java.lang.String value) {
+    public ModelEvaluationResult.Builder setLeadID(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.LeadID = value;
       fieldSetFlags()[0] = true;
@@ -316,12 +292,12 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     }
 
     /** Gets the value of the 'Bucket_Display_Name' field */
-    public java.lang.String getBucketDisplayName() {
+    public java.lang.CharSequence getBucketDisplayName() {
       return Bucket_Display_Name;
     }
     
     /** Sets the value of the 'Bucket_Display_Name' field */
-    public ModelEvaluationResult.Builder setBucketDisplayName(java.lang.String value) {
+    public ModelEvaluationResult.Builder setBucketDisplayName(java.lang.CharSequence value) {
       validate(fields()[1], value);
       this.Bucket_Display_Name = value;
       fieldSetFlags()[1] = true;
@@ -366,12 +342,12 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     }
 
     /** Gets the value of the 'Play_Display_Name' field */
-    public java.lang.String getPlayDisplayName() {
+    public java.lang.CharSequence getPlayDisplayName() {
       return Play_Display_Name;
     }
     
     /** Sets the value of the 'Play_Display_Name' field */
-    public ModelEvaluationResult.Builder setPlayDisplayName(java.lang.String value) {
+    public ModelEvaluationResult.Builder setPlayDisplayName(java.lang.CharSequence value) {
       validate(fields()[3], value);
       this.Play_Display_Name = value;
       fieldSetFlags()[3] = true;
@@ -465,31 +441,6 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
       return this;
     }
 
-    /** Gets the value of the 'Request_ID' field */
-    public java.lang.String getRequestID() {
-      return Request_ID;
-    }
-    
-    /** Sets the value of the 'Request_ID' field */
-    public ModelEvaluationResult.Builder setRequestID(java.lang.String value) {
-      validate(fields()[7], value);
-      this.Request_ID = value;
-      fieldSetFlags()[7] = true;
-      return this; 
-    }
-    
-    /** Checks whether the 'Request_ID' field has been set */
-    public boolean hasRequestID() {
-      return fieldSetFlags()[7];
-    }
-    
-    /** Clears the value of the 'Request_ID' field */
-    public ModelEvaluationResult.Builder clearRequestID() {
-      Request_ID = null;
-      fieldSetFlags()[7] = false;
-      return this;
-    }
-
     /** Gets the value of the 'Score' field */
     public java.lang.Integer getScore() {
       return Score;
@@ -497,21 +448,21 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     
     /** Sets the value of the 'Score' field */
     public ModelEvaluationResult.Builder setScore(java.lang.Integer value) {
-      validate(fields()[8], value);
+      validate(fields()[7], value);
       this.Score = value;
-      fieldSetFlags()[8] = true;
+      fieldSetFlags()[7] = true;
       return this; 
     }
     
     /** Checks whether the 'Score' field has been set */
     public boolean hasScore() {
-      return fieldSetFlags()[8];
+      return fieldSetFlags()[7];
     }
     
     /** Clears the value of the 'Score' field */
     public ModelEvaluationResult.Builder clearScore() {
       Score = null;
-      fieldSetFlags()[8] = false;
+      fieldSetFlags()[7] = false;
       return this;
     }
 
@@ -519,15 +470,14 @@ public class ModelEvaluationResult extends org.apache.avro.specific.SpecificReco
     public ModelEvaluationResult build() {
       try {
         ModelEvaluationResult record = new ModelEvaluationResult();
-        record.LeadID = fieldSetFlags()[0] ? this.LeadID : (java.lang.String) defaultValue(fields()[0]);
-        record.Bucket_Display_Name = fieldSetFlags()[1] ? this.Bucket_Display_Name : (java.lang.String) defaultValue(fields()[1]);
+        record.LeadID = fieldSetFlags()[0] ? this.LeadID : (java.lang.CharSequence) defaultValue(fields()[0]);
+        record.Bucket_Display_Name = fieldSetFlags()[1] ? this.Bucket_Display_Name : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.Lift = fieldSetFlags()[2] ? this.Lift : (java.lang.Double) defaultValue(fields()[2]);
-        record.Play_Display_Name = fieldSetFlags()[3] ? this.Play_Display_Name : (java.lang.String) defaultValue(fields()[3]);
+        record.Play_Display_Name = fieldSetFlags()[3] ? this.Play_Display_Name : (java.lang.CharSequence) defaultValue(fields()[3]);
         record.Percentile = fieldSetFlags()[4] ? this.Percentile : (java.lang.Integer) defaultValue(fields()[4]);
         record.Probability = fieldSetFlags()[5] ? this.Probability : (java.lang.Double) defaultValue(fields()[5]);
         record.RawScore = fieldSetFlags()[6] ? this.RawScore : (java.lang.Double) defaultValue(fields()[6]);
-        record.Request_ID = fieldSetFlags()[7] ? this.Request_ID : (java.lang.String) defaultValue(fields()[7]);
-        record.Score = fieldSetFlags()[8] ? this.Score : (java.lang.Integer) defaultValue(fields()[8]);
+        record.Score = fieldSetFlags()[7] ? this.Score : (java.lang.Integer) defaultValue(fields()[7]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
