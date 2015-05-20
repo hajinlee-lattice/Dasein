@@ -75,7 +75,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
         // modify the default config
-        DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
+        DocumentDirectory.Node node;
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("VisiDBName").getDocument().setData(visiDBName);
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
@@ -91,16 +91,17 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         DLRestResult response = deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
-
-        Assert.assertEquals(new File(permStore).list().length, 0);
-        Assert.assertEquals(new File(dataStore).list().length, 0);
+        // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
+//        Assert.assertEquals(new File(permStore).list().length, 0);
+//        Assert.assertEquals(new File(dataStore).list().length, 0);
 
         bootstrap(constructVisiDBDLInstaller(visiDBName));
         BootstrapState state = waitForSuccess(getServiceName());
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
-        Assert.assertEquals(new File(permStore).list().length, 1);
-        Assert.assertEquals(new File(dataStore + "/" + tenant).list().length, 3);
+        // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
+//        Assert.assertEquals(new File(permStore).list().length, 1);
+//        Assert.assertEquals(new File(dataStore + "/" + tenant).list().length, 3);
         response = deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }

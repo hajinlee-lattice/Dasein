@@ -485,7 +485,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
         final String tenantId = tenantIds[tenantIdx];
         // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
-        // unless we mount them
 //        Assert.assertEquals(new File(permStore).list().length, 1);
 //        Assert.assertEquals(new File(dataStore + "/" + tenantId).list().length, 3);
     }
