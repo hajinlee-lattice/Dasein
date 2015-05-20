@@ -482,7 +482,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(userDoc);
     }
 
-    @SuppressWarnings("unused")
     private void verifyVisiDBDLTenantExists(int tenantIdx) {
         if (vdbdlSkipped) return;
 
