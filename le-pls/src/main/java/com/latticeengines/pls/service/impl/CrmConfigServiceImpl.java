@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
@@ -110,10 +111,10 @@ public class CrmConfigServiceImpl implements CrmConfigService {
 
     private void setCommonParameters(String crmType, String tenantId, CrmConfig crmConfig,
             Map<String, Object> parameters) {
-
+        CustomerSpace space = CustomerSpace.parse(tenantId);
         parameters.put("dataProviderName", crmConfig.getDataProviderName());
         parameters.put("dataSourceType", crmType);
-        parameters.put("tenantName", tenantId);
+        parameters.put("tenantName", space.getTenantId());
         parameters.put("tryConnect", "false");
     }
 
