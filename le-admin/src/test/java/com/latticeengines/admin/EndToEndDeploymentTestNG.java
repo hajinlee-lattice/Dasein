@@ -478,13 +478,16 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(userDoc);
     }
 
+    @SuppressWarnings("unchecked")
     private void verifyVisiDBDLTenantExists(int tenantIdx) {
         if (vdbdlSkipped) return;
 
         final String tenantId = tenantIds[tenantIdx];
-        // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
-//        Assert.assertEquals(new File(permStore).list().length, 1);
-//        Assert.assertEquals(new File(dataStore + "/" + tenantId).list().length, 3);
+        // verify permstore and datastore
+        String url = String.format("%s/admin/internal/", getRestHostPort());
+        List<String> filesInPermStore = magicRestTemplate.getForObject(url + "permstore", List.class);
+        Assert.assertTrue(filesInPermStore.contains(visiDBServerName.toUpperCase()));
+        Assert.assertEquals(magicRestTemplate.getForObject(url + "datastore/" + tenantId, List.class).size(), 3);
     }
 
     @SuppressWarnings("unused")
@@ -549,9 +552,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         for (String tenantId: tenantIds) {
             try {
                 visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenantId);
-                // this cannot delete the files on web server
-//                FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
-//                FileUtils.deleteDirectory(new File(dataStore + "/" + tenantId));
+
+                String url = String.format("%s/admin/internal/", getRestHostPort());
+                magicRestTemplate.delete(url + "permstore?file=" + visiDBServerName.toUpperCase());
+                magicRestTemplate.delete(url + "datastore/" + tenantId);
             } catch (Exception e) {
                 // ignore
             }

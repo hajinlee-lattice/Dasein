@@ -1,10 +1,8 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -59,15 +57,19 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
-        FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
-        FileUtils.deleteDirectory(new File(dataStore + "/" + tenant));
+
+        String url = String.format("%s/admin/internal/", getRestHostPort());
+        magicRestTemplate.delete(url + "permstore?file=" + visiDBServerName.toUpperCase());
+        magicRestTemplate.delete(url + "datastore/" + tenant);
+
     }
 
     @AfterClass(groups = {"deployment", "functional"})
     @Override
     public void tearDown() throws Exception {
-        FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
-        FileUtils.deleteDirectory(new File(dataStore + "/" + tenant));
+        String url = String.format("%s/admin/internal/", getRestHostPort());
+        magicRestTemplate.delete(url + "permstore?file=" + visiDBServerName.toUpperCase());
+        magicRestTemplate.delete(url + "datastore/" + tenant);
         super.tearDown();
     }
 
@@ -87,27 +89,30 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testInstallation() throws InterruptedException, ClientProtocolException, IOException {
+    public void testInstallation() throws InterruptedException, IOException {
         DLRestResult response = deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
-        // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
-//        Assert.assertEquals(new File(permStore).list().length, 0);
-//        Assert.assertEquals(new File(dataStore).list().length, 0);
+
+        // record original number of files in permStore
+        String url = String.format("%s/admin/internal/", getRestHostPort());
+        int filesInPermStore = magicRestTemplate.getForObject(url + "permstore", List.class).size();
 
         bootstrap(constructVisiDBDLInstaller(visiDBName));
         BootstrapState state = waitForSuccess(getServiceName());
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
-        // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
-//        Assert.assertEquals(new File(permStore).list().length, 1);
-//        Assert.assertEquals(new File(dataStore + "/" + tenant).list().length, 3);
+
+        // verify permstore and datastore
+        Assert.assertEquals(magicRestTemplate.getForObject(url + "permstore", List.class).size(), filesInPermStore + 1);
+        Assert.assertEquals(magicRestTemplate.getForObject(url + "datastore/" + tenant, List.class).size(), 3);
+
         response = deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
 
     @Test(groups = "functional")
-    public void testInstallationFunctional() throws InterruptedException, ClientProtocolException, IOException {
+    public void testInstallationFunctional() throws InterruptedException, IOException {
         bootstrap(constructVisiDBDLInstaller(visiDBName));
 
         // wait a while, then test your installation
@@ -124,7 +129,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         }
     }
 
-    public DLRestResult deleteVisiDBDLTenant(String tenant) throws ClientProtocolException, IOException {
+    public DLRestResult deleteVisiDBDLTenant(String tenant) throws IOException {
         DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
         String jsonStr = JsonUtils.serialize(request);
         VisiDBDLInstaller installer = new VisiDBDLInstaller();

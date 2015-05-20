@@ -1,12 +1,9 @@
 package com.latticeengines.admin.tenant.batonadapter.template.visidb;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -61,7 +58,8 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
     @AfterClass(groups = {"deployment", "functional"})
     @Override
     public void tearDown() throws Exception {
-        FileUtils.deleteDirectory(new File(dataStore + "/" + tenant));
+        String url = String.format("%s/admin/internal/", getRestHostPort());
+        magicRestTemplate.delete(url + "datastore/" + tenant);
         super.tearDown();
     }
 
@@ -78,7 +76,7 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
     }
 
     @Test(groups = "deployment")
-    public void testInstallation() throws InterruptedException, ClientProtocolException, IOException {
+    public void testInstallation() throws InterruptedException, IOException {
         DLRestResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));

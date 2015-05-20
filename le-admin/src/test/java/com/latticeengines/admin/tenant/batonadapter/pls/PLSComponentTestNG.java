@@ -69,13 +69,21 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         // send to bootstrapper message queue
         bootstrap(confDir);
-
         // wait a while, then test your installation
         BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
-
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
-
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
+
+        // test idempotent
+        bootstrap(confDir);
+        state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
+        try {
+            Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
+            Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
+        } catch (AssertionError e) {
+            Assert.fail("Idempotent test failed.", e);
+        }
+
     }
 
     @Test(groups = "functional")

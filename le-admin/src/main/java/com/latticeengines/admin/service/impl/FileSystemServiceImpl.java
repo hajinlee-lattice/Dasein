@@ -1,6 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,7 +18,11 @@ public class FileSystemServiceImpl implements FileSystemService {
     @Override
     public List<String> filesInDirectory(File dir){
         try {
-            return Arrays.asList(dir.list());
+            if (dir == null || !dir.exists()) {
+                return new ArrayList<>();
+            } else {
+                return Arrays.asList(dir.list());
+            }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_19103, e);
         }

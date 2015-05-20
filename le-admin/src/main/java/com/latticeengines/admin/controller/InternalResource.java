@@ -1,4 +1,4 @@
-package com.latticeengines.admin.controller.internal;
+package com.latticeengines.admin.controller;
 
 import java.io.File;
 import java.util.List;
@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,8 +28,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "internal_service_resource", description = "REST service resource for internal operations")
 @RestController
-@RequestMapping(value = "/internal/services")
-public class InternalServiceResource extends InternalResourceBase {
+@RequestMapping(value = "/internal")
+public class InternalResource extends InternalResourceBase {
 
     @Value("${admin.vdb.permstore}")
     private String permStore;
@@ -45,7 +46,7 @@ public class InternalServiceResource extends InternalResourceBase {
     @Autowired
     private FileSystemService fileSystemService;
 
-    @RequestMapping(value = "options", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "services/options", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
     public SelectableConfigurationDocument getServiceOptionalConfigs(
@@ -58,7 +59,7 @@ public class InternalServiceResource extends InternalResourceBase {
         return dynamicOptionsService.bind(doc);
     }
 
-    @RequestMapping(value = "options", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "services/options", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update dropdown options of a field")
     public Boolean patchServiceOptionalConfigs(
@@ -86,20 +87,20 @@ public class InternalServiceResource extends InternalResourceBase {
         return true;
     }
 
-    @RequestMapping(value = "datastore", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "datastore/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get file names in datastore")
-    public List<String> getFilesInDatastore(HttpServletRequest request) {
+    @ApiOperation(value = "Get files of a tenant in datastore")
+    public List<String> getFilesInDatastore(@PathVariable String tenantId, HttpServletRequest request) {
         checkHeader(request);
-        return fileSystemService.filesInDirectory(new File(dataStore));
+        return fileSystemService.filesInDirectory(new File(dataStore + "/" + tenantId));
     }
 
-    @RequestMapping(value = "datastore", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "datastore/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Delete file in datastore")
-    public Boolean deleteFileInDatastore(@RequestParam(value = "file") String file, HttpServletRequest request) {
+    @ApiOperation(value = "Delete a tenant from datastore")
+    public Boolean deleteFileInDatastore(@PathVariable String tenantId, HttpServletRequest request) {
         checkHeader(request);
-        fileSystemService.deleteFile(new File(dataStore + "/" + file));
+        fileSystemService.deleteFile(new File(dataStore + "/" + tenantId));
         return true;
     }
 
