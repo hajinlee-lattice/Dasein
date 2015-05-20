@@ -66,6 +66,7 @@ app.directive('configEntry', function(){
                     $scope.inputType = "number";
                     $scope.config.Data = parseFloat($scope.config.Data);
                 } else if (CamilleConfigUtility.isPassword($scope.type)) {
+                    $scope.isPassword = true;
                     $scope.inputType = "password";
                 } else {
                     $scope.inputType = "text";
