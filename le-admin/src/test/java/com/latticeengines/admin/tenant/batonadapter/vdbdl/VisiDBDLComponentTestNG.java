@@ -88,7 +88,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException, ClientProtocolException, IOException {
-        DLRestResult response = deleteVisiDBDLTenant(tenant);
+        DLRestResult response = deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
         // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
@@ -102,7 +102,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         // permStore and dataStore live on web server (52, 53) not the testing server (109, 216)
 //        Assert.assertEquals(new File(permStore).list().length, 1);
 //        Assert.assertEquals(new File(dataStore + "/" + tenant).list().length, 3);
-        response = deleteVisiDBDLTenant(tenant);
+        response = deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
 
@@ -131,6 +131,18 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
                 false, installer.getHeaders(), jsonStr);
         return JsonUtils.deserialize(response, DLRestResult.class);
+    }
+
+    public DLRestResult deleteVisiDBDLTenantWithRetry(String tenant) throws IOException, InterruptedException {
+        int numOfRetry = 5;
+        DLRestResult response;
+        do {
+            response = deleteVisiDBDLTenant(tenant);
+            numOfRetry--;
+            Thread.sleep(2000L);
+        } while(numOfRetry >0 &&
+                (response.getStatus() != 5 || !response.getErrorMessage().contains("does not exist")));
+        return response;
     }
 
     @Override

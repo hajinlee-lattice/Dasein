@@ -551,7 +551,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         for (String tenantId: tenantIds) {
             try {
                 String tenant =  tenantId;
-                visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
+                visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
                 FileUtils.deleteDirectory(new File(permStore + "/" + visiDBServerName.toUpperCase()));
                 FileUtils.deleteDirectory(new File(dataStore + "/" + tenantId));
             } catch (Exception e) {

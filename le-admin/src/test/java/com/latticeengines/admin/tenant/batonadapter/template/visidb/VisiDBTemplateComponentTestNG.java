@@ -78,7 +78,7 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException, ClientProtocolException, IOException {
-        DLRestResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
+        DLRestResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
 
@@ -89,7 +89,7 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
 
         state = waitForSuccess(getServiceName());
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
-        response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
+        response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
 
