@@ -94,7 +94,4 @@
 
     <import resource="classpath:eai-yarn-context.xml" />
 
-    <bean id="yarnService"
-        class="com.latticeengines.dataplatform.exposed.service.impl.YarnServiceImpl" />
-
 </beans>
