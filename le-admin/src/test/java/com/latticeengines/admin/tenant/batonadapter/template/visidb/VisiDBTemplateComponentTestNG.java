@@ -1,13 +1,16 @@
 package com.latticeengines.admin.tenant.batonadapter.template.visidb;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -36,6 +39,9 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
     @Value("${admin.test.dl.url}")
     private String dlUrl;
 
+    @Value("${admin.test.dl.datastore}")
+    private String dataStore;
+
     private String tenant;
 
     private String visiDBName;
@@ -49,6 +55,13 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
         SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
+    }
+
+    @AfterClass(groups = {"deployment", "functional"})
+    @Override
+    public void tearDown() throws Exception {
+        FileUtils.deleteDirectory(new File(dataStore + "/" + tenant));
+        super.tearDown();
     }
 
     public void installVisiDBTemplate(){
