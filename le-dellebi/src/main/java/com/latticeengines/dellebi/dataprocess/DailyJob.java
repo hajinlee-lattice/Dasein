@@ -28,17 +28,17 @@ public class DailyJob extends QuartzJobBean {
         // But Cascading does it's job once when it be called. So there's only
         // time Casadading processes data and new data incomes after that,
         // Cascading processes it next day.
-        dailyFlow.doDailyFlow();
-        
-        if (dailyFlow.getReturnCode() == 0){
-        	sqoopDataService.export();
-        	log.info("EBI daily refresh just finished successfully.");
-        }else if (dailyFlow.getReturnCode() == 3){
-        	log.warn("Skip Sqoop exporting this time.");
-        }else{
-        	log.error("EBI daily refresh just failed with return code: " + dailyFlow.getReturnCode());
+        int returnCode = dailyFlow.doDailyFlow();
+
+        if (returnCode == 0) {
+            sqoopDataService.export();
+            log.info("EBI daily refresh just finished successfully.");
+        } else if (returnCode == 3) {
+            log.warn("Skip Sqoop exporting this time with return code=" + returnCode);
+        } else {
+            log.error("EBI daily refresh just failed with return code= " + returnCode);
         }
-        
+
     }
 
     @Override

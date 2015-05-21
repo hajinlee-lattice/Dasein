@@ -82,8 +82,8 @@ public class SqoopDataService {
         }
 
         if (rc == 0) {
-            log.info("Begin to execute the Store Procedure: " + quote_sp);
-            rc = sqoopSyncJobService.eval(sqlStr, 1, uri);
+//            log.info("Begin to execute the Store Procedure: " + quote_sp);
+//            rc = sqoopSyncJobService.eval(sqlStr, 1, uri);
         }
 
         if (rc == 0) {

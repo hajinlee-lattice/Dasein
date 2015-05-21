@@ -164,7 +164,6 @@ public boolean isExistWithTXTFile(String folderName) {
     
     public Boolean ifReadyToProcessData(){
     	if(listFileNumber(dataHadoopInPath + "/" + quoteTrans) != 0
-    			&& isExist(dataHadoopWorkingPath + "/" + quoteTrans) != true
     			&& isExistWithOpenFileName(dataHadoopInPath + "/" + quoteTrans) != true){
     		log.info("Cascading meets the conditions to process data from in folder on HDFS.");
     		return true;

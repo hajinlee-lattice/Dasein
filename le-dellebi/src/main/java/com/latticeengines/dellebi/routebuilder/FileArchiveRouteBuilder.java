@@ -75,7 +75,7 @@ public class FileArchiveRouteBuilder extends RouteBuilder {
                                             + env + " environment.");
                         }
                     }).multicast().stopOnException()
-                    .to(camelDataArchivePath, "direct:files").endChoice()
+                    .to("direct:files").endChoice()
                     .otherwise().stop().end();
         } catch (Exception e) {
             log.info("File archiving failed!");

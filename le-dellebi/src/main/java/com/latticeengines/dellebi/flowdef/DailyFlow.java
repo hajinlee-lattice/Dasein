@@ -51,14 +51,12 @@ public class DailyFlow {
     private MailSender mailSender;
 
     private ArrayList<FlowDef> flowList;
-    
-    private int returnCode = 0;
 
     public DailyFlow(ArrayList<FlowDef> flowList) {
         this.flowList = flowList;
     }
 
-    public void doDailyFlow() {
+    public int doDailyFlow() {
 
         log.info("All daily refresh files arrive!");
         log.info("Start process data on HDFS!");
@@ -90,33 +88,46 @@ public class DailyFlow {
                         && (hadoopfilesystemoperations.listFileNumber(dataHadoopInPath + "/" + warrantyGlobal) != 0)) {
                     flowConnector.connect(item).complete();
                     hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + warrantyGlobal);
+
                 } else if ("QuoteTransDailyFlow".equals(item.getName())
                         && hadoopfilesystemoperations.ifReadyToProcessData() == true) {
                     log.info("Cascading starts to process quote files!");
+                    if (hadoopfilesystemoperations.isExist(dataHadoopWorkingPath + "/" + quoteTrans) == true) {
+                        if (hadoopfilesystemoperations.isExist(dataHadoopWorkingPath + "/" + quoteTrans + "/_SUCCESS") == false) {
+                            log.warn("Cascading output is not clean, cleanup the directory!");
+                            hadoopfilesystemoperations.cleanFolder(dataHadoopWorkingPath + "/" + quoteTrans);
+                        } else {
+                            log.info("Cascading output directory has result, return!");
+                            return 0;
+                        }
+                    }
                     flowConnector.connect(item).complete();
                     log.info("Cascading finished to process quote files!");
-                    if (hadoopfilesystemoperations.isExist(dataHadoopWorkingPath + "/" + quoteTrans + "/_SUCCESS") == true){
-                    	log.info("Cascading process is done.  Removing txt files!");
-                    	hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + quoteTrans);
-                    }else{
-                    	log.info("Cascading is processing data.");
-                    	returnCode = 3;
+                    if (hadoopfilesystemoperations.isExist(dataHadoopWorkingPath + "/" + quoteTrans + "/_SUCCESS") == true) {
+                        log.info("Cascading process is done.  Removing txt files!");
+                        hadoopfilesystemoperations.cleanFolder(dataHadoopInPath + "/" + quoteTrans);
+                    } else {
+                        log.warn("Cascading failed to process data.");
+                        return 3;
                     }
                 }
             }
         } catch (PlannerException e) {
-            log.error("Seems there is corrupt data!", e);
-            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed because of some reasons!",
-                    "Seems there is corrupt data!" + e);
-            returnCode = 1;
+            log.error("Cascading failed!", e);
+            mailSender.sendEmail(mailReceiveList,
+                    "Dell EBI daily refresh just failed for Cascading because of some reasons!",
+                    "check if there is corrupt data! on " + System.getProperty("DELLEBI_PROPDIR")
+                            + " environment. error=" + e);
+            return 1;
         } catch (Exception e) {
             log.error("Failed!", e);
             mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed because of some reasons!",
-                    "Please check Dell EBI logs on " + System.getProperty("DELLEBI_PROPDIR") + " environment " + e);
-            returnCode = 2;
+                    "Please check Dell EBI logs on " + System.getProperty("DELLEBI_PROPDIR") + " environment. error="
+                            + e);
+            return 2;
         }
-        
-        returnCode = 0;
+
+        return 0;
     }
 
     public void setDataHadoopInPath(String s) {
@@ -150,8 +161,5 @@ public class DailyFlow {
     public void setMailReceiveList(String s) {
         this.mailReceiveList = s;
     }
-    
-    public int getReturnCode(){
-    	return returnCode;
-    }
+
 }
