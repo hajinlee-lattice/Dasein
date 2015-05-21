@@ -43,10 +43,10 @@ public class MetadataServiceImpl implements MetadataService {
     public String getJdbcConnectionUrl(DbCreds creds) {
         String dbType = creds.getDBType();
         MetadataProvider provider = metadataProviders.get(dbType);
-        
+
         String url = creds.getJdbcUrl();
         String driverClass = creds.getDriverClass();
-        
+
         if (StringUtils.isEmpty(driverClass)) {
             driverClass = provider.getDriverClass();
         }
@@ -72,10 +72,10 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
-        Integer positiveEventCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM " + tableName + " WHERE " + eventColName + " = 1", Integer.class);
+        Integer positiveEventCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + tableName + " WHERE "
+                + eventColName + " = 1", Integer.class);
         return Long.valueOf(positiveEventCount);
-        
+
     }
 
     @Override
@@ -101,20 +101,32 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable){
+    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
+        MetadataProvider provider = getProvider(jdbcTemplate);
+        provider.createNewTableFromExistingOne(jdbcTemplate, newTable, oldTable);
+    }
+
+    @Override
+    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
         MetadataProvider provider = getProvider(jdbcTemplate);
         provider.createNewEmptyTableFromExistingOne(jdbcTemplate, newTable, oldTable);
     }
 
     @Override
-    public void dropTable(JdbcTemplate jdbcTemplate, String table){
+    public void dropTable(JdbcTemplate jdbcTemplate, String table) {
         MetadataProvider provider = getProvider(jdbcTemplate);
         provider.dropTable(jdbcTemplate, table);
     }
 
     @Override
-    public List<String> showTable(JdbcTemplate jdbcTemplate, String table){
+    public List<String> showTable(JdbcTemplate jdbcTemplate, String table) {
         MetadataProvider provider = getProvider(jdbcTemplate);
         return provider.showTable(jdbcTemplate, table);
+    }
+
+    @Override
+    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid) {
+        MetadataProvider provider = getProvider(jdbcTemplate);
+        provider.addPrimaryKeyColumn(jdbcTemplate, table, pid);
     }
 }

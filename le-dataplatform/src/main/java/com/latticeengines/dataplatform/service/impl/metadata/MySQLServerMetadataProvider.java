@@ -49,6 +49,11 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
+    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable){
+        jdbcTemplate.execute("create table " + newTable + " select * from " + oldTable);
+    }
+
+    @Override
     public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable){
         jdbcTemplate.execute("create table " + newTable + " select * from " + oldTable + " where 1 = 0");
     }
@@ -61,6 +66,11 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     @Override
     public List<String> showTable(JdbcTemplate jdbcTemplate, String table){
         return jdbcTemplate.queryForList("show tables like '" + table + "'", String.class);
+    }
+
+    @Override
+    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid){
+        jdbcTemplate.execute("alter table " + table + " add " + pid + " INT PRIMARY KEY auto_increment");
     }
 
     @Override

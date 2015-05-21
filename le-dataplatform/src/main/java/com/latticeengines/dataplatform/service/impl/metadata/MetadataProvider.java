@@ -37,7 +37,9 @@ public abstract class MetadataProvider {
     public abstract void dropTable(JdbcTemplate jdbcTemplate, String table);
 
     public abstract List<String> showTable(JdbcTemplate jdbcTemplate, String table);
-    
+
+    public abstract void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid);
+
     public abstract String getDriverClass();
     
     public abstract String getJdbcUrlTemplate();
@@ -83,5 +85,7 @@ public abstract class MetadataProvider {
     public String getConnectionString(DbCreds creds) {
         return replaceUrlWithParamsAndTestConnection(getJdbcUrlTemplate(), getDriverClass(), creds);
     }
+
+    public abstract void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
 
 }

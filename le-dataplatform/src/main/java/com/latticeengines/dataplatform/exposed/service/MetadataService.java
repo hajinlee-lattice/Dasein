@@ -29,4 +29,8 @@ public interface MetadataService {
     void dropTable(JdbcTemplate jdbcTemplate, String table);
 
     List<String> showTable(JdbcTemplate jdbcTemplate, String table);
+
+    void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid);
+
+    void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
 }

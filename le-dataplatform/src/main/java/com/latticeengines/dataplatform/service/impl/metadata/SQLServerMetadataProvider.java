@@ -43,6 +43,11 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
+    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
+        jdbcTemplate.execute("SELECT * INTO " + newTable + " FROM " + oldTable);
+    }
+
+    @Override
     public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
         jdbcTemplate.execute("SELECT * INTO " + newTable + " FROM " + oldTable + " WHERE 1 = 0");
     }
@@ -66,4 +71,10 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     public String getJdbcUrlTemplate() {
         return "jdbc:sqlserver://$$HOST$$:$$PORT$$;databaseName=$$DB$$;user=$$USER$$;password=$$PASSWD$$";
     }
+
+    @Override
+    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid) {
+        jdbcTemplate.execute("ALTER TABLE " + table + " ADD " + pid + " INT IDENTITY");
+    }
+
 }

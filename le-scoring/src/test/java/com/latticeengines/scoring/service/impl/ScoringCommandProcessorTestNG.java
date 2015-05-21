@@ -65,18 +65,22 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private String outputTable;
 
+    private String inputLeadsTable;
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
     }
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
+        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
         String path = customerBaseDir + "/" + customer + "/scoring";
         HdfsUtils.rmdir(yarnConfiguration, path);
 
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/VisiDBTest_Model_Submission1_2015-04-18_12-30_model.json"); //
-        String modelPath = customerBaseDir + "/" + customer + "/models/" + testInputTable
+        String modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
                 + "/f3e29fd8-fb88-4758-9bcb-ea8d48ae6ac5/1429553747321_0004";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/model.json";
@@ -87,13 +91,14 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
     public void afterEachTest() {
         if (outputTable != null) {
             metadataService.dropTable(scoringJdbcTemplate, outputTable);
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
             clearTables();
         }
     }
 
     @Test(groups = "functional")
     public void testWorkflow() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, testInputTable, 0, 4352, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0, 4352, new Timestamp(System.currentTimeMillis()));
 
         scoringCommandEntityMgr.create(scoringCommand);
 

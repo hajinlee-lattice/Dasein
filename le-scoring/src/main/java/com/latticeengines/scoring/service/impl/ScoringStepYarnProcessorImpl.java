@@ -82,7 +82,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private static final String OUTPUT_TABLE_PREFIX = "Lead_";
 
-    private static final String LeadID = "LeadID";
+    private static final String PID = "Pid";
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
 
@@ -111,8 +111,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private ApplicationId load(String customer, ScoringCommand scoringCommand) {
         String table = scoringCommand.getTableName();
         String targetDir = customerBaseDir + "/" + customer + "/scoring/" + table + "/data";
+        metadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
         ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, scoringCreds,
-                LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList(LeadID), "", 4);
+                LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList(PID), "", 4);
         return appId;
     }
 
