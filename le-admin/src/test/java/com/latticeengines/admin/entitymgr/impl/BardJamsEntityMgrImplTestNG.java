@@ -29,10 +29,10 @@ public class BardJamsEntityMgrImplTestNG extends AbstractTestNGSpringContextTest
         Assert.assertNotNull(newTenant);
         Assert.assertEquals(newTenant.getPid(), tenant.getPid());
 
-         bardJamsEntityMgr.delete(newTenant);
-        
-         newTenant = bardJamsEntityMgr.findByKey(tenant);
-         Assert.assertNull(newTenant);
+        bardJamsEntityMgr.delete(newTenant);
+
+        newTenant = bardJamsEntityMgr.findByKey(tenant);
+        Assert.assertNull(newTenant);
 
     }
 

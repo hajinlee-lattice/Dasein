@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -74,7 +76,14 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
 
-        // test idempotent
+        // idempotent test
+        Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, PLSComponent.componentName);
+        try {
+            CamilleEnvironment.getCamille().delete(servicePath);
+        } catch (Exception e) {
+            // ignore
+        }
         bootstrap(confDir);
         state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
         try {

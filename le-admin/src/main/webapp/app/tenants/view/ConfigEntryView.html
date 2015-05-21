@@ -4,8 +4,9 @@
         <span class="node">{{ config.Node }} :</span>
     </td>
     <td>
-        <span ng-show="!isList">{{ config.Data }}</span>
+        <span ng-show="!isList && !isPassword">{{ config.Data }}</span>
         <span ng-show="isList">{{ listData }}</span>
+        <span ng-show="isPassword" class="text-muted">encrypted</span>
     </td>
 </table>
 

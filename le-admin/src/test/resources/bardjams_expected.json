@@ -49,11 +49,11 @@
     },
     {
       "Node": "ImmediateFolderStruct",
-      "Data": "DanteTesting\\\\Immediate"
+      "Data": "DanteTesting\\Immediate"
     },
     {
       "Node": "JAMSUser",
-      "Data": "PROD\\\\s-jams"
+      "Data": "PROD\\s-jams"
     },
     {
       "Node": "LoadGroupList",
@@ -65,7 +65,7 @@
     },
     {
       "Node": "NotifyEmailJob",
-      "Data": "DataLoader\\\\DL Omnibus\\\\DL_NOTIFY_EMAIL"
+      "Data": "DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL"
     },
     {
       "Node": "Queue_Name",
@@ -73,7 +73,7 @@
     },
     {
       "Node": "ScheduledFolderStruct",
-      "Data": "DataLoader\\\\DL TEST\\\\Scheduled Jobs"
+      "Data": "DataLoader\\DL TEST\\Scheduled Jobs"
     },
     {
       "Node": "TenantType",

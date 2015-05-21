@@ -61,6 +61,29 @@ public class SerializableDocumentDirectoryUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testEscapeJson() throws IOException {
+        String defaultJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/toescape.json"),
+                "UTF-8"
+        );
+        String metaJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/toescape_meta.json"),
+                "UTF-8"
+        );
+
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(defaultJson, metaJson);
+        Assert.assertNotNull(sDir);
+        Assert.assertEquals(sDir.getNodeAtPath("/Config1").getData(), "my\\path");
+        Assert.assertEquals(sDir.getNodeAtPath("/Config2").getData(), "{\"property1\":\"value1\",\"property2\":\"value2\"}");
+        Assert.assertEquals(sDir.getNodeAtPath("/Config3").getData(), "[\"item1\",\"item2\"]");
+
+        DocumentDirectory dir = SerializableDocumentDirectory.deserialize(sDir);
+        Assert.assertEquals(dir.get("/Config1").getDocument().getData(), "my\\path");
+        Assert.assertEquals(dir.get("/Config2").getDocument().getData(), "{\"property1\":\"value1\",\"property2\":\"value2\"}");
+        Assert.assertEquals(dir.get("/Config3").getDocument().getData(), "[\"item1\",\"item2\"]");
+    }
+
+    @Test(groups = "unit")
     public void testSerializeValue() throws JsonProcessingException {
         String expectedJson = "{\"RootPath\":\"/\",\"Nodes\":[{\"Node\":\"property\",\"Data\":\"value\",\"Version\":-1}]}";
         testSingleValueNode("value", null, expectedJson);

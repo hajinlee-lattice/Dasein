@@ -47,8 +47,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             try {
                 Path nodePath = new Path(entry.getKey());
-                docDir.add(nodePath,
-                        new Document(StringEscapeUtils.unescapeJava(entry.getValue())), true);
+                docDir.add(nodePath, new Document(entry.getValue()), true);
             } catch (IllegalArgumentException e) {
                 //ignore
             }
@@ -185,7 +184,8 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         try {
             ObjectMapper mapper = new ObjectMapper();
             String string = mapper.writeValueAsString(this);
-            string.replace("\\\"", "\"");
+            string = string.replace("\\\"", "\"");
+            string = string.replace("\\\\", "\\");
             return string;
         } catch (IOException e) {
             return "Failed to serialize " + super.toString();
@@ -591,14 +591,16 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                 JsonNode dataNode = jNode.get("Data");
                 boolean mustBeString = false;
                 if (dataNode != null) {
+                    String data;
                     if (Metadata.isObject(dataNode.toString()) || Metadata.isArray(dataNode.toString())) {
-                        docNode.setData(dataNode.toString());
+                        data = dataNode.toString();
                     }else if (dataNode.toString().startsWith("\"") && dataNode.toString().endsWith("\"")) {
-                        docNode.setData(dataNode.toString().substring(1, dataNode.toString().length() - 1));
+                        data = unescapeDataText(dataNode.toString().substring(1, dataNode.toString().length() - 1));
                         mustBeString = isNumber(dataNode.asText()) || isBoolean(dataNode.asText());
                     } else {
-                        docNode.setData(dataNode.asText());
+                        data = unescapeDataText(dataNode.asText());
                     }
+                    docNode.setData(data);
                 }
 
                 // sync with metadata
@@ -634,7 +636,6 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             }
             return docNodes;
         }
-
         @Override
         public String toString() {
             try {
@@ -642,6 +643,10 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             } catch (JsonProcessingException e) {
                 return this.toString();
             }
+        }
+
+        private static String unescapeDataText(String data) {
+            return StringEscapeUtils.unescapeJson(data);
         }
     }
 }

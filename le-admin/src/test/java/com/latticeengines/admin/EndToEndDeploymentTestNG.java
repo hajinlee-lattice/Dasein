@@ -257,15 +257,11 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         spaceConfiguration.setTopology(CRMTopology.ELOQUA);
 
         // BARDJAMS
-        SerializableDocumentDirectory jamsConfig = serviceService
-                .getDefaultServiceConfig(BardJamsComponent.componentName);
-        jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
-
-        SerializableDocumentDirectory actualDirecory = new SerializableDocumentDirectory(
+        SerializableDocumentDirectory jamsConfig = new SerializableDocumentDirectory(
                 BardJamsComponentDeploymentTestNG.getOverrideProperties());
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
-        actualDirecory.applyMetadata(metaDir);
-        actualDirecory.setRootPath("/" + BardJamsComponent.componentName);
+        jamsConfig.applyMetadata(metaDir);
+        jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
 
 
         // PLS
@@ -304,7 +300,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
-        configDirs.add(actualDirecory);
+        configDirs.add(jamsConfig);
         configDirs.add(PLSconfig);
         configDirs.add(vdbdlConfig);
         configDirs.add(vdbTplConfig);

@@ -1,0 +1,8 @@
+{
+  "RootPath": "/",
+  "Nodes": [
+    { "Node": "Config1", "Data": "my\\path"},
+    { "Node": "Config2", "Data": {"property1":"value1","property2":"value2"}},
+    { "Node": "Config3", "Data": ["item1", "item2"]}
+  ]
+}
