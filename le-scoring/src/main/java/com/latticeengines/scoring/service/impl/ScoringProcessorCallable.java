@@ -124,9 +124,9 @@ public class ScoringProcessorCallable implements Callable<Long> {
             executeYarnStep(ScoringCommandStep.LOAD_DATA);
             scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
         } else { // scoringCommand IN_PROGRESS
-            if (scoringCommandState.getStatus().equals(FinalApplicationStatus.UNDEFINED))
-                return;
             String yarnApplicationId = scoringCommandState.getYarnApplicationId();
+            if(yarnApplicationId == null)
+                return;
             JobStatus jobStatus = jobService.getJobStatus(yarnApplicationId);
             saveScoringCommandStateFromJobStatus(scoringCommandState, jobStatus);
             if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
