@@ -18,6 +18,9 @@ public class CreateVisiDBDLRequest {
     private int diskspaceLimit;
     private int permanentStoreOption;
     private String permanentStorePath;
+    private String backupFolder;
+    private String launchFolder;
+    private String launchStatusFolder;
 
     private CreateVisiDBDLRequest(Builder builder) {
         this.tenantName = builder.tenantName;
@@ -34,6 +37,9 @@ public class CreateVisiDBDLRequest {
         this.diskspaceLimit = builder.diskspaceLimit;
         this.permanentStoreOption = builder.permanentStoreOption;
         this.permanentStorePath = builder.permanentStorePath;
+        this.backupFolder = builder.backupFolder;
+        this.launchFolder = builder.launchFolder;
+        this.launchStatusFolder = builder.launchStatusFolder;
     }
 
     @JsonProperty("tenantName")
@@ -162,6 +168,33 @@ public class CreateVisiDBDLRequest {
         this.permanentStorePath = permanentStorePath;
     }
 
+    @JsonProperty("backupFolder")
+    public String getBackupFolder() {
+        return backupFolder;
+    }
+
+    public void setBackupFolder(String backupFolder) {
+        this.backupFolder = backupFolder;
+    }
+
+    @JsonProperty("launchFolder")
+    public String getLaunchFolder() {
+        return launchFolder;
+    }
+
+    public void setLaunchFolder(String launchFolder) {
+        this.launchFolder = launchFolder;
+    }
+
+    @JsonProperty("launchStatusFolder")
+    public String getLaunchStatusFolder() {
+        return launchStatusFolder;
+    }
+
+    public void setLaunchStatusFolder(String launchStatusFolder) {
+        this.launchStatusFolder = launchStatusFolder;
+    }
+
     public static class Builder {
         private String tenantName;
         private String tenantAlias;
@@ -177,6 +210,9 @@ public class CreateVisiDBDLRequest {
         private int diskspaceLimit;
         private int permanentStoreOption;
         private String permanentStorePath;
+        private String backupFolder;
+        private String launchFolder;
+        private String launchStatusFolder;
 
         public Builder(String tenantName, String dmDeployment, String contractExternalID) {
             this.tenantName = tenantName;
@@ -251,6 +287,21 @@ public class CreateVisiDBDLRequest {
 
         public Builder permanentStorePath(String permanentStorePath) {
             this.permanentStorePath = permanentStorePath;
+            return this;
+        }
+
+        public Builder backupFolder(String backupFolder) {
+            this.backupFolder = backupFolder;
+            return this;
+        }
+
+        public Builder launchFolder(String launchFolder) {
+            this.launchFolder = launchFolder;
+            return this;
+        }
+
+        public Builder launchStatusFolder(String launchStatusFolder) {
+            this.launchStatusFolder = launchStatusFolder;
             return this;
         }
 
