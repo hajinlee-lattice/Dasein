@@ -26,13 +26,13 @@ public class ScoreOutput{
     private String Bucket_Display_Name;
 
     @Column(name = "RawScore", nullable = true)
-    private float RawScore;
+    private double RawScore;
 
     @Column(name = "Probability", nullable = true)
-    private float Probability;
+    private double Probability;
 
     @Column(name = "Lift", nullable = true)
-    private float Lift;
+    private double Lift;
  
     @Column(name = "Percentile", nullable = true)
     private int Percentile;
@@ -85,27 +85,27 @@ public class ScoreOutput{
         this.Bucket_Display_Name = bucketDisplayName;
     }
 
-    public float getRawScore(){
+    public double getRawScore(){
         return this.RawScore;
     }
 
-    public void setRawScore(float rawScore){
+    public void setRawScore(double rawScore){
         this.RawScore = rawScore;
     }
 
-    public float getProbability(){
+    public double getProbability(){
         return this.Probability;
     }
 
-    public void setProbability(float probability){
+    public void setProbability(double probability){
         this.Probability = probability;
     }
 
-    public float getLift(){
+    public double getLift(){
         return this.Lift;
     }
 
-    public void setLift(float lift){
+    public void setLift(double lift){
         this.Lift = lift;
     }
 
