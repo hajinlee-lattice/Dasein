@@ -109,7 +109,10 @@ public enum LedpCode {
     // le-admin 19101-19999
     LEDP_19101("Service service error."),
     LEDP_19102("Service component {0} is not registered."),
-    LEDP_19103("Getting files in a server-side directory failed.");
+    LEDP_19103("Getting files in a server-side directory failed."),
+
+    // le-scoring 20000-20100
+    LEDP_20000("ScoringCommand Failed");
 
     private String message;
 
