@@ -44,7 +44,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
-        jdbcTemplate.execute("SELECT * INTO " + newTable + " FROM " + oldTable);
+        jdbcTemplate.execute("SELECT * INTO " + newTable + " FROM [" + oldTable + "]");
     }
 
     @Override
