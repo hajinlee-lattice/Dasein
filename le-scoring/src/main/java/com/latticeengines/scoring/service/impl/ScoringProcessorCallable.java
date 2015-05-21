@@ -80,16 +80,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
         this.scoringCommand = scoringCommand;
     }
 
-    public ScoringProcessorCallable(ScoringCommandEntityMgr scoringCommandEntityMgr,
-            ScoringCommandStateEntityMgr scoringCommandStateEntityMgr,
-            ScoringCommandLogService scoringCommandLogService, String appTimeLineWebAppAddress, AlertService alertService) {
-        this.scoringCommandEntityMgr = scoringCommandEntityMgr;
-        this.scoringCommandStateEntityMgr = scoringCommandStateEntityMgr;
-        this.scoringCommandLogService = scoringCommandLogService;
-        this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
-        this.alertService = alertService;
-    }
-
     @Override
     public Long call() throws Exception {
         int result = SUCCESS;
@@ -211,8 +201,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
         StringBuilder clientUrl = new StringBuilder(appTimeLineWebAppAddress);
         if (failedYarnApplicationId != null) {
-            // Currently each step only generates one yarn job anyways so first
-            // failed appId works
             clientUrl.append("/app/").append(failedYarnApplicationId);
             scoringCommandLogService.log(scoringCommand, "Failed job link: " + clientUrl.toString());
         }

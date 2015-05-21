@@ -50,6 +50,9 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
+    
+    @Autowired
+    private ScoringProcessorCallable scoringProcessor;
 
     @Value("${scoring.test.table}")
     private String testInputTable;
@@ -139,13 +142,12 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringCommandLogService.log(scoringCommand, "message.  #%#$%%^$%^$%^$%^");
         scoringCommandLogService.log(scoringCommand, "another message.  #%#$%%^$%^$%^$%^ 12344       .");
 
-        ScoringProcessorCallable callable = new ScoringProcessorCallable(scoringCommandEntityMgr, scoringCommandStateEntityMgr, scoringCommandLogService, "http://app-timeline-server.com", alertService);
-        callable.setScoringCommand(scoringCommand);
+        scoringProcessor.setScoringCommand(scoringCommand);
         String failedAppId = "application_1415144508340_0729";
         ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.SCORE_DATA);
         scoringCommandStateEntityMgr.create(scoringCommandState);
-        PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed(failedAppId));
-        PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
+        PagerDutyTestUtils.confirmPagerDutyIncident(scoringProcessor.handleJobFailed(failedAppId));
+        PagerDutyTestUtils.confirmPagerDutyIncident(scoringProcessor.handleJobFailed());
     }
 
 }

@@ -10,6 +10,8 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -101,8 +103,9 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     @VisibleForTesting
     void cleanTables() {
         List<ScoringCommand> consumedCommands = scoringCommandEntityMgr.getConsumed();
+        DateTime dt = new DateTime(DateTimeZone.UTC);
         for (ScoringCommand scoringCommand : consumedCommands) {
-            if (scoringCommand.getConsumed() != null && scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < System.currentTimeMillis()) {
+            if (scoringCommand.getConsumed() != null && scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < dt.getMillis()) {
                 metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
                 if (enableCleanHdfs)
                     cleanHdfs(scoringCommand);
