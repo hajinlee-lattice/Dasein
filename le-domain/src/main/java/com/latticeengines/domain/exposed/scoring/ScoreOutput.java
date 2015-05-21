@@ -1,114 +1,115 @@
 package com.latticeengines.domain.exposed.scoring;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
 
 @Entity
-@Table(name = "ScoreOutput")
+@IdClass(ScoreOutput.ScoreOutputPK.class)
 public class ScoreOutput{
 
-    @EmbeddedId
-    private ScoreOutputPK scoreOutputPK;
+    @Id
+    @Column(name = "LeadID", nullable = true)
+    private String LeadId;
 
-    @Column(name = "Request_ID", nullable = false)
-    private String requestId;
+    @Id
+    @Column(name = "Play_Display_Name", nullable = true)
+    private String Play_Display_Name;
 
     @Column(name = "Score", nullable = true)
-    private int score;
+    private int Score;
 
     @Column(name = "Bucket_Display_Name", nullable = true)
-    private String bucketDisplayName;
+    private String Bucket_Display_Name;
 
     @Column(name = "RawScore", nullable = true)
-    private float rawScore;
+    private float RawScore;
 
     @Column(name = "Probability", nullable = true)
-    private float probability;
+    private float Probability;
 
     @Column(name = "Lift", nullable = true)
-    private float lift;
+    private float Lift;
  
     @Column(name = "Percentile", nullable = true)
-    private int percentile;
-    
+    private int Percentile;
 
-     
-    public ScoreOutputPK getPK() {
-        return scoreOutputPK;
-    }
-    
-    public void setScoreOutputPK(ScoreOutputPK scoreOutputPK){
-        this.scoreOutputPK = scoreOutputPK;
-    }
-    
-    @Embeddable
-    public static class ScoreOutputPK implements Serializable {
+    public static class ScoreOutputPK{
 
-        private static final long serialVersionUID = 1L;
-        @Column(name = "LeadID", nullable = true)
-        String leadId;
+        @SuppressWarnings("unused")
+        private String LeadId;
 
-        @Column(name = "Play_Display_Name", nullable = true)
-        String modelGUID;
-        
-        public ScoreOutputPK () {}
-        
-        public ScoreOutputPK (String leadId, String modelGUID) {
-            this.leadId = leadId;
-            this.modelGUID = modelGUID;
+        @SuppressWarnings("unused")
+        private String Play_Display_Name;
+
+        public ScoreOutputPK (String LeadId, String Play_Display_Name) {
+            this.LeadId = LeadId;
+            this.Play_Display_Name = Play_Display_Name;
         }
     }
 
+    public String getLeadId(){
+        return LeadId;
+    }
+
+    public void setLeadId(String LeadId){
+        this.LeadId = LeadId;
+    }
+
+    public String getPlay_Display_Name(){
+        return Play_Display_Name;
+    }
+
+    public void setPlay_Display_Name(String Play_Display_Name){
+        this.Play_Display_Name = Play_Display_Name;
+    }
+
     public int getScore(){
-        return this.score;
+        return this.Score;
     }
 
     public void setScore(int score){
-        this.score = score;
+        this.Score = score;
     }
 
     public String getBucketDisplayName(){
-        return this.bucketDisplayName;
+        return this.Bucket_Display_Name;
     }
 
     public void setBucketDisplayName(String bucketDisplayName){
-        this.bucketDisplayName = bucketDisplayName;
+        this.Bucket_Display_Name = bucketDisplayName;
     }
 
     public float getRawScore(){
-        return this.rawScore;
+        return this.RawScore;
     }
 
     public void setRawScore(float rawScore){
-        this.rawScore = rawScore;
+        this.RawScore = rawScore;
     }
 
     public float getProbability(){
-        return this.probability;
+        return this.Probability;
     }
 
     public void setProbability(float probability){
-        this.probability = probability;
+        this.Probability = probability;
     }
 
     public float getLift(){
-        return this.lift;
+        return this.Lift;
     }
 
     public void setLift(float lift){
-        this.lift = lift;
+        this.Lift = lift;
     }
 
     public int getPercentile(){
-        return this.percentile;
+        return this.Percentile;
     }
 
     public void setPercentile(int percentile){
-        this.percentile = percentile;
+        this.Percentile = percentile;
     }
 }
