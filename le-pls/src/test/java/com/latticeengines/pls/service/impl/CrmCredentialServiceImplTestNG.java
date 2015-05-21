@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -24,11 +25,16 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private CrmCredentialService crmService;
 
+    private final String contractId = "PLSTestContract";
+    private final String tenantId = "PLSCrmConfigTestTenant";
+    private final String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
+    private final String fullId = String.format("%s.%s.%s", contractId, tenantId, spaceId);
+
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
-        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId",
-                "spaceId");
+        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                contractId, tenantId, spaceId);
         try {
             camille.delete(path);
         } catch (Exception ex) {
@@ -40,8 +46,8 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     @AfterClass(groups = { "functional" })
     public void afterClass() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
-        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId",
-                "spaceId");
+        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                contractId, tenantId, spaceId);
         camille.delete(path);
     }
 
@@ -53,7 +59,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
-        CrmCredential newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, "contractId.tenantId.spaceId",
+        CrmCredential newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId,
                 Boolean.TRUE, crmCredential);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
 
@@ -61,7 +67,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
-        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, "contractId.tenantId.spaceId", Boolean.FALSE,
+        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE,
                 crmCredential);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
 
@@ -69,7 +75,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential = new CrmCredential();
         crmCredential.setUserName("latticeenginessandbox1_9026948050BD016F376AE6");
         crmCredential.setPassword("41802295835604145500BBDD0011770133777863CA58");
-        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_MARKETO, "contractId.tenantId.spaceId", null, crmCredential);
+        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_MARKETO, fullId, null, crmCredential);
         Assert.assertNotNull(newCrmCredential);
 
         // eloqua
@@ -77,36 +83,36 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setUserName("Matt.Sable");
         crmCredential.setPassword("Lattice1");
         crmCredential.setCompany("TechnologyPartnerLatticeEngines");
-        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_ELOQUA, "contractId.tenantId.spaceId", null, crmCredential);
+        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_ELOQUA, fullId, null, crmCredential);
         Assert.assertNotNull(newCrmCredential);
     }
 
     @Test(groups = "functional", dependsOnMethods = "verifyCredential")
     public void getCredential() {
         CrmCredentialService crmService = new CrmCredentialServiceImpl();
-        CrmCredential newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, "contractId.tenantId.spaceId", Boolean.TRUE);
+        CrmCredential newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
         Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
 
-        newCrmCredential = crmService.getCredential(CrmConstants.CRM_MARKETO, "contractId.tenantId.spaceId", Boolean.TRUE);
+        newCrmCredential = crmService.getCredential(CrmConstants.CRM_MARKETO, fullId, Boolean.TRUE);
         Assert.assertEquals(newCrmCredential.getUserName(), "latticeenginessandbox1_9026948050BD016F376AE6");
 
-        newCrmCredential = crmService.getCredential(CrmConstants.CRM_ELOQUA, "contractId.tenantId.spaceId", Boolean.TRUE);
+        newCrmCredential = crmService.getCredential(CrmConstants.CRM_ELOQUA, fullId, Boolean.TRUE);
         Assert.assertEquals(newCrmCredential.getPassword(), "Lattice1");
     }
 
     @Test(groups = "functional", dependsOnMethods = "getCredential")
     public void removeCredentials() {
         CrmCredentialService crmService = new CrmCredentialServiceImpl();
-        crmService.removeCredentials(CrmConstants.CRM_SFDC, "contractId.tenantId.spaceId", true);
-        crmService.removeCredentials(CrmConstants.CRM_SFDC, "contractId.tenantId.spaceId", false);
-        crmService.removeCredentials(CrmConstants.CRM_MARKETO, "contractId.tenantId.spaceId", true);
-        crmService.removeCredentials(CrmConstants.CRM_ELOQUA, "contractId.tenantId.spaceId", true);
+        crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, true);
+        crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, false);
+        crmService.removeCredentials(CrmConstants.CRM_MARKETO, fullId, true);
+        crmService.removeCredentials(CrmConstants.CRM_ELOQUA, fullId, true);
 
         for (String crmType : Arrays.asList(CrmConstants.CRM_SFDC, CrmConstants.CRM_MARKETO, CrmConstants.CRM_ELOQUA)) {
             boolean exception = false;
             try {
-                crmService.getCredential(crmType, "contractId.tenantId.spaceId", Boolean.TRUE);
+                crmService.getCredential(crmType, fullId, Boolean.TRUE);
             } catch (LedpException e) {
                 exception = true;
             }
@@ -114,7 +120,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
             exception = false;
             try {
-                crmService.getCredential(crmType, "contractId.tenantId.spaceId", Boolean.FALSE);
+                crmService.getCredential(crmType, fullId, Boolean.FALSE);
             } catch (LedpException e) {
                 exception = true;
             }

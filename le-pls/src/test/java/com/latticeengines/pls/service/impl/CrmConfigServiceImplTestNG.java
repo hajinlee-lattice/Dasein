@@ -31,6 +31,8 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Value("${pls.dataloader.rest.api}")
     private String dataLoaderUrl;
 
+    private final String tenant = "PLSCrmConfigTestTenant";
+
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         String url = dataLoaderUrl + "/CreateDLTenant";
@@ -40,22 +42,22 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception ex) {
         }
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("tenantName", "contractId.tenantId.spaceId");
-        parameters.put("tenantAlias", "contractId.tenantId.spaceId");
+        parameters.put("tenantName", tenant);
+        parameters.put("tenantAlias", tenant);
         parameters.put("ownerEmail", "richard.liu@lattice-engines.com");
         parameters.put("visiDBLocation", "ServerName=127.0.0.1");
-        parameters.put("visiDBName", "contractId.tenantId.spaceId");
-        parameters.put("dmDeployment", "DMDeployment");
-        parameters.put("contractExternalID", "contractId.tenantId.spaceId");
+        parameters.put("visiDBName", tenant);
+        parameters.put("dmDeployment", tenant);
+        parameters.put("contractExternalID", "PLSTestContract");
         parameters.put("createNewVisiDB", "true");
 
         ((CrmConfigServiceImpl) crmService).excuteHttpRequest(url, parameters);
 
         url = dataLoaderUrl + "/InstallVisiDBStructureFile_Sync";
-        uploadFile(url, "contractId.tenantId.spaceId", "Template_MKTO.specs");
+        uploadFile(url, tenant, "Template_MKTO.specs");
 
         url = dataLoaderUrl + "/InstallConfigFile_Sync";
-        uploadFile(url, "contractId.tenantId.spaceId", "Template_MKTO.config");
+        uploadFile(url, tenant, "Template_MKTO.config");
 
     }
 
@@ -83,7 +85,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
     public void afterClass() throws Exception {
         String url = dataLoaderUrl + "/DeleteDLTenant";
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("tenantName", "contractId.tenantId.spaceId");
+        parameters.put("tenantName", tenant);
         parameters.put("deleteVisiDBOption", "3");
         ((CrmConfigServiceImpl) crmService).excuteHttpRequest(url, parameters);
     }
@@ -91,8 +93,8 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void config() {
 
-        CrmCredential crmCredential = new CrmCredential();
-        CrmConfig crmConfig = new CrmConfig();
+        CrmCredential crmCredential;
+        CrmConfig crmConfig;
 
         // marketo
         crmCredential = new CrmCredential();
@@ -100,7 +102,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setPassword("41802295835604145500BBDD0011770133777863CA58");
         crmConfig = new CrmConfig();
         crmConfig.setCrmCredential(crmCredential);
-        crmService.config("marketo", "contractId.tenantId.spaceId", crmConfig);
+        crmService.config("marketo", "PLSTestContract." + tenant + ".Production", crmConfig);
 
     }
 
