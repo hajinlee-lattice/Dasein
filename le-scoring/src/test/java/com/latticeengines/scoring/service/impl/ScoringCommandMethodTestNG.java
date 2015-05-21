@@ -2,6 +2,8 @@ package com.latticeengines.scoring.service.impl;
 
 import java.sql.Timestamp;
 
+import javax.annotation.Resource;
+
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +12,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.monitor.alerts.service.impl.BaseAlertServiceImpl;
 import com.latticeengines.monitor.alerts.service.impl.PagerDutyTestUtils;
+import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
@@ -39,6 +43,9 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
+    @Resource(name = "modelingAlertService")
+    private BaseAlertServiceImpl alertService;
+
     @Autowired
     private MetadataService metadataService;
 
@@ -66,6 +73,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringManager.setEnableCleanHdfs(true);
         scoringManager.setCleanUpInterval(cleanUpInterval);
         scoringManager.init(applicationContext);
+        alertService.enableTestMode();
     }
 
     @Test(groups = "functional")
@@ -123,21 +131,21 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         assertEquals(metadataService.showTable(scoringJdbcTemplate, outputTable).size(), 0);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testHandleJobFailed() throws ParseException {
-        ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "some_table", 0,
+        ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, inputTable, 0,
                 100, new Timestamp(System.currentTimeMillis()));
-
         scoringCommandEntityMgr.create(scoringCommand);
 
         scoringCommandLogService.log(scoringCommand, "message.  #%#$%%^$%^$%^$%^");
         scoringCommandLogService.log(scoringCommand, "another message.  #%#$%%^$%^$%^$%^ 12344       .");
 
-        ScoringProcessorCallable callable = new ScoringProcessorCallable();
+        ScoringProcessorCallable callable = new ScoringProcessorCallable(scoringCommandEntityMgr, scoringCommandStateEntityMgr, scoringCommandLogService, "http://app-timeline-server.com", alertService);
         callable.setScoringCommand(scoringCommand);
         String failedAppId = "application_1415144508340_0729";
+        ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.SCORE_DATA);
+        scoringCommandStateEntityMgr.create(scoringCommandState);
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed(failedAppId));
-
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
     }
 

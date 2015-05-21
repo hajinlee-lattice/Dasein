@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -19,12 +21,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandLog;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
+import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.service.ScoringCommandLogService;
@@ -58,6 +62,9 @@ public class ScoringProcessorCallable implements Callable<Long> {
     @Autowired
     private JobService jobService;
 
+    @Resource(name = "modelingAlertService")
+    private AlertService alertService;
+
     @SuppressWarnings("unused")
     private Configuration yarnConfiguration;
 
@@ -73,13 +80,24 @@ public class ScoringProcessorCallable implements Callable<Long> {
         this.scoringCommand = scoringCommand;
     }
 
+    public ScoringProcessorCallable(ScoringCommandEntityMgr scoringCommandEntityMgr,
+            ScoringCommandStateEntityMgr scoringCommandStateEntityMgr,
+            ScoringCommandLogService scoringCommandLogService, String appTimeLineWebAppAddress, AlertService alertService) {
+        this.scoringCommandEntityMgr = scoringCommandEntityMgr;
+        this.scoringCommandStateEntityMgr = scoringCommandStateEntityMgr;
+        this.scoringCommandLogService = scoringCommandLogService;
+        this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
+        this.alertService = alertService;
+    }
+
     @Override
     public Long call() throws Exception {
         int result = SUCCESS;
         try {
             log.info("Begin scheduled work on " + ScoringCommandLogServiceImpl.SCORINGCOMMAND_ID_LOG_PREFIX + ":"
                     + scoringCommand.getPid()); // Need this line to associate
-                                                // scoringCommandId with threadId
+                                                // scoringCommandId with
+                                                // threadId
                                                 // in
                                                 // log4j output.
             executeWorkflow();
@@ -106,7 +124,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
             executeYarnStep(ScoringCommandStep.LOAD_DATA);
             scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
         } else { // scoringCommand IN_PROGRESS
-            if(scoringCommandState.getStatus().equals(FinalApplicationStatus.UNDEFINED))
+            if (scoringCommandState.getStatus().equals(FinalApplicationStatus.UNDEFINED))
                 return;
             String yarnApplicationId = scoringCommandState.getYarnApplicationId();
             JobStatus jobStatus = jobService.getJobStatus(yarnApplicationId);
@@ -213,9 +231,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
             }
         }
 
-        // return
-        // alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(),
-        // clientUrl.toString(), details);
-        return clientUrl.toString();
+        return alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(), details);
     }
 }
