@@ -51,7 +51,14 @@
         },
         {
           "Node": "PermanentStoreOption",
-          "Data": "Master"
+          "Data": "Master",
+          "Metadata": {
+            "Type": "options",
+            "Options": [
+              "Master",
+              "StandAlone"
+            ]
+          }
         },
         {
           "Node": "PermanentStorePath",

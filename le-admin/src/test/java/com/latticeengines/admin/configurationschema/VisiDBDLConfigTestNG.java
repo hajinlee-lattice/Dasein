@@ -46,7 +46,7 @@ public class VisiDBDLConfigTestNG extends ConfigurationSchemaTestNGBase {
         Assert.assertEquals(tenantAlias, "");
 
         String visiDBName = dir.get("/VisiDB").getChild("VisiDBName").getDocument().getData();
-        Assert.assertEquals(visiDBName, "test_tenant");
+        Assert.assertEquals(visiDBName, "");
 
         String visiDBFileDir = dir.get("/VisiDB").getChild("VisiDBFileDirectory").getDocument().getData();
         Assert.assertEquals(visiDBFileDir, "");

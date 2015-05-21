@@ -4,7 +4,8 @@
     [
       { "Node": "VisiDB", 
         "Children" : [
-            { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"]}}
+            { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"]}},
+            { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}}
          ]
       }
     ]
