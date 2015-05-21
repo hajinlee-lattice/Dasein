@@ -5,7 +5,7 @@
     { "Node": "VisiDB", 
       "Children" : [
         { "Node": "CreateNewVisiDB", "Data": true },
-        { "Node": "VisiDBName", "Data": "test_tenant"},
+        { "Node": "VisiDBName", "Data": ""},
         { "Node": "ServerName", "Data": "bodcdevvint207" },
         { "Node": "VisiDBFileDirectory", "Data": ""},
         { "Node": "CacheLimit", "Data": 8192},
