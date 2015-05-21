@@ -288,10 +288,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         node.getChild("VisiDBName").getDocument().setData(visiDBName);
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("PermanentStorePath").getDocument().setData(permStore);
+        node.getChild("PermanentStorePath").getDocument().setData(permStore  + "/" + visiDBServerName.toUpperCase());
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        node.getChild("DataStorePath").getDocument().setData(dataStore);
+        node.getChild("DataStorePath").getDocument().setData(dataStore  + "/" + tenantId);
         SerializableDocumentDirectory vdbdlConfig = new SerializableDocumentDirectory(confDir);
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 

@@ -34,6 +34,12 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
     private static final int STANDALONE = 0;
 
+    private String backupFolder;
+
+    private String launchStatusFolder;
+
+    private String launchFolder;
+
     public VisiDBDLInstaller() {
         super(VisiDBDLComponent.componentName);
     }
@@ -55,14 +61,17 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String createNewVisiDB = getChild(configDir, "VisiDB", "CreateNewVisiDB").getDocument().getData();
         String caseSensitive = getChild(configDir, "VisiDB", "CaseSensitive").getDocument().getData();
         String visiDBName = getChild(configDir, "VisiDB", "VisiDBName").getDocument().getData();
+        String visiDBServerName = getChild(configDir, "VisiDB", "ServerName").getDocument().getData();
         String visiDBFileDirectory = getChild(configDir, "VisiDB", "VisiDBFileDirectory").getDocument().getData();
         String cacheLimit = getChild(configDir, "VisiDB", "CacheLimit").getDocument().getData();
         String diskspaceLimit = getChild(configDir, "VisiDB", "DiskspaceLimit").getDocument().getData();
-        String permanentStoreOption = getChild(configDir, "VisiDB", "PermanentStoreOption").getDocument().getData();
+        String permanentStoreOption = getChild(configDir, "VisiDB", "PermanentStoreOption").getDocument().getData()  + "/" + visiDBServerName.toUpperCase();
         String permanentStorePath = getChild(configDir, "VisiDB", "PermanentStorePath").getDocument().getData();
-        String visiDBServerName = getChild(configDir, "VisiDB", "ServerName").getDocument().getData();
         String ownerEmail = getChild(configDir, "DL", "OwnerEmail").getDocument().getData();
-        String dataStorePath = getChild(configDir, "DL", "DataStorePath").getDocument().getData();
+        String dataStorePath = getChild(configDir, "DL", "DataStorePath").getDocument().getData() + "/" + dmDeployment;
+        backupFolder = dataStorePath + "/backup";
+        launchFolder = dataStorePath + "/launch";
+        launchStatusFolder = dataStorePath + "/status";
 
         if (StringUtils.isEmpty(tenantAlias)) {
             tenantAlias = tenant;
@@ -90,7 +99,8 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         .createNewVisiDB(Boolean.parseBoolean(createNewVisiDB))
                         .caseSensitive(Boolean.parseBoolean(caseSensitive)).cacheLimit(Integer.parseInt(cacheLimit))
                         .diskspaceLimit(Integer.parseInt(diskspaceLimit)).permanentStoreOption(permStoreOpt)
-                        .permanentStorePath(permanentStorePath);
+                        .permanentStorePath(permanentStorePath).backupFolder(backupFolder).launchFolder(launchFolder)
+                        .launchStatusFolder(launchStatusFolder);
                 CreateVisiDBDLRequest postRequest = builder.build();
                 response = createTenant(postRequest, getHeaders(), dlUrl);
                 status = response.getStatus();
@@ -109,19 +119,20 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
     }
 
     private void createDataStoreFolder(String dataStorePath, String dmDeployment) {
-        new File(dataStorePath + "/" + dmDeployment + "/backup").mkdirs();
-        new File(dataStorePath + "/" + dmDeployment + "/launch").mkdirs();
-        new File(dataStorePath + "/" + dmDeployment + "/status").mkdirs();
+        new File(backupFolder).mkdirs();
+        new File(launchFolder).mkdirs();
+        new File(launchStatusFolder).mkdirs();
     }
 
     private void createPermstoreFolder(String permanentStorePath, String visiDBServerName) {
-        new File(permanentStorePath + "/" + visiDBServerName.toUpperCase()).mkdir();
+        new File(permanentStorePath).mkdir();
     }
 
-    public DLRestResult getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers, String dlUrl) throws IOException {
+    public DLRestResult getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers, String dlUrl)
+            throws IOException {
         String jsonString = JsonUtils.serialize(getRequest);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/GetDLTenantSettings",
-                true, getHeaders(), jsonString);
+        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
+                dlUrl + "/DLRestService/GetDLTenantSettings", true, getHeaders(), jsonString);
         return JsonUtils.deserialize(response, DLRestResult.class);
     }
 
