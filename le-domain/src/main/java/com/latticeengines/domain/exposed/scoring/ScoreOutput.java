@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.scoring;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -35,7 +37,9 @@ public class ScoreOutput{
     @Column(name = "Percentile", nullable = true)
     private int Percentile;
 
-    public static class ScoreOutputPK{
+    public static class ScoreOutputPK implements Serializable{
+
+        private static final long serialVersionUID = 1L;
 
         @SuppressWarnings("unused")
         private String LeadId;
