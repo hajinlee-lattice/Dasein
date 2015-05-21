@@ -280,13 +280,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
         // VisiDBDL
-        String visiDBName = "TestVisiDB";
         DocumentDirectory confDir =
                 serviceService.getDefaultServiceConfig(VisiDBDLComponent.componentName).getDocumentDirectory();
         confDir.makePathsLocal();
         DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
-        node.getChild("VisiDBName").getDocument().setData(visiDBName);
-        node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
         node.getChild("PermanentStorePath").getDocument().setData(permStore  + "/" + visiDBServerName.toUpperCase());
         node = confDir.get(new Path("/DL"));

@@ -46,13 +46,10 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     private String tenant;
 
-    private String visiDBName;
-
     @BeforeClass(groups = { "deployment", "functional" })
     @Override
     public void setup() throws Exception {
         super.setup();
-        visiDBName = "TestVisiDB";
         tenant = tenantId;
         SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
         spaceConfig.setDlAddress(dlUrl);
@@ -73,13 +70,12 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         super.tearDown();
     }
 
-    public DocumentDirectory constructVisiDBDLInstaller(String visiDBName) {
+    public DocumentDirectory constructVisiDBDLInstaller() {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
         // modify the default config
         DocumentDirectory.Node node;
         node = confDir.get(new Path("/VisiDB"));
-        node.getChild("VisiDBName").getDocument().setData(visiDBName);
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
         node.getChild("PermanentStorePath").getDocument().setData(permStore  + "/" + visiDBServerName.toUpperCase());
         node = confDir.get(new Path("/DL"));
@@ -98,7 +94,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         String url = String.format("%s/admin/internal/", getRestHostPort());
         int filesInPermStore = magicRestTemplate.getForObject(url + "permstore", List.class).size();
 
-        bootstrap(constructVisiDBDLInstaller(visiDBName));
+        bootstrap(constructVisiDBDLInstaller());
         BootstrapState state = waitForSuccess(getServiceName());
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
@@ -113,7 +109,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Test(groups = "functional")
     public void testInstallationFunctional() throws InterruptedException, IOException {
-        bootstrap(constructVisiDBDLInstaller(visiDBName));
+        bootstrap(constructVisiDBDLInstaller());
 
         // wait a while, then test your installation
         BootstrapState state = waitForSuccess(getServiceName());

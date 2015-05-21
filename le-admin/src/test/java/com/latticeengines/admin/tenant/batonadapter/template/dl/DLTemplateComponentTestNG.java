@@ -42,13 +42,10 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
 
     private String tenant;
 
-    private String visiDBName;
-
     @BeforeClass(groups = { "deployment", "functional" })
     @Override
     public void setup() throws Exception {
         super.setup();
-        visiDBName = "TestVisiDB";
         tenant = tenantId;
         SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
         spaceConfig.setDlAddress(dlUrl);
@@ -65,7 +62,7 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
 
     public void installDLTemplate(){
         Map<String, Map<String, String>> properties = new HashMap<>();
-        DocumentDirectory confDir = visiDBDLComponentTestNG.constructVisiDBDLInstaller(visiDBName);
+        DocumentDirectory confDir = visiDBDLComponentTestNG.constructVisiDBDLInstaller();
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(confDir);
         properties.put(visiDBDLComponentTestNG.getServiceName(), sDir.flatten());
 
