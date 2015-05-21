@@ -81,9 +81,9 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         }
 
         int permStoreOpt = MASTER;
-        if (permanentStoreOption.toLowerCase().equals("master")) {
+        if (permanentStoreOption.equals("Master")) {
             permStoreOpt = MASTER;
-        } else if (permanentStoreOption.toLowerCase().equals("standalone")) {
+        } else if (permanentStoreOption.equals("StandAlone")) {
             permStoreOpt = STANDALONE;
         }
 
