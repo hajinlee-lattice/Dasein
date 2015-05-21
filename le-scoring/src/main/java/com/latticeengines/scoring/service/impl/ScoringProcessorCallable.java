@@ -181,8 +181,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
     }
 
     private void handleAllJobsSucceeded() {
-        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
-                .findLastStateByScoringCommand(scoringCommand);
+        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr.findLastStateByScoringCommand(scoringCommand);
         scoringCommandLogService.logCompleteStep(scoringCommand, scoringCommandState.getScoringCommandStep(),
                 ScoringCommandStatus.SUCCESS);
         ScoringCommandStep nextScoringCommandStep = scoringCommandState.getScoringCommandStep().getNextStep();
