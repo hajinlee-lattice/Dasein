@@ -4,14 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.ServiceService;
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -22,15 +26,27 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     @Autowired
     private ServiceService serviceService;
 
-    @Test(groups = "deployment")
+    @Autowired
+    private TenantService tenantService;
+
+    @Value("${admin.test.dl.url}")
+    private String dlUrl;
+
+    @Test(groups = "deployment", enabled = false)
     public void testInstallation() {
+        SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
+        spaceConfiguration.setDlAddress(dlUrl);
+        spaceConfiguration.setTopology(CRMTopology.ELOQUA);
+        tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfiguration);
+
         SerializableDocumentDirectory jamsConfig = new SerializableDocumentDirectory(getOverrideProperties());
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
         jamsConfig.applyMetadata(metaDir);
         jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
 
         // send to bootstrapper message queue
-        bootstrap(SerializableDocumentDirectory.deserialize(jamsConfig));
+        DocumentDirectory confDir = SerializableDocumentDirectory.deserialize(jamsConfig);
+        bootstrap(confDir);
 
         // wait a while, then test your installation
         BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, BardJamsComponent.componentName);
@@ -44,7 +60,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         } catch (Exception e) {
             // ignore
         }
-        bootstrap(SerializableDocumentDirectory.deserialize(jamsConfig));
+        bootstrap(confDir);
         // wait a while, then test your installation
         state = waitUntilStateIsNotInitial(contractId, tenantId, BardJamsComponent.componentName);
         try {

@@ -67,7 +67,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     protected static final String ADTesterUsername = "testuser1";
     protected static final String ADTesterPassword = "Lattice1";
-    protected static final String TestTenantId = "TestTenant";
+    protected static final String TestTenantId = "AdminFunctionalTestTenant";
     protected static final BatonService batonService = new BatonServiceImpl();
     private static boolean ZKIsClean = false;
 

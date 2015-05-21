@@ -107,12 +107,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private String dataStore;
 
     /**
-     * In setup, orchestrate 2 full tenants.
-     * The first one is the main testing tenant.
-     * The second one uses only default configuration, to make sure default configuration can work out of box.
-     *
-     * @throws Exception
-     */
+     * In setup, orchestrate a full tenant.
+     **/
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         loginAD();
@@ -135,9 +131,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     }
 
     /**
-     * Delete the two testing tenant in both ZK and each component.
-     *
-     * @throws Exception
+     * Delete the testing tenant in both ZK and each component.
      */
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
