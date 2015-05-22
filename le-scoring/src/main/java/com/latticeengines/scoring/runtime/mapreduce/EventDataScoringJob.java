@@ -44,6 +44,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
+    private static final String scoringPythonPath = "/app/scoring/scripts/scoring.py";
+
     private static final Log log = LogFactory.getLog(EventDataScoringJob.class);
  
     public EventDataScoringJob(Configuration config) {
@@ -111,6 +113,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
                 mrJob.setCacheFiles(cacheFiles);
             }
             mrJob.addCacheFile(new URI(dataTypeFilePath));
+            mrJob.addCacheFile(new URI(scoringPythonPath));
 
             if (properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()) != null) {
                 String[] cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()).split(
