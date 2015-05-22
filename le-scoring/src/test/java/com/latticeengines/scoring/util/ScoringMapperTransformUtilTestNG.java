@@ -21,7 +21,6 @@
 //import org.json.simple.parser.ParseException;
 //import org.testng.annotations.Test;
 //
-//import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 //import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
 //
 //public class ScoringMapperTransformUtilTestNG {
@@ -34,17 +33,17 @@
 //			+ "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
 //			+ "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
 //
-//	//@Test(groups = "unit")
+//	@Test(groups = "unit")
 //	public void testParseDatatypeFile() throws IOException {
 //	    URL url = ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc");
 //		String fileName = url.getFile();
 //		Path path = new Path(fileName);
 //		JSONObject datatypeObj = ScoringMapperTransformUtil.parseDatatypeFile(path);
-//		assertTrue(datatypeObj.size() == 7);
-//		assertTrue(datatypeObj.get("ModelingID").equals(new Long(1)));
+//		assertTrue(datatypeObj.size() == 7, "datatypeObj should have 7 objects");
+//		assertTrue(datatypeObj.get("ModelingID").equals(new Long(1)), "parseDatatypeFile should be successful");
 //	}
 //	
-//	//@Test(groups = "unit")
+//	@Test(groups = "unit")
 //	public void testParseModelFiles() {
 //		String[] targetFiles = {"encoder.py", "pipeline.py", "pipelinefwk.py", "pipelinesteps.py", "scoringengine.py", "STPipelineBinary.p"};
 //	    URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
@@ -53,12 +52,12 @@
 //		
 //		HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
 //		ScoringMapperTransformUtil.parseModelFiles(models, path);
-//		assertTrue(models.size() == 1);
+//		assertTrue(models.size() == 1, "models should have 1 model");
 //		//assertTrue(models.containsRightContents("2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json"));
 //		
 //		for (int i = 0; i < targetFiles.length; i++) {
 //			System.out.println("Current target file is " + targetFiles[i]);
-//			assertTrue(compareFiles(targetFiles[i]));
+//			assertTrue(compareFiles(targetFiles[i]), "parseModelFiles should be successful");
 //		}
 //	
 //	}
@@ -101,7 +100,7 @@
 //		return filesAreSame;
 //	}
 //	
-//	//@Test(groups = "unit")
+//	@Test(groups = "unit")
 //	public void testManipulateLeadFile() {
 //		
 //        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
@@ -116,21 +115,16 @@
 //		
 //		String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 //		ArrayList<String> recordList = leadInputRecordMap.get(modelID);
-//		System.out.println("haha");
 //		assertTrue(leadInputRecordMap.size() == 1);
-//		System.out.println("jaja");
 //		assertTrue(recordList.size() == 1);
-//		System.out.println("hoho");
 //		String record = recordList.get(0);
 //		JSONParser parser = new JSONParser();
 //		try {
 //			JSONObject j = (JSONObject) parser.parse(record);
 //			assertTrue(j.get("key").equals("837394"));
-//			System.out.println("lele");
 //			JSONArray arr = (JSONArray) j.get("value"); 
 //			// model.json file has 194 columns for metadata
 //			assertTrue(arr.size() == 194);
-//			System.out.println("hehe");
 //			assertTrue(containsRightContents(arr));
 //		} catch (ParseException e) {
 //			e.printStackTrace();
@@ -140,7 +134,6 @@
 //	private boolean containsRightContents(JSONArray arr) {
 //		boolean result = true;
 //		for (int i = 0; i < arr.size() && result; i++) {
-//			System.out.println("the current index is " + i);
 //			JSONObject obj = (JSONObject) arr.get(i);
 //			String key = (String)obj.get("Key");
 //			switch (key) {
@@ -174,6 +167,49 @@
 //			}
 //		}
 //		return result;
+//	}
+//	
+//	@Test(groups = "unit")
+//	public void testWriteToLeadInputFiles() {
+//		HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
+//		ArrayList<String> records1 = new ArrayList<String>();
+//		records1.add("value11\n");
+//		records1.add("value12\n");
+//		records1.add("value13\n");
+//		leadInputRecordMap.put("model1", records1);
+//		ArrayList<String> records2 = new ArrayList<String>();
+//		records2.add("value21\n");
+//		records2.add("value22\n");
+//		records2.add("value23\n");
+//		leadInputRecordMap.put("model2", records2);
+//		ScoringMapperTransformUtil.writeToLeadInputFiles(leadInputRecordMap, 2);
+//		// check the files
+//		File f1 = new File("model1-0");
+//		File f2 = new File("model1-1");
+//		File f3 = new File("model2-0");
+//		File f4 = new File("model2-1");
+//		assertTrue(f1.exists(), "f1 should be existed");
+//		assertTrue(f2.exists(), "f2 should be existed");
+//		assertTrue(f3.exists(), "f3 should be existed");
+//		assertTrue(f4.exists(), "f4 should be existed");
+//		try {
+//			String f1Contents = FileUtils.readFileToString(f1);
+//			String f2Contents = FileUtils.readFileToString(f2);
+//			String f3Contents = FileUtils.readFileToString(f3);
+//			String f4Contents = FileUtils.readFileToString(f4);
+//			assertTrue(f1Contents.equals("value11\nvalue12\n"), "f1 should have the right contents");
+//			assertTrue(f2Contents.equals("value13\n"), "f2 should have the right contents");
+//			assertTrue(f3Contents.equals("value21\nvalue22\n"), "f3 should have the right contents");
+//			assertTrue(f4Contents.equals("value23\n"), "f4 should have the right contents");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		// delete the files
+//		f1.delete();
+//		f2.delete();
+//		f3.delete();
+//		f4.delete();
 //	}
 //	
 //}
