@@ -141,7 +141,11 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         response = createTenant(postRequest, getHeaders(), dlUrl);
                         status = response.getStatus();
                         if (status != SUCCESS) {
-                            throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
+                            if (!response.getErrorMessage().contains("already exists.")) {
+                                throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
+                            } else {
+                                log.info("Tenant " + tenant + " has already been installed in VisiDB/Dataloader");
+                            }
                         }
                     } else {
                         throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
