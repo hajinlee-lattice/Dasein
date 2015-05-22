@@ -1,5 +1,5 @@
 #!/bin/bash
-rm -rf /tmp/app
+rm -rf /tmp/app/dataplatform
 rm -rf /tmp/datascientist
-hadoop fs -rm -f -r /app
+hadoop fs -rm -f -r /app/dataplatform
 hadoop fs -rm -f -r /datascientist
