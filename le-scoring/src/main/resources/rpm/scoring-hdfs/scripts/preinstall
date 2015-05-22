@@ -1,0 +1,3 @@
+#!/bin/bash
+rm -rf /tmp/app/scoring
+hadoop fs -rm -f -r /app/scoring

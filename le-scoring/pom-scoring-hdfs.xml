@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-scoring-hdfs</artifactId>
+    <packaging>rpm</packaging>
+    <description>LE DATAPLATFORM NO DEPENDENCY RPM</description>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>1.0.32-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
+    <properties>
+        <mapping.username>yarn</mapping.username>
+        <mapping.groupname>hdfs</mapping.groupname>
+        <pre.install.script>preinstall</pre.install.script>
+        <post.install.script>postinstall</post.install.script>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>devcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <dataplatform.properties.path>conf/env/devcluster</dataplatform.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/devcluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/devcluster</eai.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>integration</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>intcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <dataplatform.properties.path>conf/env/intcluster</dataplatform.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/intcluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/intcluster</eai.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>qa</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qacluster</value>
+                </property>
+            </activation>
+            <properties>
+                <dataplatform.properties.path>conf/env/qacluster</dataplatform.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/qacluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/qacluster</eai.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>production</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/prodcluster</eai.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>buildmachine</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>buildmachine</value>
+                </property>
+            </activation>
+            <properties>
+                <dataplatform.properties.path>conf/env/buildmachine</dataplatform.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/buildmachine</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/buildmachine</eai.properties.path>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1-alpha-4</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- license>GPL (c) 2005, SWWDC</license -->
+                    <!--distribution>Trash 2005</distribution -->
+                    <group>Application/Collectors</group>
+                    <!-- prefix>/usr/local</prefix -->
+                    <changelogFile>src/main/resources/rpm/dependency/changelog</changelogFile>
+                    <defineStatements>
+                        <defineStatement>_unpackaged_files_terminate_build
+                            0</defineStatement>
+                    </defineStatements>
+                    <mappings>
+                        <mapping>
+                            <directory>/tmp/app/dataplatform/scripts</directory>
+                            <filemode>644</filemode>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
+                            <sources>
+                                <source>
+                                    <location>src/main/python/scoring.py</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                    </mappings>
+                    <preinstallScriptlet>
+                        <scriptFile>src/main/resources/rpm/scoring-hdfs/scripts/${pre.install.script}</scriptFile>
+                    </preinstallScriptlet>
+                    <postinstallScriptlet>
+                        <scriptFile>src/main/resources/rpm/scoring-hdfs/scripts/${post.install.script}</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
+                    </postinstallScriptlet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
