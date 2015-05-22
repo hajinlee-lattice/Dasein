@@ -5,6 +5,7 @@ import static com.latticeengines.admin.dynamicopts.impl.DataStoreProvider.DLFold
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,8 +83,8 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String permanentStorePath = permStoreProvider.toRemoteAddr(localPermanentStorePath);
         String dataStorePath = dataStoreProvider.toRemoteAddr(localDataStorePath);
 
-        dataStorePath = dataStorePath + "/" + dmDeployment;
-        permanentStorePath += "/" + visiDBServerName.toUpperCase();
+        dataStorePath = StringEscapeUtils.unescapeJava(dataStorePath + "\\" + dmDeployment);
+        permanentStorePath = StringEscapeUtils.unescapeJava( permanentStorePath + "\\" + visiDBServerName.toUpperCase());
 
         if (StringUtils.isEmpty(tenantAlias)) {
             tenantAlias = tenant;
@@ -106,7 +107,6 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
             String errorMessage = response.getErrorMessage();
 
             if (status != SUCCESS && !StringUtils.isEmpty(errorMessage) && errorMessage.contains("does not exist")) {
-                createPermstoreFolder(localPermanentStorePath, visiDBServerName);
                 createDataStoreFolder(localDataStorePath, dmDeployment);
                 CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, dmDeployment,
                         contractExternalID);
@@ -114,42 +114,19 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         .visiDBLocation("ServerName=" + visiDBServerName).visiDBFileDirectory(visiDBFileDirectory)
                         .createNewVisiDB(Boolean.parseBoolean(createNewVisiDB))
                         .caseSensitive(Boolean.parseBoolean(caseSensitive)).cacheLimit(Integer.parseInt(cacheLimit))
-                        .diskspaceLimit(Integer.parseInt(diskspaceLimit)).permanentStoreOption(permStoreOpt)
-                        .permanentStorePath(permanentStorePath)
+                        .diskspaceLimit(Integer.parseInt(diskspaceLimit))
                         .backupFolder(dataStorePath + "/" + DLFolder.BACKUP.toPath())
                         .launchFolder(dataStorePath + "/" + DLFolder.LAUNCH.toPath())
                         .launchStatusFolder(dataStorePath + "/" + DLFolder.STATUS.toPath());
+                if (Boolean.parseBoolean(createNewVisiDB)) {
+                    createPermstoreFolder(localPermanentStorePath, visiDBServerName);
+                    builder.permanentStoreOption(permStoreOpt).permanentStorePath(permanentStorePath);
+                }
                 CreateVisiDBDLRequest postRequest = builder.build();
                 response = createTenant(postRequest, getHeaders(), dlUrl);
                 status = response.getStatus();
                 if (status != SUCCESS) {
-                    if (response.getErrorMessage().contains("VisiDB") && response.getErrorMessage().contains("already exists.")) {
-                        builder = new CreateVisiDBDLRequest.Builder(tenant, dmDeployment,
-                                contractExternalID);
-                        builder.tenantAlias(tenantAlias).ownerEmail(ownerEmail).visiDBName(visiDBName)
-                                .visiDBLocation("ServerName=" + visiDBServerName)
-                                .visiDBFileDirectory(visiDBFileDirectory)
-                                .createNewVisiDB(false).caseSensitive(Boolean.parseBoolean(caseSensitive))
-                                .cacheLimit(Integer.parseInt(cacheLimit))
-                                .diskspaceLimit(Integer.parseInt(diskspaceLimit))
-                                .permanentStoreOption(permStoreOpt)
-                                .permanentStorePath(permanentStorePath)
-                                .backupFolder(dataStorePath + "/" + DLFolder.BACKUP.toPath())
-                                .launchFolder(dataStorePath + "/" + DLFolder.LAUNCH.toPath())
-                                .launchStatusFolder(dataStorePath + "/" + DLFolder.STATUS.toPath());
-                        postRequest = builder.build();
-                        response = createTenant(postRequest, getHeaders(), dlUrl);
-                        status = response.getStatus();
-                        if (status != SUCCESS) {
-                            if (!response.getErrorMessage().contains("already exists.")) {
-                                throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
-                            } else {
-                                log.warn("Tenant " + tenant + " has already been installed in VisiDB/Dataloader");
-                            }
-                        }
-                    } else {
-                        throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
-                    }
+                    throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
                 }
                 log.info("Tenant " + tenant + " has been successfully created in VisiDB/Dataloader");
             } else if (StringUtils.isEmpty(errorMessage) && status == SUCCESS) {
@@ -167,6 +144,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
     }
 
     private void createPermstoreFolder(String permanentStorePath, String visiDBServerName) {
+        permStoreProvider.deleteVDBFolder(permanentStorePath, visiDBServerName.toUpperCase());
         permStoreProvider.createVDBFolder(permanentStorePath, visiDBServerName.toUpperCase());
     }
 

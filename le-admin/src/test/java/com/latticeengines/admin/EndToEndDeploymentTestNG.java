@@ -53,9 +53,8 @@ import com.latticeengines.security.exposed.service.UserService;
 public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     private final static String contractId = "EndToEndTestContract";
-    private final static String[] tenantIds = new String[]{"EndToEndTenant", "EndToEndDefaultTenant"};
-    private final static String[] tenantNames =
-            new String[]{"Global Test Tenant", "Global Test Tenant Default"};
+    private final static String[] tenantIds = new String[]{"EndToEndTenant"};
+    private final static String[] tenantNames = new String[]{"Global Test Tenant"};
 
     @Autowired
     private TenantService tenantService;
