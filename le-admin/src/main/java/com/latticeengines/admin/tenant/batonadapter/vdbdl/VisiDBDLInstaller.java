@@ -117,10 +117,11 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         .diskspaceLimit(Integer.parseInt(diskspaceLimit))
                         .backupFolder(dataStorePath + "/" + DLFolder.BACKUP.toPath())
                         .launchFolder(dataStorePath + "/" + DLFolder.LAUNCH.toPath())
-                        .launchStatusFolder(dataStorePath + "/" + DLFolder.STATUS.toPath());
+                        .launchStatusFolder(dataStorePath + "/" + DLFolder.STATUS.toPath())
+                        .permanentStoreOption(permStoreOpt);
                 if (Boolean.parseBoolean(createNewVisiDB)) {
                     createPermstoreFolder(localPermanentStorePath, visiDBServerName);
-                    builder.permanentStoreOption(permStoreOpt).permanentStorePath(permanentStorePath);
+                    builder.permanentStorePath(permanentStorePath);
                 }
                 CreateVisiDBDLRequest postRequest = builder.build();
                 response = createTenant(postRequest, getHeaders(), dlUrl);
