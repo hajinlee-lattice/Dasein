@@ -293,7 +293,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
 
     function changeComponentToMessage(component) {
         if (component.hasOwnProperty("State") && component.State.state === "ERROR") {
-            component.Message = TenantUtility.parseBootstrapErrorMsg(component.State.errorMessage) + " (see full stacktrace in console log)";
+            component.Message = component.State.errorMessage;
         }
         return component;
     }
