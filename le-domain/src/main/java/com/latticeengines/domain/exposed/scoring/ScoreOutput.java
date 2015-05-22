@@ -47,9 +47,9 @@ public class ScoreOutput{
         @SuppressWarnings("unused")
         private String Play_Display_Name;
 
-        public ScoreOutputPK (String LeadId, String Play_Display_Name) {
-            this.LeadId = LeadId;
-            this.Play_Display_Name = Play_Display_Name;
+        public ScoreOutputPK (String leadId, String playDisplayName) {
+            this.LeadId = leadId;
+            this.Play_Display_Name = playDisplayName;
         }
     }
 
@@ -57,16 +57,16 @@ public class ScoreOutput{
         return LeadId;
     }
 
-    public void setLeadId(String LeadId){
-        this.LeadId = LeadId;
+    public void setLeadId(String leadId){
+        this.LeadId = leadId;
     }
 
     public String getPlay_Display_Name(){
         return Play_Display_Name;
     }
 
-    public void setPlay_Display_Name(String Play_Display_Name){
-        this.Play_Display_Name = Play_Display_Name;
+    public void setPlay_Display_Name(String playDisplayName){
+        this.Play_Display_Name = playDisplayName;
     }
 
     public int getScore(){
