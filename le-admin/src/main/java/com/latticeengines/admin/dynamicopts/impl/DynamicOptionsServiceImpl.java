@@ -46,10 +46,10 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
         OptionsProvider productProvider = new EnumOptionsProvider(LatticeProduct.class);
         register(new Path(LatticeComponent.spaceConfigNode, "Product"), productProvider);
 
-        Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStorePath");
+        Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStore");
         register(zkPath, dataStoreProvider);
 
-        zkPath = new Path(VisiDBDLComponent.componentName, "VisiDB", "PermanentStorePath");
+        zkPath = new Path(VisiDBDLComponent.componentName, "VisiDB", "PermanentStore");
         register(zkPath, permStoreProvider);
     }
 
