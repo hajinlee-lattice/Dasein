@@ -97,14 +97,20 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @Value("${admin.test.vdb.servername}")
     private String visiDBServerName;
 
-    @Value("${admin.vdb.permstore}")
-    private String permStore;
-
     @Value("${admin.test.dl.user}")
     private String ownerEmail;
 
-    @Value("${admin.dl.datastore}")
+    @Value("${admin.mount.vdb.permstore}")
+    private String permStore;
+
+    @Value("${admin.mount.dl.datastore}")
     private String dataStore;
+
+    @Value("${admin.test.dl.datastore.server}")
+    private String dataStoreServer;
+
+    @Value("${admin.test.vdb.permstore.server}")
+    private String permStoreServer;
 
     /**
      * In setup, orchestrate a full tenant.
@@ -218,12 +224,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     private void provisionEndToEndTestTenants() {
         provisionEndToEndTestTenant1();
-//        try {
-//            Thread.sleep(10000L);
-//        } catch (InterruptedException e) {
-//            // ignore
-//        }
-//        provisionEndToEndTestTenant2();
     }
 
     /**
@@ -275,78 +275,11 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         confDir.makePathsLocal();
         DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("PermanentStorePath").getDocument().setData(permStore  + "/" + visiDBServerName.toUpperCase());
+        node.getChild("PermanentStorePath").getDocument().setData(permStoreServer);
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        node.getChild("DataStorePath").getDocument().setData(dataStore  + "/" + tenantId);
+        node.getChild("DataStorePath").getDocument().setData(dataStoreServer);
         SerializableDocumentDirectory vdbdlConfig = new SerializableDocumentDirectory(confDir);
-        vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
-
-        // VDB Template
-        SerializableDocumentDirectory vdbTplConfig =
-                serviceService.getDefaultServiceConfig(VisiDBTemplateComponent.componentName);
-        vdbTplConfig.setRootPath("/" + VisiDBTemplateComponent.componentName);
-
-        // DL Template
-        SerializableDocumentDirectory dlTplConfig =
-                serviceService.getDefaultServiceConfig(DLTemplateComponent.componentName);
-        dlTplConfig.setRootPath("/" + DLTemplateComponent.componentName);
-
-        // Combine configurations
-        List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
-        configDirs.add(jamsConfig);
-        configDirs.add(PLSconfig);
-        configDirs.add(vdbdlConfig);
-        configDirs.add(vdbTplConfig);
-        configDirs.add(dlTplConfig);
-
-        // Orchestrate tenant
-        TenantRegistration reg =  new TenantRegistration();
-        reg.setContractInfo(new ContractInfo(new ContractProperties()));
-        reg.setTenantInfo(tenantInfo);
-        reg.setSpaceInfo(spaceInfo);
-        reg.setSpaceConfig(spaceConfiguration);
-        reg.setConfigDirectories(configDirs);
-
-        String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
-        boolean created = restTemplate.postForObject(url, reg, Boolean.class);
-        Assert.assertTrue(created);
-    }
-
-    /**
-     * This is the tenant with default configuration
-     */    
-    @SuppressWarnings("unused")
-	private void provisionEndToEndTestTenant2() {
-        String tenantId = tenantIds[1];
-
-        // TenantInfo
-        TenantProperties tenantProperties = new TenantProperties();
-        tenantProperties.description = "A cross-component tenant with default configurations.";
-        tenantProperties.displayName = tenantNames[1];
-        TenantInfo tenantInfo = new TenantInfo(tenantProperties);
-
-        // SpaceInfo
-        CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
-        spaceProperties.description = tenantProperties.description;
-        spaceProperties.displayName = tenantProperties.displayName;
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, "");
-
-        // SpaceConfiguration
-        SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
-
-        // BARDJAMS
-        SerializableDocumentDirectory jamsConfig =
-                serviceService.getDefaultServiceConfig(BardJamsComponent.componentName);
-        jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
-
-        // PLS
-        SerializableDocumentDirectory PLSconfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
-        PLSconfig.setRootPath("/" + PLSComponent.componentName);
-
-        // VisiDBDL
-        SerializableDocumentDirectory vdbdlConfig =
-                serviceService.getDefaultServiceConfig(VisiDBDLComponent.componentName);
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 
         // VDB Template
@@ -472,23 +405,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         final String tenantId = tenantIds[tenantIdx];
         // verify permstore and datastore
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        List<String> filesInPermStore = magicRestTemplate.getForObject(url + "permstore", List.class);
-        Assert.assertTrue(filesInPermStore.contains(visiDBServerName.toUpperCase()));
+        Boolean VDBInPermStore = magicRestTemplate.getForObject(url + "permstore/" + visiDBServerName, Boolean.class);
+        Assert.assertTrue(VDBInPermStore);
         Assert.assertEquals(magicRestTemplate.getForObject(url + "datastore/" + tenantId, List.class).size(), 3);
-    }
-
-    @SuppressWarnings("unused")
-    private void verifyVDBTplTenantExists(int tenantIdx) {
-        if (vdbTplSkipped) return;
-
-        final String tenantId = tenantIds[tenantIdx];
-    }
-
-    @SuppressWarnings("unused")
-    private void verifyDLTplTenantExists(int tenantIdx) {
-        if (dlTplSkipped) return;
-
-        final String tenantId = tenantIds[tenantIdx];
     }
 
     @SuppressWarnings("unused")

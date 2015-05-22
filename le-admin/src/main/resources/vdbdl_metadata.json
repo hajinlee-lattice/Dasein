@@ -5,8 +5,20 @@
       { "Node": "VisiDB", 
         "Children" : [
             { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"]}},
-            { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}}
+            { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}},
+            {
+              "Node": "PermanentStorePath",
+              "Data": {"Type": "options", "Options": [], "DynamicOptions": true}
+            }
          ]
+      },
+      { "Node": "DL",
+        "Children" : [
+          {
+            "Node": "DataStorePath",
+            "Data": {"Type": "options", "Options": [], "DynamicOptions": true}
+          }
+        ]
       }
     ]
 }

@@ -1,0 +1,47 @@
+package com.latticeengines.admin.dynamicopts.impl;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Properties;
+
+public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider {
+
+    private Properties mountMap;
+    private final String defaultMntPnt;
+    private final String absoluteRoot;
+
+    public MountedDirectoryOptionsProvider(Path path, String defaultMntPnt) {
+        super(path);
+        this.defaultMntPnt = defaultMntPnt;
+        absoluteRoot = path.toAbsolutePath().toString();
+        loadMountMap();
+    }
+
+    public String toRemoteAddr(String key) { return mountMap.getProperty(key, defaultMntPnt); }
+
+    public String getAbsoluteRoot() { return this.absoluteRoot; }
+
+    private void loadMountMap() {
+        mountMap = new Properties();
+        InputStream input = null;
+        try {
+            input = new FileInputStream(this.path + "/.mtable");
+            // load mount table file
+            mountMap.load(input);
+        } catch (IOException ex) {
+            // ignore
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+}

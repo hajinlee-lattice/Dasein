@@ -6,7 +6,8 @@
       "Children": [
         {
           "Node": "DataStorePath",
-          "Data": ""
+          "Data": "",
+          "Metadata" : {"Type": "options", "Options": [], "DynamicOptions": true }
         },
         {
           "Node": "OwnerEmail",
@@ -62,7 +63,8 @@
         },
         {
           "Node": "PermanentStorePath",
-          "Data": ""
+          "Data": "",
+          "Metadata" : {"Type": "options", "Options": [], "DynamicOptions": true }
         },
         {
           "Node": "ServerName",

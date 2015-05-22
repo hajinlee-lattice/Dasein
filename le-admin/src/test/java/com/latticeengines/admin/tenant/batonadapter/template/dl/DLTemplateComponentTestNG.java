@@ -37,7 +37,7 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
     @Value("${admin.test.dl.url}")
     private String dlUrl;
 
-    @Value("${admin.test.dl.datastore}")
+    @Value("${admin.mount.dl.datastore}")
     private String dataStore;
 
     private String tenant;

@@ -1,6 +1,7 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
-import java.io.File;
+import static com.latticeengines.admin.dynamicopts.impl.DataStoreProvider.DLFolder;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -9,6 +10,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
+import com.latticeengines.admin.dynamicopts.impl.PermStoreProvider;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
@@ -28,17 +31,15 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
     private TenantService tenantService;
 
+    private DataStoreProvider dataStoreProvider;
+
+    private PermStoreProvider permStoreProvider;
+
     private static final int SUCCESS = 3;
 
     private static final int MASTER = 1;
 
     private static final int STANDALONE = 0;
-
-    private String backupFolder;
-
-    private String launchStatusFolder;
-
-    private String launchFolder;
 
     public VisiDBDLInstaller() {
         super(VisiDBDLComponent.componentName);
@@ -46,6 +47,14 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
     public void setTenantService(TenantService tenantService) {
         this.tenantService = tenantService;
+    }
+
+    public void setDataStoreProvider(DataStoreProvider dataStoreProvider) {
+        this.dataStoreProvider = dataStoreProvider;
+    }
+
+    public void setPermStoreProvider(PermStoreProvider permStoreProvider) {
+        this.permStoreProvider = permStoreProvider;
     }
 
     @Override
@@ -65,13 +74,16 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String visiDBFileDirectory = getChild(configDir, "VisiDB", "VisiDBFileDirectory").getDocument().getData();
         String cacheLimit = getChild(configDir, "VisiDB", "CacheLimit").getDocument().getData();
         String diskspaceLimit = getChild(configDir, "VisiDB", "DiskspaceLimit").getDocument().getData();
-        String permanentStoreOption = getChild(configDir, "VisiDB", "PermanentStoreOption").getDocument().getData()  + "/" + visiDBServerName.toUpperCase();
-        String permanentStorePath = getChild(configDir, "VisiDB", "PermanentStorePath").getDocument().getData();
+        String permanentStoreOption = getChild(configDir, "VisiDB", "PermanentStoreOption").getDocument().getData();
+        String localPermanentStorePath = getChild(configDir, "VisiDB", "PermanentStorePath").getDocument().getData();
         String ownerEmail = getChild(configDir, "DL", "OwnerEmail").getDocument().getData();
-        String dataStorePath = getChild(configDir, "DL", "DataStorePath").getDocument().getData() + "/" + dmDeployment;
-        backupFolder = dataStorePath + "/backup";
-        launchFolder = dataStorePath + "/launch";
-        launchStatusFolder = dataStorePath + "/status";
+        String localDataStorePath = getChild(configDir, "DL", "DataStorePath").getDocument().getData();
+
+        String permanentStorePath = permStoreProvider.toRemoteAddr(localPermanentStorePath);
+        String dataStorePath = dataStoreProvider.toRemoteAddr(localDataStorePath);
+
+        dataStorePath = dataStorePath + "/" + dmDeployment;
+        permanentStorePath += "/" + visiDBServerName.toUpperCase();
 
         if (StringUtils.isEmpty(tenantAlias)) {
             tenantAlias = tenant;
@@ -94,8 +106,8 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
             String errorMessage = response.getErrorMessage();
 
             if (status != SUCCESS && !StringUtils.isEmpty(errorMessage) && errorMessage.contains("does not exist")) {
-                createPermstoreFolder(permanentStorePath, visiDBServerName);
-                createDataStoreFolder(dataStorePath, dmDeployment);
+                createPermstoreFolder(localPermanentStorePath, visiDBServerName);
+                createDataStoreFolder(localDataStorePath, dmDeployment);
                 CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, dmDeployment,
                         contractExternalID);
                 builder.tenantAlias(tenantAlias).ownerEmail(ownerEmail).visiDBName(visiDBName)
@@ -103,8 +115,10 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         .createNewVisiDB(Boolean.parseBoolean(createNewVisiDB))
                         .caseSensitive(Boolean.parseBoolean(caseSensitive)).cacheLimit(Integer.parseInt(cacheLimit))
                         .diskspaceLimit(Integer.parseInt(diskspaceLimit)).permanentStoreOption(permStoreOpt)
-                        .permanentStorePath(permanentStorePath).backupFolder(backupFolder).launchFolder(launchFolder)
-                        .launchStatusFolder(launchStatusFolder);
+                        .permanentStorePath(permanentStorePath)
+                        .backupFolder(dataStorePath + "/" + DLFolder.BACKUP.toPath())
+                        .launchFolder(dataStorePath + "/" + DLFolder.LAUNCH.toPath())
+                        .launchStatusFolder(dataStorePath + "/" + DLFolder.STATUS.toPath());
                 CreateVisiDBDLRequest postRequest = builder.build();
                 response = createTenant(postRequest, getHeaders(), dlUrl);
                 status = response.getStatus();
@@ -122,14 +136,12 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         }
     }
 
-    private void createDataStoreFolder(String dataStorePath, String dmDeployment) {
-        new File(backupFolder).mkdirs();
-        new File(launchFolder).mkdirs();
-        new File(launchStatusFolder).mkdirs();
+    private void createDataStoreFolder(String localDataStorePath, String dmDeployment) {
+        dataStoreProvider.createTenantFolder(localDataStorePath, dmDeployment);
     }
 
     private void createPermstoreFolder(String permanentStorePath, String visiDBServerName) {
-        new File(permanentStorePath).mkdir();
+        permStoreProvider.createVDBFolder(permanentStorePath, visiDBServerName.toUpperCase());
     }
 
     public DLRestResult getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers, String dlUrl)

@@ -1,12 +1,13 @@
 package com.latticeengines.admin.controller;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
-import com.latticeengines.admin.service.FileSystemService;
+import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
+import com.latticeengines.admin.dynamicopts.impl.PermStoreProvider;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
@@ -31,12 +33,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/internal")
 public class InternalResource extends InternalResourceBase {
 
-    @Value("${admin.vdb.permstore}")
-    private String permStore;
-
-    @Value("${admin.dl.datastore}")
-    private String dataStore;
-
     @Autowired
     private ServiceService serviceService;
 
@@ -44,7 +40,10 @@ public class InternalResource extends InternalResourceBase {
     private DynamicOptionsService dynamicOptionsService;
 
     @Autowired
-    private FileSystemService fileSystemService;
+    private DataStoreProvider dataStoreProvider;
+
+    @Autowired
+    private PermStoreProvider permStoreProvider;
 
     @RequestMapping(value = "services/options", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -70,37 +69,42 @@ public class InternalResource extends InternalResourceBase {
         return serviceService.patchOptions(component, patch);
     }
 
-    @RequestMapping(value = "permstore", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "permstore/{server}/{vdbname}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get file names in permstore")
-    public List<String> getFilesInPermstore(HttpServletRequest request) {
+    public Boolean hasVDBInPermstore(@PathVariable String server, @PathVariable String vdbname, HttpServletRequest request) {
         checkHeader(request);
-        return fileSystemService.filesInDirectory(new File(permStore));
+        return permStoreProvider.getVDBFolder(server, vdbname.toUpperCase()).exists();
     }
 
-    @RequestMapping(value = "permstore", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "permstore/{server}/{vdbname}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete file in permstore")
-    public Boolean deleteFileInPermstore(@RequestParam(value = "file") String file, HttpServletRequest request) {
+    public Boolean deleteVDBInPermstore(@PathVariable String server, @PathVariable String vdbname, HttpServletRequest request) {
         checkHeader(request);
-        fileSystemService.deleteFile(new File(permStore + "/" + file));
+        permStoreProvider.deleteVDBFolder(server, vdbname.toUpperCase());
         return true;
     }
 
-    @RequestMapping(value = "datastore/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "datastore/{server}/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get files of a tenant in datastore")
-    public List<String> getFilesInDatastore(@PathVariable String tenantId, HttpServletRequest request) {
+    public List<String> getTenantFoldersInDatastore(@PathVariable String server, @PathVariable String tenantId, HttpServletRequest request) {
         checkHeader(request);
-        return fileSystemService.filesInDirectory(new File(dataStore + "/" + tenantId));
+        File dir = dataStoreProvider.getTenantFolder(server, tenantId);
+        if (dir.exists()) {
+            return Arrays.asList(dir.list());
+        } else {
+            return new ArrayList<>();
+        }
     }
 
-    @RequestMapping(value = "datastore/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "datastore/{server}/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a tenant from datastore")
-    public Boolean deleteFileInDatastore(@PathVariable String tenantId, HttpServletRequest request) {
+    public Boolean deleteTenantInDatastore(@PathVariable String server, @PathVariable String tenantId, HttpServletRequest request) {
         checkHeader(request);
-        fileSystemService.deleteFile(new File(dataStore + "/" + tenantId));
+        dataStoreProvider.deleteTenantFolder(server, tenantId);
         return true;
     }
 

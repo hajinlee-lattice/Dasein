@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
+import com.latticeengines.admin.dynamicopts.impl.PermStoreProvider;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
@@ -15,6 +17,12 @@ public class VisiDBDLComponent extends LatticeComponent {
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private DataStoreProvider dataStoreProvider;
+
+    @Autowired
+    private PermStoreProvider permStoreProvider;
 
     @Value("${admin.vdbdl.dryrun}")
     private boolean dryrun;
@@ -42,6 +50,8 @@ public class VisiDBDLComponent extends LatticeComponent {
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
         ((VisiDBDLInstaller)installer).setTenantService(tenantService);
+        ((VisiDBDLInstaller)installer).setDataStoreProvider(dataStoreProvider);
+        ((VisiDBDLInstaller)installer).setPermStoreProvider(permStoreProvider);
         return installer;
     }
 

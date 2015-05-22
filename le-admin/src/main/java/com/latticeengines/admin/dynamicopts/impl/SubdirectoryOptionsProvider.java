@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,18 +31,33 @@ import com.latticeengines.admin.dynamicopts.OptionsProvider;
 public class SubdirectoryOptionsProvider implements OptionsProvider {
 
     private static final Log log = LogFactory.getLog(SubdirectoryOptionsProvider.class);
-    private final Path path;
+    private final boolean recursive;
     private final List<String> options;
     private WatchService watcher;
     private final Map<WatchKey,Path> keys = new HashMap<>();
     private boolean initialized = false;
     private Thread watcherThread;
 
-    public SubdirectoryOptionsProvider(Path path) {
+    protected final Path path;
+
+    public SubdirectoryOptionsProvider(Path path, boolean recursive) {
+        this.recursive = recursive;
         this.path = path;
+        File dir = this.path.toFile();
+        if (dir.isFile()) { FileUtils.deleteQuietly(dir); }
+        if (!dir.exists()) {
+            try {
+                FileUtils.forceMkdir(path.toFile());
+            } catch (IOException e) {
+                // ignore
+            }
+        }
         this.options = readSubdirectories();
         startWatcherThread();
     }
+
+    public SubdirectoryOptionsProvider(Path path) { this(path, false); }
+
 
     public SubdirectoryOptionsProvider(String path) {
         this(FileSystems.getDefault().getPath(path));
@@ -61,12 +77,16 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
         return options;
     }
 
+    private void updateOptions() {
+        options.clear();
+        options.addAll(readSubdirectories());
+    }
+
     @Override
     public List<String> getOptions() {
         if (!watcherIsWorking()) {
-            // for safety, directly read option list
-            options.clear();
-            options.addAll(readSubdirectories());
+            // directly read option list
+            updateOptions();
             startWatcherThread();
         }
         return options;
@@ -87,14 +107,18 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
         log.info(String.format("Scanning %s to setup the watcher ...", start));
         this.initialized = false;
 
-        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                    throws IOException {
-                register(dir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
+        if (this.recursive) {
+            Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                        throws IOException {
+                    register(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } else {
+            register(start);
+        }
 
         this.initialized = true;
         log.info(String.format("Scanning %s done.", start));
@@ -119,12 +143,11 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
                     Path relativePath = path.relativize(child);
 
                     // refresh option list
-                    log.info(String.format("%s: %s\n", event.kind().name(), relativePath));
-                    options.clear();
-                    options.addAll(readSubdirectories());
+                    log.info(String.format("%s: %s", event.kind().name(), relativePath));
+                    updateOptions();
 
                     // if directory is created, then register it and its sub-directories
-                    if (kind == ENTRY_CREATE && Files.isDirectory(child, NOFOLLOW_LINKS)) {
+                    if (kind == ENTRY_CREATE && recursive && Files.isDirectory(child, NOFOLLOW_LINKS)) {
                         registerAll(child);
                     }
 

@@ -1,6 +1,5 @@
 package com.latticeengines.admin.dynamicopts.impl;
 
-import java.nio.file.FileSystems;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -8,13 +7,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.dynamicopts.OptionsProvider;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
@@ -30,8 +30,11 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
     @Value("${admin.mount.rootpath}")
     private String mountRoot;
 
-    @Value("${admin.mount.pls}")
-    private String plsFolder;
+    @Autowired
+    private PermStoreProvider permStoreProvider;
+
+    @Autowired
+    private DataStoreProvider dataStoreProvider;
 
     @PostConstruct
     private void registerProviders() {
@@ -43,15 +46,11 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
         OptionsProvider productProvider = new EnumOptionsProvider(LatticeProduct.class);
         register(new Path(LatticeComponent.spaceConfigNode, "Product"), productProvider);
 
-        // this is an example of using SubdirectoryOptionsProvider
-        Path zkPath = new Path(PLSComponent.componentName, "Directory");
-        if (!optionMap.containsKey(zkPath)) {
-            // avoid duplicated instantiation: each SubdirectoryOptionsProvider has a long polling watcher thread
-            java.nio.file.Path filePath = FileSystems.getDefault().getPath(mountRoot, plsFolder);
-            OptionsProvider plsProvider = new SubdirectoryOptionsProvider(filePath);
-            register(zkPath, plsProvider);
-        }
+        Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStorePath");
+        register(zkPath, dataStoreProvider);
 
+        zkPath = new Path(VisiDBDLComponent.componentName, "VisiDB", "PermanentStorePath");
+        register(zkPath, permStoreProvider);
     }
 
     private void register(Path path, OptionsProvider provider) { optionMap.put(path, provider); }

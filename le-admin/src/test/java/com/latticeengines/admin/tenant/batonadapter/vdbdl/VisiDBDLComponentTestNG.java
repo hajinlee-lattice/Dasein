@@ -35,14 +35,20 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Value("${admin.test.vdb.servername}")
     private String visiDBServerName;
 
-    @Value("${admin.vdb.permstore}")
-    private String permStore;
-
     @Value("${admin.test.dl.user}")
     private String ownerEmail;
 
-    @Value("${admin.dl.datastore}")
+    @Value("${admin.mount.vdb.permstore}")
+    private String permStore;
+
+    @Value("${admin.mount.dl.datastore}")
     private String dataStore;
+
+    @Value("${admin.test.vdb.permstore.server}")
+    private String permStoreServer;
+
+    @Value("${admin.test.dl.datastore.server}")
+    private String dataStoreServer;
 
     private String tenant;
 
@@ -56,8 +62,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "permstore?file=" + visiDBServerName.toUpperCase());
-        magicRestTemplate.delete(url + "datastore/" + tenant);
+        magicRestTemplate.delete(url + "permstore/" + permStoreServer +  "/" + visiDBServerName.toUpperCase());
+        magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
 
     }
 
@@ -65,8 +71,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Override
     public void tearDown() throws Exception {
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "permstore?file=" + visiDBServerName.toUpperCase());
-        magicRestTemplate.delete(url + "datastore/" + tenant);
+        magicRestTemplate.delete(url + "permstore/" + permStoreServer +  "/" + visiDBServerName.toUpperCase());
+        magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
         super.tearDown();
     }
 
@@ -77,10 +83,10 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         DocumentDirectory.Node node;
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("PermanentStorePath").getDocument().setData(permStore  + "/" + visiDBServerName.toUpperCase());
+        node.getChild("PermanentStorePath").getDocument().setData(permStoreServer);
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        node.getChild("DataStorePath").getDocument().setData(dataStore + "/" + tenantId);
+        node.getChild("DataStorePath").getDocument().setData(dataStoreServer);
         return confDir;
     }
 
@@ -92,7 +98,9 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         // record original number of files in permStore
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        int filesInPermStore = magicRestTemplate.getForObject(url + "permstore", List.class).size();
+        Boolean VDBInPermStore = magicRestTemplate.getForObject(
+                url + "permstore/" + permStoreServer + "/" + visiDBServerName, Boolean.class);
+        Assert.assertFalse(VDBInPermStore);
 
         bootstrap(constructVisiDBDLInstaller());
         BootstrapState state = waitForSuccess(getServiceName());
@@ -100,8 +108,11 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         Assert.assertEquals(state.state, BootstrapState.State.OK);
 
         // verify permstore and datastore
-        Assert.assertEquals(magicRestTemplate.getForObject(url + "permstore", List.class).size(), filesInPermStore + 1);
-        Assert.assertEquals(magicRestTemplate.getForObject(url + "datastore/" + tenant, List.class).size(), 3);
+        VDBInPermStore = magicRestTemplate.getForObject(
+                url + "permstore/" + permStoreServer + "/" + visiDBServerName, Boolean.class);
+        Assert.assertTrue(VDBInPermStore);
+        Assert.assertEquals(magicRestTemplate.getForObject(
+                url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
 
         response = deleteVisiDBDLTenant(tenant);
         Assert.assertEquals(response.getStatus(), 3);

@@ -1,6 +1,2 @@
 {
-  "RootPath": "/",
-  "Nodes": [
-    { "Node": "Directory", "Data": {"Type": "options", "Options": [""], "DynamicOptions": true } }
-  ]
 }
