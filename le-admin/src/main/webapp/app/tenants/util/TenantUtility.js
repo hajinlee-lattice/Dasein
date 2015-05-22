@@ -169,5 +169,14 @@ app.service('TenantUtility', function(_){
         }
     }
     this.getStatusDisplayName = getStatusDisplayName;
+
+
+    this.parseBootstrapErrorMsg = function(message) {
+        var idx = message.indexOf("::");
+        if (idx != -1) {
+            return message.substring(0, idx);
+        }
+    }
+
 });
 

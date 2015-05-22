@@ -60,7 +60,7 @@ describe('TenantUtility tests', function (){
         expect(configDirs.length).toEqual(1);
 
         var spaceInfo = tenantReg.CustomerSpaceInfo;
-        console.log(spaceInfo);
+
         var parsedFlags = JSON.parse(spaceInfo.featureFlags);
         expect(parsedFlags.Feature1).toBe(true);
         expect(parsedFlags.Feature2).toBe(false);
@@ -162,6 +162,11 @@ describe('TenantUtility tests', function (){
         expect(record.Product).toEqual("LPA");
         expect(record.CreatedDate).toEqual(new Date("2015-05-05T19:38:02.618Z"));
         expect(record.LastModifiedDate).toEqual(new Date("2015-05-05T19:38:02.643Z"));
+    });
+
+    it('should parse errormessage correctly', function () {
+        var message = "[LE-ysong-ubuntu] An intented exception for the purpose of testing.:: java.lang.RuntimeException: An intented exception for the purpose of testing.\n\tat com.latticeengines.admin.tenant.batonadapter.dante.DanteInstaller.installCore(DanteInstaller.java:17)\n\tat com.latticeengines.baton.exposed.camille.LatticeComponentInstaller.install(LatticeComponentInstaller.java:43)\n";
+        expect(tenantUtility.parseBootstrapErrorMsg(message)).toBe("[LE-ysong-ubuntu] An intented exception for the purpose of testing.");
     });
 });
 
