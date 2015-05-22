@@ -123,7 +123,29 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                 response = createTenant(postRequest, getHeaders(), dlUrl);
                 status = response.getStatus();
                 if (status != SUCCESS) {
-                    throw new LedpException(LedpCode.LEDP_18032, new String[] { response.getErrorMessage() });
+                    if (response.getErrorMessage().contains("VisiDB") && response.getErrorMessage().contains("already exists.")) {
+                        builder = new CreateVisiDBDLRequest.Builder(tenant, dmDeployment,
+                                contractExternalID);
+                        builder.tenantAlias(tenantAlias).ownerEmail(ownerEmail).visiDBName(visiDBName)
+                                .visiDBLocation("ServerName=" + visiDBServerName)
+                                .visiDBFileDirectory(visiDBFileDirectory)
+                                .createNewVisiDB(false).caseSensitive(Boolean.parseBoolean(caseSensitive))
+                                .cacheLimit(Integer.parseInt(cacheLimit))
+                                .diskspaceLimit(Integer.parseInt(diskspaceLimit))
+                                .permanentStoreOption(permStoreOpt)
+                                .permanentStorePath(permanentStorePath)
+                                .backupFolder(dataStorePath + "/" + DLFolder.BACKUP.toPath())
+                                .launchFolder(dataStorePath + "/" + DLFolder.LAUNCH.toPath())
+                                .launchStatusFolder(dataStorePath + "/" + DLFolder.STATUS.toPath());
+                        postRequest = builder.build();
+                        response = createTenant(postRequest, getHeaders(), dlUrl);
+                        status = response.getStatus();
+                        if (status != SUCCESS) {
+                            throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
+                        }
+                    } else {
+                        throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
+                    }
                 }
                 log.info("Tenant " + tenant + " has been successfully created in VisiDB/Dataloader");
             } else if (StringUtils.isEmpty(errorMessage) && status == SUCCESS) {
