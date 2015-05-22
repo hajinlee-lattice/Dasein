@@ -79,12 +79,12 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(newCrmCredential);
 
         // eloqua
-        crmCredential = new CrmCredential();
-        crmCredential.setUserName("Matt.Sable");
-        crmCredential.setPassword("Lattice1");
-        crmCredential.setCompany("TechnologyPartnerLatticeEngines");
-        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_ELOQUA, fullId, null, crmCredential);
-        Assert.assertNotNull(newCrmCredential);
+//        crmCredential = new CrmCredential();
+//        crmCredential.setUserName("Matt.Sable");
+//        crmCredential.setPassword("Lattice1");
+//        crmCredential.setCompany("TechnologyPartnerLatticeEngines");
+//        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_ELOQUA, fullId, null, crmCredential);
+//        Assert.assertNotNull(newCrmCredential);
     }
 
     @Test(groups = "functional", dependsOnMethods = "verifyCredential")
@@ -97,8 +97,8 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         newCrmCredential = crmService.getCredential(CrmConstants.CRM_MARKETO, fullId, Boolean.TRUE);
         Assert.assertEquals(newCrmCredential.getUserName(), "latticeenginessandbox1_9026948050BD016F376AE6");
 
-        newCrmCredential = crmService.getCredential(CrmConstants.CRM_ELOQUA, fullId, Boolean.TRUE);
-        Assert.assertEquals(newCrmCredential.getPassword(), "Lattice1");
+//        newCrmCredential = crmService.getCredential(CrmConstants.CRM_ELOQUA, fullId, Boolean.TRUE);
+//        Assert.assertEquals(newCrmCredential.getPassword(), "Lattice1");
     }
 
     @Test(groups = "functional", dependsOnMethods = "getCredential")

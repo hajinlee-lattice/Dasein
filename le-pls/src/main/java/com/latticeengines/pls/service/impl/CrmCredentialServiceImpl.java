@@ -17,6 +17,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
@@ -147,7 +149,14 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         try {
             String status = HttpWithRetryUtils.executePostRequest(url, parameters, headers);
             if (!checkStatus(status)) {
-                throw new LedpException(LedpCode.LEDP_18030);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jNode = mapper.readTree(status);
+                for (JsonNode node: jNode.get("Value")) {
+                    if (node.get("Key").asText().equals("Info")) {
+                        throw new RuntimeException(String.format("CRM verification failed: %s", node.get("Value").asText()));
+                    }
+                }
+                throw new RuntimeException("CRM verification failed for an unknonw reason.");
             }
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18030, ex);
