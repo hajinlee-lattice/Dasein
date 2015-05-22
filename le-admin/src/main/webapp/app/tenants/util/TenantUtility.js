@@ -176,7 +176,7 @@ app.service('TenantUtility', function(_){
         if (idx != -1) {
             return message.substring(0, idx);
         }
-    }
+    };
 
 });
 
