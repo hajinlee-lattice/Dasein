@@ -12,7 +12,7 @@ rm /tmp/app/playmaker/evmodel/*.pyc
 rm /tmp/app/playmaker/evmodel/*.pyo
 rm /tmp/datascientist/*.pyc
 rm /tmp/datascientist/*.pyo
-su -l yarn -c 'hadoop dfs -mkdir /app/dataplatform'
+su -l yarn -c 'hadoop dfs -mkdir /app'
 su -l yarn -c 'hadoop dfs -mkdir /datascientist'
 su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
 su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/playmaker /app/playmaker'
