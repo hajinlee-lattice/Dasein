@@ -40,6 +40,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         try {
             afterClass();
         } catch (Exception ex) {
+            // ignore
         }
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("tenantName", tenant);
