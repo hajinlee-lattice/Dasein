@@ -1,5 +1,6 @@
 package com.latticeengines.admin;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +31,7 @@ import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTempla
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
@@ -275,10 +277,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         confDir.makePathsLocal();
         DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("PermanentStorePath").getDocument().setData(permStoreServer);
+        node.getChild("PermanentStore").getDocument().setData(permStoreServer);
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        node.getChild("DataStorePath").getDocument().setData(dataStoreServer);
+        node.getChild("DataStore").getDocument().setData(dataStoreServer);
         SerializableDocumentDirectory vdbdlConfig = new SerializableDocumentDirectory(confDir);
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 
@@ -399,7 +401,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     }
 
     @SuppressWarnings("unchecked")
-    private void verifyVisiDBDLTenantExists(int tenantIdx) {
+    private void verifyVisiDBDLTenantExists(int tenantIdx) throws IOException {
         if (vdbdlSkipped) return;
 
         final String tenantId = tenantIds[tenantIdx];
@@ -410,6 +412,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         Assert.assertTrue(VDBInPermStore);
         Assert.assertEquals(magicRestTemplate.getForObject(
                 url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
+
+        DLRestResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenantId);
+        Assert.assertEquals(response.getStatus(), 3);
     }
 
     @SuppressWarnings("unused")

@@ -5,7 +5,7 @@
       "Node": "DL",
       "Children": [
         {
-          "Node": "DataStorePath",
+          "Node": "DataStore",
           "Data": "",
           "Metadata" : {"Type": "options", "Options": [], "DynamicOptions": true }
         },
@@ -51,6 +51,11 @@
           }
         },
         {
+          "Node": "PermanentStore",
+          "Data": "",
+          "Metadata" : {"Type": "options", "Options": [], "DynamicOptions": true }
+        },
+        {
           "Node": "PermanentStoreOption",
           "Data": "Master",
           "Metadata": {
@@ -60,11 +65,6 @@
               "StandAlone"
             ]
           }
-        },
-        {
-          "Node": "PermanentStorePath",
-          "Data": "",
-          "Metadata" : {"Type": "options", "Options": [], "DynamicOptions": true }
         },
         {
           "Node": "ServerName",

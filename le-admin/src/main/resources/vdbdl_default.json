@@ -12,13 +12,13 @@
         { "Node": "CaseSensitive", "Data": false},
         { "Node": "DiskspaceLimit", "Data": 0},
         { "Node": "PermanentStoreOption", "Data": "Master"},
-        { "Node": "PermanentStorePath", "Data": ""}
+        { "Node": "PermanentStore", "Data": ""}
       ]
     },
     { "Node": "DL", 
       "Children" : [
         { "Node": "OwnerEmail", "Data": "richard.liu@lattice-engines.com" },
-        { "Node": "DataStorePath", "Data": "" }
+        { "Node": "DataStore", "Data": "" }
       ]
     }
   ]

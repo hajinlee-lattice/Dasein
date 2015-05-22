@@ -75,9 +75,9 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String cacheLimit = getChild(configDir, "VisiDB", "CacheLimit").getDocument().getData();
         String diskspaceLimit = getChild(configDir, "VisiDB", "DiskspaceLimit").getDocument().getData();
         String permanentStoreOption = getChild(configDir, "VisiDB", "PermanentStoreOption").getDocument().getData();
-        String localPermanentStorePath = getChild(configDir, "VisiDB", "PermanentStorePath").getDocument().getData();
+        String localPermanentStorePath = getChild(configDir, "VisiDB", "PermanentStore").getDocument().getData();
         String ownerEmail = getChild(configDir, "DL", "OwnerEmail").getDocument().getData();
-        String localDataStorePath = getChild(configDir, "DL", "DataStorePath").getDocument().getData();
+        String localDataStorePath = getChild(configDir, "DL", "DataStore").getDocument().getData();
 
         String permanentStorePath = permStoreProvider.toRemoteAddr(localPermanentStorePath);
         String dataStorePath = dataStoreProvider.toRemoteAddr(localDataStorePath);
@@ -144,7 +144,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                             if (!response.getErrorMessage().contains("already exists.")) {
                                 throw new LedpException(LedpCode.LEDP_18032, new String[]{response.getErrorMessage()});
                             } else {
-                                log.info("Tenant " + tenant + " has already been installed in VisiDB/Dataloader");
+                                log.warn("Tenant " + tenant + " has already been installed in VisiDB/Dataloader");
                             }
                         }
                     } else {
@@ -153,7 +153,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                 }
                 log.info("Tenant " + tenant + " has been successfully created in VisiDB/Dataloader");
             } else if (StringUtils.isEmpty(errorMessage) && status == SUCCESS) {
-                log.info("Tenant " + tenant + " has already been installed in VisiDB/Dataloader");
+                log.warn("Tenant " + tenant + " has already been installed in VisiDB/Dataloader");
             } else {
                 throw new LedpException(LedpCode.LEDP_18032, new String[] { errorMessage });
             }

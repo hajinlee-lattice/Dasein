@@ -7,7 +7,7 @@
             { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"]}},
             { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}},
             {
-              "Node": "PermanentStorePath",
+              "Node": "PermanentStore",
               "Data": {"Type": "options", "Options": [], "DynamicOptions": true}
             }
          ]
@@ -15,7 +15,7 @@
       { "Node": "DL",
         "Children" : [
           {
-            "Node": "DataStorePath",
+            "Node": "DataStore",
             "Data": {"Type": "options", "Options": [], "DynamicOptions": true}
           }
         ]
