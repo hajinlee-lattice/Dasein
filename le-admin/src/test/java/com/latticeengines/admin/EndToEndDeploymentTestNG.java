@@ -405,9 +405,11 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         final String tenantId = tenantIds[tenantIdx];
         // verify permstore and datastore
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        Boolean VDBInPermStore = magicRestTemplate.getForObject(url + "permstore/" + visiDBServerName, Boolean.class);
+        Boolean VDBInPermStore = magicRestTemplate.getForObject(
+                url + "permstore/" + permStoreServer + "/" + visiDBServerName, Boolean.class);
         Assert.assertTrue(VDBInPermStore);
-        Assert.assertEquals(magicRestTemplate.getForObject(url + "datastore/" + tenantId, List.class).size(), 3);
+        Assert.assertEquals(magicRestTemplate.getForObject(
+                url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
     }
 
     @SuppressWarnings("unused")
