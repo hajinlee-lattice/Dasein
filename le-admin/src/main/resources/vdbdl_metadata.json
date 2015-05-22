@@ -8,7 +8,7 @@
             { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}},
             {
               "Node": "PermanentStore",
-              "Data": {"Type": "options", "Options": [], "DynamicOptions": true}
+              "Data": { "Type": "options", "Options": ["D:\\VisiDB\\PermenantStore"] }
             }
          ]
       },

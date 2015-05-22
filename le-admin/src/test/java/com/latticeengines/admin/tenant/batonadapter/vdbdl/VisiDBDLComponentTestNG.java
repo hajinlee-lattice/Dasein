@@ -38,14 +38,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Value("${admin.test.dl.user}")
     private String ownerEmail;
 
-    @Value("${admin.mount.vdb.permstore}")
-    private String permStore;
-
     @Value("${admin.mount.dl.datastore}")
     private String dataStore;
-
-    @Value("${admin.test.vdb.permstore.server}")
-    private String permStoreServer;
 
     @Value("${admin.test.dl.datastore.server}")
     private String dataStoreServer;
@@ -62,7 +56,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "permstore/" + permStoreServer +  "/" + visiDBServerName.toUpperCase());
         magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
 
     }
@@ -71,7 +64,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Override
     public void tearDown() throws Exception {
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "permstore/" + permStoreServer +  "/" + visiDBServerName.toUpperCase());
         magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
         super.tearDown();
     }
@@ -83,7 +75,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         DocumentDirectory.Node node;
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("PermanentStore").getDocument().setData(permStoreServer);
+        node.getChild("CreateNewVisiDB").getDocument().setData("false");
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
         node.getChild("DataStore").getDocument().setData(dataStoreServer);
@@ -98,9 +90,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         // record original number of files in permStore
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        Boolean VDBInPermStore = magicRestTemplate.getForObject(
-                url + "permstore/" + permStoreServer + "/" + visiDBServerName, Boolean.class);
-        Assert.assertFalse(VDBInPermStore);
 
         bootstrap(constructVisiDBDLInstaller());
         BootstrapState state = waitForSuccess(getServiceName());
@@ -108,9 +97,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         Assert.assertEquals(state.state, BootstrapState.State.OK);
 
         // verify permstore and datastore
-        VDBInPermStore = magicRestTemplate.getForObject(
-                url + "permstore/" + permStoreServer + "/" + visiDBServerName, Boolean.class);
-        Assert.assertTrue(VDBInPermStore);
         Assert.assertEquals(magicRestTemplate.getForObject(
                 url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
 

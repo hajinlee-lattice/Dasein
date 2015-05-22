@@ -31,9 +31,6 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
     private String mountRoot;
 
     @Autowired
-    private PermStoreProvider permStoreProvider;
-
-    @Autowired
     private DataStoreProvider dataStoreProvider;
 
     @PostConstruct
@@ -48,9 +45,6 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
         Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStore");
         register(zkPath, dataStoreProvider);
-
-        zkPath = new Path(VisiDBDLComponent.componentName, "VisiDB", "PermanentStore");
-        register(zkPath, permStoreProvider);
     }
 
     private void register(Path path, OptionsProvider provider) { optionMap.put(path, provider); }

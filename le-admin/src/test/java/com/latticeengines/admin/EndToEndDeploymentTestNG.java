@@ -52,9 +52,9 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
-    private final static String contractId = "EndToEndTestContract";
-    private final static String[] tenantIds = new String[]{"EndToEndTenant"};
-    private final static String[] tenantNames = new String[]{"Global Test Tenant"};
+    private final static String contractId = "EndToEndTest";
+    private final static String tenantName = "Global Test Tenant";
+    private static String tenantId = "EndToEndTenant";
 
     @Autowired
     private TenantService tenantService;
@@ -70,6 +70,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     @Autowired
     private VisiDBDLComponentTestNG visiDBDLComponentTestNG;
+
+    @Value("${admin.test.contract}")
+    private String testContract;
 
     @Value("${pls.api.hostport}")
     private String plsHostPort;
@@ -101,14 +104,14 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @Value("${admin.test.dl.user}")
     private String ownerEmail;
 
-    @Value("${admin.mount.vdb.permstore}")
-    private String permStore;
-
     @Value("${admin.mount.dl.datastore}")
     private String dataStore;
 
     @Value("${admin.test.dl.datastore.server}")
     private String dataStoreServer;
+
+    @Value("${admin.mount.vdb.permstore}")
+    private String permStore;
 
     @Value("${admin.test.vdb.permstore.server}")
     private String permStoreServer;
@@ -118,18 +121,18 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      **/
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        tenantId = testContract + tenantId;
+
         loginAD();
         cleanupZK();
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
-        for (String tenantId: tenantIds) {
-            try {
-                deleteTenant(TestContractId, tenantId);
-            } catch (Exception e) {
-                //ignore
-            }
+        try {
+            deleteTenant(TestContractId, tenantId);
+        } catch (Exception e) {
+            //ignore
         }
         // delete PLS tenant
         deletePLSTenants();
@@ -142,12 +145,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      */
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
-        for (String tenantId: tenantIds) {
-            try {
-                deleteTenant(TestContractId, tenantId);
-            } catch (Exception e) {
-                // ignore
-            }
+        try {
+            deleteTenant(TestContractId, tenantId);
+        } catch (Exception e) {
+            // ignore
         }
 
         // delete PLS tenant
@@ -166,7 +167,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     //==================================================
 
     @Test(groups = "deployment")
-    public void verifyZKStatesInMainTestTenant() { verifyZKState(0); }
+    public void verifyZKStatesInMainTestTenant() { verifyZKState(); }
 
     //==================================================
     // verify tenant truly exists
@@ -174,17 +175,17 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "deployment")
     public void verifyJAMSMainTestTenantExists() throws Exception {
-        verifyJAMSTenantExists(0);
+        verifyJAMSTenantExists();
     }
 
     @Test(groups = "deployment")
     public void verifyPLSMainTestTenantExists() throws Exception {
-        verifyPLSTenantExists(0);
+        verifyPLSTenantExists();
     }
 
     @Test(groups = "deployment")
     public void verifyVisiDBDLMainTestTenantExists() throws Exception {
-        verifyVisiDBDLTenantExists(0);
+        verifyVisiDBDLTenantExists();
     }
 
     //==================================================
@@ -219,7 +220,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     /**
      * ==================================================
-     * BEGIN: Tenants creation methods
+     * BEGIN: Tenant creation methods
      * ==================================================
      */
 
@@ -231,13 +232,11 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      * This is the main testing tenant
      */
     private void provisionEndToEndTestTenant1() {
-        String tenantId = tenantIds[0];
-
         // TenantInfo
         TenantProperties tenantProperties = new TenantProperties();
         tenantProperties.description =
                 "First test tenant across all component provisioned by tenant console through deployment tests.";
-        tenantProperties.displayName = tenantNames[0];
+        tenantProperties.displayName = tenantName;
         TenantInfo tenantInfo = new TenantInfo(tenantProperties);
 
         // SpaceInfo
@@ -276,7 +275,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         confDir.makePathsLocal();
         DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("PermanentStore").getDocument().setData(permStoreServer);
+        node.getChild("PermanentStore").getDocument().setData("D:\\VisiDB\\PermenantStore");
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
         node.getChild("DataStore").getDocument().setData(dataStoreServer);
@@ -315,18 +314,16 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     }
     /**
      * ==================================================
-     * END: Tenants creation methods
+     * END: Tenant creation methods
      * ==================================================
      */
 
     /**
      * ==================================================
-     * BEGIN: Tenants verification methods
+     * BEGIN: Tenant verification methods
      * ==================================================
      */
-    private void verifyZKState(int tenantIdx) {
-        final String tenantId = tenantIds[tenantIdx];
-
+    private void verifyZKState() {
         ExecutorService executor = Executors.newFixedThreadPool(6);
 
         List<Future<BootstrapState>> futures = new ArrayList<>();
@@ -375,16 +372,12 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     }
 
     @SuppressWarnings("unused")
-    private void verifyJAMSTenantExists(int tenantIdx) {
-        if (jamsSkipped) return;
-
-        String tenantId = tenantIds[tenantIdx];
+    private void verifyJAMSTenantExists() {
+        // if (jamsSkipped) return;
     }
 
-    private void verifyPLSTenantExists(int tenantIdx) {
+    private void verifyPLSTenantExists() {
         if (plsSkipped) return;
-
-        final String tenantId = tenantIds[tenantIdx];
 
         // check non-zero users
         final String PLSTenantId =
@@ -400,34 +393,26 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     }
 
     @SuppressWarnings("unchecked")
-    private void verifyVisiDBDLTenantExists(int tenantIdx) throws IOException {
+    private void verifyVisiDBDLTenantExists() throws IOException {
         if (vdbdlSkipped) return;
 
-        final String tenantId = tenantIds[tenantIdx];
         // verify permstore and datastore
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        Boolean VDBInPermStore = magicRestTemplate.getForObject(
-                url + "permstore/" + permStoreServer + "/" + visiDBServerName, Boolean.class);
-        Assert.assertTrue(VDBInPermStore);
         Assert.assertEquals(magicRestTemplate.getForObject(
                 url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
-
         DLRestResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenantId);
         Assert.assertEquals(response.getStatus(), 3);
     }
 
     @SuppressWarnings("unused")
     private void verifyDanteTenantExists(int tenantIdx) {
-        if (danteSkipped) return;
-
-        final String tenantId = tenantIds[tenantIdx];
+        // if (danteSkipped) return;
     }
 
 
     private void verifyPLSTenantKnowsTopology() {
         if (plsSkipped) return;
 
-        String tenantId = tenantIds[0];
         String PLSTenantId =
                 String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         RestTemplate plsRestTemplate = plsComponentTestNG.plsRestTemplate;
@@ -437,45 +422,41 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     }
     /**
      * ==================================================
-     * END: Tenants verification methods
+     * END: Tenant verification methods
      * ==================================================
      */
 
     /**
      * ==================================================
-     * BEGIN: Tenants clean up methods
+     * BEGIN: Tenant clean up methods
      * ==================================================
      */
     private void deletePLSTenants() {
-        for (String tenantId: tenantIds) {
-            String PLSTenantId = String.format("%s.%s.%s",
-                    contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-            plsComponentTestNG.deletePLSTestTenant(PLSTenantId);
-            try {
-                // let GA recover from error deletion
-                Thread.sleep(5000L);
-            } catch (Exception e) {
-                // ignore
-            }
+        String PLSTenantId = String.format("%s.%s.%s",
+                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        plsComponentTestNG.deletePLSTestTenant(PLSTenantId);
+        try {
+            // let GA recover from error deletion
+            Thread.sleep(5000L);
+        } catch (Exception e) {
+            // ignore
         }
     }
 
     private void deleteVisiDBDLTenants() {
-        for (String tenantId: tenantIds) {
-            try {
-                visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenantId);
-
-                String url = String.format("%s/admin/internal/", getRestHostPort());
-                magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName.toUpperCase());
-                magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenantId);
-            } catch (Exception e) {
-                // ignore
-            }
+        try {
+            visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenantId);
+            String url = String.format("%s/admin/internal/", getRestHostPort());
+            magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenantId);
+            //TODO:song this is temporary. It should be handled by DL API
+            magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName + "/" + tenantId);
+        } catch (Exception e) {
+            // ignore
         }
     }
     /**
      * ==================================================
-     * END: Tenants clean up methods
+     * END: Tenant clean up methods
      * ==================================================
      */
 }

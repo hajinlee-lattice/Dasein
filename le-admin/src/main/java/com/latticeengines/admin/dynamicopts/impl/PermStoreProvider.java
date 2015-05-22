@@ -42,18 +42,18 @@ public class PermStoreProvider implements OptionsProvider {
     public String toRemoteAddr(String folder) { return dirWatcher.toRemoteAddr(folder); }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void createVDBFolder(String option, String visiDBServerName) {
+    public void createVDBFolder(String option, String visiDBServerName, String tenant) {
         Path absoluteRoot = FileSystems.getDefault().getPath(mountRoot, psPath);
-        FileSystems.getDefault().getPath(absoluteRoot.toString(), option, visiDBServerName).toFile().mkdir();
+        FileSystems.getDefault().getPath(absoluteRoot.toString(), option, visiDBServerName, tenant).toFile().mkdir();
     }
 
-    public File getVDBFolder(String server, String vdbName) {
+    public File getVDBFolder(String option, String server, String vdbName) {
         FileSystem fs = FileSystems.getDefault();
-        return fs.getPath(absoluteRoot, server, vdbName).toFile();
+        return fs.getPath(absoluteRoot, option, server, vdbName).toFile();
     }
 
-    public void deleteVDBFolder(String server, String vdbName) {
+    public void deleteVDBFolder(String option, String server, String vdbName) {
         FileSystem fs = FileSystems.getDefault();
-        FileUtils.deleteQuietly(fs.getPath(absoluteRoot, server, vdbName).toFile());
+        FileUtils.deleteQuietly(fs.getPath(absoluteRoot, option, server, vdbName).toFile());
     }
 }

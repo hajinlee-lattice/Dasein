@@ -33,7 +33,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminFunctionalTe
     public void setup() throws Exception {
         serviceName = getServiceName();
         contractId = TestContractId + serviceName + "Contract";
-        tenantId = serviceName + "Tenant";
+        tenantId = TestContractId + serviceName + "Tenant";
 
         loginAD();
         cleanupZK();
