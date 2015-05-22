@@ -14,12 +14,12 @@ module.exports = function (grunt) {
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             },
             integration: {
-                url:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                url:            'http://bodcdevhdpweb53.dev.lattice.local:8080',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.int.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             },
             qa:          {
-                url:            'http://bodcdevhdpweb53.dev.lattice.local:8080',
+                url:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.qa.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.qa.js'
             },
