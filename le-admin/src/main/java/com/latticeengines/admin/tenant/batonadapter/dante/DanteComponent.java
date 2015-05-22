@@ -30,7 +30,7 @@ public class DanteComponent extends LatticeComponent {
 
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
-        installer.setDryrun(dryrun);
+        installer.setDryrun(false);
         return installer;
     }
 

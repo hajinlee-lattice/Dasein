@@ -125,6 +125,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                             TenantService.GetTenantServiceConfig($scope.tenantId, $scope.contractId, service).then(
                                 function(result){
                                     var component = result.resultObj;
+                                    component = changeComponentToMessage(component);
                                     $scope.components.push(component);
                                     if ($scope.components.length == $scope.services.length) {
                                         if ($scope.listenState) updateServiceStatus();
@@ -257,6 +258,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                                 var newComponent = result.resultObj;
                                 component.RootPath = newComponent.RootPath;
                                 component.Nodes = newComponent.Nodes;
+                                changeComponentToMessage(component);
                             }
                         );
                     }
@@ -287,6 +289,13 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                 });
             }
         });
+    }
+
+    function changeComponentToMessage(component) {
+        if (component.hasOwnProperty("State") && component.State.state === "ERROR") {
+            component.Message = component.State.errorMessage;
+        }
+        return component;
     }
 
 });

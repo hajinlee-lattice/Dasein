@@ -33,7 +33,7 @@ public class PLSComponent extends LatticeComponent {
 
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
-        installer.setDryrun(dryrun);
+        installer.setDryrun(false);
         ((PLSInstaller) installer).setTenantService(tenantService);
         return installer;
     }
