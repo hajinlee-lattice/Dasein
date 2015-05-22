@@ -32,9 +32,7 @@
                 </property>
             </activation>
             <properties>
-                <dataplatform.properties.path>conf/env/devcluster</dataplatform.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/devcluster</hadoop-metrics2.properties.path>
-                <eai.properties.path>../le-eai/conf/env/devcluster</eai.properties.path>
+                <scoring.properties.path>conf/env/devcluster</scoring.properties.path>
             </properties>
         </profile>
         <profile>
@@ -47,9 +45,7 @@
                 </property>
             </activation>
             <properties>
-                <dataplatform.properties.path>conf/env/intcluster</dataplatform.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/intcluster</hadoop-metrics2.properties.path>
-                <eai.properties.path>../le-eai/conf/env/intcluster</eai.properties.path>
+                <scoring.properties.path>conf/env/intcluster</scoring.properties.path>
             </properties>
         </profile>
         <profile>
@@ -61,9 +57,7 @@
                 </property>
             </activation>
             <properties>
-                <dataplatform.properties.path>conf/env/qacluster</dataplatform.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/qacluster</hadoop-metrics2.properties.path>
-                <eai.properties.path>../le-eai/conf/env/qacluster</eai.properties.path>
+                <scoring.properties.path>conf/env/qacluster</scoring.properties.path>
             </properties>
         </profile>
         <profile>
@@ -75,9 +69,7 @@
                 </property>
             </activation>
             <properties>
-                <dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
-                <eai.properties.path>../le-eai/conf/env/prodcluster</eai.properties.path>
+                <scoring.properties.path>conf/env/prodcluster</scoring.properties.path>
             </properties>
         </profile>
         <profile>
@@ -89,9 +81,7 @@
                 </property>
             </activation>
             <properties>
-                <dataplatform.properties.path>conf/env/buildmachine</dataplatform.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/buildmachine</hadoop-metrics2.properties.path>
-                <eai.properties.path>../le-eai/conf/env/buildmachine</eai.properties.path>
+                <scoring.properties.path>conf/env/buildmachine</scoring.properties.path>
             </properties>
         </profile>
     </profiles>
@@ -110,12 +100,11 @@
                     <!-- prefix>/usr/local</prefix -->
                     <changelogFile>src/main/resources/rpm/dependency/changelog</changelogFile>
                     <defineStatements>
-                        <defineStatement>_unpackaged_files_terminate_build
-                            0</defineStatement>
+                        <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
                     </defineStatements>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/app/dataplatform/scripts</directory>
+                            <directory>/tmp/app/scoring/scripts</directory>
                             <filemode>644</filemode>
                             <username>${mapping.username}</username>
                             <groupname>${mapping.groupname}</groupname>
