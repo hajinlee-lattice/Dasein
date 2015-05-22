@@ -40,6 +40,9 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
     @Value("${admin.mount.dl.datastore}")
     private String dataStore;
 
+    @Value("${admin.test.dl.datastore.server}")
+    private String dataStoreServer;
+
     private String tenant;
 
     @BeforeClass(groups = { "deployment", "functional" })
@@ -56,7 +59,7 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
     @Override
     public void tearDown() throws Exception {
         String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "datastore/" + tenant);
+        magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
         super.tearDown();
     }
 
