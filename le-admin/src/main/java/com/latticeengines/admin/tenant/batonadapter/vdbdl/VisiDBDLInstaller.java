@@ -5,7 +5,6 @@ import static com.latticeengines.admin.dynamicopts.impl.DataStoreProvider.DLFold
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,8 +82,8 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String permanentStorePath = permStoreProvider.toRemoteAddr(localPermanentStorePath);
         String dataStorePath = dataStoreProvider.toRemoteAddr(localDataStorePath);
 
-        dataStorePath = StringEscapeUtils.unescapeJava(dataStorePath + "\\" + dmDeployment);
-        permanentStorePath = StringEscapeUtils.unescapeJava( permanentStorePath + "\\" + visiDBServerName.toUpperCase());
+        dataStorePath = dataStorePath + "\\" + dmDeployment;
+        permanentStorePath = permanentStorePath + "\\" + visiDBServerName.toUpperCase();
 
         if (StringUtils.isEmpty(tenantAlias)) {
             tenantAlias = tenant;
@@ -115,9 +114,9 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         .createNewVisiDB(Boolean.parseBoolean(createNewVisiDB))
                         .caseSensitive(Boolean.parseBoolean(caseSensitive)).cacheLimit(Integer.parseInt(cacheLimit))
                         .diskspaceLimit(Integer.parseInt(diskspaceLimit))
-                        .backupFolder(dataStorePath + "/" + DLFolder.BACKUP.toPath())
-                        .launchFolder(dataStorePath + "/" + DLFolder.LAUNCH.toPath())
-                        .launchStatusFolder(dataStorePath + "/" + DLFolder.STATUS.toPath())
+                        .backupFolder(dataStorePath + "\\" + DLFolder.BACKUP.toPath())
+                        .launchFolder(dataStorePath + "\\" + DLFolder.LAUNCH.toPath())
+                        .launchStatusFolder(dataStorePath + "\\" + DLFolder.STATUS.toPath())
                         .permanentStoreOption(permStoreOpt);
                 if (Boolean.parseBoolean(createNewVisiDB)) {
                     createPermstoreFolder(localPermanentStorePath, visiDBServerName);
