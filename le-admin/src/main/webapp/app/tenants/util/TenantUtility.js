@@ -45,6 +45,10 @@ app.service('TenantUtility', function(_){
                 return componentConfig;
             });
 
+        if (!featureFlags.hasOwnProperty("Dante") || featureFlags.Dante === false) {
+            result.ConfigDirectories = _.reject(result.ConfigDirectories, {"Component": "Dante"});
+        }
+
         if (typeof(infos) === "undefined" || infos === null) infos = {};
 
         if (infos.hasOwnProperty("CustomerSpaceInfo")) {
