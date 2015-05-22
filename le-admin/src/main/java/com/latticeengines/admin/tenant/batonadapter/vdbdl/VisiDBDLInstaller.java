@@ -89,7 +89,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
             tenantAlias = tenant;
         }
         if (StringUtils.isEmpty(visiDBName)) {
-            visiDBName = visiDBServerName;
+            visiDBName = tenant;
         }
 
         int permStoreOpt = MASTER;
@@ -144,7 +144,6 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
     }
 
     private void createPermstoreFolder(String permanentStorePath, String visiDBServerName) {
-        permStoreProvider.deleteVDBFolder(permanentStorePath, visiDBServerName.toUpperCase());
         permStoreProvider.createVDBFolder(permanentStorePath, visiDBServerName.toUpperCase());
     }
 
