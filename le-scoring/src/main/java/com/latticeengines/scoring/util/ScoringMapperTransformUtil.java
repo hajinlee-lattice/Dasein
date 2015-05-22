@@ -34,8 +34,8 @@ public class ScoringMapperTransformUtil {
 	
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
-    private static final String LEAD_RECORD_MODEL_ID_COLUMN = "model_ID";
-    private static final String LEAD_RECORD_REQUEST_ID_COLUMN = "request_ID";
+    //TODO change it to be "Model_GUID"
+    private static final String LEAD_RECORD_MODEL_ID_COLUMN = "Model_GUID";
     private static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
     private static final String MODEL = "Model";
     private static final String MODEL_COMPRESSED_SUPPORT_Files = "CompressedSupportFiles";
@@ -163,7 +163,7 @@ public class ScoringMapperTransformUtil {
 		}
 	}
     
-    public static void  manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, HashMap<String, Integer> leadNumber, String record) {
+    public static void  manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, String record) {
     	JSONParser jsonParser = new JSONParser();
     	JSONObject leadJsonObject = null;
 		try {
@@ -178,7 +178,7 @@ public class ScoringMapperTransformUtil {
     	String leadID = (String)leadJsonObject.get("LeadID");
     	//if (!leadID.equals("1006549")) return;
     	
-    	String formattedRecord = transformToJsonString(leadJsonObject, models, leadNumber, modelID);
+    	String formattedRecord = transformToJsonString(leadJsonObject, models, modelID);
     	if (leadInputRecordMap.containsKey(modelID)) {
     		leadInputRecordMap.get(modelID).add(formattedRecord);
     	} else {
@@ -212,7 +212,7 @@ public class ScoringMapperTransformUtil {
     	return modelID;
     }
     
-    public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models, HashMap<String, Integer> leadNumber, String modelID) {
+    public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models, String modelID) {
     	String formattedRecord = null;
     	
     	if (models == null) {
@@ -228,12 +228,6 @@ public class ScoringMapperTransformUtil {
 		// parse the avro file since it is in json format
 		JSONObject jsonObj = new JSONObject();
 		String leadID = (String) leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
-		if (!leadNumber.containsKey(leadID)) {
-			leadNumber.put(leadID, 1);
-		} else {
-			int i = leadNumber.get(leadID);
-			leadNumber.put(leadID, ++i);
-		}
 
 		JSONArray jsonArray = new JSONArray();  
 		jsonObj.put("value", jsonArray); 
@@ -330,20 +324,6 @@ public class ScoringMapperTransformUtil {
 		if (typeAndValue.equals(trpeAndValue2)) {
 			System.out.println("jaja");
 		}
-		
-		
-//		HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
-//		ArrayList<String> records1 = new ArrayList<String>();
-//		records1.add("value11\n");
-//		records1.add("value12\n");
-//		records1.add("value13\n");
-//		leadInputRecordMap.put("model1", records1);
-//		ArrayList<String> records2 = new ArrayList<String>();
-//		records2.add("value21\n");
-//		records2.add("value22\n");
-//		records2.add("value23\n");
-//		leadInputRecordMap.put("model2", records2);
-//		writeToLeadInputFiles(leadInputRecordMap, 2);
 	}
 	
 }
