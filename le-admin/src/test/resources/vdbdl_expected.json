@@ -52,7 +52,7 @@
         },
         {
           "Node": "PermanentStore",
-          "Data": "D:\\VisiDB\\PermenantStore",
+          "Data": "D:\\VisiDB\\PermanentStore",
           "Metadata" : { "Type": "options", "Options": ["D:\\VisiDB\\PermanentStore"] }
         },
         {
