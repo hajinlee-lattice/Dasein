@@ -445,10 +445,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private void deleteVisiDBDLTenants() {
         try {
             visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenantId);
-            String url = String.format("%s/admin/internal/", getRestHostPort());
-            magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenantId);
-            //TODO:song this is temporary. It should be handled by DL API
-            magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName + "/" + tenantId);
+            visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenantId);
         } catch (Exception e) {
             // ignore
         }
