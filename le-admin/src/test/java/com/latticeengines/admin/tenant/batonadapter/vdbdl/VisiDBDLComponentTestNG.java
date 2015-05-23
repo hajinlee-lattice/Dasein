@@ -61,19 +61,13 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
-        String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
-        //TODO:song this is temporary. It should be handled by DL API
-        magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName + "/" + tenantId);
+        deleteVisiDBDLTenant(tenant);
     }
 
     @AfterClass(groups = {"deployment", "functional"})
     @Override
     public void tearDown() throws Exception {
-        String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
-        //TODO:song this is temporary. It should be handled by DL API
-        magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName + "/" + tenantId);
+        deleteVisiDBDLTenant(tenant);
         super.tearDown();
     }
 
@@ -136,6 +130,10 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         VisiDBDLInstaller installer = new VisiDBDLInstaller();
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
                 false, installer.getHeaders(), jsonStr);
+        String url = String.format("%s/admin/internal/", getRestHostPort());
+        magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
+        //TODO:song this is temporary. It should be handled by DL API
+        magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName + "/" + tenantId);
         return JsonUtils.deserialize(response, DLRestResult.class);
     }
 

@@ -392,14 +392,13 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(userDoc);
     }
 
-    @SuppressWarnings("unchecked")
     private void verifyVisiDBDLTenantExists() throws IOException {
         if (vdbdlSkipped) return;
 
         // verify permstore and datastore
-        String url = String.format("%s/admin/internal/", getRestHostPort());
-        Assert.assertEquals(magicRestTemplate.getForObject(
-                url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
+        String url = String.format("%s/admin/internal/datastore/", getRestHostPort());
+        Assert.assertEquals(
+                magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class).size(), 3);
         DLRestResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenantId);
         Assert.assertEquals(response.getStatus(), 3);
     }
