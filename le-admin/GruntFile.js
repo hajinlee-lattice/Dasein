@@ -32,12 +32,12 @@ module.exports = function(grunt) {
                 protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
             integration: {
-                url:            'http://bodcdevhdpweb52.dev.lattice.local',
+                url:            'http://bodcdevhdpweb53.dev.lattice.local',
                 protractorConf: testDir + '/e2e/conf/protractor.conf.js',
                 protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
             qa:          {
-                url:            'http://bodcdevhdpweb53.dev.lattice.local',
+                url:            'http://bodcdevhdpweb52.dev.lattice.local',
                 protractorConf: testDir + '/e2e/conf/protractor.conf.js',
                 protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
