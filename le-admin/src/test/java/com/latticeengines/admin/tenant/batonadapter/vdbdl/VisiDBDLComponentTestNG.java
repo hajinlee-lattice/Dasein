@@ -44,7 +44,13 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Value("${admin.test.dl.datastore.server}")
     private String dataStoreServer;
 
-    private String tenant;
+    @Value("${admin.mount.vdb.permstore}")
+    private String permStore;
+
+    @Value("${admin.test.vdb.permstore.server}")
+    private String permStoreServer;
+
+    protected String tenant;
 
     @BeforeClass(groups = { "deployment", "functional" })
     @Override
@@ -57,7 +63,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         String url = String.format("%s/admin/internal/", getRestHostPort());
         magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
-
+        //TODO:song this is temporary. It should be handled by DL API
+        magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName + "/" + tenantId);
     }
 
     @AfterClass(groups = {"deployment", "functional"})
@@ -65,6 +72,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     public void tearDown() throws Exception {
         String url = String.format("%s/admin/internal/", getRestHostPort());
         magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
+        //TODO:song this is temporary. It should be handled by DL API
+        magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName + "/" + tenantId);
         super.tearDown();
     }
 
@@ -75,7 +84,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         DocumentDirectory.Node node;
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("CreateNewVisiDB").getDocument().setData("false");
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
         node.getChild("DataStore").getDocument().setData(dataStoreServer);

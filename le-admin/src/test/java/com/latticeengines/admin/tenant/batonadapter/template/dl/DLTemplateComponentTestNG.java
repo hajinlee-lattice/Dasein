@@ -7,32 +7,24 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
-import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
 import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
-import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
-public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
+public class DLTemplateComponentTestNG extends VisiDBDLComponentTestNG {
 
     @Autowired
     private VisiDBDLComponentTestNG visiDBDLComponentTestNG;
 
     @Autowired
     private ComponentOrchestrator orchestrator;
-
-    @Autowired
-    private TenantService tenantService;
 
     @Value("${admin.test.dl.url}")
     private String dlUrl;
@@ -42,26 +34,6 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
 
     @Value("${admin.test.dl.datastore.server}")
     private String dataStoreServer;
-
-    private String tenant;
-
-    @BeforeClass(groups = { "deployment", "functional" })
-    @Override
-    public void setup() throws Exception {
-        super.setup();
-        tenant = tenantId;
-        SpaceConfiguration spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
-        spaceConfig.setDlAddress(dlUrl);
-        tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
-    }
-
-    @AfterClass(groups = {"deployment", "functional"})
-    @Override
-    public void tearDown() throws Exception {
-        String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
-        super.tearDown();
-    }
 
     public void installDLTemplate(){
         Map<String, Map<String, String>> properties = new HashMap<>();
@@ -94,12 +66,12 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase{
     }
 
     @Override
-    protected String getServiceName() {
+    public String getServiceName() {
         return DLTemplateComponent.componentName;
     }
 
     @Override
-    protected String getExpectedJsonFile() {
+    public String getExpectedJsonFile() {
         return "dl_tpl_expected.json";
     }
 }
