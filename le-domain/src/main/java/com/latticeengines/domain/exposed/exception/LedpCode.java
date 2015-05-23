@@ -102,6 +102,7 @@ public enum LedpCode {
     LEDP_18035("Can not config system, ErrorMessage={0}."), //
     LEDP_18036("Install VisiDB Template Failed: {0}"), //
     LEDP_18037("Template {0} is not supported."), //
+    LEDP_18038("Install DL Template Failed: {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

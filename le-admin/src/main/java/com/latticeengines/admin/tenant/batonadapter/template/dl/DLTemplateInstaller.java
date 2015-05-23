@@ -64,12 +64,12 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
             if (response != null && response.getStatus() == SUCCESS) {
                 log.info("Template " + topology.name() + " has successfully been installed!");
             } else {
-                throw new LedpException(LedpCode.LEDP_18036, new String[] { response.getErrorMessage() });
+                throw new LedpException(LedpCode.LEDP_18038, new String[] { response.getErrorMessage() });
             }
         } catch (FileNotFoundException e) {
             throw new LedpException(LedpCode.LEDP_18023, e);
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18036, e);
+            throw new LedpException(LedpCode.LEDP_18038, e);
         }
     }
 
