@@ -24,6 +24,7 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponentDeploymentTestNG;
+import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
@@ -37,7 +38,6 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
@@ -270,15 +270,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
         // VisiDBDL
-        DocumentDirectory confDir =
-                serviceService.getDefaultServiceConfig(VisiDBDLComponent.componentName).getDocumentDirectory();
-        confDir.makePathsLocal();
-        DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
-        node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("PermanentStore").getDocument().setData("D:\\VisiDB\\PermanentStore");
-        node = confDir.get(new Path("/DL"));
-        node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        node.getChild("DataStore").getDocument().setData(dataStoreServer);
+        DocumentDirectory confDir = visiDBDLComponentTestNG.constructVisiDBDLInstaller();
         SerializableDocumentDirectory vdbdlConfig = new SerializableDocumentDirectory(confDir);
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 
@@ -292,6 +284,11 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
                 serviceService.getDefaultServiceConfig(DLTemplateComponent.componentName);
         dlTplConfig.setRootPath("/" + DLTemplateComponent.componentName);
 
+        // Dante
+        SerializableDocumentDirectory danteConfig =
+                serviceService.getDefaultServiceConfig(DanteComponent.componentName);
+        danteConfig.setRootPath("/" + DanteComponent.componentName);
+
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
         configDirs.add(jamsConfig);
@@ -299,6 +296,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         configDirs.add(vdbdlConfig);
         configDirs.add(vdbTplConfig);
         configDirs.add(dlTplConfig);
+        configDirs.add(danteConfig);
 
         // Orchestrate tenant
         TenantRegistration reg =  new TenantRegistration();
