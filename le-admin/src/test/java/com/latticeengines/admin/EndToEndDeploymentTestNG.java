@@ -32,7 +32,6 @@ import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTempla
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
-import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
@@ -54,7 +53,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     private final static String contractId = "EndToEndTest";
     private final static String tenantName = "Global Test Tenant";
-    private static String tenantId = "EndToEndTenant";
+    private static String tenantId = "EndToEnd";
 
     @Autowired
     private TenantService tenantService;
@@ -393,12 +392,11 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private void verifyVisiDBDLTenantExists() throws IOException {
         if (vdbdlSkipped) return;
 
+        visiDBDLComponentTestNG.verifyTenant(tenantId, dlUrl);
         // verify permstore and datastore
         String url = String.format("%s/admin/internal/datastore/", getRestHostPort());
         Assert.assertEquals(
                 magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class).size(), 3);
-        DLRestResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenantId);
-        Assert.assertEquals(response.getStatus(), 3);
     }
 
     @SuppressWarnings("unused")

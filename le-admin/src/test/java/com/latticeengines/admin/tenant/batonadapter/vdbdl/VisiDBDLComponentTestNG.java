@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
+import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -95,6 +96,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         DLRestResult response = deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
+        verifyTenant(tenant, dlUrl, false);
 
         // record original number of files in permStore
         String url = String.format("%s/admin/internal/", getRestHostPort());
@@ -104,12 +106,11 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         Assert.assertEquals(state.state, BootstrapState.State.OK);
 
+        verifyTenant(tenant, dlUrl);
         // verify permstore and datastore
         Assert.assertEquals(magicRestTemplate.getForObject(
                 url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
-
-        response = deleteVisiDBDLTenant(tenant);
-        Assert.assertEquals(response.getStatus(), 3);
+        deleteVisiDBDLTenant(tenant);
     }
 
     @Test(groups = "functional")
@@ -151,8 +152,27 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         return response;
     }
 
-    public void clearDatastore(String dataStoreOption, String permStoreOption, String visiDBServerName, String tenant)
-            throws IOException, InterruptedException {
+    public int getTenantStatus(GetVisiDBDLRequest getRequest, String dlUrl) {
+        // setup magic rest template
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        String response = magicRestTemplate.postForObject(dlUrl + "/DLRestService/GetDLTenantSettings", getRequest, String.class);
+        DLRestResult result = JsonUtils.deserialize(response, DLRestResult.class);
+        return result.getStatus();
+    }
+
+    public void verifyTenant(String tenant, String dlUrl, boolean expectToExists) {
+        GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant);
+        if (expectToExists) {
+            Assert.assertEquals(getTenantStatus(getRequest, dlUrl), 3);
+        } else {
+            Assert.assertEquals(getTenantStatus(getRequest, dlUrl), 5);
+        }
+    }
+
+    public void verifyTenant(String tenant, String dlUrl) { verifyTenant(tenant, dlUrl, true); }
+
+    public void clearDatastore(String dataStoreOption, String permStoreOption, String visiDBServerName, String tenant) {
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
