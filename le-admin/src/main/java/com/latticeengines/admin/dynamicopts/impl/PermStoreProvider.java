@@ -54,6 +54,7 @@ public class PermStoreProvider implements OptionsProvider {
 
     public void deleteVDBFolder(String option, String server, String vdbName) {
         FileSystem fs = FileSystems.getDefault();
-        FileUtils.deleteQuietly(fs.getPath(absoluteRoot, option, server, vdbName).toFile());
+        Path path = fs.getPath(absoluteRoot, option, server, vdbName);
+        FileUtils.deleteQuietly(path.toFile());
     }
 }

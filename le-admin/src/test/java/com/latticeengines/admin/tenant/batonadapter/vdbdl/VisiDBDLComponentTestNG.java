@@ -1,10 +1,12 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.security.exposed.Constants;
 
 @Component
 public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
@@ -62,12 +65,14 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
         deleteVisiDBDLTenant(tenant);
+        clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
     }
 
     @AfterClass(groups = {"deployment", "functional"})
     @Override
     public void tearDown() throws Exception {
         deleteVisiDBDLTenant(tenant);
+        clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
         super.tearDown();
     }
 
@@ -78,6 +83,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         DocumentDirectory.Node node;
         node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
+        node.getChild("PermanentStore").getDocument().setData("D:\\VisiDB\\PermanentStore");
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
         node.getChild("DataStore").getDocument().setData(dataStoreServer);
@@ -130,10 +136,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         VisiDBDLInstaller installer = new VisiDBDLInstaller();
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
                 false, installer.getHeaders(), jsonStr);
-        String url = String.format("%s/admin/internal/", getRestHostPort());
-        magicRestTemplate.delete(url + "datastore/" + dataStoreServer + "/" + tenant);
-        //TODO:song this is temporary. It should be handled by DL API
-        magicRestTemplate.delete(url + "permstore/" + permStoreServer + "/" + visiDBServerName + "/" + tenantId);
         return JsonUtils.deserialize(response, DLRestResult.class);
     }
 
@@ -147,6 +149,17 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         } while(numOfRetry >0 &&
                 (response.getStatus() != 5 || !response.getErrorMessage().contains("does not exist")));
         return response;
+    }
+
+    public void clearDatastore(String dataStoreOption, String permStoreOption, String visiDBServerName, String tenant)
+            throws IOException, InterruptedException {
+        // setup magic rest template
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        String url = String.format("%s/admin/internal/", getRestHostPort());
+        magicRestTemplate.delete(url + "datastore/" + dataStoreOption + "/" + tenant);
+        //TODO:song this is temporary. It should be handled by DL API
+        magicRestTemplate.delete(url + "permstore/" + permStoreOption + "/" + visiDBServerName + "/" + tenant);
     }
 
     @Override
