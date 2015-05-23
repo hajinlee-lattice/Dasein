@@ -275,7 +275,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         confDir.makePathsLocal();
         DocumentDirectory.Node node = confDir.get(new Path("/VisiDB"));
         node.getChild("ServerName").getDocument().setData(visiDBServerName);
-        node.getChild("PermanentStore").getDocument().setData("D:\\VisiDB\\PermenantStore");
+        node.getChild("PermanentStore").getDocument().setData("D:\\VisiDB\\PermanentStore");
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
         node.getChild("DataStore").getDocument().setData(dataStoreServer);

@@ -12,7 +12,7 @@
         { "Node": "CaseSensitive", "Data": false},
         { "Node": "DiskspaceLimit", "Data": 0},
         { "Node": "PermanentStoreOption", "Data": "Master"},
-        { "Node": "PermanentStore", "Data": "D:\\VisiDB\\PermenantStore"}
+        { "Node": "PermanentStore", "Data": "D:\\VisiDB\\PermanentStore"}
       ]
     },
     { "Node": "DL", 
