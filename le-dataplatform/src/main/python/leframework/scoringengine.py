@@ -13,6 +13,8 @@ def decodeDataValue(serializedValueAndType):
     serializedType, _, serializedValue = serializedValueAndType.partition('|')
     if len(serializedValue) > 0:
         serializedValue = serializedValue[1:-1]
+        if serializedType == 'Float':
+            serializedValue = float(serializedValue)        
     elif serializedType == "String":
         serializedValue = None
     else:

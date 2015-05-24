@@ -129,7 +129,7 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
                     valueType = typeAndValue[0]
                     value = 1.0
                     if len(typeAndValue) == 2:
-                        value = float(typeAndValue[1])
+                        value = float(typeAndValue[1][1:-1])
                     if valueType == "Float":
                         data["Value"]["SerializedValueAndType"] = "%s|%f" % (valueType, value * 100)
                     elif valueType == "String":
