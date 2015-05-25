@@ -45,7 +45,7 @@ public class ExportAndReportService {
 
     @Value("${dellebi.datatarget.host}")
     private String targetJdbcHost;
-    @Value("${dellebin.datatarget.port}")
+    @Value("${dellebi.datatarget.port}")
     private String targetJdbcPort;
     @Value("${dellebi.datatarget.dbname}")
     private String targetJdbcDb;
