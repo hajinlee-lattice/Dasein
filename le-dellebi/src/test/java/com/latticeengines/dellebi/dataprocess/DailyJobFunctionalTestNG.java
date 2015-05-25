@@ -46,7 +46,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     private DailyFlow dailyFlow;
 
     @Autowired
-    private ExportAndReportService sqoopDataService;
+    private ExportAndReportService exportAndReportService;
 
     @Autowired
     private DellEbiFlowService dellEbiFlowService;
@@ -70,7 +70,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
         boolean result = dailyFlow.doDailyFlow();
         Assert.assertEquals(result, true);
-        sqoopDataService.export(requestContext);
+        exportAndReportService.export(requestContext);
 
         Configuration conf = new Configuration();
         Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir()), true);
