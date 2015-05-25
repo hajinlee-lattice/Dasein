@@ -22,4 +22,7 @@ public interface SqoopSyncJobService {
 
     void eval(String sql, String assignedQueue, String jobName, String connectionString);
 
+    ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer,
+            int numMappers, String javaColumnTypeMappings, String exportColumns);
+
 }

@@ -104,8 +104,8 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
         cmds.add("--target-dir");
         cmds.add(targetDir);
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
-//        yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS, 
-//        "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5003,server=y,suspend=y");
+        // yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS,
+        // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5003,server=y,suspend=y");
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
 
     }
@@ -123,7 +123,7 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
 
         final String jobName = jobNameService.createJobName(customer, "sqoop-export");
 
-        exportSync(table, sourceDir, creds, queue, jobName, numMappers, null);
+        exportSync(table, sourceDir, creds, queue, jobName, numMappers, null, null);
 
         return getApplicationId(jobName);
     }
@@ -134,13 +134,24 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
 
         final String jobName = jobNameService.createJobName(customer, "sqoop-export");
 
-        exportSync(table, sourceDir, creds, queue, jobName, numMappers, javaColumnTypeMappings);
+        exportSync(table, sourceDir, creds, queue, jobName, numMappers, javaColumnTypeMappings, null);
+
+        return getApplicationId(jobName);
+    }
+
+    @Override
+    public ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer,
+            int numMappers, String javaColumnTypeMappings, String exportColumns) {
+
+        final String jobName = jobNameService.createJobName(customer, "sqoop-export");
+
+        exportSync(table, sourceDir, creds, queue, jobName, numMappers, javaColumnTypeMappings, exportColumns);
 
         return getApplicationId(jobName);
     }
 
     private void exportSync(final String table, final String sourceDir, final DbCreds creds, final String queue,
-            final String jobName, final int numMappers, String javaColumnTypeMappings) {
+            final String jobName, final int numMappers, String javaColumnTypeMappings, String exportColumns) {
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
         cmds.add("-Dmapred.job.queue.name=" + queue);
@@ -157,6 +168,10 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
         if (javaColumnTypeMappings != null) {
             cmds.add("--map-column-java");
             cmds.add(javaColumnTypeMappings);
+        }
+        if (exportColumns != null) {
+            cmds.add("--columns");
+            cmds.add(exportColumns);
         }
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
     }
