@@ -31,6 +31,6 @@
 
 	<bean id="mail" class="com.latticeengines.dellebi.util.MailSender" />
 
-	<bean id="sqoopDataService" class="com.latticeengines.dellebi.util.SqoopDataService" />
+	<bean id="exportAndReportService" class="com.latticeengines.dellebi.util.ExportAndReportService" />
 
 </beans>

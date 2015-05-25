@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
 
+@Deprecated
 public class FileArchiveRouteBuilder extends RouteBuilder {
 
     private static final Log log = LogFactory.getLog(FileArchiveRouteBuilder.class);

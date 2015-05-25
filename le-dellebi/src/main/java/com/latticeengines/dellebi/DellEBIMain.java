@@ -12,7 +12,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 
-import com.latticeengines.dellebi.dataprocess.DailyJob;
+import com.latticeengines.dellebi.dataprocess.DellEbiDailyJob;
 
 public class DellEBIMain {
 
@@ -33,7 +33,7 @@ public class DellEBIMain {
 
         LOGGER.info("DellEBI daily refresh starts.");
 
-        JobDetail dailyRefreshJob = JobBuilder.newJob(DailyJob.class).withIdentity("job1", "group1").build();
+        JobDetail dailyRefreshJob = JobBuilder.newJob(DellEbiDailyJob.class).withIdentity("job1", "group1").build();
 
         // Execute daily refresh on Monday to Friday on 4 PM.
         Trigger dailyRefreshTrigger = TriggerBuilder.newTrigger().withIdentity("trigger1", "group1")

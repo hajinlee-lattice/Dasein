@@ -2,6 +2,7 @@ package com.latticeengines.dellebi.flowdef;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,8 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 
+import com.latticeengines.dellebi.service.DellEbiFlowService;
+import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.dellebi.util.PipeFactory;
 
 @Configuration
@@ -53,16 +56,17 @@ public class FlowDefinition {
     @Value("${dellebi.quotefields}")
     private String quoteFields;
 
+    @Autowired
+    private DellEbiFlowService dellEbiFlowService;
+
     private static final Log log = LogFactory.getLog(FlowDefinition.class);
 
     @SuppressWarnings("rawtypes")
-	@Bean
+    @Bean
     public FlowDef getOrderSumDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/" + orderSummary
-                + dataInputFileType);
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dataHadoopRootPath + dataHadoopWorkingPath + "/"
-                + orderSummary, SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -74,19 +78,17 @@ public class FlowDefinition {
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
                 .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName("OrderSumDailyFlow");
+        flowDef_fileType.setName(FileType.ORDER_SUMMARY.getType());
 
         return flowDef_fileType;
     }
 
     @SuppressWarnings("rawtypes")
-	@Bean
+    @Bean
     public FlowDef getOrderDetailDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/" + orderDetail
-                + dataInputFileType);
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dataHadoopRootPath + dataHadoopWorkingPath + "/"
-                + orderDetail, SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -98,18 +100,16 @@ public class FlowDefinition {
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
                 .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName("OrderDetailDailyFlow");
+        flowDef_fileType.setName(FileType.ORDER_DETAIL.getType());
         return flowDef_fileType;
     }
 
     @SuppressWarnings("rawtypes")
-	@Bean
+    @Bean
     public FlowDef getShipDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/"
-                + shipToAddrLattice + dataInputFileType);
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dataHadoopRootPath + dataHadoopWorkingPath + "/"
-                + shipToAddrLattice, SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -121,18 +121,16 @@ public class FlowDefinition {
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
                 .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName("ShipDailyFlow");
+        flowDef_fileType.setName(FileType.SHIP.getType());
         return flowDef_fileType;
     }
 
     @SuppressWarnings("rawtypes")
-	@Bean
+    @Bean
     public FlowDef getWarrantyDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/"
-                + warrantyGlobal + dataInputFileType);
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dataHadoopRootPath + dataHadoopWorkingPath + "/"
-                + warrantyGlobal, SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -144,20 +142,18 @@ public class FlowDefinition {
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
                 .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName("WarrantyDailyFlow");
+        flowDef_fileType.setName(FileType.WARRANTE.getType());
         return flowDef_fileType;
     }
 
     @SuppressWarnings("rawtypes")
-	@Bean
+    @Bean
     public FlowDef getQuoteDailyFlow() {
 
         log.info("Initial quote daily flow definition!");
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), cascadingInpath + "/" + quoteTrans
-                + dataInputFileType);
-        Tap outTapFile = new Hfs(new TextDelimited(false, ","), dataHadoopRootPath + dataHadoopWorkingPath + "/"
-                + quoteTrans, SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
+        Tap outTapFile = new Hfs(new TextDelimited(false, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -169,31 +165,7 @@ public class FlowDefinition {
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
                 .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName("QuoteTransDailyFlow");
+        flowDef_fileType.setName(FileType.QUOTE.getType());
         return flowDef_fileType;
-    }
-
-    public void setOrderSummaryFields(String s) {
-        this.orderSummaryFields = s;
-    }
-
-    public void setOrderDetailFields(String s) {
-        this.orderDetailFields = s;
-    }
-
-    public void setShipToAddrFields(String s) {
-        this.shipToAddrFields = s;
-    }
-
-    public void setWarrantyFields(String s) {
-        this.warrantyFields = s;
-    }
-
-    public void quoteFields(String s) {
-        this.quoteFields = s;
-    }
-
-    public void setCascadingInputDelimiter(String s) {
-        this.cascadingInputDelimiter = s;
     }
 }

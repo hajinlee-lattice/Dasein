@@ -27,17 +27,23 @@ public class PipeFactory {
 
         Pipe docPipe = null;
 
-        if ("order_detail_Pipe".equals(pipeName)) {
+        switch (pipeName) {
+        case "order_detail_Pipe":
             docPipe = createOdrDetialPipe(fields);
-        } else if ("order_summary_Pipe".equals(pipeName)) {
+            break;
+        case "order_summary_Pipe":
             docPipe = createOdrSumPipe(fields);
-        } else if ("ship_to_addr_lattice_Pipe".equals(pipeName)) {
+            break;
+        case "ship_to_addr_lattice_Pipe":
             docPipe = createShipAddrPipe(fields);
-        } else if ("warranty_global_Pipe".equals(pipeName)) {
+            break;
+        case "warranty_global_Pipe":
             docPipe = createWarrantyPipe(fields);
-        } else if ("quote_trans_Pipe".equals(pipeName)) {
+            break;
+        case "quote_trans_Pipe":
             docPipe = createQuoteTransPipe(fields);
-        } else {
+            break;
+        default:
             log.error(pipeName + " is not registed!");
         }
 

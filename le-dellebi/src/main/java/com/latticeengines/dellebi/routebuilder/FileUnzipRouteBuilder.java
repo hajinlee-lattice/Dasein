@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+@Deprecated
 public class FileUnzipRouteBuilder extends RouteBuilder {
 
     private static final Log log = LogFactory.getLog(FileUnzipRouteBuilder.class);
@@ -146,7 +147,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                     }
                 })
                 .endChoice()
-                .when(header("CamelFileName").startsWith("tgt_quote_trans_global_1"))
+                .when(header("CamelFileName").startsWith("tgt_quote_trans_global_1_"))
                 .split(new ZipSplitter())
                 .streaming()
                 .to("mock:processZipEntry")
