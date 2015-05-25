@@ -43,17 +43,17 @@ public class ExportAndReportService {
     @Value("${dellebi.env}")
     private String dellebiEnv;
 
-    @Value("${propdata.madison.datatarget.host}")
+    @Value("${dellebi.datatarget.host}")
     private String targetJdbcHost;
-    @Value("${propdata.madison.datatarget.port}")
+    @Value("${dellebin.datatarget.port}")
     private String targetJdbcPort;
-    @Value("${propdata.madison.datatarget.dbname}")
+    @Value("${dellebi.datatarget.dbname}")
     private String targetJdbcDb;
-    @Value("${propdata.madison.datatarget.type}")
+    @Value("${dellebi.datatarget.type}")
     private String targetJdbcType;
-    @Value("${propdata.madison.datatarget.user}")
+    @Value("${dellebi.datatarget.user}")
     private String targetJdbcUser;
-    @Value("${propdata.madison.datatarget.password.encrypted}")
+    @Value("${dellebi.datatarget.password.encrypted}")
     private String targetJdbcPassword;
 
     @Autowired
