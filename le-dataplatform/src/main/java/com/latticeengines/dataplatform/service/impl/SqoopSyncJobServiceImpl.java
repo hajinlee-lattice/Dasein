@@ -53,6 +53,12 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
         int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
         return importData(table, targetDir, creds, queue, customer, splitCols, columnsToInclude, numDefaultMappers, null);
     }
+    
+    @Override
+    public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols, String columnsToInclude, int numMappers) {
+        return importData(table, targetDir, creds, queue, customer, splitCols, columnsToInclude, numMappers, null);
+    }
 
     @Override
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
@@ -239,4 +245,5 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
         }
         return null;
     }
+
 }
