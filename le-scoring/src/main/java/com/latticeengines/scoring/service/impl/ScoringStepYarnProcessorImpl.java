@@ -179,7 +179,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 //         scoringCreds.setHost("10.41.1.250");
 //         scoringCreds.setPort(1433);
         String sourceDir = customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName() + "/data";
-        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, customer, 4);
+        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, customer);
 
         return appId;
     }
