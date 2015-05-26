@@ -26,12 +26,8 @@ public class ConfigurationController<T extends ConfigurationScope> implements Co
         impl = new StandardConfigurationControllerImpl<T>(scope);
     }
 
-    public static <T extends ConfigurationScope> ConfigurationController<T> construct(T scope) {
-        try {
-            return new ConfigurationController<T>(scope);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public static <T extends ConfigurationScope> ConfigurationController<T> construct(T scope) throws Exception {
+        return new ConfigurationController<T>(scope);
     }
 
     @Override

@@ -21,13 +21,9 @@ public class ConfigurationCache<T extends ConfigurationScope> implements Configu
         }
     }
 
-    public static <T extends ConfigurationScope> ConfigurationCache<T> construct(T scope, Path localPath) {
-        try {
-            return new ConfigurationCache<T>(scope, localPath);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
+    public static <T extends ConfigurationScope> ConfigurationCache<T> construct(T scope, Path localPath)
+            throws Exception {
+        return new ConfigurationCache<T>(scope, localPath);
     }
 
     @Override

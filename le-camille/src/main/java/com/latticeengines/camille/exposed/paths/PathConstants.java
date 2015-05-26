@@ -14,10 +14,7 @@ public final class PathConstants {
     public static final String CONFIGSCHEMA_NODE = "Metadata";
 
     public static final String PROPERTIES_FILE = "properties.json";
-    @Deprecated
     public static final String FEATURE_FLAGS_FILE = "feature-flags.json";
-    public static final String FEATURE_FLAGS_DEFINITIONS_FILE = "feature-flag-definitions.json";
-    public static final String FEATURE_FLAGS_VALUES_FILE = "feature-flag-values.json";
     public static final String BOOTSTRAP_STATE_FILE = "state.json";
     public static final String BOOTSTRAP_LOCK = "lock";
 
