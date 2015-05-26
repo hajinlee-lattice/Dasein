@@ -204,6 +204,11 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
     }
 
     @Override
+    public void eval(String sql, String assignedQueue, String jobName, DbCreds creds) {
+        eval(sql, assignedQueue, jobName, metadataService.getJdbcConnectionUrl(creds));
+    }
+    
+    @Override
     public void eval(String sql, String queue, String jobName, String jdbcUrl) {
         List<String> cmds = new ArrayList<>();
         cmds.add("eval");
