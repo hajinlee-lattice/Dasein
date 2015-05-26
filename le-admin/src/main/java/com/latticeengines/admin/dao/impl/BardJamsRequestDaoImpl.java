@@ -1,5 +1,9 @@
 package com.latticeengines.admin.dao.impl;
 
+import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.dao.BardJamsRequestDao;
@@ -12,6 +16,20 @@ public class BardJamsRequestDaoImpl extends BaseDaoImpl<BardJamsTenant> implemen
     @Override
     protected Class<BardJamsTenant> getEntityClass() {
         return BardJamsTenant.class;
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public BardJamsTenant findByTenant(String tenant) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<BardJamsTenant> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where tenant = '%s'", entityClz.getSimpleName(), tenant);
+        Query query = session.createQuery(queryStr);
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (BardJamsTenant) list.get(0);
     }
 
 }

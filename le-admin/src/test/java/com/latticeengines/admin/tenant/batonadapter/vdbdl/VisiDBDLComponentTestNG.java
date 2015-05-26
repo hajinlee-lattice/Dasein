@@ -156,7 +156,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
-        String response = magicRestTemplate.postForObject(dlUrl + "/DLRestService/GetDLTenantSettings", getRequest, String.class);
+        String response =
+                magicRestTemplate.postForObject(dlUrl + "/DLRestService/GetDLTenantSettings", getRequest, String.class);
         DLRestResult result = JsonUtils.deserialize(response, DLRestResult.class);
         return result.getStatus();
     }
@@ -178,7 +179,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
         String url = String.format("%s/admin/internal/", getRestHostPort());
         magicRestTemplate.delete(url + "datastore/" + dataStoreOption + "/" + tenant);
-        //TODO:song this is temporary. It should be handled by DL API
         magicRestTemplate.delete(url + "permstore/" + permStoreOption + "/" + visiDBServerName + "/" + tenant);
     }
 

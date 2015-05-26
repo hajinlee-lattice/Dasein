@@ -69,11 +69,10 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String cacheLimit = getChild(configDir, "VisiDB", "CacheLimit").getDocument().getData();
         String diskspaceLimit = getChild(configDir, "VisiDB", "DiskspaceLimit").getDocument().getData();
         String permanentStoreOption = getChild(configDir, "VisiDB", "PermanentStoreOption").getDocument().getData();
-        //String localPermanentStorePath = getChild(configDir, "VisiDB", "PermanentStore").getDocument().getData();
+        String permanentStorePath = getChild(configDir, "VisiDB", "PermanentStore").getDocument().getData();
         String ownerEmail = getChild(configDir, "DL", "OwnerEmail").getDocument().getData();
         String localDataStorePath = getChild(configDir, "DL", "DataStore").getDocument().getData();
 
-        String permanentStorePath = "D:\\VisiDB\\PermanentStore";
         String dataStorePath = dataStoreProvider.toRemoteAddr(localDataStorePath);
 
         dataStorePath = dataStorePath + "\\" + dmDeployment;

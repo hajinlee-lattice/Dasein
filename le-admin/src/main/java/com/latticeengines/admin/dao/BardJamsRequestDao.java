@@ -5,4 +5,6 @@ import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 
 public interface BardJamsRequestDao extends BaseDao<BardJamsTenant> {
 
+    BardJamsTenant findByTenant(String tenant);
+
 }

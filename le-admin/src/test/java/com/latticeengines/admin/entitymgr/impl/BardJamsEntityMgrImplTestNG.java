@@ -36,6 +36,42 @@ public class BardJamsEntityMgrImplTestNG extends AbstractTestNGSpringContextTest
 
     }
 
+    @Test(groups = "functional")
+    public void testFindByTenant() {
+        BardJamsTenant tenant = getBardJamsTenant();
+        bardJamsEntityMgr.create(tenant);
+
+        BardJamsTenant newTenant = bardJamsEntityMgr.findByTenant(tenant);
+        Assert.assertNotNull(newTenant);
+
+        bardJamsEntityMgr.delete(newTenant);
+
+        newTenant = bardJamsEntityMgr.findByTenant(tenant);
+        Assert.assertNull(newTenant);
+    }
+
+    @Test(groups = "functional")
+    public void testUpdateTenant() {
+        BardJamsTenant tenant = getBardJamsTenant();
+        bardJamsEntityMgr.create(tenant);
+
+        BardJamsTenant newTenant = bardJamsEntityMgr.findByTenant(tenant);
+        Assert.assertNotNull(newTenant);
+        long pid = newTenant.getPid();
+
+        tenant.setJamsUser("new user");
+        bardJamsEntityMgr.update(tenant);
+        newTenant = bardJamsEntityMgr.findByTenant(tenant);
+        Assert.assertNotNull(newTenant);
+        Assert.assertTrue(newTenant.getPid() == pid);
+        Assert.assertEquals(newTenant.getJamsUser(), "new user");
+
+        bardJamsEntityMgr.delete(newTenant);
+
+        newTenant = bardJamsEntityMgr.findByTenant(tenant);
+        Assert.assertNull(newTenant);
+    }
+
     private BardJamsTenant getBardJamsTenant() {
         BardJamsTenant tenant = new BardJamsTenant();
         tenant.setTenant("newTenant3");

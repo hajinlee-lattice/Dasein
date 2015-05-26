@@ -1,6 +1,5 @@
 package com.latticeengines.admin.tenant.batonadapter.bardjams;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,7 +29,13 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
     protected void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
 
         BardJamsTenant tenant = pupulateTenant(space, serviceName, dataVersion, configDir);
-        bardJamsEntityMgr.create(tenant);
+        BardJamsTenant oldTenant = bardJamsEntityMgr.findByTenant(tenant);
+        if (oldTenant == null) {
+            bardJamsEntityMgr.create(tenant);
+        } else {
+            tenant.setPid(oldTenant.getPid());
+            bardJamsEntityMgr.update(tenant);
+        }
 
         log.info("Created BardJams tenant=" + tenant.toString());
 
@@ -83,17 +88,9 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
             DocumentDirectory configDir) {
         BardJamsTenant tenant = new BardJamsTenant();
 
-        String tenantId = getData(configDir, "Tenant");
-        if (StringUtils.isEmpty(tenantId)) {
-            tenantId = space.toString();
-        }
-        tenant.setTenant(tenantId);
+        tenant.setTenant(space.toString());
         tenant.setTenantType(getData(configDir, "TenantType"));
-        String dlTenantName = getData(configDir, "DL_TenantName");
-        if (StringUtils.isEmpty(dlTenantName)) {
-            dlTenantName = tenantId;
-        }
-        tenant.setDlTenantName(dlTenantName);
+        tenant.setDlTenantName(space.getTenantId());
         tenant.setDlUrl(getData(configDir, "DL_URL"));
         tenant.setDlUser(getData(configDir, "DL_User"));
         tenant.setDlPassword(getData(configDir, "DL_Password"));

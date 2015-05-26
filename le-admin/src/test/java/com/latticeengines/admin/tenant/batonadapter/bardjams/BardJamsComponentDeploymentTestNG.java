@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.ServiceService;
@@ -16,12 +18,21 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
+import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 
 public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
+
+    private final String tenantName = "BardJams Test Tenant";
 
     @Autowired
     private ServiceService serviceService;
@@ -32,13 +43,49 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     @Value("${admin.test.dl.url}")
     private String dlUrl;
 
-    @Test(groups = "deployment", enabled = false)
-    public void testInstallation() {
+    @BeforeClass(groups = "deployment")
+    public void setup() throws Exception {
+        // TenantInfo
+        TenantProperties tenantProperties = new TenantProperties();
+        tenantProperties.description = "Test tenant";
+        tenantProperties.displayName = getServiceName() + " Test Tenant";
+        TenantInfo tenantInfo = new TenantInfo(tenantProperties);
+
+        // SpaceInfo
+        CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
+        spaceProperties.description = tenantProperties.description;
+        spaceProperties.displayName = tenantProperties.displayName;
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, "{\"Dante\":true}");
+
+        // SpaceConfiguration
         SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
         spaceConfiguration.setDlAddress(dlUrl);
         spaceConfiguration.setTopology(CRMTopology.ELOQUA);
-        tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfiguration);
 
+        // Orchestrate tenant
+        TenantRegistration reg =  new TenantRegistration();
+        reg.setContractInfo(new ContractInfo(new ContractProperties()));
+        reg.setTenantInfo(tenantInfo);
+        reg.setSpaceInfo(spaceInfo);
+        reg.setSpaceConfig(spaceConfiguration);
+
+        loginAD();
+        String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
+        boolean created = restTemplate.postForObject(url, reg, Boolean.class);
+        Assert.assertTrue(created);
+    }
+
+    @AfterClass(groups = "deployment")
+    public void tearDown() throws Exception {
+        try {
+            deleteTenant(contractId, tenantId);
+        } catch (Exception e) {
+            //ignore
+        }
+    }
+
+    @Test(groups = "deployment", enabled = false)
+    public void testInstallation() {
         SerializableDocumentDirectory jamsConfig = new SerializableDocumentDirectory(getOverrideProperties());
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
         jamsConfig.applyMetadata(metaDir);

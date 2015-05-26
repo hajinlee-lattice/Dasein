@@ -19,6 +19,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
@@ -31,6 +32,7 @@ import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateCompon
 import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
+import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -63,6 +65,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BardJamsEntityMgr bardJamsEntityMgr;
 
     @Autowired
     private PLSComponentTestNG plsComponentTestNG;
@@ -136,6 +141,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         // delete PLS tenant
         deletePLSTenants();
         deleteVisiDBDLTenants();
+        deleteBardJamesTenant();
+
         provisionEndToEndTestTenants();
     }
 
@@ -153,6 +160,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         // delete PLS tenant
         deletePLSTenants();
         deleteVisiDBDLTenants();
+        deleteBardJamesTenant();
     }
 
     /**
@@ -204,21 +212,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     /**
      * ==================================================
-     * BEGIN: Verify default configuration tenant
-     * ==================================================
-     */
-
-    @Test(groups = "deployment", enabled = false)
-    public void verifyDefaultTestTenant() {}
-
-    /**
-     * ==================================================
-     * END: Verify default configuration tenant
-     * ==================================================
-     */
-
-    /**
-     * ==================================================
      * BEGIN: Tenant creation methods
      * ==================================================
      */
@@ -255,7 +248,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
         jamsConfig.applyMetadata(metaDir);
         jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
-
 
         // PLS
         SerializableDocumentDirectory PLSconfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
@@ -331,9 +323,13 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
             Future<BootstrapState> future = executor.submit(new Callable<BootstrapState>() {
                 @Override
                 public BootstrapState call() throws Exception {
-                    // not ready for integration test with Dante
-                    if (component.toLowerCase().contains("dante") ||
-                            component.toLowerCase().contains("test")) {
+                    if (component.toLowerCase().contains("test") ||
+                            (component.equals(DanteComponent.componentName)) || // not ready for integration test with Dante
+                            (plsSkipped && component.equals(PLSComponent.componentName)) ||
+                            (vdbdlSkipped && component.equals(VisiDBDLComponent.componentName)) ||
+                            (vdbTplSkipped && component.equals(VisiDBTemplateComponent.componentName)) ||
+                            (jamsSkipped && component.equals(BardJamsComponent.componentName))
+                    ) {
                         return BootstrapState.constructOKState(1);
                     } else {
                         return waitUntilStateIsNotInitial(contractId, tenantId, component, 60);
@@ -446,6 +442,16 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
             // ignore
         }
     }
+
+    private void deleteBardJamesTenant() throws IOException, InterruptedException {
+        try {
+            BardJamsTenant jamsTenant = bardJamsEntityMgr.findByTenant(tenantId);
+            bardJamsEntityMgr.delete(jamsTenant);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
     /**
      * ==================================================
      * END: Tenant clean up methods

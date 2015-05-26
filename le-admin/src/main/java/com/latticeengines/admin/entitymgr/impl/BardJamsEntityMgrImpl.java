@@ -20,9 +20,11 @@ public class BardJamsEntityMgrImpl implements BardJamsEntityMgr {
 
     @Override
     @Transactional(value = "bardJamsRequest")
-    public void create(BardJamsTenant request) {
-        bardJamsRequestDao.create(request);
-    }
+    public void create(BardJamsTenant request) { bardJamsRequestDao.create(request); }
+
+    @Override
+    @Transactional(value = "bardJamsRequest")
+    public void update(BardJamsTenant request) { bardJamsRequestDao.update(request); }
 
     @Override
     @Transactional(value = "bardJamsRequest")
@@ -34,5 +36,17 @@ public class BardJamsEntityMgrImpl implements BardJamsEntityMgr {
     @Transactional(value = "bardJamsRequest")
     public BardJamsTenant findByKey(BardJamsTenant request) {
         return bardJamsRequestDao.findByKey(request);
+    }
+
+    @Override
+    @Transactional(value = "bardJamsRequest")
+    public BardJamsTenant findByTenant(BardJamsTenant request) {
+        return bardJamsRequestDao.findByTenant(request.getTenant());
+    }
+
+    @Override
+    @Transactional(value = "bardJamsRequest")
+    public BardJamsTenant findByTenant(String tenant) {
+        return bardJamsRequestDao.findByTenant(tenant);
     }
 }
