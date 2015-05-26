@@ -7,7 +7,7 @@ var ExternalUser = function() {
 
     this.testUserManagement = function() {
         describe('An external user', function(){
-            it('should behave such and such', function () {
+            it('should not be able to see the manage user page', function () {
                 loginPage.loginAsExternalUser();
 
                 // can see manage users link
@@ -15,7 +15,7 @@ var ExternalUser = function() {
                 usermgmt.assertManageUsersIsVisible(false);
 
                 loginPage.logout();
-            }, 60000);
+            });
         });
     };
 };

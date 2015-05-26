@@ -7,7 +7,7 @@ var InternalAdmin = function() {
 
     this.testUserManagement = function() {
         describe('An internal admin', function(){
-            it('should behave such and such', function () {
+            it('should be able to see the manage user page', function () {
                 loginPage.loginAsInternalAdmin();
 
                 // can see manage users link

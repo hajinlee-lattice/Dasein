@@ -7,7 +7,7 @@ var InternalUser = function() {
 
     this.testUserManagement = function() {
         describe('An internal user', function(){
-            it('should behave such and such', function () {
+            it('should not be able to see the manage user page', function () {
                 loginPage.loginAsInternalUser();
 
                 // can see manage users link
@@ -15,7 +15,7 @@ var InternalUser = function() {
                 usermgmt.assertManageUsersIsVisible(false);
 
                 loginPage.logout();
-            }, 60000);
+            });
         });
     };
 
