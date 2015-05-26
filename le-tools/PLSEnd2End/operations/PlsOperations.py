@@ -49,7 +49,7 @@ def runModelingLoadGroups(tenant,marketting_app,
                            "CreateAnalyticPlay"]
             assert TestHelpers.runLoadGroups(dlc, params, load_groups)
         else:
-            assert TestHelpers.runLoadGroups(dlc, params, ["ExecuteModelBuilding"])
+            assert TestHelpers.runLoadGroups(dlc, params, ["ExecuteModelBuilding"],7200,120)
     else:
         # we can't get a method about how to update the nested groups, LoadMapDataForModeling just include the same two sub groups.
         load_groups = ["LoadMAPDataForModeling_ActivityRecord_NewLead",
@@ -64,9 +64,9 @@ def updateModelingServiceSettings(bard_path):
     # Run AutomaticModelDownloader
     bard = BardAdminRunner(host=dlc_host, bard_path=bard_path);
     
-    bard.runSetProperty("ModelDownloadSettings", "HDFSNameServerAddress", "10.41.1.216")
+    bard.runSetProperty("ModelDownloadSettings", "HDFSNameServerAddress", "10.41.1.106")
     assert bard.getStatus()
-    bard.runSetProperty("ModelDownloadSettings", "HDFSNameServerPort", 50070)
+    bard.runSetProperty("ModelDownloadSettings", "HDFSNameServerPort", 14000)
     assert bard.getStatus()
     bard.runSetProperty("ScoringConfiguration", "LeadsPerBatch", 10000)
     assert bard.getStatus()

@@ -423,7 +423,7 @@ class PerformanceTest(SessionRunner):
            
         editPerformanceRefreshDataSources(self.tenantName, self.app); 
                     
-        PlsOperations.runModelingLoadGroups(self.tenantName, self.app);
+        PlsOperations.runModelingLoadGroups(self.tenantName, self.app,True);
         PlsOperations.updateModelingServiceSettings(self.bardAdmin);        
         PlsOperations.activateModel(self.bardAdmin,self.tenantName);
         

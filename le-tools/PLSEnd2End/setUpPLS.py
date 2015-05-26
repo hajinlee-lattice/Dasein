@@ -12,6 +12,7 @@ from operations.TestHelpers import PLSConfigRunner
 from operations.TestHelpers import DLConfigRunner
 from operations.TestHelpers import PretzelRunner
 from operations.TestRunner import SessionRunner
+from operations.TestHelpers import JamsRunner
 import logging
 
 
@@ -44,7 +45,7 @@ def configureBardTenant(tenant, marketting_app):
     print "Running Setup"
     pretzel = PretzelRunner();
     assert pretzel.setupPretzel(marketting_app)
- 
+   
     ''' Configure PLS Credentials '''
     print "for PLS Configuration from UI";
     plsUI = PLSConfigRunner(pls_url);
@@ -59,6 +60,10 @@ def configureBardTenant(tenant, marketting_app):
     dlConfig.editMockRefreshDataSources(tenant, marketting_app);
     dlConfig.loadCfgTables(tenant, marketting_app);
     PerformanceHelpers.createPerformanceDataProviders(tenant, marketting_app); 
+    
+    print "for jams configurations"
+    jams = JamsRunner();
+    assert jams.setJamsTenant(tenant);
 
 if __name__ == '__main__':
     setUpPls()
