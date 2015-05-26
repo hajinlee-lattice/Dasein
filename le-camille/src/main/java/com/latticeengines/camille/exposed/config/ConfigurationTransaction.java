@@ -20,8 +20,12 @@ public class ConfigurationTransaction<T extends ConfigurationScope> implements C
         impl = new StandardConfigurationTransactionImpl<T>(scope);
     }
 
-    public static <T extends ConfigurationScope> ConfigurationTransaction<T> construct(T scope) throws Exception {
-        return new ConfigurationTransaction<T>(scope);
+    public static <T extends ConfigurationScope> ConfigurationTransaction<T> construct(T scope) {
+        try {
+            return new ConfigurationTransaction<T>(scope);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
