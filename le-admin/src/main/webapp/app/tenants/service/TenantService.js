@@ -96,6 +96,8 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
             defer.resolve(result);
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
+            result.success = false;
+            defer.resolve(result);
         });
 
         return defer.promise;
@@ -134,6 +136,8 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
             defer.resolve(result);
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
+            result.success = false;
+            defer.resolve(result);
         });
 
         return defer.promise;

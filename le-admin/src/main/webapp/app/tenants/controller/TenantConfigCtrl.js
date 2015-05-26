@@ -121,13 +121,27 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                 ServiceService.GetRegisteredServices().then( function(result2) {
                     if (result2.success) {
                         $scope.services = result2.resultObj;
+                        $scope.componentsToScan = $scope.services.length;
                         _.each($scope.services, function(service){
+                            if (!$scope.featureFlags.Dante && service === "Dante") {
+                                $scope.componentsToScan--;
+                                return;
+                            }
                             TenantService.GetTenantServiceConfig($scope.tenantId, $scope.contractId, service).then(
                                 function(result){
-                                    var component = result.resultObj;
-                                    component = changeComponentToMessage(component);
+                                    $scope.componentsToScan--;
+                                    var component;
+                                    if (result.success) {
+                                        component = result.resultObj;
+                                        component = changeComponentToMessage(component);
+                                    } else {
+                                        component = {
+                                            Component: service,
+                                            Message: result.errorMsg
+                                        };
+                                    }
                                     $scope.components.push(component);
-                                    if ($scope.components.length == $scope.services.length) {
+                                    if ($scope.componentsToScan <= 0) {
                                         if ($scope.listenState) updateServiceStatus();
                                         $scope.loading = false;
                                     }
