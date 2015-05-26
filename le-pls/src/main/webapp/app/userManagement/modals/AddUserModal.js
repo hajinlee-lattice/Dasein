@@ -117,7 +117,8 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
         UserManagementService.AddUser($scope.user).then(function(result){
             if (result.Success) {
                 $scope.showAddUserSuccess = true;
-                $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_USER_SUCCESS", [result.ResultObj.Username, result.ResultObj.Password]);
+                var levelString = ResourceUtility.getString('ACCESS_LEVEL_' + result.ResultObj.AccessLevel);
+                $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_USER_SUCCESS", [result.ResultObj.Username, levelString]);
                 $scope.saveInProgress = false;
                 $scope.showExistingUser = false;
                 $event.target.blur();

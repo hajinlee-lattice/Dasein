@@ -104,7 +104,7 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
             };
             if (data.Success) {
                 result.Success = true;
-                result.ResultObj = {Username: user.Username, Password: data.Result.Password};
+                result.ResultObj = {Username: user.Username, AccessLevel: user.AccessLevel, Password: data.Result.Password};
                 deferred.resolve(result);
             } else {
                 result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
