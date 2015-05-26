@@ -39,7 +39,7 @@ public class DellEbiDailyJob extends QuartzJobBean {
             }
 
         } else {
-            log.error("EBI daily Job Flow failed!");
+            log.error("EBI daily Job Flow did not find file or failed!");
         }
 
         long endTime = System.currentTimeMillis();
