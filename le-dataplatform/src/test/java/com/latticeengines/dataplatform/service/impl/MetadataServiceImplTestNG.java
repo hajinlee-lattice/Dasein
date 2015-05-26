@@ -90,4 +90,15 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         assertEquals(metadataService.getJdbcConnectionUrl(creds), url);
     }
+
+    @Test(groups = { "functional" }, enabled = true)
+    public void getJdbcConnectionUrlUsingUrlAndDriverClassForFile() throws Exception {
+        String url = String.format("jdbc:relique:csv:%s", "/home/rgonzalez/Documents/Customers/Nutanix/data");
+        String driver = "org.relique.jdbc.csv.CsvDriver";
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.jdbcUrl(url).driverClass(driver);
+        DbCreds creds = new DbCreds(builder);
+
+        assertEquals(metadataService.getJdbcConnectionUrl(creds), url);
+    }
 }

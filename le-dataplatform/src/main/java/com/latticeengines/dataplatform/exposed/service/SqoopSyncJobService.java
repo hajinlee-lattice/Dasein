@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.exposed.service;
 
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
@@ -12,7 +13,7 @@ public interface SqoopSyncJobService {
             List<String> splitCols, String columnsToInclude);
 
     ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, String columnsToInclude, int numMappers);
+            List<String> splitCols, String columnsToInclude, int numMappers, Properties props);
 
     ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer);
 

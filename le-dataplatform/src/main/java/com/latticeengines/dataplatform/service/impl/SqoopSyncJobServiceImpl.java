@@ -1,7 +1,11 @@
 package com.latticeengines.dataplatform.service.impl;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -47,16 +51,16 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude) {
         int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
-        return importData(table, targetDir, creds, queue, customer, splitCols, columnsToInclude, numDefaultMappers);
+        return importData(table, targetDir, creds, queue, customer, splitCols, columnsToInclude, numDefaultMappers, null);
     }
 
     @Override
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, String columnsToInclude, int numMappers) {
+            List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
 
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
-        importSync(table, targetDir, creds, queue, jobName, splitCols, columnsToInclude, numMappers);
+        importSync(table, targetDir, creds, queue, jobName, splitCols, columnsToInclude, creds.getDriverClass(), numMappers, props);
 
         return getApplicationId(jobName);
     }
@@ -80,7 +84,8 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
     }
 
     private void importSync(final String table, final String targetDir, final DbCreds creds, final String queue,
-            final String jobName, final List<String> splitCols, final String columnsToInclude, final int numMappers) {
+            final String jobName, final List<String> splitCols, final String columnsToInclude, String driver, 
+            final int numMappers, final Properties props) {
 
         List<String> cmds = new ArrayList<>();
         cmds.add("import");
@@ -99,10 +104,26 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
             cmds.add("--columns");
             cmds.add(columnsToInclude);
         }
+        if (driver != null && !driver.isEmpty()) {
+            cmds.add("--driver");
+            cmds.add(driver);
+        }
         cmds.add("--split-by");
         cmds.add(StringUtils.join(splitCols, ","));
         cmds.add("--target-dir");
         cmds.add(targetDir);
+        
+        if (props != null) {
+            String propsFileName = String.format("sqoop-import-props-%s.properties", System.currentTimeMillis());
+            File propsFile = new File(propsFileName);
+            try {
+                props.store(new FileWriter(propsFile), "");
+                cmds.add("--connection-param-file");
+                cmds.add(propsFile.getCanonicalPath());
+            } catch (IOException e) {
+                log.error(e);
+            }
+        }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         // yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS,
         // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5003,server=y,suspend=y");

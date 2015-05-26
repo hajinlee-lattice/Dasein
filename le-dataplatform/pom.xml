@@ -399,6 +399,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>net.sourceforge.csvjdbc</groupId>
+            <artifactId>csvjdbc</artifactId>
+            <version>1.0.25</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
