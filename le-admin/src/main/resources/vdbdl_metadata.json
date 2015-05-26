@@ -8,7 +8,10 @@
             { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}},
             {
               "Node": "PermanentStore",
-              "Data": { "Type": "options", "Options": ["D:\\VisiDB\\PermanentStore"] }
+              "Data": { "Type": "options", "Options": [
+                "\\\\BODCDEVVINT187\\VisiDB\\PermanentStore",
+                "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore"
+              ] }
             }
          ]
       },

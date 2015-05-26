@@ -374,12 +374,16 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     protected BootstrapState waitUntilStateIsNotInitial(
             String contractId, String tenantId, String serviceName) {
-        int numOfRetries = 30;
+        return waitUntilStateIsNotInitial(contractId, tenantId, serviceName, 20);
+    }
+
+    protected BootstrapState waitUntilStateIsNotInitial(
+            String contractId, String tenantId, String serviceName, int numOfRetries) {
         BootstrapState state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
         while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0) {
             numOfRetries--;
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1000L);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Waiting for component state update interrupted", e);
             }
