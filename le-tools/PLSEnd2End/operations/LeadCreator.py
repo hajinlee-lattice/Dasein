@@ -543,7 +543,7 @@ class SFDCRequest():
         
         for i in range(lead_num):
             emailAddress =  getRandomMail(domains[i][0]);
-            lead_id = self.addLeadsToSFDC(email=emailAddress);
+            lead_id = self.addLeadToSFDC(email=emailAddress);
             if lead_id != None:
                 lead_lists[lead_id] = emailAddress;
                 recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC, "Lead", lead_id, lead_lists[lead_id]); 
