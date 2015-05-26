@@ -80,7 +80,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private static final String JSON_SUFFIX = ".json";
 
-    private static final String OUTPUT_TABLE_PREFIX = "Lead_";
+    private static final String OUTPUT_TABLE_PREFIX = "Leads_";
 
     private static final String PID = "Pid";
 
@@ -157,15 +157,6 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     }
 
     private ApplicationId export(String customer, ScoringCommand scoringCommand) {
-        // remove later
-        try {
-            HdfsUtils.rmdir(yarnConfiguration,
-                    customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName()
-                            + "/data/datatype.avsc");
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
         String targetTable = createNewTable(customer, scoringCommand);
         //targetTable = "TestLeadsTable";
@@ -178,7 +169,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 //         scoringCreds.setDBType("SQLServer");
 //         scoringCreds.setHost("10.41.1.250");
 //         scoringCreds.setPort(1433);
-        String sourceDir = customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName() + "/data";
+        String sourceDir = customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName() + "/scores";
         ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, customer);
 
         return appId;
