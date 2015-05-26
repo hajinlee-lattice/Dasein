@@ -113,7 +113,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String targetDir = customerBaseDir + "/" + customer + "/scoring/" + table + "/data";
         metadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
         ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, scoringCreds,
-                LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList(PID), "", 4);
+                LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList(PID), "");
         return appId;
     }
 
