@@ -89,27 +89,30 @@ public class ExportAndReportService {
 
         log.info("Start export from HDFS files " + sourceDir);
 
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
+                .password(targetJdbcPassword).dbType(targetJdbcType);
+        DbCreds creds = new DbCreds(builder);
         String errorMsg = null;
+        String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
         try {
-            String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
-            DbCreds.Builder builder = new DbCreds.Builder();
-            builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
-                    .password(targetJdbcPassword).dbType(targetJdbcType);
-            DbCreds creds = new DbCreds(builder);
             sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer, 4, null, columns);
 
         } catch (Exception e) {
             errorMsg = "Export files " + sourceDir + " to SQL server failed! errorMsg=" + e.getMessage();
             log.error("Export files " + sourceDir + " to SQL server failed", e);
         }
+        log.info("Finish export HDFS files to SQL server");
 
         if (errorMsg == null) {
-            // log.info("Begin to execute the Store Procedure: " + quote_sp);
-            // rc = sqoopSyncJobService.eval(sqlStr, 1, uri);
-
-            log.info("Finish export HDFS files to SQL server");
-        } else {
-            errorMsg = "Export files " + sourceDir + " to SQL server failed!";
+            log.info("Begin to execute the Store Procedure= " + quote_sp);
+            try {
+                sqoopSyncJobService.eval(sqlStr, queue, "Exceute SP-" + quote_sp, creds);
+                log.info("Finished executing the Store Procedure= " + quote_sp);
+            } catch (Exception e) {
+                errorMsg = "Failed to execute the Store Procedure= " + quote_sp;
+                log.error(errorMsg, e);
+            }
         }
 
         String fileName = "";
