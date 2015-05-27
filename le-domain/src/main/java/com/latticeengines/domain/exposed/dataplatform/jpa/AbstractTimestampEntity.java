@@ -18,25 +18,13 @@ public abstract class AbstractTimestampEntity {
     @Column(name = "Created", nullable = false)
     private Date created = new Date();
 
-//    @Temporal(TemporalType.TIMESTAMP)
-//    @Column(name = "Updated", nullable = false)
-//    private Date updated;
-
     public Date getCreated() {
         return created;
     }
-
-//    public Date getUpdated() {
-//        return updated;
-//    }
 
     @PrePersist
     protected void onCreate() {
         /*updated = */created = new Date();
     }
 
-//    @PreUpdate
-//    protected void onUpdate() {
-//        updated = new Date();
-//    }
 }
