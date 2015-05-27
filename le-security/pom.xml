@@ -4,6 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-security</artifactId>
     <packaging>jar</packaging>
+	<scm>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+	</scm>
+
     <name>le-${component-name}</name>
 
     <properties>
@@ -325,6 +331,12 @@
                                 </goals>
                                 <configuration>
                                     <packaging>jar</packaging>
+	<scm>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+	</scm>
+
                                     <artifactId>${project.artifactId}</artifactId>
                                     <groupId>${project.parent.groupId}</groupId>
                                     <version>${project.parent.version}</version>
@@ -346,6 +358,12 @@
                                 </goals>
                                 <configuration>
                                     <packaging>jar</packaging>
+	<scm>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+	</scm>
+
                                     <generatePom>true</generatePom>
                                     <url>${project.distributionManagement.repository.url}</url>
                                     <artifactId>${project.artifactId}</artifactId>
