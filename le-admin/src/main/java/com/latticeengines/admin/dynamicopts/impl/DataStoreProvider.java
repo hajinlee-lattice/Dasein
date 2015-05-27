@@ -41,7 +41,6 @@ public class DataStoreProvider implements OptionsProvider {
 
     public String toRemoteAddr(String folder) { return dirWatcher.toRemoteAddr(folder); }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void createTenantFolder(String server, String dmDeployment) {
         FileSystem fs = FileSystems.getDefault();
         fs.getPath(absoluteRoot, server, dmDeployment).toFile().mkdir();

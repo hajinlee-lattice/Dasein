@@ -364,7 +364,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         Assert.assertTrue(allOK, msg.toString());
     }
 
-    @SuppressWarnings("unused")
     private void verifyJAMSTenantExists() {
         // if (jamsSkipped) return;
     }

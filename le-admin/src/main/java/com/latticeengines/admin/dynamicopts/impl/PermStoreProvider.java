@@ -41,7 +41,6 @@ public class PermStoreProvider implements OptionsProvider {
 
     public String toRemoteAddr(String folder) { return dirWatcher.toRemoteAddr(folder); }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void createVDBFolder(String option, String visiDBServerName, String tenant) {
         Path absoluteRoot = FileSystems.getDefault().getPath(mountRoot, psPath);
         FileSystems.getDefault().getPath(absoluteRoot.toString(), option, visiDBServerName, tenant).toFile().mkdir();
