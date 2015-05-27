@@ -19,6 +19,17 @@
               "\\\\BODCDEVVINT187\\VisiDB\\PermanentStore",
               "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore"
             ] }
+          },
+          { "Node": "PermStoreFullPath",
+            "Data": {
+              "Type": "string",
+              "Derived": {
+                "Expression": "{0}",
+                "Parameters": [
+                  {"NodePath": "/VisiDB/PermanentStore"}
+                ]
+              }
+            }
           }
          ]
       },

@@ -16,7 +16,9 @@
             <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
             {{ config.Node }}<span ng-if="required" class="required-mark">*</span>
         </label>
-
+        <label ng-if="isDerived" class="control-label derived-label">
+            {{ config.Data }} <span class="text-muted">[derived]</span>
+        </label>
         <input ng-if="isInput" class="form-control"
                type="{{ inputType }}" ng-model="config.Data"
                ng-model-options="{ debounce: 200 }" placeholder="{{ placeholder }}"

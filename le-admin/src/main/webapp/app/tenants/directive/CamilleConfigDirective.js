@@ -60,7 +60,12 @@ app.directive('configEntry', function(){
 
             $scope.type = CamilleConfigUtility.getDataType($scope.config);
 
-            $scope.isInput = CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
+            $scope.derivation = CamilleConfigUtility.getDerivation($scope.config);
+            $scope.isDerived = ($scope.derivation !== null);
+            if ($scope.isDerived) {
+            }
+
+            $scope.isInput = !$scope.isDerived && CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
             if ($scope.isInput) {
                 if (CamilleConfigUtility.isNumber($scope.type)) {
                     $scope.inputType = "number";

@@ -54,6 +54,18 @@
           }
         },
         {
+          "Node": "PermStoreFullPath",
+          "Data": "",
+          "Metadata": {
+            "Type": "string",
+            "Derived": {
+              "Expression": "{0}",
+              "Parameters": [
+                {"Component":null, "NodePath": "/VisiDB/PermanentStore"}
+              ]}
+          }
+        },
+        {
           "Node": "PermanentStore",
           "Data": "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore",
           "Metadata" : { "Type": "options", "Options": [

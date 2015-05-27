@@ -12,7 +12,8 @@
         { "Node": "CaseSensitive", "Data": false},
         { "Node": "DiskspaceLimit", "Data": 0},
         { "Node": "PermanentStoreOption", "Data": "Master"},
-        { "Node": "PermanentStore", "Data": "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore"}
+        { "Node": "PermanentStore", "Data": "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore"},
+        { "Node": "PermStoreFullPath", "Data": ""}
       ]
     },
     { "Node": "DL", 

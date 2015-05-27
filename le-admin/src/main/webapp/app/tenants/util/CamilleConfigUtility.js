@@ -58,6 +58,14 @@
             }
         };
 
+        this.getDerivation = function(config) {
+            if (config.hasOwnProperty("Metadata") && config.Metadata.hasOwnProperty("Derived")) {
+                return config.Metadata.Derived;
+            } else {
+                return null;
+            }
+        };
+
     });
 
 }).call();
