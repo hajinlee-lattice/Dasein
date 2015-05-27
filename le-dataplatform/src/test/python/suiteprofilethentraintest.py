@@ -131,7 +131,7 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
                     if len(typeAndValue) == 2:
                         value = float(typeAndValue[1][1:-1])
                     if valueType == "Float":
-                        data["Value"]["SerializedValueAndType"] = "%s|%f" % (valueType, value * 100)
+                        data["Value"]["SerializedValueAndType"] = "%s|'%f'" % (valueType, value * 100)
                     elif valueType == "String":
                         data["Value"]["SerializedValueAndType"] = "%s|'SomeRandomString'" % valueType
         with open("./results/scorefileforonerowchanged.txt", "w") as fp:
