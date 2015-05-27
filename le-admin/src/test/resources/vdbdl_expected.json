@@ -17,7 +17,8 @@
     },
     {
       "Node": "TenantAlias",
-      "Data": ""
+      "Data": "",
+      "Metadata": {"Type": "string", "Helper": "Leave it blank if it is the same as Tenant Id."}
     },
     {
       "Node": "VisiDB",
@@ -86,7 +87,8 @@
         },
         {
           "Node": "VisiDBName",
-          "Data": ""
+          "Data": "",
+          "Metadata": {"Type": "string", "Helper": "Leave it blank if it is the same as Tenant Id."}
         }
       ]
     }

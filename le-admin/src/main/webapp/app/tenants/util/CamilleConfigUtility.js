@@ -42,6 +42,14 @@
         this.isNumber = function(type) { return type === "number"; };
         this.isPassword = function(type) { return type === "password"; };
 
+        this.getHelper = function(config) {
+            if (config.hasOwnProperty("Metadata") && config.Metadata.hasOwnProperty("Helper")) {
+                return config.Metadata.Helper;
+            } else {
+                return null;
+            }
+        }
+
     });
 
 }).call();

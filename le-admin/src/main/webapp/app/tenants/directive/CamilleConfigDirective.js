@@ -71,6 +71,13 @@ app.directive('configEntry', function(){
                 } else {
                     $scope.inputType = "text";
                 }
+
+                var helper = CamilleConfigUtility.getHelper($scope.config);
+                if (helper !== null) {
+                    $scope.placeholder = helper;
+                } else {
+                    $scope.placeholder = "";
+                }
             }
 
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);

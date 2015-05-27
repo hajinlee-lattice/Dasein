@@ -19,7 +19,7 @@
 
         <input ng-if="isInput" class="form-control"
                type="{{ inputType }}" ng-model="config.Data"
-               ng-model-options="{ debounce: 200 }"
+               ng-model-options="{ debounce: 200 }" placeholder="{{ placeholder }}"
                ng-change="validateInput()" required />
 
         <input ng-if="isBoolean" class="checkbox"

@@ -2,17 +2,19 @@
     "RootPath": "/",
     "Nodes": 
     [
+      { "Node": "TenantAlias", "Data": {"Type": "string", "Helper": "Leave it blank if it is the same as Tenant Id."} },
       { "Node": "VisiDB", 
         "Children" : [
-            { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"]}},
-            { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}},
-            {
-              "Node": "PermanentStore",
-              "Data": { "Type": "options", "Options": [
-                "\\\\BODCDEVVINT187\\VisiDB\\PermanentStore",
-                "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore"
-              ] }
-            }
+          { "Node": "VisiDBName", "Data": {"Type": "string", "Helper": "Leave it blank if it is the same as Tenant Id."}},
+          { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"]}},
+          { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}},
+          {
+            "Node": "PermanentStore",
+            "Data": { "Type": "options", "Options": [
+              "\\\\BODCDEVVINT187\\VisiDB\\PermanentStore",
+              "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore"
+            ] }
+          }
          ]
       },
       { "Node": "DL",
