@@ -175,12 +175,12 @@
             <artifactId>le-dellebi</artifactId>
             <version>${le.dellebi.version}</version>
         </dependency>
-        <!-- <dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-pls</artifactId>
             <version>${le.pls.version}</version>
             <scope>runtime</scope>
-        </dependency> -->
+        </dependency>
         <!-- use this instead of <artifactId>persistence-api</artifactId> 
             1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
