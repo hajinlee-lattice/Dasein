@@ -17,6 +17,7 @@ import cascading.property.AppProps;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class DailyFlow {
 
@@ -75,6 +76,8 @@ public class DailyFlow {
 
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
+        String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        properties.put("mapred.job.queue.name", queue);
         FlowConnector flowConnector = new Hadoop2MR1FlowConnector(properties);
 
         try {
