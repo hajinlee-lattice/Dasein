@@ -139,9 +139,8 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
         yarnConfiguration.set("sqoop.app.id.file.name", appIdFileName);
         // yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS,
         // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5003,server=y,suspend=y");
-        Configuration config = new Configuration(yarnConfiguration);
         try {
-            LedpSqoop.runTool(cmds.toArray(new String[0]), config);
+            LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
         } finally {
             FileUtils.deleteQuietly(new File(table + ".avsc"));
             FileUtils.deleteQuietly(new File(table + ".java"));
