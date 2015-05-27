@@ -476,6 +476,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         private Boolean dynamicOptions = null;
         private String helper;
         private Boolean required = null;
+        private DerivedField derived;
 
         private ObjectMapper mapper = new ObjectMapper();
         public Metadata() { }
@@ -509,6 +510,12 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         @JsonProperty("Helper")
         public void setHelper(String helper) { this.helper = helper; }
+
+        @JsonProperty("Derived")
+        public DerivedField getDerived() { return derived; }
+
+        @JsonProperty("Derived")
+        public void setDerived(DerivedField derived) { this.derived = derived; }
 
         private boolean validateData(String data) {
             if (this.getType() == null) { return true; }
