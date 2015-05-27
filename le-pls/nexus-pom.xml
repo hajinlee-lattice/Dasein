@@ -448,15 +448,10 @@
     </dependencies>
     
      <distributionManagement>
-        <repository>
-            <id>deployment</id>
-            <name>Releases</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases/</url>
-        </repository>
         <snapshotRepository>
             <id>deployment</id>
             <name>Snapshots</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/snapshots/</url>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/groups/public/</url>
         </snapshotRepository>
     </distributionManagement>
 
