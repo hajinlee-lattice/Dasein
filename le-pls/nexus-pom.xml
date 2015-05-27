@@ -8,13 +8,13 @@
 
     <properties>
         <component-name>pls</component-name>
-        <le.common.version>1.0.32-SNAPSHOT</le.common.version>
-        <le.db.version>1.0.32-SNAPSHOT</le.db.version>
-        <le.domain.version>1.0.32-SNAPSHOT</le.domain.version>
-        <le.camille.version>1.0.32-SNAPSHOT</le.camille.version>
-        <le.security.version>1.0.32-SNAPSHOT</le.security.version>
-        <le.baton.version>1.0.32-SNAPSHOT</le.baton.version>
-        <le.monitor.version>1.0.32-SNAPSHOT</le.monitor.version>
+        <le.common.version>1.0.33-SNAPSHOT</le.common.version>
+        <le.db.version>1.0.33-SNAPSHOT</le.db.version>
+        <le.domain.version>1.0.33-SNAPSHOT</le.domain.version>
+        <le.camille.version>1.0.33-SNAPSHOT</le.camille.version>
+        <le.security.version>1.0.33-SNAPSHOT</le.security.version>
+        <le.baton.version>1.0.33-SNAPSHOT</le.baton.version>
+        <le.monitor.version>1.0.33-SNAPSHOT</le.monitor.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <globalauth.base.url>https://bodcdevvcus209.dev.lattice.local/test</globalauth.base.url>
@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.32-SNAPSHOT</version>
+        <version>1.0.33-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

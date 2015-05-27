@@ -9,10 +9,10 @@
     <properties>
         <component-name>job</component-name>
         <le.dataplatform.version>1.0.33-SNAPSHOT</le.dataplatform.version>
-        <le.db.version>1.0.32-SNAPSHOT</le.db.version>
+        <le.db.version>1.0.33-SNAPSHOT</le.db.version>
         <le.camille.version>1.0.33-SNAPSHOT</le.camille.version>
         <le.propdata.version>1.0.33-SNAPSHOT</le.propdata.version>
-        <le.pls.version>1.0.32-SNAPSHOT</le.pls.version>
+        <le.pls.version>1.0.33-SNAPSHOT</le.pls.version>
         <le.scoring.version>1.0.33-SNAPSHOT</le.scoring.version>
         <le.dellebi.version>1.0.33-SNAPSHOT</le.dellebi.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
