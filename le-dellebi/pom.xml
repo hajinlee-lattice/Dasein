@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-dellebi</artifactId>
     <packaging>jar</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.32/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.32/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.32/develop</url>
 	</scm>
 
     <name>le-${component-name}</name>
@@ -27,9 +26,9 @@
         <camel.version>2.14.0</camel.version>
         <cameljcifs.version>2.13.2</cameljcifs.version>
         <cascading.version>2.5.0</cascading.version>
-        <le.common.version>1.0.32-SNAPSHOT</le.common.version>
-        <le.scheduler.version>1.0.32-SNAPSHOT</le.scheduler.version>
-        <le.dataplatform.version>1.0.32-SNAPSHOT</le.dataplatform.version>
+        <le.common.version>1.0.32</le.common.version>
+        <le.scheduler.version>1.0.32</le.scheduler.version>
+        <le.dataplatform.version>1.0.32</le.dataplatform.version>
         <jetty.version>6.1.26</jetty.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
     </properties>
@@ -37,7 +36,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.32-SNAPSHOT</version>
+        <version>1.0.32</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

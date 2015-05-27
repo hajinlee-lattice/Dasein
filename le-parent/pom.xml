@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-parent</artifactId>
     <packaging>pom</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.32/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.32/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.32/develop</url>
 	</scm>
 
-    <version>1.0.32-SNAPSHOT</version>
+    <version>1.0.32</version>
     <name>le-parent</name>
     <description>Parent of all lattice engine maven projects.</description>
 
@@ -408,44 +407,30 @@
                                 <configuration>
                                     <target>
                                         <!-- Execute an ant task within maven -->
-                                        <echo
-                                            message="Generating jacoco reports..." />
-                                        <taskdef name="report"
-                                            classname="org.jacoco.ant.ReportTask">
-                                            <classpath
-                                                path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
+                                        <echo message="Generating jacoco reports..." />
+                                        <taskdef name="report" classname="org.jacoco.ant.ReportTask">
+                                            <classpath path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
                                         </taskdef>
-                                        <mkdir
-                                            dir="${jacoco.coverage.dir}/site/jacoco" />
+                                        <mkdir dir="${jacoco.coverage.dir}/site/jacoco" />
                                         <report>
                                             <executiondata>
-                                                <fileset
-                                                    dir="${jacoco.coverage.dir}/jacoco">
-                                                    <include
-                                                        name="*.exec" />
+                                                <fileset dir="${jacoco.coverage.dir}/jacoco">
+                                                    <include name="*.exec" />
                                                 </fileset>
                                             </executiondata>
-                                            <structure
-                                                name="Jacoco Multi-Run Coverage Project">
-                                                <group
-                                                    name="jacoco-multi-run-coverage">
+                                            <structure name="Jacoco Multi-Run Coverage Project">
+                                                <group name="jacoco-multi-run-coverage">
                                                     <classfiles>
-                                                        <fileset
-                                                            dir="${project.build.directory}/classes" />
+                                                        <fileset dir="${project.build.directory}/classes" />
                                                     </classfiles>
-                                                    <sourcefiles
-                                                        encoding="UTF-8">
-                                                        <fileset
-                                                            dir="${project.build.sourceDirectory}" />
+                                                    <sourcefiles encoding="UTF-8">
+                                                        <fileset dir="${project.build.sourceDirectory}" />
                                                     </sourcefiles>
                                                 </group>
                                             </structure>
-                                            <html
-                                                destdir="${jacoco.coverage.dir}/site/jacoco" />
-                                            <xml
-                                                destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
-                                            <csv
-                                                destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
+                                            <html destdir="${jacoco.coverage.dir}/site/jacoco" />
+                                            <xml destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
+                                            <csv destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
                                         </report>
                                     </target>
                                 </configuration>
