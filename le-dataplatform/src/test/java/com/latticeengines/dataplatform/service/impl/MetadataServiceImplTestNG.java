@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
+import java.net.URL;
 import java.sql.Types;
 
 import org.apache.avro.Schema;
@@ -93,7 +94,8 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Test(groups = { "functional" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrlAndDriverClassForFile() throws Exception {
-        String url = String.format("jdbc:relique:csv:%s", "/home/rgonzalez/Documents/Customers/Nutanix/data");
+        URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+        String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver);
