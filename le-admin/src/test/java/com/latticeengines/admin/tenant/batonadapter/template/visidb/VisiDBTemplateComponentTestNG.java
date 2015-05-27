@@ -108,10 +108,5 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
     public String getServiceName() {
         return VisiDBTemplateComponent.componentName;
     }
-
-    @Override
-    public String getExpectedJsonFile() {
-        return "vdb_tpl_expected.json";
-    }
     
 }

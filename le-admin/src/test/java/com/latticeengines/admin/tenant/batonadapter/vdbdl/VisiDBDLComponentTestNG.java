@@ -186,9 +186,4 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     public String getServiceName() {
         return VisiDBDLComponent.componentName;
     }
-
-    @Override
-    public String getExpectedJsonFile() {
-        return "vdbdl_expected.json";
-    }
 }

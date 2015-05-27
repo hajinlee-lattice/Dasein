@@ -138,9 +138,6 @@ public class PLSComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Override
     protected String getServiceName() { return PLSComponent.componentName; }
 
-    @Override
-    public String getExpectedJsonFile() { return "pls_expected.json"; }
-
     private void deletePLSAdminUser(String username) {
         if (globalUserManagementService.getUserByUsername(username) != null) {
             globalUserManagementService.deleteUser(username);

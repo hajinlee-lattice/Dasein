@@ -109,9 +109,4 @@ public class DLTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase 
     public String getServiceName() {
         return DLTemplateComponent.componentName;
     }
-
-    @Override
-    public String getExpectedJsonFile() {
-        return "dl_tpl_expected.json";
-    }
 }

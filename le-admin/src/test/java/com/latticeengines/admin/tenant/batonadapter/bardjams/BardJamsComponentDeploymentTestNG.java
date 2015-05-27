@@ -143,7 +143,4 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     }
     @Override
     protected String getServiceName() { return BardJamsComponent.componentName; }
-
-    @Override
-    public String getExpectedJsonFile() { return "bardjams_expected.json"; }
 }
