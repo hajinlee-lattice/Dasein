@@ -19,6 +19,7 @@ import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -131,10 +132,21 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public BootstrapState getTenantOverallState(String contractId, String tenantId) {
+        final String podId = CamilleEnvironment.getPodId();
+        final Camille camille = CamilleEnvironment.getCamille();
         Set<String> components = serviceService.getRegisteredServices();
-        BootstrapState state =  BootstrapState.createInitialState();
+        BootstrapState state =  BootstrapState.constructOKState(1);
         for (String serviceName : components) {
-            BootstrapState newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
+            Path tenantServiceStatePath = PathBuilder.buildCustomerSpaceServicePath(podId, contractId, tenantId,
+                    CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
+            BootstrapState newState = BootstrapState.constructOKState(1);
+            try {
+                if (camille.exists(tenantServiceStatePath)) {
+                    newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
+                }
+            } catch (Exception e) {
+                // ignore
+            }
             if (newState != null) {
                 // null means the tenant was provisioned without this component
                 state = mergeBootstrapStates(state, newState, serviceName);
