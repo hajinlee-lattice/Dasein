@@ -27,7 +27,8 @@
           "Node": "CacheLimit",
           "Data": "8192",
           "Metadata": {
-            "Type": "number"
+            "Type": "number",
+            "Required": true
           }
         },
         {
@@ -48,7 +49,8 @@
           "Node": "DiskspaceLimit",
           "Data": "0",
           "Metadata": {
-            "Type": "number"
+            "Type": "number",
+            "Required": true
           }
         },
         {

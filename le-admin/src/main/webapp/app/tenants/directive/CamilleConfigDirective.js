@@ -78,6 +78,13 @@ app.directive('configEntry', function(){
                 } else {
                     $scope.placeholder = "";
                 }
+
+                $scope.required = CamilleConfigUtility.isRequired($scope.config);
+                if ($scope.required && $scope.config.Data === "") {
+                    $scope.showError = true;
+                    $scope.isValid.valid = false;
+                    $scope.errorMsg = "cannot be empty.";
+                }
             }
 
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
@@ -125,7 +132,7 @@ app.directive('configEntry', function(){
             }
 
             $scope.validateInput = function() {
-                if ($scope.configform.$dirty && $scope.configform.$invalid) {
+                if ($scope.configform.$invalid) {
                     $scope.showError = true;
                     $scope.isValid.valid = false;
                     if ($scope.configform.$error.required) {

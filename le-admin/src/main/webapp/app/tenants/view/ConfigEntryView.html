@@ -14,13 +14,13 @@
     <div ng-if="!readonly">
         <label class="control-label">
             <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
-            {{ config.Node }}
+            {{ config.Node }}<span ng-if="required" class="required-mark">*</span>
         </label>
 
         <input ng-if="isInput" class="form-control"
                type="{{ inputType }}" ng-model="config.Data"
                ng-model-options="{ debounce: 200 }" placeholder="{{ placeholder }}"
-               ng-change="validateInput()" required />
+               ng-change="validateInput()" ng-required="required" />
 
         <input ng-if="isBoolean" class="checkbox"
                type="checkbox" ng-model="config.Data"

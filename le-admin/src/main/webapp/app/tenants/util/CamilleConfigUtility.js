@@ -48,7 +48,15 @@
             } else {
                 return null;
             }
-        }
+        };
+
+        this.isRequired = function(config) {
+            if (config.hasOwnProperty("Metadata") && config.Metadata.hasOwnProperty("Required")) {
+                return config.Metadata.Required;
+            } else {
+                return false;
+            }
+        };
 
     });
 
