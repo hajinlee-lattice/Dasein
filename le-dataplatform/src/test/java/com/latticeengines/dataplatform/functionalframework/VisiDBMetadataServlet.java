@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpStatus;
 
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class VisiDBMetadataServlet extends HttpServlet {
 
@@ -34,12 +35,12 @@ public class VisiDBMetadataServlet extends HttpServlet {
         resp.setContentType("application/json");
         GetQueryMetaDataColumnsResponse metadata = new GetQueryMetaDataColumnsResponse();
         metadata.setStatus(3);
-        List<GetQueryMetaDataColumnsResponse.Metadata> metadataCols = new ArrayList<>();
+        List<ModelingMetadata.AttributeMetadata> metadataCols = new ArrayList<>();
         
         for (int i = 0; i < colNames.size(); i++) {
             String colName = colNames.get(i);
             Integer dataType = dataTypes.get(i);
-            GetQueryMetaDataColumnsResponse.Metadata m = new GetQueryMetaDataColumnsResponse.Metadata();
+            ModelingMetadata.AttributeMetadata m = new ModelingMetadata.AttributeMetadata();
             m.setColumnName(colName);
             
             if (dataType >= Types.NUMERIC && dataType <= Types.DOUBLE) {

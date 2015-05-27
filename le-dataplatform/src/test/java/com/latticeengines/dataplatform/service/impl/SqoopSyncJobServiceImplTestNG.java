@@ -17,6 +17,8 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -207,7 +209,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         Properties props = new Properties();
         props.put("trimHeaders", "true");
         props.put("columnTypes", StringUtils.join(types, ","));
-        sqoopSyncJobService.importData("Nutanix", //
+        ApplicationId appId = sqoopSyncJobService.importData("Nutanix", //
                 "/tmp/dataFromFile", //
                 creds, //
                 "Priority0.MapReduce", //
@@ -216,7 +218,9 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 null, //
                 1, //
                 props);
-        
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/dataFromFile", new HdfsFilenameFilter() {
 
             @Override

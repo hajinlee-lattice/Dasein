@@ -6,14 +6,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.sqoop.LedpSqoop;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -66,32 +68,34 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
 
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
-        importSync(table, targetDir, creds, queue, jobName, splitCols, columnsToInclude, creds.getDriverClass(), numMappers, props);
+        String appIdFileName = importSync(table, targetDir, creds, queue, jobName, splitCols, columnsToInclude, creds.getDriverClass(), numMappers, props);
 
-        return getApplicationId(jobName);
+        return getApplicationId(appIdFileName);
     }
 
-    private ApplicationId getApplicationId(final String jobName) {
-        int tries = 0;
-        ApplicationId appId = null;
-        while (tries < MAX_TRIES) {
-            try {
-                Thread.sleep(APP_WAIT_TIME);
-            } catch (InterruptedException e) {
-                log.warn("Thread.sleep interrupted.", e);
-            }
-            appId = getAppIdFromName(jobName);
-            if (appId != null) {
-                return appId;
-            }
-            tries++;
+    private ApplicationId getApplicationId(final String appIdFileName) {
+        String jobId = null;
+        File appIdFile = new File(appIdFileName);
+        try {
+            jobId = FileUtils.readFileToString(appIdFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return appId;
+        String[] idComponents = jobId.split("_");
+        try {
+            return ApplicationIdPBImpl.newInstance(Long.parseLong(idComponents[1]), Integer.parseInt(idComponents[2]));
+        } finally {
+            FileUtils.deleteQuietly(appIdFile);
+        }
+        
     }
 
-    private void importSync(final String table, final String targetDir, final DbCreds creds, final String queue,
+    private String importSync(final String table, final String targetDir, final DbCreds creds, final String queue,
             final String jobName, final List<String> splitCols, final String columnsToInclude, String driver, 
-            final int numMappers, final Properties props) {
+            int numMappers, final Properties props) {
+        if (table.startsWith("Play")) {
+            numMappers = 1;
+        }
 
         List<String> cmds = new ArrayList<>();
         cmds.add("import");
@@ -131,10 +135,19 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
             }
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
+        String appIdFileName = String.format("appid-%s.txt", UUID.randomUUID().toString());
+        yarnConfiguration.set("sqoop.app.id.file.name", appIdFileName);
         // yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS,
         // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5003,server=y,suspend=y");
-        LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
-
+        Configuration config = new Configuration(yarnConfiguration);
+        try {
+            LedpSqoop.runTool(cmds.toArray(new String[0]), config);
+        } finally {
+            FileUtils.deleteQuietly(new File(table + ".avsc"));
+            FileUtils.deleteQuietly(new File(table + ".java"));
+        }
+        
+        return appIdFileName;
     }
 
     @Override
@@ -218,37 +231,6 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
         cmds.add("--query");
         cmds.add(sql);
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
-    }
-
-    protected ApplicationId getAppIdFromName(String appName) {
-        // Running state means one of:
-        // YarnApplicationState.NEW
-        // YarnApplicationState.NEW_SAVING
-        // YarnApplicationState.SUBMITTED
-        // YarnApplicationState.ACCEPTED
-        // YarnApplicationState.RUNNING
-        ApplicationId appId = getAppIdFromName(appName, defaultYarnClient.listRunningApplications("MAPREDUCE"));
-        if (appId != null) {
-            return appId;
-        }
-        try {
-            Thread.sleep(APP_WAIT_TIME);
-        } catch (InterruptedException e) {
-            // Do nothing
-        }
-        // If it still comes here, then go through all the existing applications
-        // of type MAPREDUCE
-        appId = getAppIdFromName(appName, defaultYarnClient.listApplications("MAPREDUCE"));
-        return appId;
-    }
-
-    private ApplicationId getAppIdFromName(String appName, List<ApplicationReport> apps) {
-        for (ApplicationReport app : apps) {
-            if (app.getName().equals(appName)) {
-                return app.getApplicationId();
-            }
-        }
-        return null;
     }
 
 }
