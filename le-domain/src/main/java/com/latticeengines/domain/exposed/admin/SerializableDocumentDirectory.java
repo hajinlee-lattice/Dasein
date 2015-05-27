@@ -475,6 +475,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         private Collection<String> options;
         private Boolean dynamicOptions = null;
         private String helper;
+        private Boolean required = null;
 
         private ObjectMapper mapper = new ObjectMapper();
         public Metadata() { }
@@ -496,6 +497,12 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         @JsonProperty("DynamicOptions")
         public void setDynamicOptions(Boolean dynamicOptions) { this.dynamicOptions = dynamicOptions; }
+
+        @JsonProperty("Required")
+        public Boolean isRequired() { return required; }
+
+        @JsonProperty("Required")
+        public void setRequired(Boolean required) { this.required = required; }
 
         @JsonProperty("Helper")
         public String getHelper() { return helper; }
