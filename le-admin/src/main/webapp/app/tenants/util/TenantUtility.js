@@ -224,7 +224,9 @@ app.service('TenantUtility', function(_){
             var re = new RegExp(token, 'g');
             expression = expression.replace(re, values[i]);
         }
+        /* jshint ignore:start */
         return eval(expression);
+        /* jshint ignore:end */
     }
     this.evalExpressionWithValues = evalExpressionWithValues;
 
