@@ -18,7 +18,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $scope.userDisplayName = clientSession.DisplayName;
     $scope.showUserManagement = RightsUtility.maySeeUserManagement();
     $scope.showSystemSetup =  RightsUtility.maySeeSystemSetup();
-    $scope.showModelCreationHistory = RightsUtility.maySeeModelCreationHistory();
+    $scope.showModelCreationHistoryDropdown = RightsUtility.maySeeModelCreationHistory();
     $scope.showMultipleModelSetup = RightsUtility.mayEditMultipleModelSetup();
     
     $scope.dropdownClicked = function ($event) {
