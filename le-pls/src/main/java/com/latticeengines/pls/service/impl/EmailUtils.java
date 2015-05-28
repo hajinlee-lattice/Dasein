@@ -97,6 +97,32 @@ public class EmailUtils {
             htmlTemplate = htmlTemplate.replace("{{firstname}}", user.getFirstName());
             htmlTemplate = htmlTemplate.replace("{{lastname}}", user.getLastName());
             htmlTemplate = htmlTemplate.replace("{{tenantname}}",tenant.getName());
+            htmlTemplate = htmlTemplate.replace("{{appname}}","Lead Prioritization Tenant");
+            htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
+
+            Multipart mp = new MimeMultipart();
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlTemplate, "text/html");
+            mp.addBodyPart(htmlPart);
+            appendImagesToMultipart(mp);
+
+            emailService.sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp,
+                    Collections.singleton(user.getEmail()));
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to send existing external user email to " + user.getEmail() + " " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean sendExistingExternalUserEmail(Tenant tenant, User user) {
+        try {
+            String htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("com/latticeengines/pls/service/old_user.html"));
+            htmlTemplate = htmlTemplate.replace("{{firstname}}", user.getFirstName());
+            htmlTemplate = htmlTemplate.replace("{{lastname}}", user.getLastName());
+            htmlTemplate = htmlTemplate.replace("{{tenantname}}",tenant.getName());
+            htmlTemplate = htmlTemplate.replace("{{appname}}","Tenant in Lattice Lead Prioritization App");
             htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
 
             Multipart mp = new MimeMultipart();

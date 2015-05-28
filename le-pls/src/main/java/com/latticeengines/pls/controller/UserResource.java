@@ -280,10 +280,13 @@ public class UserResource {
                 User user = userService.findByUsername(username);
                 Tenant tenant = tenantService.findByTenantId(tenantId);
 
-                if (newUser && tenant != null && user != null
-                        && !targetLevel.equals(AccessLevel.EXTERNAL_ADMIN)
-                        && !targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                    emailUtils.sendExistingInternalUserEmail(tenant, user);
+                if (newUser && tenant != null && user != null) {
+                    if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) ||
+                            targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
+                        emailUtils.sendExistingExternalUserEmail(tenant, user);
+                    } else {
+                        emailUtils.sendExistingInternalUserEmail(tenant, user);
+                    }
                 }
             } else {
                 response.setStatus(403);
