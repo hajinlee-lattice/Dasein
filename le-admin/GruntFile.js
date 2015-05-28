@@ -304,6 +304,7 @@ module.exports = function(grunt) {
 
         jshint: {
             options: {
+                evil: true,
                 reporter: require('jshint-stylish-ex')
             },
 
