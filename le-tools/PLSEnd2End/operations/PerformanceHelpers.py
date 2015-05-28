@@ -478,8 +478,8 @@ class VisiDBRollBack(SessionRunner):
         self.exception = exception;
         self.dl_server=dl_server;
 #         self.dlUI = webdriver.Firefox();
-        self.dlc_host = "http://bodcdevvint187.dev.lattice.local:5000"#PLSEnvironments.pls_test_server
-        self.dlc_path= "E:\Sharing\dl_2.3.3.9571n\DLC";#"D:\prod\DLC"
+        self.dlc_host = "http://%s:5000" % PLSEnvironments.visidb_server
+        self.dlc_path= PLSEnvironments.visidb_dlc_path
         self.dl_user=PLSEnvironments.dl_server_user
         self.dl_pwd=PLSEnvironments.dl_server_pwd
         self.visidb_conn="ServerName=%s;UserID=%s;Password=%s;" % (PLSEnvironments.visidb_server,PLSEnvironments.visidb_server_user,PLSEnvironments.visidb_server_pwd)
