@@ -110,6 +110,13 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         // verify permstore and datastore
         Assert.assertEquals(magicRestTemplate.getForObject(
                 url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
+        // verify auto filled visidbname and tenantalias
+        SerializableDocumentDirectory configured =
+                tenantService.getTenantServiceConfig(contractId, tenantId, getServiceName());
+        SerializableDocumentDirectory.Node node = configured.getNodeAtPath("/TenantAlias");
+        Assert.assertEquals(node.getData(), tenantId);
+        node = configured.getNodeAtPath("/VisiDB/VisiDBName");
+        Assert.assertEquals(node.getData(), tenantId);
         deleteVisiDBDLTenant(tenant);
     }
 

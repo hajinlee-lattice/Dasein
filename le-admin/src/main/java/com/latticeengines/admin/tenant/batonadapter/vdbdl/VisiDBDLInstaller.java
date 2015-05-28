@@ -80,9 +80,11 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
         if (StringUtils.isEmpty(tenantAlias)) {
             tenantAlias = tenant;
+            configDir.getChild("TenantAlias").getDocument().setData(tenant);
         }
         if (StringUtils.isEmpty(visiDBName)) {
             visiDBName = tenant;
+            getChild(configDir, "VisiDB", "VisiDBName").getDocument().setData(tenant);
         }
 
         int permStoreOpt = MASTER;
