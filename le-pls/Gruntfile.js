@@ -16,7 +16,7 @@ module.exports = function (grunt) {
             integration: {
                 url:            'http://bodcdevhdpweb53.dev.lattice.local:8080',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.int.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
+                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.int.js'
             },
             qa:          {
                 url:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
