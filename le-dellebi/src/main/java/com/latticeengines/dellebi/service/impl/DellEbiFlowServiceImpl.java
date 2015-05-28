@@ -55,7 +55,7 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         try {
             SmbFile smbDir = new SmbFile(smbInboxPath + "/", auth);
 
-            SmbFile[] files = smbDir.listFiles();
+            SmbFile[] files = smbDir.listFiles("tgt_quote_*");
             String txtFileName = null;
             for (SmbFile zipFile : files) {
                 if (zipFile.isDirectory()) {
@@ -145,9 +145,6 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
     @Override
     public FileType getFileType(String zipFileName) {
-        if (zipFileName.startsWith("tgt_quote_trans_global")) {
-            return FileType.QUOTE;
-        }
         if (zipFileName.startsWith("tgt_quote_trans_global")) {
             return FileType.QUOTE;
         }
