@@ -572,7 +572,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private void setTestingTenants(){
         if (testingTenants == null || testingTenants.isEmpty()) {
-            List<String> subTenantIds = Arrays.asList("Tenant1", "Tenant2");
+            List<String> subTenantIds = Arrays.asList(contractId + "Tenant1", contractId + "Tenant2");
             testingTenants = new ArrayList<>();
             for (String subTenantId: subTenantIds) {
                 String tenantId = String.format("%s.%s.%s", contractId + "PLS" + "Contract", subTenantId,
@@ -580,7 +580,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 if (!tenantService.hasTenantId(tenantId)) {
                     Tenant tenant = new Tenant();
                     tenant.setId(tenantId);
-                    String name = subTenantId.equals("Tenant1") ? "Tenant 1" : "Tenatn 2";
+                    String name = subTenantId.endsWith("Tenant1") ? "Tenant 1" : "Tenatn 2";
                     tenant.setName(contractId + " " + name);
                     tenantService.registerTenant(tenant);
                 }
