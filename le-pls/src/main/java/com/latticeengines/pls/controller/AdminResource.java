@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,10 +55,12 @@ public class AdminResource extends InternalResourceBase {
     @RequestMapping(value = "/tenants/{tenantId:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a tenant.")
-    public Boolean deleteTenant(@PathVariable String tenantId, HttpServletRequest request) {
+    public Boolean deleteTenant(@PathVariable String tenantId,
+                                @RequestParam(value = "tenantName", required = false, defaultValue = " ") String tenantName,
+                                HttpServletRequest request) {
         checkHeader(request);
         Tenant tenant = new Tenant();
-        tenant.setName(" ");
+        tenant.setName(tenantName);
         tenant.setId(tenantId);
         tenantService.discardTenant(tenant);
         return true;
