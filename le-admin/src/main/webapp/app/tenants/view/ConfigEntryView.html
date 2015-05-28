@@ -17,7 +17,7 @@
             {{ config.Node }}<span ng-if="required" class="required-mark">*</span>
         </label>
         <label ng-if="isDerived" class="control-label derived-label">
-            {{ config.Data }} <span class="text-muted">[derived]</span>
+            {{ config.Data }} <span class="text-muted">&nbsp;&nbsp;&nbsp;&nbsp;[derived]</span>
         </label>
         <input ng-if="isInput" class="form-control"
                type="{{ inputType }}" ng-model="config.Data"

@@ -178,5 +178,62 @@ app.service('TenantUtility', function(_){
         }
     };
 
+    function selectNodeByPath(nodes, path, rootPath) {
+        for (var i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            if ((rootPath + "/" + node.Node) === path) {
+                return node;
+            }
+            if (node.hasOwnProperty("Children")) {
+                var nodeInChildren = selectNodeByPath(node.Children, path, rootPath + "/" + node.Node);
+                if (nodeInChildren !== null) return nodeInChildren;
+            }
+        }
+        return null;
+    }
+
+    function findNodeByPath(component, path) {
+        if (component.hasOwnProperty("Nodes")) {
+            return selectNodeByPath(component.Nodes, path, "");
+        }
+        return null;
+    }
+    this.findNodeByPath = findNodeByPath;
+
+    function getDerivedParameter(components, parameter) {
+        var component = _.find(components, {Component: parameter.Component});
+        if (component !== null) {
+            var node= findNodeByPath(component, parameter.NodePath);
+            if (node !== null) {
+                if (node.hasOwnProperty("Metadata") &&
+                    (!node.Metadata.hasOwnProperty("Type") || node.Metadata.Type === "string" || node.Metadata.Type === "options")) {
+                    return node.Data.replace(/\\/g, "\\\\");
+                } else {
+                    return node.Data;
+                }
+            }
+        }
+        return null;
+    }
+    this.getDerivedParameter = getDerivedParameter;
+
+    function evalExpressionWithValues(expression, values, scope) {
+        // replace tokens by values one by one
+        for (var i = 0; i < values.length; i++){
+            var token = "\\\{" + i + "\\\}";
+            var re = new RegExp(token, 'g');
+            expression = expression.replace(re, values[i]);
+        }
+        return eval(expression);
+    }
+    this.evalExpressionWithValues = evalExpressionWithValues;
+
+    function calcDerivation(components, derivation, scope) {
+        var values = _.map(derivation.Parameters, function(par){
+            return getDerivedParameter(components, par);
+        });
+        return evalExpressionWithValues(derivation.Expression, values, scope);
+    }
+    this.calcDerivation = calcDerivation;
 });
 

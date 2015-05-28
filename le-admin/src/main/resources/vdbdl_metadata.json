@@ -24,9 +24,11 @@
             "Data": {
               "Type": "string",
               "Derived": {
-                "Expression": "{0}",
+                "Expression": "var vdbname = \"{2}\" === \"\" ? scope.tenantId : \"{2}\"; \"{0}\" + \"\\\\\" + \"{1}\".toUpperCase() + \"\\\\\" + vdbname",
                 "Parameters": [
-                  {"NodePath": "/VisiDB/PermanentStore"}
+                  {"Component": "VisiDBDL", "NodePath": "/VisiDB/PermanentStore"},
+                  {"Component": "VisiDBDL", "NodePath": "/VisiDB/ServerName"},
+                  {"Component": "VisiDBDL", "NodePath": "/VisiDB/VisiDBName"}
                 ]
               }
             }

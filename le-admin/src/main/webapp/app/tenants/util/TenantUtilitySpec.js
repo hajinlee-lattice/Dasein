@@ -168,5 +168,115 @@ describe('TenantUtility tests', function (){
         var message = "[LE-ysong-ubuntu] An intented exception for the purpose of testing.:: java.lang.RuntimeException: An intented exception for the purpose of testing.\n\tat com.latticeengines.admin.tenant.batonadapter.dante.DanteInstaller.installCore(DanteInstaller.java:17)\n\tat com.latticeengines.baton.exposed.camille.LatticeComponentInstaller.install(LatticeComponentInstaller.java:43)\n";
         expect(tenantUtility.parseBootstrapErrorMsg(message)).toBe("[LE-ysong-ubuntu] An intented exception for the purpose of testing.");
     });
+
+    it('should find the correct node by path', function () {
+        var component = {
+            Component: "comp1",
+            Nodes: [
+                {Node: "node1", Children: [
+                    {Node:"child1", Data:true, Metadata: {Type:"boolean"} },
+                    {Node:"child2", Data:2, Metadata: {Type:"number"} }
+                ]},
+                {Node: "node2", Data: "string"}
+            ]
+        };
+        var node = tenantUtility.findNodeByPath(component, "/node1/child2");
+        expect(node.Data).toBe(2);
+    });
+
+    it('should find the derived parameter', function () {
+        var component1 = {
+            Component: "comp1",
+            Nodes: [
+                {Node: "node1", Children: [
+                    {Node:"child1", Data:2, Metadata: {Type:"number"} }
+                ]}
+            ]
+        };
+        var component2 = {
+            Component: "comp2",
+            Nodes: [
+                {Node: "node1", Children: [
+                    {Node:"child1", Data:"string" }
+                ]}
+            ]
+        };
+        var component3 = {
+            Component: "comp3",
+            Nodes: [
+                {Node: "node1", Data: false, Metadata: {Type:"boolean"} }
+            ]
+        };
+        var components = [component1, component2, component3];
+        var parameter = {
+            Component: "comp1",
+            NodePath: "/node1/child1"
+        };
+        expect(tenantUtility.getDerivedParameter(components, parameter)).toBe(2);
+
+        parameter = {
+            Component: "comp3",
+            NodePath: "/node1/child1"
+        };
+        expect(tenantUtility.getDerivedParameter(components, parameter)).toBe(null);
+
+        parameter = {
+            Component: "comp1",
+            NodePath: "/node1/child2"
+        };
+        expect(tenantUtility.getDerivedParameter(components, parameter)).toBe(null);
+    });
+
+    it('should evaluate expressions with values', function () {
+        var expression = "{0} + {1} / {0}"
+        var values = [1, 2];
+        var result = tenantUtility.evalExpressionWithValues(expression, values);
+        expect(result).toBe(3);
+
+        expression = "\"//{0}/{1}/{2}/{0}\"";
+        values = ["root", "dir", "folder"];
+        result = tenantUtility.evalExpressionWithValues(expression, values);
+        expect(result).toBe("//root/dir/folder/root");
+    });
+
+    it('should calculate derived values', function () {
+        var component1 = {
+            Component: "comp1",
+            Nodes: [
+                {Node: "node1", Children: [
+                    {Node:"child1", Data:2, Metadata: {Type:"number"} }
+                ]}
+            ]
+        };
+        var component2 = {
+            Component: "comp2",
+            Nodes: [
+                {Node: "node1", Data: "root"}
+            ]
+        };
+        var component3 = {
+            Component: "comp3",
+            Nodes: [
+                {Node: "node1", Children: [
+                    {Node:"child1", Data:"dir" }
+                ]}
+            ]
+        };
+        var components = [component1, component2, component3];
+        var par1 = {
+            Component: "comp2",
+            NodePath: "/node1"
+        };
+        var par2 = {
+            Component: "comp3",
+            NodePath: "/node1/child1"
+        };
+        var derivation= {
+            Expression: "\"//{0}/{1}\"",
+            Parameters: [par1, par2]
+        };
+        expect(tenantUtility.calcDerivation(components, derivation)).toBe("//root/dir");
+    });
+
 });
 

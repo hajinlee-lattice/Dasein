@@ -53,7 +53,7 @@ app.directive('configEntry', function(){
         restrict: 'AE',
         templateUrl: 'app/tenants/view/ConfigEntryView.html',
         scope: {config: '=', isValid: '=', isOpen: '=', expandable: '=', readonly: '='},
-        controller: function($scope, CamilleConfigUtility){
+        controller: function($scope, $rootScope, CamilleConfigUtility){
             if (!$scope.config.hasOwnProperty("Data") && !$scope.config.hasOwnProperty("Children")) {
                 $scope.config.Data = "";
             }
@@ -63,6 +63,16 @@ app.directive('configEntry', function(){
             $scope.derivation = CamilleConfigUtility.getDerivation($scope.config);
             $scope.isDerived = ($scope.derivation !== null);
             if ($scope.isDerived) {
+                $scope.updateDerived = function(derivation) {
+                    // emit a signal to TenantConfigCtrl to evaluate the derivation
+                    function callback(value) { $scope.config.Data = value; }
+                    $rootScope.$broadcast("CALC_DERIVED", {derivation: derivation, callback: callback});
+                    console.log($scope.config.Node + " is updated: " + $scope.config.Data);
+                };
+
+                $scope.$on("UPDATE_DERIVED", function(){
+                    $scope.updateDerived($scope.derivation);
+                });
             }
 
             $scope.isInput = !$scope.isDerived && CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
@@ -153,9 +163,9 @@ app.directive('configEntry', function(){
                     $scope.showError = false;
                     $scope.isValid.valid = true;
                     $scope.errorMsg = "no error";
+                    $rootScope.$broadcast("UPDATE_DERIVED");
                 }
             };
-
         }
     };
 });

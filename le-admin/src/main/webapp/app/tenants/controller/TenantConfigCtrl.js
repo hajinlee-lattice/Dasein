@@ -10,7 +10,7 @@ var app = angular.module("app.tenants.controller.TenantConfigCtrl", [
     'ngSanitize'
 ]);
 
-app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal, $interval, _, TenantService, TenantUtility, ServiceService) {
+app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state, $stateParams, $modal, $interval, _, TenantService, TenantUtility, ServiceService) {
     //==================================================
     // initialize flags
     //==================================================
@@ -94,6 +94,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                             }
                             if ($scope.defaultConfigScaned == $scope.services.length) {
                                 $scope.loading = false;
+                                $timeout(function(){$rootScope.$broadcast("UPDATE_DERIVED");}, 500);
                             }
                         }
                     );
@@ -258,10 +259,18 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         });
     };
 
+    $scope.$on("CALC_DERIVED", function(evt, data) {
+        var derivation = data.derivation;
+        var derivedValue = TenantUtility.calcDerivation($scope.components, derivation, $scope);
+        data.callback(derivedValue);
+    });
+
     function updateServiceStatus() {
+        var componentsToScan = $scope.components.length;
         _.each($scope.components, function (component) {
             TenantService.GetTenantServiceStatus($scope.tenantId, $scope.contractId, component.Component).then(
                 function (result) {
+                    componentsToScan--;
                     var newState = result.resultObj;
                     if (typeof(component.State) === "undefined" ||
                         newState.state !== component.State.state) {
@@ -273,6 +282,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                                 component.RootPath = newComponent.RootPath;
                                 component.Nodes = newComponent.Nodes;
                                 changeComponentToMessage(component);
+                                $scope.$broadcast("UPDATE_DERIVED");
                             }
                         );
                     }
