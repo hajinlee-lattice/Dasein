@@ -65,8 +65,8 @@ public class FlowDefinition {
     @Bean
     public FlowDef getOrderSumDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -87,8 +87,8 @@ public class FlowDefinition {
     @Bean
     public FlowDef getOrderDetailDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -108,8 +108,8 @@ public class FlowDefinition {
     @Bean
     public FlowDef getShipDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -129,8 +129,8 @@ public class FlowDefinition {
     @Bean
     public FlowDef getWarrantyDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
@@ -152,8 +152,8 @@ public class FlowDefinition {
 
         log.info("Initial quote daily flow definition!");
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir());
-        Tap outTapFile = new Hfs(new TextDelimited(false, ","), dellEbiFlowService.getOutputDir(), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(false, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;

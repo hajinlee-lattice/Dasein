@@ -12,6 +12,7 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,9 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     @Value("${dellebi.smbinboxpath}")
     private String smbInboxPath;
 
+    @Value("${dellebi.local.inboxpath}")
+    private String localInboxPath;
+
     @Autowired
     private DailyFlow dailyFlow;
 
@@ -57,31 +61,42 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
         Configuration configuration = new Configuration();
         HdfsUtils.rmdir(configuration, dataHadoopWorkingPath);
 
-        dellEbiFlowService.deleteSMBFile("tgt_quote_trans_global_1_2015.zip");
-        dellEbiFlowService.deleteSMBFile("tgt_quote_trans_global_4_2015.zip");
+        DataFlowContext context = new DataFlowContext();
+        context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, "tgt_quote_trans_global_1_2015.zip");
+        dellEbiFlowService.deleteFile(context);
+        context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, "tgt_quote_trans_global_4_2015.zip");
+        dellEbiFlowService.deleteFile(context);
+
+        FileUtils.deleteDirectory(new File(localInboxPath));
+        FileUtils.forceMkdir(new File(localInboxPath));
     }
 
     @Test(groups = "functional", dataProvider = "fileDataProvider")
-    public void testExecute(String fileName) throws Exception {
-        smbPut(smbInboxPath, fileName);
+    public void testExecute(String fileName, String sourceType) throws Exception {
+        if (sourceType.equals("SMB")) {
+            smbPut(smbInboxPath, fileName);
+        } else {
+            FileUtils.copyFileToDirectory(new File(fileName), new File(localInboxPath));
+        }
 
-        DataFlowContext requestContext = new DataFlowContext();
-        requestContext.setProperty(DellEbiDailyJob.START_TIME, System.currentTimeMillis());
-
-        boolean result = dailyFlow.doDailyFlow();
+        DataFlowContext context = dailyFlow.doDailyFlow();
+        context.setProperty(DellEbiFlowService.START_TIME, System.currentTimeMillis());
+        boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
         Assert.assertEquals(result, true);
-        exportAndReportService.export(requestContext);
+        exportAndReportService.export(context);
 
         Configuration conf = new Configuration();
-        Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir()), true);
-        List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir() + "/*.txt");
+        Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(null)), true);
+        List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(null) + "/*.txt");
         Assert.assertEquals(files.size(), 1);
     }
 
     @DataProvider(name = "fileDataProvider")
     public static Object[][] getValidateNameData() {
-        return new Object[][] { { "./src/test/resources/tgt_quote_trans_global_1_2015.zip" },
-                { "./src/test/resources/tgt_quote_trans_global_4_2015.zip" } };
+        return new Object[][] { { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "SMB" },
+                { "./src/test/resources/tgt_quote_trans_global_4_2015.zip", "SMB" },
+                { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL" },
+                { "./src/test/resources/tgt_quote_trans_global_4_2015.zip", "LOCAL" } };
     }
 
     private void smbPut(String remoteUrl, String localFilePath) throws Exception {

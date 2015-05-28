@@ -2,7 +2,6 @@ package com.latticeengines.dellebi.util;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.dellebi.dataprocess.DellEbiDailyJob;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -47,8 +45,7 @@ public class ExportAndReportService {
     private String targetJdbcHost;
     @Value("${dellebi.datatarget.port}")
     private String targetJdbcPort;
-    @Value("${dellebi.datatarget.dbname}")
-    private String targetJdbcDb;
+
     @Value("${dellebi.datatarget.type}")
     private String targetJdbcType;
     @Value("${dellebi.datatarget.user}")
@@ -68,11 +65,11 @@ public class ExportAndReportService {
     @Autowired
     private HadoopFileSystemOperations hadoopfilesystemoperations;
 
-    public boolean export(DataFlowContext requestContext) {
+    public boolean export(DataFlowContext context) {
 
         String targetTable = targetRawTable;
-        String sourceDir = dellEbiFlowService.getOutputDir();
-        String successFile = dellEbiFlowService.getOutputDir() + "/_SUCCESS";
+        String sourceDir = dellEbiFlowService.getOutputDir(null);
+        String successFile = dellEbiFlowService.getOutputDir(null) + "/_SUCCESS";
         String columns = "QuoteNumber,Date,CustomerID,Product,RepBadge,Quantity,Amount,QuoteFileName";
         String sqlStr = "exec " + quote_sp;
 
@@ -89,6 +86,7 @@ public class ExportAndReportService {
 
         log.info("Start export from HDFS files " + sourceDir);
 
+        String targetJdbcDb = dellEbiFlowService.getTargetDB(context);
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
                 .password(targetJdbcPassword).dbType(targetJdbcType);
@@ -107,7 +105,8 @@ public class ExportAndReportService {
         if (errorMsg == null) {
             log.info("Begin to execute the Store Procedure= " + quote_sp);
             try {
-//                sqoopSyncJobService.eval(sqlStr, queue, "Exceute SP-" + quote_sp, creds);
+                // sqoopSyncJobService.eval(sqlStr, queue, "Exceute SP-" +
+                // quote_sp, creds);
                 log.info("Finished executing the Store Procedure= " + quote_sp);
             } catch (Exception e) {
                 errorMsg = "Failed to execute the Store Procedure= " + quote_sp;
@@ -115,24 +114,21 @@ public class ExportAndReportService {
             }
         }
 
-        String fileName = "";
+        String fileName = context.getProperty(DellEbiFlowService.ZIP_FILE_NAME, String.class);
+        ;
         if (errorMsg == null) {
             try {
-                List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir() + "/*.txt");
+                List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(null) + "/*.txt");
                 if (files != null && files.size() > 0) {
-                    fileName = files.get(0);
-                    int idx = fileName.lastIndexOf("/");
-                    if (idx >= 0) {
-                        fileName = fileName.substring(idx + 1);
-                    }
-                    fileName = StringUtils.removeEndIgnoreCase(fileName, ".txt") + ".zip";
-                    boolean result = dellEbiFlowService.deleteSMBFile(fileName);
+                    boolean result = dellEbiFlowService.deleteFile(context);
                     if (result) {
-                        report(requestContext, "Dell EBI daily refresh (export) succeeded!", fileName);
+                        report(context, "Dell EBI daily refresh (export) succeeded!", fileName);
                         return true;
                     } else {
                         errorMsg = "Can not delete smbFile=" + fileName;
                     }
+                } else {
+                    errorMsg = "Can not find txt file for " + fileName;
                 }
 
             } catch (Exception ex) {
@@ -142,8 +138,8 @@ public class ExportAndReportService {
         }
 
         if (errorMsg != null) {
-            report(requestContext, "Dell EBI daily refresh (export) failed! errorMsg=" + errorMsg, fileName);
-            dellEbiFlowService.registerFailedFile(fileName);
+            report(context, "Dell EBI daily refresh (export) failed! errorMsg=" + errorMsg, fileName);
+            dellEbiFlowService.registerFailedFile(context);
         }
         return false;
 
@@ -156,7 +152,7 @@ public class ExportAndReportService {
     }
 
     private String getTotalTime(DataFlowContext requestContext) {
-        Long startTime = requestContext.getProperty(DellEbiDailyJob.START_TIME, Long.class);
+        Long startTime = requestContext.getProperty(DellEbiFlowService.START_TIME, Long.class);
         if (startTime == null) {
             return "unknow";
         }

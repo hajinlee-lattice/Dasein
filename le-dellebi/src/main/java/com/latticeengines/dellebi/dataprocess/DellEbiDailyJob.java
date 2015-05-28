@@ -9,13 +9,13 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.dellebi.flowdef.DailyFlow;
+import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.ExportAndReportService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @DisallowConcurrentExecution
 public class DellEbiDailyJob extends QuartzJobBean {
 
-    public static final String START_TIME = "startTime";
     private DailyFlow dailyFlow;
     private ExportAndReportService exportAndReportService;
 
@@ -25,13 +25,13 @@ public class DellEbiDailyJob extends QuartzJobBean {
 
         log.info("Start to process files from inbox.");
         long startTime = System.currentTimeMillis();
-        DataFlowContext requestContext = new DataFlowContext();
-        requestContext.setProperty(START_TIME, startTime);
-        
-        boolean result = dailyFlow.doDailyFlow();
+
+        DataFlowContext context = dailyFlow.doDailyFlow();
+        boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
         if (result) {
             log.info("EBI daily Job Flow finished successfully.");
-            result = exportAndReportService.export(requestContext);
+            context.setProperty(DellEbiFlowService.START_TIME, startTime);
+            result = exportAndReportService.export(context);
             if (result) {
                 log.info("EBI daily refresh (export) finished successfully.");
             } else {
