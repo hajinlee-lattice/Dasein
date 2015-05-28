@@ -44,6 +44,7 @@ class PLSEnvironments(object):
     dl_server_user="richard.liu@lattice-engines.com";
     dl_server_pwd="1";
     dl_dlc_path="%s\\%s\\ScoringDaemon\\ScoringDaemon\\bin\\Services\\DataLoaderShim" % (pls_server_folder, pls_bard_1[3:]);
+    visidb_dlc_path = "D:\\performanceTest\\DLC"
     
     visidb_server_user="admin";
     visidb_server_pwd="visid@t@b@se";
