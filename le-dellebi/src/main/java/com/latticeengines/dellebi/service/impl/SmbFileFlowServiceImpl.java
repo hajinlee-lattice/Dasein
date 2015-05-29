@@ -55,7 +55,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             return txtFileName;
 
         } catch (Exception ex) {
-            log.error("Failed to get Smb file! error=" + ex.getMessage());
+            log.warn("Failed to get Smb file! error=" + ex.getMessage());
         }
 
         return null;
