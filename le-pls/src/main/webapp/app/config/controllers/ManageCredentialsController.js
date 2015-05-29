@@ -69,21 +69,24 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     ConfigService.GetCurrentTopology().then(function(result) {
         $scope.loading = false;
         if (result.success === true) {
-            if (typeof result.resultObj === "string" && result.resultObj.toLowerCase() === "eloqua") {
-                $scope.isMarketo = false;
-            } else {
+            if (typeof result.resultObj === "string" && result.resultObj.toLowerCase() === "marketo") {
                 $scope.isMarketo = true;
             }
-            var mapType = $scope.isMarketo ? "marketo" : "eloqua";
-            ConfigService.GetCurrentCredentials(mapType).then(function(result) {
-                if (result != null && result.success === true) {
-                    var returned = result.resultObj;
-                    $scope.mapCredentials = new Credentials(returned.Url, returned.SecurityToken, returned.OrgId, returned.Password, returned.UserName, returned.Company);
-                    $scope.mapComplete = true;
-                } else {
-                    $scope.mapCredentials = new Credentials();
-                }
-            });
+            if (typeof result.resultObj === "string" && result.resultObj.toLowerCase() === "eloqua") {
+                $scope.isEloqua = true;
+            }
+            if ($scope.isMarketo || $scope.isEloqua) {
+                var mapType = $scope.isMarketo ? "marketo" : "eloqua";
+                ConfigService.GetCurrentCredentials(mapType).then(function(result) {
+                    if (result != null && result.success === true) {
+                        var returned = result.resultObj;
+                        $scope.mapCredentials = new Credentials(returned.Url, returned.SecurityToken, returned.OrgId, returned.Password, returned.UserName, returned.Company);
+                        $scope.mapComplete = true;
+                    } else {
+                        $scope.mapCredentials = new Credentials();
+                    }
+                });
+            }
         } else {
             $scope.showError = true;
             $scope.errorMessage = result.resultErrors;
