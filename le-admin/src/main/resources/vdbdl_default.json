@@ -2,6 +2,7 @@
   "RootPath": "/",
   "Nodes": [
     { "Node": "TenantAlias", "Data": "" },
+    { "Node": "TemplateVersion", "Data": "2.0" },
     { "Node": "VisiDB", 
       "Children" : [
         { "Node": "CreateNewVisiDB", "Data": true },

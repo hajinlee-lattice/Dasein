@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.admin.dynamicopts.impl.TemplateProvider;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
@@ -24,6 +25,9 @@ public class VisiDBTemplateComponent extends LatticeComponent {
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private TemplateProvider templateProvider;
 
     @Autowired
     private VisiDBDLComponent visiDBDLComponent;
@@ -50,6 +54,7 @@ public class VisiDBTemplateComponent extends LatticeComponent {
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
         ((VisiDBTemplateInstaller)installer).setTenantService(tenantService);
+        ((VisiDBTemplateInstaller)installer).setTemplateProvider(templateProvider);
         return installer;
     }
 

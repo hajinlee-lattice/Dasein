@@ -13,13 +13,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.latticeengines.admin.dynamicopts.impl.TemplateProvider;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.InstallTemplateRequest;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -33,6 +36,8 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
 
     private TenantService tenantService;
 
+    private TemplateProvider templateProvider;
+
     private static final String marketoTemplate = "Template_MKTO.config";
 
     private static final String eloquaTemplate = "Template_ELQ.config";
@@ -45,6 +50,10 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
         this.tenantService = tenantService;
     }
 
+    public void setTemplateProvider(TemplateProvider templateProvider) {
+        this.templateProvider = templateProvider;
+    }
+
     @Override
     public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
         String dmDeployment = space.getTenantId();
@@ -53,9 +62,18 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
         TenantDocument tenantDoc = tenantService.getTenant(contractExternalID, dmDeployment);
         String tenant = dmDeployment;
         String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
-        String templatePath = tenantDoc.getSpaceConfig().getTemplatePath();
         CRMTopology topology = tenantDoc.getSpaceConfig().getTopology();
-        File dataloaderTemplate = getTemplateFile(topology, templatePath);
+
+        SerializableDocumentDirectory vdbdlConfig;
+        try {
+            vdbdlConfig = tenantService.getTenantServiceConfig(
+                    contractExternalID, dmDeployment, VisiDBDLComponent.componentName);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18038, "Cannot find the configuration of VisiDBDL component.", e);
+        }
+
+        String version = vdbdlConfig.getNodeAtPath("/TemplateVersion").getData();
+        File dataloaderTemplate = new File(templateProvider.getTemplate(version, topology) + ".config");
 
         try {
             String str = IOUtils.toString(new InputStreamReader(new FileInputStream(dataloaderTemplate)));

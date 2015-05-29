@@ -33,6 +33,9 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
     @Autowired
     private DataStoreProvider dataStoreProvider;
 
+    @Autowired
+    private TemplateProvider templateProvider;
+
     @PostConstruct
     private void registerProviders() {
         // CRM Topologies
@@ -45,6 +48,9 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
         Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStore");
         register(zkPath, dataStoreProvider);
+
+        zkPath = new Path(VisiDBDLComponent.componentName, "VisiDBDL", "TemplateVersion");
+        register(zkPath, templateProvider);
     }
 
     private void register(Path path, OptionsProvider provider) { optionMap.put(path, provider); }

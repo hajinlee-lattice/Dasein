@@ -15,6 +15,7 @@
         }
       ]
     },
+    {"Node":"TemplateVersion","Data":"2.0","Metadata":{"Type":"options","Options":["2.0"],"DynamicOptions":true}},
     {
       "Node": "TenantAlias",
       "Data": "",
