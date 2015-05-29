@@ -139,7 +139,7 @@ public class TenantServiceImpl implements TenantService {
         for (String serviceName : components) {
             Path tenantServiceStatePath = PathBuilder.buildCustomerSpaceServicePath(podId, contractId, tenantId,
                     CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
-            BootstrapState newState = BootstrapState.constructOKState(1);
+            BootstrapState newState = BootstrapState.createInitialState();
             try {
                 if (camille.exists(tenantServiceStatePath)) {
                     newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
