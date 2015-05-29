@@ -111,7 +111,12 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public void eval(String sql, String queue, String jobName, int numMappers, String jdbcUrl) {
+    public void eval(String sql, String assignedQueue, String jobName, DbCreds creds) {
+        eval(sql, assignedQueue, jobName, metadataService.getJdbcConnectionUrl(creds));
+    }
+    
+    @Override
+    public void eval(String sql, String queue, String jobName, String jdbcUrl) {
         List<String> cmds = new ArrayList<>();
         cmds.add("eval");
         cmds.add("-Dmapred.job.queue.name=" + queue);
