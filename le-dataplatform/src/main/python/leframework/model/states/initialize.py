@@ -1,9 +1,10 @@
 import logging
-import pandas as pd
 
 from leframework.codestyle import overrides
 from leframework.model.state import State
 from leframework.util.scoringutil import ScoringUtil
+import pandas as pd
+
 
 class Initialize(State):
     
@@ -15,7 +16,7 @@ class Initialize(State):
     def execute(self):
         mediator = self.getMediator()
 
-        #Score and Update Data
+        # Score and Update Data
         dataScores = ScoringUtil.score(mediator, mediator.data, self.logger)
         dataScoreSeries = pd.Series(dataScores, index=mediator.data.index)
         mediator.data[mediator.schema["reserved"]["score"]].update(dataScoreSeries)

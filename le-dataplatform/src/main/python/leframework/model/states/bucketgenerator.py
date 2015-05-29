@@ -20,7 +20,7 @@ class BucketGenerator(State, JsonGenBase):
         # Algorithm generates buckets from low to highest
         # Will reverse it in the end to comply with overall order
         buckets = []
-        labels = ["Low", "Medium", "High", "Highest"]       
+        labels = ["Low", "Medium", "High", "Highest"]
         probRange = self.mediator.probRange   
         widthRange = self.mediator.widthRange
 

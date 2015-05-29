@@ -22,8 +22,8 @@ class DP628ProfilingTest(ProfilingTestBase):
         
         # boolean to STR
         self.assertEquals(len(metadata['MKTOLead_IsFirstLastNameSame']), 2)
-        self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][0]['Dtype'], 'STR')
-        self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][1]['Dtype'], 'STR')
+        self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][0]['Dtype'], 'BND')
+        self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][1]['Dtype'], 'BND')
         # string to STR
         self.assertEqual(metadata['BusinessECommerceSite'][0]['Dtype'], 'STR')
         

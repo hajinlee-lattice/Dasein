@@ -23,7 +23,13 @@ class Finalize(State):
         self.invokeModelPredictorsExtraction(self.getMediator())
         self.writeReadoutSample(self.getMediator())
         self.writeEnhancedFiles(self.getMediator())
-
+        self.writeMessages(self.getMediator())
+        
+    def writeMessages(self, mediator):
+        if len(mediator.messages) > 0:
+            with open(mediator.modelLocalDir + mediator.name + "_messages.txt", "wb") as fp:
+                fp.write("\n".join(mediator.messages))
+            
     def writeScoredText(self, mediator):
         scored = mediator.data[mediator.schema["reserved"]["score"]].as_matrix()
         # add the key data and append the scored data

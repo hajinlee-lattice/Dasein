@@ -54,6 +54,9 @@ class PercentileBucketGenerator(State, JsonGenBase):
             self.percentileBuckets.append(bucket)
         except Exception:
             self.logger.info("Length of list = %d indexForMin = %d i = %d" % (scoredSortedLen, indexForMin, i))
+        if bucket["MinimumScore"] == bucket["MaximumScore"]:
+            self.mediator.messages.append("Bucket for percentile %d has the same min and max for the range of %f." % \
+                            (pct, scoredSorted[self.mediator.schema["reserved"]["score"]].iloc[i]))
 
     @overrides(JsonGenBase)
     def getKey(self):

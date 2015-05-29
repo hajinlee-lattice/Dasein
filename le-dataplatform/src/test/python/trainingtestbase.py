@@ -130,13 +130,14 @@ class TrainingTestBase(TestBase):
                         first = False
                     else:
                         line += ","
-                    dataType = 'String' if fields[field] == 'string' or fields[field] == 'bytes' or fields[field] == 'boolean' else 'Float'
-                    if row[1][field] is None or (dataType == 'Float' and np.isnan(row[1][field])):
+                    dataType = 'String' if fields[field] == 'string' or fields[field] == 'bytes' else 'Float'
+                    
+                    if row[1][field] is None or (dataType == 'Float' and np.isnan(float(row[1][field]))):
                         line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"%s|\"}}" % (field, dataType)
                     elif dataType == 'String':
                         line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"String|'%s'\"}}" % (field, value)
                     else:
-                        line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (field, str(value))
+                        line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (field, str(float(value)))
                 line += "]"
                 line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()), line)
                 fp.write(line + "\n")

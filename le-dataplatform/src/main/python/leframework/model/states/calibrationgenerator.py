@@ -14,7 +14,7 @@ class CalibrationGenerator(State, JsonGenBase):
         self.logger = logging.getLogger(name='calibrationgenerator')
     
     @overrides(State)
-    def execute(self):    
+    def execute(self):
         mediator = self.mediator
         schema = mediator.schema
 

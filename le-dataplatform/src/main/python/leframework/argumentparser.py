@@ -5,9 +5,9 @@ import json
 import logging
 
 import fastavro as avro
+from leframework.util.reservedfieldutil import ReservedFieldUtil
 import pandas as pd
 
-from leframework.util.reservedfieldutil import ReservedFieldUtil
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -170,7 +170,7 @@ class ArgumentParser(object):
                 logger.info("Adding %s with index %d" % (fName, i))
                 includedNames.append(fName)
                 included.append(i)
-                if (fType == 'string' or fType == 'bytes' or fType == 'boolean') and fName != self.target:
+                if (fType == 'string' or fType == 'bytes') and fName != self.target:
                     self.stringColNames.add(fName)
 
         tmpData = []
@@ -196,7 +196,7 @@ class ArgumentParser(object):
                     continue
                 else:
                     row[targetName] = float(row[targetName])
-                rowlist += [str(row[name]) if name in self.stringColNames and row[name] is not None else row[name] for name in includedNames]
+                rowlist += [None if row[name] is None else str(row[name]) if name in self.stringColNames else float(row[name]) for name in includedNames]
             else:
                 # CSV format
                 rowlist += [float(row[i]) if self.__getField(i)["name"] == self.target else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]

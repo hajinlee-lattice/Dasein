@@ -1,7 +1,5 @@
-import json
-import logging
-
 from collections import OrderedDict
+import logging
 
 from leframework.codestyle import overrides
 from leframework.model.state import State

@@ -14,11 +14,11 @@ class BadTargetProfilingTest(ProfilingTestBase):
         
         metadata = results[0]
         
-        # Two values for a boolean
-        self.assertEquals(len(metadata['IsIT']), 2)
-        # Booleans should be categorical
-        self.assertEquals(metadata['IsIT'][0]['Dtype'], 'STR')
-        self.assertEquals(metadata['IsIT'][1]['Dtype'], 'STR')
+        # Only one value for metadata
+        self.assertEquals(len(metadata['IsIT']), 1)
+
+        # Booleans are only categorical if the metadata says so
+        self.assertEquals(metadata['IsIT'][0]['Dtype'], 'BND')
         
         self.assertTrue(results is not None)
     

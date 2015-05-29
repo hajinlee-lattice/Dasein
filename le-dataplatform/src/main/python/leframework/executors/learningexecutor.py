@@ -9,22 +9,22 @@ from leframework.model.states.averageprobabilitygenerator import AverageProbabil
 from leframework.model.states.bucketgenerator import BucketGenerator
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
 from leframework.model.states.columnmetadatagenerator import ColumnMetadataGenerator
+from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
+from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
 from leframework.model.states.finalize import Finalize
 from leframework.model.states.initialize import Initialize
+from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
-from leframework.model.states.samplegenerator import SampleGenerator
-from leframework.model.states.rocgenerator import ROCGenerator
-from leframework.model.states.provenancegenerator import ProvenanceGenerator
 from leframework.model.states.predictorgenerator import PredictorGenerator
-from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
+from leframework.model.states.provenancegenerator import ProvenanceGenerator
+from leframework.model.states.rocgenerator import ROCGenerator
+from leframework.model.states.samplegenerator import SampleGenerator
+from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
-from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
-from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
-from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -140,6 +140,7 @@ class LearningExecutor(Executor):
             mediator.provenanceProperties = parser.getProvenanceProperties()
             mediator.metadata = params["metadata"]
             mediator.templateVersion = parser.templateVersion
+            mediator.messages = []
             stateMachine.run()
         else:
             logger.warn("Generated classifier is null.")
