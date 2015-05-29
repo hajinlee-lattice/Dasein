@@ -36,10 +36,6 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
     private TemplateProvider templateProvider;
 
-    private static final String marketoTemplate = "Template_MKTO.specs";
-
-    private static final String eloquaTemplate = "Template_ELQ.specs";
-
     private static final int SUCCESS = 3;
 
     public VisiDBTemplateInstaller() {
@@ -88,24 +84,6 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
             throw new LedpException(LedpCode.LEDP_18023, e);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18036, e);
-        }
-    }
-
-    private File getTemplateFile(CRMTopology topology, String templatePath) {
-        if (topology.equals(CRMTopology.MARKETO)) {
-            return getFile(templatePath, marketoTemplate);
-        } else if (topology.equals(CRMTopology.ELOQUA)) {
-            return getFile(templatePath, eloquaTemplate);
-        } else {
-            throw new LedpException(LedpCode.LEDP_18037, new String[] { topology.name() });
-        }
-    }
-
-    public File getFile(String templatePath, String templateFileName) {
-        if (new File(templatePath, templateFileName).exists()) {
-            return new File(templatePath + "/" + templateFileName);
-        } else {
-            throw new LedpException(LedpCode.LEDP_18023);
         }
     }
 
