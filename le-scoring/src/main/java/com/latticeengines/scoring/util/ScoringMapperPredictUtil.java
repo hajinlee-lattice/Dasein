@@ -10,18 +10,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
+import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import com.latticeengines.common.exposed.util.AvroUtils;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 
@@ -47,8 +47,7 @@ public class ScoringMapperPredictUtil {
 	private static final String PERCENTILE_BUCKETS_MAXIMUMSCORE = "MaximumScore";
     private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
 	
-	public static ArrayList<ModelEvaluationResult> evaluate(HashMap<String, JSONObject> models, HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, String> modelIdMap, String outputPath, int threshold) {
-		ArrayList<ModelEvaluationResult> resultList= null;
+	public static void evaluate(HashMap<String, JSONObject> models) {
 		// spawn python 
 		Set<String> modelIDs = models.keySet();
 		StringBuilder sb = new StringBuilder();
@@ -90,9 +89,6 @@ public class ScoringMapperPredictUtil {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
-		resultList = readScoreFiles(leadInputRecordMap, models, modelIdMap, outputPath, threshold);
-		return resultList;
 	}
 	
 
@@ -112,8 +108,9 @@ public class ScoringMapperPredictUtil {
 		for (int i = 0; i < resultList.size(); i++) {
 			ModelEvaluationResult result = resultList.get(i);
             try {
-            	if (i == 0)
+            	if (i == 0) {
             		dataFileWriter.create(result.getSchema(), outputFile);
+            	}
 	            dataFileWriter.append(result);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -131,7 +128,7 @@ public class ScoringMapperPredictUtil {
 		}
 	}
 	
-	private static ArrayList<ModelEvaluationResult> readScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, String outputPath, int threshold) {
+	public static ArrayList<ModelEvaluationResult> processScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, int threshold) {
 		Set<String> modelIDs = leadInputRecordMap.keySet();
 		// list of HashMap<leadID: score>
 		ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
@@ -279,12 +276,61 @@ public class ScoringMapperPredictUtil {
             (upperExclusive == null || value < upperExclusive);
     }
     
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 
-		String hdfs = "/user/s-analytics/customers/Nutanix/scoring/ScoringCommandProcessorTestNG_LeadsTable/scores/15e01328-9e73-4977-9298-259e68632bce.avro";
-		List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(hdfs));
-		for (GenericRecord ele : list) {
-			System.out.println(ele.toString());
+//		String hdfs = "/user/s-analytics/customers/Nutanix/scoring/ScoringCommandProcessorTestNG_LeadsTable/scores/15e01328-9e73-4977-9298-259e68632bce.avro";
+//		List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(hdfs));
+//		for (GenericRecord ele : list) {
+//			System.out.println(ele.toString());
+//		}
+		
+		ModelEvaluationResult result1 = new ModelEvaluationResult("18f446f1-747b-461e-9160-c995c3876ed4", "Highest", 4.88519256666, "modelID", 100, 0.05822784810126582, 0.0777755757027, 6);
+		ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
+		resultList.add(result1);
+		String fileName = "/Users/ygao/test/test.avro";
+		File outputFile = new File(fileName);
+  		DatumWriter<ModelEvaluationResult> userDatumWriter = new SpecificDatumWriter<ModelEvaluationResult>();
+        DataFileWriter<ModelEvaluationResult> dataFileWriter = new DataFileWriter<ModelEvaluationResult>(userDatumWriter);
+        
+		for (int i = 0; i < resultList.size(); i++) {
+			ModelEvaluationResult result = resultList.get(i);
+            try {
+            	if (i == 0) {
+            		dataFileWriter.create(result.getSchema(), outputFile);
+            	}
+	            dataFileWriter.append(result);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}        	
 		}
+        try {
+			dataFileWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        SpecificDatumReader<ModelEvaluationResult> reader = new SpecificDatumReader<ModelEvaluationResult>(ModelEvaluationResult.class);
+		DataFileReader<ModelEvaluationResult> dataFileReader = null;
+		try {
+			dataFileReader = new DataFileReader<ModelEvaluationResult>(outputFile, reader);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ModelEvaluationResult result = null;
+		while (dataFileReader.hasNext()) {
+			result = dataFileReader.next();
+			System.out.println(result);
+		}
+		
+		// delete the temp folder and the temp file
+		try {
+			dataFileReader.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+		
 	}
 }

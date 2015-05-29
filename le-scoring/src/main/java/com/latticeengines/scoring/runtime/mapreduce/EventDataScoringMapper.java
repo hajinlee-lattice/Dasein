@@ -3,7 +3,6 @@ package com.latticeengines.scoring.runtime.mapreduce;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.avro.generic.GenericData.Record;
@@ -14,8 +13,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.scoring.util.ModelEvaluationResult;
@@ -76,7 +73,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         
         String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
         log.info("outputDir: " + outputPath);
-        resultList = ScoringMapperPredictUtil.evaluate(models, leadInputRecordMap, modelIdMap, outputPath, THRESHOLD);
+        ScoringMapperPredictUtil.evaluate(models);
+        resultList = ScoringMapperPredictUtil.processScoreFiles(leadInputRecordMap, models, modelIdMap, THRESHOLD);
         log.info("The size of resultList is: " + resultList.size());
         ScoringMapperPredictUtil.writeToOutputFile(resultList, context.getConfiguration(), outputPath);
     }
