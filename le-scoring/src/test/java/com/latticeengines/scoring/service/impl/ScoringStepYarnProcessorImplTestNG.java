@@ -86,12 +86,10 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/VisiDBTest_Model_Submission1_2015-04-18_12-30_model.json"); //
         String modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
-                + "/f3e29fd8-fb88-4758-9bcb-ea8d48ae6ac5/1429553747321_0004";
+                + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1429553747321_0004";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/model.json";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
-        metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
-        metadataService.dropTable(scoringJdbcTemplate, outputTable);
     }
 
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
