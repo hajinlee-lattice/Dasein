@@ -41,7 +41,7 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
-    
+
     @Autowired
     private ScoringCommandLogEntityMgr scoringCommandLogEntityMgr;
 
@@ -67,6 +67,10 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private String inputLeadsTable;
 
+    private String modelPath;
+
+    private String path;
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
     }
@@ -75,12 +79,12 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
-        String path = customerBaseDir + "/" + customer + "/scoring";
+        path = customerBaseDir + "/" + customer + "/scoring";
         HdfsUtils.rmdir(yarnConfiguration, path);
 
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json"); //
-        String modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
+        modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
                 + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1425511391553_3007";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/1_model.json";
@@ -94,31 +98,38 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
             metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
             clearTables();
         }
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, path);
+            HdfsUtils.rmdir(yarnConfiguration, modelPath);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Test(groups = "functional")
     public void testWorkflow() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0, 4352, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
+                0, 4352, new Timestamp(System.currentTimeMillis()));
 
         scoringCommandEntityMgr.create(scoringCommand);
 
         int iterations = 0;
-        while ((scoringCommand.getStatus() == ScoringCommandStatus.POPULATED) && iterations < 100) { 
+        while ((scoringCommand.getStatus() == ScoringCommandStatus.POPULATED) && iterations < 100) {
             iterations++;
             Thread.sleep(15000);
             scoringCommand = scoringCommandEntityMgr.findByKey(scoringCommand);
         }
 
         ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr.findByScoringCommand(scoringCommand);
-        if(scoringCommandResult == null || scoringCommandResult.getStatus() == ScoringCommandStatus.NEW) {
+        if (scoringCommandResult == null || scoringCommandResult.getStatus() == ScoringCommandStatus.NEW) {
             List<ScoringCommandLog> logs = scoringCommandLogEntityMgr.findAll();
             for (ScoringCommandLog scoringCommandLog : logs) {
                 log.info(scoringCommandLog.getMessage());
             }
         }
 
-        assertTrue(scoringCommandResult.getStatus() == ScoringCommandStatus.POPULATED,
-                "The actual command state is " + scoringCommand.getStatus());
+        assertTrue(scoringCommandResult.getStatus() == ScoringCommandStatus.POPULATED, "The actual command state is "
+                + scoringCommand.getStatus());
 
         List<ScoringCommandLog> logs = scoringCommandLogEntityMgr.findAll();
         assertTrue(logs.size() >= 12);
@@ -127,7 +138,8 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
         assertEquals(states.size(), 4);
 
         outputTable = scoringCommandResult.getTableName();
-        assertEquals(metadataService.getRowCount(scoringJdbcTemplate, testInputTable), metadataService.getRowCount(scoringJdbcTemplate, outputTable));
+        assertEquals(metadataService.getRowCount(scoringJdbcTemplate, testInputTable),
+                metadataService.getRowCount(scoringJdbcTemplate, outputTable));
 
     }
 }

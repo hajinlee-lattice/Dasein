@@ -71,6 +71,10 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
 
     private String inputLeadsTable;
 
+    private String modelPath;
+
+    private String path;
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
     }
@@ -80,12 +84,12 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
 
-        String path = customerBaseDir + "/" + customer + "/scoring";
+        path = customerBaseDir + "/" + customer + "/scoring";
         HdfsUtils.rmdir(yarnConfiguration, path);
 
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/VisiDBTest_Model_Submission1_2015-04-18_12-30_model.json"); //
-        String modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
+        modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
                 + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1429553747321_0004";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/model.json";
@@ -98,6 +102,12 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
             metadataService.dropTable(scoringJdbcTemplate, outputTable);
             metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
             clearTables();
+        }
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, path);
+            HdfsUtils.rmdir(yarnConfiguration, modelPath);
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 
