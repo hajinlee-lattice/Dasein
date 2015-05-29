@@ -580,7 +580,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 if (!tenantService.hasTenantId(tenantId)) {
                     Tenant tenant = new Tenant();
                     tenant.setId(tenantId);
-                    String name = subTenantId.endsWith("Tenant1") ? "Tenant 1" : "Tenatn 2";
+                    String name = subTenantId.endsWith("Tenant1") ? "Tenant 1" : "Tenant 2";
                     tenant.setName(contractId + " " + name);
                     tenantService.registerTenant(tenant);
                 }

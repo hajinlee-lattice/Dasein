@@ -97,7 +97,6 @@ public class EmailUtils {
             htmlTemplate = htmlTemplate.replace("{{firstname}}", user.getFirstName());
             htmlTemplate = htmlTemplate.replace("{{lastname}}", user.getLastName());
             htmlTemplate = htmlTemplate.replace("{{tenantname}}",tenant.getName());
-            htmlTemplate = htmlTemplate.replace("{{appname}}","Lead Prioritization Tenant");
             htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
 
             Multipart mp = new MimeMultipart();
@@ -122,7 +121,6 @@ public class EmailUtils {
             htmlTemplate = htmlTemplate.replace("{{firstname}}", user.getFirstName());
             htmlTemplate = htmlTemplate.replace("{{lastname}}", user.getLastName());
             htmlTemplate = htmlTemplate.replace("{{tenantname}}",tenant.getName());
-            htmlTemplate = htmlTemplate.replace("{{appname}}","Tenant in Lattice Lead Prioritization App");
             htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
 
             Multipart mp = new MimeMultipart();
