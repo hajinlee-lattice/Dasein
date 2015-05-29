@@ -38,9 +38,11 @@ public class EmailUtils {
             String htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream("com/latticeengines/pls/service/new_user.html"));
 
-            htmlTemplate = htmlTemplate.replace("{{tenantname}}", String.format("<strong>%s</strong>", tenant.getName()));
             htmlTemplate = htmlTemplate.replace("{{firstname}}", user.getFirstName());
             htmlTemplate = htmlTemplate.replace("{{lastname}}", user.getLastName());
+            htmlTemplate = htmlTemplate.replace("{{tenantmsg}}",
+                    String.format("You have been added to the <strong>%s</strong> Lead Prioritization Tenant.",
+                            tenant.getName()));
             htmlTemplate = htmlTemplate.replace("{{username}}", user.getUsername());
             htmlTemplate = htmlTemplate.replace("{{password}}", password);
             htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
@@ -64,15 +66,13 @@ public class EmailUtils {
             String htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream("com/latticeengines/pls/service/new_user.html"));
 
-            String paragraphs = "<p>You have been been granted access to the Lattice Lead Prioritization App.</p>";
-            paragraphs += "<p>Use the following credentials to access the application:</p>";
-
             htmlTemplate = htmlTemplate.replace("{{firstname}}", user.getFirstName());
             htmlTemplate = htmlTemplate.replace("{{lastname}}", user.getLastName());
+            htmlTemplate = htmlTemplate.replace("{{tenantmsg}}",
+                    "You have been granted access to the Lattice Lead Prioritization App.");
             htmlTemplate = htmlTemplate.replace("{{username}}", user.getUsername());
             htmlTemplate = htmlTemplate.replace("{{tenantname}}", "&nbsp;");
             htmlTemplate = htmlTemplate.replace("{{password}}", password);
-            htmlTemplate = htmlTemplate.replace("{{paragraphs}}", paragraphs);
             htmlTemplate = htmlTemplate.replace("{{url}}", hostport);
 
             Multipart mp = new MimeMultipart();
