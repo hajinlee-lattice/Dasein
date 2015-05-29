@@ -105,8 +105,7 @@ public class ExportAndReportService {
         if (errorMsg == null) {
             log.info("Begin to execute the Store Procedure= " + quote_sp);
             try {
-                // sqoopSyncJobService.eval(sqlStr, queue, "Exceute SP-" +
-                // quote_sp, creds);
+                sqoopSyncJobService.eval(sqlStr, queue, "Exceute SP-" + quote_sp, creds);
                 log.info("Finished executing the Store Procedure= " + quote_sp);
             } catch (Exception e) {
                 errorMsg = "Failed to execute the Store Procedure= " + quote_sp;
