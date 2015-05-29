@@ -24,16 +24,6 @@
       }
     },
     {
-      "Node": "Template_Path",
-      "Data": "/etc/template",
-      "Metadata": {
-        "Type": "options",
-        "Options": [
-          "/etc/template"
-        ]
-      }
-    },
-    {
       "Node": "Topology",
       "Data": "Marketo",
       "Metadata": {
