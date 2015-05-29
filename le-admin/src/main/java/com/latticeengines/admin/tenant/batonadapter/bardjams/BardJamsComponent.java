@@ -1,11 +1,16 @@
 package com.latticeengines.admin.tenant.batonadapter.bardjams;
 
+import java.util.Collections;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
@@ -16,6 +21,9 @@ public class BardJamsComponent extends LatticeComponent {
     @Autowired
     private BardJamsEntityMgr bardJamsEntityMgr;
 
+    @Autowired
+    private VisiDBDLComponent visiDBDLComponent;
+
     @Value("${admin.bardjams.timeout}")
     private int timeout;
 
@@ -25,6 +33,11 @@ public class BardJamsComponent extends LatticeComponent {
     private LatticeComponentInstaller installer = new BardJamsInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new BardJamsUpgrader();
     public static final String componentName = "BardJams";
+
+    @PostConstruct
+    public void setDependencies(){
+        dependencies = Collections.singleton(visiDBDLComponent);
+    }
 
     @Override
     public boolean doRegistration() {
