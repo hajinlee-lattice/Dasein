@@ -165,11 +165,18 @@ public class ImportJobBase extends JobBase {
      * Submit the Map Reduce Job.
      */
     protected boolean doSubmitJob(Job job) throws IOException, InterruptedException, ClassNotFoundException {
-        job.submit();
+        boolean doSync = job.getConfiguration().getBoolean("sqoop.sync", false);
+        boolean success = true;
+        if (doSync) {
+            success = job.waitForCompletion(true);
+        } else {
+            job.submit();
+        }
         JobID jobId = job.getJobID();
         String fileName = job.getConfiguration().get("sqoop.app.id.file.name");
         FileUtils.write(new File(fileName), jobId.toString());
-        return true;
+
+        return success;
     }
 
     /**
