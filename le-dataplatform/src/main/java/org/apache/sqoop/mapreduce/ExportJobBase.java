@@ -267,6 +267,7 @@ public class ExportJobBase extends JobBase {
      * Submit the Map Reduce Job.
      */
     protected boolean doSubmitJob(Job job) throws IOException, InterruptedException, ClassNotFoundException {
+        LOG.info("Using ledp ImportJobBase.");
         boolean doSync = job.getConfiguration().getBoolean("sqoop.sync", false);
         boolean success = true;
         if (doSync) {
@@ -276,7 +277,9 @@ public class ExportJobBase extends JobBase {
         }
         JobID jobId = job.getJobID();
         String fileName = job.getConfiguration().get("sqoop.app.id.file.name");
-        FileUtils.write(new File(fileName), jobId.toString());
+        File file = new File(fileName);
+        LOG.info(String.format("Application id file full path is %s.", file.getAbsolutePath()));
+        FileUtils.write(file, jobId.toString());
 
         return success;
     }
