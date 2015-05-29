@@ -97,9 +97,9 @@ public class PropDataDBServiceImpl implements PropDataDBService {
             for (int i = 0; i < tableList.size(); i++) {
                 String newTable = tableList.get(i);
                 String keyCols = keyColsList.get(i);
-                ApplicationId appId = propDataJobService.importData(newTable,
+                ApplicationId appId = propDataJobService.importDataSync(newTable,
                         getDataHdfsPath(customer, tableName + "/" + newTable, PROPDATA_OUTPUT), creds, assignedQueue,
-                        customer, Arrays.asList(keyCols), "");
+                        customer, Arrays.asList(keyCols), "", 0);
                 Integer applicationId;
                 if (appId != null) {
                     applicationId = appId.getId();
@@ -138,9 +138,9 @@ public class PropDataDBServiceImpl implements PropDataDBService {
                     .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
             DbCreds creds = new DbCreds(builder);
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-            ApplicationId appId = propDataJobService.importData(tableName,
+            ApplicationId appId = propDataJobService.importDataSync(tableName,
                     getDataHdfsPath(customer, tableName, PROPDATA_OUTPUT), creds, assignedQueue, customer, Arrays.asList(keyCols),
-                    "");
+                    "", 1);
             Integer applicationId;
             if (appId != null) {
                 applicationId = appId.getId();
@@ -385,15 +385,15 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 
         String customer = requestContext.getProperty(ImportExportKey.CUSTOMER.getKey(), String.class);
         String table = requestContext.getProperty(ImportExportKey.TABLE.getKey(), String.class);
-        String keyCols = requestContext.getProperty(ImportExportKey.KEY_COLS.getKey(), String.class);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
                 .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
         DbCreds creds = new DbCreds(builder);
-        Integer appId = propDataJobService.exportData(table, getDataHdfsPath(customer, table, PROPDATA_INPUT),
-                creds, assignedQueue, customer).getId();
+        
+        Integer appId = propDataJobService.exportDataSync(table, getDataHdfsPath(customer, table, PROPDATA_INPUT),
+                creds, assignedQueue, customer, 1, null).getId();
 
         Integer applicationId;
         if (appId != null) {

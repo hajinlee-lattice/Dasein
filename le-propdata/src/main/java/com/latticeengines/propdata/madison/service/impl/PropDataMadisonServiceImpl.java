@@ -136,7 +136,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             builder.host(sourceDataJdbcHost).port(Integer.parseInt(sourceDataJdbcPort)).db(sourceDataJdbcDb)
                     .user(sourceDataJdbcUser).password(sourceDataJdbcPassword).dbType(sourceDataJdbcType);
             DbCreds creds = new DbCreds(builder);
-            propDataJobService.importData(dailyProgress.getDestinationTable(), targetDir, creds, assignedQueue,
+            propDataJobService.importDataSync(dailyProgress.getDestinationTable(), targetDir, creds, assignedQueue,
                     getJobName() + "-Progress Id-" + dailyProgress.getPid(), Arrays.asList(splitColumns.split(",")),
                     "", numMappers);
 
@@ -250,7 +250,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
                         .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
                 DbCreds creds = new DbCreds(builder);
-                propDataJobService.importData(targetTable + "_new", schemaPath, creds, assignedQueue, getJobName()
+                propDataJobService.importDataSync(targetTable + "_new", schemaPath, creds, assignedQueue, getJobName()
                         + "-schema", Arrays.asList("DomainID"), "", 1);
                 log.info("Finished getting targetTable's schema file=" + schemaPath);
             }
@@ -321,8 +321,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
                     .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
             DbCreds creds = new DbCreds(builder);
-            propDataJobService.exportData(getTableNew(), getOutputDir(sourceDir), creds, assignedQueue, getJobName()
-                    + "-uploadAggregationData", numMappers);
+            propDataJobService.exportDataSync(getTableNew(), getOutputDir(sourceDir), creds, assignedQueue, getJobName()
+                    + "-uploadAggregationData", numMappers, null);
 
             swapTargetTables(assignedQueue);
             uploadTodayRawData(today);
@@ -373,8 +373,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 + "-uploadRawDataCreateTable", connectionString);
         log.info("Uploading today's data, targetTable=" + tableName + " connectionUrl=" + connectionString);
         
-        propDataJobService.exportData(tableName, todayIncrementalPath, creds, assignedQueue, getJobName()
-                + "-uploadRawDataExportData", numMappers);
+        propDataJobService.exportDataSync(tableName, todayIncrementalPath, creds, assignedQueue, getJobName()
+                + "-uploadRawDataExportData", numMappers, null);
         propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
                 + "-uploadRawDataMergeTable", connectionString);
         log.info("Finished uploading today's raw data=" + todayIncrementalPath);
