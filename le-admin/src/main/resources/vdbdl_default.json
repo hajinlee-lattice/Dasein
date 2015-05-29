@@ -7,7 +7,7 @@
       "Children" : [
         { "Node": "CreateNewVisiDB", "Data": true },
         { "Node": "VisiDBName", "Data": ""},
-        { "Node": "ServerName", "Data": "bodcdevvint207" },
+        { "Node": "ServerName", "Data": "bodcdevvint187" },
         { "Node": "VisiDBFileDirectory", "Data": ""},
         { "Node": "CacheLimit", "Data": 8192},
         { "Node": "CaseSensitive", "Data": false},

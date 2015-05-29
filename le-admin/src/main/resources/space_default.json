@@ -1,7 +1,7 @@
 {
   "RootPath": "/",
   "Nodes": [
-	{ "Node": "DL_Address", "Data": "http://bodcdevvint207.dev.lattice.local:8081" },
+	{ "Node": "DL_Address", "Data": "http://bodcdevvint187.dev.lattice.local:8081" },
 	{ "Node": "Product", "Data": "Lead Prioritization" },
 	{ "Node": "Topology", "Data": "Marketo" }
   ]
