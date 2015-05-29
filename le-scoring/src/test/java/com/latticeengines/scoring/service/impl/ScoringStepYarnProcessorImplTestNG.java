@@ -90,7 +90,8 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/model.json";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
-
+        metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        metadataService.dropTable(scoringJdbcTemplate, outputTable);
     }
 
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)

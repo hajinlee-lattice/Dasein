@@ -85,7 +85,8 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/1_model.json";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
-        
+        metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        metadataService.dropTable(scoringJdbcTemplate, outputTable);
     }
 
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
