@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.util.CollectionUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -78,6 +79,9 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
+        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
         path = customerBaseDir + "/" + customer + "/scoring";
         HdfsUtils.rmdir(yarnConfiguration, path);
@@ -89,6 +93,7 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/1_model.json";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
+
     }
 
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)

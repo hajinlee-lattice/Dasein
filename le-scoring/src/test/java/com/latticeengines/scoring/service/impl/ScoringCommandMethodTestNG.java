@@ -8,6 +8,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.CollectionUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -76,6 +77,12 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringManager.setCleanUpInterval(cleanUpInterval);
         scoringManager.init(applicationContext);
         alertService.enableTestMode();
+        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputTable))){
+            metadataService.dropTable(scoringJdbcTemplate, inputTable);
+        }
+        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, outputTable))){
+            metadataService.dropTable(scoringJdbcTemplate, outputTable);
+        }
     }
 
     @Test(groups = "functional")
