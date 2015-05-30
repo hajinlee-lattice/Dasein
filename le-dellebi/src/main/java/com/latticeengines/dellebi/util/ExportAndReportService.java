@@ -103,10 +103,12 @@ public class ExportAndReportService {
         log.info("Finish export HDFS files to SQL server");
 
         if (errorMsg == null) {
-            log.info("Begin to execute the Store Procedure= " + quote_sp);
             try {
-                sqoopSyncJobService.eval(sqlStr, queue, "Exceute SP-" + quote_sp, creds);
-                log.info("Finished executing the Store Procedure= " + quote_sp);
+                if (dellEbiFlowService.runStoredProcedure(context)) {
+                    log.info("Begin to execute the Store Procedure= " + quote_sp);
+                    sqoopSyncJobService.eval(sqlStr, queue, "Exceute SP-" + quote_sp, creds);
+                    log.info("Finished executing the Store Procedure= " + quote_sp);
+                }
             } catch (Exception e) {
                 errorMsg = "Failed to execute the Store Procedure= " + quote_sp;
                 log.error(errorMsg, e);

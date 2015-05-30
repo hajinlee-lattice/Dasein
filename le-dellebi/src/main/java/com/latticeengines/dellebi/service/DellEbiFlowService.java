@@ -30,4 +30,6 @@ public interface DellEbiFlowService {
 
     String getTargetDB(DataFlowContext context);
 
+    boolean runStoredProcedure(DataFlowContext context);
+
 }

@@ -121,5 +121,12 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         }
         localFileFlowService.registerFailedFile(zipFileName);
     }
-    
+
+    @Override
+    public boolean runStoredProcedure(DataFlowContext context) {
+        if (isSmb(context)) {
+            return true;
+        }
+        return false;
+    }
 }
