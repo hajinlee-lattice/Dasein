@@ -123,7 +123,7 @@ public class ExportAndReportService {
                 if (files != null && files.size() > 0) {
                     boolean result = dellEbiFlowService.deleteFile(context);
                     if (result) {
-                        report(context, "Dell EBI daily refresh (export) succeeded!", fileName);
+                        report(context, "Dell EBI daily refresh (export) succeeded!", fileName, targetJdbcDb);
                         return true;
                     } else {
                         errorMsg = "Can not delete smbFile=" + fileName;
@@ -139,17 +139,17 @@ public class ExportAndReportService {
         }
 
         if (errorMsg != null) {
-            report(context, "Dell EBI daily refresh (export) failed! errorMsg=" + errorMsg, fileName);
+            report(context, "Dell EBI daily refresh (export) failed! errorMsg=" + errorMsg, fileName, targetJdbcDb);
             dellEbiFlowService.registerFailedFile(context);
         }
         return false;
 
     }
 
-    private void report(DataFlowContext requestContext, String msg, String fileName) {
+    private void report(DataFlowContext requestContext, String msg, String fileName, String targetJdbcDb) {
         String totalTime = getTotalTime(requestContext);
         mailSender.sendEmail(mailReceiveList, msg + " File=" + fileName, "\nEnv = " + dellebiEnv + "\nTotalTime = "
-                + totalTime);
+                + totalTime + "\nDB = " + targetJdbcDb);
     }
 
     private String getTotalTime(DataFlowContext requestContext) {
