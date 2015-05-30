@@ -4,16 +4,33 @@ import json
 import os
 import subprocess
 import sys
+
+from testbase import TestBase
 from trainingtestbase import TrainingTestBase
+
 
 class ScoringEngineTest(TrainingTestBase):
  
-    def testScoringEngine(self):
+    def testScoringEngineForMulesoft(self):
+        self.__runScoringEngine("modeldriver-mulesoft-scoring.json")
+
+    def testScoringEngineForClio(self):
+        self.__runScoringEngine("modeldriver-clio.json")
+        
+    def setUp(self):
+        TestBase.setUpClass()
+        TrainingTestBase.setUp(self)
+        
+    def tearDown(self):
+        TrainingTestBase.tearDown(self)
+        TestBase.tearDownClass()
+        
+    def __runScoringEngine(self, modelDriver):
         if 'launcher' in sys.modules:
             del sys.modules['launcher']
         from launcher import Launcher
 
-        traininglauncher = Launcher("modeldriver-mulesoft-scoring.json")
+        traininglauncher = Launcher(modelDriver)
         traininglauncher.execute(False)
         traininglauncher.training
         
@@ -29,10 +46,11 @@ class ScoringEngineTest(TrainingTestBase):
         with open("./results/scoringengine.py", "w") as scoringScript:
             scoringScript.write(jsonDict["Model"]["Script"])
 
-        self.createCSVFromModel("modeldriver-mulesoft-scoring.json", "./results/scoreinputfile.txt")
+        self.createCSVFromModel(modelDriver, "./results/scoreinputfile.txt")
         os.environ["PYTHONPATH"] = ''
-        popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
-                         stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+        popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", \
+                                 "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
+                                 stdout = subprocess.PIPE, stderr=subprocess.PIPE)
         _, stderr = popen.communicate()
         self.assertEquals(len(stderr), 0)
 

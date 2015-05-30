@@ -3,11 +3,15 @@ from StringIO import StringIO
 import csv
 import json
 import logging
+import sys
 
 import fastavro as avro
 from leframework.util.reservedfieldutil import ReservedFieldUtil
 import pandas as pd
 
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

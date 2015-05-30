@@ -62,7 +62,7 @@ def generateScore(pipeline, inputFileName, outputFileName):
 
 def getRowToScore(line):
     try:
-        decoder = json.decoder.JSONDecoder(encoding="Latin1")
+        decoder = json.decoder.JSONDecoder(encoding="utf-8")
         dataRow = decoder.decode(line)
         rowId = dataRow["key"]
         colValues = dataRow["value"]

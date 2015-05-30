@@ -1,6 +1,7 @@
 import base64
 import csv
 import gzip
+import json
 import os
 from random import shuffle
 import shutil
@@ -117,6 +118,7 @@ class TrainingTestBase(TestBase):
         fields = { k['name']:k['type'][0] for k in parser.fields }
         
         with open(scoringFile, "w") as fp:
+            i = 1
             for row in data.iterrows():
                 line = "["
                 first = True
@@ -131,16 +133,18 @@ class TrainingTestBase(TestBase):
                     else:
                         line += ","
                     dataType = 'String' if fields[field] == 'string' or fields[field] == 'bytes' else 'Float'
+                    #print ("Row %d Column = %s, Type = %s" % (i, field, type(value)))
                     
                     if row[1][field] is None or (dataType == 'Float' and np.isnan(float(row[1][field]))):
                         line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"%s|\"}}" % (field, dataType)
                     elif dataType == 'String':
-                        line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"String|'%s'\"}}" % (field, value)
+                        line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"String|'%s'\"}}" % (field, json.dumps(value)[1:-1])
                     else:
                         line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (field, str(float(value)))
                 line += "]"
                 line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()), line)
                 fp.write(line + "\n")
+                i += 1
 
     def getPredictScore(self, pipeline, typeDict, values):
         scores = []
