@@ -9,11 +9,11 @@ describe('user management', function() {
     //=======================================================
     // All user management tests are distributed to each role
     //=======================================================
-    externalUser.testUserManagement();
+    //externalUser.testUserManagement();
     externalAdmin.testUserManagement();
-    internalUser.testUserManagement();
-    internalAdmin.testUserManagement();
-    superAdmin.testUserManagement();
+    //internalUser.testUserManagement();
+    //internalAdmin.testUserManagement();
+    //superAdmin.testUserManagement();
 
     //it('should verify create user', function () {
     //    // popup add user
