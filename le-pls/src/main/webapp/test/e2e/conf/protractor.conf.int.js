@@ -4,7 +4,7 @@ var common = require('./protractor.conf.common');
 
 var config = common.generateConfig('..');
 
-config.params.tenantId = "IntegrationTestPLSContract.Tenant2.Production";
-config.params.alternativeTenantId = "IntegrationTestPLSContract.Tenant1.Production";
+config.params.tenantId = "IntegrationTestPLSContract.IntegrationTestTenant2.Production";
+config.params.alternativeTenantId = "IntegrationTestPLSContract.IntegrationTestTenant1.Production";
 
 exports.config = config;
