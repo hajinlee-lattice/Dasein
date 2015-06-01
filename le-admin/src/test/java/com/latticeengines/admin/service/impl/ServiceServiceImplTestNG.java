@@ -8,15 +8,22 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
+import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     
     @Autowired
     private ServiceService serviceService;
+
+    @Autowired
+    private TenantService tenantService;
 
     @Test(groups = "functional")
     public void testGetSelectableFields() throws Exception {
@@ -80,4 +87,54 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 2);
     }
 
+
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
+    public void testPathDefaultConfigToNonExistingNode() throws Exception {
+        serviceService.patchDefaultConfig("TestComponent", "/nonode", "data");
+    }
+
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
+    public void testPathDefaultConfigToInvalidDataType() throws Exception {
+        serviceService.patchDefaultConfig("TestComponent", "/Config1", "data");
+    }
+
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
+    public void testPathDefaultConfigToOutsideOptions() throws Exception {
+        serviceService.patchDefaultConfig("TestComponent", "/Config1", "5");
+    }
+
+    @Test(groups = "functional")
+    public void testPathDefaultConfig() throws Exception {
+        SerializableDocumentDirectory dir = serviceService.getDefaultServiceConfig("TestComponent");
+        SerializableDocumentDirectory.Node node = dir.getNodeAtPath("/Config1");
+        Assert.assertEquals(node.getData(), "1");
+
+        serviceService.patchDefaultConfig("TestComponent", "/Config1", "2");
+
+        dir = serviceService.getDefaultServiceConfig("TestComponent");
+        node = dir.getNodeAtPath("/Config1");
+        Assert.assertEquals(node.getData(), "2");
+
+        serviceService.patchDefaultConfig("TestComponent", "/Config1", "1");
+
+        dir = serviceService.getDefaultServiceConfig("TestComponent");
+        node = dir.getNodeAtPath("/Config1");
+        Assert.assertEquals(node.getData(), "1");
+    }
+
+    @Test(groups = "functional")
+    public void testPathSpaceConfiguration() throws Exception {
+        SpaceConfiguration conf = tenantService.getDefaultSpaceConfig();
+        Assert.assertEquals(conf.getTopology(), CRMTopology.MARKETO);
+
+        serviceService.patchDefaultConfig(LatticeComponent.spaceConfigNode, "/Topology", CRMTopology.ELOQUA.getName());
+
+        conf = tenantService.getDefaultSpaceConfig();
+        Assert.assertEquals(conf.getTopology(), CRMTopology.ELOQUA);
+
+        serviceService.patchDefaultConfig(LatticeComponent.spaceConfigNode, "/Topology", CRMTopology.MARKETO.getName());
+
+        conf = tenantService.getDefaultSpaceConfig();
+        Assert.assertEquals(conf.getTopology(), CRMTopology.MARKETO);
+    }
 }

@@ -93,4 +93,25 @@ public class ServiceServiceImpl implements ServiceService {
         }
 
     }
+    @Override
+    public Boolean patchDefaultConfig(String serviceName, String nodePath, String data) {
+        try {
+            SerializableDocumentDirectory conf = getDefaultServiceConfig(serviceName);
+            SerializableDocumentDirectory.Node node = conf.getNodeAtPath(nodePath);
+            if (node == null) { throw new IllegalArgumentException("Cannot find node at path " + nodePath); }
+            node.setData(data);
+            DocumentDirectory metaDir = getConfigurationSchema(serviceName);
+            conf.applyMetadata(metaDir);
+
+            DocumentDirectory dirToUpload = SerializableDocumentDirectory.deserialize(conf);
+            Path configPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), serviceName);
+            dirToUpload.makePathsLocal();
+            return batonService.loadDirectory(dirToUpload, configPath);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_19101, String.format(
+                    "Failed to patch default configuration for node %s in component %s", nodePath, serviceName), e);
+        }
+
+    }
+
 }

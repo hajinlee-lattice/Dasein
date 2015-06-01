@@ -18,4 +18,6 @@ public interface ServiceService {
     SelectableConfigurationDocument getSelectableConfigurationFields(String serviceName, boolean includeDynamicOpts);
 
     Boolean patchOptions(String serviceName, SelectableConfigurationField field);
+
+    Boolean patchDefaultConfig(String serviceName, String nodePath, String data);
 }
