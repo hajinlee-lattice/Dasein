@@ -227,7 +227,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         // TenantInfo
         TenantProperties tenantProperties = new TenantProperties();
         tenantProperties.description =
-                "First test tenant across all component provisioned by tenant console through deployment tests.";
+                "A test tenant across all component provisioned by tenant console through deployment tests.";
         tenantProperties.displayName = tenantName;
         TenantInfo tenantInfo = new TenantInfo(tenantProperties);
 
