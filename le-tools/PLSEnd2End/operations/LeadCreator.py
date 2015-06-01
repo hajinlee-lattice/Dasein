@@ -222,12 +222,17 @@ class EloquaRequest():
         for k in contact_ids.keys():
             response = self.getContact(k);
             if len(response.text)>0:
-                result = json.loads(response.text);
+                result = json.loads(response.text);                
                 results = {};
                 results["id"]=k;
                 results["email"]=result["emailAddress"];
-                results["latticeforleads__Last_Score_Date__c"] =  time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(float(result["fieldValues"][-10]["value"]))) ;
-                results["latticeforleads__Score__c"] = result["fieldValues"][-11]["value"];
+                
+                if float(result["fieldValues"][-11]["value"]) > 0:
+                    results["latticeforleads__Last_Score_Date__c"] =  time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(float(result["fieldValues"][-10]["value"]))) ;
+                    results["latticeforleads__Score__c"] = result["fieldValues"][-11]["value"];
+                else:
+                    results["latticeforleads__Last_Score_Date__c"] =  None ;
+                    results["latticeforleads__Score__c"] = result["fieldValues"][-11]["value"];
                 print "==>    %s    %s    %s    %s" % (k, results["email"], results["latticeforleads__Score__c"],results["latticeforleads__Last_Score_Date__c"])
                 contacts.append(results);
             

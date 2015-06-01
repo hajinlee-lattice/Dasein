@@ -25,7 +25,7 @@ def setUpPls():
 
     ''' configure Bard Tenant -- drop templates, configure DL.. '''
     configureBardTenant(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ)
-    configureBardTenant(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
+#     configureBardTenant(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
 
 
 
@@ -43,16 +43,16 @@ def configureBardTenant(tenant, marketting_app):
  
     ''' Setup Pretzel '''
     print "Running Setup"
-    pretzel = PretzelRunner();
-    assert pretzel.setupPretzel(marketting_app)
-   
-    ''' Configure PLS Credentials '''
-    print "for PLS Configuration from UI";
-    plsUI = PLSConfigRunner(pls_url);
-    print "==>    The PLS URL is: %s" % pls_url;
-    plsUI.config(marketting_app);
- 
-    ''' configure dataLoader settings '''
+#     pretzel = PretzelRunner();
+#     assert pretzel.setupPretzel(marketting_app)
+#    
+#     ''' Configure PLS Credentials '''
+#     print "for PLS Configuration from UI";
+#     plsUI = PLSConfigRunner(pls_url);
+#     print "==>    The PLS URL is: %s" % pls_url;
+#     plsUI.config(marketting_app);
+#  
+#     ''' configure dataLoader settings '''
     print "configure dataloader settings"
     dlConfig = DLConfigRunner();
     dlConfig.configDLTables(tenant, marketting_app);

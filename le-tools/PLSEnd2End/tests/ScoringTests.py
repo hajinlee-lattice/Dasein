@@ -65,14 +65,14 @@ class Test(unittest.TestCase):
     def TestHourlyScoringELQ_Dante(self):
         elq = EloquaRequest();
         contact_lists = elq.addEloquaContactForDante(3);        
-        
+                
         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_1); 
                 
         elq_contacts = elq.getEloquaContact(contact_lists[0]);
          
         contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",elq_contacts);
         assert len(contact_faileds)==1, contact_faileds;
-         
+          
         PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_1);
    
     def TestHourlyScoringMKTO_Dante(self):

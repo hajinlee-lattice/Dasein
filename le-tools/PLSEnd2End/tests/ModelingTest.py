@@ -24,9 +24,9 @@ class Test(unittest.TestCase):
         PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
         PlsOperations.activateModel(bardAdminTool,pls_bard);
-        print "for jams configurations"
-        jams = JamsRunner();
-        assert jams.setJamsTenant(pls_bard);
+#         print "for jams configurations"
+#         jams = JamsRunner();
+#         assert jams.setJamsTenant(pls_bard);
         #TODO -- add more assertions here
 
     
@@ -39,9 +39,9 @@ class Test(unittest.TestCase):
         PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
         PlsOperations.activateModel(bardAdminTool,pls_bard);
-        print "for jams configurations"
-        jams = JamsRunner();
-        assert jams.setJamsTenant(pls_bard);
+#         print "for jams configurations"
+#         jams = JamsRunner();
+#         assert jams.setJamsTenant(pls_bard);
         #TODO -- add more assertions here
 
 

@@ -753,6 +753,37 @@ class DLConfigRunner(SessionRunner):
             dlc.getStatus()
     
         runLoadGroups(dlc, params, [lg_name],sleep_time=120)
+
+class DanteRunner(SessionRunner):
+    def __init__(self, SFDC_url=None, logfile=None, exception=False):
+        super(PLSConfigRunner, self).__init__(SFDC_url, logfile);
+        self.exception = exception;
+        self.sfdc_url=SFDC_url;
+        self.sfdcUI = webdriver.Firefox();
+    
+    def SFDCLogin(self): 
+        self.plsUI.get(self.sfdc_url);
+        time.sleep(30);       
+        self.sfdcUI.find_element_by_id("username").clear()
+        self.sfdcUI.find_element_by_id("username").send_keys(PLSEnvironments.pls_SFDC_user)
+        self.sfdcUI.find_element_by_id("password").clear()
+        self.sfdcUI.find_element_by_id("password").send_keys(PLSEnvironments.pls_SFDC_pwd)
+        self.sfdcUI.find_element_by_id("Login").click()
+        time.sleep(30);
+    
+    def setDanteConfigSettings(self):
+        self.sfdcUI.find_element_by_id("userNav-arrow").click()
+        self.sfdcUI.find_element_by_link_text("Setup").click()
+        self.sfdcUI.find_element_by_css_selector("#DevToolsIntegrate_icon > img.setupImage").click()
+        self.sfdcUI.find_element_by_id("CustomSettings_font").click()
+        self.sfdcUI.find_element_by_xpath("//a[contains(@href, '/a06/o')]").click()
+        time.sleep(30);
+        dt_url = "https://%s/DT_%s" % (PLSEnvironments.pls_server,PLSEnvironments.pls_bard_1[3:])
+        self.sfdcUI.find_element_by_id("CS_list:CS_Form:theDetailPageBlock:thePageBlockButtons:edit").click()
+        self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockSection:latticeforleads__url__c").clear()
+        self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockSection:latticeforleads__url__c").send_keys(dt_url)
+        self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockButtons:save").click()
+
         
 class UtilsRunner(SessionRunner):
 

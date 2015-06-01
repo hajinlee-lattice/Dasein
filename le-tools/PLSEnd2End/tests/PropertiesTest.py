@@ -4,10 +4,14 @@ Created on Mar 18, 2015
 @author: smeng
 '''
 import unittest
+import requests
+import json
+import datetime
 from Properties import PLSEnvironments
 from operations.TestHelpers import JamsRunner
 from operations.PerformanceHelpers import PerformanceData
 from operations.PerformanceHelpers import VisiDBRollBack
+from operations.LeadCreator import SFDCRequest
 
 
 class Test(unittest.TestCase):
@@ -36,7 +40,11 @@ class Test(unittest.TestCase):
     def testFail(self):
         assert False, "failing on purpose, expecting to see this text..."
 
-
+    
+    def testAddLeadsToSFDC(self):
+        sfdc = SFDCRequest();
+        print sfdc.addLeadsToSFDC(3)
+        
     def testGetLaunchData(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
         pd.getLaunchData("aa");
@@ -95,6 +103,66 @@ class Test(unittest.TestCase):
     def testIsExistVisidbDB(self):
         visidb = VisiDBRollBack();
         print visidb.isExistVisidbDB("BD_ADEDTBDd70064747nG26263627r1");
+        
+    def testGetQueryMetaDataColumns(self):
+        passed=0;
+        failed=0;
+        for i in range(300):
+            print "==========> %d" % i
+            beginTime = datetime.datetime.now()
+            response = self.runGetQueryMetaDataClolumns();
+            if response.status_code == 200:
+                endTime = datetime.datetime.now()
+                duration = (endTime-beginTime).seconds
+                if duration<=30:
+                    passed +=1
+                else:
+                    print duration
+                    failed +=1
+            else:
+                print response.text;    
+        print "there are %d cost less than 30 seconds, %d more than 30 seconds" % (passed,failed) 
+        
+    def testGetQueryMetaDataColumnsWithSSL(self):
+        passed=0;
+        failed=0;
+        for i in range(2):
+            print "==========> %d" % i
+            beginTime = datetime.datetime.now()
+            response = self.runGetQueryMetaDataClolumnsWithSSL();
+            if response.status_code == 200:
+                endTime = datetime.datetime.now()
+                duration = (endTime-beginTime).seconds
+                if duration<=30:
+                    passed +=1
+                else:
+                    print duration
+                    failed +=1
+            else:
+                print response.text;    
+        print "there are %d cost less than 30 seconds, %d more than 30 seconds" % (passed,failed) 
+           
+    def runGetQueryMetaDataClolumns(self):
+        url = "http://bodcdevvint187.dev.lattice.local:8081//DLRestService/GetQueryMetaDataColumns"
+        headers = {"Content-Type":"application/json","Accept": "application/json", "MagicAuthentication":"Security through obscurity!"};
+        
+        parameters = {}
+        parameters["tenantName"] = "BD2_ADEDTBDd70064747nN26263627r12";
+        parameters["queryName"] = "Q_PLS_Modeling";
+        
+        response = requests.post(url,headers = headers,data=json.dumps(parameters));
+        return response;
+        
+    def runGetQueryMetaDataClolumnsWithSSL(self):
+        url = "https://bodcdevvint187.dev.lattice.local:8080//DLRestService/GetQueryMetaDataColumns"
+        headers = {"Content-Type":"application/json","Accept": "application/json", "MagicAuthentication":"Security through obscurity!"};
+        
+        parameters = {}
+        parameters["tenantName"] = "BD2_ADEDTBDd70064747nN26263627r12";
+        parameters["queryName"] = "Q_PLS_Modeling";
+        
+        response = requests.post(url,headers = headers,data=json.dumps(parameters),verify=True);
+        return response;
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
