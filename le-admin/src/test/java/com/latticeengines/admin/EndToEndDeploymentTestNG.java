@@ -324,7 +324,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
                 @Override
                 public BootstrapState call() throws Exception {
                     if (component.toLowerCase().contains("test") ||
-                            (component.equals(DanteComponent.componentName)) || // not ready for integration test with Dante
+                            (danteSkipped && component.equals(DanteComponent.componentName)) ||
                             (plsSkipped && component.equals(PLSComponent.componentName)) ||
                             (vdbdlSkipped && component.equals(VisiDBDLComponent.componentName)) ||
                             (vdbTplSkipped && component.equals(VisiDBTemplateComponent.componentName)) ||
