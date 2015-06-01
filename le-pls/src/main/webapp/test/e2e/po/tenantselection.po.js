@@ -11,14 +11,14 @@ var Tenants = function() {
 
     this.selectTenantByIndex = function(index) {
         browser.wait(function(){
-            return element(by.css('select#tenantSelectionInput')).isDisplayed();
+            return element(by.css('select#tenantSelectionInput')).isPresent();
         }, 10000, 'tenant list should appear with in 10 sec.');
         element(by.repeater('tenant in tenantList').row(index)).click();
     };
 
     this.selectTenantByName = function(name) {
         browser.wait(function(){
-            return element(by.css('select#tenantSelectionInput')).isDisplayed();
+            return element(by.css('select#tenantSelectionInput')).isPresent();
         }, 10000, 'tenant list should appear with in 10 sec.');
         selectTenantByName(name);
     };

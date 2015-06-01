@@ -25,7 +25,12 @@ var SuperAdmin = function() {
                 // Open add new user modal and add the user
                 //==================================================
                 userManagement.AddNewUserLink.click();
+                browser.waitForAngular();
+                browser.driver.sleep(500);
                 expect(element(by.css('#add-user-modal')).isPresent()).toBe(true);
+                // verify number of roles in dropdown
+                element(by.css('select')).click();
+                expect(element.all(by.css('option')).count()).toBe(3);
                 var testName = "0000" + userManagement.randomName(8);
                 userManagement.createNewUser(testName);
                 browser.driver.sleep(500);
@@ -35,7 +40,10 @@ var SuperAdmin = function() {
                 //==================================================
                 element.all(by.css('.js-edit-user-link')).first().click();
                 browser.driver.sleep(500);
-                expect(element(by.css('#edit-user-modal')).isDisplayed()).toBe(true);
+                expect(element(by.css('#edit-user-modal')).isPresent()).toBe(true);
+                // verify number of roles in dropdown
+                element(by.css('select')).click();
+                expect(element.all(by.css('option')).count()).toBeLessThan(4);
                 element(by.css('#edit-user-btn-save')).click();
                 browser.driver.sleep(500);
                 element(by.css('#edit-user-btn-ok')).click();

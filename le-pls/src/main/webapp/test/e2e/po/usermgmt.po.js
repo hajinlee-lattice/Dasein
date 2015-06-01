@@ -16,12 +16,7 @@ var UserManagement = function() {
     };
 
     this.assertManageUsersIsVisible = function (expected) {
-        if (expected) {
-            expect(userDropdown.ManageUsersLink.isDisplayed()).toBe(true);
-        } else {
-            expect(userDropdown.ManageUsersLink.isPresent()).toBe(false);
-        }
-
+        expect(userDropdown.ManageUsersLink.isPresent()).toBe(expected);
     };
     
     this.createNewUser = function (name) {
