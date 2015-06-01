@@ -26,7 +26,7 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
@@ -40,7 +40,6 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
         setupDbWithMarketoSMB("TENANT1", "TENANT1");
         setupDbWithEloquaSMB("TENANT2", "TENANT2");
-        segmentEntityMgr.deleteAll();
         
         tenant1 = tenantEntityMgr.findByTenantId("TENANT1");
         tenant2 = tenantEntityMgr.findByTenantId("TENANT2");
@@ -55,6 +54,10 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         segment1.setName("SMB");
         segment1.setPriority(1);
         segment1.setTenant(tenant1);
+        setupSecurityContext(tenant1);
+        for (Segment segment: segmentEntityMgr.findAll()) {
+            segmentEntityMgr.delete(segment);
+        }
         segmentEntityMgr.create(segment1);
 
         Segment segment2 = new Segment();
@@ -62,6 +65,10 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         segment2.setName("US");
         segment2.setPriority(2);
         segment2.setTenant(tenant2);
+        setupSecurityContext(tenant2);
+        for (Segment segment: segmentEntityMgr.findAll()) {
+            segmentEntityMgr.delete(segment);
+        }
         segmentEntityMgr.create(segment2);
     }
 

@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -29,6 +30,7 @@ import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TenantService;
 
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -41,16 +43,31 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
+    @Autowired
+    private TenantService tenantService;
+
     private ModelSummary summary1;
     private ModelSummary summary2;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        keyValueEntityMgr.deleteAll();
-        tenantEntityMgr.deleteAll();
+        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
+        Tenant tenant2 = tenantService.findByTenantId("TENANT2");
+
+        if (tenant1 != null) { tenantService.discardTenant(tenant1); }
+        if (tenant2 != null) { tenantService.discardTenant(tenant2); }
 
         summary1 = createModelSummaryForTenant1();
         summary2 = createModelSummaryForTenant2();
+    }
+
+    @AfterClass(groups = "functional")
+    public void teardown() throws Exception {
+        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
+        Tenant tenant2 = tenantService.findByTenantId("TENANT2");
+
+        tenantService.discardTenant(tenant1);
+        tenantService.discardTenant(tenant2);
     }
 
     private void setDetails(ModelSummary summary) throws Exception {

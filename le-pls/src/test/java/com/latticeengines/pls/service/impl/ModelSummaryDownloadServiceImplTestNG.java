@@ -9,6 +9,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -16,16 +17,13 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.mbean.TimeStampContainer;
+import com.latticeengines.pls.service.TenantService;
 
 public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBase {
-    
-    @Autowired
-    private KeyValueEntityMgr keyValueEntityMgr;
 
     @Autowired
     private ModelSummaryDownloadServiceImpl modelSummaryDownloadService;
@@ -35,6 +33,9 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private TenantService tenantService;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -62,13 +63,17 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         modelSummaryDownloadService.setTimeStampContainer(timeStampContainer);
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
     }
+
+    @AfterClass(groups = "functional")
+    public void teardown() throws Exception {
+        Tenant tenant = tenantService.findByTenantId("TENANT1");
+        if (tenant != null) {
+            tenantService.discardTenant(tenant);
+        }
+    }
     
     @BeforeMethod(groups = "functional")
-    public void setupMethod() {
-        keyValueEntityMgr.deleteAll();
-        modelSummaryEntityMgr.deleteAll();
-        tenantEntityMgr.deleteAll();
-    }
+    public void setupMethod() throws Exception { teardown(); }
 
     @Test(groups = "functional")
     public void executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation() throws Exception {
@@ -95,8 +100,6 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         summaries = modelSummaryEntityMgr.findAll();
         // No new summaries should have been created
         assertEquals(summaries.size(), 1);
-        
-        
     }
 
     @Test(groups = "functional")

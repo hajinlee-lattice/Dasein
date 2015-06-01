@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
@@ -33,22 +34,23 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-    
+
+    @Autowired
+    private TenantService tenantService;
+
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
     
     @BeforeClass(groups = { "functional", "deployment" })
-    public void setup() {
+    public void setup() throws Exception {
         makeSureUserDoesNotExist("ron@lattice-engines.com");
-        tenantEntityMgr.deleteAll();
-        tenant = new Tenant();
-        tenant.setId("T1");
-        tenant.setName("T1");
+        setupDbWithMarketoSMB("T1", "T1");
+        tenant = tenantService.findByTenantId("T1");
     }
 
     @AfterClass(groups = { "functional", "deployment" })
     public void teardown() {
-        tenantEntityMgr.deleteAll();
+        tenantService.discardTenant(tenant);
     }
 
     @Test(groups = { "functional", "deployment" })
@@ -100,7 +102,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         List<Tenant> tenants = restTemplate.getForObject(getRestAPIHostPort() + "/pls/admin/tenants", List.class);
-        assertEquals(tenants.size(), 1);
+        assertTrue(tenants.size() >= 1);
     }
 
     @Test(groups = { "functional", "deployment" })

@@ -9,19 +9,27 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TenantService;
 
 public class TenantEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-    
+
+    @Autowired
+    private TenantService tenantService;
+
     @BeforeClass(groups = "functional")
     public void setup() {
-        tenantEntityMgr.deleteAll();
-
         Tenant tenant = new Tenant();
         tenant.setId("TENANT1");
         tenant.setName("TENANT1");
+
+        try {
+            tenantService.discardTenant(tenant);
+        } catch (Exception e) {
+            // ignore
+        }
         tenantEntityMgr.create(tenant);
     }
     
