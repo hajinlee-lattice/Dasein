@@ -257,8 +257,8 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         LOGGER.info("Cleaning up test tenants through internal API");
 
-        final String tenant1Id = contractId + "PLSContract.Tenant1.Production";
-        final String tenant2Id = contractId + "PLSContract.Tenant2.Production";
+        final String tenant1Id = contractId + "PLSContract." + contractId + "Tenant1.Production";
+        final String tenant2Id = contractId + "PLSContract." + contractId + "Tenant2.Production";
 
         //==================================================
         // Upload modelsummary if necessary
@@ -302,6 +302,20 @@ public class InternalResource extends InternalResourceBase {
                             true, headers);
                     jNode = mapper.readTree(response);
                 }
+            }
+        }
+
+        //==================================================
+        // Delete test users
+        //==================================================
+        for (User user: userService.getUsers(tenant1Id)) {
+            if (user.getUsername().startsWith("0000")) {
+                userService.deleteUser(tenant1Id, user.getUsername());
+            }
+        }
+        for (User user: userService.getUsers(tenant2Id)) {
+            if (user.getUsername().startsWith("0000")) {
+                userService.deleteUser(tenant1Id, user.getUsername());
             }
         }
 
