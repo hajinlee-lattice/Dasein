@@ -315,7 +315,7 @@ public class InternalResource extends InternalResourceBase {
         }
         for (User user: userService.getUsers(tenant2Id)) {
             if (user.getUsername().startsWith("0000")) {
-                userService.deleteUser(tenant1Id, user.getUsername());
+                userService.deleteUser(tenant2Id, user.getUsername());
             }
         }
 
