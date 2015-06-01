@@ -33,7 +33,6 @@ public class BardJamsEntityMgrImplTestNG extends AbstractTestNGSpringContextTest
 
         newTenant = bardJamsEntityMgr.findByKey(tenant);
         Assert.assertNull(newTenant);
-
     }
 
     @Test(groups = "functional")

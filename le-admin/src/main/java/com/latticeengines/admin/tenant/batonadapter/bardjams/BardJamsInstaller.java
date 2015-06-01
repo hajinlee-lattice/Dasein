@@ -4,9 +4,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
+import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -21,6 +25,8 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
 
     private BardJamsEntityMgr bardJamsEntityMgr;
 
+    private TenantService tenantService;
+
     public BardJamsInstaller() {
         super(BardJamsComponent.componentName);
     }
@@ -28,7 +34,7 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
     @Override
     protected void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
 
-        BardJamsTenant tenant = pupulateTenant(space, serviceName, dataVersion, configDir);
+        BardJamsTenant tenant = pupulateTenant(space, configDir);
         BardJamsTenant oldTenant = bardJamsEntityMgr.findByTenant(tenant);
         if (oldTenant == null) {
             bardJamsEntityMgr.create(tenant);
@@ -51,6 +57,10 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
 
     protected void setBardJamsEntityMgr(BardJamsEntityMgr bardJamsEntityMgr) {
         this.bardJamsEntityMgr = bardJamsEntityMgr;
+    }
+
+    protected void setTenantService(TenantService tenantService) {
+        this.tenantService = tenantService;
     }
 
     protected void setTimeout(int timeout) {
@@ -84,38 +94,13 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
         return isSuccessful;
     }
 
-    private BardJamsTenant pupulateTenant(CustomerSpace space, String serviceName, int dataVersion,
-            DocumentDirectory configDir) {
-        BardJamsTenant tenant = new BardJamsTenant();
-
-        tenant.setTenant(space.toString());
-        tenant.setTenantType(getData(configDir, "TenantType"));
-        tenant.setDlTenantName(space.getTenantId());
-        tenant.setDlUrl(getData(configDir, "DL_URL"));
-        tenant.setDlUser(getData(configDir, "DL_User"));
-        tenant.setDlPassword(getData(configDir, "DL_Password"));
-        tenant.setNotificationEmail(getData(configDir, "NotificationEmail"));
-        tenant.setNotifyEmailJob(getData(configDir, "NotifyEmailJob"));
-        tenant.setJamsUser(getData(configDir, "JAMSUser"));
-        tenant.setImmediateFolderStruct(getData(configDir, "ImmediateFolderStruct"));
-        tenant.setScheduledFolderStruct(getData(configDir, "ScheduledFolderStruct"));
-        tenant.setDanteManifestPath(getData(configDir, "DanteManifestPath"));
-        tenant.setQueueName(getData(configDir, "Queue_Name"));
-        tenant.setAgentName(getData(configDir, "Agent_Name"));
-        tenant.setWeekdayScheduleName(getData(configDir, "WeekdaySchedule_Name"));
-        tenant.setWeekendScheduleName(getData(configDir, "WeekendSchedule_Name"));
-        tenant.setDataLaunchPath(getData(configDir, "Data_LaunchPath"));
-        tenant.setDataArchivePath(getData(configDir, "Data_ArchivePath"));
-        tenant.setDataLoaderToolsPath(getData(configDir, "DataLoaderTools_Path"));
-        tenant.setDanteToolPath(getData(configDir, "DanteTool_Path"));
-        String active = getData(configDir, "Active");
-        if (active != null) {
-            tenant.setActive(Integer.parseInt(active));
-        }
-        tenant.setDanteQueueName(getData(configDir, "Dante_Queue_Name"));
-        tenant.setLoadGroupList(getData(configDir, "LoadGroupList"));
-        tenant.setStatus(BardJamsTenantStatus.NEW.getStatus());
-
-        return tenant;
+    private BardJamsTenant pupulateTenant(CustomerSpace space, DocumentDirectory configDir) {
+        String contractId = space.getContractId();
+        String tenantId = space.getTenantId();
+        TenantDocument tenant = tenantService.getTenant(contractId, tenantId);
+        DocumentDirectory vdbdlConfig = SerializableDocumentDirectory.deserialize(
+                tenantService.getTenantServiceConfig(contractId, tenantId, VisiDBDLComponent.componentName));
+        vdbdlConfig.makePathsLocal();
+        return BardJamsComponent.getTenantFromDocDir(configDir, tenantId, tenant.getSpaceConfig(), vdbdlConfig);
     }
 }

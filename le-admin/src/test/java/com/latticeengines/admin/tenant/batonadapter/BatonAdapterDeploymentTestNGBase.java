@@ -58,15 +58,15 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminFunctionalTe
     }
 
     @Test(groups = {"deployment", "functional"})
-    public void getDefaultConfig() throws Exception {
-        testGetDefaultConfig();
+    public void testGetDefaultConfig() throws Exception {
+        verifyDefaultConfig();
     }
 
     protected abstract String getServiceName();
 
     protected void bootstrap(DocumentDirectory confDir) { super.bootstrap(contractId, tenantId, serviceName, confDir); }
 
-    private void testGetDefaultConfig() {
+    private void verifyDefaultConfig() {
         loginAD();
         String url = String.format("%s/admin/services/%s/default", getRestHostPort(), serviceName);
         SerializableDocumentDirectory serializableDir =
