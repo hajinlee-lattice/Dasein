@@ -675,6 +675,64 @@ SpecLatticeNamedElements(
     SpecLatticeNamedElement(
       SpecLatticeAliasDeclaration(
         LatticeAddressSetFcn(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "OR"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsFailedScoringLeads"
+              )
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsUnscored_New/ModifiedLeads"
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "ELQ_Contact_Validation"
+                )
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_DownloadedUnscoredLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetFcn(
+          LatticeFunctionIdentifier(
+            ContainerElementName(
+              "Diagnostic_IsMissingDownloadedLeads"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "ELQ_Contact_Validation"
+                )
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_MissingDownloadedLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetFcn(
           LatticeFunctionIdentifier(
             ContainerElementName(
               "ELQ_Contact_ContactID_IsSelectedForModeling"
@@ -1392,6 +1450,46 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Binder_E2I_T_ELQ_Contact_Import_Extract_2_ELQ_Contact_Import"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeBinder(
+        SpecBoundName(
+          ContainerElementName(
+            "ELQ_Contact_Validation_Import"
+          )
+        , NameTypeImportTable
+        )
+      , SpecBoundName(
+          ContainerElementName(
+            "ELQ_Contact_Validation"
+          )
+        , NameTypeSourceTable
+        )
+      )
+    , ContainerElementName(
+        "Binder_I2S_T_ELQ_Contact_Validation_Import_ELQ_Contact_Validation"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeBinder(
+        SpecBoundName(
+          ContainerElementName(
+            "ELQ_Contact_Validation_Import_Extract_28"
+          )
+        , NameTypeExtract
+        )
+      , SpecBoundName(
+          ContainerElementName(
+            "ELQ_Contact_Validation_Import"
+          )
+        , NameTypeImportTable
+        )
+      )
+    , ContainerElementName(
+        "Binder_E2I_T_ELQ_Contact_Validation_Import_Extract_28_ELQ_Contact_Validation_Import"
       )
     )
   ,
@@ -2672,6 +2770,64 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Binder_E2I_T_Timestamp_PushToScoring_Import_Extract_2_Timestamp_PushToScoring_Import"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeExtract(
+        SpecColumnBindings(
+          (
+            SpecColumnBinding(
+              ContainerElementName(
+                "C_DateCreated"
+              )
+            , 1000000000000000000000000014829
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "C_DateModified"
+              )
+            , 1000000000000000000000000014834
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "C_Lattice_LeadScore1"
+              )
+            , 1000000000000000000000000014839
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "ContactID"
+              )
+            , 1000000000000000000000000014844
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "C_Lattice_LastScoreDate1"
+              )
+            , 1000000000000000000000000014849
+            )
+          )
+        )
+      , SpecImportDate(
+          "2015-06-01 13:19:32"
+        )
+      , SpecEffectiveDate(
+          "2015-06-01 13:19:32"
+        )
+      , SpecExtractDetails(
+          (
+            SpecExtractDetail(
+              "TableName", "ELQ_Contact_Validation_Import"
+            )
+          , SpecExtractDetail(
+              "Rows", "0"
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "ELQ_Contact_Validation_Import_Extract_28"
       )
     )
   ,
@@ -5463,6 +5619,61 @@ SpecLatticeNamedElements(
       SpecLatticeFunction(
         LatticeFunctionExpression(
           LatticeFunctionOperatorIdentifier(
+            "AddDay"
+          )
+        , LatticeFunctionExpressionTransform(
+            LatticeFunctionIdentifier(
+              ContainerElementNameTableQualifiedName(
+                LatticeSourceTableIdentifier(
+                  ContainerElementName(
+                    "ELQ_Contact"
+                  )
+                )
+              , ContainerElementName(
+                  "C_DateModified"
+                )
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "ELQ_Contact_ContactID"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "Multiply"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Const_DaysOfValidityForScore"
+              )
+            )
+          , LatticeFunctionExpressionConstant(
+              "-1", DataTypeInt
+            )
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_Validate_ScoringRange"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpression(
+          LatticeFunctionOperatorIdentifier(
             "Cat"
           )
         , LatticeFunctionExpressionConstant(
@@ -7825,6 +8036,78 @@ SpecLatticeNamedElements(
                     )
                   )
                 , ContainerElementName(
+                    "Days_SinceLastScoreAtTimeOfDownload"
+                  )
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "14000", DataTypeInt
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "Less"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_Lattice_LastScoreDate1"
+                  )
+                )
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "Diagnostic_Validate_ScoringRange"
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "ELQ_Contact_Validation"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "Max"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_IsUnscored_New/ModifiedLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "AND"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "Greater"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "Timestamp_DownloadedLeads"
+                    )
+                  )
+                , ContainerElementName(
                     "Time_OfCompletion_DownloadedLeads"
                   )
                 )
@@ -7975,6 +8258,149 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "ELQ_Contact_ContactID_ToBeScored"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "AND"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "NOT"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IsNullValue"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "ContactID"
+                    )
+                  )
+                )
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "IsNullValue"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "Timestamp_DownloadedLeads"
+                    )
+                  )
+                , ContainerElementName(
+                    "ELQ_Contact_ContactID"
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "ELQ_Contact_Validation"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "Max"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_IsMissingDownloadedLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "AND"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "NOT"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IsNullValue"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "Timestamp_PushToScoring"
+                      )
+                    )
+                  , ContainerElementName(
+                      "ELQ_Contact_ContactID"
+                    )
+                  )
+                )
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "Less"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_Lattice_LastScoreDate1"
+                  )
+                )
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "Diagnostic_Validate_ScoringRange"
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "ELQ_Contact_Validation"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "Max"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_IsFailedScoringLeads"
       )
     )
   ,
@@ -14427,6 +14853,52 @@ SpecLatticeNamedElements(
           (
             SpecColumnBinding(
               ContainerElementName(
+                "C_DateCreated"
+              )
+            , DataTypeDateTime
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "C_DateModified"
+              )
+            , DataTypeDateTime
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "C_Lattice_LeadScore1"
+              )
+            , DataTypeDouble
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "ContactID"
+              )
+            , DataTypeInt
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "C_Lattice_LastScoreDate1"
+              )
+            , DataTypeDateTime
+            )
+          )
+        )
+      , SpecSourceFilterNone
+      )
+    , ContainerElementName(
+        "ELQ_Contact_Validation_Import"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeImportTable(
+        SpecSourceAggregationRuleMostRecent(
+          SpecTotalOrderEffectiveDate
+        )
+      , SpecColumnBindings(
+          (
+            SpecColumnBinding(
+              ContainerElementName(
                 "ELQ_Contact Column"
               )
             , DataTypeNVarChar(
@@ -17659,6 +18131,472 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "EmailToSFDCOpportunityMeetConstructionRule"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionFromLAS(
+            LatticeAddressSetMeet(
+              (
+                LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "Diagnostic_DownloadedUnscoredLeads"
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetMeet(
+            (
+              LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "Diagnostic_DownloadedUnscoredLeads"
+                )
+              )
+            )
+          )
+        , LatticeAddressExpressionMeet(
+            (
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicFTOA(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "LeadID_50Char"
+                    )
+                  )
+                , LatticeAddressSetFromFcnSupport(
+                    LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "LeadID_50Char"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LeadID"
+            )
+          , LatticeFunctionIdentifierAddressAtomic(
+              LatticeAddressAtomicFTOA(
+                LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "LeadID_50Char"
+                  )
+                )
+              , LatticeAddressSetFromFcnSupport(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "LeadID_50Char"
+                    )
+                  )
+                )
+              )
+            )
+          )
+          SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LeadScore"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_Lattice_LeadScore1"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_Lattice_LeadScore1"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Sum"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LastScoreDate"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_Lattice_LastScoreDate1"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_Lattice_LastScoreDate1"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "ModifiedDate"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_DateModified"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_DateModified"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "CreatedDate"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_DateCreated"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_DateCreated"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "IsFailedScoringLeads"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsFailedScoringLeads"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "IsDownloadedButMissScoringLeads"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsUnscored_New/ModifiedLeads"
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Q_Diagnostic_DownloadedUnscoredLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionFromLAS(
+            LatticeAddressSetMeet(
+              (
+                LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "Diagnostic_MissingDownloadedLeads"
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetMeet(
+            (
+              LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "Diagnostic_MissingDownloadedLeads"
+                )
+              )
+            )
+          )
+        , LatticeAddressExpressionMeet(
+            (
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicFTOA(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "LeadID_50Char"
+                    )
+                  )
+                , LatticeAddressSetFromFcnSupport(
+                    LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "LeadID_50Char"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LeadID"
+            )
+          , LatticeFunctionIdentifierAddressAtomic(
+              LatticeAddressAtomicFTOA(
+                LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "LeadID_50Char"
+                  )
+                )
+              , LatticeAddressSetFromFcnSupport(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "LeadID_50Char"
+                    )
+                  )
+                )
+              )
+            )
+          )
+          SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LeadScore"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_Lattice_LeadScore1"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_Lattice_LeadScore1"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Sum"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LastScoreDate"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_Lattice_LastScoreDate1"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_Lattice_LastScoreDate1"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "ModifiedDate"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_DateModified"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_DateModified"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "CreatedDate"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_DateCreated"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_DateCreated"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "IsMissingDownloadedLeads"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsMissingDownloadedLeads"
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Q_Diagnostic_MissingDownloadedLeads"
       )
     )
   ,
@@ -23492,6 +24430,108 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "ROI_ByMonth"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionFromLAS(
+            LatticeAddressSetMeet(
+              empty
+            )
+          )
+        , LatticeAddressSetMeet(
+            empty
+          )
+        , LatticeAddressExpressionMeet(
+            empty
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Diagnostic_LowerLimitTime"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "AddHour"
+              )
+            , LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_DateModified"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_ContactID"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "-24", DataTypeInt
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Diagnostic_UpperLimitTime"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "AddHour"
+              )
+            , LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact"
+                      )
+                    )
+                  , ContainerElementName(
+                      "C_DateModified"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "ELQ_Contact_ContactID"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "-4", DataTypeInt
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Q_Diagnostic_ExtractLeadsRange"
       )
     )
   ,
@@ -36751,6 +37791,208 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "ELQ_Contact_Diagnostic"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeSourceTable(
+        SpecLatticeSourceTableColumnSet(
+          (
+            SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_DateCreated"
+                  )
+                )
+              )
+            , DataTypeDateTime, SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "C_DateCreated"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_DateModified"
+                  )
+                )
+              )
+            , DataTypeDateTime, SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "C_DateModified"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_Lattice_LeadScore1"
+                  )
+                )
+              )
+            , DataTypeDouble, SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "C_Lattice_LeadScore1"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "C_Lattice_LastScoreDate1"
+                  )
+                )
+              )
+            , DataTypeDateTime, SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "C_Lattice_LastScoreDate1"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "ELQ_Contact_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "ContactID"
+                  )
+                )
+              )
+            , DataTypeVarChar(
+                50
+              )
+            , SpecFieldTypeAttribute(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "ELQ_Contact_ContactID"
+                  )
+                )
+              , SpecConstructiveIsConstructive, FunctionAggregationOperator(
+                  "Combine"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "ContactID"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNullNoRTrim, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            )
+          )
+        )
+      , SpecKeys(
+          empty
+        )
+      , SpecDescription(
+          ""
+        )
+      , SpecMaximalIsMaximal, SpecKeyAggregation(
+          SpecColumnAggregationRuleMostRecent
+        )
+      , SpecEquivalenceAggregation(
+          SpecColumnAggregationRuleMostRecent
+        )
+      )
+    , ContainerElementName(
+        "ELQ_Contact_Validation"
       )
     )
   ,

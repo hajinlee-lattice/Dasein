@@ -699,6 +699,64 @@ SpecLatticeNamedElements(
     SpecLatticeNamedElement(
       SpecLatticeAliasDeclaration(
         LatticeAddressSetFcn(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "OR"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsFailedScoringLeads"
+              )
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsUnscored_New/ModifiedLeads"
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_LeadRecord_Validation"
+                )
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_DownloadedUnscoredLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetFcn(
+          LatticeFunctionIdentifier(
+            ContainerElementName(
+              "Diagnostic_IsMissingDownloadedLeads"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_LeadRecord_Validation"
+                )
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_MissingDownloadedLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetFcn(
           LatticeFunctionIdentifier(
             ContainerElementName(
               "MKTO_LeadRecord_ID_IsSelectedForDownloadingBulk"
@@ -880,6 +938,198 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Alias_AllLeadID"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetPullback(
+          LatticeAddressSetIdentifier(
+            ContainerElementName(
+              "FilterForModelingQuery"
+            )
+          )
+        , LatticeAddressExpressionAtomic(
+            LatticeAddressAtomicIdentifier(
+              ContainerElementName(
+                "MKTO_LeadRecord"
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "FilterOnMALeadsForModeling"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetPullback(
+          LatticeAddressSetIdentifier(
+            ContainerElementName(
+              "FilterForModelingQuery_Default"
+            )
+          )
+        , LatticeAddressExpressionAtomic(
+            LatticeAddressAtomicIdentifier(
+              ContainerElementName(
+                "MKTO_LeadRecord"
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "FilterOnMALeadsForModeling_Default"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionMeet(
+            (
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_LeadRecord"
+                  )
+                )
+              )
+            , LatticeAddressExpressionFromLAS(
+                LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "HAVING_LeadHasEmail"
+                  )
+                )
+              )
+            , LatticeAddressExpressionFromLAS(
+                LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "SelectedForModeling_MKTO"
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetMeet(
+            (
+              LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord"
+                    )
+                  )
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "HAVING_LeadHasEmail"
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "SelectedForModeling_MKTO"
+                )
+              )
+            )
+          )
+        , LatticeAddressExpressionAtomic(
+            LatticeAddressAtomicFTOA(
+              LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "LeadID_50Char"
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "LeadID_50Char"
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "FilterForModelingQuery"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionMeet(
+            (
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_LeadRecord"
+                  )
+                )
+              )
+            , LatticeAddressExpressionFromLAS(
+                LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "HAVING_LeadHasEmail"
+                  )
+                )
+              )
+            , LatticeAddressExpressionFromLAS(
+                LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "SelectedForModeling_MKTO"
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetMeet(
+            (
+              LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord"
+                    )
+                  )
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "HAVING_LeadHasEmail"
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "SelectedForModeling_MKTO"
+                )
+              )
+            )
+          )
+        , LatticeAddressExpressionAtomic(
+            LatticeAddressAtomicFTOA(
+              LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "LeadID_50Char"
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "LeadID_50Char"
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "FilterForModelingQuery_Default"
       )
     )
   ,
@@ -1547,6 +1797,26 @@ SpecLatticeNamedElements(
       SpecLatticeBinder(
         SpecBoundName(
           ContainerElementName(
+            "MKTO_ActivityRecord_Import"
+          )
+        , NameTypeImportTable
+        )
+      , SpecBoundName(
+          ContainerElementName(
+            "MKTO_ActivityRecord_Validation"
+          )
+        , NameTypeSourceTable
+        )
+      )
+    , ContainerElementName(
+        "Binder_I2S_T_MKTO_ActivityRecord_Import_MKTO_ActivityRecord_Validation"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeBinder(
+        SpecBoundName(
+          ContainerElementName(
             "MKTO_ActivityRecord_Import_Extract_2"
           )
         , NameTypeExtract
@@ -1640,6 +1910,46 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Binder_E2I_T_MKTO_LeadRecord_Import_Extract_2_MKTO_LeadRecord_Import"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeBinder(
+        SpecBoundName(
+          ContainerElementName(
+            "MKTO_LeadRecord_Validation_Import"
+          )
+        , NameTypeImportTable
+        )
+      , SpecBoundName(
+          ContainerElementName(
+            "MKTO_LeadRecord_Validation"
+          )
+        , NameTypeSourceTable
+        )
+      )
+    , ContainerElementName(
+        "Binder_I2S_T_MKTO_LeadRecord_Validation_Import_MKTO_LeadRecord_Validation"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeBinder(
+        SpecBoundName(
+          ContainerElementName(
+            "MKTO_LeadRecord_Validation_Import_Extract_16"
+          )
+        , NameTypeExtract
+        )
+      , SpecBoundName(
+          ContainerElementName(
+            "MKTO_LeadRecord_Validation_Import"
+          )
+        , NameTypeImportTable
+        )
+      )
+    , ContainerElementName(
+        "Binder_E2I_T_MKTO_LeadRecord_Validation_Import_Extract_16_MKTO_LeadRecord_Validation_Import"
       )
     )
   ,
@@ -4275,6 +4585,52 @@ SpecLatticeNamedElements(
           (
             SpecColumnBinding(
               ContainerElementName(
+                "Id"
+              )
+            , 1000000000000000000000000017167
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "latticeforleads__Last_Score_Date__c"
+              )
+            , 1000000000000000000000000017172
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "latticeforleads__Score__c"
+              )
+            , 1000000000000000000000000017177
+            )
+          )
+        )
+      , SpecImportDate(
+          "2015-06-01 13:20:54"
+        )
+      , SpecEffectiveDate(
+          "2015-06-01 13:20:54"
+        )
+      , SpecExtractDetails(
+          (
+            SpecExtractDetail(
+              "TableName", "MKTO_LeadRecord_Validation_Import"
+            )
+          , SpecExtractDetail(
+              "Rows", "0"
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "MKTO_LeadRecord_Validation_Import_Extract_16"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeExtract(
+        SpecColumnBindings(
+          (
+            SpecColumnBinding(
+              ContainerElementName(
                 "Kernel Query Name"
               )
             , 1000000000000000000000000000227
@@ -5968,16 +6324,24 @@ SpecLatticeNamedElements(
                       LatticeFunctionOperatorIdentifier(
                         "NOT"
                       )
-                    , LatticeFunctionIdentifier(
-                        ContainerElementNameTableQualifiedName(
-                          LatticeSourceTableIdentifier(
-                            ContainerElementName(
-                              "Summary_DownloadActivity"
+                    , LatticeFunctionExpression(
+                        LatticeFunctionOperatorIdentifier(
+                          "IsNull"
+                        )
+                      , LatticeFunctionIdentifier(
+                          ContainerElementNameTableQualifiedName(
+                            LatticeSourceTableIdentifier(
+                              ContainerElementName(
+                                "Summary_DownloadActivity"
+                              )
+                            )
+                          , ContainerElementName(
+                              "Completed"
                             )
                           )
-                        , ContainerElementName(
-                            "Completed"
-                          )
+                        )
+                      , LatticeFunctionExpressionConstant(
+                          "TRUE", DataTypeBit
                         )
                       )
                     )
@@ -6070,6 +6434,40 @@ SpecLatticeNamedElements(
       SpecLatticeFunction(
         LatticeFunctionExpression(
           LatticeFunctionOperatorIdentifier(
+            "AddDay"
+          )
+        , LatticeFunctionIdentifier(
+            ContainerElementName(
+              "Max_ActivityDateTimeLastExtract"
+            )
+          )
+        , LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "Multiply"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Const_DaysOfValidityForScore"
+              )
+            )
+          , LatticeFunctionExpressionConstant(
+              "-1", DataTypeInt
+            )
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_Validate_ScoringRange"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpression(
+          LatticeFunctionOperatorIdentifier(
             "Cat"
           )
         , LatticeFunctionExpressionConstant(
@@ -6100,7 +6498,7 @@ SpecLatticeNamedElements(
           )
         , LatticeFunctionIdentifier(
             ContainerElementName(
-              "Count_NumberOfLeadsLastExtract"
+              "Count_NumberOfLeadsEligibleForDownload"
             )
           )
         , LatticeFunctionIdentifier(
@@ -7252,6 +7650,221 @@ SpecLatticeNamedElements(
             )
           , LatticeFunctionExpression(
               LatticeFunctionOperatorIdentifier(
+                "Greater"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "Timestamp_DownloadedLeads"
+                    )
+                  )
+                , ContainerElementName(
+                    "Days_SinceLastScoreAtTimeOfDownload"
+                  )
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "14000", DataTypeInt
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "Less"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "latticeforleads__Last_Score_Date__c"
+                  )
+                )
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "Diagnostic_Validate_ScoringRange"
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_LeadRecord_Validation"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "Max"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_IsUnscored_New/ModifiedLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "AND"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "NOT"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IsNullValue"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Id"
+                    )
+                  )
+                )
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "IsNullValue"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "Timestamp_DownloadedLeads"
+                    )
+                  )
+                , ContainerElementName(
+                    "MKTO_LeadRecord_ID"
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_LeadRecord_Validation"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "Max"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_IsMissingDownloadedLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "AND"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "NOT"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IsNullValue"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Id"
+                    )
+                  )
+                )
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "Less"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "latticeforleads__Last_Score_Date__c"
+                  )
+                )
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "Diagnostic_Validate_ScoringRange"
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_LeadRecord_Validation"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "Max"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Diagnostic_IsFailedScoringLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "AND"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
                 "NOT"
               )
             , LatticeFunctionIdentifier(
@@ -7317,6 +7930,124 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Summary_DownloadActivity_IsMissingActivity"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "AddDay"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Profile_Most Recent Date"
+              )
+            )
+          , LatticeFunctionExpressionConstant(
+              "-365", DataTypeInt
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicAll
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_Start of Modeling Period"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "Cat"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "ConvertToString"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "Year"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_ActivityRecord"
+                      )
+                    )
+                  , ContainerElementName(
+                      "activityDateTime"
+                    )
+                  )
+                )
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "Cat"
+              )
+            , LatticeFunctionExpressionConstant(
+                " ", DataTypeVarChar(
+                  1
+                )
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "ConvertToString"
+                )
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Month"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "MKTO_ActivityRecord"
+                        )
+                      )
+                    , ContainerElementName(
+                        "activityDateTime"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_ActivityRecord"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_ActivityMonth"
       )
     )
   ,
@@ -11933,6 +12664,200 @@ SpecLatticeNamedElements(
             LatticeFunctionOperatorIdentifier(
               "IF"
             )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "OR"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "OR"
+                )
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IsNullValue"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord"
+                        )
+                      )
+                    , ContainerElementName(
+                        "Company"
+                      )
+                    )
+                  )
+                )
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IsNullValue"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord"
+                        )
+                      )
+                    , ContainerElementName(
+                        "City"
+                      )
+                    )
+                  )
+                )
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IsNullValue"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord"
+                      )
+                    )
+                  , ContainerElementName(
+                      "State"
+                    )
+                  )
+                )
+              )
+            )
+          , LatticeFunctionExpressionConstantNull(
+              DataTypeVarChar(
+                256
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "ConvertToString"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "Hash"
+                )
+              , LatticeFunctionExpressionList(
+                  LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord"
+                        )
+                      )
+                    , ContainerElementName(
+                        "Company"
+                      )
+                    )
+                  )
+                  LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord"
+                        )
+                      )
+                    , ContainerElementName(
+                        "City"
+                      )
+                    )
+                  )
+                  LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord"
+                        )
+                      )
+                    , ContainerElementName(
+                        "State"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_LeadRecord"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "Max"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_Lead Name City State"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "IF"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "MKTO_LeadRecord_ID_ToBeDownloaded"
+              )
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementNameTableQualifiedName(
+                LatticeSourceTableIdentifier(
+                  ContainerElementName(
+                    "MKTO_ActivityRecord"
+                  )
+                )
+              , ContainerElementName(
+                  "mktPersonId"
+                )
+              )
+            )
+          , LatticeFunctionExpressionConstantNull(
+              DataTypeLong
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_LeadRecord_ID"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "DistinctCount"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Count_NumberOfLeadsEligibleForDownload"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "IF"
+            )
           , LatticeFunctionIdentifier(
               ContainerElementName(
                 "Summary_DownloadActivity_IsMissingActivity"
@@ -11989,16 +12914,51 @@ SpecLatticeNamedElements(
               )
             , LatticeFunctionExpression(
                 LatticeFunctionOperatorIdentifier(
-                  "Greater"
+                  "AND"
                 )
-              , LatticeFunctionIdentifier(
-                  ContainerElementName(
-                    "MKTO_LeadRecord_ActivityDate"
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Greater"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_ActivityDate"
+                    )
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "Thrttl_LowerLimit_activityDateTime"
+                    )
                   )
                 )
-              , LatticeFunctionIdentifier(
-                  ContainerElementName(
-                    "Thrttl_LowerLimit_activityDateTime"
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Greater"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_ActivityDate"
+                    )
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "IsNull"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementNameTableQualifiedName(
+                        LatticeSourceTableIdentifier(
+                          ContainerElementName(
+                            "Timestamp_DownloadedLeads"
+                          )
+                        )
+                      , ContainerElementName(
+                          "Time_OfCompletion_DownloadedLeads"
+                        )
+                      )
+                    )
+                  , LatticeFunctionExpressionConstant(
+                      "1970-01-01", DataTypeDateTime
+                    )
                   )
                 )
               )
@@ -18039,23 +18999,65 @@ SpecLatticeNamedElements(
               )
             , LatticeFunctionExpression(
                 LatticeFunctionOperatorIdentifier(
-                  "Equal"
+                  "AND"
                 )
-              , LatticeFunctionIdentifier(
-                  ContainerElementNameTableQualifiedName(
-                    LatticeSourceTableIdentifier(
-                      ContainerElementName(
-                        "MKTO_ActivityRecord"
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Greater"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "IsNull"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementNameTableQualifiedName(
+                        LatticeSourceTableIdentifier(
+                          ContainerElementName(
+                            "Timestamp_DownloadedLeads"
+                          )
+                        )
+                      , ContainerElementName(
+                          "Time_OfCompletion_DownloadedLeads"
+                        )
                       )
                     )
-                  , ContainerElementName(
-                      "activityType"
+                  , LatticeFunctionExpressionConstant(
+                      "1970-01-01", DataTypeDateTime
+                    )
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "Timestamp_DownloadedActivity"
+                        )
+                      )
+                    , ContainerElementName(
+                        "Time_OfCompletion_DownloadedActivity"
+                      )
                     )
                   )
                 )
-              , LatticeFunctionExpressionConstant(
-                  "New Lead", DataTypeVarChar(
-                    8
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Equal"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "MKTO_ActivityRecord"
+                        )
+                      )
+                    , ContainerElementName(
+                        "activityType"
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "New Lead", DataTypeVarChar(
+                      8
+                    )
                   )
                 )
               )
@@ -18107,6 +19109,148 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "MKTO_LeadRecord_ID_MostRecentNewLeadActivity"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "IF"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "Equal"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "Email_Domain_IsPublic"
+                  )
+                )
+              , LatticeFunctionExpressionConstant(
+                  "0", DataTypeInt
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "1", DataTypeInt
+              )
+            , LatticeFunctionExpressionConstant(
+                "0", DataTypeInt
+              )
+            )
+          , LatticeAddressSetPushforward(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_LeadRecord"
+                  )
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "FilterForModelingQuery"
+                )
+              )
+            , LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "Email_Domain"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Sum"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicAll
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_Number of corporate domains for modeling"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "IF"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "Equal"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "Email_Domain_IsPublic"
+                  )
+                )
+              , LatticeFunctionExpressionConstant(
+                  "0", DataTypeInt
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "1", DataTypeInt
+              )
+            , LatticeFunctionExpressionConstant(
+                "0", DataTypeInt
+              )
+            )
+          , LatticeAddressSetPushforward(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_LeadRecord"
+                  )
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "FilterForModelingQuery_Default"
+                )
+              )
+            , LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "Email_Domain"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Sum"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicAll
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_Number of corporate domains for modeling-Default"
       )
     )
   ,
@@ -18851,6 +19995,353 @@ SpecLatticeNamedElements(
       SpecLatticeFunction(
         LatticeFunctionExpressionTransform(
           LatticeFunctionExpressionTransform(
+            LatticeFunctionExpressionConstant(
+              "1", DataTypeInt
+            )
+          , LatticeAddressSetIdentifier(
+              ContainerElementName(
+                "FilterOnMALeadsForModeling"
+              )
+            )
+          , FunctionAggregationOperator(
+              "Sum"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicAll
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_Number of MA Leads for Modeling"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionExpressionConstant(
+              "1", DataTypeInt
+            )
+          , LatticeAddressSetIdentifier(
+              ContainerElementName(
+                "FilterOnMALeadsForModeling_Default"
+              )
+            )
+          , FunctionAggregationOperator(
+              "Sum"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicAll
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_Number of MA Leads for Modeling-Default"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionExpressionTransform(
+              LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IF"
+                )
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Equal"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "SFDC_Opportunity"
+                        )
+                      )
+                    , ContainerElementName(
+                        "IsWon"
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "TRUE", DataTypeBit
+                  )
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeFunctionExpressionConstantNull(
+                  DataTypeDateTime
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "SFDC_Opportunity"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "SFDC_Contact"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "Email"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_MaxIsWonOpportunityCreateDateForEmailFromContact"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionExpressionTransform(
+              LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IF"
+                )
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Equal"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "SFDC_Opportunity"
+                        )
+                      )
+                    , ContainerElementName(
+                        "IsWon"
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "TRUE", DataTypeBit
+                  )
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeFunctionExpressionConstantNull(
+                  DataTypeDateTime
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "SFDC_Opportunity"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "SFDC_Lead"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "Email"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_MaxIsWonOpportunityCreateDateForEmailFromLead"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionExpressionTransform(
+              LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IF"
+                )
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Equal"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "SFDC_Opportunity"
+                        )
+                      )
+                    , ContainerElementName(
+                        "IsWon"
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "TRUE", DataTypeBit
+                  )
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeFunctionExpressionConstantNull(
+                  DataTypeDateTime
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "SFDC_Opportunity"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "SFDC_Opportunity_ID"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "Email"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_MaxIsWonOpportunityCreateDateForEmailFromAllPaths"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
             LatticeFunctionExpressionTransform(
               LatticeFunctionExpression(
                 LatticeFunctionOperatorIdentifier(
@@ -18972,6 +20463,71 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "MKTO_LeadRecord_CountIDForDomain_ZeroAllowed"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "SFDC_Opportunity"
+                    )
+                  )
+                , ContainerElementName(
+                    "CreatedDate"
+                  )
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "SFDC_Opportunity"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "SFDC_Opportunity_ID"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "Email"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_MaxOpportunityCreateDateForEmailFromAllPaths"
       )
     )
   ,
@@ -19127,6 +20683,304 @@ SpecLatticeNamedElements(
               ContainerElementNameTableQualifiedName(
                 LatticeSourceTableIdentifier(
                   ContainerElementName(
+                    "MKTO_ActivityRecord"
+                  )
+                )
+              , ContainerElementName(
+                  "activityDateTime"
+                )
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_ActivityRecord"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicAll
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_Most Recent Date"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionIdentifier(
+              ContainerElementNameTableQualifiedName(
+                LatticeSourceTableIdentifier(
+                  ContainerElementName(
+                    "MKTO_ActivityRecord"
+                  )
+                )
+              , ContainerElementName(
+                  "activityDateTime"
+                )
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_ActivityRecord"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Min"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicAll
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_Least Recent Date"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionIdentifier(
+              ContainerElementNameTableQualifiedName(
+                LatticeSourceTableIdentifier(
+                  ContainerElementName(
+                    "SFDC_Contact"
+                  )
+                )
+              , ContainerElementName(
+                  "Id"
+                )
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "SFDC_Contact"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "Email"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_SFDC contact at Email"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionIdentifier(
+              ContainerElementNameTableQualifiedName(
+                LatticeSourceTableIdentifier(
+                  ContainerElementName(
+                    "SFDC_Lead"
+                  )
+                )
+              , ContainerElementName(
+                  "Id"
+                )
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "SFDC_Lead"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "Email"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_SFDC lead at Email"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionIdentifier(
+              ContainerElementNameTableQualifiedName(
+                LatticeSourceTableIdentifier(
+                  ContainerElementName(
+                    "SFDC_Opportunity"
+                  )
+                )
+              , ContainerElementName(
+                  "CreatedDate"
+                )
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "SFDC_Contact"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "Email"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_MaxOpportunityCreateDateForEmailFromContact"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionIdentifier(
+              ContainerElementNameTableQualifiedName(
+                LatticeSourceTableIdentifier(
+                  ContainerElementName(
+                    "SFDC_Opportunity"
+                  )
+                )
+              , ContainerElementName(
+                  "CreatedDate"
+                )
+              )
+            )
+          , LatticeAddressSetPi(
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "SFDC_Lead"
+                  )
+                )
+              )
+            )
+          , FunctionAggregationOperator(
+              "Max"
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "Email"
+                )
+              )
+            )
+          )
+        , FunctionAggregationOperator(
+            "None"
+          )
+        )
+      , DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(
+          ""
+        )
+      )
+    , ContainerElementName(
+        "Profile_MaxOpportunityCreateDateForEmailFromLead"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeFunction(
+        LatticeFunctionExpressionTransform(
+          LatticeFunctionExpressionTransform(
+            LatticeFunctionIdentifier(
+              ContainerElementNameTableQualifiedName(
+                LatticeSourceTableIdentifier(
+                  ContainerElementName(
                     "SFDC_Opportunity"
                   )
                 )
@@ -19222,6 +21076,40 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Cfg_PLS_Event_Import"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeImportTable(
+        SpecSourceAggregationRuleMostRecent(
+          SpecTotalOrderEffectiveDate
+        )
+      , SpecColumnBindings(
+          (
+            SpecColumnBinding(
+              ContainerElementName(
+                "Id"
+              )
+            , DataTypeInt
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "latticeforleads__Last_Score_Date__c"
+              )
+            , DataTypeDateTime
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "latticeforleads__Score__c"
+              )
+            , DataTypeInt
+            )
+          )
+        )
+      , SpecSourceFilterNone
+      )
+    , ContainerElementName(
+        "MKTO_LeadRecord_Validation_Import"
       )
     )
   ,
@@ -21202,6 +23090,12 @@ SpecLatticeNamedElements(
               )
             , DataTypeDateTime
             )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "CreatedDate"
+              )
+            , DataTypeDateTime
+            )
           )
         )
       , SpecSourceFilterNone
@@ -22814,6 +24708,368 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "EmailToSFDCOpportunityMeetConstructionRule"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionFromLAS(
+            LatticeAddressSetMeet(
+              (
+                LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "Diagnostic_DownloadedUnscoredLeads"
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetMeet(
+            (
+              LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "Diagnostic_DownloadedUnscoredLeads"
+                )
+              )
+            )
+          )
+        , LatticeAddressExpressionMeet(
+            (
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicFTOA(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "LeadID_50Char"
+                    )
+                  )
+                , LatticeAddressSetFromFcnSupport(
+                    LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "LeadID_50Char"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LeadID"
+            )
+          , LatticeFunctionIdentifierAddressAtomic(
+              LatticeAddressAtomicFTOA(
+                LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "LeadID_50Char"
+                  )
+                )
+              , LatticeAddressSetFromFcnSupport(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "LeadID_50Char"
+                    )
+                  )
+                )
+              )
+            )
+          )
+          SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LeadScore"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "latticeforleads__Score__c"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "latticeforleads__Score__c"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Sum"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LastScoreDate"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "latticeforleads__Last_Score_Date__c"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "latticeforleads__Last_Score_Date__c"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "ModifiedDate"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "MKTO_LeadRecord_ActivityDate"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "CreatedDate"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "MKTO_LeadRecord_ActivityDateMin"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "IsFailedScoringLeads"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsFailedScoringLeads"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "IsDownloadedButMissScoringLeads"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsUnscored_New/ModifiedLeads"
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Q_Diagnostic_DownloadedUnscoredLeads"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionFromLAS(
+            LatticeAddressSetMeet(
+              (
+                LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "Diagnostic_MissingDownloadedLeads"
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetMeet(
+            (
+              LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "Diagnostic_MissingDownloadedLeads"
+                )
+              )
+            )
+          )
+        , LatticeAddressExpressionMeet(
+            (
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicFTOA(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "LeadID_50Char"
+                    )
+                  )
+                , LatticeAddressSetFromFcnSupport(
+                    LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "LeadID_50Char"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LeadID"
+            )
+          , LatticeFunctionIdentifierAddressAtomic(
+              LatticeAddressAtomicFTOA(
+                LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "LeadID_50Char"
+                  )
+                )
+              , LatticeAddressSetFromFcnSupport(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "LeadID_50Char"
+                    )
+                  )
+                )
+              )
+            )
+          )
+          SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LeadScore"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "latticeforleads__Score__c"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "latticeforleads__Score__c"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Sum"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "LastScoreDate"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "latticeforleads__Last_Score_Date__c"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "latticeforleads__Last_Score_Date__c"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Max"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "ModifiedDate"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "MKTO_LeadRecord_ActivityDate"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "CreatedDate"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "MKTO_LeadRecord_ActivityDateMin"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "IsMissingDownloadedLeads"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Diagnostic_IsMissingDownloadedLeads"
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Q_Diagnostic_MissingDownloadedLeads"
       )
     )
   ,
@@ -26087,6 +28343,70 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Diagnostic_LeadID_Template"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionFromLAS(
+            LatticeAddressSetMeet(
+              (
+                LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "MKTO_ActivityRecord_Validation"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetMeet(
+            (
+              LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressExpressionMeet(
+            (
+              LatticeAddressExpressionAtomic(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_LeadRecord_ID"
+                  )
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "MKTO_LeadRecord_ID"
+            )
+          , LatticeFunctionIdentifierAddressAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "MKTO_LeadRecord_ID"
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Q_Diagnostic_GetLeadRecordID"
       )
     )
   ,
@@ -29382,214 +31702,37 @@ SpecLatticeNamedElements(
       , SpecQueryNamedFunctions(
           SpecQueryNamedFunctionExpression(
             ContainerElementName(
-              "FunctionName"
+              "Diagnostic_LowerLimitTime"
             )
-          , LatticeFunctionIdentifierFunctionName
-          )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "FunctionValue"
-            )
-          , LatticeFunctionIdentifierFunctionValue
-          )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "Marketing Contact In Last Year"
-            )
-          , LatticeFunctionExpressionTransform(
-              LatticeFunctionIdentifier(
-                ContainerElementNameTableQualifiedName(
-                  LatticeSourceTableIdentifier(
-                    ContainerElementName(
-                      "MKTO_LeadRecord"
-                    )
-                  )
-                , ContainerElementName(
-                    "Id"
-                  )
-                )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "AddHour"
               )
-            , LatticeAddressSetIdentifier(
+            , LatticeFunctionIdentifier(
                 ContainerElementName(
-                  "WHERE_Lead_CreatedInLastYear"
+                  "MKTO_LeadRecord_ActivityDate"
                 )
               )
-            , FunctionAggregationOperator(
-                "DistinctCount"
+            , LatticeFunctionExpressionConstant(
+                "-24", DataTypeInt
               )
             )
           )
           SpecQueryNamedFunctionExpression(
             ContainerElementName(
-              "SFDC Lead Emails"
+              "Diagnostic_UpperLimitTime"
             )
-          , LatticeFunctionExpressionTransform(
-              LatticeFunctionIdentifier(
-                ContainerElementNameTableQualifiedName(
-                  LatticeSourceTableIdentifier(
-                    ContainerElementName(
-                      "SFDC_Lead"
-                    )
-                  )
-                , ContainerElementName(
-                    "Id"
-                  )
-                )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "AddHour"
               )
-            , LatticeAddressSetIdentifier(
+            , LatticeFunctionIdentifier(
                 ContainerElementName(
-                  "WHERE_SFDC_Lead_CreatedInLastYear"
+                  "MKTO_LeadRecord_ActivityDate"
                 )
               )
-            , FunctionAggregationOperator(
-                "DistinctCount"
-              )
-            )
-          )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "SFDC Contact Emails"
-            )
-          , LatticeFunctionExpressionTransform(
-              LatticeFunctionIdentifier(
-                ContainerElementNameTableQualifiedName(
-                  LatticeSourceTableIdentifier(
-                    ContainerElementName(
-                      "SFDC_Contact"
-                    )
-                  )
-                , ContainerElementName(
-                    "Email"
-                  )
-                )
-              )
-            , LatticeAddressSetFromFcnSupport(
-                LatticeFunctionIdentifier(
-                  ContainerElementNameTableQualifiedName(
-                    LatticeSourceTableIdentifier(
-                      ContainerElementName(
-                        "SFDC_Contact"
-                      )
-                    )
-                  , ContainerElementName(
-                      "Email"
-                    )
-                  )
-                )
-              )
-            , FunctionAggregationOperator(
-                "DistinctCount"
-              )
-            )
-          )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "SFDC Account ID Count"
-            )
-          , LatticeFunctionExpressionTransform(
-              LatticeFunctionExpressionTransform(
-                LatticeFunctionIdentifierAddressAtomic(
-                  LatticeAddressAtomicIdentifier(
-                    ContainerElementName(
-                      "SFDC_Account_ID"
-                    )
-                  )
-                )
-              , LatticeAddressSetPi(
-                  LatticeAddressExpressionAtomic(
-                    LatticeAddressAtomicIdentifier(
-                      ContainerElementName(
-                        "SFDC_Account_ID"
-                      )
-                    )
-                  )
-                )
-              , FunctionAggregationOperator(
-                  "Count"
-                )
-              )
-            , LatticeAddressSetPi(
-                LatticeAddressExpressionAtomic(
-                  LatticeAddressAtomicAll
-                )
-              )
-            , FunctionAggregationOperator(
-                "None"
-              )
-            )
-          )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "SFDC Opportunity In Last Year Count"
-            )
-          , LatticeFunctionExpressionTransform(
-              LatticeFunctionIdentifier(
-                ContainerElementNameTableQualifiedName(
-                  LatticeSourceTableIdentifier(
-                    ContainerElementName(
-                      "SFDC_Opportunity"
-                    )
-                  )
-                , ContainerElementName(
-                    "Id"
-                  )
-                )
-              )
-            , LatticeAddressSetIdentifier(
-                ContainerElementName(
-                  "WHERE_SFDC_Opportunity_CreatedInLastYear"
-                )
-              )
-            , FunctionAggregationOperator(
-                "DistinctCount"
-              )
-            )
-          )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "Count of Won Opportunities"
-            )
-          , LatticeFunctionExpressionTransform(
-              LatticeFunctionExpressionTransform(
-                LatticeFunctionExpression(
-                  LatticeFunctionOperatorIdentifier(
-                    "IF"
-                  )
-                , LatticeFunctionIdentifier(
-                    ContainerElementNameTableQualifiedName(
-                      LatticeSourceTableIdentifier(
-                        ContainerElementName(
-                          "SFDC_Opportunity"
-                        )
-                      )
-                    , ContainerElementName(
-                        "IsWon"
-                      )
-                    )
-                  )
-                , LatticeFunctionExpressionConstant(
-                    "1", DataTypeInt
-                  )
-                , LatticeFunctionExpressionConstant(
-                    "0", DataTypeInt
-                  )
-                )
-              , LatticeAddressSetIdentifier(
-                  ContainerElementName(
-                    "WHERE_SFDC_Opportunity_CreatedInLastYear"
-                  )
-                )
-              , FunctionAggregationOperator(
-                  "Sum"
-                )
-              )
-            , LatticeAddressSetPi(
-                LatticeAddressExpressionAtomic(
-                  LatticeAddressAtomicAll
-                )
-              )
-            , FunctionAggregationOperator(
-                "None"
+            , LatticeFunctionExpressionConstant(
+                "-4", DataTypeInt
               )
             )
           )
@@ -29597,7 +31740,7 @@ SpecLatticeNamedElements(
       , SpecQueryResultSetAll
       )
     , ContainerElementName(
-        "Profile_SummaryCounts"
+        "Q_Diagnostic_ExtractLeadsRange"
       )
     )
   ,
@@ -31953,6 +34096,400 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Q_Metadata_Custom"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionMeet(
+            empty
+          )
+        , LatticeAddressSetMeet(
+            empty
+          )
+        , LatticeAddressExpressionAtomic(
+            LatticeAddressAtomicFTOA(
+              LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "Profile_ActivityMonth"
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "Profile_ActivityMonth"
+                  )
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Activity Year-Month"
+            )
+          , LatticeFunctionIdentifierAddressAtomic(
+              LatticeAddressAtomicFTOA(
+                LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "Profile_ActivityMonth"
+                  )
+                )
+              , LatticeAddressSetFromFcnSupport(
+                  LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "Profile_ActivityMonth"
+                    )
+                  )
+                )
+              )
+            )
+          , SpecSortOrder(
+              1, SpecSortDirectionAscending
+            )
+          )
+          SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count of Activities"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord"
+                    )
+                  )
+                , ContainerElementName(
+                    "id"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_ActivityRecord"
+                      )
+                    )
+                  , ContainerElementName(
+                      "id"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Count"
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Profile_MA_ActivityByMonth"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionMeet(
+            empty
+          )
+        , LatticeAddressSetMeet(
+            empty
+          )
+        , LatticeAddressExpressionAtomic(
+            LatticeAddressAtomicFTOA(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord"
+                    )
+                  )
+                , ContainerElementName(
+                    "LeadSource"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord"
+                      )
+                    )
+                  , ContainerElementName(
+                      "LeadSource"
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "FTOA(LeadSource::MKTO_LeadRecord, FromFcn(LeadSource::MKTO_LeadRecord))"
+            )
+          , LatticeFunctionIdentifierAddressAtomic(
+              LatticeAddressAtomicFTOA(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord"
+                      )
+                    )
+                  , ContainerElementName(
+                      "LeadSource"
+                    )
+                  )
+                )
+              , LatticeAddressSetFromFcnSupport(
+                  LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord"
+                        )
+                      )
+                    , ContainerElementName(
+                        "LeadSource"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+          SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count Of Leads"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord"
+                    )
+                  )
+                , ContainerElementName(
+                    "Id"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_LeadRecord"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Id"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Count"
+              )
+            )
+          , SpecSortOrder(
+              1, SpecSortDirectionDescending
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Profile_LeadsBySource"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionMeet(
+            empty
+          )
+        , LatticeAddressSetMeet(
+            empty
+          )
+        , LatticeAddressExpressionAtomic(
+            LatticeAddressAtomicFTOA(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "SFDC_OpportunityHistory"
+                    )
+                  )
+                , ContainerElementName(
+                    "StageName"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_OpportunityHistory"
+                      )
+                    )
+                  , ContainerElementName(
+                      "StageName"
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Stage Name"
+            )
+          , LatticeFunctionIdentifierAddressAtomic(
+              LatticeAddressAtomicFTOA(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_OpportunityHistory"
+                      )
+                    )
+                  , ContainerElementName(
+                      "StageName"
+                    )
+                  )
+                )
+              , LatticeAddressSetFromFcnSupport(
+                  LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "SFDC_OpportunityHistory"
+                        )
+                      )
+                    , ContainerElementName(
+                        "StageName"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+          SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Opportunities in Modeling Period by Current Stage"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "SFDC_Opportunity"
+                    )
+                  )
+                , ContainerElementName(
+                    "Id"
+                  )
+                )
+              )
+            , LatticeAddressSetFcn(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "AND"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "Greater"
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "AddDay"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementNameTableQualifiedName(
+                          LatticeSourceTableIdentifier(
+                            ContainerElementName(
+                              "SFDC_Opportunity"
+                            )
+                          )
+                        , ContainerElementName(
+                            "CreatedDate"
+                          )
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Const_DaysOfDataForModeling"
+                        )
+                      )
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_Most Recent Date"
+                      )
+                    )
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "LessOrEqual"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementNameTableQualifiedName(
+                        LatticeSourceTableIdentifier(
+                          ContainerElementName(
+                            "SFDC_Opportunity"
+                          )
+                        )
+                      , ContainerElementName(
+                          "CreatedDate"
+                        )
+                      )
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_Most Recent Date"
+                      )
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Count"
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Profile_SummaryOpportunitiesByStage"
       )
     )
   ,
@@ -34968,6 +37505,1586 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Q_Unpivot_SFDC_User"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeQuery(
+        LatticeAddressSetPushforward(
+          LatticeAddressExpressionMeet(
+            empty
+          )
+        , LatticeAddressSetMeet(
+            empty
+          )
+        , LatticeAddressExpressionMeet(
+            empty
+          )
+        )
+      , SpecQueryNamedFunctions(
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "FunctionName"
+            )
+          , LatticeFunctionIdentifierFunctionName
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "FunctionValue"
+            )
+          , LatticeFunctionIdentifierFunctionValue
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count of all extracted marketing activity"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionConstant(
+                "1", DataTypeInt
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Sum"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count of all extracted MA Leads"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionConstant(
+                "1", DataTypeInt
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "Sum"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Most Recent Extracted MA Lead Date"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Profile_Most Recent Date"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Least Recent Extracted MA Lead Date"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Profile_Least Recent Date"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count of extracted CRM Leads"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpressionConstant(
+                  "1", DataTypeInt
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Lead"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Most recent extracted CRM lead"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Lead"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Lead"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Least recent extracted CRM lead"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Lead"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Lead"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count of extracted CRM Opportunities"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpressionConstant(
+                  "1", DataTypeInt
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Most recent extracted CRM Opportunity"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Least recent extracted CRM Opportunity"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Min"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count of extracted CRM Contacts"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Lead"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Contact"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Most recent extracted CRM Contact"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Contact"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Contact"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Least recent extracted CRM Contact"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Contact"
+                      )
+                    )
+                  , ContainerElementName(
+                      "CreatedDate"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Contact"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Min"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count of all extracted CRM Account IDs"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpressionConstant(
+                  "1", DataTypeInt
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Account_ID"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "SFDC Lead Emails"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "SFDC_Lead"
+                    )
+                  )
+                , ContainerElementName(
+                    "Id"
+                  )
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "WHERE_SFDC_Lead_CreatedInLastYear"
+                )
+              )
+            , FunctionAggregationOperator(
+                "DistinctCount"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "SFDC Contact Emails"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "SFDC_Contact"
+                    )
+                  )
+                , ContainerElementName(
+                    "Email"
+                  )
+                )
+              )
+            , LatticeAddressSetFromFcnSupport(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Contact"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Email"
+                    )
+                  )
+                )
+              )
+            , FunctionAggregationOperator(
+                "DistinctCount"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "SFDC Account ID Count"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifierAddressAtomic(
+                  LatticeAddressAtomicIdentifier(
+                    ContainerElementName(
+                      "SFDC_Account_ID"
+                    )
+                  )
+                )
+              , LatticeAddressSetPi(
+                  LatticeAddressExpressionAtomic(
+                    LatticeAddressAtomicIdentifier(
+                      ContainerElementName(
+                        "SFDC_Account_ID"
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Count"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "SFDC Opportunity In Last Year Count"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "SFDC_Opportunity"
+                    )
+                  )
+                , ContainerElementName(
+                    "Id"
+                  )
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "WHERE_SFDC_Opportunity_CreatedInLastYear"
+                )
+              )
+            , FunctionAggregationOperator(
+                "DistinctCount"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Count of Won Opportunities"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "SFDC_Opportunity"
+                        )
+                      )
+                    , ContainerElementName(
+                        "IsWon"
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "WHERE_SFDC_Opportunity_CreatedInLastYear"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of MA Leads for Modeling-Default"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Profile_Number of MA Leads for Modeling-Default"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of MA Leads for Modeling"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Profile_Number of MA Leads for Modeling"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of corporate domains for modeling-Default"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Profile_Number of corporate domains for modeling-Default"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of corporate domains for modeling"
+            )
+          , LatticeFunctionIdentifier(
+              ContainerElementName(
+                "Profile_Number of corporate domains for modeling"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of public domains with distinct Name City State for modeling"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IF"
+                )
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "Equal"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "Email_Domain_IsPublic"
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "Profile_Lead Name City State"
+                  )
+                )
+              , LatticeFunctionExpressionConstantNull(
+                  DataTypeVarChar(
+                    256
+                  )
+                )
+              )
+            , LatticeAddressSetIdentifier(
+                ContainerElementName(
+                  "FilterOnMALeadsForModeling"
+                )
+              )
+            , FunctionAggregationOperator(
+                "DistinctCount"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of public domains with distinct Name City State for modeling-default"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "Equal"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Email_Domain_IsPublic"
+                      )
+                    )
+                  , LatticeFunctionExpressionConstant(
+                      "1", DataTypeInt
+                    )
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementName(
+                      "Profile_Lead Name City State"
+                    )
+                  )
+                , LatticeFunctionExpressionConstantNull(
+                    DataTypeVarChar(
+                      256
+                    )
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling_Default"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "DistinctCount"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Opportunities Created In Modeling Period"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Id"
+                    )
+                  )
+                )
+              , LatticeAddressSetFcn(
+                  LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "AND"
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "Greater"
+                      )
+                    , LatticeFunctionExpression(
+                        LatticeFunctionOperatorIdentifier(
+                          "AddDay"
+                        )
+                      , LatticeFunctionIdentifier(
+                          ContainerElementNameTableQualifiedName(
+                            LatticeSourceTableIdentifier(
+                              ContainerElementName(
+                                "SFDC_Opportunity"
+                              )
+                            )
+                          , ContainerElementName(
+                              "CreatedDate"
+                            )
+                          )
+                        )
+                      , LatticeFunctionIdentifier(
+                          ContainerElementName(
+                            "Const_DaysOfDataForModeling"
+                          )
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Profile_Most Recent Date"
+                        )
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "LessOrEqual"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementNameTableQualifiedName(
+                          LatticeSourceTableIdentifier(
+                            ContainerElementName(
+                              "SFDC_Opportunity"
+                            )
+                          )
+                        , ContainerElementName(
+                            "CreatedDate"
+                          )
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Profile_Most Recent Date"
+                        )
+                      )
+                    )
+                  )
+                , LatticeAddressSetPi(
+                    LatticeAddressExpressionAtomic(
+                      LatticeAddressAtomicIdentifier(
+                        ContainerElementName(
+                          "SFDC_Opportunity"
+                        )
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Count"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Opportunity Contact Role in the Modeling Period"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_OpportunityContactRole"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Id"
+                    )
+                  )
+                )
+              , LatticeAddressSetFcn(
+                  LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "AND"
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "Greater"
+                      )
+                    , LatticeFunctionExpression(
+                        LatticeFunctionOperatorIdentifier(
+                          "AddDay"
+                        )
+                      , LatticeFunctionIdentifier(
+                          ContainerElementNameTableQualifiedName(
+                            LatticeSourceTableIdentifier(
+                              ContainerElementName(
+                                "SFDC_OpportunityContactRole"
+                              )
+                            )
+                          , ContainerElementName(
+                              "CreatedDate"
+                            )
+                          )
+                        )
+                      , LatticeFunctionIdentifier(
+                          ContainerElementName(
+                            "Const_DaysOfDataForModeling"
+                          )
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Profile_Most Recent Date"
+                        )
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "LessOrEqual"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementNameTableQualifiedName(
+                          LatticeSourceTableIdentifier(
+                            ContainerElementName(
+                              "SFDC_OpportunityContactRole"
+                            )
+                          )
+                        , ContainerElementName(
+                            "CreatedDate"
+                          )
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Profile_Most Recent Date"
+                        )
+                      )
+                    )
+                  )
+                , LatticeAddressSetPi(
+                    LatticeAddressExpressionAtomic(
+                      LatticeAddressAtomicIdentifier(
+                        ContainerElementName(
+                          "SFDC_OpportunityContactRole"
+                        )
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Count"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Opportunities Won in Modeling Period"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "SFDC_Opportunity"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Id"
+                    )
+                  )
+                )
+              , LatticeAddressSetFcn(
+                  LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "AND"
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "AND"
+                      )
+                    , LatticeFunctionExpression(
+                        LatticeFunctionOperatorIdentifier(
+                          "Greater"
+                        )
+                      , LatticeFunctionExpression(
+                          LatticeFunctionOperatorIdentifier(
+                            "AddDay"
+                          )
+                        , LatticeFunctionIdentifier(
+                            ContainerElementNameTableQualifiedName(
+                              LatticeSourceTableIdentifier(
+                                ContainerElementName(
+                                  "SFDC_Opportunity"
+                                )
+                              )
+                            , ContainerElementName(
+                                "CreatedDate"
+                              )
+                            )
+                          )
+                        , LatticeFunctionIdentifier(
+                            ContainerElementName(
+                              "Const_DaysOfDataForModeling"
+                            )
+                          )
+                        )
+                      , LatticeFunctionIdentifier(
+                          ContainerElementName(
+                            "Profile_Most Recent Date"
+                          )
+                        )
+                      )
+                    , LatticeFunctionExpression(
+                        LatticeFunctionOperatorIdentifier(
+                          "LessOrEqual"
+                        )
+                      , LatticeFunctionIdentifier(
+                          ContainerElementNameTableQualifiedName(
+                            LatticeSourceTableIdentifier(
+                              ContainerElementName(
+                                "SFDC_Opportunity"
+                              )
+                            )
+                          , ContainerElementName(
+                              "CreatedDate"
+                            )
+                          )
+                        )
+                      , LatticeFunctionIdentifier(
+                          ContainerElementName(
+                            "Profile_Most Recent Date"
+                          )
+                        )
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "Equal"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementNameTableQualifiedName(
+                          LatticeSourceTableIdentifier(
+                            ContainerElementName(
+                              "SFDC_Opportunity"
+                            )
+                          )
+                        , ContainerElementName(
+                            "IsWon"
+                          )
+                        )
+                      )
+                    , LatticeFunctionExpressionConstant(
+                        "TRUE", DataTypeBit
+                      )
+                    )
+                  )
+                , LatticeAddressSetPi(
+                    LatticeAddressExpressionAtomic(
+                      LatticeAddressAtomicIdentifier(
+                        ContainerElementName(
+                          "SFDC_Opportunity"
+                        )
+                      )
+                    )
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Count"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Modeling Leads with at least one SFDC lead"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "IsNullValue"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_SFDC lead at Email"
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Modeling Leads with at least one created opportunity after MA lead linked by SFDC lead"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "Greater"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_MaxOpportunityCreateDateForEmailFromLead"
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "AddDay"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord_ID_LeadCreationDateTime"
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Const_DaysPriorToOptyConv"
+                        )
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Modeling leads with at least one IsWon Opportunity after MA lead linked by SFDC lead"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "Greater"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_MaxIsWonOpportunityCreateDateForEmailFromLead"
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "AddDay"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord_ID_LeadCreationDateTime"
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Const_DaysPriorToOptyConv"
+                        )
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Modeling Leads with at least one SFDC contact"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "IsNullValue"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_SFDC contact at Email"
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Modeling Leads with at least one created opportunity after MA lead linked by SFDC contact"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "Greater"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_MaxOpportunityCreateDateForEmailFromContact"
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "AddDay"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord_ID_LeadCreationDateTime"
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Const_DaysPriorToOptyConv"
+                        )
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Modeling Leads with at least one IsWon Opportunity after MA lead linked by SFDC contact"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "Greater"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_MaxIsWonOpportunityCreateDateForEmailFromLead"
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "AddDay"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord_ID_LeadCreationDateTime"
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Const_DaysPriorToOptyConv"
+                        )
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Modeling Leads with at least one created opportunity after MA lead linked by All paths"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "Greater"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_MaxOpportunityCreateDateForEmailFromAllPaths"
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "AddDay"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord_ID_LeadCreationDateTime"
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Const_DaysPriorToOptyConv"
+                        )
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+          SpecQueryNamedFunctionExpression(
+            ContainerElementName(
+              "Number of Modeling Leads with at least one IsWon Opportunity after MA lead linked by All paths"
+            )
+          , LatticeFunctionExpressionTransform(
+              LatticeFunctionExpressionTransform(
+                LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IF"
+                  )
+                , LatticeFunctionExpression(
+                    LatticeFunctionOperatorIdentifier(
+                      "Greater"
+                    )
+                  , LatticeFunctionIdentifier(
+                      ContainerElementName(
+                        "Profile_MaxIsWonOpportunityCreateDateForEmailFromAllPaths"
+                      )
+                    )
+                  , LatticeFunctionExpression(
+                      LatticeFunctionOperatorIdentifier(
+                        "AddDay"
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "MKTO_LeadRecord_ID_LeadCreationDateTime"
+                        )
+                      )
+                    , LatticeFunctionIdentifier(
+                        ContainerElementName(
+                          "Const_DaysPriorToOptyConv"
+                        )
+                      )
+                    )
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "1", DataTypeInt
+                  )
+                , LatticeFunctionExpressionConstant(
+                    "0", DataTypeInt
+                  )
+                )
+              , LatticeAddressSetIdentifier(
+                  ContainerElementName(
+                    "FilterOnMALeadsForModeling"
+                  )
+                )
+              , FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , LatticeAddressSetPi(
+                LatticeAddressExpressionAtomic(
+                  LatticeAddressAtomicAll
+                )
+              )
+            , FunctionAggregationOperator(
+                "None"
+              )
+            )
+          )
+        )
+      , SpecQueryResultSetAll
+      )
+    , ContainerElementName(
+        "Profile_SummaryCounts"
       )
     )
   ,
@@ -39754,6 +43871,409 @@ SpecLatticeNamedElements(
                 ContainerElementNameTableQualifiedName(
                   LatticeSourceTableIdentifier(
                     ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "id"
+                  )
+                )
+              )
+            , DataTypeLong, SpecFieldTypeAttribute(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_ActivityRecord_ID"
+                  )
+                )
+              , SpecConstructiveIsConstructive, FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "id"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "activityDateTime"
+                  )
+                )
+              )
+            , DataTypeDateTime, SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "activityDateTime"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValue(
+                ""
+              )
+            , SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "activityType"
+                  )
+                )
+              )
+            , DataTypeNVarChar(
+                510
+              )
+            , SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Combine"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "activityType"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "mktgAssetName"
+                  )
+                )
+              )
+            , DataTypeNVarChar(
+                1022
+              )
+            , SpecFieldTypeAttribute(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "mktgAssetName"
+                  )
+                )
+              , SpecConstructiveIsConstructive, FunctionAggregationOperator(
+                  "Combine"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "mktgAssetName"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNullNoRTrim, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "campaign"
+                  )
+                )
+              )
+            , DataTypeNVarChar(
+                1022
+              )
+            , SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Combine"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "campaign"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "personName"
+                  )
+                )
+              )
+            , DataTypeNVarChar(
+                510
+              )
+            , SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Combine"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "personName"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "mktPersonId"
+                  )
+                )
+              )
+            , DataTypeLong, SpecFieldTypeAttribute(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_LeadRecord_ID"
+                  )
+                )
+              , SpecConstructiveIsConstructive, FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "mktPersonId"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "foreignSysId"
+                  )
+                )
+              )
+            , DataTypeNVarChar(
+                100
+              )
+            , SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Combine"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "foreignSysId"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "orgName"
+                  )
+                )
+              )
+            , DataTypeNVarChar(
+                1022
+              )
+            , SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Combine"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "orgName"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_ActivityRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "foreignSysOrgId"
+                  )
+                )
+              )
+            , DataTypeNVarChar(
+                100
+              )
+            , SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Combine"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "foreignSysOrgId"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Combine"
+                )
+              )
+            )
+          )
+        )
+      , SpecKeys(
+          empty
+        )
+      , SpecDescription(
+          ""
+        )
+      , SpecMaximalIsMaximal, SpecKeyAggregation(
+          SpecColumnAggregationRuleMostRecent
+        )
+      , SpecEquivalenceAggregation(
+          SpecColumnAggregationRuleMostRecent
+        )
+      )
+    , ContainerElementName(
+        "MKTO_ActivityRecord_Validation"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeSourceTable(
+        SpecLatticeSourceTableColumnSet(
+          (
+            SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
                       "MKTO_LeadRecord"
                     )
                   )
@@ -43116,6 +47636,137 @@ SpecLatticeNamedElements(
                 ContainerElementNameTableQualifiedName(
                   LatticeSourceTableIdentifier(
                     ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "Id"
+                  )
+                )
+              )
+            , DataTypeLong, SpecFieldTypeAttribute(
+                LatticeAddressAtomicIdentifier(
+                  ContainerElementName(
+                    "MKTO_LeadRecord_ID"
+                  )
+                )
+              , SpecConstructiveIsConstructive, FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "Id"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "latticeforleads__Last_Score_Date__c"
+                  )
+                )
+              )
+            , DataTypeDateTime, SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Max"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "latticeforleads__Last_Score_Date__c"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Max"
+                )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "MKTO_LeadRecord_Validation"
+                    )
+                  )
+                , ContainerElementName(
+                    "latticeforleads__Score__c"
+                  )
+                )
+              )
+            , DataTypeInt, SpecFieldTypeMetric(
+                FunctionAggregationOperator(
+                  "Sum"
+                )
+              )
+            , SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  "latticeforleads__Score__c"
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleFunction(
+                  "Sum"
+                )
+              )
+            )
+          )
+        )
+      , SpecKeys(
+          empty
+        )
+      , SpecDescription(
+          ""
+        )
+      , SpecMaximalIsMaximal, SpecKeyAggregation(
+          SpecColumnAggregationRuleMostRecent
+        )
+      , SpecEquivalenceAggregation(
+          SpecColumnAggregationRuleMostRecent
+        )
+      )
+    , ContainerElementName(
+        "MKTO_LeadRecord_Validation"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeSourceTable(
+        SpecLatticeSourceTableColumnSet(
+          (
+            SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
                       "Map_LeadID_PropDataID"
                     )
                   )
@@ -44778,6 +49429,34 @@ SpecLatticeNamedElements(
                 SpecColumnAggregationRuleFunction(
                   "Max"
                 )
+              )
+            )
+          , SpecLatticeSourceTableColumn(
+              LatticeFunctionIdentifier(
+                ContainerElementNameTableQualifiedName(
+                  LatticeSourceTableIdentifier(
+                    ContainerElementName(
+                      "SFDC_Contact"
+                    )
+                  )
+                , ContainerElementName(
+                    "CreatedDate"
+                  )
+                )
+              )
+            , DataTypeDateTime, SpecFieldTypeMetric, SpecColumnContentContainerElementName(
+                ContainerElementName(
+                  ""
+                )
+              )
+            , SpecEndpointTypeNone, SpecDefaultValue(
+                ""
+              )
+            , SpecKeyAggregation(
+                SpecColumnAggregationRuleDefault
+              )
+            , SpecEquivalenceAggregation(
+                SpecColumnAggregationRuleDefault
               )
             )
           )
