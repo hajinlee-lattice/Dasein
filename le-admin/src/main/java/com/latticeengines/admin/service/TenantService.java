@@ -33,4 +33,6 @@ public interface TenantService {
     DocumentDirectory getSpaceConfigSchema();
 
     boolean setupSpaceConfiguration(String contractId, String tenantId, SpaceConfiguration spaceConfig);
+
+    boolean danteIsEnabled(String contracId, String tenantId);
 }

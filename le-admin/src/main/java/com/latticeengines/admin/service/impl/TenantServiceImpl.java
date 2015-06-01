@@ -13,10 +13,13 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
@@ -135,7 +138,7 @@ public class TenantServiceImpl implements TenantService {
         final String podId = CamilleEnvironment.getPodId();
         final Camille camille = CamilleEnvironment.getCamille();
         Set<String> components = serviceService.getRegisteredServices();
-        BootstrapState state =  BootstrapState.constructOKState(1);
+        BootstrapState state =  null;
         for (String serviceName : components) {
             Path tenantServiceStatePath = PathBuilder.buildCustomerSpaceServicePath(podId, contractId, tenantId,
                     CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
@@ -149,7 +152,11 @@ public class TenantServiceImpl implements TenantService {
             }
             if (newState != null) {
                 // null means the tenant was provisioned without this component
-                state = mergeBootstrapStates(state, newState, serviceName);
+                if (state == null) {
+                    state = newState;
+                } else if (!serviceName.equals(DanteComponent.componentName) || danteIsEnabled(contractId, tenantId)) {
+                    state = mergeBootstrapStates(state, newState, serviceName);
+                }
             }
         }
         return state;
@@ -180,6 +187,21 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public boolean setupSpaceConfiguration(String contractId, String tenantId, SpaceConfiguration spaceConfig) {
         return setupSpaceConfiguration(contractId, tenantId, spaceConfig.toDocumentDirectory());
+    }
+
+    @Override
+    public boolean danteIsEnabled(String contracId, String tenantId) {
+        TenantDocument tenant = getTenant(contracId, tenantId);
+        String str = tenant.getSpaceInfo().featureFlags;
+        if (!str.contains("Dante")) { return false; }
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode json = mapper.readTree(str);
+            return json.get("Dante").asBoolean();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean setupSpaceConfiguration(String contractId, String tenantId, DocumentDirectory spaceConfig) {
