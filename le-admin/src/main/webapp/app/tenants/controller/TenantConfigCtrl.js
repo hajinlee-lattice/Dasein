@@ -37,9 +37,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     //==================================================
     // system-wise options
     //==================================================
-    $scope.availableProducts = [];
-    $scope.availableTopologies = [];
-    $scope.availableDLAddresses = [];
+    $scope.availableProducts = ["Lead Prioritization"];
+    $scope.availableTopologies = ["Marketo"];
+    $scope.availableDLAddresses = ["http://bodcdevvint207.dev.lattice.local:8081"];
     $scope.services = [];
     updateSpaceConfigurationOptions();
 
