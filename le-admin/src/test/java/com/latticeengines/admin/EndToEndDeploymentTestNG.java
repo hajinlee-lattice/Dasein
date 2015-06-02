@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -133,34 +132,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
-        try {
-            deleteTenant(TestContractId, tenantId);
-        } catch (Exception e) {
-            //ignore
-        }
-        // delete PLS tenant
-        deletePLSTenants();
-        deleteVisiDBDLTenants();
-        deleteBardJamesTenant();
+        cleanup();
 
         provisionEndToEndTestTenants();
-    }
-
-    /**
-     * Delete the testing tenant in both ZK and each component.
-     */
-    @AfterClass(groups = "deployment")
-    public void tearDown() throws Exception {
-        try {
-            deleteTenant(TestContractId, tenantId);
-        } catch (Exception e) {
-            // ignore
-        }
-
-        // delete PLS tenant
-        deletePLSTenants();
-        deleteVisiDBDLTenants();
-        deleteBardJamesTenant();
     }
 
     /**
@@ -421,6 +395,19 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
      * BEGIN: Tenant clean up methods
      * ==================================================
      */
+    public void cleanup() throws Exception {
+        try {
+            deleteTenant(TestContractId, tenantId);
+        } catch (Exception e) {
+            // ignore
+        }
+
+        // delete PLS tenant
+        deletePLSTenants();
+        deleteVisiDBDLTenants();
+        deleteBardJamesTenant();
+    }
+
     private void deletePLSTenants() {
         String PLSTenantId = String.format("%s.%s.%s",
                 contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
