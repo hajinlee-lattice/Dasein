@@ -125,9 +125,9 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
                         data.State = JSON.parse(node.Data);
                         break;
                     case "lock":
-                    case "HDFSSettingsDocument.json":
-                    case "MetadataDocument.json":
-                    case "WidgetConfigurationDocument.json":
+                    case "hdfssettingsdocument.json":
+                    case "metadatadocument.json":
+                    case "widgetconfigurationdocument.json":
                         break;
                     default:
                         data.Nodes.push(node);
