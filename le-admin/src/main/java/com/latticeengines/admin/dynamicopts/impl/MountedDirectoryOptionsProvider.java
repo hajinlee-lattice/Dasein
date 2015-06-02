@@ -10,7 +10,6 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 
-
 public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider {
 
     private Properties mountMap;
@@ -18,10 +17,14 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
     private final String absoluteRoot;
 
     public MountedDirectoryOptionsProvider(Path path, String defaultMntPnt) {
+        this(path, defaultMntPnt, loadMountMap(path.toString()));
+    }
+
+    public MountedDirectoryOptionsProvider(Path path, String defaultMntPnt, Properties mountMap) {
         super(path);
         this.defaultMntPnt = defaultMntPnt;
         absoluteRoot = path.toAbsolutePath().toString();
-        loadMountMap();
+        this.mountMap = mountMap;
     }
 
     public String toRemoteAddr(String key) { return mountMap.getProperty(key, defaultMntPnt); }
@@ -37,13 +40,13 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
 
     public String getAbsoluteRoot() { return this.absoluteRoot; }
 
-    private void loadMountMap() {
-        mountMap = new Properties();
+    private static Properties loadMountMap(String path) {
+        Properties props = new Properties();
         InputStream input = null;
         try {
-            input = new FileInputStream(this.path + "/.mtable");
+            input = new FileInputStream(path + "/.mtable");
             // load mount table file
-            mountMap.load(new StringReader(IOUtils.toString(input).replace("\\", "\\\\")));
+            props.load(new StringReader(IOUtils.toString(input).replace("\\", "\\\\")));
         } catch (IOException ex) {
             // ignore
         } finally {
@@ -55,6 +58,7 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
                 }
             }
         }
+        return props;
     }
 
 
