@@ -47,7 +47,9 @@ public class ScoringMapperPredictUtil {
 	private static final String PERCENTILE_BUCKETS_MAXIMUMSCORE = "MaximumScore";
     private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
 	
-	public static void evaluate(HashMap<String, JSONObject> models) {
+	public static String evaluate(HashMap<String, JSONObject> models) {
+		
+		StringBuilder strs = new StringBuilder();
 		// spawn python 
 		Set<String> modelIDs = models.keySet();
 		StringBuilder sb = new StringBuilder();
@@ -73,10 +75,12 @@ public class ScoringMapperPredictUtil {
 		String line = null;
 		try {
 			while (( line = in.readLine()) != null ) {
+				strs.append(line);
 				log.info(line);
 			}
 			in.close();
 			while (( line = err.readLine()) != null ) {
+				strs.append(line);
 				log.info(line);
 			}
 			err.close();
@@ -89,6 +93,8 @@ public class ScoringMapperPredictUtil {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		return strs.toString();
 	}
 	
 

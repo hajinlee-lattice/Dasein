@@ -18,7 +18,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
-public class ScoringMapperTransformUtilTestNG {
+public class ScoringMapperTransformUtilUnitTestNG {
 	
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
 	private final static String DATA_PATH = "com/latticeengines/scoring/data/";

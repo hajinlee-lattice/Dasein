@@ -23,6 +23,10 @@ def main(argv):
         modelID = argv[index]
         manipulateSupportedFiles(modelID, scoringFiles, leadFiles)    
         #do scoring
+        print "leadFiles are:"
+        print leadFiles
+        if len(leadFiles) == 0:
+            raise "leadFile is null"
         for leadFile in leadFiles:
             modelEvaluate(modelID, leadFile)
         #delete the supported files for the next round of scoring
@@ -52,8 +56,6 @@ def manipulateSupportedFiles(modelID, scoringFiles, leadFiles):
 def modelEvaluate(modelID, leadFile):
     #scoringoutputfile name
     outputFile = modelID + SCORING_OUTPUT_PREFIX + leadFile[len(SCORING_INPUT_PREFIX):] + ".txt"
-    #print os.environ["PYTHONPATH"]
-    print sys.executable 
     executable = "/usr/local/bin/python2.7"
     popen = subprocess.Popen([executable, SCORING_SCRIPT_NAME, leadFile, outputFile], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     s, stderr = popen.communicate()

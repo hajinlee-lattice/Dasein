@@ -93,7 +93,7 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
         HdfsUtils.rmdir(yarnConfiguration, path);
 
         URL modelSummaryUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/models/VisiDBTest_Model_Submission1_2015-04-18_12-30_model.json"); //
+                .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json"); //
         modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
                 + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1429553747321_0004";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);

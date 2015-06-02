@@ -11,9 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.avro.file.DataFileReader;
-import org.apache.avro.file.FileReader;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -22,165 +19,13 @@ import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 
-public class ScoringMapperPredictUtilTestNG extends ScoringFunctionalTestNGBase {
+public class ScoringMapperPredictUtilUnitTestNG {
 	
-	private static final double EPS = 1e-6;
 	private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 	
-	//@Test(groups = "funtional")
-	public void compareFinalResults() {
-		// read input lead files
-		
-		// trigger the scoring
-		
-		// compare the results
-		// compareEvaluationResults()
-	}
-	
-	// compare the results
-	//@Test(groups = "unit")
-	public void compareEvaluationResults() {
-		boolean evaluationIsSame = false;
-
-		List<GenericRecord> newlist = null;
-		List<GenericRecord> oldlist = null;
-		
-		// load new scores from HDFS	
-		newlist = loadHDFSAvroFiles(new Configuration(), 
-				"/user/s-analytics/customers/Nutanix/scoring/ScoringCommandProcessorTestNG_LeadsTable/scores/");
-				
-		// load existing scores from testing file
-	    URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/results/"
-	    		+ "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-result-part-m-00000.avro");
-		String fileName = url.getFile();
-		System.out.println(fileName);
-		oldlist = loadLocalAvroFiles(fileName);
-	
-		//compareJsonResults(str1, str2)
-		evaluationIsSame = compareJsonResults(newlist, oldlist);
-		assertTrue(evaluationIsSame);
-		//return evaluationIsSame;
-	}
-	
-	private  ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
-		ArrayList<GenericRecord> newlist = new ArrayList<GenericRecord>();
-		List<String> files = null;
-		try {
-			files = HdfsUtils.getFilesForDir(configuration, hdfsDir);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		for(String file : files) {
-			try {
-				List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
-				newlist.addAll(list);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return newlist;
-	}
-	
-	private  List<GenericRecord> loadLocalAvroFiles(String localDir) {
-		List<GenericRecord> newlist = new ArrayList<GenericRecord>();
-		File localAvroFile = new File(localDir);
-		FileReader<GenericRecord> reader;
-		GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
-        try {
-			reader = DataFileReader.openReader(localAvroFile, fileReader);
-            for (GenericRecord datum : reader) {
-            	newlist.add(datum);
-            }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}  
-		return newlist;
-	}
-	
-	public boolean compareJsonResults(List<GenericRecord> newResults, List<GenericRecord> oldResults) {
-		boolean resultsAreSame = true;
-		if (newResults.size() != oldResults.size()) {
-			resultsAreSame = false;
-		} else {
-			HashMap<String, GenericRecord> resultMap = new HashMap<String, GenericRecord>();
-			for (int i = 0; i < newResults.size(); i++) {
-				GenericRecord newResult = newResults.get(i);
-				String key = newResult.get("LeadID").toString() + newResult.get("Play_Display_Name").toString();
-				resultMap.put(key, newResult);
-			}
-			
-			for (int i = 0; i < oldResults.size(); i++) {
-				GenericRecord oldResult = oldResults.get(i);
-				String key = oldResult.get("LeadID").toString() + oldResult.get("Play_Display_Name").toString();
-				if (!resultMap.containsKey(key)) {
-					resultsAreSame = false;
-					break;
-				} else {
-					if (!compareTwoRecord(resultMap.get(key), oldResult)) {
-						resultsAreSame = false;
-						break;
-					}
-				}
-			}
-		}
-		return resultsAreSame;
-	}
-	
-	private boolean compareTwoRecord(GenericRecord newRecord, GenericRecord oldRecord) {
-		boolean recordsAreSame = true;
-		// TODO based on Schema related methods
-		String[] columns = {"Bucket_Display_Name", "Lift", "Percentile", "Probability", "RawScore", "Score"};
-		for (String column : columns) {
-			switch (column) {
-				case "Bucket_Display_Name": 
-					if (!newRecord.get(column).equals(oldRecord.get(column))) {
-						System.out.println("come to the " + column);
-						recordsAreSame = false;
-					}
-					break;
-				case "Lift": 
-					if (!newRecord.get(column).equals(oldRecord.get(column))) {
-						System.out.println("come to the " + column);
-						recordsAreSame = false;
-					}
-					break;
-				case "Percentile": 
-					if (!newRecord.get(column).equals(oldRecord.get(column))) {
-						System.out.println("come to the " + column);
-						recordsAreSame = false;
-					}
-					break;
-				case "Probability": 
-					if (!newRecord.get(column).equals(oldRecord.get(column))) {
-						System.out.println("come to the " + column);
-						recordsAreSame = false;
-					}
-					break;
-				case "RawScore": 
-					if (Math.abs((Double)newRecord.get(column)-(Double)oldRecord.get(column)) > EPS) {
-						System.out.println("come to the " + column);
-						recordsAreSame = false;
-					}
-					break;
-				case "Score": 
-					if (!newRecord.get(column).equals(oldRecord.get(column))) {
-						System.out.println("come to the " + column);
-						recordsAreSame = false;
-					}	
-					break;
-			}
-		}
-		return recordsAreSame;
-	}
-
-	// compare the results
-	//@Test(groups = "unit")
+	@Test(groups = "unit")
 	public void testProcessScoreFiles() {
 		// copy over the score.txt file to the current directory
 		 URL scoreUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/results/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.jsonscoringoutputfile-0.txt");
@@ -371,6 +216,26 @@ public class ScoringMapperPredictUtilTestNG extends ScoringFunctionalTestNGBase 
 		return same;
 	}
 
-	
-	
+	@Test(groups = "unit")
+	public void testEvaluate() {
+		// copy over the test scoring.py file to the current directory
+		URL scoreUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/python/scoring.py");
+		File dest = new File(System.getProperty("user.dir") + "/scoring.py");
+		try {
+			FileUtils.copyURLToFile(scoreUrl, dest);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 
+		// make up models
+		HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
+		models.put("model1", null);
+		models.put("model2", null);
+		String returnedStr = ScoringMapperPredictUtil.evaluate(models);
+		assertTrue(returnedStr.equals("model1model2testEvaluate") || returnedStr.equals("model2model1testEvaluate"), "testEvaluate should pass");
+		
+		// delete the score.txt file to the current directory
+		dest.delete();
+	}	
 }
