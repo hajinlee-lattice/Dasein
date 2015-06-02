@@ -94,7 +94,7 @@ public class DailyFlow {
 
         } catch (PlannerException e) {
             log.error("Cascading failed!", e);
-            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! ", "check " + dellebiEnv
+            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName, "check " + dellebiEnv
                     + " environment. error=" + e);
             dellEbiFlowService.registerFailedFile(context);
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
@@ -102,7 +102,7 @@ public class DailyFlow {
 
         } catch (Exception e) {
             log.error("Daily flow failed!", e);
-            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! ", "check " + dellebiEnv
+            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName, "check " + dellebiEnv
                     + " environment. error=" + e);
             dellEbiFlowService.registerFailedFile(context);
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
