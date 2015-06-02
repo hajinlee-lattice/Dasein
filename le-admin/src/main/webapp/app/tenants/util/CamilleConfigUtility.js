@@ -58,6 +58,14 @@
             }
         };
 
+        this.isReadonly = function(config) {
+            if (config.hasOwnProperty("Metadata") && config.Metadata.hasOwnProperty("Readonly")) {
+                return config.Metadata.Readonly;
+            } else {
+                return false;
+            }
+        };
+
         this.getDerivation = function(config) {
             if (config.hasOwnProperty("Metadata") && config.Metadata.hasOwnProperty("Derived")) {
                 return config.Metadata.Derived;

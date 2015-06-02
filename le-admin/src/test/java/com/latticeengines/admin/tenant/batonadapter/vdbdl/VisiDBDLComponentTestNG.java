@@ -13,6 +13,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
@@ -32,6 +33,9 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private DataStoreProvider dataStoreProvider;
 
     @Value("${admin.test.dl.url}")
     private String dlUrl;
@@ -87,7 +91,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         node.getChild("PermanentStore").getDocument().setData("\\\\" + permStoreServer + "\\VisiDB\\PermanentStore");
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        node.getChild("DataStore").getDocument().setData(dataStoreServer);
+        String datastorePath = dataStoreProvider.toRemoteAddr(dataStoreServer);
+        node.getChild("DataStore").getDocument().setData(datastorePath);
         return confDir;
     }
 

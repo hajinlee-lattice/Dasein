@@ -71,10 +71,9 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         String permanentStoreOption = getChild(configDir, "VisiDB", "PermanentStoreOption").getDocument().getData();
         String permanentStorePath = getChild(configDir, "VisiDB", "PermanentStore").getDocument().getData();
         String ownerEmail = getChild(configDir, "DL", "OwnerEmail").getDocument().getData();
-        String localDataStorePath = getChild(configDir, "DL", "DataStore").getDocument().getData();
+        String dataStorePath = getChild(configDir, "DL", "DataStore").getDocument().getData();
 
-        String dataStorePath = dataStoreProvider.toRemoteAddr(localDataStorePath);
-
+        String dataStoreFolder = dataStoreProvider.toOptionKey(dataStorePath);
         dataStorePath = dataStorePath + "\\" + dmDeployment;
         permanentStorePath = permanentStorePath + "\\" + visiDBServerName.toUpperCase() + "\\" + tenant;
 
@@ -86,6 +85,14 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
             visiDBName = tenant;
             getChild(configDir, "VisiDB", "VisiDBName").getDocument().setData(tenant);
         }
+
+        String dataStoreLaunch = dataStorePath + "\\" + DLFolder.LAUNCH.toPath();
+        getChild(configDir, "DL", "DataStore_Launch").getDocument() .setData(dataStoreLaunch);
+        String dataStoreBackup = dataStorePath + "\\" + DLFolder.BACKUP.toPath();
+        getChild(configDir, "DL", "DataStore_Backup").getDocument() .setData(dataStoreBackup);
+        String dataStoreStatus = dataStorePath + "\\" + DLFolder.STATUS.toPath();
+        getChild(configDir, "DL", "DataStore_Status").getDocument() .setData(dataStoreStatus);
+
 
         int permStoreOpt = MASTER;
         if (permanentStoreOption.equals("Master")) {
@@ -101,7 +108,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
             String errorMessage = response.getErrorMessage();
 
             if (status != SUCCESS && !StringUtils.isEmpty(errorMessage) && errorMessage.contains("does not exist")) {
-                createDataStoreFolder(localDataStorePath, dmDeployment);
+                createDataStoreFolder(dataStoreFolder, dmDeployment);
                 CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, dmDeployment,
                         contractExternalID);
                 builder.tenantAlias(tenantAlias).ownerEmail(ownerEmail).visiDBName(visiDBName)
@@ -109,9 +116,9 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         .createNewVisiDB(Boolean.parseBoolean(createNewVisiDB))
                         .caseSensitive(Boolean.parseBoolean(caseSensitive)).cacheLimit(Integer.parseInt(cacheLimit))
                         .diskspaceLimit(Integer.parseInt(diskspaceLimit))
-                        .backupFolder(dataStorePath + "\\" + DLFolder.BACKUP.toPath())
-                        .launchFolder(dataStorePath + "\\" + DLFolder.LAUNCH.toPath())
-                        .launchStatusFolder(dataStorePath + "\\" + DLFolder.STATUS.toPath())
+                        .backupFolder(dataStoreBackup)
+                        .launchFolder(dataStoreLaunch)
+                        .launchStatusFolder(dataStoreStatus)
                         .permanentStoreOption(permStoreOpt)
                         .permanentStorePath(permanentStorePath);
                 CreateVisiDBDLRequest postRequest = builder.build();

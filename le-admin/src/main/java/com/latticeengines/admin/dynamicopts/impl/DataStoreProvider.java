@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -37,9 +38,17 @@ public class DataStoreProvider implements OptionsProvider {
     }
 
     @Override
-    public List<String> getOptions() { return dirWatcher.getOptions(); }
+    public List<String> getOptions() {
+        List<String> toReturn = new ArrayList<>();
+        for (String option: dirWatcher.getOptions()) {
+            toReturn.add(dirWatcher.toRemoteAddr(option));
+        }
+        return toReturn;
+    }
 
     public String toRemoteAddr(String folder) { return dirWatcher.toRemoteAddr(folder); }
+
+    public String toOptionKey(String remoteAddr) { return dirWatcher.toOptionKey(remoteAddr); }
 
     public void createTenantFolder(String server, String dmDeployment) {
         FileSystem fs = FileSystems.getDefault();
@@ -60,7 +69,7 @@ public class DataStoreProvider implements OptionsProvider {
     }
 
     public enum DLFolder {
-        BACKUP("backup"), LAUNCH("launch"), STATUS("status");
+        BACKUP("Backup"), LAUNCH("Launch"), STATUS("Status");
         private final String path;
         DLFolder(String path) {
             this.path = path;

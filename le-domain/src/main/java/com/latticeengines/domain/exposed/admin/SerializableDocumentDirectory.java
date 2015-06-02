@@ -477,6 +477,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         private String helper;
         private Boolean required = null;
         private DerivedField derived;
+        private Boolean readonly = null;
 
         private ObjectMapper mapper = new ObjectMapper();
         public Metadata() { }
@@ -504,6 +505,12 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         @JsonProperty("Required")
         public void setRequired(Boolean required) { this.required = required; }
+
+        @JsonProperty("Readonly")
+        public Boolean isReadonly() { return readonly; }
+
+        @JsonProperty("Readonly")
+        public void setReadonly(Boolean readonly) { this.readonly = readonly; }
 
         @JsonProperty("Helper")
         public String getHelper() { return helper; }

@@ -3,8 +3,13 @@ package com.latticeengines.admin.dynamicopts.impl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Properties;
+
+import org.apache.commons.io.IOUtils;
+
 
 public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider {
 
@@ -21,6 +26,15 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
 
     public String toRemoteAddr(String key) { return mountMap.getProperty(key, defaultMntPnt); }
 
+    public String toOptionKey(String remoteAddr) {
+        for(Map.Entry<Object, Object> entry: mountMap.entrySet()){
+            if ((entry.getValue()).equals(remoteAddr)) {
+                return (String) entry.getKey();
+            }
+        }
+        return null;
+    }
+
     public String getAbsoluteRoot() { return this.absoluteRoot; }
 
     private void loadMountMap() {
@@ -29,7 +43,7 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
         try {
             input = new FileInputStream(this.path + "/.mtable");
             // load mount table file
-            mountMap.load(input);
+            mountMap.load(new StringReader(IOUtils.toString(input).replace("\\", "\\\\")));
         } catch (IOException ex) {
             // ignore
         } finally {

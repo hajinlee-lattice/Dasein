@@ -37,17 +37,18 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     //==================================================
     // system-wise options
     //==================================================
-    $scope.availableProducts = ["Lead Prioritization"];
-    $scope.availableTopologies = ["Marketo"];
-    $scope.availableDLAddresses = ["http://bodcdevvint207.dev.lattice.local:8081"];
-    $scope.availableTemplatePath = ["/etc/template"];
+    $scope.availableProducts = [];
+    $scope.availableTopologies = [];
+    $scope.availableDLAddresses = [];
     $scope.services = [];
     updateSpaceConfigurationOptions();
 
+    //==================================================
+    // initialization
+    //==================================================
     $scope.accordion = _.map($scope.services, function(){
         return { open: false, disabled: false };
     });
-
     $scope.components = [];
     $scope.isValid = {valid: true};
 

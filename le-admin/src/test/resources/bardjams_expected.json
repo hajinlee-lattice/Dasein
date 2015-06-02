@@ -1,91 +1,201 @@
 {
-  "RootPath": "/",
-  "Nodes": [
+  "RootPath":"/",
+  "Nodes":[
     {
-      "Node": "Active",
-      "Data": "1",
-      "Metadata": {"Type": "number"}
+      "Node":"Active",
+      "Data":"1",
+      "Metadata":{
+        "Type":"number",
+        "Readonly":true
+      }
     },
     {
-      "Node": "Agent_Name",
-      "Data": "10.51.1.131"
+      "Node":"Agent_Name",
+      "Data":"10.51.1.131",
+      "Metadata":{
+        "Type":"string",
+        "Required":true
+      }
     },
     {
-      "Node": "DL_Password",
-      "Data": "adm1nDLpr0d",
-      "Metadata": {"Type":"password"}
+      "Node":"DL_Password",
+      "Data":"adm1nDLpr0d",
+      "Metadata":{
+        "Type":"password",
+        "Readonly":true
+      }
     },
     {
-      "Node": "DL_URL",
-      "Data": "https://dataloader-prod.lattice-engines.com/Dataloader_PLS"
+      "Node":"DL_TenantName",
+      "Data":"",
+      "Metadata":{
+        "Type":"string",
+        "Derived":{
+          "Expression":"scope.tenantId"
+        }
+      }
     },
     {
-      "Node": "DL_User",
-      "Data": "admin.dataloader@lattice-engines.com"
+      "Node":"DL_URL",
+      "Data":"",
+      "Metadata":{
+        "Type":"string",
+        "Derived":{
+          "Expression":"scope.spaceConfig.DL_Address"
+        }
+      }
     },
     {
-      "Node": "DanteManifestPath",
-      "Data": ""
+      "Node":"DL_User",
+      "Data":"admin.dataloader@lattice-engines.com",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "DanteTool_Path",
-      "Data": ""
+      "Node":"DanteManifestPath",
+      "Data":"",
+      "Metadata":{
+        "Type":"string",
+        "Derived":{
+          "Expression":"\"{0}\" + \"\\\\\" + scope.tenantId + \"\\\\Launch\"",
+          "Parameters":[
+            {
+              "Component":"VisiDBDL",
+              "NodePath":"/DL/DataStore"
+            }
+          ]
+        }
+      }
     },
     {
-      "Node": "Dante_Queue_Name",
-      "Data": ""
+      "Node":"DanteTool_Path",
+      "Data":"C:\\Lattice\\Dante3\\Tools\\bin\\",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "DataLoaderTools_Path",
-      "Data": ""
+      "Node":"Dante_Queue_Name",
+      "Data":"",
+      "Metadata":{
+        "Type":"string",
+        "Helper":"Leave it blank to use \"$tenantId_Dante_Queue\""
+      }
     },
     {
-      "Node": "Data_ArchivePath",
-      "Data": ""
+      "Node":"DataLoaderTools_Path",
+      "Data":"C:\\LEO\\DLTools\\",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "Data_LaunchPath",
-      "Data": ""
+      "Node":"Data_ArchivePath",
+      "Data":"",
+      "Metadata":{
+        "Type":"string",
+        "Derived":{
+          "Expression":"\"{0}\" + \"\\\\\" + scope.tenantId + \"\\\\Backup\"",
+          "Parameters":[
+            {
+              "Component":"VisiDBDL",
+              "NodePath":"/DL/DataStore"
+            }
+          ]
+        }
+      }
     },
     {
-      "Node": "ImmediateFolderStruct",
-      "Data": "DanteTesting\\Immediate"
+      "Node":"Data_LaunchPath",
+      "Data":"",
+      "Metadata":{
+        "Type":"string",
+        "Derived":{
+          "Expression":"\"{0}\" + \"\\\\\" + scope.tenantId + \"\\\\Launch\"",
+          "Parameters":[
+            {
+              "Component":"VisiDBDL",
+              "NodePath":"/DL/DataStore"
+            }
+          ]
+        }
+      }
     },
     {
-      "Node": "JAMSUser",
-      "Data": "PROD\\s-jams"
+      "Node":"ImmediateFolderStruct",
+      "Data":"DanteTesting\\Immediate",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "LoadGroupList",
-      "Data": ""
+      "Node":"JAMSUser",
+      "Data":"PROD\\s-jams",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "NotificationEmail",
-      "Data": ""
+      "Node":"NotificationEmail",
+      "Data":"platformoperations@lattice-engines.com",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "NotifyEmailJob",
-      "Data": "DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL"
+      "Node":"NotifyEmailJob",
+      "Data":"DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "Queue_Name",
-      "Data": ""
+      "Node":"Queue_Name",
+      "Data":"",
+      "Metadata":{
+        "Type":"string",
+        "Helper":"Leave it blank to use \"$tenantId_Queue\""
+      }
     },
     {
-      "Node": "ScheduledFolderStruct",
-      "Data": "DataLoader\\DL TEST\\Scheduled Jobs"
+      "Node":"ScheduledFolderStruct",
+      "Data":"DataLoader\\DL TEST\\Scheduled Jobs",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "TenantType",
-      "Data": "P"
+      "Node":"TenantType",
+      "Data":"P",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "WeekdaySchedule_Name",
-      "Data": ""
+      "Node":"WeekdaySchedule_Name",
+      "Data":"All_Weekday",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     },
     {
-      "Node": "WeekendSchedule_Name",
-      "Data": ""
+      "Node":"WeekendSchedule_Name",
+      "Data":"All_Weekend",
+      "Metadata":{
+        "Type":"string",
+        "Readonly":true
+      }
     }
   ]
 }

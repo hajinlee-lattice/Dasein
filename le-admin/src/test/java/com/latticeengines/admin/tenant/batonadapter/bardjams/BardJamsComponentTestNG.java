@@ -62,7 +62,7 @@ public class BardJamsComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
         vdbdlConfig = visiDBDLComponentTestNG.constructVisiDBDLInstaller();
-        jamsConfig = new SerializableDocumentDirectory(getOverrideProperties());
+        jamsConfig = serviceService.getDefaultServiceConfig(BardJamsComponent.componentName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
         jamsConfig.applyMetadata(metaDir);
         jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
@@ -111,12 +111,12 @@ public class BardJamsComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     public void testConvertDocDirToTenant() {
         // send to bootstrapper message queue
         DocumentDirectory confDir = SerializableDocumentDirectory.deserialize(jamsConfig);
+
         BardJamsTenant tenant = BardJamsComponent.getTenantFromDocDir(confDir, tenantId, spaceConfig, vdbdlConfig);
         verifyTenantCRUD(tenant);
 
         // construct from overwritten properties
-        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(getOverrideProperties());
-        confDir = SerializableDocumentDirectory.deserialize(sDir);
+        confDir = SerializableDocumentDirectory.deserialize(jamsConfig);
         tenant = BardJamsComponent.getTenantFromDocDir(confDir, tenantId, spaceConfig, vdbdlConfig);
         verifyTenantCRUD(tenant);
     }

@@ -23,7 +23,6 @@ import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
-import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponentDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentTestNG;
@@ -217,8 +216,8 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         spaceConfiguration.setTopology(CRMTopology.ELOQUA);
 
         // BARDJAMS
-        SerializableDocumentDirectory jamsConfig = new SerializableDocumentDirectory(
-                BardJamsComponentDeploymentTestNG.getOverrideProperties());
+        SerializableDocumentDirectory jamsConfig
+                = serviceService.getDefaultServiceConfig(BardJamsComponent.componentName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
         jamsConfig.applyMetadata(metaDir);
         jamsConfig.setRootPath("/" + BardJamsComponent.componentName);

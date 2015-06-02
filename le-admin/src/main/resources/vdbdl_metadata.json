@@ -42,7 +42,38 @@
           {
             "Node": "DataStore",
             "Data": {"Type": "options", "Options": [], "DynamicOptions": true}
+          },
+          { "Node": "DataStore_Launch", "Data": {
+              "Type": "string",
+              "Derived": {
+                "Expression": "\"{0}\" + \"\\\\\" + scope.tenantId + \"\\\\Launch\"",
+                "Parameters": [
+                  {"Component": "VisiDBDL", "NodePath": "/DL/DataStore"}
+                ]
+              }
+            }
+          },
+          { "Node": "DataStore_Backup", "Data": {
+            "Type": "string",
+            "Derived": {
+              "Expression": "\"{0}\" + \"\\\\\" + scope.tenantId + \"\\\\Backup\"",
+              "Parameters": [
+                {"Component": "VisiDBDL", "NodePath": "/DL/DataStore"}
+              ]
+            }
           }
+          },
+          { "Node": "DataStore_Status", "Data": {
+            "Type": "string",
+            "Derived": {
+              "Expression": "\"{0}\" + \"\\\\\" + scope.tenantId + \"\\\\Status\"",
+              "Parameters": [
+                {"Component": "VisiDBDL", "NodePath": "/DL/DataStore"}
+              ]
+            }
+          }
+          },
+          { "Node": "OwnerEmail", "Data": {"Type": "string", "Required": true}}
         ]
       }
     ]

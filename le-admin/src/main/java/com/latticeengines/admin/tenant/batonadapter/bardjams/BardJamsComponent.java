@@ -87,46 +87,61 @@ public class BardJamsComponent extends LatticeComponent {
     public static BardJamsTenant getTenantFromDocDir(DocumentDirectory dir, String tenantId,
                                                      SpaceConfiguration spaceConfig, DocumentDirectory vdbdlConfig) {
         BardJamsTenant tenant = new BardJamsTenant();
-        tenant.setTenant(tenantId);
-        tenant.setTenantType(dir.getChild("TenantType").getDocument().getData());
+        dir.makePathsLocal();
 
-        tenant.setDlTenantName(tenantId);
-        tenant.setDlUrl(spaceConfig.getDlAddress());
+        //==================================================
+        // hardcoded
+        //==================================================
+        tenant.setTenantType(dir.getChild("TenantType").getDocument().getData());
         tenant.setDlUser(dir.getChild("DL_User").getDocument().getData());
         tenant.setDlPassword(dir.getChild("DL_Password").getDocument().getData());
-
         tenant.setNotificationEmail(dir.getChild("NotificationEmail").getDocument().getData());
         tenant.setNotifyEmailJob(dir.getChild("NotifyEmailJob").getDocument().getData());
-
         tenant.setJamsUser(dir.getChild("JAMSUser").getDocument().getData());
-
         tenant.setImmediateFolderStruct(dir.getChild("ImmediateFolderStruct").getDocument().getData());
         tenant.setScheduledFolderStruct(dir.getChild("ScheduledFolderStruct").getDocument().getData());
-        tenant.setDanteManifestPath(dir.getChild("DanteManifestPath").getDocument().getData());
-
-        tenant.setQueueName(dir.getChild("Queue_Name").getDocument().getData());
-        tenant.setAgentName(dir.getChild("Agent_Name").getDocument().getData());
-
+        tenant.setDataLoaderToolsPath(dir.getChild("DataLoaderTools_Path").getDocument().getData());
+        tenant.setDanteToolPath(dir.getChild("DanteTool_Path").getDocument().getData());
         tenant.setWeekdayScheduleName(dir.getChild("WeekdaySchedule_Name").getDocument().getData());
         tenant.setWeekendScheduleName(dir.getChild("WeekendSchedule_Name").getDocument().getData());
 
-        tenant.setDataLaunchPath(dir.getChild("Data_LaunchPath").getDocument().getData());
-        tenant.setDataArchivePath(dir.getChild("Data_ArchivePath").getDocument().getData());
-        tenant.setDataLoaderToolsPath(dir.getChild("DataLoaderTools_Path").getDocument().getData());
-        tenant.setDanteToolPath(dir.getChild("DanteTool_Path").getDocument().getData());
-
-        String active = null;
-        try {
-            active = dir.getChild("Active").getDocument().getData();
-        } catch (NullPointerException e) {
-            // ignore
-        }
-        if (active != null) { tenant.setActive(Integer.parseInt(active)); }
-
-        tenant.setDanteQueueName(dir.getChild("Dante_Queue_Name").getDocument().getData());
-        tenant.setLoadGroupList(dir.getChild("LoadGroupList").getDocument().getData());
+        String active = dir.getChild("Active").getDocument().getData();
+        tenant.setActive(Integer.parseInt(active));
 
         tenant.setStatus(BardJamsTenantStatus.NEW.getStatus());
+
+        //==================================================
+        // derived
+        //==================================================
+        tenant.setTenant(tenantId);
+
+        tenant.setDlTenantName(getDataWithFailover(dir.getChild("DL_TenantName").getDocument().getData(), tenantId));
+
+        tenant.setDlUrl(getDataWithFailover(dir.getChild("DL_URL").getDocument().getData(),
+                spaceConfig.getDlAddress()));
+
+        tenant.setDanteManifestPath(getDataWithFailover(dir.getChild("DanteManifestPath").getDocument().getData(),
+                vdbdlConfig.get("/DL/DataStore_Launch").getDocument().getData()));
+
+        tenant.setDataLaunchPath(getDataWithFailover(dir.getChild("Data_LaunchPath").getDocument().getData(),
+                vdbdlConfig.get("/DL/DataStore_Launch").getDocument().getData()));
+
+        tenant.setDataArchivePath(getDataWithFailover(dir.getChild("Data_ArchivePath").getDocument().getData(),
+                vdbdlConfig.get("/DL/DataStore_Backup").getDocument().getData()));
+
+        //==================================================
+        // configurable
+        //==================================================
+        tenant.setQueueName(getDataWithFailover(dir.getChild("Queue_Name").getDocument().getData(),
+                tenantId + "_Queue"));
+        dir.getChild("Queue_Name").getDocument().setData(tenant.getQueueName());
+
+        tenant.setDanteQueueName(getDataWithFailover(dir.getChild("Dante_Queue_Name").getDocument().getData(),
+                tenantId + "_Dante_Queue"));
+        dir.getChild("Queue_Name").getDocument().setData(tenant.getDanteQueueName());
+
+        tenant.setAgentName(dir.getChild("Agent_Name").getDocument().getData());
+
         return tenant;
     }
 

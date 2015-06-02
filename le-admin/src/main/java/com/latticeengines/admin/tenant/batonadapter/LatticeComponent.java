@@ -9,6 +9,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
@@ -149,6 +150,14 @@ public abstract class LatticeComponent implements HasName, GraphNode {
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(confDir);
         sDir.applyMetadata(metaDir);
         return sDir;
+    }
+
+    protected static String getDataWithFailover(String data, String failover) {
+        if (data == null || StringUtils.isEmpty(data)) {
+            return failover;
+        } else {
+            return data;
+        }
     }
 
     @Override

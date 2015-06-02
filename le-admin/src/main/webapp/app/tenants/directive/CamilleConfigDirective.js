@@ -67,7 +67,7 @@ app.directive('configEntry', function(){
                     // emit a signal to TenantConfigCtrl to evaluate the derivation
                     function callback(value) { $scope.config.Data = value; }
                     $rootScope.$broadcast("CALC_DERIVED", {derivation: derivation, callback: callback});
-                    console.log($scope.config.Node + " is updated: " + $scope.config.Data);
+                    console.debug($scope.config.Node + " is updated: " + $scope.config.Data);
                 };
 
                 $scope.$on("UPDATE_DERIVED", function(){
@@ -75,8 +75,11 @@ app.directive('configEntry', function(){
                 });
             }
 
-            $scope.isInput = !$scope.isDerived && CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
-            if ($scope.isInput) {
+            $scope.isReadonly = CamilleConfigUtility.isReadonly($scope.config);
+
+            $scope.isInput = !$scope.isDerived && !$scope.isReadonly
+                && CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
+            if ($scope.isInput || $scope.isDerived || $scope.isReadonly) {
                 if (CamilleConfigUtility.isNumber($scope.type)) {
                     $scope.inputType = "number";
                     $scope.config.Data = parseFloat($scope.config.Data);

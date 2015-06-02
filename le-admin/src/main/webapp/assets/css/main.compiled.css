@@ -1,262 +1,193 @@
-@default: #477CBA;
-@defaultLighter: #A3BEDC;
-@primary: #e96339;
-
-@master-width: 1024px;
-
 body {
   font-family: 'Open Sans', Verdana, Arial, sans-serif;
   color: black;
   font-size: 10pt;
   background-color: white;
 }
-
 h1.logo-title {
   font-family: 'Squada One', sans-serif;
   text-transform: uppercase;
 }
-
 header {
-  // background-color: @default;
-  box-shadow:1px 0 3px rgba(0,0,0,.25);
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.25);
   background: #477cba url(/assets/img/bg_header.jpg) no-repeat bottom right;
-
-  h1 {
-    margin: 0;
-    line-height: 140%;
-    color: white;
-  }
 }
-
-section.container,  {
-  max-width: @master-width;
+header h1 {
+  margin: 0;
+  line-height: 140%;
+  color: white;
 }
-
+section.container {
+  max-width: 1024px;
+}
 a.logo {
   position: absolute;
   top: 5px;
   left: 5px;
-
-  img {
-    height: 24px;
-  }
-
 }
-
+a.logo img {
+  height: 24px;
+}
 nav {
   font-size: 12pt;
-
-  li.dropdown {
-    a:hover {
-      cursor: pointer;
-    }
-  }
 }
-
+nav li.dropdown a:hover {
+  cursor: pointer;
+}
 .login-title {
   font-size: 28pt;
   margin-top: 100px;
-  color: @default;
+  color: #477cba;
 }
-
 .login-form {
   margin-top: 30px;
   margin-left: auto;
   margin-right: auto;
   width: 450px;
-  border: 3px solid @default;
+  border: 3px solid #477cba;
   -webkit-border-radius: 10px;
   -moz-border-radius: 10px;
   border-radius: 10px;
   padding: 30px;
-
-  h2 {
-    text-align: center;
-    margin: 0 0 20px 0;
-    img {
-      height: 50px;
-    }
-  }
-
-  .control-label {
-    font-size: small;
-  }
-
-  .button-row {
-    margin-top: 10px;
-  }
-
-  .alert {
-    margin: 5px 0;
-  }
-
 }
-
+.login-form h2 {
+  text-align: center;
+  margin: 0 0 20px 0;
+}
+.login-form h2 img {
+  height: 50px;
+}
+.login-form .control-label {
+  font-size: small;
+}
+.login-form .button-row {
+  margin-top: 10px;
+}
+.login-form .alert {
+  margin: 5px 0;
+}
 .tenants-grid {
   font-size: 9pt;
-
-  tr:hover {
-    background-color: @defaultLighter;
-    cursor: pointer;
-  }
 }
-
-
-.tenant-info-panel {
-  h4 {
-    color: @primary;
-  }
-
-  div.col .form-control {
-    margin: 5px;
-  }
-
-  div.col textarea.form-control {
-    width: 95%;
-  }
-
-  .form-feature-flags {
-    width: 100%;
-    margin-left: auto;
-
-    input.checkbox {
-      margin: 5px 10px 5px 10px;
-    }
-
-  }
-
-  .feature-flag {
-    margin: 15px;
-  }
+.tenants-grid tr:hover {
+  background-color: #a3bedc;
+  cursor: pointer;
 }
-
-.tenant-config {
-  .form-control {
-    width: 55%;
-    margin: 0 10px;
-  }
-  .component-status {
-    margin-left: 25px;
-  }
-  .required-mark {
-    font-weight: bold;
-    color: red;
-  }
+.tenant-info-panel h4 {
+  color: #e96339;
 }
-
-.config-entry {
-  .form-control {
-    margin: 5px;
-  }
-  .checkbox {
-    margin: 10px;
-  }
-  .alert {
-    height: 10px;
-  }
-  b {
-    font-size: 10pt;
-  }
-
-  label.control-label {
-    font-size: 10pt;
-    width: 180px;
-  }
-  label.derived-label,label.readonly-label {
-    margin: 10px;
-    width: 75%;
-  }
+.tenant-info-panel div.col .form-control {
+  margin: 5px;
 }
-
-.space-config, .tenant-info {
-  label.control-label {
-    font-size: 10pt;
-    width: 150px;
-  }
+.tenant-info-panel div.col textarea.form-control {
+  width: 95%;
 }
-
+.tenant-info-panel .form-feature-flags {
+  width: 100%;
+  margin-left: auto;
+}
+.tenant-info-panel .form-feature-flags input.checkbox {
+  margin: 5px 10px 5px 10px;
+}
+.tenant-info-panel .feature-flag {
+  margin: 15px;
+}
+.tenant-config .form-control {
+  width: 55%;
+  margin: 0 10px;
+}
+.tenant-config .component-status {
+  margin-left: 25px;
+}
+.tenant-config .required-mark {
+  font-weight: bold;
+  color: red;
+}
+.config-entry .form-control {
+  margin: 5px;
+}
+.config-entry .checkbox {
+  margin: 10px;
+}
+.config-entry .alert {
+  height: 10px;
+}
+.config-entry b {
+  font-size: 10pt;
+}
+.config-entry label.control-label {
+  font-size: 10pt;
+  width: 180px;
+}
+.config-entry label.derived-label,
+.config-entry label.readonly-label {
+  margin: 10px;
+  width: 75%;
+}
+.space-config label.control-label,
+.tenant-info label.control-label {
+  font-size: 10pt;
+  width: 150px;
+}
 .readonly-config-entry {
   margin: 5px 0;
-  .node {
-    font-weight: bold;
-    color: @default;
-    font-size: 10pt;
-  }
 }
-
+.readonly-config-entry .node {
+  font-weight: bold;
+  color: #477cba;
+  font-size: 10pt;
+}
 table.readonly-table {
   width: 100%;
-
-  .node {
-    font-weight: bold;
-    color: @default;
-    font-size: 10pt;
-  }
-
-  td.readonly-label {
-    width: 200px;
-  }
-
 }
-
-.list-entry-form {
-
-  .input-group {
-    margin: 5px;
-
-    .form-control {
-      margin: 0;
-    }
-  }
-
-  .control-label {
-    .btn {
-      padding: 6px 9px;
-      border: none;
-    }
-  }
+table.readonly-table .node {
+  font-weight: bold;
+  color: #477cba;
+  font-size: 10pt;
 }
-
+table.readonly-table td.readonly-label {
+  width: 200px;
+}
+.list-entry-form .input-group {
+  margin: 5px;
+}
+.list-entry-form .input-group .form-control {
+  margin: 0;
+}
+.list-entry-form .control-label .btn {
+  padding: 6px 9px;
+  border: none;
+}
 .file-downloader {
   margin-left: 2em;
 }
-
 img.error-image {
   width: 400px;
 }
-
 i.component-status {
   margin-right: 1em;
 }
-
 .btn {
   font-weight: bold;
   text-transform: uppercase;
 }
-
 .btn:disabled {
   background: #ccc;
   color: #aaa;
   border-color: #aaa;
 }
-
 #add-new-model-btn {
   margin: 10px 0;
 }
-
-.add-tenant-form {
-  .control-label{
-    width: 20%;
-  }
-
-  .form-control {
-    width: 75%;
-    margin: 5px;
-  }
+.add-tenant-form .control-label {
+  width: 20%;
 }
-
+.add-tenant-form .form-control {
+  width: 75%;
+  margin: 5px;
+}
 .btn-primary {
-  background:@primary;
+  background: #e96339;
 }
 .btn-primary:hover {
   background: #f35321;
@@ -267,10 +198,10 @@ i.component-status {
 .btn-primary:focus {
   background: #e96339;
 }
-
 .btn-default {
   background: #477CBA;
-  text-transform: uppercase;}
+  text-transform: uppercase;
+}
 .btn-default:hover {
   background: #3d7fcd;
   color: #fff;
@@ -281,15 +212,12 @@ i.component-status {
 .btn-default:focus {
   background: #477CBA;
 }
-
 a.accordion-toggle {
   text-decoration: none;
 }
-
 div.panel-heading:hover {
-  background-color: @defaultLighter;
+  background-color: #a3bedc;
 }
-
 /*
 Spinner
 */
