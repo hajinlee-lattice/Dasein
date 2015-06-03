@@ -138,8 +138,8 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         }
     }
 
-    private void createDataStoreFolder(String localDataStorePath, String dmDeployment) {
-        dataStoreProvider.createTenantFolder(localDataStorePath, dmDeployment);
+    private void createDataStoreFolder(String dataStoreFolder, String dmDeployment) {
+        dataStoreProvider.createTenantFolder(dataStoreFolder, dmDeployment);
     }
 
     public DLRestResult getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers, String dlUrl)
