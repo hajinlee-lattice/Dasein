@@ -1,6 +1,5 @@
 package com.latticeengines.admin.dynamicopts.impl;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,9 +70,7 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
     @Override
     public SerializableDocumentDirectory bind(SerializableDocumentDirectory sDir) {
-        Iterator<SerializableDocumentDirectory.Node> iter = sDir.getDepthFirstIterator();
-        while(iter.hasNext()) {
-            SerializableDocumentDirectory.Node node = iter.next();
+        for (SerializableDocumentDirectory.Node node: sDir) {
             Path fullPath = new Path(sDir.getRootPath()).append(node.path);
             if (optionMap.containsKey(fullPath)) {
                 OptionsProvider provider = optionMap.get(fullPath);
