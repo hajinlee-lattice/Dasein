@@ -12,5 +12,5 @@ public interface DataLoaderService {
 
     InstallResult setSegments(String tenantName, String dlUrl, List<Segment> segments);
 
-    InstallResult installVisiDBTemplate(InstallTemplateRequest request, String dlUrl);
+    InstallResult installVisiDBStructureFile(InstallTemplateRequest request, String dlUrl);
 }

@@ -11,6 +11,7 @@
         <le.baton.version>1.0.33-SNAPSHOT</le.baton.version>
         <le.common.version>1.0.33-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.33-SNAPSHOT</le.domain.version>
+        <le.remote.version>1.0.33-SNAPSHOT</le.remote.version>
         <le.camille.version>1.0.33-SNAPSHOT</le.camille.version>
 	    <le.db.version>1.0.33-SNAPSHOT</le.db.version>
         <le.security.version>1.0.33-SNAPSHOT</le.security.version>
@@ -113,7 +114,7 @@
             </build>
         </profile>
     </profiles>
-    
+
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
@@ -213,6 +214,11 @@
                 <artifactId>jetty-util</artifactId>
             </exclusion>
         </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${le.remote.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

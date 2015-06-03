@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.remote.exposed.service.Headers;
 
 public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
@@ -74,7 +75,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         try {
             String str = IOUtils.toString(new BOMInputStream(new FileInputStream(visiDBTemplate)));
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
-            InstallResult response = installVisiDBTemplate(request, getHeaders(), dlUrl);
+            InstallResult response = installVisiDBTemplate(request, Headers.getHeaders(), dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {
                 log.info("Template " + topology.name() + " has successfully been installed!");
             } else {

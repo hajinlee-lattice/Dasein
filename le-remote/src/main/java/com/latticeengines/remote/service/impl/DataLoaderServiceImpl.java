@@ -180,7 +180,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         spec.append(SPEC_POSTFIX);
 
         InstallTemplateRequest request = new InstallTemplateRequest(tenantName, spec.toString());
-        InstallResult result = installVisiDBTemplate(request, dlUrl);
+        InstallResult result = installVisiDBStructureFile(request, dlUrl);
         if (result.getStatus() != 3 && result.getErrorMessage() != null) {
             throw new LedpException(LedpCode.LEDP_21001, new String[] { String.valueOf(result.getStatus()),
                     result.getErrorMessage() });
@@ -198,7 +198,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return Strings.isNullOrEmpty(segment.getModelId()) ? UNINITIALIZED_MODELID : segment.getModelId();
     }
 
-    public InstallResult installVisiDBTemplate(InstallTemplateRequest request, String dlUrl) {
+    public InstallResult installVisiDBStructureFile(InstallTemplateRequest request, String dlUrl) {
         String jsonStr = JsonUtils.serialize(request);
         String response = "";
         try {

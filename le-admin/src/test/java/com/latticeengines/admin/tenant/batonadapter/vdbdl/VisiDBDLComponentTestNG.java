@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
+import com.latticeengines.remote.exposed.service.Headers;
 import com.latticeengines.security.exposed.Constants;
 
 @Component
@@ -144,9 +145,8 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     public InstallResult deleteVisiDBDLTenant(String tenant) throws IOException {
         DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
         String jsonStr = JsonUtils.serialize(request);
-        VisiDBDLInstaller installer = new VisiDBDLInstaller();
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
-                false, installer.getHeaders(), jsonStr);
+                false, Headers.getHeaders(), jsonStr);
         return JsonUtils.deserialize(response, InstallResult.class);
     }
 

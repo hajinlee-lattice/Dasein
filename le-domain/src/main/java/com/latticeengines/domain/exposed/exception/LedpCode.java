@@ -128,7 +128,7 @@ public enum LedpCode {
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),
     LEDP_21001("Problem installing segment spec; DataLoader result code:{0}, error message{1}"),
-    LEDP_21002("Problem sending REST request to DataLoader:{0}"),
+    LEDP_21002("Problem installing VisiDB structure file via DataLoader REST:{0}"),
     LEDP_21003("Problem updating segments.  Updated segment names {0} does not match existing segment names {1}");
 
     private String message;

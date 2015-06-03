@@ -1,7 +1,5 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
-import static com.latticeengines.admin.dynamicopts.impl.DataStoreProvider.DLFolder;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -12,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
+import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider.DLFolder;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
@@ -24,6 +23,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.remote.exposed.service.Headers;
 
 public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
@@ -103,7 +103,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
         GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant);
         try {
-            InstallResult response = getTenantInfo(getRequest, getHeaders(), dlUrl);
+            InstallResult response = getTenantInfo(getRequest, Headers.getHeaders(), dlUrl);
             int status = response.getStatus();
             String errorMessage = response.getErrorMessage();
 
@@ -122,7 +122,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                         .permanentStoreOption(permStoreOpt)
                         .permanentStorePath(permanentStorePath);
                 CreateVisiDBDLRequest postRequest = builder.build();
-                response = createTenant(postRequest, getHeaders(), dlUrl);
+                response = createTenant(postRequest, Headers.getHeaders(), dlUrl);
                 status = response.getStatus();
                 if (status != SUCCESS) {
                     throw new LedpException(LedpCode.LEDP_18032, new String[]{StringEscapeUtils.escapeJava(response.getErrorMessage())});
@@ -146,7 +146,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
             throws IOException {
         String jsonString = JsonUtils.serialize(getRequest);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
-                dlUrl + "/DLRestService/GetDLTenantSettings", true, getHeaders(), jsonString);
+                dlUrl + "/DLRestService/GetDLTenantSettings", true, Headers.getHeaders(), jsonString);
         return JsonUtils.deserialize(response, InstallResult.class);
     }
 
