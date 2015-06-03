@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -237,6 +238,7 @@ public class ScoringMapperTransformUtil {
     }
     
     public static void writeToLeadInputFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, int threshold) {
+    	log.info("threshold is " + threshold);
     	if (leadInputRecordMap == null) {
     		new Exception("leadInputRecordMap is null");
     	}
@@ -256,7 +258,8 @@ public class ScoringMapperTransformUtil {
 	    	log.info("Filename is " + leadInputFileName);
 			File file = new File(leadInputFileName);
 			BufferedWriter bw = null;
-			bw = new BufferedWriter(new FileWriter(file));
+			bw = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(file), "UTF8"));
 	    	for (int i = 0; i < leadInputRecords.size(); i++) {
 	    		count++;
 	    		bw.write(leadInputRecords.get(i));
@@ -283,10 +286,11 @@ public class ScoringMapperTransformUtil {
     
 	public static void main(String[] args) throws Exception {
 		String type = "Float";
-		String value = "123.00";
+		String value = "'123.00'wx";
 		
 		String typeAndValue = type + "|\'" + value + "\'";
 		String trpeAndValue2 = String.format("%s|\'%s\'", type, value);
+		System.out.println(value);
 		if (typeAndValue.equals(trpeAndValue2)) {
 			System.out.println("jaja");
 		}

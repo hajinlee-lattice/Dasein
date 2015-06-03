@@ -58,7 +58,7 @@ public class ValidationResult
 		if (df == null && mf == null) {
 			return true;
 		} else if (df == null && mf != null) {
-			return modelFailures.size() == 0;
+			return mf.size() == 0;
 		} else if (df != null && mf == null) {
 			return df.size() == 0;
 		} else {

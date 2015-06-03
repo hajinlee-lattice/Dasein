@@ -320,7 +320,6 @@ public class ScoringMapperPredictUtil {
 		try {
 			dataFileReader = new DataFileReader<ModelEvaluationResult>(outputFile, reader);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		ModelEvaluationResult result = null;
@@ -333,7 +332,6 @@ public class ScoringMapperPredictUtil {
 		try {
 			dataFileReader.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
