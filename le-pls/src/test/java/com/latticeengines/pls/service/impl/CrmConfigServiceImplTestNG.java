@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.admin.InstallTemplateRequest;
+import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;

@@ -16,12 +16,12 @@ import com.latticeengines.admin.service.impl.ComponentOrchestrator;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
-import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.dataloader.InstallResult;
 
 public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
@@ -89,7 +89,7 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException, IOException {
-        DLRestResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
+        InstallResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
 

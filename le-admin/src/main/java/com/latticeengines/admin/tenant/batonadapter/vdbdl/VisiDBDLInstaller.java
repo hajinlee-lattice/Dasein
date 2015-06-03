@@ -17,11 +17,11 @@ import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
-import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -103,7 +103,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
         GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant);
         try {
-            DLRestResult response = getTenantInfo(getRequest, getHeaders(), dlUrl);
+            InstallResult response = getTenantInfo(getRequest, getHeaders(), dlUrl);
             int status = response.getStatus();
             String errorMessage = response.getErrorMessage();
 
@@ -142,20 +142,20 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         dataStoreProvider.createTenantFolder(dataStoreFolder, dmDeployment);
     }
 
-    public DLRestResult getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers, String dlUrl)
+    public InstallResult getTenantInfo(GetVisiDBDLRequest getRequest, List<BasicNameValuePair> headers, String dlUrl)
             throws IOException {
         String jsonString = JsonUtils.serialize(getRequest);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
                 dlUrl + "/DLRestService/GetDLTenantSettings", true, getHeaders(), jsonString);
-        return JsonUtils.deserialize(response, DLRestResult.class);
+        return JsonUtils.deserialize(response, InstallResult.class);
     }
 
-    public DLRestResult createTenant(CreateVisiDBDLRequest postRequest, List<BasicNameValuePair> headers, String dlUrl)
+    public InstallResult createTenant(CreateVisiDBDLRequest postRequest, List<BasicNameValuePair> headers, String dlUrl)
             throws IOException {
         String jsonString = JsonUtils.serialize(postRequest);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/CreateDLTenant",
                 false, headers, jsonString);
-        return JsonUtils.deserialize(response, DLRestResult.class);
+        return JsonUtils.deserialize(response, InstallResult.class);
     }
 
 }

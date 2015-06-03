@@ -531,6 +531,64 @@ angular.module('mainApp.models.services.ModelService', [
         return deferred.promise;
     };
     
+    this.UpdateSegments = function (segments) {
+        var deferred = $q.defer();
+        var result;
+        if (segments == null) {
+            deferred.resolve(result);
+            return deferred.promise;
+        }
+        
+        for (var i = 0; i < segments.length; i++) {
+            if (segments[i].ModelId == "FAKE_MODEL") {
+                segments[i].ModelId = "";
+            }
+        }        
+
+        $http({
+            method: 'POST',
+            url: '/pls/segments/list',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data: segments
+        })
+        .success(function(data, status, headers, config) {
+            if (data == null) {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+                deferred.resolve(result);
+            } else {
+                result = {
+                    success: data.Success,
+                    resultObj: {},
+                    resultErrors: null
+                };
+                if (result.success === false) {
+                    result.resultErrors = data.Errors[0];
+                }
+                
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            result = {
+                success: false,
+                resultObj: null,
+                resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;        
+    }
+
     this.UpdateSegment = function (segment) {
         var deferred = $q.defer();
         var result;

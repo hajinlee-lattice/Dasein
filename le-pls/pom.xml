@@ -11,6 +11,7 @@
         <le.common.version>1.0.33-SNAPSHOT</le.common.version>
         <le.db.version>1.0.33-SNAPSHOT</le.db.version>
         <le.domain.version>1.0.33-SNAPSHOT</le.domain.version>
+        <le.remote.version>1.0.33-SNAPSHOT</le.remote.version>
         <le.camille.version>1.0.33-SNAPSHOT</le.camille.version>
         <le.security.version>1.0.33-SNAPSHOT</le.security.version>
         <le.baton.version>1.0.33-SNAPSHOT</le.baton.version>
@@ -361,11 +362,16 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${le.remote.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
             <version>${le.camille.version}</version>
             <classifier>intf</classifier>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId> 
+        <!-- use this instead of <artifactId>persistence-api</artifactId>
             1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>

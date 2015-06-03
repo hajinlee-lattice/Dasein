@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "SEGMENT", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
-    
+
     private String name;
     private Long pid;
     private Tenant tenant;
@@ -118,5 +118,9 @@ public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
         this.priority = priority;
     }
 
+    @Override
+    public String toString() {
+        return "Segment [name=" + name + ", modelId=" + modelId + ", priority=" + priority + "]";
+    }
 
 }

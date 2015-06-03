@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.admin;
+package com.latticeengines.domain.exposed.dataloader;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

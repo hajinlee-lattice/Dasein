@@ -18,7 +18,6 @@ import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.admin.DLRestResult;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -26,6 +25,7 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.security.exposed.Constants;
 
 @Component
@@ -100,7 +100,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException, IOException {
-        DLRestResult response = deleteVisiDBDLTenantWithRetry(tenant);
+        InstallResult response = deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);
         Assert.assertTrue(response.getErrorMessage().contains("does not exist"));
         verifyTenant(tenant, dlUrl, false);
@@ -145,18 +145,18 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         }
     }
 
-    public DLRestResult deleteVisiDBDLTenant(String tenant) throws IOException {
+    public InstallResult deleteVisiDBDLTenant(String tenant) throws IOException {
         DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
         String jsonStr = JsonUtils.serialize(request);
         VisiDBDLInstaller installer = new VisiDBDLInstaller();
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
                 false, installer.getHeaders(), jsonStr);
-        return JsonUtils.deserialize(response, DLRestResult.class);
+        return JsonUtils.deserialize(response, InstallResult.class);
     }
 
-    public DLRestResult deleteVisiDBDLTenantWithRetry(String tenant) throws IOException, InterruptedException {
+    public InstallResult deleteVisiDBDLTenantWithRetry(String tenant) throws IOException, InterruptedException {
         int numOfRetry = 5;
-        DLRestResult response;
+        InstallResult response;
         do {
             response = deleteVisiDBDLTenant(tenant);
             numOfRetry--;
@@ -172,7 +172,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
         String response =
                 magicRestTemplate.postForObject(dlUrl + "/DLRestService/GetDLTenantSettings", getRequest, String.class);
-        DLRestResult result = JsonUtils.deserialize(response, DLRestResult.class);
+        InstallResult result = JsonUtils.deserialize(response, InstallResult.class);
         return result.getStatus();
     }
 

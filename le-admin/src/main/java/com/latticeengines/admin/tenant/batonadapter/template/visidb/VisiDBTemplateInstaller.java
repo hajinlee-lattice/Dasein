@@ -19,12 +19,12 @@ import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
-import com.latticeengines.domain.exposed.admin.DLRestResult;
-import com.latticeengines.domain.exposed.admin.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.dataloader.InstallResult;
+import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -75,7 +75,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
             String str = IOUtils.toString(new InputStreamReader(new FileInputStream(visiDBTemplate)));
             str = str.replace("\uFEFF", "");
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
-            DLRestResult response = installVisiDBTemplate(request, getHeaders(), dlUrl);
+            InstallResult response = installVisiDBTemplate(request, getHeaders(), dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {
                 log.info("Template " + topology.name() + " has successfully been installed!");
             } else {
@@ -88,11 +88,11 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         }
     }
 
-    public DLRestResult installVisiDBTemplate(InstallTemplateRequest request, List<BasicNameValuePair> headers,
+    public InstallResult installVisiDBTemplate(InstallTemplateRequest request, List<BasicNameValuePair> headers,
             String dlUrl) throws IOException {
         String jsonStr = JsonUtils.serialize(request);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl
                 + "/DLRestService/InstallVisiDBStructureFile_Sync", false, headers, jsonStr);
-        return JsonUtils.deserialize(response, DLRestResult.class);
+        return JsonUtils.deserialize(response, InstallResult.class);
     }
 }

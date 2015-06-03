@@ -15,7 +15,7 @@
     <div data-ng-show="loading">
         <div class="loader"> </div>
         <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
-    </div>
+    </div>      
     <section data-ng-show="!loading">
         <div class="panel panel-default user-list">
             <div novalidate>
@@ -73,6 +73,14 @@
                             {{ResourceUtility.getString('MULTIPLE_MODEL_ADD_NEW')}}
                         </button>
                     </div>
+                    <div class="text-left" data-ng-show="!saving">
+                        <button class="btn btn-primary" data-ng-click="saveSegmentsClicked()">
+                            {{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}
+                        </button>
+                    </div> 
+                    <div class="loader" data-ng-show="saving">
+                                
+                    </div>                                        
                 </div>
             </div>
         </div>

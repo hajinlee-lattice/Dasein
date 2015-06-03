@@ -1,10 +1,10 @@
-package com.latticeengines.domain.exposed.admin;
+package com.latticeengines.domain.exposed.dataloader;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DLRestResult {
+public class InstallResult {
     private String errorMessage;
 
     private int status;

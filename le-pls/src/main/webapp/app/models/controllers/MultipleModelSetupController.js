@@ -15,6 +15,7 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
     $scope.segments = [];
     $scope.showError = false;
     $scope.errorMessage = "";
+    $scope.saving = false;
     // Can't Add or Delete segments. Leaving this in case we want to reactivate it in the future.
     $scope.allowAddAndDelete = false;
     
@@ -48,8 +49,13 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             $scope.models = $scope.models.concat(result.resultObj);
         }
         
+        loadSegments();
+    });
+    
+    function loadSegments() {
         ModelService.GetAllSegments($scope.models).then(function(result) {
-            $scope.loading = false;
+            $scope.loading = false;                    
+            $scope.saving = false;        
             if (result != null && result.success === true) {
                 for (var i=0;i<result.resultObj.length;i++){
                     //Need this to verify changes against the model in the list
@@ -60,9 +66,28 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
                 $scope.showError = true;
                 $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_GET_SEGMENTS_ERROR");
             }
+        });        
+    }
+
+    $scope.saveSegmentsClicked = function () {
+        if ($scope.saving) {
+            return;
+        }    
+        $scope.saving = true;    
+        ModelService.UpdateSegments($scope.segments).then(function(result) {       
+            if (result != null && result.success === true) {
+                // pass
+            } else if (result.success === false) {              
+                $scope.showError = true;
+                $scope.errorMessage = result.resultErrors;
+            } else {
+                $scope.showError = true;
+                $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_UPDATE_SEGMENTS_ERROR");              
+            }
+            loadSegments();         
         });
-    });
-    
+    };
+
     $scope.addNewSegmentClicked = function () {
         AddSegmentModal.show($scope.segments, $scope.models, function (segment) {
             if (segment != null) {
@@ -71,7 +96,7 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
                 }
                 segment.NewModelId = segment.ModelId;
                 $scope.segments.push(segment);
-            }
+            } 
         });
     };
     
@@ -96,19 +121,9 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
     };
     
     function updateSegment(segment, successCallback, failCallback) {
-        ModelService.UpdateSegment(segment).then(function(result) {
-            if (result != null && result.success === true) {
-                if (successCallback) {
-                    successCallback();
-                }
-            } else {
-               $scope.showError = true;
-               $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_UPDATE_SEGMENT_ERROR", [segment.Name]);
-               if (failCallback) {
-                   failCallback();
-               }
-            }
-        });
+        if (successCallback) {
+            successCallback();
+        }
     }
     
     $scope.modelChanged = function (segment) {
@@ -138,13 +153,14 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             segment.ModelId = model.Id;
             segment.ModelName = model.DisplayName;
             
+            // 20150603 BKN - Model to Segment is 1:1. Do not allow model assignment to multiple segments.
             // now we need to figure out if that model was associated to another segment and remove it
             for (var x=0;x<$scope.segments.length;x++) {
                 if (segment.Name != $scope.segments[x].Name && $scope.segments[x].ModelId == model.Id) {
                     secondSegment = $scope.segments[x];
                     break;
                 }
-            }
+            }        
             
             if (secondSegment != null) {
                 backupSecondSegment = $.extend(true, {}, secondSegment);
@@ -179,6 +195,14 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             return false;
         }
         
+        if (segment.Name == 'LATTICE_DEFAULT_SEGMENT') {
+            return false;
+        }
+
+        if (segment.Priority >= $scope.segments.length-1) {
+            return false;
+        }
+
         for (var i=0;i<$scope.segments.length;i++) {
             var toCheck = $scope.segments[i];
             if (segment.Name != toCheck.Name && segment.Priority < toCheck.Priority) {
@@ -193,6 +217,10 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             return false;
         }
         
+        if (segment.Name == 'LATTICE_DEFAULT_SEGMENT') {
+            return false;
+        }
+
         for (var i=0;i<$scope.segments.length;i++) {
             var toCheck = $scope.segments[i];
             if (segment.Name != toCheck.Name && segment.Priority > toCheck.Priority) {
