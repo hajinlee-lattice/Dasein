@@ -4,10 +4,6 @@ rm -rf /etc/ledp/admin.properties
 rm -rf /opt/jetty/bin/jetty.sh
 rm -rf /home/yarn/.bashrc
 
-rm -rf /var/www/le-admin
-mkdir -p /var/www/le-admin
-chown -R apache:apache /var/www/le-admin
-
 adduser yarn
 groupadd yarn
 mkdir -p /var/log/ledp
