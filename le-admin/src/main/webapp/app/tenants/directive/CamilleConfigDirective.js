@@ -77,8 +77,8 @@ app.directive('configEntry', function(){
 
             $scope.isReadonly = CamilleConfigUtility.isReadonly($scope.config);
 
-            $scope.isInput = !$scope.isDerived && !$scope.isReadonly
-                && CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
+            $scope.isInput = !$scope.isDerived && !$scope.isReadonly &&
+                CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
             if ($scope.isInput || $scope.isDerived || $scope.isReadonly) {
                 if (CamilleConfigUtility.isNumber($scope.type)) {
                     $scope.inputType = "number";
