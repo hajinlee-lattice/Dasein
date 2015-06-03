@@ -46,9 +46,17 @@ public class DataStoreProvider implements OptionsProvider {
         return toReturn;
     }
 
-    public String toRemoteAddr(String folder) { return dirWatcher.toRemoteAddr(folder); }
+    public String toRemoteAddr(String folder) {
+        String addr = dirWatcher.toRemoteAddr(folder);
+        if (addr != null) {
+            return addr;
+        } else {
+            throw new RuntimeException(String.format("Option %s does not have a registered remote address", folder));
+        }
+    }
 
-    public String toOptionKey(String remoteAddr) { return dirWatcher.toOptionKey(remoteAddr); }
+    public String toOptionKey(String remoteAddr) {
+        return dirWatcher.toOptionKey(remoteAddr); }
 
     public void createTenantFolder(String server, String dmDeployment) {
         FileSystem fs = FileSystems.getDefault();
