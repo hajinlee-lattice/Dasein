@@ -116,18 +116,23 @@ public class BardJamsComponent extends LatticeComponent {
         tenant.setTenant(tenantId);
 
         tenant.setDlTenantName(getDataWithFailover(dir.getChild("DL_TenantName").getDocument().getData(), tenantId));
+        dir.getChild("DL_TenantName").getDocument().setData(tenant.getDlTenantName());
 
         tenant.setDlUrl(getDataWithFailover(dir.getChild("DL_URL").getDocument().getData(),
                 spaceConfig.getDlAddress()));
+        dir.getChild("DL_URL").getDocument().setData(tenant.getDlUrl());
 
         tenant.setDanteManifestPath(getDataWithFailover(dir.getChild("DanteManifestPath").getDocument().getData(),
                 vdbdlConfig.get("/DL/DataStore_Launch").getDocument().getData()));
+        dir.getChild("DanteManifestPath").getDocument().setData(tenant.getDanteManifestPath());
 
         tenant.setDataLaunchPath(getDataWithFailover(dir.getChild("Data_LaunchPath").getDocument().getData(),
                 vdbdlConfig.get("/DL/DataStore_Launch").getDocument().getData()));
+        dir.getChild("Data_LaunchPath").getDocument().setData(tenant.getDataLaunchPath());
 
         tenant.setDataArchivePath(getDataWithFailover(dir.getChild("Data_ArchivePath").getDocument().getData(),
                 vdbdlConfig.get("/DL/DataStore_Backup").getDocument().getData()));
+        dir.getChild("Data_ArchivePath").getDocument().setData(tenant.getDataArchivePath());
 
         //==================================================
         // configurable
