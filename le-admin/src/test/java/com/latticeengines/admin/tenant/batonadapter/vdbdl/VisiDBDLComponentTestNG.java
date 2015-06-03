@@ -52,6 +52,9 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
     @Value("${admin.test.dl.datastore.server}")
     private String dataStoreServer;
 
+    @Value("${admin.test.dl.datastore.path}")
+    private String dataStorePath;
+
     @Value("${admin.mount.vdb.permstore}")
     private String permStore;
 
@@ -91,7 +94,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         node.getChild("PermanentStore").getDocument().setData("\\\\" + permStoreServer + "\\VisiDB\\PermanentStore");
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        node.getChild("DataStore").getDocument().setData(dataStoreServer);
+        node.getChild("DataStore").getDocument().setData(dataStorePath);
         return confDir;
     }
 
