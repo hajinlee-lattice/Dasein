@@ -91,8 +91,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         node.getChild("PermanentStore").getDocument().setData("\\\\" + permStoreServer + "\\VisiDB\\PermanentStore");
         node = confDir.get(new Path("/DL"));
         node.getChild("OwnerEmail").getDocument().setData(ownerEmail);
-        String datastorePath = dataStoreProvider.toRemoteAddr(dataStoreServer);
-        node.getChild("DataStore").getDocument().setData(datastorePath);
+        node.getChild("DataStore").getDocument().setData(dataStoreServer);
         return confDir;
     }
 
