@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -72,7 +71,8 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
         File dataloaderTemplate = new File(templateProvider.getTemplate(version, topology) + ".config");
 
         try {
-            String str = IOUtils.toString(new InputStreamReader(new FileInputStream(dataloaderTemplate)));
+            String str = IOUtils.toString(new FileInputStream(dataloaderTemplate));
+            str = str.replace("\uFEFF", "");
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
             DLRestResult response = installDataloaderTemplate(request, getHeaders(), dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {

@@ -73,6 +73,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
         try {
             String str = IOUtils.toString(new InputStreamReader(new FileInputStream(visiDBTemplate)));
+            str = str.replace("\uFEFF", "");
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
             DLRestResult response = installVisiDBTemplate(request, getHeaders(), dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {
