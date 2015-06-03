@@ -35,7 +35,7 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
                 return (String) entry.getKey();
             }
         }
-        return null;
+        throw new RuntimeException(String.format("The remote address %s is not registered as an option key.", remoteAddr));
     }
 
     public String getAbsoluteRoot() { return this.absoluteRoot; }
