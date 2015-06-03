@@ -75,8 +75,7 @@ def editPerformanceRefreshDataSources(tenant, marketting_app,host=PLSEnvironment
         params = {"-s": dl_server,
                   "-u": user,
                   "-p": password,
-                  "-t": tenant,
-                  "-f": "@recordcount(2000000)"
+                  "-t": tenant
                  }
     
         #LoadCRMDataForModeling

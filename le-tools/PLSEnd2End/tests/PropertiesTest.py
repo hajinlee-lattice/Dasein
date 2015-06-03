@@ -11,6 +11,7 @@ from Properties import PLSEnvironments
 from operations.TestHelpers import JamsRunner
 from operations.PerformanceHelpers import PerformanceData
 from operations.PerformanceHelpers import VisiDBRollBack
+from operations.TestHelpers import DanteRunner
 from operations.LeadCreator import SFDCRequest
 
 
@@ -38,9 +39,15 @@ class Test(unittest.TestCase):
         print jams.setJamsTenant(PLSEnvironments.pls_bard_2);
 
     def testFail(self):
-        assert False, "failing on purpose, expecting to see this text..."
+#         assert False, "failing on purpose, expecting to see this text..."
+        sss = PLSEnvironments.pls_SFDC_url
+        print sss[0:sss.find("services")]
 
-    
+    def testCheckDanteValue(self):
+        dr = DanteRunner()
+        danteLead="00Q8000001aCoGX"
+        dr.checkDanteValue(danteLead)
+       
     def testAddLeadsToSFDC(self):
         sfdc = SFDCRequest();
         print sfdc.addLeadsToSFDC(3)

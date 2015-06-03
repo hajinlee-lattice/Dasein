@@ -9,6 +9,7 @@ from operations import LeadCreator
 from operations import PlsOperations
 from operations.LeadCreator import EloquaRequest;
 from operations.LeadCreator import MarketoRequest;
+from operations.TestHelpers import DanteRunner
 
 
 class Test(unittest.TestCase):
@@ -67,13 +68,17 @@ class Test(unittest.TestCase):
         contact_lists = elq.addEloquaContactForDante(3);        
                 
         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_1); 
-                
+                  
         elq_contacts = elq.getEloquaContact(contact_lists[0]);
-         
+           
         contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",elq_contacts);
         assert len(contact_faileds)==1, contact_faileds;
-          
-        PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_1);
+            
+        PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_1);        
+        
+        danteLead = contact_lists[2].values()[0]        
+        dr = DanteRunner()
+        dr.checkDanteValue(danteLead)
    
     def TestHourlyScoringMKTO_Dante(self):
         mkto = MarketoRequest();
@@ -89,6 +94,10 @@ class Test(unittest.TestCase):
         assert len(lead_faileds)==1, lead_faileds;
          
         PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_2);   
+        
+        danteLead = leads_list[2].values()[0]        
+        dr = DanteRunner()
+        dr.checkDanteValue(danteLead)
     def testName(self):
         pass
 

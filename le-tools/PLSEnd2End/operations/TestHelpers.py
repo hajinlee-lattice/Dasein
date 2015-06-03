@@ -756,35 +756,58 @@ class DLConfigRunner(SessionRunner):
 
 class DanteRunner(SessionRunner):
     def __init__(self, SFDC_url=None, logfile=None, exception=False):
-        super(PLSConfigRunner, self).__init__(SFDC_url, logfile);
+        super(DanteRunner, self).__init__(SFDC_url, logfile);
         self.exception = exception;
-        self.sfdc_url=SFDC_url;
-        self.sfdcUI = webdriver.Firefox();
-    
+        if SFDC_url == None:
+            self.sfdc_url=PLSEnvironments.pls_SFDC_login_url;
+        else:
+            self.sfdc_url=SFDC_url;
+        self.sfdcUI = None
+     
     def SFDCLogin(self): 
-        self.plsUI.get(self.sfdc_url);
-        time.sleep(30);       
+        self.sfdcUI = webdriver.Firefox();
+        self.sfdcUI.get(self.sfdc_url);
+        time.sleep(15);       
         self.sfdcUI.find_element_by_id("username").clear()
         self.sfdcUI.find_element_by_id("username").send_keys(PLSEnvironments.pls_SFDC_user)
         self.sfdcUI.find_element_by_id("password").clear()
         self.sfdcUI.find_element_by_id("password").send_keys(PLSEnvironments.pls_SFDC_pwd)
         self.sfdcUI.find_element_by_id("Login").click()
         time.sleep(30);
-    
+     
     def setDanteConfigSettings(self):
         self.sfdcUI.find_element_by_id("userNav-arrow").click()
         self.sfdcUI.find_element_by_link_text("Setup").click()
+        time.sleep(5);
         self.sfdcUI.find_element_by_css_selector("#DevToolsIntegrate_icon > img.setupImage").click()
+        time.sleep(5);
         self.sfdcUI.find_element_by_id("CustomSettings_font").click()
+        time.sleep(5);
         self.sfdcUI.find_element_by_xpath("//a[contains(@href, '/a06/o')]").click()
-        time.sleep(30);
+        time.sleep(20);
         dt_url = "https://%s/DT_%s" % (PLSEnvironments.pls_server,PLSEnvironments.pls_bard_1[3:])
         self.sfdcUI.find_element_by_id("CS_list:CS_Form:theDetailPageBlock:thePageBlockButtons:edit").click()
+        time.sleep(10);
         self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockSection:latticeforleads__url__c").clear()
         self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockSection:latticeforleads__url__c").send_keys(dt_url)
         self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockButtons:save").click()
-
+ 
+    def checkDanteValueFromUI(self,dante_lead):
+        self.SFDCLogin()
+        self.setDanteConfigSettings()
+        lead_url = "%s%s" % (PLSEnvironments.pls_SFDC_url[0:PLSEnvironments.pls_SFDC_url.find("services")],dante_lead)
+        time.sleep(10);
+        print "the lead which you want to check is: %s" % lead_url
+        self.sfdcUI.get(lead_url)
         
+    def checkDanteValueFromDB(self,dante_lead):
+        connection_string = PLSEnvironments.SQL_conn_dante;
+        query = "SELECT count(*)  FROM [LeadCache] where [Salesforce_ID]='%s' " % dante_lead; 
+        result = self.getQuery(connection_string, query);
+        assert result[0][0]==1
+    def checkDanteValue(self,dante_lead):
+        checkDanteValueFromDB(dante_lead)
+                
 class UtilsRunner(SessionRunner):
 
     def __init__(self, host=PLSEnvironments.pls_test_server, logfile=None, exception=False):

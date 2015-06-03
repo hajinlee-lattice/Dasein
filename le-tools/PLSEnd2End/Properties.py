@@ -53,6 +53,7 @@ class PLSEnvironments(object):
     visidb_data_folder="D:\\VisiDBData";
     visidb_data_bak="D:\\performanceTest\\dbbak";
     
+    pls_SFDC_login_url = "https://login.salesforce.com/"
     pls_SFDC_user="apeters-widgettech@lattice-engines.com";
     pls_SFDC_pwd="Happy2010";
     pls_SFDC_key="oIogZVEFGbL3n0qiAp6F66TC";
@@ -83,6 +84,7 @@ class PLSEnvironments(object):
     SQL_conn_dataloader = "DRIVER={SQL Server};SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % visidb_server;
     SQL_conn_pdMatch = "DRIVER={SQL Server};SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
     SQL_conn_leadscoring = "DRIVER={SQL Server};SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % "10.41.1.187";
+    SQL_conn_dante = "DRIVER={SQL Server};SERVER=%s\SQL2012STD;DATABASE=DT_%s;uid=dataloader_prod;pwd=L@ttice2;" % (pls_server,pls_bard_1[3:]);
         
     #dataloader providers
     SQL_PropDataForModeling = "Data Source=bodcprodvsql130;" + \
