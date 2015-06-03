@@ -3,12 +3,9 @@ package com.latticeengines.admin.dynamicopts.impl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.commons.io.IOUtils;
 
 public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider {
 
@@ -44,7 +41,7 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
         try {
             input = new FileInputStream(path + "/.mtable");
             // load mount table file
-            props.load(new StringReader(IOUtils.toString(input).replace("\\", "\\\\")));
+            props.load(input);
         } catch (IOException ex) {
             // ignore
         } finally {
