@@ -6,7 +6,6 @@ import subprocess
 import sys
 import shutil
 from unittest import TestCase
-from test2 import manipulateSupportedFiles
 
 modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json"
 SCORING_SCRIPT_NAME = "scoringengine.py"

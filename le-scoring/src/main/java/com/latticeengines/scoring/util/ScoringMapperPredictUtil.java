@@ -81,7 +81,7 @@ public class ScoringMapperPredictUtil {
 			in.close();
 			while (( line = err.readLine()) != null ) {
 				strs.append(line);
-				log.info(line);
+				log.error(line);
 			}
 			err.close();
 		} catch (IOException e) {
@@ -336,7 +336,5 @@ public class ScoringMapperPredictUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
-		
 	}
 }

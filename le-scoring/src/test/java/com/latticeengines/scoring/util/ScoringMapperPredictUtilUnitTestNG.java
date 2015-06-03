@@ -123,7 +123,7 @@ public class ScoringMapperPredictUtilUnitTestNG {
 		expectedResultList.add(result5);
 		
 		// create a temp folder 
-		String tempOutputPath = "/user/s-analytics/customers/ScoringMapperPredictUtilTestNG/scoring";
+		String tempOutputPath = "/user/s-analytics/customers/ScoringMapperPredictUtilUnitTestNG/scoring";
 		try {
 			if (HdfsUtils.fileExists(new Configuration(), tempOutputPath)) {
 				HdfsUtils.rmdir(new Configuration(), tempOutputPath);

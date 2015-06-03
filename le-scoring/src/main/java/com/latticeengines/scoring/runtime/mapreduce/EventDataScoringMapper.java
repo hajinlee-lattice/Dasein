@@ -19,6 +19,7 @@ import com.latticeengines.scoring.util.ModelEvaluationResult;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
 import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
 import com.latticeengines.scoring.util.ScoringMapperValidateUtil;
+import com.latticeengines.scoring.util.ValidationResult;
 
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
@@ -36,13 +37,11 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
     	// key: modelGuid, value: modelName
     	HashMap<String, String> modelIdMap = new HashMap<String, String>();
         JSONObject datatype = null;
-        boolean datatypeFileProvided = false;
         
         for (Path p : paths) {
             log.info("files" + p);
             log.info(p.getName());
             if (p.getName().equals("datatype.avsc")) {
-            	datatypeFileProvided = true;
             	datatype = ScoringMapperTransformUtil.parseDatatypeFile(p);
             } else if (!p.getName().equals("scoring.py")) {
             	ScoringMapperTransformUtil.parseModelFiles(models, p);
@@ -52,7 +51,12 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         }
     	log.info("the size of the models is " + models.size());
         
-        ScoringMapperValidateUtil.validate(datatype, datatypeFileProvided, models);
+    	ValidationResult vr= ScoringMapperValidateUtil.validate(datatype, models);
+    	if (!vr.passValidation()) {
+    		log.error("ValidationResult is: " + vr);
+    		new Exception("validation fails");
+    	}
+    	
         int n = 0;
         while (context.nextKeyValue()) {
         	n++;

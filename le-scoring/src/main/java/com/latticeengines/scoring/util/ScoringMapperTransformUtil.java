@@ -256,7 +256,7 @@ public class ScoringMapperTransformUtil {
 	    	log.info("Filename is " + leadInputFileName);
 			File file = new File(leadInputFileName);
 			BufferedWriter bw = null;
-			bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+			bw = new BufferedWriter(new FileWriter(file));
 	    	for (int i = 0; i < leadInputRecords.size(); i++) {
 	    		count++;
 	    		bw.write(leadInputRecords.get(i));
@@ -269,7 +269,7 @@ public class ScoringMapperTransformUtil {
 	    			leadInputFileName = modelID + "-" + indexOfFile;
 	    	    	log.info("Filename is " + leadInputFileName);
 	    			file = new File(leadInputFileName);
-	    			bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+	    			bw = new BufferedWriter(new FileWriter(file));
 	    		}
 	    	}
 	    	if (count != 0) {

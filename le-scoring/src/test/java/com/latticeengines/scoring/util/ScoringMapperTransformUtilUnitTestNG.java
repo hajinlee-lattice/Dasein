@@ -118,9 +118,8 @@ public class ScoringMapperTransformUtilUnitTestNG {
 			JSONObject j = (JSONObject) parser.parse(record);
 			assertTrue(j.get("key").equals("837394"));
 			JSONArray arr = (JSONArray) j.get("value"); 
-			// model.json file has 194 columns for metadata
-			assertTrue(arr.size() == 194);
-			assertTrue(containsRightContents(arr));
+			assertTrue(arr.size() == 194, "model.json file should have 194 columns for metadata.");
+			assertTrue(containsRightContents(arr), "leadInputFile should contain the right contents.");
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
