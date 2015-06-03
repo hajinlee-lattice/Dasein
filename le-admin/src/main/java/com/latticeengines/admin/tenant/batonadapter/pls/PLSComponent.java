@@ -25,10 +25,10 @@ public class PLSComponent extends LatticeComponent {
     @Value("${admin.pls.dryrun}")
     private boolean dryrun;
 
-    @Value("${admin.overwrite.pls.superadmin:}")
+    @Value("${admin.overwrite.pls.superadmin:DEFAULT}")
     private String superAdmins;
 
-    @Value("${admin.overwrite.pls.latticeadmin:}")
+    @Value("${admin.overwrite.pls.latticeadmin:DEFAULT}")
     private String latticeAdmins;
 
     @Autowired
@@ -76,7 +76,7 @@ public class PLSComponent extends LatticeComponent {
         //================================================================================
         ObjectMapper mapper = new ObjectMapper();
         List<String> adminEmailList = new ArrayList<>();
-        if (superAdmins != null && !StringUtils.isEmpty(superAdmins)) {
+        if (superAdmins != null && !superAdmins.equals("DEFAULT")) {
             List<String> emailList = new ArrayList<>();
             for (String email: Arrays.asList(superAdmins.split(","))) {
                 if (!StringUtils.isEmpty(email)) { emailList.add(email); }
@@ -90,7 +90,7 @@ public class PLSComponent extends LatticeComponent {
             }
         }
 
-        if (latticeAdmins != null && !StringUtils.isEmpty(latticeAdmins)) {
+        if (latticeAdmins != null && !latticeAdmins.equals("DEFAULT")) {
             List<String> emailList = new ArrayList<>();
             for (String email: Arrays.asList(latticeAdmins.split(","))) {
                 if (!StringUtils.isEmpty(email)) { emailList.add(email); }
