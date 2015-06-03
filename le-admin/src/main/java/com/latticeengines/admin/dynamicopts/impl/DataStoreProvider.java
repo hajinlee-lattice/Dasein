@@ -32,7 +32,7 @@ public class DataStoreProvider implements OptionsProvider {
     private void watchDir() {
         if (dirWatcher == null) {
             Path path = FileSystems.getDefault().getPath(mountRoot, dsPath);
-            dirWatcher = new MountedDirectoryOptionsProvider(path, "D:\\DataLoader\\Customers");
+            dirWatcher = new MountedDirectoryOptionsProvider(path);
         }
         absoluteRoot = dirWatcher.getAbsoluteRoot();
     }

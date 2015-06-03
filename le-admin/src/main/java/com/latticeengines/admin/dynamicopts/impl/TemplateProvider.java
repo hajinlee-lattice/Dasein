@@ -33,8 +33,7 @@ public class TemplateProvider implements OptionsProvider {
     private void watchDir() {
         if (dirWatcher == null) {
             Path path = FileSystems.getDefault().getPath(mountRoot, tplPath);
-            dirWatcher = new MountedDirectoryOptionsProvider(path,
-                    "\\\\lebodcvfile55.dev.lattice.local\\DevelopmentShare\\Release\\Template\\7.point_release.r\\2.0");
+            dirWatcher = new MountedDirectoryOptionsProvider(path);
         }
         absoluteRoot = dirWatcher.getAbsoluteRoot();
 

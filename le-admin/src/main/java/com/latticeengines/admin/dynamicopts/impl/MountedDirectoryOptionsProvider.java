@@ -13,21 +13,19 @@ import org.apache.commons.io.IOUtils;
 public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider {
 
     private Properties mountMap;
-    private final String defaultMntPnt;
     private final String absoluteRoot;
 
-    public MountedDirectoryOptionsProvider(Path path, String defaultMntPnt) {
-        this(path, defaultMntPnt, loadMountMap(path.toString()));
+    public MountedDirectoryOptionsProvider(Path path) {
+        this(path, loadMountMap(path.toString()));
     }
 
-    public MountedDirectoryOptionsProvider(Path path, String defaultMntPnt, Properties mountMap) {
+    public MountedDirectoryOptionsProvider(Path path, Properties mountMap) {
         super(path);
-        this.defaultMntPnt = defaultMntPnt;
         absoluteRoot = path.toAbsolutePath().toString();
         this.mountMap = mountMap;
     }
 
-    public String toRemoteAddr(String key) { return mountMap.getProperty(key, defaultMntPnt); }
+    public String toRemoteAddr(String key) { return mountMap.getProperty(key); }
 
     public String toOptionKey(String remoteAddr) {
         for(Map.Entry<Object, Object> entry: mountMap.entrySet()){

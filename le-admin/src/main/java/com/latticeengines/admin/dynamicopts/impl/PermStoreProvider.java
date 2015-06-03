@@ -31,7 +31,7 @@ public class PermStoreProvider implements OptionsProvider {
     private void watchDir() {
         if (dirWatcher == null) {
             Path path = FileSystems.getDefault().getPath(mountRoot, psPath);
-            dirWatcher = new MountedDirectoryOptionsProvider(path, "D:\\VisiDB\\PermenantStore");
+            dirWatcher = new MountedDirectoryOptionsProvider(path);
         }
         absoluteRoot = dirWatcher.getAbsoluteRoot();
     }
