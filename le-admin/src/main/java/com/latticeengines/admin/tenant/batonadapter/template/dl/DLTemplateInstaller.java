@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
@@ -71,8 +72,7 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
         File dataloaderTemplate = new File(templateProvider.getTemplate(version, topology) + ".config");
 
         try {
-            String str = IOUtils.toString(new FileInputStream(dataloaderTemplate));
-            str = str.replace("\uFEFF", "");
+            String str = IOUtils.toString(new BOMInputStream(new FileInputStream(dataloaderTemplate)));
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
             InstallResult response = installDataloaderTemplate(request, getHeaders(), dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {

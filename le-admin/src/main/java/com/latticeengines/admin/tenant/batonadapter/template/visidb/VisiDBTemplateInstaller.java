@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
@@ -72,8 +72,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         File visiDBTemplate = new File(templateProvider.getTemplate(version, topology) + ".specs");
 
         try {
-            String str = IOUtils.toString(new InputStreamReader(new FileInputStream(visiDBTemplate)));
-            str = str.replace("\uFEFF", "");
+            String str = IOUtils.toString(new BOMInputStream(new FileInputStream(visiDBTemplate)));
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
             InstallResult response = installVisiDBTemplate(request, getHeaders(), dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {
