@@ -17,6 +17,7 @@
     <modules>
         <module>le-common</module>
         <module>le-domain</module>
+        <module>le-remote</module>
         <module>le-parent</module>
         <module>le-db</module>
         <module>le-security</module>
