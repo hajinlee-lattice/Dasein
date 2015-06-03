@@ -13,7 +13,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
@@ -33,9 +32,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;
-
-    @Autowired
-    private DataStoreProvider dataStoreProvider;
 
     @Value("${admin.test.dl.url}")
     private String dlUrl;
