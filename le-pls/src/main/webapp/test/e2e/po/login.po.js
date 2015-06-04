@@ -10,8 +10,8 @@ var Login = function() {
 
     this.loginUser = function(name, password, tenantId) {
         tenantId = tenantId || browser.params.tenantId;
-        browser.driver.sleep(2000);
         getWebApp();
+        browser.driver.sleep(2000);
         isLoginPage().then(function(ispresent){
             if (!ispresent) { logout(); }
             submitLoginCredentials(name, password);
