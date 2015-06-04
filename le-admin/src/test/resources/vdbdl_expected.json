@@ -6,7 +6,7 @@
       "Children":[
         {
           "Node":"DataStore",
-          "Data":"",
+          "Data":"\\\\BODCDEVVINT187\\DataLoader\\Customers",
           "Metadata":{
             "Type":"options",
             "Options":[

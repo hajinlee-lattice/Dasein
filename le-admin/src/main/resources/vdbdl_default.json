@@ -20,7 +20,7 @@
     { "Node": "DL", 
       "Children" : [
         { "Node": "OwnerEmail", "Data": "richard.liu@lattice-engines.com" },
-        { "Node": "DataStore", "Data": "" },
+        { "Node": "DataStore", "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers" },
         { "Node": "DataStore_Launch", "Data": "" },
         { "Node": "DataStore_Backup", "Data": "" },
         { "Node": "DataStore_Status", "Data": "" }
