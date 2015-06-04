@@ -10,6 +10,7 @@ var Login = function() {
 
     this.loginUser = function(name, password, tenantId) {
         tenantId = tenantId || browser.params.tenantId;
+        browser.driver.sleep(2000);
         getWebApp();
         isLoginPage().then(function(ispresent){
             if (!ispresent) { logout(); }
@@ -20,7 +21,7 @@ var Login = function() {
         });
         browser.wait(function(){
             return element(by.css('div.page-title')).isPresent();
-        }, 30000, 'page title should appear with in 30 sec.');
+        }, 20000, 'page title should appear with in 30 sec.');
     };
 
     function getWebApp() {
