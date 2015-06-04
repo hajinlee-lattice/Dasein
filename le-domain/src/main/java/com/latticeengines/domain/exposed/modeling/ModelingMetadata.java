@@ -35,29 +35,56 @@ public class ModelingMetadata {
         
         
     }
+    
+    public static class DateTime {
+        private String dateTime;
+        private int offsetMinutes;
+        
+        @JsonProperty("DateTime")
+        public String getDateTime() {
+            return dateTime;
+        }
+        
+        @JsonProperty("DateTime")
+        public void setDateTime(String dateTime) {
+            this.dateTime = dateTime;
+        }
+
+        @JsonProperty("OffsetMinutes")
+        public int getOffsetMinutes() {
+            return offsetMinutes;
+        }
+
+        @JsonProperty("OffsetMinutes")
+        public void setOffsetMinutes(int offsetMinutes) {
+            this.offsetMinutes = offsetMinutes;
+        }
+    }
 
 
     public static class AttributeMetadata {
-        private String approvedUsage;
+        private List<String> approvedUsage;
         private String columnName;
-        private String dataSource;
+        private List<String> dataSource;
         private String dataType;
         private String description;
         private String displayDiscretizationStrategy;
         private String displayName;
         private List<KV> extensions;
         private String fundamentalType;
-        private String lastTimeSourceUpdated;
+        private List<DateTime> lastTimeSourceUpdated;
+        private DateTime mostRecentUpdateDate;
         private String statisticalType;
         private List<String> tags;
+        private String dataQuality;
         
         @JsonProperty("ApprovedUsage")
-        public String getApprovedUsage() {
+        public List<String> getApprovedUsage() {
             return approvedUsage;
         }
         
         @JsonProperty("ApprovedUsage")
-        public void setApprovedUsage(String approvedUsage) {
+        public void setApprovedUsage(List<String> approvedUsage) {
             this.approvedUsage = approvedUsage;
         }
 
@@ -72,12 +99,12 @@ public class ModelingMetadata {
         }
 
         @JsonProperty("DataSource")
-        public String getDataSource() {
+        public List<String> getDataSource() {
             return dataSource;
         }
 
         @JsonProperty("DataSource")
-        public void setDataSource(String dataSource) {
+        public void setDataSource(List<String> dataSource) {
             this.dataSource = dataSource;
         }
 
@@ -142,13 +169,23 @@ public class ModelingMetadata {
         }
 
         @JsonProperty("LastTimeSourceUpdated")
-        public String getLastTimeSourceUpdated() {
+        public List<DateTime> getLastTimeSourceUpdated() {
             return lastTimeSourceUpdated;
         }
 
         @JsonProperty("LastTimeSourceUpdated")
-        public void setLastTimeSourceUpdated(String lastTimeSourceUpdated) {
+        public void setLastTimeSourceUpdated(List<DateTime> lastTimeSourceUpdated) {
             this.lastTimeSourceUpdated = lastTimeSourceUpdated;
+        }
+
+        @JsonProperty("MostRecentUpdateDate")
+        public DateTime getMostRecentUpdateDate() {
+            return mostRecentUpdateDate;
+        }
+
+        @JsonProperty("MostRecentUpdateDate")
+        public void setMostRecentUpdateDate(DateTime mostRecentUpdateDate) {
+            this.mostRecentUpdateDate = mostRecentUpdateDate;
         }
 
         @JsonProperty("StatisticalType")
@@ -169,6 +206,16 @@ public class ModelingMetadata {
         @JsonProperty("Tags")
         public void setTags(List<String> tags) {
             this.tags = tags;
+        }
+
+        @JsonProperty("DataQuality")
+        public String getDataQuality() {
+            return dataQuality;
+        }
+
+        @JsonProperty("DataQuality")
+        public void setDataQuality(String dataQuality) {
+            this.dataQuality = dataQuality;
         }
         
     }
