@@ -85,13 +85,18 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
                     } else {
                         $scope.mapCredentials = new Credentials();
                     }
+                    getSFDCCredentials();
                 });
             }
         } else {
             $scope.showError = true;
             $scope.errorMessage = result.resultErrors;
+            getSFDCCredentials();
         }
 
+    });
+
+    function getSFDCCredentials() {
         ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
             if (result != null && result.success === true) {
                 var returned = result.resultObj;
@@ -110,11 +115,8 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
                     $scope.crmSandboxCredentials = new Credentials();
                 }
             });
-
         });
-
-    });
-
+    }
     
     $scope.crmProductionSaveClicked = function () {
         $scope.crmProductionError = "";
