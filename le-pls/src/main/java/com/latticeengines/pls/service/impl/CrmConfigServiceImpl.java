@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.admin.DLRestResult.ValueResult;
+import com.latticeengines.domain.exposed.dataloader.InstallResult.ValueResult;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
