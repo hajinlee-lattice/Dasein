@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
+import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
 @Component("scoringStepYarnProcessor")
@@ -65,6 +66,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Value("${scoring.output.table.sample}")
     private String targetRawTable;
+    
+    @Value("${scoring.mapper.threshold}")
+    private String leadFileThreshold;
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
@@ -122,11 +126,12 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), customer);
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getMRQueueNameForSubmission());
-
         properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table
                 + "/data");
         properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table
                 + "/scores");
+        properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
+
         String customerModelPath = customerBaseDir + "/" + customer + "/models";
 
         List<String> modelFilePaths = Collections.emptyList();

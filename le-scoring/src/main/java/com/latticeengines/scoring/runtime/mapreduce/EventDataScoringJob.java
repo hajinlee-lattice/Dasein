@@ -93,6 +93,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             String dataTypeFilePath = inputDir + "/" + dataTypeFile;
             generateDataTypeSchema(schema, dataTypeFilePath, config);
 
+            String leadInputFileThreshold = properties.getProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name());
+            config.setLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(), Long.parseLong(leadInputFileThreshold));
             String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
             config.set(MapReduceProperty.OUTPUT.name(), outputDir);
             mrJob.setInputFormatClass(AvroKeyInputFormat.class);
