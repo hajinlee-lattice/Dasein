@@ -30,12 +30,12 @@ public class ScoringMapperValidateUtil {
 		
 		// datatype validation
 		if (datatype == null) {
-			datatypeFailures.add("Datatype file is not provided.");
+			datatypeFailures.add("Datatype file is not provided. ");
 			return vf;
 		}
 		
 		if (models == null) {
-			datatypeFailures.add("Models are not provided.");
+			datatypeFailures.add("Models are not provided. ");
 			return vf;
 		}
 		
@@ -43,7 +43,7 @@ public class ScoringMapperValidateUtil {
 		for (String key : keySet) {
 			Long datatypeVal = (Long) datatype.get(key);
 			if (datatypeVal != 0 && datatypeVal != 1) {
-				String msg = String.format("Column %s contains unknown datatype: %d", key, datatypeVal);
+				String msg = String.format("Column %s contains unknown datatype: %d ", key, datatypeVal);
 				datatypeFailures.add(msg);
 			}
 		}
@@ -75,17 +75,17 @@ public class ScoringMapperValidateUtil {
 					continue;
 				}
 				if (!datatype.containsKey(name)) {
-					String msg = String.format("Missing required column: %s", name);
+					String msg = String.format("Missing required column: %s ", name);
 					toReturn.add(msg);
 					continue;
 				}
 				if (datatype.get(name) != type) {
-					String msg = String.format("%d does not match with %d", type, datatype.get(name));
+					String msg = String.format("%d does not match with %d ", type, datatype.get(name));
 					toReturn.add(msg);
 				}
 			}
 		} else {
-			String msg = String.format("%s does not contain %s.", modelID, INPUT_COLUMN_METADATA);
+			String msg = String.format("%s does not contain %s. ", modelID, INPUT_COLUMN_METADATA);
 			toReturn.add(msg);
 		}
 		return toReturn;

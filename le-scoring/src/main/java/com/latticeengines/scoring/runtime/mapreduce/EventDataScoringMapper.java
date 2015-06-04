@@ -15,6 +15,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.json.simple.JSONObject;
 
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.util.ModelEvaluationResult;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
 import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
@@ -37,24 +39,30 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
     	// key: modelGuid, value: modelName
     	HashMap<String, String> modelIdMap = new HashMap<String, String>();
         JSONObject datatype = null;
+        boolean scoringScriptProvided = false;
         
         for (Path p : paths) {
             log.info("files" + p);
             log.info(p.getName());
             if (p.getName().equals("datatype.avsc")) {
             	datatype = ScoringMapperTransformUtil.parseDatatypeFile(p);
-            } else if (!p.getName().equals("scoring.py")) {
-            	ScoringMapperTransformUtil.parseModelFiles(models, p);
+            } else if (p.getName().equals("scoring.py")) {
+            	scoringScriptProvided = true;
+            	log.info("Localize 'scoring.py'");
             } else {
-                log.info("Localize 'scoring.py'");
+            	ScoringMapperTransformUtil.parseModelFiles(models, p);
             }
         }
     	log.info("the size of the models is " + models.size());
         
+    	if (!scoringScriptProvided) {
+    		throw new LedpException(LedpCode.LEDP_20002);
+    	}
+    	
     	ValidationResult vr= ScoringMapperValidateUtil.validate(datatype, models);
     	if (!vr.passValidation()) {
     		log.error("ValidationResult is: " + vr);
-    		new Exception("validation fails");
+    		throw new LedpException(LedpCode.LEDP_20001, new String[] { vr.toString() });
     	}
     	
         int n = 0;
@@ -73,12 +81,13 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         }
         log.info("The number of leads is: " + i);
         
-        ScoringMapperTransformUtil.writeToLeadInputFiles(leadInputRecordMap, THRESHOLD);
+        Long leadFileThreshold = context.getConfiguration().getLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(), THRESHOLD);
+        ScoringMapperTransformUtil.writeToLeadInputFiles(leadInputRecordMap, leadFileThreshold);
         
         String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
         log.info("outputDir: " + outputPath);
         ScoringMapperPredictUtil.evaluate(models);
-        resultList = ScoringMapperPredictUtil.processScoreFiles(leadInputRecordMap, models, modelIdMap, THRESHOLD);
+        resultList = ScoringMapperPredictUtil.processScoreFiles(leadInputRecordMap, models, modelIdMap, leadFileThreshold);
         log.info("The size of resultList is: " + resultList.size());
         ScoringMapperPredictUtil.writeToOutputFile(resultList, context.getConfiguration(), outputPath);
     }

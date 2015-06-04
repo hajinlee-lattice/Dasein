@@ -237,7 +237,7 @@ public class ScoringMapperTransformUtil {
 		return formattedRecord;
     }
     
-    public static void writeToLeadInputFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, int threshold) {
+    public static void writeToLeadInputFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, long threshold) {
     	log.info("threshold is " + threshold);
     	if (leadInputRecordMap == null) {
     		new Exception("leadInputRecordMap is null");
@@ -248,7 +248,7 @@ public class ScoringMapperTransformUtil {
     	}
     }
     
-    private static void writeToLeadInputFile(ArrayList<String> leadInputRecords, String modelID, int threshold) {
+    private static void writeToLeadInputFile(ArrayList<String> leadInputRecords, String modelID, long threshold) {
     	log.info("for model " + modelID + ", there are " + leadInputRecords.size() + " leads");
     	
     	int indexOfFile = 0;

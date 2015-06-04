@@ -134,7 +134,7 @@ public class ScoringMapperPredictUtil {
 		}
 	}
 	
-	public static ArrayList<ModelEvaluationResult> processScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, int threshold) {
+	public static ArrayList<ModelEvaluationResult> processScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, long threshold) {
 		Set<String> modelIDs = leadInputRecordMap.keySet();
 		// list of HashMap<leadID: score>
 		ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
@@ -144,7 +144,7 @@ public class ScoringMapperPredictUtil {
 			HashMap<String, Double> scores = new HashMap<String, Double>();
 			int value = leadInputRecordMap.get(id).size();
 			JSONObject model = models.get(id);
-			int remain = value/threshold;
+			int remain = (int) (value/threshold);
 			for (int i = 0; i <= remain; i++) {
 				readScoreFile(id, i, scores);
 			}
