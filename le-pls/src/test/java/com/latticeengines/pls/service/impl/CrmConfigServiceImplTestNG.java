@@ -104,7 +104,15 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmConfig = new CrmConfig();
         crmConfig.setCrmCredential(crmCredential);
         crmService.config("marketo", "PLSTestContract." + tenant + ".Production", crmConfig);
+        
+        //sfdc
+        crmCredential = new CrmCredential();
+        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
+        crmCredential.setPassword("Happy2010");
+        crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
+        crmConfig = new CrmConfig();
+        crmConfig.setCrmCredential(crmCredential);
+        crmService.config("sfdc", "PLSTestContract." + tenant + ".Production", crmConfig);
 
     }
-
 }
