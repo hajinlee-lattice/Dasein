@@ -49,6 +49,8 @@ describe('system setup tests', function () {
         systemSetup.enterBadEloquaCredentials();
         expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("Credentials are invalid.");
 
+        browser.driver.sleep(2000);
+
         ////==================================================
         //// Enter Valid Eloqua Credentials
         ////==================================================
@@ -81,6 +83,8 @@ describe('system setup tests', function () {
         //==================================================
         systemSetup.enterBadMarketoCredentials();
         expect(element.all(by.css('.formMT .alert-danger')).first().getText()).toBe("Credentials are invalid.");
+
+        browser.driver.sleep(2000);
 
         //==================================================
         // Enter Valid Marketo Credentials
@@ -117,6 +121,8 @@ describe('system setup tests', function () {
         systemSetup.enterBadSfdcSandboxCredentials();
         expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("Credentials are invalid.");
 
+        browser.driver.sleep(2000);
+
         //==================================================
         // Enter Valid SFDC Sandbox Credentials
         //==================================================
@@ -149,6 +155,8 @@ describe('system setup tests', function () {
         //==================================================
         systemSetup.enterBadSfdcProductionCredentials();
         expect(element(by.css('#formProduction .alert-danger')).getText()).toBe("Credentials are invalid.");
+
+        browser.driver.sleep(2000);
 
         //==================================================
         // Enter Valid SFDC Production Credentials
