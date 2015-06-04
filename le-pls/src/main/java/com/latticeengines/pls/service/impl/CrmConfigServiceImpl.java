@@ -1,10 +1,13 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
+import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.DLRestResult.ValueResult;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -23,9 +28,9 @@ import com.latticeengines.pls.service.CrmConstants;
 @Component("crmConfigService")
 @Lazy(value = true)
 public class CrmConfigServiceImpl implements CrmConfigService {
-	
-	@SuppressWarnings("unused")
-	private static final Log log = LogFactory.getLog(CrmConfigServiceImpl.class);
+
+    @SuppressWarnings("unused")
+    private static final Log log = LogFactory.getLog(CrmConfigServiceImpl.class);
 
     @Value("${pls.dataloader.sfdc.login.url}")
     private String sfdcLoginUrl;
@@ -62,17 +67,15 @@ public class CrmConfigServiceImpl implements CrmConfigService {
         values.put("Password", crmConfig.getCrmCredential().getPassword());
         values.put("Company", crmConfig.getCrmCredential().getCompany());
         values.put("EntityType", "Base");
-        parameters.put("values", values);
-        
+        parameters.put("values", toDictFormat(values));
+
         crmConfig.setDataProviderName("Eloqua_DataProvider");
         setCommonParameters(crmType, tenantId, crmConfig, parameters);
         excuteHttpRequest(url, parameters);
-        
+
         crmConfig.setDataProviderName("Eloqua_Bulk_DataProvider");
         setCommonParameters(crmType, tenantId, crmConfig, parameters);
         excuteHttpRequest(url, parameters);
-        
-        
 
     }
 
@@ -83,13 +86,24 @@ public class CrmConfigServiceImpl implements CrmConfigService {
         Map<String, String> values = new HashMap<>();
         values.put("URL", marketoLoginUrl);
         values.put("UserID", crmConfig.getCrmCredential().getUserName());
-        values.put("Password", crmConfig.getCrmCredential().getPassword());
-        values.put("EncryptionKey", crmConfig.getCrmCredential().getSecurityToken());
-        parameters.put("values", values);
+        values.put("EncryptionKey", crmConfig.getCrmCredential().getPassword());
+        parameters.put("values", toDictFormat(values));
         crmConfig.setDataProviderName("Marketo_DataProvider");
 
         setCommonParameters(crmType, tenantId, crmConfig, parameters);
         excuteHttpRequest(url, parameters);
+    }
+
+    private List<ValueResult> toDictFormat(Map<String, String> values) {
+        List<ValueResult> valueResults = new ArrayList<>();
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            ValueResult valueResult = new ValueResult();
+            valueResult.setKey(entry.getKey());
+            valueResult.setValue(entry.getValue());
+            valueResults.add(valueResult);
+        }
+
+        return valueResults;
     }
 
     private void sfdcConfig(String crmType, String tenantId, CrmConfig crmConfig) {
@@ -102,9 +116,9 @@ public class CrmConfigServiceImpl implements CrmConfigService {
         values.put("Password", crmConfig.getCrmCredential().getPassword());
         values.put("SecurityToken", crmConfig.getCrmCredential().getSecurityToken());
         values.put("Version", crmConfig.getVersion());
-        parameters.put("values", values);
+        parameters.put("values", toDictFormat(values));
         crmConfig.setDataProviderName("SFDC_DataProvider");
-        
+
         setCommonParameters(crmType, tenantId, crmConfig, parameters);
         excuteHttpRequest(url, parameters);
     }
@@ -118,17 +132,24 @@ public class CrmConfigServiceImpl implements CrmConfigService {
         parameters.put("tryConnect", "false");
     }
 
-    void excuteHttpRequest(String url, Map<String, Object> parameters) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("MagicAuthentication", "Security through obscurity!");
-        headers.put("Charset", "UTF-8");
-        try {
-            String status = HttpWithRetryUtils.executePostRequest(url, parameters, headers);
-            checkStatus(status);
 
+    void excuteHttpRequest(String url, Map<String, Object> parameters) {
+
+        try {
+            String jsonStr = JsonUtils.serialize(parameters);
+            String response = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, getHeaders(), jsonStr);
+            checkStatus(response);
         } catch (Exception ex) {
-            throw new LedpException(LedpCode.LEDP_18035, ex, new String[] { ex.getMessage() } );
+            throw new LedpException(LedpCode.LEDP_18035, ex, new String[] { ex.getMessage() });
         }
+    }
+
+    List<BasicNameValuePair> getHeaders() {
+        List<BasicNameValuePair> headers = new ArrayList<>();
+        headers.add(new BasicNameValuePair("MagicAuthentication", "Security through obscurity!"));
+        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
+        headers.add(new BasicNameValuePair("Accept", "application/json"));
+        return headers;
     }
 
     boolean checkStatus(String status) throws Exception {
@@ -138,7 +159,7 @@ public class CrmConfigServiceImpl implements CrmConfigService {
         if (statusCode != null && statusCode == 3L) {
             return true;
         }
-        Boolean isSuccessful = (Boolean)jsonObject.get("Success");
+        Boolean isSuccessful = (Boolean) jsonObject.get("Success");
         if (isSuccessful != null && isSuccessful) {
             return true;
         }
