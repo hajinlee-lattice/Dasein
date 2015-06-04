@@ -91,27 +91,30 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
             $scope.showError = true;
             $scope.errorMessage = result.resultErrors;
         }
+
+        ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
+            if (result != null && result.success === true) {
+                var returned = result.resultObj;
+                $scope.crmProductionCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
+                $scope.crmProductionComplete = true;
+            } else {
+                $scope.crmProductionCredentials = new Credentials();
+            }
+
+            ConfigService.GetCurrentCredentials("sfdc", false).then(function(result) {
+                if (result != null && result.success === true) {
+                    var returned = result.resultObj;
+                    $scope.crmSandboxCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
+                    $scope.crmSandboxComplete = true;
+                } else {
+                    $scope.crmSandboxCredentials = new Credentials();
+                }
+            });
+
+        });
+
     });
-    
-    ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
-        if (result != null && result.success === true) {
-            var returned = result.resultObj;
-            $scope.crmProductionCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
-            $scope.crmProductionComplete = true;
-        } else {
-            $scope.crmProductionCredentials = new Credentials();
-        }
-    });
-    
-    ConfigService.GetCurrentCredentials("sfdc", false).then(function(result) {
-        if (result != null && result.success === true) {
-            var returned = result.resultObj;
-            $scope.crmSandboxCredentials = new Credentials(null, returned.SecurityToken, null, returned.Password, returned.UserName, null);
-            $scope.crmSandboxComplete = true;
-        } else {
-            $scope.crmSandboxCredentials = new Credentials();
-        }
-    });
+
     
     $scope.crmProductionSaveClicked = function () {
         $scope.crmProductionError = "";
