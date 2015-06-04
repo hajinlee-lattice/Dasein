@@ -587,7 +587,7 @@ angular.module('mainApp.models.services.ModelService', [
         });
 
         return deferred.promise;        
-    }
+    };
 
     this.UpdateSegment = function (segment) {
         var deferred = $q.defer();

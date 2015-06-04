@@ -127,10 +127,10 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                         if (value == "NA" || value == "N/A" || value == "-1" || value == "NULL" || value == "NOT AVAILABLE") {
                             toReturn = "Not Available";
                             return toReturn;
-                        } else if (value == "N" || value == "NO" || value == "FALSE" || value == "F" || value == "0") {
+                        } else if (value == "N" || value == "NO" || value == "FALSE" || value == "F" || value == "0" || value == "0.0") {
                             toReturn = "No";
                             return toReturn;
-                        } else if (value == "Y" || value == "YES" || value == "TRUE" || value == "T" || value == "1") {
+                        } else if (value == "Y" || value == "YES" || value == "TRUE" || value == "T" || value == "1" || value == "1.0") {
                             toReturn = "Yes";
                             return toReturn;
                         }

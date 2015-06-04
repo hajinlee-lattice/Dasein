@@ -700,6 +700,173 @@ describe('AnalyticAttributeUtility Tests', function () {
         });
     });
     
+    describe('GetAttributeBucketName given Boolean value', function () {
+        var toReturn;
+
+        var bucket1 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "0"
+                ],
+                Lift: 10
+            };
+        
+        var bucket2 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "0.0"
+                ],
+                Lift: 10
+            };
+        
+        var bucket3 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "1"
+                ],
+                Lift: 10
+            };
+        
+        var bucket4 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "1.0"
+                ],
+                Lift: 10
+            };
+        
+        var bucket5 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "T"
+                ],
+                Lift: 10
+            };
+        
+        var bucket6 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "F"
+                ],
+                Lift: 10
+            };
+        
+        var bucket7 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "true"
+                ],
+                Lift: 10
+            };
+        
+        var bucket8 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "false"
+                ],
+                Lift: 10
+            };
+        
+        var bucket9 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "Yes"
+                ],
+                Lift: 10
+            };
+        
+        var bucket10 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "No"
+                ],
+                Lift: 10
+            };
+        
+        var bucket11 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "Y"
+                ],
+                Lift: 10
+            };
+        
+        var bucket12 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "N"
+                ],
+                Lift: 10
+            };
+        
+        var metadata = {
+            DataType: null,
+            FundamentalType: "boolean"
+        };
+        
+        
+        it('If value is 0, return the string No', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket1, metadata);
+            expect(toReturn).toBe("No");
+        });
+        
+        it('If value is 0.0, return the string No', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket2, metadata);
+            expect(toReturn).toBe("No");
+        });
+        
+        it('If value is 1, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket3, metadata);
+            expect(toReturn).toBe("Yes");
+        });
+        
+        it('If value is 1.0, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket4, metadata);
+            expect(toReturn).toBe("Yes");
+        });
+        
+        it('If value is T, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket5, metadata);
+            expect(toReturn).toBe("Yes");
+        });
+        
+        it('If value is F, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket6, metadata);
+            expect(toReturn).toBe("No");
+        });
+        
+        it('If value is true, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket7, metadata);
+            expect(toReturn).toBe("Yes");
+        });
+        
+        it('If value is false, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket8, metadata);
+            expect(toReturn).toBe("No");
+        });
+        
+        it('If value is Yes, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket9, metadata);
+            expect(toReturn).toBe("Yes");
+        });
+        
+        it('If value is No, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket10, metadata);
+            expect(toReturn).toBe("No");
+        });
+        
+        it('If value is Y, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket11, metadata);
+            expect(toReturn).toBe("Yes");
+        });
+        
+        it('If value is N, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket12, metadata);
+            expect(toReturn).toBe("No");
+        });
+        
+    });
+    
     describe('ShouldShowNullBucket given the null bucket', function () {
         var toReturn;
 
