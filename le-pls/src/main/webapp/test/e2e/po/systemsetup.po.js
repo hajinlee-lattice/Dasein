@@ -59,7 +59,7 @@ var SystemSetup = function() {
     };
 
     this.waitForSfdcCredentials = function() {
-        browser.driver.wait(element(by.css('a[href="#formProduction"]')).isPresent(), 10000,
+        browser.driver.wait(element(by.css('a[href="#formSandbox"]')).isPresent(), 10000,
             "SFDC crendentials form should show up within 10 sec.");
     };
 
