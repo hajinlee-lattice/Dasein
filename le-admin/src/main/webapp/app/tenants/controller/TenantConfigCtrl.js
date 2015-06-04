@@ -67,7 +67,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         };
         $scope.tenantInfo = {
             properties: {
-                displayName: "LPA 2.0 tenant",
+                displayName: "LPA " + $scope.tenantId,
                 description: "A LPA tenant under the contract " + $scope.contractId
             }
         };
