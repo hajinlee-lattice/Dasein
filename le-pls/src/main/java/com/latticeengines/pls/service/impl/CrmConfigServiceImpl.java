@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
@@ -115,7 +116,10 @@ public class CrmConfigServiceImpl implements CrmConfigService {
         values.put("User", crmConfig.getCrmCredential().getUserName());
         values.put("Password", crmConfig.getCrmCredential().getPassword());
         values.put("SecurityToken", crmConfig.getCrmCredential().getSecurityToken());
-        values.put("Version", crmConfig.getVersion());
+        String version = crmConfig.getVersion();
+        if (!StringUtils.isBlank(version)) {
+            values.put("Version", version);
+        }
         parameters.put("values", toDictFormat(values));
         crmConfig.setDataProviderName("SFDC_DataProvider");
 
@@ -131,7 +135,6 @@ public class CrmConfigServiceImpl implements CrmConfigService {
         parameters.put("tenantName", space.getTenantId());
         parameters.put("tryConnect", "false");
     }
-
 
     void excuteHttpRequest(String url, Map<String, Object> parameters) {
 
