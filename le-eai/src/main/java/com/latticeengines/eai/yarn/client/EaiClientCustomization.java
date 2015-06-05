@@ -19,7 +19,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
-import com.latticeengines.eai.yarn.runtime.EaiContainerProperty;
+import com.latticeengines.eai.routes.ImportProperty;
 
 @Component("eaiClientCustomization")
 public class EaiClientCustomization extends DefaultYarnClientCustomization {
@@ -48,7 +48,7 @@ public class EaiClientCustomization extends DefaultYarnClientCustomization {
     public void beforeCreateLocalLauncherContextFile(Properties properties) {
         try {
             String dir = properties.getProperty(ContainerProperty.JOBDIR.name());
-            String importConfig = (String) properties.remove(EaiContainerProperty.IMPORTCONFIG.name());
+            String importConfig = (String) properties.remove(ImportProperty.IMPORTCONFIG);
             File metadataFile = new File(dir + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, importConfig);
             properties.put(ContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());

@@ -44,7 +44,7 @@ public abstract class ImportService {
 
     public abstract void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext context);
     
-    public void validate(ImportContext context) {
+    public void validate(SourceImportConfiguration extractionConfig, ImportContext context) {
         Configuration config = context.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);
         String targetPath = context.getProperty(ImportProperty.TARGETPATH, String.class);
         

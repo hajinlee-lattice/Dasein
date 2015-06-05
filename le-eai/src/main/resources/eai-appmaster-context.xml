@@ -44,9 +44,7 @@
         <yarn:classpath />
     </yarn:environment>
 
-    <bean id="itemProcessor" class="com.latticeengines.eai.yarn.runtime.EaiProcessor">
-        <property name="targetPath" value="$$TARGET_PATH$$" />
-    </bean>
+    <bean id="itemProcessor" class="com.latticeengines.eai.yarn.runtime.EaiProcessor" />
 
     <bean id="fileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
         <property name="resource" value="file:metadata.json" />
@@ -81,5 +79,6 @@
     <context:component-scan base-package="org.springframework.yarn.batch.am" />
 
     <import resource="classpath:eai-yarn-context.xml" />
+    <import resource="classpath:dataplatform-context.xml" />
 
 </beans>

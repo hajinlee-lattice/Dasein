@@ -1,40 +1,61 @@
 package com.latticeengines.eai.exposed.service.impl;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.modeling.DataSchema;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
-
-@Transactional
 public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private EaiService eaiService;
+    
+    @Autowired
+    private MetadataService metadataService;
+    
+    @Autowired
+    private Configuration yarnConfiguration;
 
     protected static final Log log = LogFactory.getLog(EaiServiceImplTestNG.class);
 
     private String customer = "Eai-" + System.currentTimeMillis();
 
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
+    }
+
     @Test(groups = { "functional", "functional.production" }, enabled = true)
-    public void invokeEai() throws Exception {
+    public void extractAndImport() throws Exception {
         SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
         Map<String, String> props = new HashMap<>();
 
@@ -61,7 +82,49 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         importConfig.setTargetPath(targetPath);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
-        //FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        //assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+    
+    @Test(groups = { "functional" }, enabled = true)
+    public void extractAndImportForFile() throws Exception {
+        URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/exposed/service/impl");
+        URL metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/exposed/service/impl/ConcurSampleMetadata.xml");
+        SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
+        Table file = createFile(dataUrl);
+        fileImportConfig.setSourceType(SourceType.FILE);
+        fileImportConfig.setTables(Arrays.<Table>asList(new Table[] { file }));
+        Map<String, String> props = new HashMap<>();
+        props.put(ImportProperty.DATAFILEDIR, dataUrl.getPath());
+        props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
+        fileImportConfig.setProperties(props);
+        String targetPath = "/tmp/dataFromFile";
+        ImportConfiguration importConfig = new ImportConfiguration();
+        importConfig.setCustomer(customer);
+        importConfig.addSourceConfiguration(fileImportConfig);
+        importConfig.setTargetPath(targetPath);
+        ApplicationId appId = eaiService.extractAndImport(importConfig);
+        assertNotNull(appId);
+    }
+    
+    private Table createFile(URL inputUrl) {
+        String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
+        String driver = "org.relique.jdbc.csv.CsvDriver";
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");
+        DbCreds creds = new DbCreds(builder);
+        
+        DataSchema schema = metadataService.createDataSchema(creds, "ConcurSample");
+
+        Table file = new Table();
+        file.setName("ConcurSample");
+        
+        for (Field field : schema.getFields()) {
+            Attribute attr = new Attribute();
+            attr.setName(field.getName());
+            file.addAttribute(attr);
+        }
+        
+       return file;
     }
 }

@@ -23,17 +23,11 @@ public class EaiProcessor implements ItemProcessor<ImportConfiguration, String> 
     @Autowired
     private DataExtractionService dataExtractionService;
 
-    private String targetPath;
-
-    public void setTargetPath(String targetPath) {
-        this.targetPath = targetPath;
-    }
-
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
         ImportContext context = new ImportContext();
         context.setProperty(ImportProperty.HADOOPCONFIG, yarnConfiguration);
-        context.setProperty(ImportProperty.TARGETPATH, targetPath);
+        context.setProperty(ImportProperty.TARGETPATH, importConfig.getTargetPath());
         log.info("Starting extract and import.");
         dataExtractionService.extractAndImport(importConfig, context);
         log.info("Finished extract and import.");

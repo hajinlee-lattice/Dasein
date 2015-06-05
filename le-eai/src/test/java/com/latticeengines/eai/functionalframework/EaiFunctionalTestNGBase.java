@@ -2,11 +2,16 @@ package com.latticeengines.eai.functionalframework;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.yarn.client.YarnClient;
+import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
 
@@ -16,6 +21,20 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
+    
+    @Autowired
+    private Configuration yarnConfiguration;
+    
+    @Autowired
+    private YarnClient defaultYarnClient;
+    
+    protected DataPlatformFunctionalTestNGBase platformTestBase;
+    
+    @BeforeClass(groups = { "functional", "deployment" })
+    public void setupRunEnvironment() throws Exception {
+        platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
+        platformTestBase.setYarnClient(defaultYarnClient);
+    }
     
     protected Table createMarketoActivity() {
         Table table = new Table();
@@ -137,5 +156,4 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         return table;
     }
 
-    
 }
