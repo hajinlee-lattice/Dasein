@@ -91,10 +91,10 @@ public class SqoopJobServiceImpl {
             cmds.add("--columns");
             cmds.add(columnsToInclude);
         }
-//        if (driver != null && !driver.isEmpty()) {
-//            cmds.add("--driver");
-//            cmds.add(driver);
-//        }
+        if (driver != null && !driver.isEmpty()) {
+            cmds.add("--driver");
+            cmds.add(driver);
+        }
         cmds.add("--split-by");
         cmds.add(StringUtils.join(splitCols, ","));
         cmds.add("--target-dir");
