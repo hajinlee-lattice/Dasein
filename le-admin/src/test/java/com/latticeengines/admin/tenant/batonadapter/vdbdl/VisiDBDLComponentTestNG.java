@@ -1,9 +1,11 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -25,7 +27,6 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
-import com.latticeengines.remote.exposed.service.Headers;
 import com.latticeengines.security.exposed.Constants;
 
 @Component
@@ -146,7 +147,7 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
         String jsonStr = JsonUtils.serialize(request);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
-                false, Headers.getHeaders(), jsonStr);
+                false, getHeaders(), jsonStr);
         return JsonUtils.deserialize(response, InstallResult.class);
     }
 
@@ -190,6 +191,18 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         String url = String.format("%s/admin/internal/", getRestHostPort());
         magicRestTemplate.delete(url + "datastore/" + dataStoreOption + "/" + tenant);
         magicRestTemplate.delete(url + "permstore/" + permStoreOption + "/" + visiDBServerName + "/" + tenant);
+
+        Boolean permStoreExists = magicRestTemplate.getForObject(url + "permstore/" + permStoreOption + "/"
+                + visiDBServerName + "/" + tenant, Boolean.class);
+        Assert.assertFalse(permStoreExists);
+    }
+
+    public List<BasicNameValuePair> getHeaders(){
+        List<BasicNameValuePair> headers = new ArrayList<>();
+        headers.add(new BasicNameValuePair("MagicAuthentication", "Security through obscurity!"));
+        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
+        headers.add(new BasicNameValuePair("Accept", "application/json"));
+        return headers;
     }
 
     @Override

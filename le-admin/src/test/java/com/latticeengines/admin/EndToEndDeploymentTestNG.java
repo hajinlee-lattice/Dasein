@@ -420,12 +420,12 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     }
 
     private void deleteVisiDBDLTenants() {
+        visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenantId);
         try {
             visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenantId);
         } catch (Exception e) {
             // ignore
         }
-        visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenantId);
     }
 
     private void deleteBardJamesTenant() throws IOException, InterruptedException {
