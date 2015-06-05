@@ -77,7 +77,7 @@ public class SegmentResource {
     public List<Segment> getSegments(@RequestParam(value = "selection", required = false) String selection,
             HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        List<Segment> segments = dataLoaderService.getSegments(tenant.getName(),
+        List<Segment> segments = dataLoaderService.getSegments(CustomerSpace.parse(tenant.getId()).getTenantId(),
                 tenantConfigService.getDLRestServiceAddress(tenant.getId()));
         log.info("getSegments:" + segments.toString());
 
