@@ -14,9 +14,8 @@
         resource="classpath:scoring-scoringmanager-quartz-${SCORING_MGR_QUARTZ_ENABLED:disabled}-context.xml" />
 
     <bean id="scoringCreds" class="com.latticeengines.domain.exposed.modeling.DbCreds">
-        <property name="host" value="${scoring.dao.datasource.host}" />
-        <property name="port" value="${scoring.dao.datasource.port}" />
-        <property name="db" value="${scoring.dao.datasource.dbname}" />
+        <property name="jdbcUrl" value="${scoring.cred.datasource.url}" />
+        <property name="driverClass" value="${scoring.dao.datasource.driver}"/>
         <property name="DBType" value="${scoring.dao.datasource.type}" />
         <property name="user" value="${scoring.dao.datasource.user}" />
         <property name="password"
