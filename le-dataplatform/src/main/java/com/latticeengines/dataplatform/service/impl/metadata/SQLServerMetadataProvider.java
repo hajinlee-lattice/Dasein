@@ -54,7 +54,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public void dropTable(JdbcTemplate jdbcTemplate, String table) {
-        jdbcTemplate.execute("IF OBJECT_ID('" + table + "', 'U') IS NOT NULL DROP TABLE " + table);
+        jdbcTemplate.execute("IF OBJECT_ID('" + table + "', 'U') IS NOT NULL DROP TABLE [" + table + "]");
     }
 
     @Override
@@ -74,7 +74,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid) {
-        jdbcTemplate.execute("ALTER TABLE " + table + " ADD " + pid + " INT IDENTITY");
+        jdbcTemplate.execute("ALTER TABLE [" + table + "] ADD " + pid + " INT IDENTITY");
     }
 
 }
