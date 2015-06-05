@@ -99,8 +99,9 @@ public class SqoopJobServiceImpl {
         cmds.add(StringUtils.join(splitCols, ","));
         cmds.add("--target-dir");
         cmds.add(targetDir);
+        String propsFileName = null;
         if (props != null) {
-            String propsFileName = String.format("sqoop-import-props-%s.properties", System.currentTimeMillis());
+            propsFileName = String.format("sqoop-import-props-%s.properties", System.currentTimeMillis());
             File propsFile = new File(propsFileName);
             try {
                 props.store(new FileWriter(propsFile), "");
@@ -110,11 +111,16 @@ public class SqoopJobServiceImpl {
                 log.error(e);
             }
         }
-        yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());        try {
+        yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
+        try {
             return runTool(cmds, yarnConfiguration, sync);
         } finally {
             FileUtils.deleteQuietly(new File(table + ".avsc"));
             FileUtils.deleteQuietly(new File(table + ".java"));
+            
+            if (propsFileName != null) {
+                FileUtils.deleteQuietly(new File(propsFileName));
+            }
         }
     }
 
