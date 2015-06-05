@@ -11,7 +11,7 @@ public class SelectableConfigurationField {
 
     private String node;
     private List<String> options;
-    private String defaultOption = "";
+    private String defaultOption;
 
     public SelectableConfigurationField(){ }
 
@@ -57,6 +57,7 @@ public class SelectableConfigurationField {
     }
 
     public boolean defaultIsValid() {
-        return (StringUtils.isEmpty(defaultOption)) || (options != null && options.contains(defaultOption));
+        return ((defaultOption == null || StringUtils.isEmpty(defaultOption)) ||
+                (options != null && options.contains(defaultOption)));
     }
 }
