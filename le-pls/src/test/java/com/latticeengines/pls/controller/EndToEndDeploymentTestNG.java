@@ -129,9 +129,10 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
             Thread.sleep(1000L);
         } while (numOfRetries > 0 && (response == null || response.size() < 2));
         assertNotNull(response);
-        assertTrue(response.size() >= 2);
+        assertTrue(response.size() >= 2, String.format("There is only %d models in tenant %s", response.size(), tenant));
         Map<String, String> map = (Map) response.get(0);
-        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
+        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
+                ModelSummary.class);
         assertTrue(summary.getName().startsWith("PLSModel-Eloqua"));
         assertNotNull(summary.getDetails());
     }
