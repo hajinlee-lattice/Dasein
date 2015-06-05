@@ -72,6 +72,7 @@ public enum LedpCode {
     // Eai Service 17000-17999
     LEDP_17000("At least one attribute required."), //
     LEDP_17001("File import can only have one data source."), //
+    LEDP_17002("No metadata for attribute {0}."), //
 
     // PLS 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
@@ -129,9 +130,9 @@ public enum LedpCode {
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),
-    LEDP_21001("Problem installing segment spec; DataLoader result code:{0}, error message{1}"),
-    LEDP_21002("Problem installing VisiDB structure file via DataLoader REST:{0}"),
-    LEDP_21003("Problem updating segments.  Updated segment names {0} does not match existing segment names {1}");
+    LEDP_21001("Problem installing segment spec; DataLoader result code: {0}, error message {1}"),
+    LEDP_21002("Problem installing VisiDB structure file via DataLoader REST: {0}"),
+    LEDP_21003("Problem updating segments. Updated segment names {0} does not match existing segment names {1}");
 
     private String message;
 
@@ -143,3 +144,4 @@ public enum LedpCode {
         return message;
     }
 }
+
