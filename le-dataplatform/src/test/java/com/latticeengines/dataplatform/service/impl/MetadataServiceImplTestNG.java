@@ -1,9 +1,11 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 import java.sql.Types;
+import java.util.AbstractMap;
 
 import org.apache.avro.Schema;
 import org.apache.derby.drda.NetworkServerControl;
@@ -94,13 +96,24 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Test(groups = { "functional" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrlAndDriverClassForFile() throws Exception {
+        AbstractMap.SimpleEntry<DbCreds, String> dbInfo = buildCredsForFile();
+        assertEquals(metadataService.getJdbcConnectionUrl(dbInfo.getKey()), dbInfo.getValue());
+    }
+
+    @Test(groups = { "functional" }, enabled = true)
+    public void createDataSchema() throws Exception {
+        AbstractMap.SimpleEntry<DbCreds, String> dbInfo = buildCredsForFile();
+        DataSchema schema = metadataService.createDataSchema(dbInfo.getKey(), "Nutanix");
+        assertTrue(schema.getFields().size() > 0);
+    }
+    
+    private AbstractMap.SimpleEntry<DbCreds, String> buildCredsForFile() {
         URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.jdbcUrl(url).driverClass(driver);
+        builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");
         DbCreds creds = new DbCreds(builder);
-
-        assertEquals(metadataService.getJdbcConnectionUrl(creds), url);
+        return new AbstractMap.SimpleEntry<DbCreds, String>(creds, url);
     }
 }

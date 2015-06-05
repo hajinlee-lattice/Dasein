@@ -72,8 +72,9 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
-        Integer positiveEventCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + tableName + " WHERE "
-                + eventColName + " = 1", Integer.class);
+        Integer positiveEventCount = jdbcTemplate.queryForObject( //
+                String.format("SELECT COUNT(*) FROM %s WHERE %s = 1", tableName, eventColName), //
+                Integer.class);
         return Long.valueOf(positiveEventCount);
 
     }

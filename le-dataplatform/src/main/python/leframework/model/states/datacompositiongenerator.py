@@ -91,11 +91,11 @@ class DataCompositionGenerator(State):
 
         return result
     
-    def _make_transform(self, name, output, type, arguments):
+    def _make_transform(self, name, output, data_type, arguments):
         result = OrderedDict()
         result["name"] = name
         result["output"] = output
-        result["type"] = type
+        result["type"] = data_type
         result["arguments"] = OrderedDict(arguments)
         return result
             

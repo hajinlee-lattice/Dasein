@@ -293,6 +293,7 @@
             <groupId>org.apache.sqoop</groupId>
             <artifactId>sqoop</artifactId>
             <version>${sqoop.version}</version>
+            <classifier>ledp</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

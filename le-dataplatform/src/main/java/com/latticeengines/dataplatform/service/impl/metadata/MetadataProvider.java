@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sqoop.orm.AvroSchemaGenerator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -47,6 +48,11 @@ public abstract class MetadataProvider {
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();
         options.setConnectString(getConnectionString(dbCreds));
+        
+        if (!StringUtils.isEmpty(dbCreds.getDriverClass())) {
+            options.setDriverClassName(dbCreds.getDriverClass());
+        }
+        
         ConnManager connManager = getConnectionManager(options);
         avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
         try {
@@ -83,7 +89,16 @@ public abstract class MetadataProvider {
     }
 
     public String getConnectionString(DbCreds creds) {
-        return replaceUrlWithParamsAndTestConnection(getJdbcUrlTemplate(), getDriverClass(), creds);
+        String url = creds.getJdbcUrl();
+        String driverClass = creds.getDriverClass();
+        
+        if (StringUtils.isEmpty(url)) {
+            url = getJdbcUrlTemplate();
+        }
+        if (StringUtils.isEmpty(driverClass)) {
+            driverClass = getDriverClass();
+        }
+        return replaceUrlWithParamsAndTestConnection(url, driverClass, creds);
     }
 
     public abstract void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
