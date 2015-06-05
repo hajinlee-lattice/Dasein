@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,10 +29,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
+import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -40,6 +44,7 @@ import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
@@ -51,12 +56,18 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     private UserService userService;
 
     @Autowired
+    private GlobalUserManagementService globalUserManagementService;
+
+    @Autowired
     private TenantService tenantService;
 
     @Autowired
     private CrmCredentialService crmCredentialService;
 
     private Tenant tenant;
+
+    @Value("${pls.api.hostport}")
+    private String hostPort;
 
     @BeforeClass(groups = {"functional", "deployment"})
     public void setup() throws Exception {
@@ -219,6 +230,9 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
+        //==================================================
+        // save CRM credentials
+        //==================================================
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("Happy2010");
@@ -233,6 +247,11 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
             // ignore
         }
 
+        //==================================================
+        // change the password of password tester
+        //==================================================
+        globalUserManagementService.resetLatticeCredentials(passwordTester);
+
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         headers.add("Accept", "application/json");
@@ -246,6 +265,18 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         ResponseDocument response = responseEntity.getBody();
         Assert.assertTrue(response.isSuccess());
 
+        //==================================================
+        // verify password tester
+        //==================================================
+        Credentials creds = new Credentials();
+        creds.setUsername(passwordTester);
+        creds.setPassword(DigestUtils.sha256Hex(passwordTesterPwd));
+        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
+        Assert.assertNotNull(doc, "Logging in password tester got null LoginDocument.");
+
+        //==================================================
+        // verify empty CRM credentials
+        //==================================================
         Camille camille = CamilleEnvironment.getCamille();
         CustomerSpace space = CustomerSpace.parse(tenantId);
         Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),

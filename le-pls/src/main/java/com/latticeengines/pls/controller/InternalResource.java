@@ -61,6 +61,10 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class InternalResource extends InternalResourceBase {
 
     private static final Log LOGGER = LogFactory.getLog(InternalResource.class);
+    private static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
+    private static final String passwordTesterPwd = "Lattice123";
+    private static final String adminTester = "pls-super-admin-tester@test.lattice-engines.com";
+    private static final String adminTesterPwd = "admin";
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -264,8 +268,8 @@ public class InternalResource extends InternalResourceBase {
         // Upload modelsummary if necessary
         //==================================================
         Credentials creds = new Credentials();
-        creds.setUsername("pls-super-admin-tester@test.lattice-engines.com");
-        creds.setPassword(DigestUtils.sha256Hex("admin"));
+        creds.setUsername(adminTester);
+        creds.setPassword(DigestUtils.sha256Hex(adminTesterPwd));
 
         List<BasicNameValuePair> headers = new ArrayList<>();
         headers.add(new BasicNameValuePair("Content-Type", "application/json"));
@@ -320,6 +324,15 @@ public class InternalResource extends InternalResourceBase {
         }
 
         //==================================================
+        // Reset password of password tester
+        //==================================================
+        try {
+            globalAuthenticationService.authenticateUser(passwordTester, DigestUtils.sha256Hex(passwordTesterPwd));
+        } catch (Exception e) {
+            resetPasswordTester();
+        }
+
+        //==================================================
         // Cleanup stored credentials
         //==================================================
         crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, true);
@@ -363,5 +376,18 @@ public class InternalResource extends InternalResourceBase {
             c.setResult(left + right);
         }
         return c;
+    }
+
+    private void resetPasswordTester() {
+        String tempPwd = globalUserManagementService.resetLatticeCredentials(passwordTester);
+        Ticket ticket = globalAuthenticationService.authenticateUser(passwordTester, DigestUtils.sha256Hex(tempPwd));
+
+        Credentials oldCreds = new Credentials();
+        oldCreds.setUsername(passwordTester);
+        oldCreds.setPassword(DigestUtils.sha256Hex(tempPwd));
+        Credentials newCreds = new Credentials();
+        newCreds.setUsername(passwordTester);
+        newCreds.setPassword(DigestUtils.sha256Hex(passwordTesterPwd));
+        globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
     }
 }

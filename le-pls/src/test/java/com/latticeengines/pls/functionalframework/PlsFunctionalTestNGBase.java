@@ -73,6 +73,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String generalUsername = "lming@lattice-engines.com";
     protected static final String generalPassword = "admin";
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+    protected static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
+    protected static final String passwordTesterPwd = "Lattice123";
+    protected static final String passwordTesterPwdHash = "3OCRIbECCiTtJ8FyaNgvTjNES/eyjQUK59Z5rMCnrAk=";
 
     protected static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@test.lattice-engines.com";
     protected static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@test.lattice-engines.com";
@@ -481,6 +484,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         for (Tenant tenant: testingTenants) {
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
             userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), generalUsername);
+            userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), passwordTester);
 
             for (AccessLevel level : AccessLevel.values()) {
                 User user = getTheTestingUserAtLevel(level);
@@ -524,6 +528,13 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             globalUserManagementService.deleteUser("lming");
             globalUserManagementService.deleteUser(generalUsername);
             createUser(generalUsername, generalUsername, "General", "User", generalPasswordHash);
+        }
+
+        // passwordTester
+        user = globalUserManagementService.getUserByEmail(passwordTester);
+        if (user == null || !user.getUsername().equals(passwordTester)) {
+            globalUserManagementService.deleteUser(passwordTester);
+            createUser(passwordTester, passwordTester, "Lattice", "Tester", passwordTesterPwdHash);
         }
     }
 
