@@ -28,7 +28,7 @@ def main(argv):
         if len(leadFiles) == 0:
             ## just a hacky thing for integration test. WILL CHANGE THIS LATER!!!
             print "the current model does not match: " + modelID
-            contiue
+            continue
             #raise "leadFile is null"
         for leadFile in leadFiles:
             modelEvaluate(modelID, leadFile)
