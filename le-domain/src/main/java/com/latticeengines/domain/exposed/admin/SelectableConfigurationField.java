@@ -3,13 +3,15 @@ package com.latticeengines.domain.exposed.admin;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SelectableConfigurationField {
 
     private String node;
     private List<String> options;
-    private String defaultOption;
+    private String defaultOption = "";
 
     public SelectableConfigurationField(){ }
 
@@ -54,4 +56,7 @@ public class SelectableConfigurationField {
         }
     }
 
+    public boolean defaultIsValid() {
+        return (StringUtils.isEmpty(defaultOption)) || (options != null && options.contains(defaultOption));
+    }
 }
