@@ -124,7 +124,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                     var fundamentalType = attributeMetadata.FundamentalType != null ? attributeMetadata.FundamentalType.toUpperCase() : null;
                     if (fundamentalType == this.FundamentalType.Boolean) {
                         var value = bucket.Values[0].toString().toUpperCase();
-                        if (value == "NA" || value == "N/A" || value == "-1" || value == "NULL" || value == "NOT AVAILABLE") {
+                        if (value == "NA" || value == "N/A" || value == "-1" || value == "-1.0" || value == "NULL" || value == "NOT AVAILABLE") {
                             toReturn = "Not Available";
                             return toReturn;
                         } else if (value == "N" || value == "NO" || value == "FALSE" || value == "F" || value == "0" || value == "0.0") {
