@@ -82,9 +82,4 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     public String getJdbcUrlTemplate() {
         return "jdbc:mysql://$$HOST$$:$$PORT$$/$$DB$$?user=$$USER$$&password=$$PASSWD$$";
     }
-
-    @Override
-    public String getConnectionManager(DbCreds creds) {
-        return "org.apache.sqoop.manager.MySQLManager";
-    }
 }

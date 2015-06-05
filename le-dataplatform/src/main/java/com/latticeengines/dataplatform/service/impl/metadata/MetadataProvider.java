@@ -103,6 +103,4 @@ public abstract class MetadataProvider {
 
     public abstract void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
 
-    public abstract String getConnectionManager(DbCreds creds);
-
 }

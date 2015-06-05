@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @SuppressWarnings("deprecation")
 public class GenericJdbcMetadataProvider extends MetadataProvider {
@@ -70,11 +69,6 @@ public class GenericJdbcMetadataProvider extends MetadataProvider {
     @Override
     public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getConnectionManager(DbCreds creds) {
-        return "org.apache.sqoop.manager.GenericJdbcManager";
     }
 
 }

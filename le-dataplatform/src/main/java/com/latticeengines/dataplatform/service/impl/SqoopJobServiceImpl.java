@@ -40,8 +40,6 @@ public class SqoopJobServiceImpl {
         cmds.add("-Dmapred.job.queue.name=" + queue);
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(creds));
-        cmds.add("--connection-manager");
-        cmds.add(metadataService.getConnectionManager(creds));
         cmds.add("--m");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
@@ -81,8 +79,6 @@ public class SqoopJobServiceImpl {
         cmds.add("-Dmapred.job.queue.name=" + queue);
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(creds));
-        cmds.add("--connection-manager");
-        cmds.add(metadataService.getConnectionManager(creds));
         cmds.add("--m");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
@@ -95,10 +91,10 @@ public class SqoopJobServiceImpl {
             cmds.add("--columns");
             cmds.add(columnsToInclude);
         }
-        if (driver != null && !driver.isEmpty()) {
-            cmds.add("--driver");
-            cmds.add(driver);
-        }
+//        if (driver != null && !driver.isEmpty()) {
+//            cmds.add("--driver");
+//            cmds.add(driver);
+//        }
         cmds.add("--split-by");
         cmds.add(StringUtils.join(splitCols, ","));
         cmds.add("--target-dir");

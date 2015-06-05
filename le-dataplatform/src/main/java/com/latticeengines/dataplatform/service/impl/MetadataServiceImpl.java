@@ -130,10 +130,4 @@ public class MetadataServiceImpl implements MetadataService {
         MetadataProvider provider = getProvider(jdbcTemplate);
         provider.addPrimaryKeyColumn(jdbcTemplate, table, pid);
     }
-
-    @Override
-    public String getConnectionManager(DbCreds creds) {
-        MetadataProvider provider = metadataProviders.get(creds.getDBType());
-        return provider.getConnectionManager(creds);
-    }
 }
