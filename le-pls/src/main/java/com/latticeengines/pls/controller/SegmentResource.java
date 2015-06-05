@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -136,7 +137,7 @@ public class SegmentResource {
         try {
             Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
             log.info("updateSegments:" + segments);
-            dataLoaderService.setSegments(tenant.getName(),
+            dataLoaderService.setSegments(CustomerSpace.parse(tenant.getId()).getTenantId(),
                     tenantConfigService.getDLRestServiceAddress(tenant.getId()), segments);
 
             // Models assigned to segments are considered active, those
