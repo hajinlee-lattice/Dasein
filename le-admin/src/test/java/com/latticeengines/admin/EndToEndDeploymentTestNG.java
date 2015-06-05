@@ -401,10 +401,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
             // ignore
         }
 
-        // delete PLS tenant
-        deletePLSTenants();
         deleteVisiDBDLTenants();
         deleteBardJamesTenant();
+        deletePLSTenants();
     }
 
     private void deletePLSTenants() {
