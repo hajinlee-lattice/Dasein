@@ -124,6 +124,8 @@ public enum LedpCode {
 
     // le-scoring 20000-20100
     LEDP_20000("ScoringCommand Failed"),
+    LEDP_20001("Validation of the datatype failed."),
+    LEDP_20002("Python script for scoring is not provided."),
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),
