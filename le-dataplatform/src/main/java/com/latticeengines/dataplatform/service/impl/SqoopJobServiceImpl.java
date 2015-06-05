@@ -40,6 +40,8 @@ public class SqoopJobServiceImpl {
         cmds.add("-Dmapred.job.queue.name=" + queue);
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(creds));
+        cmds.add("--connection-manager");
+        cmds.add(metadataService.getConnectionManager(creds));
         cmds.add("--m");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
@@ -79,6 +81,8 @@ public class SqoopJobServiceImpl {
         cmds.add("-Dmapred.job.queue.name=" + queue);
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(creds));
+        cmds.add("--connection-manager");
+        cmds.add(metadataService.getConnectionManager(creds));
         cmds.add("--m");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");

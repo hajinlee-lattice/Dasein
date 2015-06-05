@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.SQLServerManager;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @SuppressWarnings("deprecation")
 public class SQLServerMetadataProvider extends MetadataProvider {
@@ -75,6 +76,11 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     @Override
     public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid) {
         jdbcTemplate.execute("ALTER TABLE [" + table + "] ADD " + pid + " INT IDENTITY");
+    }
+
+    @Override
+    public String getConnectionManager(DbCreds creds) {
+        return "org.apache.sqoop.manager.SQLServerManager";
     }
 
 }

@@ -33,4 +33,6 @@ public interface MetadataService {
     void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid);
 
     void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
+
+    String getConnectionManager(DbCreds creds);
 }
