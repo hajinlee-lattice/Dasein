@@ -19,5 +19,7 @@ public interface ServiceService {
 
     Boolean patchOptions(String serviceName, SelectableConfigurationField field);
 
+    Boolean patchDefaultConfigWithOptions(String serviceName, SelectableConfigurationField field);
+
     Boolean patchDefaultConfig(String serviceName, String nodePath, String data);
 }

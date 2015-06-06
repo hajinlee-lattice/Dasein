@@ -75,7 +75,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected String TestContractId;
 
     @Value("${admin.api.hostport}")
-    private String hostPort;
+    protected String hostPort;
 
     @Autowired
     private TenantService tenantService;

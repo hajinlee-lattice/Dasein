@@ -122,6 +122,8 @@ public enum LedpCode {
     LEDP_19101("Service service error."),
     LEDP_19102("Service component {0} is not registered."),
     LEDP_19103("Getting files in a server-side directory failed."),
+    LEDP_19104("The default choice [{0}] is not valid among the options {1}."),
+    LEDP_19105("The requested option list {0} does not contain the existing default choice [{1}]"),
 
     // le-scoring 20000-20100
     LEDP_20000("ScoringCommand Failed"),

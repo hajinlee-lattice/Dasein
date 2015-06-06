@@ -1,10 +1,12 @@
 package com.latticeengines.admin.service.impl;
 
+import java.io.IOException;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -93,6 +95,24 @@ public class ServiceServiceImpl implements ServiceService {
         }
 
     }
+
+    @Override
+    public Boolean patchDefaultConfigWithOptions(String serviceName, SelectableConfigurationField field) {
+        if (!field.defaultIsValid()) {
+            throw new LedpException(LedpCode.LEDP_19104, new String[]{field.getDefaultOption(),
+                    field.getOptions().toString()});
+        }
+        try {
+            SerializableDocumentDirectory conf = patchDefaultDocDir(serviceName, field);
+            DocumentDirectory metaDir = patchSchemaDocDir(serviceName, field);
+            conf.applyMetadata(metaDir);
+            return upsertPatchedConfDir(serviceName, conf) && patchOptions(serviceName, field);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_19101, String.format(
+                    "Failed to patch default configuration for node %s in component %s", field.getNode(), serviceName), e);
+        }
+    }
+
     @Override
     public Boolean patchDefaultConfig(String serviceName, String nodePath, String data) {
         try {
@@ -111,7 +131,31 @@ public class ServiceServiceImpl implements ServiceService {
             throw new LedpException(LedpCode.LEDP_19101, String.format(
                     "Failed to patch default configuration for node %s in component %s", nodePath, serviceName), e);
         }
+    }
 
+    private DocumentDirectory patchSchemaDocDir(String serviceName, SelectableConfigurationField field)
+            throws IOException {
+        DocumentDirectory metaDir = getConfigurationSchema(serviceName);
+        DocumentDirectory.Node metaNode = metaDir.get(field.getNode());
+        ObjectMapper mapper = new ObjectMapper();
+        metaNode.getDocument().setData(mapper.writeValueAsString(field.getOptions()));
+        return metaDir;
+    }
+
+    private SerializableDocumentDirectory patchDefaultDocDir(String serviceName, SelectableConfigurationField field) {
+        String nodePath = field.getNode();
+        SerializableDocumentDirectory conf = getDefaultServiceConfig(serviceName);
+        SerializableDocumentDirectory.Node node = conf.getNodeAtPath(nodePath);
+        if (node == null) { throw new IllegalArgumentException("Cannot find node at path " + nodePath); }
+        node.setData(field.getDefaultOption());
+        return conf;
+    }
+
+    private boolean upsertPatchedConfDir(String serviceName, SerializableDocumentDirectory conf) {
+        DocumentDirectory dirToUpload = SerializableDocumentDirectory.deserialize(conf);
+        Path configPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), serviceName);
+        dirToUpload.makePathsLocal();
+        return batonService.loadDirectory(dirToUpload, configPath);
     }
 
 }

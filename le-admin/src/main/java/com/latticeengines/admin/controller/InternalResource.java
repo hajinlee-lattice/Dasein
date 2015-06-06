@@ -23,6 +23,7 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -70,7 +71,16 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody SelectableConfigurationField patch,
             HttpServletRequest request) {
         checkHeader(request);
-        return serviceService.patchOptions(component, patch);
+        if (patch.getDefaultOption() != null) {
+            return serviceService.patchDefaultConfigWithOptions(component, patch);
+        } else {
+            if (existingDefaultIsValid(component, patch)) {
+                return serviceService.patchOptions(component, patch);
+            } else {
+                throw new LedpException(LedpCode.LEDP_19105,
+                        new String[]{patch.getOptions().toString(), patch.getDefaultOption()});
+            }
+        }
     }
 
     @RequestMapping(value = "tenants/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -119,4 +129,10 @@ public class InternalResource extends InternalResourceBase {
         return true;
     }
 
+    private boolean existingDefaultIsValid(String serverName, SelectableConfigurationField patch) {
+        SerializableDocumentDirectory defaultDir = serviceService.getDefaultServiceConfig(serverName);
+        String defaultOption = defaultDir.getNodeAtPath(patch.getNode()).getData();
+        patch.setDefaultOption(defaultOption);
+        return patch.defaultIsValid();
+    }
 }
