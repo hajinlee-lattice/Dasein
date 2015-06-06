@@ -29,6 +29,6 @@ public class LoadConfigurationUnitTestNG {
         assertEquals(deserializedConfig.getCreds().getHost(), config.getCreds().getHost());
         assertEquals(deserializedConfig.getCreds().getUser(), config.getCreds().getUser());
         assertEquals(deserializedConfig.getCreds().getPassword(), config.getCreds().getPassword());
-        assertEquals(deserializedConfig.getCreds().getDBType(), config.getCreds().getDBType());
+        assertEquals(deserializedConfig.getCreds().getDbType(), config.getCreds().getDbType());
     }
 }

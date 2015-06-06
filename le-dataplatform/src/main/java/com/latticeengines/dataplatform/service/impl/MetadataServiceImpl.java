@@ -34,14 +34,14 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public Schema getAvroSchema(DbCreds creds, String tableName) {
-        String dbType = creds.getDBType();
+        String dbType = creds.getDbType();
         MetadataProvider provider = metadataProviders.get(dbType);
         return provider.getSchema(creds, tableName);
     }
 
     @Override
     public String getJdbcConnectionUrl(DbCreds creds) {
-        String dbType = creds.getDBType();
+        String dbType = creds.getDbType();
         MetadataProvider provider = metadataProviders.get(dbType);
 
         String url = creds.getJdbcUrl();

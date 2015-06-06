@@ -70,11 +70,11 @@ public class DbCreds {
     }
 
     @JsonProperty("db_type")
-    public String getDBType() {
+    public String getDbType() {
         return dbType;
     }
 
-    public void setDBType(String dbType) {
+    public void setDbType(String dbType) {
         this.dbType = dbType;
     }
 
