@@ -15,6 +15,8 @@ import org.apache.avro.Schema.Type;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -33,6 +35,8 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     
+    private static final Log log = LogFactory.getLog(SqoopSyncJobServiceImplTestNG.class);
+    
     @Autowired
     private Configuration yarnConfiguration;
     
@@ -42,6 +46,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromDB");
     }
     
     @AfterClass(groups = "functional")
@@ -218,6 +223,8 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 null, //
                 1, //
                 props);
+        
+        log.info(String.format("Waiting for appId %s", appId));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -255,7 +262,6 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
             i++;
         }
     }
-    
 }
 
 
