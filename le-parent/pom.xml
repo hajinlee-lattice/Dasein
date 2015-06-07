@@ -185,8 +185,7 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>${maxpermsize}
-                                        ${argLine}</argLine>
+                                    <argLine>${maxpermsize} ${argLine} -Dsqoop.throwOnError=true</argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
