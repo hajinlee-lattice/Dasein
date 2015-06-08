@@ -14,13 +14,6 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
-    <bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
-    <bean id="yarnEventPublisher" class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
-    <bean class="org.springframework.yarn.event.LoggingListener">
-        <constructor-arg value="info" />
-    </bean>
-
     <util:properties id="props">
         <prop key="jobName">eaiJob</prop>
     </util:properties>
@@ -35,10 +28,6 @@
         <property name="ignoreUnresolvablePlaceholders" value="false" />
         <property name="ignoreResourceNotFound" value="false" />
     </bean>
-
-    <import resource="classpath:dataplatform-yarn-config-context.xml" />
-
-    <yarn:localresources />
 
     <yarn:environment>
         <yarn:classpath />
@@ -64,21 +53,10 @@
         </batch:step>
     </batch:job>
 
-    <bean id="transactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
-
-    <bean id="jobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
-        <property name="transactionManager" ref="transactionManager" />
-    </bean>
-
-    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
-        <property name="jobRepository" ref="jobRepository" />
-    </bean>
-
     <yarn-batch:master job-name="eaiJob" jobs="eaiJob" />
 
-    <context:component-scan base-package="org.springframework.yarn.batch.am" />
-
-    <import resource="classpath:eai-yarn-context.xml" />
+    <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
+    <import resource="classpath:eai-yarn-context.xml" />
 
 </beans>
