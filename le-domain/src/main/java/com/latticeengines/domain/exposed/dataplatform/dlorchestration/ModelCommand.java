@@ -93,6 +93,7 @@ public class ModelCommand implements HasPid, Serializable {
         super();
         this.commandId = commandId;
         this.deploymentExternalId = deploymentExternalId;
+        this.contractExternalId = contractExternalId;
         this.commandStatus = commandStatus;
         this.commandParameters = commandParameters;
         this.modelId = modelId;
