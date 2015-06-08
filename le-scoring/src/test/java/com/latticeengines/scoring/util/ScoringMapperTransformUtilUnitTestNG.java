@@ -100,6 +100,8 @@ public class ScoringMapperTransformUtilUnitTestNG {
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
         HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
         HashMap<String, String> modelIdMap = new HashMap<String, String>();
+        String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
+        modelIdMap.put(modelID, modelID);
 
         URL url = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
@@ -108,7 +110,6 @@ public class ScoringMapperTransformUtilUnitTestNG {
         ScoringMapperTransformUtil.parseModelFiles(models, path);
         ScoringMapperTransformUtil.manipulateLeadFile(leadInputRecordMap, models, modelIdMap, TEST_RECORD);
 
-        String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
         ArrayList<String> recordList = leadInputRecordMap.get(modelID);
         assertTrue(leadInputRecordMap.size() == 1);
         assertTrue(recordList.size() == 1);

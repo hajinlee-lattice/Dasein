@@ -222,16 +222,23 @@ public class ScoringMapperTransformUtil {
         return modelID;
     }
 
+    @SuppressWarnings("unchecked")
     public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models,
             String modelID) {
         String formattedRecord = null;
 
         if (models == null) {
+            System.out.println("model");
             new Exception("model is null");
+
         } else if (models.get(modelID) == null) {
+            System.out.println("models.get(modelID)");
             new Exception("models.get(modelID) is null");
+
         } else if (models.get(modelID).get(INPUT_COLUMN_METADATA) == null) {
+            System.out.println("models.get(modelID).get(INPUT_COLUMN_METADATA)");
             new Exception("models.get(modelID).get(INPUT_COLUMN_METADATA) is null");
+
         }
 
         JSONArray metadata = (JSONArray) models.get(modelID).get(INPUT_COLUMN_METADATA);
