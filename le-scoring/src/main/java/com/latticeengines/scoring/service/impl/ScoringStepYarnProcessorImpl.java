@@ -72,6 +72,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     @Value("${scoring.mapper.threshold}")
     private String leadFileThreshold;
 
+    @Value("${scoring.mapper.logdir}")
+    private String scoringMapperLogDir;
+
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
 
@@ -136,6 +139,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table
                 + "/scores");
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
+        properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
+        properties.setProperty(ScoringProperty.TENANT_ID.name(), scoringCommand.getId());
+        properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
 
         String customerModelPath = customerBaseDir + "/" + customer + "/models";
 

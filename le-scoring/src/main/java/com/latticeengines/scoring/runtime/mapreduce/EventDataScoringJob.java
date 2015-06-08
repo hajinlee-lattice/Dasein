@@ -67,6 +67,10 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
     public void customize(Job mrJob, Properties properties) {
         try {
             Configuration config = mrJob.getConfiguration();
+            config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
+            config.set(ScoringProperty.TENANT_ID.name(), properties.getProperty(ScoringProperty.TENANT_ID.name()));
+            config.set(ScoringProperty.LOG_DIR.name(), properties.getProperty(ScoringProperty.LOG_DIR.name()));
+
             String queueName = properties.getProperty(MapReduceProperty.QUEUE.name());
             config.set("mapreduce.job.queuename", queueName);
 
