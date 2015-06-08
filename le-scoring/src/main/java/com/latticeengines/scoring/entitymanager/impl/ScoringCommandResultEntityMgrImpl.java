@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.scoring.dao.ScoringCommandResultDao;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
@@ -30,8 +29,8 @@ public class ScoringCommandResultEntityMgrImpl extends BaseScoringEntityMgrImpl<
 
     @Override
     @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
-    public ScoringCommandResult findByScoringCommand(ScoringCommand scoringCommand) {
-        return scoringCommandResultDao.findByScoringCommand(scoringCommand);
+    public ScoringCommandResult findByKey(long pid) {
+        return scoringCommandResultDao.findByKey(ScoringCommandResult.class, pid);
     }
 
     @Override

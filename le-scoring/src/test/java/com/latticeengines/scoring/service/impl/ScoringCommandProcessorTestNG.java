@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandLog;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandLogEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
@@ -125,7 +126,8 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
             scoringCommand = scoringCommandEntityMgr.findByKey(scoringCommand);
         }
 
-        ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr.findByScoringCommand(scoringCommand);
+        ScoringCommandState state = scoringCommandStateEntityMgr.findByScoringCommandAndStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr.findByKey(state.getLeadOutputQueuePid());
         if (scoringCommandResult == null || scoringCommandResult.getStatus() == ScoringCommandStatus.NEW) {
             List<ScoringCommandLog> logs = scoringCommandLogEntityMgr.findAll();
             for (ScoringCommandLog scoringCommandLog : logs) {

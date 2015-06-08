@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 
 public interface ScoringCommandStateEntityMgr extends BaseEntityMgr<ScoringCommandState>{
 
-    List<ScoringCommandState> findByScoringCommandAndStep(ScoringCommand scoringCommand,
+    ScoringCommandState findByScoringCommandAndStep(ScoringCommand scoringCommand,
             ScoringCommandStep scoringCommandStep);
 
     List<ScoringCommandState> findByScoringCommand(ScoringCommand scoringCommand);

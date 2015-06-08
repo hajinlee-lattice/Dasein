@@ -22,17 +22,20 @@ public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState>
         return ScoringCommandState.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ScoringCommandState> findByScoringCommandAndStep(ScoringCommand scoringCommand,
+    public ScoringCommandState findByScoringCommandAndStep(ScoringCommand scoringCommand,
             ScoringCommandStep scoringCommandStep) {
         Session session = getSessionFactory().getCurrentSession();
-        List<ScoringCommandState> states = session.createCriteria(ScoringCommandState.class) //
+        Object state = session.createCriteria(ScoringCommandState.class) //
                 .add(Restrictions.eq("scoringCommand", scoringCommand)) //
-                .add(Restrictions.eq("scorinbgCommandStep", scoringCommandStep)) //
+                .add(Restrictions.eq("scoringCommandStep", scoringCommandStep)) //
                 .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY) //
-                .list();
-        return states;
+                .uniqueResult();
+        ScoringCommandState scoringCommandState = null;
+        if (state != null) {
+            scoringCommandState = (ScoringCommandState) state;
+        }
+        return scoringCommandState;
     }
 
     @SuppressWarnings("unchecked")

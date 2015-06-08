@@ -36,10 +36,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
+import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
@@ -66,7 +68,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Value("${scoring.output.table.sample}")
     private String targetRawTable;
-    
+
     @Value("${scoring.mapper.threshold}")
     private String leadFileThreshold;
 
@@ -78,6 +80,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
+
+    @Autowired
+    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
     @Autowired
     private DbCreds scoringCreds;
@@ -164,16 +169,20 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private ApplicationId export(String customer, ScoringCommand scoringCommand) {
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
         String targetTable = createNewTable(customer, scoringCommand);
-        //targetTable = "TestLeadsTable";
+        // targetTable = "TestLeadsTable";
         DateTime dt = new DateTime(DateTimeZone.UTC);
         ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
                 targetTable, 0, new Timestamp(dt.getMillis()));
         scoringCommandResultEntityMgr.create(result);
+        ScoringCommandState state = scoringCommandStateEntityMgr.findLastStateByScoringCommand(scoringCommand);
 
-//         scoringCreds.setDb("ScoringDB_buildmachine");
-//         scoringCreds.setDBType("SQLServer");
-//         scoringCreds.setHost("10.41.1.250");
-//         scoringCreds.setPort(1433);
+        state.setLeadOutputQueuePid(result.getPid());
+        scoringCommandStateEntityMgr.createOrUpdate(state);
+
+        // scoringCreds.setDb("ScoringDB_buildmachine");
+        // scoringCreds.setDBType("SQLServer");
+        // scoringCreds.setHost("10.41.1.250");
+        // scoringCreds.setPort(1433);
         String sourceDir = customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName() + "/scores";
         ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, customer);
 
@@ -181,10 +190,10 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     }
 
     private String createNewTable(String customer, ScoringCommand scoringCommand) {
-//         DataSource dataSource = new
-//         DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine",
-//         "root", "welcome");
-//         scoringJdbcTemplate.setDataSource(dataSource);
+        // DataSource dataSource = new
+        // DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine",
+        // "root", "welcome");
+        // scoringJdbcTemplate.setDataSource(dataSource);
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
         metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
         return newTable;

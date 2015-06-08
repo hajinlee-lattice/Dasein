@@ -48,7 +48,7 @@ public class ScoringCommandStateEntityMgrImpl extends BaseScoringEntityMgrImpl<S
 
     @Override
     @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
-    public List<ScoringCommandState> findByScoringCommandAndStep(ScoringCommand scoringCommand,
+    public ScoringCommandState findByScoringCommandAndStep(ScoringCommand scoringCommand,
             ScoringCommandStep scoringCommandStep) {
         return scoringCommandStateDao.findByScoringCommandAndStep(scoringCommand, scoringCommandStep);
     }

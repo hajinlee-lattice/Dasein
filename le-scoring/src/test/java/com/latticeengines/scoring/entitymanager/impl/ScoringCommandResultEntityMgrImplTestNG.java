@@ -2,7 +2,6 @@ package com.latticeengines.scoring.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 import java.sql.Timestamp;
 
@@ -13,15 +12,21 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
+import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 
-public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTestNGBase{
+public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTestNGBase {
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
+
+    @Autowired
+    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
@@ -35,16 +40,21 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
     }
 
     @Test(groups = "functional")
-    public void testFindByScoringCommand() throws Exception {
-        ScoringCommand command = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 0, 100, Timestamp.valueOf("2015-04-28 00:00:00"));
+    public void testFindByScoringCommandState() throws Exception {
+        ScoringCommand command = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 0, 100,
+                Timestamp.valueOf("2015-04-28 00:00:00"));
         scoringCommandEntityMgr.create(command);
 
-        assertNull(scoringCommandResultEntityMgr.findByScoringCommand(command));
-
-        ScoringCommandResult result = new ScoringCommandResult("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 100, Timestamp.valueOf("2015-04-28 00:00:01"));
+        ScoringCommandResult result = new ScoringCommandResult("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix",
+                100, Timestamp.valueOf("2015-04-28 00:00:01"));
         scoringCommandResultEntityMgr.create(result);
 
-        ScoringCommandResult retrieved = scoringCommandResultEntityMgr.findByScoringCommand(command);
+        ScoringCommandState state = new ScoringCommandState(command, ScoringCommandStep.EXPORT_DATA);
+        state.setLeadOutputQueuePid(result.getPid());
+        scoringCommandStateEntityMgr.create(state);
+
+        ScoringCommandResult retrieved = scoringCommandResultEntityMgr.findByKey(scoringCommandStateEntityMgr
+                .findByScoringCommandAndStep(command, ScoringCommandStep.EXPORT_DATA).getLeadOutputQueuePid());
         assertNotNull(retrieved);
         assertEquals(retrieved.getId(), command.getId());
 
@@ -59,5 +69,4 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
         scoringCommandResultEntityMgr.update(retrieved);
         assertEquals(scoringCommandResultEntityMgr.getConsumed().size(), 1);
     }
-
 }

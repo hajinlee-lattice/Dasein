@@ -61,6 +61,9 @@ public class ScoringCommandState extends AbstractTimestampEntity implements HasP
     @Column(name = "ElapsedTimeInMillis")
     private Long elapsedTimeInMillis;
 
+    @Column(name = "LeadOutputQueue_ID")
+    private Long leadOutputQueuePid;
+
     ScoringCommandState() {
         super();
     }
@@ -138,5 +141,13 @@ public class ScoringCommandState extends AbstractTimestampEntity implements HasP
 
     public void setElapsedTimeInMillis(Long elapsedTimeInMillis) {
         this.elapsedTimeInMillis = elapsedTimeInMillis;
+    }
+
+    public Long getLeadOutputQueuePid() {
+        return leadOutputQueuePid;
+    }
+
+    public void setLeadOutputQueuePid(Long leadOutputQueuePid) {
+        this.leadOutputQueuePid = leadOutputQueuePid;
     }
 }

@@ -25,10 +25,12 @@ import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
+import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
@@ -52,6 +54,9 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
 
     @Value("${scoring.test.table}")
     private String testInputTable;
+
+    @Autowired
+    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
@@ -120,6 +125,7 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     public void executeYarnSteps() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0, 4352,
                 new Timestamp(System.currentTimeMillis()));
+        scoringCommandEntityMgr.create(scoringCommand);
 
         ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(),
                 ScoringCommandStep.LOAD_DATA, scoringCommand);
@@ -130,11 +136,14 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
         waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
 
         HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + customer + "/scoring/" + inputLeadsTable +"/data/datatype.avsc");
+        ScoringCommandState state = new ScoringCommandState(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        scoringCommandStateEntityMgr.create(state);
         appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(), ScoringCommandStep.EXPORT_DATA,
                 scoringCommand);
         waitForSuccess(appId, ScoringCommandStep.EXPORT_DATA);
 
-        ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr.findByScoringCommand(scoringCommand);
+        state = scoringCommandStateEntityMgr.findByScoringCommandAndStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr.findByKey(state.getLeadOutputQueuePid());
         outputTable = scoringCommandResult.getTableName();
         assertEquals(metadataService.getRowCount(scoringJdbcTemplate, testInputTable), metadataService.getRowCount(scoringJdbcTemplate, outputTable));
     }

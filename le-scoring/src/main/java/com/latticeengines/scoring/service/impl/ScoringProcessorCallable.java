@@ -156,7 +156,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
         String appIdString = appId.toString();
         scoringCommandLogService.logYarnAppId(scoringCommand, appIdString, scoringCommandStep);
         JobStatus jobStatus = jobService.getJobStatus(appIdString);
-        saveScoringCommandStateFromJobStatus(scoringCommandState, jobStatus);
+        saveScoringCommandStateFromJobStatus(scoringCommandStateEntityMgr.findByKey(scoringCommandState), jobStatus);
 
     }
 
@@ -167,7 +167,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
         scoringCommandState.setDiagnostics(jobStatus.getDiagnostics());
         scoringCommandState.setTrackingUrl(jobStatus.getTrackingUrl());
         scoringCommandState.setElapsedTimeInMillis(System.currentTimeMillis() - jobStatus.getStartTime());
-        scoringCommandStateEntityMgr.createOrUpdate(scoringCommandState);
+        scoringCommandStateEntityMgr.update(scoringCommandState);
     }
 
     private void handleAllJobsSucceeded() {
