@@ -9,6 +9,7 @@ import java.io.LineNumberReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
@@ -17,6 +18,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ScoringMapperTransformUtilUnitTestNG {
 
@@ -28,6 +32,45 @@ public class ScoringMapperTransformUtilUnitTestNG {
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
             + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
 
+    @Test(groups = "unit")
+    public void testPreprocessLeads() throws IOException, ParseException, InterruptedException {
+        String record1 = "{\"LeadID\": \"1\", \"ModelingID\": 113880, \"Model_GUID\": \"model1\"}";
+        String record2 = "{\"LeadID\": \"2\", \"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
+        String record3 = "{\"LeadID\": \"1\", \"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
+        ArrayList<String> leadList = new ArrayList<String>();
+        leadList.add(record1);
+        leadList.add(record2);
+        leadList.add(record3);
+        HashSet<String> modelNames = ScoringMapperTransformUtil.preprocessLeads(leadList);
+        assertTrue(modelNames.size() == 2, "modelNames should have 2 models");
+        
+        String recordWithoutLeadID = "{\"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
+        leadList.add(recordWithoutLeadID);
+        try {
+            modelNames = ScoringMapperTransformUtil.preprocessLeads(leadList);
+        } catch (LedpException e1) {
+            assertTrue(e1.getCode() == LedpCode.LEDP_20003);
+        }
+        leadList.remove(3);
+        
+        String recordWithoutModelGuid = "{\"ModelingID\": 113880, \"LeadID\": \"1\"}";
+        leadList.add(recordWithoutModelGuid);
+        try {
+            modelNames = ScoringMapperTransformUtil.preprocessLeads(leadList);
+        } catch (LedpException e1) {
+            assertTrue(e1.getCode() == LedpCode.LEDP_20004);
+        }
+        leadList.remove(3);
+        
+        String recordWithDuplication = "{\"LeadID\": \"1\", \"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
+        leadList.add(recordWithDuplication);
+        try {
+            modelNames = ScoringMapperTransformUtil.preprocessLeads(leadList);
+        } catch (LedpException e1) {
+            assertTrue(e1.getCode() ==  LedpCode.LEDP_20005);
+        }
+    }
+    
     @Test(groups = "unit")
     public void testParseDatatypeFile() throws IOException {
         URL url = ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc");
