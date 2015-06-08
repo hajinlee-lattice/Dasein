@@ -70,10 +70,12 @@ public class PLSComponent extends LatticeComponent {
         String defaultJson = "pls_default.json";
         String metadataJson = "pls_metadata.json";
         uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        overwriteDefaultConfigAndSchema();
+        // register dummy installer if is in dryrun mode
+        return dryrun;
+    }
 
-        //================================================================================
-        // overwrite default configuration
-        //================================================================================
+    private void overwriteDefaultConfigAndSchema() {
         ObjectMapper mapper = new ObjectMapper();
         List<String> adminEmailList = new ArrayList<>();
         if (superAdmins != null && !superAdmins.equals("DEFAULT")) {
@@ -103,10 +105,6 @@ public class PLSComponent extends LatticeComponent {
                 // ignore
             }
         }
-
-        // register dummy installer if is in dryrun mode
-        return dryrun;
     }
-
 
 }

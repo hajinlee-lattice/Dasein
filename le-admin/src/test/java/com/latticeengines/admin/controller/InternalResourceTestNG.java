@@ -22,9 +22,20 @@ public class InternalResourceTestNG extends AdminFunctionalTestNGBase {
         String url = hostPort + "/admin/internal/services/options?component=VisiDBDL";
 
         //==================================================
-        // invalid default option
+        // restore
         //==================================================
         SelectableConfigurationField patch = new SelectableConfigurationField();
+        patch.setNode("/VisiDB/ServerName");
+        patch.setOptions(Arrays.asList("bodcdevvint187", "bodcdevvint207"));
+        patch.setDefaultOption("bodcdevvint187");
+
+        boolean success = patchByHTTPPut(url, patch);
+        Assert.assertTrue(success);
+
+        //==================================================
+        // invalid default option
+        //==================================================
+        patch = new SelectableConfigurationField();
         patch.setNode("/VisiDB/ServerName");
         patch.setOptions(Arrays.asList("bodcdevvint187", "bodcdevvint207"));
         patch.setDefaultOption("nope");
@@ -59,8 +70,17 @@ public class InternalResourceTestNG extends AdminFunctionalTestNGBase {
         patch.setNode("/VisiDB/ServerName");
         patch.setOptions(Arrays.asList("bodcdevvint187", "bodcdevvint207", "bodcdevvint217"));
 
-        Boolean success = patchByHTTPPut(url, patch);
-        Assert.assertTrue(success);
+        Assert.assertTrue(patchByHTTPPut(url, patch));
+
+        //==================================================
+        // valid patch
+        //==================================================
+        patch = new SelectableConfigurationField();
+        patch.setNode("/VisiDB/ServerName");
+        patch.setOptions(Arrays.asList("option1", "option2"));
+        patch.setDefaultOption("option1");
+
+        Assert.assertTrue(patchByHTTPPut(url, patch));
 
         //==================================================
         // restore
@@ -70,8 +90,7 @@ public class InternalResourceTestNG extends AdminFunctionalTestNGBase {
         patch.setOptions(Arrays.asList("bodcdevvint187", "bodcdevvint207"));
         patch.setDefaultOption("bodcdevvint187");
 
-        success = patchByHTTPPut(url, patch);
-        Assert.assertTrue(success);
+        Assert.assertTrue(patchByHTTPPut(url, patch));
     }
 
     private Boolean patchByHTTPPut(String url, SelectableConfigurationField patch) throws IOException {
