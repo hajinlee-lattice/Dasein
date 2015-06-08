@@ -12,10 +12,10 @@
     <import resource="classpath:playmaker-properties-context.xml"/>
     <bean class="com.latticeengines.playmaker.swagger.SwaggerConfig" />
 
-    <security:global-method-security
+<!--     <security:global-method-security
             secured-annotations="disabled"
             jsr250-annotations="enabled"
             pre-post-annotations="enabled"
-            proxy-target-class="true" />
+            proxy-target-class="true" /> -->
 
 </beans>
