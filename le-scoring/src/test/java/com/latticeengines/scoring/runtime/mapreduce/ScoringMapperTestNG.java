@@ -44,247 +44,246 @@ import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBas
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.service.impl.ScoringStepYarnProcessorImplTestNG;
 
-public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase{
+public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
 
-	private static final double EPS = 1e-6;
-	private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
+    private static final double EPS = 1e-6;
+    private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 
-	private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImplTestNG.class);
+    private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImplTestNG.class);
 
-	@Autowired
-	private ScoringCommandEntityMgr scoringCommandEntityMgr;
+    @Autowired
+    private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-	@Autowired
-	private ScoringStepYarnProcessor scoringStepYarnProcessor;
+    @Autowired
+    private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
-	@Value("${dataplatform.customer.basedir}")
-	private String customerBaseDir;
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
 
-	@Autowired
-	private Configuration yarnConfiguration;
+    @Autowired
+    private Configuration yarnConfiguration;
 
-	private static final String customer = "Nutanix";
+    private static final String customer = "Nutanix";
 
-	@Value("${scoring.test.table}")
-	private String testInputTable;
+    @Value("${scoring.test.table}")
+    private String testInputTable;
 
-	@Autowired
-	private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
+    @Autowired
+    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-	@Autowired
-	private MetadataService metadataService;
+    private String inputLeadsTable;
 
-	@Autowired
-	private SqoopSyncJobService sqoopSyncJobService;
+    private String modelPath;
 
-	@Autowired
-	private DbCreds scoringCreds;
+    private String path;
 
-	@Autowired
-	private JdbcTemplate scoringJdbcTemplate;
+    private String scorePath;
 
-	private String outputTable;
+    @BeforeMethod(groups = "functional")
+    public void beforeMethod() throws Exception {
+    }
 
-	private String inputLeadsTable;
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
 
-	private String modelPath;
+        // upload lead files to HDFS
+        URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
+                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00000.avro");
+        URL url2 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
+                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00001.avro");
+        URL url3 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
+                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00002.avro");
+        URL url4 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
+                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00003.avro");
 
-	private String path;
+        path = customerBaseDir + "/" + customer + "/scoring/" + inputLeadsTable + "/data";
+        scorePath = customerBaseDir + "/" + customer + "/scoring/" + inputLeadsTable + "/scores";
+        HdfsUtils.mkdir(yarnConfiguration, path);
+        String dataPath1 = path + "/1.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, url1.getFile(), dataPath1);
+        String dataPath2 = path + "/2.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, url2.getFile(), dataPath2);
+        String dataPath3 = path + "/3.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, url3.getFile(), dataPath3);
+        String dataPath4 = path + "/4.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, url4.getFile(), dataPath4);
 
-	@BeforeMethod(groups = "functional")
-	public void beforeMethod() throws Exception {
-	}
+        URL modelSummaryUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/models/" + modelID);
+        modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
+                + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1429553747321_0004";
+        HdfsUtils.mkdir(yarnConfiguration, modelPath);
+        String filePath = modelPath + "/model.json";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
+    }
 
-	@BeforeClass(groups = "functional")
-	public void setup() throws Exception {
-		inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-		if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
-			metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
-		}
+    // compare the results
+    private boolean compareEvaluationResults() {
 
-		metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
+        boolean evaluationIsSame = false;
 
-		path = customerBaseDir + "/" + customer + "/scoring";
-		HdfsUtils.rmdir(yarnConfiguration, path);
+        List<GenericRecord> newlist = null;
+        List<GenericRecord> oldlist = null;
 
-		URL modelSummaryUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/models/" + modelID);
-		modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
-				+ "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1429553747321_0004";
-		HdfsUtils.mkdir(yarnConfiguration, modelPath);
-		String filePath = modelPath + "/model.json";
-		HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
-	}
+        // load new scores from HDFS
+        newlist = loadHDFSAvroFiles(new Configuration(),
+                "/user/s-analytics/customers/Nutanix/scoring/ScoringMapperTestNG_LeadsTable/scores");
 
-	// compare the results
-	private boolean compareEvaluationResults() {
-		boolean evaluationIsSame = false;
+        // load existing scores from testing file
+        URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/results/"
+                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-result-part-m-00000.avro");
+        String fileName = url.getFile();
+        oldlist = loadLocalAvroFiles(fileName);
+        evaluationIsSame = compareJsonResults(newlist, oldlist);
+        return evaluationIsSame;
+    }
 
-		List<GenericRecord> newlist = null;
-		List<GenericRecord> oldlist = null;
+    private ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
+        ArrayList<GenericRecord> newlist = new ArrayList<GenericRecord>();
+        List<String> files = null;
+        try {
+            files = HdfsUtils.getFilesForDir(configuration, hdfsDir);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        for (String file : files) {
+            try {
+                List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
+                newlist.addAll(list);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return newlist;
+    }
 
-		// load new scores from HDFS	
-		newlist = loadHDFSAvroFiles(new Configuration(), 
-				"/user/s-analytics/customers/Nutanix/scoring/ScoringMapperTestNG_LeadsTable/scores");
+    private List<GenericRecord> loadLocalAvroFiles(String localDir) {
+        List<GenericRecord> newlist = new ArrayList<GenericRecord>();
+        File localAvroFile = new File(localDir);
+        FileReader<GenericRecord> reader;
+        GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
+        try {
+            reader = DataFileReader.openReader(localAvroFile, fileReader);
+            for (GenericRecord datum : reader) {
+                newlist.add(datum);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return newlist;
+    }
 
-		// load existing scores from testing file
-		URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/results/"
-				+ "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-result-part-m-00000.avro");
-		String fileName = url.getFile();
-		oldlist = loadLocalAvroFiles(fileName);
-		evaluationIsSame = compareJsonResults(newlist, oldlist);
-		return evaluationIsSame;
-	}
+    private boolean compareJsonResults(List<GenericRecord> newResults, List<GenericRecord> oldResults) {
 
-	private  ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
-		ArrayList<GenericRecord> newlist = new ArrayList<GenericRecord>();
-		List<String> files = null;
-		try {
-			files = HdfsUtils.getFilesForDir(configuration, hdfsDir);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		for(String file : files) {
-			try {
-				List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
-				newlist.addAll(list);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return newlist;
-	}
+        boolean resultsAreSame = true;
+        if (newResults.size() != oldResults.size()) {
+            System.out.println("size not the same");
+            System.out.println("newResults.size() is " + newResults.size());
+            System.out.println("oldResults.size() is " + oldResults.size());
+            resultsAreSame = false;
+        } else {
+            HashMap<String, GenericRecord> resultMap = new HashMap<String, GenericRecord>();
+            for (int i = 0; i < newResults.size(); i++) {
+                GenericRecord newResult = newResults.get(i);
+                String key = newResult.get("LeadID").toString() + newResult.get("Play_Display_Name").toString();
+                resultMap.put(key, newResult);
+            }
 
-	private  List<GenericRecord> loadLocalAvroFiles(String localDir) {
-		List<GenericRecord> newlist = new ArrayList<GenericRecord>();
-		File localAvroFile = new File(localDir);
-		FileReader<GenericRecord> reader;
-		GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
-		try {
-			reader = DataFileReader.openReader(localAvroFile, fileReader);
-			for (GenericRecord datum : reader) {
-				newlist.add(datum);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}  
-		return newlist;
-	}
+            for (int i = 0; i < oldResults.size(); i++) {
+                GenericRecord oldResult = oldResults.get(i);
+                String key = oldResult.get("LeadID").toString() + oldResult.get("Play_Display_Name").toString();
+                if (!resultMap.containsKey(key)) {
+                    System.out.println("key has not the same");
+                    resultsAreSame = false;
+                    break;
+                } else {
+                    if (!compareTwoRecord(resultMap.get(key), oldResult)) {
+                        resultsAreSame = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return resultsAreSame;
+    }
 
-	private boolean compareJsonResults(List<GenericRecord> newResults, List<GenericRecord> oldResults) {
-		boolean resultsAreSame = true;
-		if (newResults.size() != oldResults.size()) {
-			resultsAreSame = false;
-		} else {
-			HashMap<String, GenericRecord> resultMap = new HashMap<String, GenericRecord>();
-			for (int i = 0; i < newResults.size(); i++) {
-				GenericRecord newResult = newResults.get(i);
-				String key = newResult.get("LeadID").toString() + newResult.get("Play_Display_Name").toString();
-				resultMap.put(key, newResult);
-			}
+    private boolean compareTwoRecord(GenericRecord newRecord, GenericRecord oldRecord) {
+        boolean recordsAreSame = true;
+        String[] columns = { "Bucket_Display_Name", "Lift", "Percentile", "Probability", "RawScore", "Score" };
+        for (String column : columns) {
+            switch (column) {
+            case "Bucket_Display_Name":
+                if (!newRecord.get(column).equals(oldRecord.get(column))) {
+                    System.out.println("come to the " + column);
+                    recordsAreSame = false;
+                }
+                break;
+            case "Lift":
+                if (!newRecord.get(column).equals(oldRecord.get(column))) {
+                    System.out.println("come to the " + column);
+                    recordsAreSame = false;
+                }
+                break;
+            case "Percentile":
+                if (!newRecord.get(column).equals(oldRecord.get(column))) {
+                    System.out.println("come to the " + column);
+                    recordsAreSame = false;
+                }
+                break;
+            case "Probability":
+                if (!newRecord.get(column).equals(oldRecord.get(column))) {
+                    System.out.println("come to the " + column);
+                    recordsAreSame = false;
+                }
+                break;
+            case "RawScore":
+                if (Math.abs((Double) newRecord.get(column) - (Double) oldRecord.get(column)) > EPS) {
+                    System.out.println("come to the " + column);
+                    recordsAreSame = false;
+                }
+                break;
+            case "Score":
+                if (!newRecord.get(column).equals(oldRecord.get(column))) {
+                    System.out.println("come to the " + column);
+                    recordsAreSame = false;
+                }
+                break;
+            }
+        }
+        return recordsAreSame;
+    }
 
-			for (int i = 0; i < oldResults.size(); i++) {
-				GenericRecord oldResult = oldResults.get(i);
-				String key = oldResult.get("LeadID").toString() + oldResult.get("Play_Display_Name").toString();
-				if (!resultMap.containsKey(key)) {
-					resultsAreSame = false;
-					break;
-				} else {
-					if (!compareTwoRecord(resultMap.get(key), oldResult)) {
-						resultsAreSame = false;
-						break;
-					}
-				}
-			}
-		}
-		return resultsAreSame;
-	}
+    @Test(groups = "functional")
+    public void loadAndScore() throws Exception {
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
+                0, 4352, new Timestamp(System.currentTimeMillis()));
 
-	private boolean compareTwoRecord(GenericRecord newRecord, GenericRecord oldRecord) {
-		boolean recordsAreSame = true;
-		String[] columns = {"Bucket_Display_Name", "Lift", "Percentile", "Probability", "RawScore", "Score"};
-		for (String column : columns) {
-			switch (column) {
-			case "Bucket_Display_Name": 
-				if (!newRecord.get(column).equals(oldRecord.get(column))) {
-					System.out.println("come to the " + column);
-					recordsAreSame = false;
-				}
-				break;
-			case "Lift": 
-				if (!newRecord.get(column).equals(oldRecord.get(column))) {
-					System.out.println("come to the " + column);
-					recordsAreSame = false;
-				}
-				break;
-			case "Percentile": 
-				if (!newRecord.get(column).equals(oldRecord.get(column))) {
-					System.out.println("come to the " + column);
-					recordsAreSame = false;
-				}
-				break;
-			case "Probability": 
-				if (!newRecord.get(column).equals(oldRecord.get(column))) {
-					System.out.println("come to the " + column);
-					recordsAreSame = false;
-				}
-				break;
-			case "RawScore": 
-				if (Math.abs((Double)newRecord.get(column)-(Double)oldRecord.get(column)) > EPS) {
-					System.out.println("come to the " + column);
-					recordsAreSame = false;
-				}
-				break;
-			case "Score": 
-				if (!newRecord.get(column).equals(oldRecord.get(column))) {
-					System.out.println("come to the " + column);
-					recordsAreSame = false;
-				}	
-				break;
-			}
-		}
-		return recordsAreSame;
-	}
+        // trigger the scoring
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(),
+                ScoringCommandStep.SCORE_DATA, scoringCommand);
+        waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
 
-	@Test(groups = "functional")
-	public void loadAndScore() throws Exception {
-		ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0, 4352,
-				new Timestamp(System.currentTimeMillis()));
-		
-		// read input lead files
-		ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(),
-				ScoringCommandStep.LOAD_DATA, scoringCommand);
-		waitForSuccess(appId, ScoringCommandStep.LOAD_DATA);
+        // compare the results
+        assertTrue(compareEvaluationResults());
+    }
 
-		// trigger the scoring
-		appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(), ScoringCommandStep.SCORE_DATA,
-				scoringCommand);
-		waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
+    private void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        log.info(step + ": appId succeeded: " + appId.toString());
+    }
 
-		// compare the results
-		assertTrue(compareEvaluationResults());
-	}
-
-	private void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {
-		FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-		assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-		log.info(step + ": appId succeeded: " + appId.toString());
-	}
-	
-	@AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
-	public void afterEachTest() {
-		if (outputTable != null) {
-			metadataService.dropTable(scoringJdbcTemplate, outputTable);
-			metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
-			clearTables();
-		}
-		try {
-			HdfsUtils.rmdir(yarnConfiguration, path);
-			HdfsUtils.rmdir(yarnConfiguration, modelPath);
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
-	}
+    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    public void afterEachTest() {
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, path);
+            HdfsUtils.rmdir(yarnConfiguration, scorePath);
+            HdfsUtils.rmdir(yarnConfiguration, modelPath);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
 
 }
