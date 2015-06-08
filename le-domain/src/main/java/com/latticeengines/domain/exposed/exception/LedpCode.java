@@ -127,8 +127,13 @@ public enum LedpCode {
 
     // le-scoring 20000-20100
     LEDP_20000("ScoringCommand Failed"),
-    LEDP_20001("Validation of the datatype failed."),
+    LEDP_20001("Validation of the datatype failed: {0}"),
     LEDP_20002("Python script for scoring is not provided."),
+    LEDP_20003("Lead does not have 'LeadID' column."),
+    LEDP_20004("Lead does not have 'Model_GUID' column."),
+    LEDP_20005("There are duplicate leads for 'LeadID': {0} and 'Model_GUID': {1} in one request."),
+    LEDP_20006("Datatype file for scoring is not provided."),
+    LEDP_20007("The following model(s) is(are) not provided: {0}"),
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),
