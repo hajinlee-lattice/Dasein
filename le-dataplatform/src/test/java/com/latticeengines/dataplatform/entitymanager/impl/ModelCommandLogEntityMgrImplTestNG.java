@@ -36,12 +36,12 @@ public class ModelCommandLogEntityMgrImplTestNG extends DataPlatformFunctionalTe
 
     @Test(groups = "functional")
     public void testFindByModelCommand() throws Exception {
-        ModelCommand modelCommand = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
-                ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand modelCommand = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
+                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         modelCommandEntityMgr.create(modelCommand);
 
-        ModelCommand anotherModelCommand = new ModelCommand(2L, "Nutanix", ModelCommandStatus.NEW, null,
-                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand anotherModelCommand = new ModelCommand(2L, "Nutanix", "Nutanix", ModelCommandStatus.NEW,
+                null, ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         modelCommandEntityMgr.create(anotherModelCommand);
 
         for (int i = 0; i < 3; i++) {

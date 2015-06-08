@@ -43,6 +43,9 @@ public class ModelCommand implements HasPid, Serializable {
     @Column(name = "Deployment_External_ID", nullable = false)
     private String deploymentExternalId;
 
+    @Column(name = "Contract_External_ID", nullable = false)
+    private String contractExternalId;
+
     @Column(name = "LeadInputTableName", nullable = false)
     private String eventTable;
 
@@ -85,8 +88,8 @@ public class ModelCommand implements HasPid, Serializable {
     }
 
     @VisibleForTesting
-    public ModelCommand(Long commandId, String deploymentExternalId, ModelCommandStatus commandStatus,
-            List<ModelCommandParameter> commandParameters, String modelId, String eventTable) {
+    public ModelCommand(Long commandId, String contractExternalId, String deploymentExternalId,
+            ModelCommandStatus commandStatus, List<ModelCommandParameter> commandParameters, String modelId, String eventTable) {
         super();
         this.commandId = commandId;
         this.deploymentExternalId = deploymentExternalId;
@@ -108,6 +111,10 @@ public class ModelCommand implements HasPid, Serializable {
 
     public String getDeploymentExternalId() {
         return deploymentExternalId;
+    }
+
+    public String getContractExternalId() {
+        return contractExternalId;
     }
 
     public String getEventTable() {

@@ -53,8 +53,8 @@ public class ModelingServiceTestUtils {
     public static ModelCommand createModelCommandWithCommandParameters(String eventTable, boolean debug,
             boolean validate) {
         List<ModelCommandParameter> parameters = new ArrayList<>();
-        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE,
-                eventTable);
+        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, parameters,
+                ModelCommand.TAHOE, eventTable);
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE,
                 "Q_EventTableDepivot_Nutanix"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
@@ -80,8 +80,8 @@ public class ModelingServiceTestUtils {
     public static ModelCommand createModelCommandWithFewRowsAndReadoutTargets(String eventTable, boolean debug,
             boolean validate) {
         List<ModelCommandParameter> parameters = new ArrayList<>();
-        ModelCommand command = new ModelCommand(1L, "FewRowsNutanix", ModelCommandStatus.NEW, parameters,
-                ModelCommand.TAHOE, eventTable);
+        ModelCommand command = new ModelCommand(1L, "FewRowsNutanix", "FewRowsNutanix", ModelCommandStatus.NEW,
+                parameters, ModelCommand.TAHOE, eventTable);
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE,
                 "Q_EventTableDepivot_Nutanix_FewRows"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));

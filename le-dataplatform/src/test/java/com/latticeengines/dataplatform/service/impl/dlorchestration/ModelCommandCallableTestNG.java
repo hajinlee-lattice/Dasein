@@ -215,8 +215,8 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     @Test(groups = "functional")
     public void testMissingParameters() throws Exception {
-        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
-                ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
+                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         modelCommandEntityMgr.create(command);
 
         int iterations = 0;
