@@ -69,6 +69,7 @@ public class ExportJobBase extends JobBase {
         this(ctxt, null, null, null);
     }
 
+    @SuppressWarnings("rawtypes")
     public ExportJobBase(final ExportJobContext ctxt, final Class<? extends Mapper> mapperClass,
             final Class<? extends InputFormat> inputFormatClass, final Class<? extends OutputFormat> outputFormatClass) {
         super(ctxt.getOptions(), mapperClass, inputFormatClass, outputFormatClass);
@@ -196,6 +197,7 @@ public class ExportJobBase extends JobBase {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected Class<? extends InputFormat> getInputFormatClass() throws ClassNotFoundException {
         Class<? extends InputFormat> configuredIF = super.getInputFormatClass();
@@ -206,6 +208,7 @@ public class ExportJobBase extends JobBase {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected Class<? extends OutputFormat> getOutputFormatClass() throws ClassNotFoundException {
         Class<? extends OutputFormat> configuredOF = super.getOutputFormatClass();
