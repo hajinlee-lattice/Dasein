@@ -7,10 +7,6 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <yarn:environment>
-        <yarn:classpath use-yarn-app-classpath="true" delimiter=":" />
-    </yarn:environment>
-
     <bean id="eaiClient" class="org.springframework.yarn.fs.PrototypeYarnClientFactoryBean"
         scope="prototype">
         <property name="appName" value="eai" />

@@ -59,6 +59,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         
         Properties props = new Properties();
         props.put("columnTypes", StringUtils.join(types, ","));
+        props.put("yarn.mr.hdfs.class.path", "/app/eai/lib");
         ApplicationId appId = sqoopSyncJobService.importData(table.getName(), //
                 ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
                 creds, //

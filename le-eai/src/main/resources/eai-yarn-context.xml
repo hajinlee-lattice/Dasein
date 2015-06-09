@@ -31,8 +31,6 @@
         <camel:package>com.latticeengines.eai.routes</camel:package>
     </camel:camelContext>
 
-    <import resource="classpath:eai-yarn-client-context.xml"/>
-    
     <import resource="classpath:eai-salesforce-context.xml"/>
     <import resource="classpath:eai-marketo-context.xml"/>
     <import resource="classpath:eai-eloqua-context.xml"/>

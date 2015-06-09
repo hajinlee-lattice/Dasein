@@ -71,9 +71,13 @@ public class EaiClientCustomization extends DefaultYarnClientCustomization {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = super.getHdfsEntries(containerProperties);
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                "/app/dataplatform/eai/eai.properties", //
+                "/app/eai/eai.properties", //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                "/app/eai/lib/*", //
                 false));
         return hdfsEntries;
     }
-
+    
 }
