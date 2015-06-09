@@ -137,6 +137,7 @@ public enum LedpCode {
     LEDP_20008("Cannot find any model for tenant: {0}"),
     LEDP_20009("Not all the leads are not scored. {0} leads are transformed, but only {1} got scored."),
     LEDP_200010("Not all the leads are transformed and stored. {0} leads are passed in, but only {1} got transformed."),
+    LEDP_200011("The scoring python script (scoring.py) failed, with the error message: {0}.}"),
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),
