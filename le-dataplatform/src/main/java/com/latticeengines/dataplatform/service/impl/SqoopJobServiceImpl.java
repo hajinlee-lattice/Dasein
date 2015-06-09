@@ -13,11 +13,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.sqoop.LedpSqoop;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
@@ -56,6 +59,7 @@ public class SqoopJobServiceImpl {
     }
 
 
+    @SuppressWarnings("deprecation")
     protected ApplicationId importData(String table, //
             String targetDir, //
             DbCreds creds, //
@@ -110,8 +114,23 @@ public class SqoopJobServiceImpl {
             } catch (IOException e) {
                 log.error(e);
             }
+            
+            String hdfsAppPath = props.getProperty("yarn.mr.hdfs.class.path");
+            
+            if (hdfsAppPath != null) {
+                try {
+                    List<String> jars = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsAppPath);
+                    for (String jar : jars) {
+                        DistributedCache.addFileToClassPath(new Path(jar), yarnConfiguration);
+                    }
+                } catch (Exception e) {
+                    log.info("Exception getting application class path", e);
+                }
+            }
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
+        //yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS, "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
+                
         try {
             return runTool(cmds, yarnConfiguration, sync);
         } finally {

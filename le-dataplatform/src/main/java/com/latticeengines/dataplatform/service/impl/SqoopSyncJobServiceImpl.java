@@ -21,6 +21,8 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 @Component("sqoopSyncJobService")
 public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements SqoopSyncJobService {
 
+    protected static final Log log = LogFactory.getLog(SqoopSyncJobServiceImpl.class);
+
     @Autowired
     private Configuration hadoopConfiguration;
 
@@ -35,11 +37,6 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
 
     @Autowired
     protected YarnClient defaultYarnClient;
-
-    protected static final int MAX_TRIES = 60;
-    protected static final long APP_WAIT_TIME = 1000L;
-
-    protected static final Log log = LogFactory.getLog(SqoopSyncJobServiceImpl.class);
 
     @Override
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
