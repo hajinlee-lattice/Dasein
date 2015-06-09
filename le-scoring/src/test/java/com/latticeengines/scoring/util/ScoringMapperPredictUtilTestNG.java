@@ -17,6 +17,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -26,7 +27,7 @@ public class ScoringMapperPredictUtilTestNG {
     private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 
     @Test(groups = "unit")
-    public void testProcessScoreFiles() {
+    public void testProcessScoreFiles() throws IOException, ParseException {
         // copy over the score.txt file to the current directory
         URL scoreUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/results/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.jsonscoringoutputfile-0.txt");

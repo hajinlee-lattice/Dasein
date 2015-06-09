@@ -4,16 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
-
 public class ScoringMapperValidateUtil {
 
-    private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
     private static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
     private static final String INPUT_COLUMN_METADATA_NAME = "Name";
     private static final String INPUT_COLUMN_METADATA_PURPOSE = "Purpose";

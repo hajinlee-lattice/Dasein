@@ -49,10 +49,10 @@ public class ScoringMapperPredictUtil {
 
         StringBuilder strs = new StringBuilder();
         // spawn python
-        Set<String> modelIDs = models.keySet();
+        Set<String> modelGuidSet = models.keySet();
         StringBuilder sb = new StringBuilder();
-        for (String modelID : modelIDs) {
-            sb.append(modelID + " ");
+        for (String modelGuid : modelGuidSet) {
+            sb.append(modelGuid + " ");
         }
 
         log.info("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
@@ -96,7 +96,7 @@ public class ScoringMapperPredictUtil {
     }
 
     public static void writeToOutputFile(ArrayList<ModelEvaluationResult> resultList, Configuration yarnConfiguration,
-            String outputPath) {
+            String outputPath) throws Exception {
         if (resultList == null) {
             new Exception("resultList is null");
         }
@@ -111,54 +111,43 @@ public class ScoringMapperPredictUtil {
 
         for (int i = 0; i < resultList.size(); i++) {
             ModelEvaluationResult result = resultList.get(i);
-            try {
-                if (i == 0) {
-                    dataFileWriter.create(result.getSchema(), outputFile);
-                }
-                dataFileWriter.append(result);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (i == 0) {
+                dataFileWriter.create(result.getSchema(), outputFile);
             }
+            dataFileWriter.append(result);
         }
-        try {
-            dataFileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/" + fileName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        dataFileWriter.close();
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/" + fileName);
     }
 
     public static ArrayList<ModelEvaluationResult> processScoreFiles(
             HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models,
             HashMap<String, String> modelIdMap, long threshold) {
-        Set<String> modelIDs = leadInputRecordMap.keySet();
+        Set<String> modelGuidSet = leadInputRecordMap.keySet();
         // list of HashMap<leadID: score>
         ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
-        for (String id : modelIDs) {
-            log.info("id is " + id);
+        for (String modelGuid : modelGuidSet) {
+            log.info("modelGuid is " + modelGuid);
             // key: leadID, value: raw score
             HashMap<String, Double> scores = new HashMap<String, Double>();
-            int value = leadInputRecordMap.get(id).size();
-            JSONObject model = models.get(id);
+            int value = leadInputRecordMap.get(modelGuid).size();
+            JSONObject model = models.get(modelGuid);
             int remain = (int) (value / threshold);
             for (int i = 0; i <= remain; i++) {
-                readScoreFile(id, i, scores);
+                readScoreFile(modelGuid, i, scores);
             }
             Set<String> keySet = scores.keySet();
             for (String key : keySet) {
-                ModelEvaluationResult result = getResult(modelIdMap, id, key, model, scores.get(key));
+                ModelEvaluationResult result = getResult(modelIdMap, modelGuid, key, model, scores.get(key));
                 resultList.add(result);
             }
         }
         return resultList;
     }
 
-    private static void readScoreFile(String modelID, int index, HashMap<String, Double> scores) {
-        String fileName = modelID + SCORING_OUTPUT_PREFIX + index + ".txt";
+    private static void readScoreFile(String modelGuid, int index, HashMap<String, Double> scores) {
+        String fileName = modelGuid + SCORING_OUTPUT_PREFIX + index + ".txt";
         File f = new File(fileName);
         if (!f.exists()) {
             new Exception("Output file" + fileName + "does not exist!");
@@ -177,7 +166,7 @@ public class ScoringMapperPredictUtil {
         }
     }
 
-    private static ModelEvaluationResult getResult(HashMap<String, String> modelIdMap, String modelID, String leadID,
+    private static ModelEvaluationResult getResult(HashMap<String, String> modelIdMap, String modelGuid, String leadId,
             JSONObject model, double score) {
         Double probability = null;
 
@@ -271,8 +260,8 @@ public class ScoringMapperPredictUtil {
         }
 
         Integer integerScore = (int) (probability != null ? Math.round(probability * 100) : Math.round(score * 100));
-        String modelName = modelIdMap.get(modelID);
-        ModelEvaluationResult result = new ModelEvaluationResult(leadID, bucket, lift, modelName, percentile,
+        String modelName = modelIdMap.get(modelGuid);
+        ModelEvaluationResult result = new ModelEvaluationResult(leadId, bucket, lift, modelName, percentile,
                 probability, score, integerScore);
         log.info("result is " + result);
         return result;

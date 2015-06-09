@@ -3,17 +3,20 @@ package com.latticeengines.scoring.util;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertFalse;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 
 import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
 public class ScoringMapperValidateUtilUnitTestNG {
 
+    @SuppressWarnings("unchecked")
     @Test(groups = "unit")
-    public void testProcessScoreFiles() {
+    public void testProcessScoreFiles() throws IOException, ParseException {
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
         URL modelUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");

@@ -41,13 +41,13 @@ public class ScoringMapperTransformUtilUnitTestNG {
         leadList.add(record1);
         leadList.add(record2);
         leadList.add(record3);
-        HashSet<String> modelNames = ScoringMapperTransformUtil.preprocessLeads(leadList);
-        assertTrue(modelNames.size() == 2, "modelNames should have 2 models");
+        HashSet<String> modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
+        assertTrue(modelIDs.size() == 2, "modelIDs should have 2 models");
         
         String recordWithoutLeadID = "{\"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
         leadList.add(recordWithoutLeadID);
         try {
-            modelNames = ScoringMapperTransformUtil.preprocessLeads(leadList);
+            modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
         } catch (LedpException e1) {
             assertTrue(e1.getCode() == LedpCode.LEDP_20003);
         }
@@ -56,7 +56,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         String recordWithoutModelGuid = "{\"ModelingID\": 113880, \"LeadID\": \"1\"}";
         leadList.add(recordWithoutModelGuid);
         try {
-            modelNames = ScoringMapperTransformUtil.preprocessLeads(leadList);
+            modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
         } catch (LedpException e1) {
             assertTrue(e1.getCode() == LedpCode.LEDP_20004);
         }
@@ -65,14 +65,14 @@ public class ScoringMapperTransformUtilUnitTestNG {
         String recordWithDuplication = "{\"LeadID\": \"1\", \"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
         leadList.add(recordWithDuplication);
         try {
-            modelNames = ScoringMapperTransformUtil.preprocessLeads(leadList);
+            modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
         } catch (LedpException e1) {
             assertTrue(e1.getCode() ==  LedpCode.LEDP_20005);
         }
     }
     
     @Test(groups = "unit")
-    public void testParseDatatypeFile() throws IOException {
+    public void testParseDatatypeFile() throws IOException, ParseException {
         URL url = ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc");
         String fileName = url.getFile();
         Path path = new Path(fileName);
@@ -82,7 +82,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testParseModelFiles() {
+    public void testParseModelFiles() throws IOException, ParseException {
         String[] targetFiles = { "encoder.py", "pipeline.py", "pipelinefwk.py", "pipelinesteps.py", "scoringengine.py",
                 "STPipelineBinary.p" };
         URL url = ClassLoader
@@ -138,7 +138,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testManipulateLeadFile() {
+    public void testManipulateLeadFile() throws IOException, ParseException {
 
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
         HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
@@ -209,7 +209,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testWriteToLeadInputFiles() {
+    public void testWriteToLeadInputFiles() throws IOException {
         HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
         ArrayList<String> records1 = new ArrayList<String>();
         records1.add("value11\n");
