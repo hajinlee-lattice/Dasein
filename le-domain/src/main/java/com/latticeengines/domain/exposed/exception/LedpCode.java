@@ -134,6 +134,7 @@ public enum LedpCode {
     LEDP_20005("There are duplicate leads for 'LeadID': {0} and 'Model_GUID': {1} in one request."),
     LEDP_20006("Datatype file for scoring is not provided."),
     LEDP_20007("The following model(s) is(are) not provided: {0}"),
+    LEDP_20008("Cannot find any model for tenant: {0}"),
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),

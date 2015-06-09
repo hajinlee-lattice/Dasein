@@ -170,7 +170,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
             log.error("Customer " + tenant + "'s scoring job failed due to: " + e.getMessage(), e);
         }
         if (CollectionUtils.isEmpty(modelFilePaths)) {
-            throw new LedpException(LedpCode.LEDP_18023);
+            throw new LedpException(LedpCode.LEDP_20008, new String[] { tenant });
         }
 
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelFilePaths));
