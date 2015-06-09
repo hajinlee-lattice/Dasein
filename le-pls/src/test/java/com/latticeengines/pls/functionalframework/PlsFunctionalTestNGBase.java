@@ -484,7 +484,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         for (Tenant tenant: testingTenants) {
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
             userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), generalUsername);
-            userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), passwordTester);
+            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), passwordTester);
 
             for (AccessLevel level : AccessLevel.values()) {
                 User user = getTheTestingUserAtLevel(level);
