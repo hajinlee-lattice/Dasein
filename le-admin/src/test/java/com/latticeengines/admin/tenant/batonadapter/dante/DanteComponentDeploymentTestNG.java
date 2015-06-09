@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.dante;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -13,8 +14,13 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class DanteComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
 
+    @Value("${admin.dante.dryrun}")
+    private boolean danteSkipped;
+
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException {
+        if (danteSkipped) { return; }
+
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
 
