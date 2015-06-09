@@ -96,54 +96,61 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private static final String PID = "Pid";
 
+    private static final String SPACEID = "Production";
+
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
+
+    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
 
     private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImpl.class);
 
     @Override
     @SuppressWarnings("incomplete-switch")
-    public ApplicationId executeYarnStep(String deploymentExternalId, ScoringCommandStep currentStep,
-            ScoringCommand scoringCommand) {
+    public ApplicationId executeYarnStep(ScoringCommand scoringCommand, ScoringCommandStep currentStep) {
         ApplicationId appId = null;
         switch (currentStep) {
         case LOAD_DATA:
-            appId = load(deploymentExternalId, scoringCommand);
+            appId = load(scoringCommand);
             break;
         case SCORE_DATA:
-            appId = score(deploymentExternalId, scoringCommand);
+            appId = score(scoringCommand);
             break;
         case EXPORT_DATA:
-            appId = export(deploymentExternalId, scoringCommand);
+            appId = export(scoringCommand);
             break;
         }
 
         return appId;
     }
 
-    private ApplicationId load(String customer, ScoringCommand scoringCommand) {
+    private ApplicationId load(ScoringCommand scoringCommand) {
         String table = scoringCommand.getTableName();
-        String targetDir = customerBaseDir + "/" + customer + "/scoring/" + table + "/data";
+        String tenant = getTenant(scoringCommand);
+        String targetDir = customerBaseDir + "/" + tenant + "/scoring/" + table + "/data";
         metadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
         ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, scoringCreds,
-                LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList(PID), "");
+                LedpQueueAssigner.getMRQueueNameForSubmission(), tenant, Arrays.asList(PID), "");
         return appId;
     }
 
-    private ApplicationId score(String customer, ScoringCommand scoringCommand) {
+    private ApplicationId score(ScoringCommand scoringCommand) {
         String table = scoringCommand.getTableName();
+        String tenant = getTenant(scoringCommand);
+
         Properties properties = new Properties();
-        properties.setProperty(MapReduceProperty.CUSTOMER.name(), customer);
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), tenant);
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getMRQueueNameForSubmission());
-        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table
+
+        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
                 + "/data");
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/" + table
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
                 + "/scores");
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
         properties.setProperty(ScoringProperty.TENANT_ID.name(), scoringCommand.getId());
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
 
-        String customerModelPath = customerBaseDir + "/" + customer + "/models";
+        String customerModelPath = customerBaseDir + "/" + tenant + "/models";
 
         List<String> modelFilePaths = Collections.emptyList();
         try {
@@ -160,7 +167,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                         }
                     });
         } catch (Exception e) {
-            log.error("Customer " + customer + "'s scoring job failed due to: " + e.getMessage(), e);
+            log.error("Customer " + tenant + "'s scoring job failed due to: " + e.getMessage(), e);
         }
         if (CollectionUtils.isEmpty(modelFilePaths)) {
             throw new LedpException(LedpCode.LEDP_18023);
@@ -172,16 +179,17 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         return appId;
     }
 
-    private ApplicationId export(String customer, ScoringCommand scoringCommand) {
+    private ApplicationId export(ScoringCommand scoringCommand) {
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        String targetTable = createNewTable(customer, scoringCommand);
-        // targetTable = "TestLeadsTable";
+        String targetTable = createNewTable(scoringCommand);
+        String tenant = getTenant(scoringCommand);
+
         DateTime dt = new DateTime(DateTimeZone.UTC);
         ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
                 targetTable, 0, new Timestamp(dt.getMillis()));
         scoringCommandResultEntityMgr.create(result);
-        ScoringCommandState state = scoringCommandStateEntityMgr.findLastStateByScoringCommand(scoringCommand);
 
+        ScoringCommandState state = scoringCommandStateEntityMgr.findLastStateByScoringCommand(scoringCommand);
         state.setLeadOutputQueuePid(result.getPid());
         scoringCommandStateEntityMgr.createOrUpdate(state);
 
@@ -189,13 +197,13 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         // scoringCreds.setDBType("SQLServer");
         // scoringCreds.setHost("10.41.1.250");
         // scoringCreds.setPort(1433);
-        String sourceDir = customerBaseDir + "/" + customer + "/scoring/" + scoringCommand.getTableName() + "/scores";
-        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, customer);
+        String sourceDir = customerBaseDir + "/" + tenant + "/scoring/" + scoringCommand.getTableName() + "/scores";
+        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, tenant);
 
         return appId;
     }
 
-    private String createNewTable(String customer, ScoringCommand scoringCommand) {
+    private String createNewTable(ScoringCommand scoringCommand) {
         // DataSource dataSource = new
         // DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine",
         // "root", "welcome");
@@ -203,5 +211,10 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
         metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
         return newTable;
+    }
+
+    public String getTenant(ScoringCommand scoringCommand) {
+        String customer = scoringCommand.getId();
+        return dotJoiner.join(customer, customer, SPACEID);
     }
 }

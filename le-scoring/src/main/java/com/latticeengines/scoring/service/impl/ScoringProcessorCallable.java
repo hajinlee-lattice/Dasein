@@ -151,8 +151,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
         ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, scoringCommandStep);
         scoringCommandState.setStatus(FinalApplicationStatus.UNDEFINED);
         scoringCommandStateEntityMgr.create(scoringCommandState);
-        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(), scoringCommandStep,
-                scoringCommand);
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, scoringCommandStep);
         String appIdString = appId.toString();
         scoringCommandLogService.logYarnAppId(scoringCommand, appIdString, scoringCommandStep);
         JobStatus jobStatus = jobService.getJobStatus(appIdString);

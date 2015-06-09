@@ -19,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
@@ -81,6 +82,10 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
 
     private String path;
 
+    private static String tenant;
+
+    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
     }
@@ -88,18 +93,18 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
             metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
 
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
-
-        path = customerBaseDir + "/" + customer + "/scoring";
+        tenant = dotJoiner.join(customer, customer, "Production");
+        path = customerBaseDir + "/" + tenant + "/scoring";
         HdfsUtils.rmdir(yarnConfiguration, path);
 
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json"); //
-        modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
+        modelPath = customerBaseDir + "/" + tenant + "/models/" + inputLeadsTable
                 + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1429553747321_0004";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/model.json";
@@ -123,29 +128,30 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
 
     @Test(groups = "functional")
     public void executeYarnSteps() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0, 4352,
-                new Timestamp(System.currentTimeMillis()));
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
+                0, 4352, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(scoringCommand);
 
-        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(),
-                ScoringCommandStep.LOAD_DATA, scoringCommand);
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.LOAD_DATA);
         waitForSuccess(appId, ScoringCommandStep.LOAD_DATA);
 
-        appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(), ScoringCommandStep.SCORE_DATA,
-                scoringCommand);
+        appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
         waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
 
-        HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + customer + "/scoring/" + inputLeadsTable +"/data/datatype.avsc");
+        HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable
+                + "/data/datatype.avsc");
         ScoringCommandState state = new ScoringCommandState(scoringCommand, ScoringCommandStep.EXPORT_DATA);
         scoringCommandStateEntityMgr.create(state);
-        appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(), ScoringCommandStep.EXPORT_DATA,
-                scoringCommand);
+        appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
         waitForSuccess(appId, ScoringCommandStep.EXPORT_DATA);
 
-        state = scoringCommandStateEntityMgr.findByScoringCommandAndStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
-        ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr.findByKey(state.getLeadOutputQueuePid());
+        state = scoringCommandStateEntityMgr
+                .findByScoringCommandAndStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr.findByKey(state
+                .getLeadOutputQueuePid());
         outputTable = scoringCommandResult.getTableName();
-        assertEquals(metadataService.getRowCount(scoringJdbcTemplate, testInputTable), metadataService.getRowCount(scoringJdbcTemplate, outputTable));
+        assertEquals(metadataService.getRowCount(scoringJdbcTemplate, testInputTable),
+                metadataService.getRowCount(scoringJdbcTemplate, outputTable));
     }
 
     private void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {

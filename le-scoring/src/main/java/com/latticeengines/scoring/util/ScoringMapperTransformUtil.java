@@ -15,16 +15,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.avro.generic.GenericData.Record;
-import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

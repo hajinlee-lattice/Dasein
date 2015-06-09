@@ -7,7 +7,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 
 public interface ScoringStepYarnProcessor {
 
-    ApplicationId executeYarnStep(String deploymentExternalId, ScoringCommandStep currentStep,
-            ScoringCommand scoringCommand);
+    ApplicationId executeYarnStep(ScoringCommand scoringCommand, ScoringCommandStep currentStep);
 
 }

@@ -17,6 +17,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
@@ -73,6 +74,10 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private String path;
 
+    private static String tenant;
+
+    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
     }
@@ -84,12 +89,13 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
             metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
-        path = customerBaseDir + "/" + customer + "/scoring";
+        tenant = dotJoiner.join(customer, customer, "Production");
+        path = customerBaseDir + "/" + tenant + "/scoring";
         HdfsUtils.rmdir(yarnConfiguration, path);
 
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json"); //
-        modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
+        modelPath = customerBaseDir + "/" + tenant + "/models/" + inputLeadsTable
                 + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1425511391553_3007";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/1_model.json";

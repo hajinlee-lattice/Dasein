@@ -23,18 +23,14 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.CollectionUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
@@ -65,6 +61,8 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
 
     private static final String customer = "Nutanix";
 
+    private static String tenant;
+
     @Value("${scoring.test.table}")
     private String testInputTable;
 
@@ -79,6 +77,8 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
 
     private String scorePath;
 
+    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
     }
@@ -86,6 +86,7 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
+        tenant = dotJoiner.join(customer, customer, "Production");
 
         // upload lead files to HDFS
         URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
@@ -97,8 +98,8 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
         URL url4 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
                 + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00003.avro");
 
-        path = customerBaseDir + "/" + customer + "/scoring/" + inputLeadsTable + "/data";
-        scorePath = customerBaseDir + "/" + customer + "/scoring/" + inputLeadsTable + "/scores";
+        path = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data";
+        scorePath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/scores";
         HdfsUtils.mkdir(yarnConfiguration, path);
         String dataPath1 = path + "/1.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url1.getFile(), dataPath1);
@@ -110,7 +111,7 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url4.getFile(), dataPath4);
 
         URL modelSummaryUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/models/" + modelID);
-        modelPath = customerBaseDir + "/" + customer + "/models/" + inputLeadsTable
+        modelPath = customerBaseDir + "/" + tenant + "/models/" + inputLeadsTable
                 + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1429553747321_0004";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
         String filePath = modelPath + "/model.json";
@@ -127,7 +128,7 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
 
         // load new scores from HDFS
         newlist = loadHDFSAvroFiles(new Configuration(),
-                "/user/s-analytics/customers/Nutanix/scoring/ScoringMapperTestNG_LeadsTable/scores");
+                "/user/s-analytics/customers/" + tenant + "/scoring/ScoringMapperTestNG_LeadsTable/scores");
 
         // load existing scores from testing file
         URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/results/"
@@ -259,10 +260,9 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
     public void loadAndScore() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
                 0, 4352, new Timestamp(System.currentTimeMillis()));
-
+        scoringCommandEntityMgr.create(scoringCommand);
         // trigger the scoring
-        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand.getId(),
-                ScoringCommandStep.SCORE_DATA, scoringCommand);
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
         waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
 
         // compare the results
