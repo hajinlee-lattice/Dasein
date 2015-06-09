@@ -147,7 +147,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                 + "/scores");
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
-        properties.setProperty(ScoringProperty.TENANT_ID.name(), scoringCommand.getId());
+        properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
 
         String customerModelPath = customerBaseDir + "/" + tenant + "/models";

@@ -24,6 +24,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
@@ -57,6 +58,10 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     private boolean enableCleanHdfs;
 
     private int waitTime = 180;
+
+    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
+    
+    private static final String SPACEID = "Production";
 
     public void init(ApplicationContext appCtx) {
         scoringProcessorExecutor = (AsyncTaskExecutor)appCtx.getBean("scoringProcessorExecutor");
@@ -124,7 +129,9 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
 
     private void cleanHdfs(ScoringCommand scoringCommand) {
         try {
-            HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + scoringCommand.getId() + "/scoring/" + scoringCommand.getTableName());
+            String customer = scoringCommand.getId();
+            String tenant = dotJoiner.join(customer, customer, SPACEID);
+            HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + tenant + "/scoring/" + scoringCommand.getTableName());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -56,7 +56,7 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
         ScoringCommandResult retrieved = scoringCommandResultEntityMgr.findByKey(scoringCommandStateEntityMgr
                 .findByScoringCommandAndStep(command, ScoringCommandStep.EXPORT_DATA).getLeadOutputQueuePid());
         assertNotNull(retrieved);
-        assertEquals(retrieved.getId(), command.getId());
+        assertEquals(retrieved.getId(), result.getId());
 
         assertEquals(scoringCommandResultEntityMgr.getConsumed().size(), 0);
         retrieved.setPopulated(Timestamp.valueOf("2015-04-28 00:00:02"));
