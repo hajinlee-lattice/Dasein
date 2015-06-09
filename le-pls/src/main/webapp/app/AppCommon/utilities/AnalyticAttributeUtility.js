@@ -108,6 +108,18 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         return null;
     };
 
+    this.FormatBooleanBucketName = function (value) {
+    	var toReturn = value;
+        if (value == "NA" || value == "N/A" || value == "NULL" || value == "NOT AVAILABLE" || parseInt(value) == (-1)) {
+            toReturn = "Not Available";
+        } else if (value == "N" || value == "NO" || value == "FALSE" || value == "F" || parseInt(value) === (0)) {
+            toReturn = "No";
+        } else if (value == "Y" || value == "YES" || value == "TRUE" || value == "T" || parseInt(value) == (1)) {
+            toReturn = "Yes";
+        } 
+        return toReturn;
+    };
+    
     this.GetAttributeBucketName = function (bucket, attributeMetadata) {
         if (bucket == null) {
             return "";
@@ -124,16 +136,8 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                     var fundamentalType = attributeMetadata.FundamentalType != null ? attributeMetadata.FundamentalType.toUpperCase() : null;
                     if (fundamentalType == this.FundamentalType.Boolean) {
                         var value = bucket.Values[0].toString().toUpperCase();
-                        if (value == "NA" || value == "N/A" || value == "-1" || value == "-1.0" || value == "NULL" || value == "NOT AVAILABLE") {
-                            toReturn = "Not Available";
-                            return toReturn;
-                        } else if (value == "N" || value == "NO" || value == "FALSE" || value == "F" || value == "0" || value == "0.0") {
-                            toReturn = "No";
-                            return toReturn;
-                        } else if (value == "Y" || value == "YES" || value == "TRUE" || value == "T" || value == "1" || value == "1.0") {
-                            toReturn = "Yes";
-                            return toReturn;
-                        }
+                        toReturn = this.FormatBooleanBucketName(value);
+                        return toReturn;
                     }
                 }
                 var discreteValueString = "";

@@ -799,6 +799,30 @@ describe('AnalyticAttributeUtility Tests', function () {
                 Lift: 10
             };
         
+        var bucket13 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "0.00"
+                ],
+                Lift: 10
+            };
+        
+        var bucket14 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "1.00"
+                ],
+                Lift: 10
+            };
+        
+        var bucket15 = {
+                ColumnName: "Attr1Name3",
+                Values: [
+                    "-1.00"
+                ],
+                Lift: 10
+            };
+        
         var metadata = {
             DataType: null,
             FundamentalType: "boolean"
@@ -863,6 +887,21 @@ describe('AnalyticAttributeUtility Tests', function () {
         it('If value is N, return the string Yes', function () {
             toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket12, metadata);
             expect(toReturn).toBe("No");
+        });
+        
+        it('If value is 0.00, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket13, metadata);
+            expect(toReturn).toBe("No");
+        });
+        
+        it('If value is 1.00, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket14, metadata);
+            expect(toReturn).toBe("Yes");
+        });
+        
+        it('If value is -1.00, return the string Yes', function () {
+            toReturn = analyticAttributeUtility.GetAttributeBucketName(bucket15, metadata);
+            expect(toReturn).toBe("Not Available");
         });
         
     });
