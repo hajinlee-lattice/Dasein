@@ -24,9 +24,9 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
@@ -59,13 +59,9 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
 
     private int waitTime = 180;
 
-    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
-    
-    private static final String SPACEID = "Production";
-
     public void init(ApplicationContext appCtx) {
-        scoringProcessorExecutor = (AsyncTaskExecutor)appCtx.getBean("scoringProcessorExecutor");
-        scoringCommandEntityMgr = (ScoringCommandEntityMgr)appCtx.getBean("scoringCommandEntityMgr");
+        scoringProcessorExecutor = (AsyncTaskExecutor) appCtx.getBean("scoringProcessorExecutor");
+        scoringCommandEntityMgr = (ScoringCommandEntityMgr) appCtx.getBean("scoringCommandEntityMgr");
         scoringCommandResultEntityMgr = (ScoringCommandResultEntityMgr) appCtx.getBean("scoringCommandResultEntityMgr");
         metadataService = (MetadataService) appCtx.getBean("metadataService");
         scoringJdbcTemplate = (JdbcTemplate) appCtx.getBean("scoringJdbcTemplate");
@@ -110,7 +106,8 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         List<ScoringCommand> consumedCommands = scoringCommandEntityMgr.getConsumed();
         DateTime dt = new DateTime(DateTimeZone.UTC);
         for (ScoringCommand scoringCommand : consumedCommands) {
-            if (scoringCommand.getConsumed() != null && scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < dt.getMillis()) {
+            if (scoringCommand.getConsumed() != null
+                    && scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < dt.getMillis()) {
                 metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
                 if (enableCleanHdfs)
                     cleanHdfs(scoringCommand);
@@ -130,8 +127,8 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     private void cleanHdfs(ScoringCommand scoringCommand) {
         try {
             String customer = scoringCommand.getId();
-            String tenant = dotJoiner.join(customer, customer, SPACEID);
-            HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + tenant + "/scoring/" + scoringCommand.getTableName());
+            HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + CustomerSpace.parse(customer) + "/scoring/"
+                    + scoringCommand.getTableName());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -31,6 +31,7 @@ import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.service.JobService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -96,11 +97,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private static final String PID = "Pid";
 
-    private static final String SPACEID = "Production";
-
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
-
-    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
 
     private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImpl.class);
 
@@ -152,7 +149,8 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private String getTenant(ScoringCommand scoringCommand) {
         String customer = scoringCommand.getId();
-        return dotJoiner.join(customer, customer, SPACEID);
+        CustomerSpace customerSpace = CustomerSpace.parse(customer);
+        return customerSpace.toString();
     }
 
     private String createNewTable(ScoringCommand scoringCommand) {
