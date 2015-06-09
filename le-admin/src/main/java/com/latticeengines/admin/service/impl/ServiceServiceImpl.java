@@ -116,12 +116,8 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public Boolean patchDefaultConfig(String serviceName, String nodePath, String data) {
         try {
-            Camille camille = CamilleEnvironment.getCamille();
-            Path configPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), serviceName);
-            configPath = configPath.append(new Path(nodePath));
-            Document doc = camille.get(configPath);
-            doc.setData(data);
-            camille.set(configPath, doc);
+            validateBewDefaultValue(serviceName, nodePath, data);
+            patchDefaultConfigWithoutValidation(serviceName, nodePath, data);
             return true;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_19101, String.format(
@@ -137,7 +133,7 @@ public class ServiceServiceImpl implements ServiceService {
         }
 
         try {
-            patchDefaultConfig(serviceName, field.getNode(), field.getDefaultOption());
+            patchDefaultConfigWithoutValidation(serviceName, field.getNode(), field.getDefaultOption());
             patchOptions(serviceName, field);
             return true;
         } catch (Exception e) {
@@ -145,4 +141,31 @@ public class ServiceServiceImpl implements ServiceService {
                     "Failed to patch default configuration for node %s in component %s", field.getNode(), serviceName), e);
         }
     }
+
+    public Boolean patchDefaultConfigWithoutValidation(String serviceName, String nodePath, String data) {
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            Path configPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), serviceName);
+            configPath = configPath.append(new Path(nodePath));
+            Document doc = camille.get(configPath);
+            doc.setData(data);
+            camille.set(configPath, doc);
+            return true;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_19101, String.format(
+                    "Failed to patch default configuration for node %s in component %s", nodePath, serviceName), e);
+        }
+    }
+
+    private void validateBewDefaultValue(String serviceName, String nodePath, String data) {
+        SerializableDocumentDirectory conf = getDefaultServiceConfig(serviceName);
+        SerializableDocumentDirectory.Node node = conf.getNodeAtPath(nodePath);
+        if (node == null) {
+            throw new IllegalArgumentException("Cannot find node at path " + nodePath);
+        }
+        node.setData(data);
+        DocumentDirectory metaDir = getConfigurationSchema(serviceName);
+        conf.applyMetadata(metaDir);
+    }
 }
+

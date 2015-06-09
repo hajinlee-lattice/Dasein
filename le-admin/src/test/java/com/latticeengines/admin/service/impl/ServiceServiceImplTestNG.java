@@ -4,9 +4,12 @@ import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
+import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -25,6 +28,16 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
+    @Autowired
+    private TestLatticeComponent testLatticeComponent;
+
+    @BeforeMethod(groups = "functional")
+    public void beforeMethod() { testLatticeComponent.doRegistration(); }
+
+    @AfterMethod(groups = "functional")
+    public void afterMethod() { testLatticeComponent.doRegistration(); }
+
+
     @Test(groups = "functional")
     public void testGetSelectableFields() throws Exception {
         SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields("TestComponent", true);
@@ -42,7 +55,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
-    public void testPathOptionsToNonExistingNode() throws Exception {
+    public void testPatchOptionsToNonExistingNode() throws Exception {
         SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
         doc.setComponent("TestComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
@@ -56,7 +69,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
-    public void testPathOptionsToNonExistingService() throws Exception {
+    public void testPatchOptionsToNonExistingService() throws Exception {
         SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
         doc.setComponent("NoComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
@@ -70,8 +83,8 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     }
 
     @Test(groups = "functional",
-            dependsOnMethods = {"testPathOptionsToNonExistingService", "testPathOptionsToNonExistingNode"})
-    public void testPathOptions() throws Exception {
+            dependsOnMethods = {"testPatchOptionsToNonExistingService", "testPatchOptionsToNonExistingNode"})
+    public void testPatchOptions() throws Exception {
         SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
         doc.setComponent("TestComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
@@ -89,22 +102,22 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
 
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
-    public void testPathDefaultConfigToNonExistingNode() throws Exception {
+    public void testPatchDefaultConfigToNonExistingNode() throws Exception {
         serviceService.patchDefaultConfig("TestComponent", "/nonode", "data");
     }
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
-    public void testPathDefaultConfigToInvalidDataType() throws Exception {
+    public void testPatchDefaultConfigToInvalidDataType() throws Exception {
         serviceService.patchDefaultConfig("TestComponent", "/Config1", "data");
     }
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
-    public void testPathDefaultConfigToOutsideOptions() throws Exception {
+    public void testPatchDefaultConfigToOutsideOptions() throws Exception {
         serviceService.patchDefaultConfig("TestComponent", "/Config1", "5");
     }
 
     @Test(groups = "functional")
-    public void testPathDefaultConfig() throws Exception {
+    public void testPatchDefaultConfig() throws Exception {
         SerializableDocumentDirectory dir = serviceService.getDefaultServiceConfig("TestComponent");
         SerializableDocumentDirectory.Node node = dir.getNodeAtPath("/Config1");
         Assert.assertEquals(node.getData(), "1");
@@ -123,7 +136,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testPathSpaceConfiguration() throws Exception {
+    public void testPatchSpaceConfiguration() throws Exception {
         SpaceConfiguration conf = tenantService.getDefaultSpaceConfig();
         Assert.assertEquals(conf.getTopology(), CRMTopology.MARKETO);
 
