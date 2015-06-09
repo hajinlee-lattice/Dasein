@@ -19,10 +19,15 @@ public class PlaymakerEntityMgrImplTestNG extends AbstractTestNGSpringContextTes
     public void testCRUD() throws Exception {
 
         PlaymakerTenant tenant = getTennat();
+        try {
+            playMakerEntityMgr.deleteByTenantName(tenant.getTenantName());
+        } catch (Exception ex) {
+
+        }
         playMakerEntityMgr.create(tenant);
-        tenant.setTenantName("tenantName2");
+        tenant.setExternalId("externalId2");
         playMakerEntityMgr.executeUpdate(tenant);
-        PlaymakerTenant tenant2 = playMakerEntityMgr.findByTenantName("tenantName2");
+        PlaymakerTenant tenant2 = playMakerEntityMgr.findByTenantName("tenantName");
         Assert.assertNotNull(tenant2);
 
         playMakerEntityMgr.delete(tenant);
