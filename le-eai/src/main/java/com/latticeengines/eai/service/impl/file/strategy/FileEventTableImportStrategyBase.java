@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes.strategy.file;
+package com.latticeengines.eai.service.impl.file.strategy;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +26,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.eai.routes.ImportProperty;
-import com.latticeengines.eai.routes.converter.AvroTypeConverter;
-import com.latticeengines.eai.routes.strategy.ImportStrategy;
+import com.latticeengines.eai.service.impl.AvroTypeConverter;
+import com.latticeengines.eai.service.impl.ImportStrategy;
 
 @Component("fileEventTableImportStrategyBase")
 public class FileEventTableImportStrategyBase extends ImportStrategy {

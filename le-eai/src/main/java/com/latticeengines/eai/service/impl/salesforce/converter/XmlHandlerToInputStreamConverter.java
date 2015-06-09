@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes.converter.salesforce;
+package com.latticeengines.eai.service.impl.salesforce.converter;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

@@ -23,7 +23,7 @@ import parquet.hadoop.metadata.CompressionCodecName;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.converter.AvroTypeConverter;
+import com.latticeengines.eai.service.impl.AvroTypeConverter;
 
 public class ExtractDataXmlHandlerForParquet extends DefaultHandler {
     private static final Log log = LogFactory.getLog(ExtractDataXmlHandlerForParquet.class);

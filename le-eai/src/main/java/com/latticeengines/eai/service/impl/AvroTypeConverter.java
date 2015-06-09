@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes.converter;
+package com.latticeengines.eai.service.impl;
 
 import org.apache.avro.Schema.Type;
 import org.apache.camel.TypeConverter;

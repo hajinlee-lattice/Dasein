@@ -1,5 +1,6 @@
 package com.latticeengines.eai.yarn.runtime;
 
+import org.apache.camel.ProducerTemplate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -22,12 +23,16 @@ public class EaiProcessor implements ItemProcessor<ImportConfiguration, String> 
 
     @Autowired
     private DataExtractionService dataExtractionService;
+    
+    @Autowired
+    private ProducerTemplate producerTemplate;
 
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
         ImportContext context = new ImportContext();
         context.setProperty(ImportProperty.HADOOPCONFIG, yarnConfiguration);
         context.setProperty(ImportProperty.TARGETPATH, importConfig.getTargetPath());
+        context.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
         log.info("Starting extract and import.");
         dataExtractionService.extractAndImport(importConfig, context);
         log.info("Finished extract and import.");

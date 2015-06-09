@@ -23,7 +23,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.converter.AvroTypeConverter;
+import com.latticeengines.eai.service.impl.AvroTypeConverter;
 
 public class ExtractDataXmlHandler extends DefaultHandler {
     private static final Log log = LogFactory.getLog(ExtractDataXmlHandler.class);

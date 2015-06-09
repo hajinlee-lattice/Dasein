@@ -11,4 +11,5 @@ public class ImportProperty {
     public static final String APPID = "appId";
     public static final String METADATAFILE = "metadataFile";
     public static final String DATAFILEDIR = "dataFile";
+    public static final String PRODUCERTEMPLATE = "producerTemplate";
 }

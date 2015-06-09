@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes.strategy;
+package com.latticeengines.eai.service.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +8,6 @@ import org.apache.camel.ProducerTemplate;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 
 public abstract class ImportStrategy {
 

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.camel.ProducerTemplate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -50,6 +51,10 @@ public abstract class ImportService {
         
         assert(config != null);
         assert(targetPath != null);
+    }
+    
+    protected ProducerTemplate getProducerTemplate(ImportContext context) {
+        return context.getProperty(ImportProperty.PRODUCERTEMPLATE, ProducerTemplate.class);
     }
     
 }

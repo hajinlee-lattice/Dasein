@@ -23,9 +23,12 @@
       http://camel.apache.org/schema/spring
       http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-    <context:component-scan base-package="com.latticeengines.eai"/>
+    <context:component-scan base-package="com.latticeengines.eai">
+        <context:exclude-filter type="regex" expression="com.latticeengines.eai.routes.*" />
+        <context:exclude-filter type="regex" expression="com.latticeengines.eai.yarn.runtime.*" />
+    </context:component-scan>
+
     <import resource="classpath:eai-yarn-client-context.xml"/>
-    <import resource="classpath:eai-yarn-context.xml"/>
     <import resource="classpath:dataplatform-context.xml"/>
 
 </beans>

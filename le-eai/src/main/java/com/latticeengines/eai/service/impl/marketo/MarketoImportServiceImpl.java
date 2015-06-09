@@ -3,26 +3,21 @@ package com.latticeengines.eai.service.impl.marketo;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.camel.ProducerTemplate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.strategy.ImportStrategy;
-import com.latticeengines.eai.routes.strategy.marketo.MarketoImportStrategyBase;
 import com.latticeengines.eai.service.ImportService;
+import com.latticeengines.eai.service.impl.ImportStrategy;
+import com.latticeengines.eai.service.impl.marketo.strategy.MarketoImportStrategyBase;
 
 @Component("marketoImportService")
 public class MarketoImportServiceImpl extends ImportService {
     private static final Log log = LogFactory.getLog(MarketoImportServiceImpl.class);
-
-    @Autowired
-    private ProducerTemplate producer;
 
     public MarketoImportServiceImpl() {
         super(SourceType.MARKETO);
@@ -33,7 +28,7 @@ public class MarketoImportServiceImpl extends ImportService {
         if (accessTokenStrategy == null) {
             throw new RuntimeException("Access token strategy not available.");
         } else {
-            accessTokenStrategy.importData(producer, null, null, ctx);
+            accessTokenStrategy.importData(getProducerTemplate(ctx), null, null, ctx);
         }
     }
 
@@ -48,7 +43,7 @@ public class MarketoImportServiceImpl extends ImportService {
                 log.error("No import strategy for Marketo table " + table.getName());
                 continue;
             }
-            tablesWithMetadata.add(strategy.importMetadata(producer, table, ctx));
+            tablesWithMetadata.add(strategy.importMetadata(getProducerTemplate(ctx), table, ctx));
         }
         return tablesWithMetadata;
     }
@@ -63,7 +58,7 @@ public class MarketoImportServiceImpl extends ImportService {
                 log.error("No import strategy for Marketo table " + table.getName());
                 continue;
             }
-            strategy.importData(producer, table, srcImportConfig.getFilter(table.getName()), ctx);
+            strategy.importData(getProducerTemplate(ctx), table, srcImportConfig.getFilter(table.getName()), ctx);
         }
     }
 

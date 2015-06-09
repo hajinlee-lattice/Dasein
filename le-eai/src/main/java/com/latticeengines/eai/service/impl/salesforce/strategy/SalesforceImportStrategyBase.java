@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes.strategy.salesforce;
+package com.latticeengines.eai.service.impl.salesforce.strategy;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -29,8 +29,8 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.routes.ImportProperty;
-import com.latticeengines.eai.routes.converter.AvroTypeConverter;
-import com.latticeengines.eai.routes.strategy.ImportStrategy;
+import com.latticeengines.eai.service.impl.AvroTypeConverter;
+import com.latticeengines.eai.service.impl.ImportStrategy;
 
 @Component
 public class SalesforceImportStrategyBase extends ImportStrategy {

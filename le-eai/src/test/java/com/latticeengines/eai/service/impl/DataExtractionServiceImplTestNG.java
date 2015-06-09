@@ -3,9 +3,11 @@ package com.latticeengines.eai.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.camel.ProducerTemplate;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
@@ -18,10 +20,14 @@ import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.service.DataExtractionService;
 
+@ContextConfiguration(locations = { "classpath:test-eai-context.xml", "classpath:eai-yarn-context.xml" })
 public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private DataExtractionService dataExtractionService;
+    
+    @Autowired
+    private ProducerTemplate producerTemplate;
 
     @Test(groups = "functional")
     public void importData() throws Exception {
@@ -41,6 +47,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         ImportContext context = new ImportContext();
         context.setProperty(ImportProperty.HADOOPCONFIG, config);
         context.setProperty(ImportProperty.TARGETPATH, "/tmp");
+        context.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
         ImportConfiguration importConfig = new ImportConfiguration();
         SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
         salesforceConfig.setSourceType(SourceType.SALESFORCE);

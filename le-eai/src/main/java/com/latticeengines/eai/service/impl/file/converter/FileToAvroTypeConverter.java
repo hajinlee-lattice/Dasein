@@ -1,10 +1,10 @@
-package com.latticeengines.eai.routes.converter.file;
+package com.latticeengines.eai.service.impl.file.converter;
 
 import org.apache.avro.Schema.Type;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.eai.routes.converter.AvroTypeConverter;
+import com.latticeengines.eai.service.impl.AvroTypeConverter;
 
 @Component("fileToAvroTypeConverter")
 public class FileToAvroTypeConverter extends AvroTypeConverter {

@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes.strategy.salesforce;
+package com.latticeengines.eai.service.impl.salesforce.strategy;
 
 import static org.testng.Assert.assertEquals;
 
@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.eai.service.impl.salesforce.strategy.SalesforceImportStrategyBase;
 
 
 public class SalesforceImportStrategyBaseUnitTestNG {

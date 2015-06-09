@@ -14,8 +14,8 @@ import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.eai.routes.ImportProperty;
-import com.latticeengines.eai.routes.strategy.ImportStrategy;
 import com.latticeengines.eai.service.ImportService;
+import com.latticeengines.eai.service.impl.ImportStrategy;
 
 @Component("fileImportService")
 public class FileImportServiceImpl extends ImportService {

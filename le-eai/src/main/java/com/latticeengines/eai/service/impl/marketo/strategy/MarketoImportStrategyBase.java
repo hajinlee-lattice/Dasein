@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes.strategy.marketo;
+package com.latticeengines.eai.service.impl.marketo.strategy;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -20,9 +20,9 @@ import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
-import com.latticeengines.eai.routes.strategy.ImportStrategy;
+import com.latticeengines.eai.service.impl.AvroTypeConverter;
+import com.latticeengines.eai.service.impl.ImportStrategy;
 
 @Component
 public abstract class MarketoImportStrategyBase extends ImportStrategy {

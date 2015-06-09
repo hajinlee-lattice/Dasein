@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes.strategy.marketo;
+package com.latticeengines.eai.service.impl.marketo.strategy;
 
 import java.util.ArrayList;
 import java.util.List;
