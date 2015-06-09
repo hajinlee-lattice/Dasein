@@ -4,16 +4,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.ClientCache;
 import org.apache.hadoop.mapred.ResourceMgrDelegate;
 import org.apache.hadoop.mapred.YARNRunner;
+import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.MRAppMaster;
 import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.yarn.api.records.ApplicationSubmissionContext;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+
 public class LedpYarnRunner extends YARNRunner {
+    private static final Log log = LogFactory.getLog(LedpYarnRunner.class);
 
     public LedpYarnRunner(Configuration conf) {
         super(conf);
@@ -27,6 +34,7 @@ public class LedpYarnRunner extends YARNRunner {
         super(conf, resMgrDelegate, clientCache);
     }
 
+    @SuppressWarnings("deprecation")
     public ApplicationSubmissionContext createApplicationSubmissionContext(Configuration jobConf, String jobSubmitDir,
             Credentials ts) throws IOException {
         ApplicationSubmissionContext appCtx = super.createApplicationSubmissionContext(jobConf, jobSubmitDir, ts);
@@ -49,6 +57,18 @@ public class LedpYarnRunner extends YARNRunner {
                 replacement.add(command);
             }
             ctrLaunchCtx.setCommands(replacement);
+        }
+        String hdfsAppPath = jobConf.get("yarn.mr.hdfs.class.path");
+        
+        if (hdfsAppPath != null) {
+            try {
+                List<String> jars = HdfsUtils.getFilesForDir(jobConf, hdfsAppPath);
+                for (String jar : jars) {
+                    DistributedCache.addFileToClassPath(new Path(jar), jobConf);
+                }
+            } catch (Exception e) {
+                log.info("Exception getting application class path", e);
+            }
         }
         return appCtx;
     }
