@@ -93,19 +93,21 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     @SuppressWarnings("incomplete-switch")
     public List<ApplicationId> executeYarnStep(String deploymentExternalId, ModelCommandStep currentStep,
             ModelCommand modelCommand, ModelCommandParameters commandParameters) {
+        String tupleId = new CustomerSpace(modelCommand.getContractExternalId(),
+                deploymentExternalId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID).toString();
         List<ApplicationId> appIds = Collections.emptyList();
         switch (currentStep) {
         case LOAD_DATA:
-            appIds = load(deploymentExternalId, modelCommand, commandParameters);
+            appIds = load(tupleId, modelCommand, commandParameters);
             break;
         case GENERATE_SAMPLES:
-            appIds = generateSamples(deploymentExternalId, modelCommand, commandParameters);
+            appIds = generateSamples(tupleId, modelCommand, commandParameters);
             break;
         case PROFILE_DATA:
-            appIds = profileData(deploymentExternalId, modelCommand, commandParameters);
+            appIds = profileData(tupleId, modelCommand, commandParameters);
             break;
         case SUBMIT_MODELS:
-            appIds = submitModel(deploymentExternalId, modelCommand, commandParameters);
+            appIds = submitModel(tupleId, modelCommand, commandParameters);
             break;
         }
 
