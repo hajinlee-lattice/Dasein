@@ -307,7 +307,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         model.setKeyCols(commandParameters.getKeyCols());
         model.setCustomer(customer);
         model.setDataFormat(AVRO);
-        model.setProvenanceProperties(generateProvenanceProperties(commandParameters, modelCommand.getContractExternalId()));
+        model.setProvenanceProperties(generateProvenanceProperties(commandParameters));
 
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
@@ -315,11 +315,10 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         return model;
     }
 
-    private String generateProvenanceProperties(ModelCommandParameters commandParameters, String contractExternalId) {
+    private String generateProvenanceProperties(ModelCommandParameters commandParameters) {
         Properties provenanceProperties = new Properties();
         provenanceProperties.put(ModelCommandParameters.DL_URL, commandParameters.getDlUrl());
-        provenanceProperties.put(ModelCommandParameters.DL_TENANT, new CustomerSpace(contractExternalId,
-                commandParameters.getDlTenant(), CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID).toString());
+        provenanceProperties.put(ModelCommandParameters.DL_TENANT, commandParameters.getDlTenant());
         provenanceProperties.put(ModelCommandParameters.DL_QUERY, commandParameters.getDlQuery());
 
         return StringTokenUtils.propertyToString(provenanceProperties);
