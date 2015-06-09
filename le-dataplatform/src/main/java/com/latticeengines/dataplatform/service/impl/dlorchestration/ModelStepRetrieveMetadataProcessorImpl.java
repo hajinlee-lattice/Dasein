@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -58,7 +59,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     @VisibleForTesting
     String executeStepWithResult(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
-        String customer = modelCommand.getDeploymentExternalId();
+        String customer = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
         String deletePath = customerBaseDir + "/" + customer + "/data";
         try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
             if (fs.exists(new Path(deletePath))) {
@@ -108,7 +109,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
     }
 
     String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
-        String customer = modelCommand.getDeploymentExternalId();
+        String customer = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
         return String.format("%s/%s/data/%s/metadata.avsc", customerBaseDir, customer, modelCommandParameters.getMetadataTable());
     }
 }
