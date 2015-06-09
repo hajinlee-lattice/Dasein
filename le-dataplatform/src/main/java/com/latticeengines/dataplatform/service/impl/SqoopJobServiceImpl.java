@@ -56,7 +56,6 @@ public class SqoopJobServiceImpl {
     }
 
 
-    @SuppressWarnings("deprecation")
     protected ApplicationId importData(String table, //
             String targetDir, //
             DbCreds creds, //
