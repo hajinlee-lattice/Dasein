@@ -30,7 +30,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     private ProducerTemplate producerTemplate;
 
     @Test(groups = "functional")
-    public void importData() throws Exception {
+    public void extractAndImport() throws Exception {
         List<Table> tables = new ArrayList<>();
         Table lead = createLead();
         Table account = createAccount();
