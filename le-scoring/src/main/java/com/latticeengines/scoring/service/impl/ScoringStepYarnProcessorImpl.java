@@ -28,9 +28,9 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -134,28 +134,62 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     }
 
     private ApplicationId score(ScoringCommand scoringCommand) {
+        Properties properties = generateCustomizedProperties(scoringCommand);
+        ApplicationId appId = jobService.submitMRJob("scoringJob", properties);
+        return appId;
+    }
+
+    private ApplicationId export(ScoringCommand scoringCommand) {
+        String queue = LedpQueueAssigner.getScoringQueueNameForSubmission();
+        String targetTable = createNewTable(scoringCommand);
+        String tenant = getTenant(scoringCommand);
+        String sourceDir = customerBaseDir + "/" + tenant + "/scoring/" + scoringCommand.getTableName() + "/scores";
+        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, tenant);
+
+        saveStateBeforeFinishStep(scoringCommand, targetTable);
+        return appId;
+    }
+
+    private String getTenant(ScoringCommand scoringCommand) {
+        String customer = scoringCommand.getId();
+        return dotJoiner.join(customer, customer, SPACEID);
+    }
+
+    private String createNewTable(ScoringCommand scoringCommand) {
+        String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
+        metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
+        return newTable;
+    }
+
+    private void saveStateBeforeFinishStep(ScoringCommand scoringCommand, String targetTable){
+        DateTime dt = new DateTime(DateTimeZone.UTC);
+        ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
+                targetTable, 0, new Timestamp(dt.getMillis()));
+        scoringCommandResultEntityMgr.create(result);
+
+        ScoringCommandState state = scoringCommandStateEntityMgr.findLastStateByScoringCommand(scoringCommand);
+        state.setLeadOutputQueuePid(result.getPid());
+        scoringCommandStateEntityMgr.createOrUpdate(state);
+    }
+
+    private Properties generateCustomizedProperties(ScoringCommand scoringCommand){
         String table = scoringCommand.getTableName();
         String tenant = getTenant(scoringCommand);
 
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), tenant);
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getScoringQueueNameForSubmission());
-
-        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
-                + "/data");
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
-                + "/scores");
+        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table + "/data");
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table + "/scores");
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
 
         String customerModelPath = customerBaseDir + "/" + tenant + "/models";
-
         List<String> modelFilePaths = Collections.emptyList();
         try {
-            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelPath,
-                    new HdfsFileFilter() {
+            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelPath, new HdfsFileFilter() {
                         @Override
                         public boolean accept(FileStatus fileStatus) {
                             if (fileStatus == null) {
@@ -172,49 +206,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         if (CollectionUtils.isEmpty(modelFilePaths)) {
             throw new LedpException(LedpCode.LEDP_20008, new String[] { tenant });
         }
-
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelFilePaths));
-        ApplicationId appId = jobService.submitMRJob("scoringJob", properties);
-
-        return appId;
-    }
-
-    private ApplicationId export(ScoringCommand scoringCommand) {
-        String queue = LedpQueueAssigner.getScoringQueueNameForSubmission();
-        String targetTable = createNewTable(scoringCommand);
-        String tenant = getTenant(scoringCommand);
-
-        DateTime dt = new DateTime(DateTimeZone.UTC);
-        ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
-                targetTable, 0, new Timestamp(dt.getMillis()));
-        scoringCommandResultEntityMgr.create(result);
-
-        ScoringCommandState state = scoringCommandStateEntityMgr.findLastStateByScoringCommand(scoringCommand);
-        state.setLeadOutputQueuePid(result.getPid());
-        scoringCommandStateEntityMgr.createOrUpdate(state);
-
-        // scoringCreds.setDb("ScoringDB_buildmachine");
-        // scoringCreds.setDBType("SQLServer");
-        // scoringCreds.setHost("10.41.1.250");
-        // scoringCreds.setPort(1433);
-        String sourceDir = customerBaseDir + "/" + tenant + "/scoring/" + scoringCommand.getTableName() + "/scores";
-        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, tenant);
-
-        return appId;
-    }
-
-    private String createNewTable(ScoringCommand scoringCommand) {
-        // DataSource dataSource = new
-        // DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine",
-        // "root", "welcome");
-        // scoringJdbcTemplate.setDataSource(dataSource);
-        String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
-        metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
-        return newTable;
-    }
-
-    public String getTenant(ScoringCommand scoringCommand) {
-        String customer = scoringCommand.getId();
-        return dotJoiner.join(customer, customer, SPACEID);
+        return properties;
     }
 }

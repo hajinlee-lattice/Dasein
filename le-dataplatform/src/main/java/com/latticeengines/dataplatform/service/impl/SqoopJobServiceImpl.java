@@ -110,10 +110,9 @@ public class SqoopJobServiceImpl {
             } catch (IOException e) {
                 log.error(e);
             }
-            
+            yarnConfiguration.set("yarn.mr.hdfs.class.path", props.getProperty("yarn.mr.hdfs.class.path"));
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
-        yarnConfiguration.set("yarn.mr.hdfs.class.path", props.getProperty("yarn.mr.hdfs.class.path"));
         //yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS, "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
                 
         try {
