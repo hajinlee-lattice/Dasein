@@ -28,9 +28,9 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -129,7 +129,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String targetDir = customerBaseDir + "/" + tenant + "/scoring/" + table + "/data";
         metadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
         ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, scoringCreds,
-                LedpQueueAssigner.getMRQueueNameForSubmission(), tenant, Arrays.asList(PID), "");
+                LedpQueueAssigner.getScoringQueueNameForSubmission(), tenant, Arrays.asList(PID), "");
         return appId;
     }
 
@@ -139,7 +139,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), tenant);
-        properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getMRQueueNameForSubmission());
+        properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getScoringQueueNameForSubmission());
 
         properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
                 + "/data");
@@ -180,7 +180,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     }
 
     private ApplicationId export(ScoringCommand scoringCommand) {
-        String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String queue = LedpQueueAssigner.getScoringQueueNameForSubmission();
         String targetTable = createNewTable(scoringCommand);
         String tenant = getTenant(scoringCommand);
 

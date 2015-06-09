@@ -25,7 +25,10 @@ public class LedpQueueAssigner {
 
     public static final String PRIORITY = "Priority";
 
-    private static final String MRQUEUENAME = "Priority0.MapReduce.0";
+    private static final String SCORING_QUEUE_NAME = "Scoring";
+    private static final String MODELING_QUEUE_NAME = "Modeling";
+    private static final String PROPDATA_QUEUE_NAME = "PropData";
+
     private static final String JOBNAME_DELIMITER = "~";
     private static final String QUEUE_NAME_DELIMITER = ".";
     private static final int ABSOLUTE_MINIMUM_UTILIZATION = 0;
@@ -161,11 +164,15 @@ public class LedpQueueAssigner {
         }
     }
 
-    public static String getNonMRQueueNameForSubmission(int priority) {
-        return PRIORITY + priority + ".0";
+    public static String getScoringQueueNameForSubmission() {
+        return SCORING_QUEUE_NAME;
     }
 
-    public static String getMRQueueNameForSubmission() {
-        return MRQUEUENAME;
+    public static String getModelingQueueNameForSubmission() {
+        return MODELING_QUEUE_NAME;
+    }
+
+    public static String getPropDataQueueNameForSubmission() {
+        return PROPDATA_QUEUE_NAME;
     }
 }

@@ -28,13 +28,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class EventDataSamplingJobUnitTestNG {
-    
+
     private String inputDir = null;
     private String outputDir = null;
     private SamplingConfiguration samplingConfig = null;
-    
+
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
         URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE");
@@ -52,7 +53,7 @@ public class EventDataSamplingJobUnitTestNG {
         samplingConfig.addSamplingElement(s0);
         samplingConfig.addSamplingElement(s1);
     }
-    
+
     private File[] getAvroFilesForDir(String parentDir) {
         return new File(parentDir).listFiles(new FilenameFilter() {
 
@@ -60,7 +61,7 @@ public class EventDataSamplingJobUnitTestNG {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".avro");
             }
-            
+
         });
     }
 
@@ -73,9 +74,9 @@ public class EventDataSamplingJobUnitTestNG {
             Pair<Map<Object, Integer>, Integer> retval = computeDistribution(avroFile.getAbsolutePath(), "Event_Latitude_Customer", histogram);
             numRows += retval.value();
         }
-        
-        
-        int res = ToolRunner.run(new EventDataSamplingJob(new Configuration()), new String[] { inputDir, outputDir, samplingConfig.toString(), "Priority0.MapReduce.0" });
+
+
+        int res = ToolRunner.run(new EventDataSamplingJob(new Configuration()), new String[] { inputDir, outputDir, samplingConfig.toString(), LedpQueueAssigner.getModelingQueueNameForSubmission() });
         assertEquals(0, res);
 
         File[] avroFiles = getAvroFilesForDir(outputDir);
@@ -85,7 +86,7 @@ public class EventDataSamplingJobUnitTestNG {
         for (int i = 1; i < avroFiles.length; i++) {
             assertEquals(schema.toString(), getSchema(avroFiles[i].getAbsolutePath()).toString());
         }
-        
+
         System.out.println("**************************");
         System.out.println("Files = all inputs");
         System.out.println("Number of rows = " + numRows);
@@ -105,28 +106,28 @@ public class EventDataSamplingJobUnitTestNG {
             System.out.println("**************************");
         }
     }
-    
+
     private String getPercentage(int numItems, int totalItems) {
         DecimalFormat df = new DecimalFormat("#.##");
         return df.format((double) numItems / (double) totalItems);
     }
-    
+
     private Schema getSchema(String filename) throws Exception {
         return getAvroReader(filename).getSchema();
     }
-    
+
     private FileReader<GenericRecord> getAvroReader(String filename) throws Exception {
         Path path = new Path(filename);
         SeekableInput input = new FsInput(path, new Configuration());
         GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<GenericRecord>();
         return DataFileReader.openReader(input, fileReader);
     }
-    
+
     private Pair<Map<Object, Integer>, Integer> computeDistribution(String filename, String column, Map<Object, Integer> histogram) throws Exception {
         if (histogram == null) {
             histogram = new HashMap<Object, Integer>();
         }
-        
+
         FileReader<GenericRecord> reader = getAvroReader(filename);
         int numRows = 0;
         for (Iterator<GenericRecord> it = reader.iterator(); it.hasNext(); ) {

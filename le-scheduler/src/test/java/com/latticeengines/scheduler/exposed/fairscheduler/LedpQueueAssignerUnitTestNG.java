@@ -23,8 +23,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
-
 public class LedpQueueAssignerUnitTestNG {
 
     private static final String PRIORITY_NO_LEAVES = "PriorityNoLeaves";
@@ -279,9 +277,4 @@ public class LedpQueueAssignerUnitTestNG {
         assertEquals(queueAssigner.getParentQueueFromFullQueueName("noDelimiter"), "noDelimiter");
     }
 
-    @Test(groups = "unit")
-    public void testGetQueueNameMethods() throws Exception {
-        assertEquals(LedpQueueAssigner.getMRQueueNameForSubmission(), "Priority0.MapReduce.0");
-        assertEquals(LedpQueueAssigner.getNonMRQueueNameForSubmission(1), "Priority1.0");
-    }
 }

@@ -79,7 +79,7 @@ public class DailyFlow {
 
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
-        String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         properties.put("mapred.job.queue.name", queue);
         FlowConnector flowConnector = new Hadoop2MR1FlowConnector(properties);
 

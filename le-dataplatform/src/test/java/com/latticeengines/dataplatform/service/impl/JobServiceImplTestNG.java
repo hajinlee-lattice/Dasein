@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -266,7 +267,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testSubmitMRJob() throws Exception {
         Properties properties = new Properties();
-        properties.setProperty(MapReduceProperty.QUEUE.name(), "Priority0.MapReduce.0");
+        properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
         properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
         properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
@@ -290,7 +291,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     // @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testSubmitMRJobWithBadCustomerName() throws Exception {
         Properties properties = new Properties();
-        properties.setProperty(MapReduceProperty.QUEUE.name(), "Priority0.MapReduce.0");
+        properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
         properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
         properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
@@ -323,7 +324,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      * src/test/resources/com/latticeengines/dataplatform/
      * service/impl/mysql/create.sql should have been run before executing this
      * test.
-     * 
+     *
      * @throws Exception
      */
     @Test(groups = { "functional", "functional.production" }, enabled = true)
@@ -333,7 +334,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 .password(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = sqoopSyncJobService.importData("iris", baseDir + "/tmp/import", creds,
-                "Priority0.MapReduce.0", "Dell", Arrays.<String> asList(new String[] { "ID" }),
+                LedpQueueAssigner.getModelingQueueNameForSubmission(), "Dell", Arrays.<String> asList(new String[] { "ID" }),
                 "");
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);

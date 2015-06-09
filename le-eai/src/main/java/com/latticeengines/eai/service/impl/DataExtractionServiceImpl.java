@@ -40,7 +40,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     public void extractAndImport(ImportConfiguration importConfig, ImportContext context) {
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
         context.setProperty(ImportProperty.CUSTOMER, importConfig.getCustomer());
-        
+
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
             Map<String, String> props = sourceImportConfig.getProperties();
@@ -49,7 +49,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
                 log.info("Property " + entry.getKey() + " = " + entry.getValue());
                 context.setProperty(entry.getKey(), entry.getValue());
             }
-            
+
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
             List<Table> tableMetadata = importService.importMetadata(sourceImportConfig, context);
             for (Table table : tableMetadata) {
@@ -60,7 +60,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
                 }
             }
             sourceImportConfig.setTables(tableMetadata);
-            
+
             importService.importDataAndWriteToHdfs(sourceImportConfig, context);
         }
     }
@@ -68,7 +68,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @Override
     public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig, ImportContext context) {
         ApplicationId appId = null;
-        
+
         boolean hasNonEaiJobSourceType = false;
         for (SourceImportConfiguration sourceImportConfig : importConfig.getSourceConfigurations()) {
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
@@ -100,7 +100,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getNonMRQueueNameForSubmission(0));
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
 
         Properties containerProperties = new Properties();
         containerProperties.put(ImportProperty.IMPORTCONFIG, importConfig.toString());

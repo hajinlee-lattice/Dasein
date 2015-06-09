@@ -92,7 +92,7 @@ public class ExportAndReportService {
                 .password(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
         String errorMsg = null;
-        String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         try {
             sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 4, columns);
 

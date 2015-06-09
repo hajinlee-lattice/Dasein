@@ -342,7 +342,7 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     private ModelingJob createJob(Model model, Algorithm algorithm, String jobType) {
-        String assignedQueue = LedpQueueAssigner.getNonMRQueueNameForSubmission(algorithm.getPriority());
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         return createJob(model, algorithm, assignedQueue, jobType);
     }
 
@@ -399,7 +399,7 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), config.toString());
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
-        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
         return modelingJobService.submitMRJob("samplingJob", properties);
     }
@@ -478,7 +478,7 @@ public class ModelingServiceImpl implements ModelingService {
             dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
         }
         modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
-        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
         ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue, "profiling");
         m.addModelingJob(modelingJob);
@@ -598,7 +598,7 @@ public class ModelingServiceImpl implements ModelingService {
         model.setTable(config.getTable());
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
-        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
 
         return sqoopSyncJobService.importData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
                 model.getCustomer(), config.getKeyCols(), columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()));
@@ -614,8 +614,8 @@ public class ModelingServiceImpl implements ModelingService {
             boolean excludeTimestampCols = Boolean.parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.getValue(properties));
             boolean first = true;
             for (Field field : fields) {
-                
-                // The scoring engine does not know how to convert datetime columns into a numeric value, 
+
+                // The scoring engine does not know how to convert datetime columns into a numeric value,
                 // which Sqoop does automatically. This should not be a problem now since dates are
                 // typically not predictive anyway so we can safely exclude them for now.
                 // We can start including TIMESTAMP and TIME columns by explicitly setting EXCLUDETIMESTAMPCOLUMNS=false
@@ -625,7 +625,7 @@ public class ModelingServiceImpl implements ModelingService {
                 }
                 String name = field.getName();
                 String colName = field.getColumnName();
-                
+
                 if (name == null) {
                     log.warn("Field name is null.");
                     continue;

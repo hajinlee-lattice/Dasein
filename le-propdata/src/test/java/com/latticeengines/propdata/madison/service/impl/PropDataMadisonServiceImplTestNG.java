@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatu
 import com.latticeengines.propdata.eai.service.PropDataContext;
 import com.latticeengines.propdata.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
-import com.latticeengines.propdata.madison.service.impl.PropDataMadisonServiceImpl;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -160,7 +159,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     public void exportToDB() throws Exception {
 
 //        ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData(today);
-        
+
         PropDataContext requestContext = new PropDataContext();
         requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
         PropDataContext responseContext = propDataService.exportToDB(requestContext);
@@ -170,7 +169,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     // @Test(groups = "manual")
     public void swapTables() {
-        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         ((PropDataMadisonServiceImpl) propDataService).swapTargetTables(assignedQueue);
 
     }

@@ -1,76 +1,18 @@
 <?xml version="1.0"?>
 <allocations>
-    <queue name="Priority0.MapReduce">
-        <weight>1000</weight>
-        <queue name="0">
-            <minResources>4096 mb,6 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
+    <queue name="Scoring">
+        <schedulingMode>fifo</schedulingMode>
+        <weight>0.25</weight>
     </queue>
-    <queue name="Priority0">
-        <weight>100</weight>
-        <queue name="0">
-            <minResources>2048 mb,2 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="1">
-            <minResources>2048 mb,2 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="2">
-            <minResources>2048 mb,2 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="3">
-            <minResources>2048 mb,2 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="4">
-            <minResources>2048 mb,2 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
+    <queue name="Modeling">
+        <schedulingMode>fifo</schedulingMode>
+        <weight>0.25</weight>
     </queue>
-    <queue name="Priority1">
-        <weight>10</weight>
-        <queue name="0">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="1">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="2">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="3">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="4">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
+    <queue name="PropData">
+        <schedulingMode>fifo</schedulingMode>
+        <weight>0.5</weight>
     </queue>
-    <queue name="Priority2">
-        <weight>1</weight>
-        <queue name="0">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="1">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="2">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="3">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="4">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-    </queue>
-    <defaultMinSharePreemptionTimeout>30</defaultMinSharePreemptionTimeout>
-    <fairSharePreemptionTimeout>30</fairSharePreemptionTimeout>
-
     <user name="yourusernamehere">
         <maxRunningApps>4</maxRunningApps>
     </user>
-
 </allocations>

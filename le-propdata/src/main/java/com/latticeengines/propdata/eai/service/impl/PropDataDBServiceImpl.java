@@ -89,7 +89,7 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 
             generateNewTables(requestContext, tableList, keyColsList);
 
-            String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+            String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
             DbCreds.Builder builder = new DbCreds.Builder();
             builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
                     .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
@@ -137,7 +137,7 @@ public class PropDataDBServiceImpl implements PropDataDBService {
             builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
                     .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
             DbCreds creds = new DbCreds(builder);
-            String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+            String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
             ApplicationId appId = propDataJobService.importDataSync(tableName,
                     getDataHdfsPath(customer, tableName, PROPDATA_OUTPUT), creds, assignedQueue, customer, Arrays.asList(keyCols),
                     "", 1);
@@ -385,13 +385,13 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 
         String customer = requestContext.getProperty(ImportExportKey.CUSTOMER.getKey(), String.class);
         String table = requestContext.getProperty(ImportExportKey.TABLE.getKey(), String.class);
-        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
                 .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
         DbCreds creds = new DbCreds(builder);
-        
+
         Integer appId = propDataJobService.exportDataSync(table, getDataHdfsPath(customer, table, PROPDATA_INPUT),
                 creds, assignedQueue, customer, 1, null).getId();
 

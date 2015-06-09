@@ -131,7 +131,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 }
             }
 
-            String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+            String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
             DbCreds.Builder builder = new DbCreds.Builder();
             builder.host(sourceDataJdbcHost).port(Integer.parseInt(sourceDataJdbcPort)).db(sourceDataJdbcDb)
                     .user(sourceDataJdbcUser).password(sourceDataJdbcPassword).dbType(sourceDataJdbcType);
@@ -245,7 +245,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 if (HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
                     HdfsUtils.rmdir(yarnConfiguration, schemaPath);
                 }
-                String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+                String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
                 DbCreds.Builder builder = new DbCreds.Builder();
                 builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
                         .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
@@ -316,7 +316,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 return response;
             }
             log.info("Uploading today's aggregation data=" + sourceDir);
-            String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+            String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
             DbCreds.Builder builder = new DbCreds.Builder();
             builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
                     .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
@@ -359,7 +359,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         log.info("Uploading today's raw data=" + todayIncrementalPath);
         String tableName = HdfsUtils.getHdfsFileContents(yarnConfiguration, getTableNameFromFile(todayIncrementalPath));
 
-        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         String connectionString = getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword);
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
@@ -372,7 +372,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 + ";ALTER TABLE " + tableName + " DROP COLUMN ID1", assignedQueue, getJobName()
                 + "-uploadRawDataCreateTable", connectionString);
         log.info("Uploading today's data, targetTable=" + tableName + " connectionUrl=" + connectionString);
-        
+
         propDataJobService.exportDataSync(tableName, todayIncrementalPath, creds, assignedQueue, getJobName()
                 + "-uploadRawDataExportData", numMappers, null);
         propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
@@ -382,7 +382,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     }
 
     void cleanupTargetRawData(Date date) throws Exception {
-        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         String tableName = getTableName(date);
 
         propDataJobService.eval("DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
