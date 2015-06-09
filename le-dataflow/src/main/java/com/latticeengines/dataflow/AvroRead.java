@@ -65,7 +65,7 @@ public class AvroRead {
         Schema contactSchema = AvroUtils.getSchema(new Configuration(), new Path(contact));
 
         Properties properties = new Properties();
-        properties.put("mapred.job.queue.name", LedpQueueAssigner.getMRQueueNameForSubmission());
+        properties.put("mapred.job.queue.name", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         AppProps.setApplicationJarClass(properties, AvroRead.class);
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
         //FlowConnector flowConnector = new LocalFlowConnector();
@@ -128,7 +128,7 @@ public class AvroRead {
         Checkpoint c1 = new Checkpoint("ckpt1", join);
         Tap<?, ?, ?> c1Tap = new Lfs(new SequenceFile(Fields.UNKNOWN), //
                 "/tmp/ckpt1", true);
-        
+
         ExpressionFunction function = new ExpressionFunction(new Fields("Domain"), //
                 "Email != null ? Email.substring(Email.indexOf(\"@\") + 1) : \"\"", //
                 new String[] { "Email" }, new Class[] { String.class });
@@ -143,7 +143,7 @@ public class AvroRead {
                 new String[] { "Domain" }, new Class[] { String.class });
 
         each = new Each(c2, new Fields("Domain"), domainFunction, Fields.ALL);
-    
+
         Checkpoint c3 = new Checkpoint("ckpt3", each);
         Tap<?, ?, ?> c3Tap = new Lfs(new SequenceFile(Fields.UNKNOWN), //
                 "/tmp/ckpt3", true);
@@ -154,29 +154,29 @@ public class AvroRead {
 
         grpby = new Every(grpby, new Fields("AnnualRevenue"), new MaxValue(new Fields("MaxRevenue")), Fields.ALL);
         grpby = new Every(grpby, new Fields("NumberOfEmployees"), new Sum(new Fields("TotalEmployees")), Fields.ALL);
-  
+
         Checkpoint c4 = new Checkpoint("ckpt4", grpby);
         Tap<?, ?, ?> c4Tap = new Lfs(new SequenceFile(Fields.UNKNOWN), //
                 "/tmp/ckpt4", true);
 
         each = new Each(c4, new Fields("Domain", "MaxRevenue", "TotalEmployees"), new AddMD5Hash(new Fields("PropDataHash")), Fields.ALL);
-        
+
         each = new Each(each, Fields.GROUP, new JythonFunction("com/latticeengines/domain/exposed/transforms/python/encoder.py", "transform", Integer.class, new Fields("Domain"), new Fields("DomainAsInt")), Fields.ALL);
 /*
         ExpressionFilter filter = new ExpressionFilter(
                 "(Email == null || Email.trim().isEmpty()) && (contact$Email == null || contact$Email.trim().isEmpty())", //
                 new String[] { "Email", "contact$Email" }, //
-                new Class<?>[] { String.class, String.class }); 
+                new Class<?>[] { String.class, String.class });
         //Not not = new Not(filter);
-               
+
         join = new Each(join, new Fields("Email", "contact$Email"), filter);
 
         //join = new Each(join, new Fields("Domain", "Company", "City", "Country"), new AddMD5Hash(new Fields("PropDataHash")), Fields.ALL);
 
         //join = new GroupBy(join, new Fields("Domain", "Company", "City", "Country", "PropDataHash", "IsDomain"));
-        
+
         //join = new Every(join, Fields.ALL, new Last(), Fields.GROUP);
-         * 
+         *
          */
         FlowDef flowDef = FlowDef.flowDef().setName("wc") //
                 .addSources(sources) //
