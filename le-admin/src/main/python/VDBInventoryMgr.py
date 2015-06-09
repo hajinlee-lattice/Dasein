@@ -1,12 +1,11 @@
-import urllib
 import httplib
 import json
 
 import sys
-from optparse import OptionParser,OptionGroup
+from optparse import OptionParser, OptionGroup
 
 
-def constructOptionParser():
+def construct_option_parser():
     parser = OptionParser()
 
     # required options
@@ -14,16 +13,16 @@ def constructOptionParser():
                       help='default = http://bodcprodjty221.prod.lattice.local')
     parser.add_option("-c", "--command", dest="command", help='list, add, remove, update')
 
-    parser.add_option_group(constructAddRemoveOptionGroup(parser))
-    parser.add_option_group(constructUpdateOptionGroup(parser))
+    parser.add_option_group(construct_add_remove_option_group(parser))
+    parser.add_option_group(construct_update_option_group(parser))
     return parser
 
-def constructAddRemoveOptionGroup(parser):
+def construct_add_remove_option_group(parser):
     group = OptionGroup(parser, "Options for add/rm")
     group.add_option("-s", "--server", dest="server", help='the server to be added/removed')
     return group
 
-def constructUpdateOptionGroup(parser):
+def construct_update_option_group(parser):
     group = OptionGroup(parser, "Options for update")
     group.add_option("-S", "--servers", dest="servers", help='the list of available servers')
     group.add_option("-d", "--default", dest="default", help='the default server')
@@ -31,8 +30,8 @@ def constructUpdateOptionGroup(parser):
 
 class CmdHandler:
     def __init__(self, options):
-        self.protocal, self.host = options['hostport'].split('://')
-        if self.protocal.lower() == 'https':
+        self.protocol, self.host = options['hostport'].split('://')
+        if self.protocol.lower() == 'https':
             self.conn = httplib.HTTPSConnection(self.host)
         else:
             self.conn = httplib.HTTPConnection(self.host)
@@ -49,7 +48,7 @@ class CmdHandler:
         self.default = options['default']
 
     def check_conn(self):
-        sys.stdout.write("Pinging host %s://%s ... " % (self.protocal, self.host))
+        sys.stdout.write("Pinging host %s://%s ... " % (self.protocol, self.host))
         self.conn.request('GET', "/")
         response = self.conn.getresponse()
         print response.status, response.reason, "\n"
@@ -172,7 +171,7 @@ class CmdHandler:
         return True
 
 if __name__ == "__main__":
-    parser = constructOptionParser()
+    parser = construct_option_parser()
     (options, _) = parser.parse_args()
     handler = CmdHandler(options.__dict__)
 
