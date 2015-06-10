@@ -215,6 +215,10 @@ public class AvroUtils {
             return Type.STRING;
         case "Boolean":
             return Type.BOOLEAN;
+        case "Date":
+            return Type.LONG;
+        case "Timestamp":
+            return Type.LONG;
         default:
             throw new RuntimeException("Unknown avro type for java type " + javaType.getSimpleName());
         }
