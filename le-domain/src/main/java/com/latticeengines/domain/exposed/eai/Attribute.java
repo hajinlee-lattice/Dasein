@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
 
@@ -42,12 +43,12 @@ public class Attribute implements HasName, HasProperty, Serializable {
         return name;
     }
 
-    @JsonIgnore
+    @JsonProperty("display_name")
     public String getDisplayName() {
         return displayName;
     }
 
-    @JsonIgnore
+    @JsonProperty("display_name")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -82,10 +83,12 @@ public class Attribute implements HasName, HasProperty, Serializable {
         this.physicalDataType = physicalDataType;
     }
 
+    @JsonIgnore
     public String getLogicalDataType() {
         return logicalDataType;
     }
 
+    @JsonIgnore
     public void setLogicalDataType(String logicalDataType) {
         this.logicalDataType = logicalDataType;
     }

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.eai;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
@@ -18,10 +19,12 @@ public class Table extends AttributeOwner implements HasName {
         this.name = name;
     }
 
+    @JsonProperty("display_name")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
+    @JsonProperty("display_name")
     public String getDisplayName() {
         return displayName;
     }
