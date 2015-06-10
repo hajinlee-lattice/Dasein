@@ -5,6 +5,7 @@ var UserDropdown = function() {
     this.ManageUsersLink = element(by.linkText('Manage Users'));
     this.MultipleModelsLink = element(by.linkText('Multiple Model Setup'));
     this.SystemSetupLink = element(by.linkText('System Setup'));
+    this.updatePassword = element(by.linkText('Update Password'));
 
     this.getUserLink = function(name) {
         return element(by.linkText(name));
