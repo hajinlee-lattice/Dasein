@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
-public class ValidationResult {
+public class DatatypeValidationResult {
 
     private ArrayList<String> datatypeFailures;
 
     private Hashtable<String, ArrayList<String>> modelFailures;
 
-    ValidationResult(ArrayList<String> df, Hashtable<String, ArrayList<String>> mf) {
+    DatatypeValidationResult(ArrayList<String> df, Hashtable<String, ArrayList<String>> mf) {
         datatypeFailures = df;
         modelFailures = mf;
     }
@@ -51,7 +51,7 @@ public class ValidationResult {
         return modelFailures;
     }
 
-    public boolean passValidation() {
+    public boolean passDatatypeValidation() {
         ArrayList<String> df = getDatatypeFailures();
         Hashtable<String, ArrayList<String>> mf = getModelFailures();
         if (df == null && mf == null) {

@@ -238,7 +238,7 @@ public class ScoringMapperPredictUtilTestNG {
     }
 
     @Test(groups = "unit")
-    public void testEvaluate() {
+    public void testEvaluate() throws IOException, InterruptedException {
         // copy over the test scoring.py file to the current directory
         URL scoreUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/python/scoring.py");
         File dest = new File(System.getProperty("user.dir") + "/scoring.py");

@@ -23,6 +23,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 
 public class ScoringMapperPredictUtil {
@@ -45,7 +47,7 @@ public class ScoringMapperPredictUtil {
     private static final String PERCENTILE_BUCKETS_MAXIMUMSCORE = "MaximumScore";
     private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
 
-    public static String evaluate(HashMap<String, JSONObject> models) {
+    public static String evaluate(HashMap<String, JSONObject> models) throws IOException, InterruptedException {
 
         StringBuilder strs = new StringBuilder();
         // spawn python
@@ -58,51 +60,39 @@ public class ScoringMapperPredictUtil {
         log.info("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
         File pyFile = new File("scoring.py");
         if (!pyFile.exists()) {
-            new Exception("scoring.py does not exist!");
+            throw new LedpException(LedpCode.LEDP_20002);
         }
 
-        Process p = null;
-        try {
-            p = Runtime.getRuntime().exec("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
+        Process p = Runtime.getRuntime().exec("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
 
         BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
         BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-        String line = null;
-        try {
-            while ((line = in.readLine()) != null) {
-                strs.append(line);
-                log.info(line);
-            }
-            in.close();
-            while ((line = err.readLine()) != null) {
-                strs.append(line);
-                log.error(line);
-            }
-            err.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String line = "";
+        StringBuilder errors = new StringBuilder();
 
-        try {
-            p.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        while ((line = in.readLine()) != null) {
+            strs.append(line);
+            log.info(line);
         }
+        in.close();
+        while ((line = err.readLine()) != null) {
+            errors.append(line);
+            strs.append(line);
+            log.error(line);
+        }
+        err.close();
+        p.waitFor();
 
+        if (errors.length() != 0) {
+            throw new LedpException(LedpCode.LEDP_200011, new String[] { errors.toString() });
+        }
+        
         return strs.toString();
     }
 
     public static void writeToOutputFile(ArrayList<ModelEvaluationResult> resultList, Configuration yarnConfiguration,
             String outputPath) throws Exception {
-        if (resultList == null) {
-            new Exception("resultList is null");
-        }
-        if (yarnConfiguration == null) {
-            new Exception("yarnConfiguration is null");
-        }
+
         String fileName = UUID.randomUUID() + ".avro";
         File outputFile = new File(fileName);
         DatumWriter<ModelEvaluationResult> userDatumWriter = new SpecificDatumWriter<ModelEvaluationResult>();
@@ -123,7 +113,8 @@ public class ScoringMapperPredictUtil {
 
     public static ArrayList<ModelEvaluationResult> processScoreFiles(
             HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models,
-            HashMap<String, String> modelIdMap, long threshold) {
+            HashMap<String, String> modelIdMap, long threshold) throws IOException {
+        
         Set<String> modelGuidSet = leadInputRecordMap.keySet();
         // list of HashMap<leadID: score>
         ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
@@ -146,23 +137,22 @@ public class ScoringMapperPredictUtil {
         return resultList;
     }
 
-    private static void readScoreFile(String modelGuid, int index, HashMap<String, Double> scores) {
+    private static void readScoreFile(String modelGuid, int index, HashMap<String, Double> scores) throws IOException {
+        
         String fileName = modelGuid + SCORING_OUTPUT_PREFIX + index + ".txt";
         File f = new File(fileName);
         if (!f.exists()) {
-            new Exception("Output file" + fileName + "does not exist!");
+            throw new LedpException(LedpCode.LEDP_200012, new String[] { fileName });
         }
-        try {
-            List<String> lines = FileUtils.readLines(f);
-            for (String line : lines) {
-                String[] splitLine = line.split(",");
-                if (splitLine.length != 2) {
-                    new Exception("Scoring output file in incorrect format");
-                }
-                scores.put(splitLine[0], Double.parseDouble(splitLine[1]));
+        
+
+        List<String> lines = FileUtils.readLines(f);
+        for (String line : lines) {
+            String[] splitLine = line.split(",");
+            if (splitLine.length != 2) {
+                throw new LedpException(LedpCode.LEDP_200013);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            scores.put(splitLine[0], Double.parseDouble(splitLine[1]));
         }
     }
 

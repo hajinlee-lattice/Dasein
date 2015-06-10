@@ -162,10 +162,7 @@ public class ScoringMapperTransformUtil {
                 break;
             }
         }
-        if (guid == null) {
-            new Exception("modelId in avro files do not match any of the models");
-        }
-        // update the mapping from model GUID to model name
+        
         return guid;
     }
 
@@ -174,19 +171,18 @@ public class ScoringMapperTransformUtil {
             String modelGuid) {
         String formattedRecord = null;
 
-        if (models == null) {
-            System.out.println("model");
-            new Exception("model is null");
-
-        } else if (models.get(modelGuid) == null) {
-            System.out.println("models.get(modelGuid)");
-            new Exception("models.get(modelGuid) is null");
-
-        } else if (models.get(modelGuid).get(INPUT_COLUMN_METADATA) == null) {
-            System.out.println("models.get(modelGuid).get(INPUT_COLUMN_METADATA)");
-            new Exception("models.get(modelGuid).get(INPUT_COLUMN_METADATA) is null");
-
-        }
+//        if (models == null) {
+//            System.out.println("model");
+//            new Exception("model is null");
+//
+//        } else if (models.get(modelGuid) == null) {
+//            System.out.println("models.get(modelGuid)");
+//            new Exception("models.get(modelGuid) is null");
+//
+//        } else if (models.get(modelGuid).get(INPUT_COLUMN_METADATA) == null) {
+//            System.out.println("models.get(modelGuid).get(INPUT_COLUMN_METADATA)");
+//            new Exception("models.get(modelGuid).get(INPUT_COLUMN_METADATA) is null");
+//        }
 
         JSONArray metadata = (JSONArray) models.get(modelGuid).get(INPUT_COLUMN_METADATA);
 
@@ -198,7 +194,6 @@ public class ScoringMapperTransformUtil {
         jsonObj.put("value", jsonArray);
         jsonObj.put("key", leadId);
 
-        Set<String> keySet = leadJsonObject.keySet();
         for (int i = 0; i < metadata.size(); i++) {
             JSONObject columnObj = new JSONObject();
             JSONObject serializedValueAndTypeObj = new JSONObject();
