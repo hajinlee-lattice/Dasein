@@ -75,7 +75,7 @@ public class CrmConfigServiceImpl implements CrmConfigService {
         excuteHttpRequest(url, parameters);
 
         crmConfig.setDataProviderName("Eloqua_Bulk_DataProvider");
-        setCommonParameters(crmType, tenantId, crmConfig, parameters);
+        setCommonParameters("EloquaBulk", tenantId, crmConfig, parameters);
         excuteHttpRequest(url, parameters);
 
     }
