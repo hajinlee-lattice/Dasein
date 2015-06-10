@@ -32,23 +32,24 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
-    
+
     private static final Log log = LogFactory.getLog(SqoopSyncJobServiceImplTestNG.class);
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromDB");
     }
-    
+
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
         Collection<File> files = FileUtils.listFiles(new File("."), new IOFileFilter() {
@@ -63,7 +64,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
             public boolean accept(File dir, String name) {
                 return false;
             }
-            
+
         }, null);
         for (File file : files) {
             FileUtils.deleteQuietly(file);
@@ -78,7 +79,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver);
         DbCreds creds = new DbCreds(builder);
-        
+
         String[] types = new String[] {
                 "Long", //
                 "String", //
@@ -217,13 +218,13 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         ApplicationId appId = sqoopSyncJobService.importData("Nutanix", //
                 "/tmp/dataFromFile", //
                 creds, //
-                "Priority0.MapReduce", //
+                LedpQueueAssigner.getModelingQueueNameForSubmission(), //
                 "Nutanix", //
                 Arrays.<String>asList(new String[] { "Nutanix_EventTable_Clean" }), //
                 null, //
                 1, //
                 props);
-        
+
         log.info(String.format("Waiting for appId %s", appId));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -234,17 +235,17 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
             public boolean accept(String fileName) {
                 return fileName.endsWith(".avro");
             }
-            
+
         });
-        
+
         assertEquals(files.size(), 1);
-        
+
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(files.get(0)));
-        
+
         int i = 0;
         for (Field field : schema.getFields()) {
             Type type = field.schema().getTypes().get(0).getType();
-            
+
             switch (type) {
             case DOUBLE:
                 assertEquals(types[i], "Float");
@@ -258,7 +259,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
             default:
                 break;
             }
-            
+
             i++;
         }
     }

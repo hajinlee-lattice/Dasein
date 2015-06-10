@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 @Component
 public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFlowService {
@@ -48,7 +49,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("CUSTOMER", "MadisonLogic");
         ctx.setProperty("TARGETPATH", targetPath + "/1");
 
-        ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
+        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", flowName + "-Aggregation");
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
@@ -67,7 +68,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("TARGETPATH", targetPath + "/output");
         ctx.setProperty("TARGETSCHEMAPATH", targetSchemaPath + "/*.avro");
 
-        ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
+        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", flowName + "-GroupAndExpand");
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);

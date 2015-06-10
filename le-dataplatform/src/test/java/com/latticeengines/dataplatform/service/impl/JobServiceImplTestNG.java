@@ -133,7 +133,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Properties createAppMasterPropertiesForYarnJob() {
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.0");
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
         return appMasterProperties;
     }

@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -51,7 +52,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
     private Classifier classifier4Mins;
-    
+
     private String baseDir = "/functionalTests/" + suffix;
 
     @BeforeClass(groups = {"functional"})
@@ -107,9 +108,9 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
     @AfterClass(groups = {"functional"})
     public void tearDown() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path("/functionalTests"), true);        
+        fs.delete(new Path("/functionalTests"), true);
     }
-    
+
     @Test(groups = {"functional"})
     public void testThrottleLongHangingJobs() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
@@ -119,15 +120,15 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 
         for (int i = 0; i < 3; i++) {
-            ModelingJob p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
+            ModelingJob p0 = getJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
-            p0 = getJob(classifier2Mins, "Priority0.0", 0, "DELL");
+            p0 = getJob(classifier2Mins, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
-            p0 = getJob(classifier4Mins, "Priority0.0", 0, "DELL");
+            p0 = getJob(classifier4Mins, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
@@ -157,10 +158,10 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         return classifier;
     }
 
-    private ModelingJob getJob(Classifier classifier, String queue, int priority, String customer) {
+    private ModelingJob getJob(Classifier classifier, int priority, String customer) {
         ModelingJob modelingJob = new ModelingJob();
         modelingJob.setClient("pythonClient");
-        Properties[] properties = getPropertiesPair(classifier, queue, priority, customer);
+        Properties[] properties = getPropertiesPair(classifier, LedpQueueAssigner.getModelingQueueNameForSubmission(), priority, customer);
         modelingJob.setAppMasterPropertiesObject(properties[0]);
         modelingJob.setContainerPropertiesObject(properties[1]);
         return modelingJob;

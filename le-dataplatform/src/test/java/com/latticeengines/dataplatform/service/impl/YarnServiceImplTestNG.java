@@ -18,6 +18,7 @@ import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -43,7 +44,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = {"functional", "functional.production"})
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.0");
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-" + suffix);
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");

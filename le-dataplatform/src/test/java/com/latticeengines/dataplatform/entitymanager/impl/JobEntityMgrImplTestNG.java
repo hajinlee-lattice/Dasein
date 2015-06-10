@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -78,7 +79,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelingJob.setId("application_12345_00001_" + suffix);
         modelingJob.setClient("CLIENT");
         Properties appMasterProperties = new Properties();
-        appMasterProperties.setProperty("QUEUE", "Priority0.0");
+        appMasterProperties.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         Properties containerProperties = new Properties();
         // setting container metadata
         String metadata = classifier.toString();

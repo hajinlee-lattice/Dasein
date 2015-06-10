@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 /**
  * This test working is dependent on the cluster settings. Ensure that:
@@ -150,13 +151,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 1; i++) {
-            ModelingJob p0 = createJob(classifier1Min, "Priority0.0", 0, "DELL");
+            ModelingJob p0 = createJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                ModelingJob p1 = createJob(classifier2Mins, "Priority1.0", 1, "DELL");
+                ModelingJob p1 = createJob(classifier2Mins, 1, "DELL");
                 model.addModelingJob(p1);
                 appIds.add(modelingJobService.submitJob(p1));
             }
@@ -167,13 +168,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // B
         for (int i = 0; i < 1; i++) {
-            ModelingJob p0 = createJob(classifier1Min, "Priority0.1", 0, "DELL");
+            ModelingJob p0 = createJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                ModelingJob p1 = createJob(classifier2Mins, "Priority1.1", 1, "DELL");
+                ModelingJob p1 = createJob(classifier2Mins, 1, "DELL");
                 model.addModelingJob(p1);
                 appIds.add(modelingJobService.submitJob(p1));
             }// */
@@ -182,13 +183,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // C
         for (int i = 0; i < 1; i++) {
-            ModelingJob p0 = createJob(classifier1Min, "Priority0.2", 0, "DELL");
+            ModelingJob p0 = createJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                ModelingJob p1 = createJob(classifier2Mins, "Priority1.2", 1, "DELL");
+                ModelingJob p1 = createJob(classifier2Mins, 1, "DELL");
                 model.addModelingJob(p1);
                 appIds.add(modelingJobService.submitJob(p1));
             }// */
@@ -196,13 +197,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         }
         // D
         for (int i = 0; i < 1; i++) {
-            ModelingJob p0 = createJob(classifier1Min, "Priority0.3", 0, "DELL");
+            ModelingJob p0 = createJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                ModelingJob p1 = createJob(classifier2Mins, "Priority1.3", 1, "DELL");
+                ModelingJob p1 = createJob(classifier2Mins, 1, "DELL");
                 model.addModelingJob(p1);
                 appIds.add(modelingJobService.submitJob(p1));
             }// */
@@ -210,13 +211,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         }
         // E
         for (int i = 0; i < 1; i++) {
-            ModelingJob p0 = createJob(classifier1Min, "Priority0.4", 0, "DELL");
+            ModelingJob p0 = createJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                ModelingJob p1 = createJob(classifier2Mins, "Priority1.4", 1, "DELL");
+                ModelingJob p1 = createJob(classifier2Mins, 1, "DELL");
                 model.addModelingJob(p1);
                 appIds.add(modelingJobService.submitJob(p1));
             }// */
@@ -236,13 +237,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 4; i++) {
-            ModelingJob p0 = createJob(classifier1Min, "Priority0.0", 0, "DELL");
+            ModelingJob p0 = createJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                ModelingJob p1 = createJob(classifier2Mins, "Priority1.0", 1, "DELL");
+                ModelingJob p1 = createJob(classifier2Mins, 1, "DELL");
                 model.addModelingJob(p1);
                 appIds.add(modelingJobService.submitJob(p1));
             }// */
@@ -252,13 +253,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // B
         for (int i = 0; i < 1; i++) {
-            ModelingJob p0 = createJob(classifier1Min, "Priority0.1", 0, "DELL");
+            ModelingJob p0 = createJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                ModelingJob p1 = createJob(classifier2Mins, "Priority1.1", 1, "DELL");
+                ModelingJob p1 = createJob(classifier2Mins, 1, "DELL");
                 model.addModelingJob(p1);
                 appIds.add(modelingJobService.submitJob(p1));
             }// */
@@ -267,13 +268,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // C
         for (int i = 0; i < 1; i++) {
-            ModelingJob p0 = createJob(classifier1Min, "Priority0.2", 0, "DELL");
+            ModelingJob p0 = createJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                ModelingJob p1 = createJob(classifier2Mins, "Priority1.2", 1, "DELL");
+                ModelingJob p1 = createJob(classifier2Mins, 1, "DELL");
                 model.addModelingJob(p1);
                 appIds.add(modelingJobService.submitJob(p1));
             }// */
@@ -283,10 +284,10 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         // assertTrue(countPremptedJobs(appIds) > 0);
     }
 
-    private ModelingJob createJob(Classifier classifier, String queue, int priority, String customer) {
+    private ModelingJob createJob(Classifier classifier, int priority, String customer) {
         ModelingJob modelingJob = new ModelingJob();
         modelingJob.setClient("pythonClient");
-        Properties[] properties = getPropertiesPair(classifier, queue, priority, customer);
+        Properties[] properties = getPropertiesPair(classifier, LedpQueueAssigner.getModelingQueueNameForSubmission(), priority, customer);
         modelingJob.setAppMasterPropertiesObject(properties[0]);
         modelingJob.setContainerPropertiesObject(properties[1]);
         return modelingJob;
