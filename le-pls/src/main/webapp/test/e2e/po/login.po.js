@@ -16,7 +16,11 @@ var Login = function() {
             if (!ispresent) { logout(); }
             submitLoginCredentials(name, password);
             tenants.tenantSelectionIsPresent().then(function(present){
-                if (present) tenants.selectTenantByName(tenantId);
+                if (present) {
+                    browser.driver.sleep(500);
+                    element(by.id('tenantSelectionInput')).click();
+                    tenants.selectTenantByName(tenantId);
+                }
             });
         });
         browser.wait(function(){
@@ -30,7 +34,6 @@ var Login = function() {
         browser.driver.manage().window().setSize(width, height);
         browser.get('/');
     }
-
 
     function isLoginPage() {
         return element(by.css('div.login-wrap')).isPresent();
