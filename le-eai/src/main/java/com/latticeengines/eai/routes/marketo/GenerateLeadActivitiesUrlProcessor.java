@@ -1,5 +1,6 @@
 package com.latticeengines.eai.routes.marketo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.Exchange;
@@ -16,5 +17,6 @@ public class GenerateLeadActivitiesUrlProcessor implements Processor {
         List<String> activityTypes = exchange.getProperty(MarketoImportProperty.ACTIVITYTYPES, List.class);
         String url = new MarketoUrlGenerator().getActivitiesUrl(baseUrl, accessToken, nextPageToken, activityTypes); 
         exchange.setProperty("activitiesUrl", url);
+        exchange.setProperty(MarketoImportProperty.ACTIVITYRESULTLIST, new ArrayList<>());
     }
 }

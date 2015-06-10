@@ -51,7 +51,13 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
         AvroTypeConverter converter = getAvroTypeConverter();
         List<Attribute> attributes = table.getAttributes();
         for (Attribute attribute : attributes) {
-            attribute.setPhysicalDataType(converter.convertTypeToAvro(attribute.getLogicalDataType()).name());
+            assert(attribute != null);
+            assert(converter != null);
+            assert(converter.convertTypeToAvro(attribute.getLogicalDataType()) != null);
+            
+            if (attribute.getLogicalDataType() != null) {
+                attribute.setPhysicalDataType(converter.convertTypeToAvro(attribute.getLogicalDataType()).name());
+            }
         }
         return table;
     }

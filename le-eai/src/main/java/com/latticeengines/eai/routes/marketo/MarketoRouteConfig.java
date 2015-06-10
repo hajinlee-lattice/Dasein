@@ -35,7 +35,8 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
         process(new GenerateLeadActivitiesUrlProcessor()). //
         recipientList(header("activitiesUrl")). //
         unmarshal(dataFormat). //
-        process(new LoopConditionProcessor());
+        process(new LoopConditionProcessor()). //
+        to("seda:createActivities?size=10");
         
         from("direct:getAllLeadActivities"). //
         process(setPropertiesFromImportCtxProcessor). //
@@ -69,6 +70,8 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
         process(new GenerateLeadsUrlProcessor()). //
         recipientList(header("leadsUrl"));
         
+        from("seda:createActivities?concurrentConsumers=4"). //
+        process(new ActivityToHdfsAvroProcessor());
         
 
     }

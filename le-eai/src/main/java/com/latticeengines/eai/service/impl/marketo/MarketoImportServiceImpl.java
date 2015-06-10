@@ -40,8 +40,10 @@ public class MarketoImportServiceImpl extends ImportService {
         for (Table table : tables) {
             ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
             if (strategy == null) {
-                log.error("No import strategy for Marketo table " + table.getName());
+                log.error(String.format("No import strategy for Marketo table %s.", table.getName()));
                 continue;
+            } else {
+                log.info(String.format("Import strategy for table %s is %s.", table, strategy.toString()));
             }
             tablesWithMetadata.add(strategy.importMetadata(getProducerTemplate(ctx), table, ctx));
         }

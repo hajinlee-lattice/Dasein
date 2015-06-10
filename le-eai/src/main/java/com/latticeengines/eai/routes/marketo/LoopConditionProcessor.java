@@ -1,5 +1,6 @@
 package com.latticeengines.eai.routes.marketo;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
@@ -10,10 +11,13 @@ import org.apache.commons.logging.LogFactory;
 public class LoopConditionProcessor implements Processor {
     private static final Log log = LogFactory.getLog(LoopConditionProcessor.class);
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void process(Exchange exchange) throws Exception {
+        List<?> list = exchange.getProperty(MarketoImportProperty.ACTIVITYRESULTLIST, List.class);
         Map<String, Object> body = exchange.getIn().getBody(Map.class);
+        list.addAll((List) body.get("result"));
+        
         String nextPageToken = (String) body.get("nextPageToken");
         log.info("Next page token = " + nextPageToken);
         Boolean hasMoreResults = (Boolean) body.get("moreResult");
@@ -25,7 +29,6 @@ public class LoopConditionProcessor implements Processor {
             log.info("No more results...");
             exchange.setProperty("loop", null);
         }
-        
         exchange.getOut().setBody(null);
     }
 }
