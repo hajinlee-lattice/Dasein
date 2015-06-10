@@ -31,7 +31,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
     private static final long THRESHOLD = 10000L;
 
-    private JSONObject processLocalizedFiles(Path[] paths, HashSet<String> modelIDs, HashMap<String, String> modelIdMap, HashMap<String, JSONObject> models) throws IOException, ParseException {
+    private void processLocalizedFiles(Path[] paths, HashSet<String> modelIDs, HashMap<String, String> modelIdMap, HashMap<String, JSONObject> models) throws IOException, ParseException {
         
         JSONObject datatype = null;
         boolean scoringScriptProvided = false;
@@ -68,8 +68,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         log.info("the size of the models is " + models.size());
         
         ScoringMapperValidateUtil.validateLocalizedFiles(scoringScriptProvided, datatypeFileProvided, modelIDs);
-        
-        return datatype;
+        ScoringMapperValidateUtil.validateDatatype(datatype, models);
     }
     
     
@@ -81,10 +80,9 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         HashMap<String, String> modelIdMap = new HashMap<String, String>();
         // key: modelGuid, value: model contents
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
+        // key: modelGuid, value: list of lead records
+        HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
         ArrayList<ModelEvaluationResult> resultList = null;
-        JSONObject datatype = null;
-        boolean scoringScriptProvided = false;
-        boolean datatypeFileProvided = false;
 
         try {
 
@@ -101,42 +99,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 log.info(str);
             }
 
-            // key: modelGuid, value: list of lead records
-            HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
-
-            for (Path p : paths) {
-                log.info("files" + p);
-                log.info(p.getName());
-                if (p.getName().equals("datatype.avsc")) {
-                    datatypeFileProvided = true;
-                    datatype = ScoringMapperTransformUtil.parseDatatypeFile(p);
-                } else if (p.getName().equals("scoring.py")) {
-                    scoringScriptProvided = true;
-                } else {
-                    String modelGuid = p.getName();
-                    // if the model is selected by this request, parse that particular model
-                    for (Iterator<String> i = modelIDs.iterator(); i.hasNext();) {
-                        String modelId = i.next();
-                        if (modelId.contains(modelGuid)) {
-                            ScoringMapperTransformUtil.parseModelFiles(models, p);
-                            modelIdMap.put(modelGuid, modelId);
-                            modelIDs.remove(modelId);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // print out the modelIdMap
-            for (String modelID : modelIdMap.keySet()) {
-                log.info(modelID + ": " + modelIdMap.get(modelID));
-            }
-
-            log.info("the size of the models is " + models.size());
-            
-            ScoringMapperValidateUtil.validateLocalizedFiles(scoringScriptProvided, datatypeFileProvided, modelIDs);
-            
-            ScoringMapperValidateUtil.validateDatatype(datatype, models);
+            processLocalizedFiles(paths, modelIDs, modelIdMap, models);
 
             int numberOfRecords = 0;
             for (String record : leadList) {
