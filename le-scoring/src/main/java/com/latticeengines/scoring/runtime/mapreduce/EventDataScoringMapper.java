@@ -136,9 +136,10 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             ScoringMapperPredictUtil.writeToOutputFile(resultList, context.getConfiguration(), outputPath);
             
         } catch (Exception e) {
-            log.info(String.format(
+            log.error(String.format(
                     "Failure Step=Scoring Mapper Failure Message=%s Failure Cause=%s Failure StackTrace=%s", //
                     e.getMessage(), e.getCause(), e.getStackTrace()));
+            //throw new LedpException(LedpCode.LEDP_200014, new String[] { e.getMessage(), e.getCause(), e.getStackTrace() });
         }
     }
 }

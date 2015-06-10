@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -208,7 +209,8 @@ public class ScoringMapperTransformUtil {
             String typeAndValue = "";
             if (leadJsonObject.get(key) != null) {
                 String value = leadJsonObject.get(key).toString();
-                typeAndValue = String.format("%s|\'%s\'", type, value);
+                String processedValue = processBitValue(type, value);
+                typeAndValue = String.format("%s|\'%s\'", type, processedValue);
             } else {
                 typeAndValue = String.format("%s|", type);
             }
@@ -220,6 +222,23 @@ public class ScoringMapperTransformUtil {
         return formattedRecord;
     }
 
+    static String processBitValue(String type, String value) {
+        String toReturn = value;
+        if (type.equals("Float")) {
+            switch (value.toUpperCase()) {
+            case "TRUE":
+                toReturn = "1";
+                break;
+            case "FALSE":
+                toReturn = "0";
+                break;
+            default:
+                break;
+            }
+        }
+        return toReturn;
+    }
+    
     public static void writeToLeadInputFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, long threshold) throws IOException {
         log.info("threshold is " + threshold);
         if (leadInputRecordMap == null) {
@@ -264,15 +283,30 @@ public class ScoringMapperTransformUtil {
     }
 
     public static void main(String[] args) throws Exception {
-        String type = "Float";
-        String value = "'123.00'wx";
-
-        String typeAndValue = type + "|\'" + value + "\'";
-        String trpeAndValue2 = String.format("%s|\'%s\'", type, value);
-        System.out.println(value);
-        if (typeAndValue.equals(trpeAndValue2)) {
-            System.out.println("jaja");
-        }
+//        String type = "Float";
+//        String value = "'123.00'wx";
+//
+//        String typeAndValue = type + "|\'" + value + "\'";
+//        String trpeAndValue2 = String.format("%s|\'%s\'", type, value);
+//        System.out.println(value);
+//        if (typeAndValue.equals(trpeAndValue2)) {
+//            System.out.println("jaja");
+//        }
+        
+        
+        /*
+         *  Decompose the model.json
+         *
+         */
+        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
+        File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
+        String modelStr = FileUtils.readFileToString(modelFile);
+        JSONObject modelObject;
+        JSONParser parser = new JSONParser();
+        modelObject = (JSONObject) parser.parse((modelStr));
+        decodeSupportedFiles("e2e", (JSONObject) modelObject.get(MODEL));
+        writeScoringScript("e2e", (JSONObject) modelObject.get(MODEL));
     }
+
 
 }

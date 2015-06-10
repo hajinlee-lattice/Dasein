@@ -21,6 +21,8 @@ import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ScoringMapperPredictUtilTestNG {
 
@@ -253,9 +255,14 @@ public class ScoringMapperPredictUtilTestNG {
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
         models.put("model1", null);
         models.put("model2", null);
-        String returnedStr = ScoringMapperPredictUtil.evaluate(models);
-        assertTrue(returnedStr.equals("model1model2testEvaluate") || returnedStr.equals("model2model1testEvaluate"),
-                "testEvaluate should pass");
+        String returnedStr = "";
+        try {
+            returnedStr = ScoringMapperPredictUtil.evaluate(models);
+        } catch (LedpException e) {
+            assertTrue(e.getCode() == LedpCode.LEDP_200011);
+        }
+        //assertTrue(returnedStr.equals("model1model2testEvaluate") || returnedStr.equals("model2model1testEvaluate"),
+        //        "testEvaluate should pass");
 
         // delete the score.txt file to the current directory
         dest.delete();
