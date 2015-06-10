@@ -140,6 +140,7 @@ public enum LedpCode {
     LEDP_200011("The scoring python script (scoring.py) failed, with the error message: {0}.}"),
     LEDP_200012("Output file {0} does not exist.}"),
     LEDP_200013("Scoring output file in incorrect format.}"),
+    LEDP_200014("The scoring mapper failed. The message is: {0}, the cause is: {1}, and the stack trace is: {2}}"),
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),
