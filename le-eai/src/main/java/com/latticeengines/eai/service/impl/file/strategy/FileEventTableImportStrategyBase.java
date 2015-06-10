@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 @Component("fileEventTableImportStrategyBase")
 public class FileEventTableImportStrategyBase extends ImportStrategy {
@@ -63,7 +64,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         ApplicationId appId = sqoopSyncJobService.importData(table.getName(), //
                 ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
                 creds, //
-                "Priority0.MapReduce", //
+                LedpQueueAssigner.getPropDataQueueNameForSubmission(), //
                 ctx.getProperty(ImportProperty.CUSTOMER, String.class), //
                 Arrays.<String>asList(new String[] { table.getAttributes().get(0).getName() }), //
                 null, //
