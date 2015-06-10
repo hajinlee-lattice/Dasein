@@ -53,6 +53,9 @@
                 </tr>
             </tbody>
         </table>
+        <div class="text-centered">
+            <button class="btn btn-primary" data-ng-click="onBackClicked()">{{ResourceUtility.getString('MODEL_ADMIN_BACK_TO_MODELDETAIL')}}</button>
+        </div>
         <div class="global-error model-admin-info-error" data-ng-show="Error.ShowError">
             <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{Error.ErrorMsg}}</span>
             <button class="close btn btn-link" data-ng-click="Error.ShowError = false;"><i class="fa fa-times fa-inverse"></i></button>
