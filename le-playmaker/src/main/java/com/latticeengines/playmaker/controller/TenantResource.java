@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.playmaker.entitymgr.PlaymakerEntityMgr;
+import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -19,7 +19,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class TenantResource {
 
     @Autowired
-    private PlaymakerEntityMgr playmakerEntityMgr;
+    private PlaymakerTenantEntityMgr playmakerEntityMgr;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody

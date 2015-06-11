@@ -2,7 +2,7 @@ package com.latticeengines.playmaker.entitymgr;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 
-public interface PlaymakerEntityMgr {
+public interface PlaymakerTenantEntityMgr {
 
     void executeUpdate(PlaymakerTenant tenant);
 

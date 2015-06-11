@@ -7,13 +7,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.playmaker.entitymgr.PlaymakerEntityMgr;
+import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
-public class PlaymakerEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {
+public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private PlaymakerEntityMgr playMakerEntityMgr;
+    private PlaymakerTenantEntityMgr playMakerEntityMgr;
 
     @Test(groups = "functional", enabled = true)
     public void testCRUD() throws Exception {
