@@ -82,16 +82,24 @@ class PLSEnvironments(object):
     pls_marketing_app_ELQ="ELQ";
     pls_marketing_app_MKTO="MKTO";
     pls_marketing_app_SFDC="SFDC";
+
+    driverName = "SQL Server"
+    platformName = platform.system();
+    if platformName == "Linux" or "Darwin":
+        driverName = "FreeTDS";
+
+    connStr = "DRIVER={%s};" % driverName;
     
-    SQL_JAMS_CFG = "DRIVER={SQL Server};SERVER=10.41.1.247;DATABASE=JAMSCFG;uid=dataloader_user;pwd=password";
-#     SQL_ScoringDaemon = "DRIVER={SQL Server};SERVER=%s\SQL2012STD;DATABASE=SD_%s;uid=dataloader_prod;pwd=L@ttice2" % (pls_server, pls_bard_1[3:]);
-    SQL_ScoringDaemon = "DRIVER={SQL Server};SERVER=10.41.1.207\SQL2012STD;DATABASE=ScoringDaemon_QA;uid=dataloader_prod;pwd=L@ttice2";
-    SQL_BasicDataForIntegrationTest = "DRIVER={SQL Server};SERVER=10.41.1.187\SQL2008;DATABASE=BasicDataForIntegrationTest;uid=dataloader_user;pwd=password";
-    SQL_conn_dataloader = "DRIVER={SQL Server};SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % visidb_server;
-    SQL_conn_pdMatch = "DRIVER={SQL Server};SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
-    SQL_conn_leadscoring = "DRIVER={SQL Server};SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % "10.41.1.187";
-    SQL_conn_dante = "DRIVER={SQL Server};SERVER=%s\SQL2012STD;DATABASE=DT_%s;uid=dataloader_prod;pwd=L@ttice2;" % (pls_server,pls_bard_1[3:]);
-        
+    SQL_JAMS_CFG = connStr + "SERVER=10.41.1.247;DATABASE=JAMSCFG;uid=dataloader_user;pwd=password";
+#    SQL_ScoringDaemon = connStr + "SERVER=10.41.1.207\SQL2012STD;DATABASE=SD_%s;uid=dataloader_prod;pwd=L@ttice2" % (pls_server, pls_bard_1[3:]);
+    SQL_ScoringDaemon = connStr + "SERVER=10.41.1.207\SQL2012STD;DATABASE=ScoringDaemon_QA;uid=dataloader_prod;pwd=L@ttice2";
+    SQL_BasicDataForIntegrationTest = connStr + "SERVER=10.41.1.187\SQL2008;DATABASE=BasicDataForIntegrationTest;uid=dataloader_user;pwd=password";
+    SQL_conn_dataloader = connStr + "SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % visidb_server;
+    SQL_conn_pdMatch = connStr + "SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
+    SQL_conn_leadscoring = connStr + "SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % "10.41.1.187";
+    SQL_conn_dante = connStr + "SERVER=%s\SQL2012STD;DATABASE=DT_%s;uid=dataloader_prod;pwd=L@ttice2;" % (pls_server,pls_bard_1[3:]);
+    SQL_conn_SFDC_End2EndTest_Data = connStr + "SERVER=%s\Sql2008;DATABASE=PLS_SFDC_End2EndTest_Data;uid=dataloader_user;pwd=password;" % "10.41.1.187";
+
     #dataloader providers
     SQL_PropDataForModeling = "Data Source=bodcprodvsql130;" + \
                         "Initial Catalog=PropDataMatchDB;" + \
