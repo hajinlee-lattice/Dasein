@@ -3,12 +3,12 @@
   "Nodes": [
     {
     "Node":"LatticeAdminEmails",
-    "Data": "[\"tsanghavi@lattice-engines.com\"]",
+    "Data": "[\"ysong@lattice-engines.com\"]",
     "Metadata" : {"Type":"array"}
     },
     {
       "Node":"SuperAdminEmails",
-      "Data": "[\"rswarts@lattice-engines.com\"]",
+      "Data": "[\"bnguyen@lattice-engines.com\"]",
       "Metadata" : {"Type":"array"}
     }
   ]

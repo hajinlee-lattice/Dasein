@@ -1,7 +1,7 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "LatticeAdminEmails", "Data": [ "tsanghavi@lattice-engines.com" ] },
-    { "Node": "SuperAdminEmails", "Data": [ "rswarts@lattice-engines.com" ] }
+    { "Node": "LatticeAdminEmails", "Data": [ "ysong@lattice-engines.com" ] },
+    { "Node": "SuperAdminEmails", "Data": [ "bnguyen@lattice-engines.com" ] }
   ]
 }
