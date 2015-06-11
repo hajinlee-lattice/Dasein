@@ -321,7 +321,11 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     private void addTemplateVersion(ModelCommandParameters commandParameters) {
-        if (commandParameters == null || commandParameters.getModelTargets() == null) {
+        if (commandParameters == null || commandParameters.getModelTargets() == null
+                || commandParameters.getModelTargets().size() <= 1) {
+            return;
+        }
+        if (dataLoaderService == null) {
             return;
         }
         List<String> targets = commandParameters.getModelTargets();
