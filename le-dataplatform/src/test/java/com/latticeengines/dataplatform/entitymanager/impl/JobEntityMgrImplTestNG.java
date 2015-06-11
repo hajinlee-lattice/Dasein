@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 

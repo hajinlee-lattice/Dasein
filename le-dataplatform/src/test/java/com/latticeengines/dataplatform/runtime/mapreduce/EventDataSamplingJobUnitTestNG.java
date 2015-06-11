@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class EventDataSamplingJobUnitTestNG {
 

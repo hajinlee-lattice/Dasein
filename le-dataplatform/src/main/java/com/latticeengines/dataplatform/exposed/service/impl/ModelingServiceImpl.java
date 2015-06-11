@@ -66,7 +66,7 @@ import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
 import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {

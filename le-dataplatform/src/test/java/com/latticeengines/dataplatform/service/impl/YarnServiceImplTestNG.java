@@ -18,7 +18,7 @@ import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 

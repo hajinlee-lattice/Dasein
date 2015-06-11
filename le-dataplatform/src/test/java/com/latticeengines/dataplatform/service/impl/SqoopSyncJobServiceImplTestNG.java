@@ -32,7 +32,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 

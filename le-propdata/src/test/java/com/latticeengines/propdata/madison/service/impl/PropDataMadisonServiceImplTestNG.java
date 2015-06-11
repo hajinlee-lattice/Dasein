@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatu
 import com.latticeengines.propdata.eai.service.PropDataContext;
 import com.latticeengines.propdata.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:propdata-madison-context.xml",

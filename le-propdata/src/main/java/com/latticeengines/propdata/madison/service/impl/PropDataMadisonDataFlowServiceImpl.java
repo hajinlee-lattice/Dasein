@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
 public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFlowService {

@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.google.common.collect.ComparisonChain;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("yarnService")
 public class YarnServiceImpl implements YarnService {

@@ -26,7 +26,7 @@ import com.latticeengines.propdata.eai.service.PropDataContext;
 import com.latticeengines.propdata.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("propDataMadisonService")
 public class PropDataMadisonServiceImpl implements PropDataMadisonService {

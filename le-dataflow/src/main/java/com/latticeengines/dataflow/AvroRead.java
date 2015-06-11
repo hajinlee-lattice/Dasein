@@ -43,7 +43,7 @@ import cascading.util.NullNotEquivalentComparator;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class AvroRead {
 

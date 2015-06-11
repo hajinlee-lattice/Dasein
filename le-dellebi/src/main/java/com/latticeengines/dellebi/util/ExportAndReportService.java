@@ -14,7 +14,7 @@ import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class ExportAndReportService {
 

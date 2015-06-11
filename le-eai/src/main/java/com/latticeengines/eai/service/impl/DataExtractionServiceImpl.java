@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("dataExtractionService")
 public class DataExtractionServiceImpl implements DataExtractionService {

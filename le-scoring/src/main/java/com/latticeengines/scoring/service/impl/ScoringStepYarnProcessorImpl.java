@@ -40,7 +40,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;

@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGBase {
 

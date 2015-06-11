@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataflow.exposed.service.impl.DataTransformationServiceImpl;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 

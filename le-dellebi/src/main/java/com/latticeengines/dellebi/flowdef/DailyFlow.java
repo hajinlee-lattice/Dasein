@@ -18,7 +18,7 @@ import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class DailyFlow {
 

@@ -34,7 +34,7 @@ import com.latticeengines.propdata.eai.service.PropDataDBService;
 import com.latticeengines.propdata.eai.service.PropDataKey.CommandIdsKey;
 import com.latticeengines.propdata.eai.service.PropDataKey.CommandsKey;
 import com.latticeengines.propdata.eai.service.PropDataKey.ImportExportKey;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
 public class PropDataDBServiceImpl implements PropDataDBService {

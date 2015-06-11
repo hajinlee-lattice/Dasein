@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
-import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("fileEventTableImportStrategyBase")
 public class FileEventTableImportStrategyBase extends ImportStrategy {
