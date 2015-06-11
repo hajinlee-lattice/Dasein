@@ -143,17 +143,6 @@
                                 </source>
                             </sources>
                         </mapping>
-                        <mapping>
-                            <directory>/etc/httpd/conf</directory>
-                            <filemode>755</filemode>
-                            <username>apache</username>
-                            <groupname>apache</groupname>
-                            <sources>
-                                <source>
-                                    <location>${bin.env.path}/httpd.conf</location>
-                                </source>
-                            </sources>
-                        </mapping>
                     </mappings>
                     <preremoveScriptlet>
                         <scriptFile>src/main/scripts/preremove</scriptFile>
