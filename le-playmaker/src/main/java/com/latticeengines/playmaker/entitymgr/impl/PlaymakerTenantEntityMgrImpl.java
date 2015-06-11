@@ -8,10 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.playmaker.dao.PalymakerTenantDao;
-import com.latticeengines.playmaker.entitymgr.PlaymakerEntityMgr;
+import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
-@Component("playmakerEntityMgr")
-public class PlaymakerEntityMgrImpl implements PlaymakerEntityMgr {
+@Component("playmakerTenantEntityMgr")
+public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
     @SuppressWarnings("unused")
     private final Log log = LogFactory.getLog(this.getClass());
