@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.logging.Log;
@@ -73,7 +74,10 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
         File dataloaderTemplate = new File(templateProvider.getTemplate(version, topology) + ".config");
 
         try {
-            String str = IOUtils.toString(new BOMInputStream(new FileInputStream(dataloaderTemplate)));
+            String str = IOUtils.toString(new BOMInputStream(new FileInputStream(dataloaderTemplate),
+                    false, ByteOrderMark.UTF_8,
+                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
+                    ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE));
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
             InstallResult response = installDataloaderTemplate(request, Headers.getHeaders(), dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {

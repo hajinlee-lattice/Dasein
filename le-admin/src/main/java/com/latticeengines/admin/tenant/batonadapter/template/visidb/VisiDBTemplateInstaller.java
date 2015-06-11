@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.logging.Log;
@@ -73,7 +74,10 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         File visiDBTemplate = new File(templateProvider.getTemplate(version, topology) + ".specs");
 
         try {
-            String str = IOUtils.toString(new BOMInputStream(new FileInputStream(visiDBTemplate)));
+            String str = IOUtils.toString(new BOMInputStream(new FileInputStream(visiDBTemplate),
+                    false, ByteOrderMark.UTF_8,
+                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
+                    ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE));
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
             InstallResult response = installVisiDBTemplate(request, Headers.getHeaders(), dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {
