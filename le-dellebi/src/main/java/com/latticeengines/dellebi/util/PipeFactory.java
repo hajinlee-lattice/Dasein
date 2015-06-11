@@ -159,7 +159,8 @@ public class PipeFactory {
         Fields outputScrubArguments = new Fields("#QTE_NUM_VAL").append(new Fields("QUOTE_CREATE_DATE"))
                 .append(new Fields("SLDT_CUST_NUM_VAL")).append(new Fields("ITM_NUM_VAL"))
                 .append(new Fields("LEAD_SLS_REP_ASSOC_BDGE_NBR")).append(new Fields("SYS_QTY"))
-                .append(new Fields("REVN_USD_AMT")).append(new Fields("fileName"));
+                .append(new Fields("REVN_USD_AMT")).append(new Fields("SLDT_BU_ID"))
+                .append(new Fields("fileName"));
 
         docPipe = new Pipe("copy");
         docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments), Fields.RESULTS);
