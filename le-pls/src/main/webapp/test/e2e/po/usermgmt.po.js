@@ -16,7 +16,12 @@ var UserManagement = function() {
     };
 
     this.assertManageUsersIsVisible = function (expected) {
-        expect(userDropdown.ManageUsersLink.isPresent()).toBe(expected);
+        if (expected) {
+            expect(userDropdown.ManageUsersLink.getWebElement().isDisplayed()).toBe(expected);
+        } else {
+            expect(userDropdown.ManageUsersLink.isPresent()).toBe(expected);
+        }
+
     };
     
     this.createNewUser = function (name) {
@@ -29,6 +34,19 @@ var UserManagement = function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
     };
+
+    this.assertAdminLinkIsVisible = function(expected) {
+        element.all(by.css('a.model')).first().click();
+        browser.driver.wait(element(by.css('a.back-button')).isPresent(),
+            10000, 'tabs list should appear with in 10 sec.');
+
+        element(by.linkText('SAMPLE LEADS')).click();
+        if (expected) {
+            expect(element(by.linkText('Admin')).getWebElement().isDisplayed()).toBe(expected);
+        } else {
+            expect(element(by.linkText('Admin')).isPresent()).toBe(expected);
+        }
+    }
 };
 
 module.exports = new UserManagement();

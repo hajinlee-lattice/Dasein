@@ -7,6 +7,12 @@ var SuperAdmin = function() {
 
     this.testUserManagement = function() {
         describe('A super admin', function(){
+            it('should sees the hidden link', function () {
+                loginPage.loginAsSuperAdmin();
+                userManagement.assertAdminLinkIsVisible(true);
+                loginPage.logout();
+            });
+
             it('should be able to add a new user, modify the user and then delete the user', function () {
                 //==================================================
                 // Login

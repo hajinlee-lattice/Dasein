@@ -7,6 +7,12 @@ var ExternalAdmin = function() {
 
     this.testUserManagement = function() {
         describe('An external admin', function(){
+            it('should not see the hidden link', function () {
+                loginPage.loginAsExternalAdmin();
+                userManagement.assertAdminLinkIsVisible(false);
+                loginPage.logout();
+            });
+
             it('should be able to add a new user, modify the user and then delete the user', function () {
                 //==================================================
                 // Login
