@@ -71,6 +71,14 @@ public class ScoringMapperTransformUtil {
         }
         return toReturn;
     }
+    
+    public static int getColumnNumber(String leadRecord) throws ParseException {
+        int columnNum = 0;
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse(leadRecord);
+        columnNum = jsonObject.size();
+        return columnNum;
+    }
 
     public static void parseModelFiles(HashMap<String, JSONObject> models, Path path) throws IOException, ParseException {
 
@@ -258,8 +266,7 @@ public class ScoringMapperTransformUtil {
         String leadInputFileName = modelGuid + "-" + indexOfFile;
         log.info("Filename is " + leadInputFileName);
         File file = new File(leadInputFileName);
-        BufferedWriter bw = null;
-        bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF8"));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, false), "UTF8"));
         for (int i = 0; i < leadInputRecords.size(); i++) {
             count++;
             bw.write(leadInputRecords.get(i));
@@ -272,14 +279,13 @@ public class ScoringMapperTransformUtil {
                 leadInputFileName = modelGuid + "-" + indexOfFile;
                 log.info("Filename is " + leadInputFileName);
                 file = new File(leadInputFileName);
-                bw = new BufferedWriter(new FileWriter(file));
+                bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, false), "UTF8"));
             }
         }
         if (count != 0) {
             bw.flush();
             bw.close();
         }
-
     }
 
     public static void main(String[] args) throws Exception {
