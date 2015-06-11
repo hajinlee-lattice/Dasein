@@ -49,6 +49,7 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         result.add(argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR"));
         result.add(argument.getString("SYS_QTY"));
         result.add(argument.getString("REVN_USD_AMT"));
+        result.add(argument.getString("SLDT_BU_ID"));
         result.add(fileName);
 
         functionCall.getOutputCollector().add(result);
