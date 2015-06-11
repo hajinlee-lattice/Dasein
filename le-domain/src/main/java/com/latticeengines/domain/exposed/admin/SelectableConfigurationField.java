@@ -39,6 +39,9 @@ public class SelectableConfigurationField {
             throw new IllegalArgumentException("Cannot find the node to be patched.");
         }
 
+        if (!StringUtils.isEmpty(this.defaultOption) &&
+                dirNode.getData().equals(this.defaultOption)) { dirNode.setData(this.defaultOption); }
+
         SerializableDocumentDirectory.Metadata metadata = dirNode.getMetadata();
         // do not patch if is dynamic options
         if (metadata != null && metadata.isDynamicOptions() != null && metadata.isDynamicOptions()) {
