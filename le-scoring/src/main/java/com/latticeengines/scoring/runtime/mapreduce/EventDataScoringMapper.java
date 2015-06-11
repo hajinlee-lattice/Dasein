@@ -1,5 +1,6 @@
 package com.latticeengines.scoring.runtime.mapreduce;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -131,6 +133,11 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
     @Override
     public void run(Context context) throws IOException, InterruptedException {
+        
+        String leadnputQueueId = context.getConfiguration().get(ScoringProperty.LEAD_INPUT_QUEUE_ID.name());
+        String logDir = context.getConfiguration().get(ScoringProperty.LEAD_FILE_THRESHOLD.name());
+        String tenantId = context.getConfiguration().get(ScoringProperty.TENANT_ID.name());
+        
         try {
             
             int columnNum;
@@ -141,6 +148,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 count++;
                 if (count == 1) {
                     columnNum = ScoringMapperTransformUtil.getColumnNumber(context.getCurrentKey().toString());
+                    log.info("The columnNum of the lead record is " + columnNum);
                     maxNumOfRows = MEMORY_THRESHOLD/columnNum;
                     leadList = new ArrayList<String>();
                 }
@@ -151,15 +159,20 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                     count = 0;
                 }
             }
-            if (leadList.size() != 0) {
+            
+            if (leadList != null) {
                 scoring(context,leadList);
+            } else { 
+                log.error("The mapper gets zero leads.");
             }
             
         } catch (Exception e) {
-            log.error(String.format(
-                    "Failure Step=Scoring Mapper Failure Message=%s Failure Cause=%s Failure StackTrace=%s", //
-                    e.getMessage(), e.getCause().toString(), ExceptionUtils.getStackTrace(e)));
-            throw new LedpException(LedpCode.LEDP_200014, new String[] { e.getMessage(), e.getCause().toString(), ExceptionUtils.getStackTrace(e)});
+            String errorMessage = String.format( "TenantId=%s leadnputQueueId+%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
+                    tenantId, leadnputQueueId, e.getMessage(), ExceptionUtils.getStackTrace(e));
+            log.error(errorMessage);
+            File logFile = new File(logDir + "/scoring.txt");
+            FileUtils.writeStringToFile(logFile, errorMessage);
+            throw new LedpException(LedpCode.LEDP_200014, new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e)});
         }
     }
 }
