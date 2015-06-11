@@ -143,6 +143,17 @@
                                 </source>
                             </sources>
                         </mapping>
+                        <mapping>
+                            <directory>/etc/httpd/conf.d</directory>
+                            <filemode>755</filemode>
+                            <username>apache</username>
+                            <groupname>apache</groupname>
+                            <sources>
+                                <source>
+                                    <location>${bin.env.path}/jetty_forward.conf</location>
+                                </source>
+                            </sources>
+                        </mapping>
                     </mappings>
                     <preremoveScriptlet>
                         <scriptFile>src/main/scripts/preremove</scriptFile>
