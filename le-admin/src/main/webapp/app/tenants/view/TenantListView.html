@@ -28,8 +28,10 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label">Contract ID</label>
-                    <input type="text" name="contracId" class="form-control" ng-model="tenantInfo.contractId"
-                            placeholder="Leave it blank if it is the same as Tenant ID." disabled/>
+                    <!-- hide Contract ID input, until we can support ContractID != TenantId -->
+                    <label class="control-label">{{ tenantInfo.tenantId }}</label>
+                    <input type="hidden" name="contracId" class="form-control" ng-model="tenantInfo.contractId"
+                            placeholder="Leave it blank if it is the same as Tenant ID."/>
                 </div>
             </form>
         </div>
