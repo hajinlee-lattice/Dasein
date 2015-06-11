@@ -70,7 +70,7 @@ public class ExportAndReportService {
         String targetTable = targetRawTable;
         String sourceDir = dellEbiFlowService.getOutputDir(null);
         String successFile = dellEbiFlowService.getOutputDir(null) + "/_SUCCESS";
-        String columns = "QuoteNumber,Date,CustomerID,Product,RepBadge,Quantity,Amount,QuoteFileName";
+        String columns = "QuoteNumber,Date,CustomerID,Product,RepBadge,Quantity,Amount,BusinessUnitID,QuoteFileName";
         String sqlStr = "exec " + quote_sp;
 
         Configuration conf = new Configuration();
