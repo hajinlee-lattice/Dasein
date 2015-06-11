@@ -35,7 +35,7 @@ public class FileImportServiceImpl extends ImportService {
         context.setProperty(ImportProperty.METADATAFILE, //
                 srcImportConfig.getProperties().get(ImportProperty.METADATAFILE));
         for (Table table : tables) {
-            Table newTable = strategy.importMetadata(null, table, context);
+            Table newTable = strategy.importMetadata(null, table, null, context);
             newTables.add(newTable);
         }
         return newTables;

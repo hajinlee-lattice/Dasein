@@ -115,7 +115,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
     }
 
     @Override
-    public Table importMetadata(ProducerTemplate template, Table table, ImportContext ctx) {
+    public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         JobInfo jobInfo = setupJob(template, table);
         try {
             SObjectDescription desc = template.requestBodyAndHeader("direct:getDescription", jobInfo,

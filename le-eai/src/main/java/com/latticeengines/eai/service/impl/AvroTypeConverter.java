@@ -16,7 +16,31 @@ public abstract class AvroTypeConverter {
 
     private static final Log log = LogFactory.getLog(AvroTypeConverter.class);
 
-    public abstract Type convertTypeToAvro(String type);
+    public Type convertTypeToAvro(String type) {
+        
+        switch (type) {
+        case "Int":
+            type = "java.lang.Integer";
+            break;
+        case "Date":
+            type = "java.util.Date";
+            break;
+        case "Timestamp":
+            type = "java.sql.Timestamp";
+            break;
+        default:
+            type = "java.lang." + type;
+            
+        }
+        Class<?> javaType = null;
+        try {
+            javaType = Class.forName(type);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return AvroUtils.getAvroType(javaType);
+    }
+
 
     public static Object convertIntoJavaValueForAvroType(TypeConverterRegistry typeRegistry, Type avroType,
             Attribute attr, Object value) {
@@ -44,7 +68,7 @@ public abstract class AvroTypeConverter {
                 DateTime dateTime = dtf.parseDateTime((String) value);
                 return dateTime.getMillis();
             } catch (Exception e) {
-                log.warn("Error parsing date for column " + attr.getName() + " with value " + value, e);
+                log.warn(String.format("Error parsing date for column %s with value %s.", attr.getName(), value), e);
             }
         case STRING:
             targetType = String.class;

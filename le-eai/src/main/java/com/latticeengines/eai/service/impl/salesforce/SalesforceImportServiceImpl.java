@@ -25,18 +25,18 @@ public class SalesforceImportServiceImpl extends ImportService {
         List<Table> tables = srcImportConfig.getTables();
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.SALESFORCE, "AllTables");
         for (Table table : tables) {
-            Table newTable = strategy.importMetadata(getProducerTemplate(ctx), table, ctx);
+            Table newTable = strategy.importMetadata(getProducerTemplate(ctx), table, srcImportConfig.getFilter(table.getName()), ctx);
             newTables.add(newTable);
         }
         return newTables;
     }
 
     @Override
-    public void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext ctx) {
-        List<Table> tables = extractionConfig.getTables();
+    public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext ctx) {
+        List<Table> tables = srcImportConfig.getTables();
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.SALESFORCE, "AllTables");
         for (Table table : tables) {
-            String filter = extractionConfig.getFilter(table.getName());
+            String filter = srcImportConfig.getFilter(table.getName());
             strategy.importData(getProducerTemplate(ctx), table, filter, ctx);
         }
     }

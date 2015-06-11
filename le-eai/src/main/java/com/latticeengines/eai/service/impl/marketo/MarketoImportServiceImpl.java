@@ -38,6 +38,7 @@ public class MarketoImportServiceImpl extends ImportService {
         List<Table> tablesWithMetadata = new ArrayList<>();
         List<Table> tables = srcImportConfig.getTables();
         for (Table table : tables) {
+            log.info(String.format("Importing metadata for table %s.", table.getName()));
             ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
             if (strategy == null) {
                 log.error(String.format("No import strategy for Marketo table %s.", table.getName()));
@@ -45,7 +46,7 @@ public class MarketoImportServiceImpl extends ImportService {
             } else {
                 log.info(String.format("Import strategy for table %s is %s.", table, strategy.toString()));
             }
-            tablesWithMetadata.add(strategy.importMetadata(getProducerTemplate(ctx), table, ctx));
+            tablesWithMetadata.add(strategy.importMetadata(getProducerTemplate(ctx), table, srcImportConfig.getFilter(table.getName()), ctx));
         }
         return tablesWithMetadata;
     }

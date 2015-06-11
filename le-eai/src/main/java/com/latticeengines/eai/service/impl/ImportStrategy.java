@@ -27,7 +27,7 @@ public abstract class ImportStrategy {
     
     public abstract void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx);
     
-    public abstract Table importMetadata(ProducerTemplate template, Table table, ImportContext ctx);
+    public abstract Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx);
     
     public abstract ImportContext resolveFilterExpression(String expression, ImportContext ctx);
     

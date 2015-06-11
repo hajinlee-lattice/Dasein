@@ -30,7 +30,7 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Table importMetadata(ProducerTemplate template, Table table, ImportContext ctx) {
+    public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         Map<String, Object> headers = getHeaders(ctx);
         Map<String, Object> result = template.requestBodyAndHeaders("direct:getLeadMetadata", null, headers, Map.class);
         List<Map<String, Object>> leadMetadata = (List<Map<String, Object>>) result.get("result");
@@ -51,7 +51,7 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
             attribute.setLength((Integer) lead.get("length"));
         }
         
-        return super.importMetadata(template, table, ctx);
+        return super.importMetadata(template, table, filter, ctx);
     }
     
     @Override

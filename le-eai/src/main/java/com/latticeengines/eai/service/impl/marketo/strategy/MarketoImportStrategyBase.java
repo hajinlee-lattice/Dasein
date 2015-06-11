@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -26,47 +28,50 @@ import com.latticeengines.eai.service.impl.ImportStrategy;
 
 @Component
 public abstract class MarketoImportStrategyBase extends ImportStrategy {
-    
+    private static final Log log = LogFactory.getLog(MarketoImportStrategyBase.class);
+
     @Autowired
     private AvroTypeConverter marketoToAvroTypeConverter;
 
     public MarketoImportStrategyBase(String name) {
         super(name);
     }
-    
+
     protected Map<String, Object> getHeaders(ImportContext ctx) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(MarketoImportProperty.IMPORTCONTEXT, ctx);
         properties.put(Exchange.CONTENT_TYPE, "application/json");
         return properties;
     }
-    
+
     @Override
     protected AvroTypeConverter getAvroTypeConverter() {
         return marketoToAvroTypeConverter;
     }
-    
+
     @Override
-    public Table importMetadata(ProducerTemplate template, Table table, ImportContext ctx) {
+    public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         AvroTypeConverter converter = getAvroTypeConverter();
         List<Attribute> attributes = table.getAttributes();
         for (Attribute attribute : attributes) {
-            assert(attribute != null);
-            assert(converter != null);
-            assert(converter.convertTypeToAvro(attribute.getLogicalDataType()) != null);
-            
+            log.info(String.format("Processing attribute %s with logical type %s.", attribute.getName(),
+                    attribute.getLogicalDataType()));
+            assert (attribute != null);
+            assert (converter != null);
+            assert (converter.convertTypeToAvro(attribute.getLogicalDataType()) != null);
+
             if (attribute.getLogicalDataType() != null) {
                 attribute.setPhysicalDataType(converter.convertTypeToAvro(attribute.getLogicalDataType()).name());
             }
         }
         return table;
     }
-    
+
     @Override
     public ImportContext resolveFilterExpression(String expression, ImportContext ctx) {
         return ctx;
     }
-    
+
     protected void setupPagingToken(ProducerTemplate template, ImportContext ctx, String sinceDateTime) {
         ImportStrategy pagingTokenStrategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, "PagingToken");
         if (pagingTokenStrategy == null) {
@@ -82,16 +87,16 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
         ctx.setProperty(MarketoImportProperty.SINCEDATETIME, sinceDateTime);
         pagingTokenStrategy.importData(template, null, null, ctx);
     }
-    
+
     protected Map<String, Object> parse(String expression) {
         ExpressionParserVisitorBase exprVisitor = getParser();
         return parse(exprVisitor, expression);
     }
-    
+
     protected ExpressionParserVisitorBase getParser() {
         return null;
     }
-    
+
     protected static Map<String, Object> parse(ExpressionParserVisitorBase exprVisitor, String expression) {
         if (exprVisitor == null) {
             return new HashMap<>();

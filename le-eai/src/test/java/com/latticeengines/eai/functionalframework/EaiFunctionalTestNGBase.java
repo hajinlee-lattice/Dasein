@@ -42,19 +42,19 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         Attribute id = new Attribute();
         id.setName("id");
         id.setDisplayName("Id");
-        id.setLogicalDataType("id");
+        id.setLogicalDataType("String");
         Attribute leadId = new Attribute();
         leadId.setName("leadId");
         leadId.setDisplayName("Lead Id");
-        leadId.setLogicalDataType("integer");
+        leadId.setLogicalDataType("Int");
         Attribute activityDate = new Attribute();
         activityDate.setName("activityDate");
         activityDate.setDisplayName("Activity Date");
-        activityDate.setLogicalDataType("datetime");
+        activityDate.setLogicalDataType("Timestamp");
         Attribute activityTypeId = new Attribute();
         activityTypeId.setName("activityTypeId");
         activityTypeId.setDisplayName("Activity Type Id");
-        activityTypeId.setLogicalDataType("integer");
+        activityTypeId.setLogicalDataType("Int");
         table.addAttribute(id);
         table.addAttribute(leadId);
         table.addAttribute(activityDate);
@@ -68,13 +68,27 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         Attribute id = new Attribute();
         id.setName("id");
         id.setDisplayName("Id");
-        id.setLogicalDataType("id");
+        id.setLogicalDataType("String");
+        
         Attribute name = new Attribute();
         name.setName("name");
         name.setDisplayName("Name");
-        name.setLogicalDataType("string");
+        name.setLogicalDataType("String");
+        
+        Attribute description = new Attribute();
+        description.setName("description");
+        description.setDisplayName("Description");
+        description.setLogicalDataType("String");
+        
+        Attribute attributes = new Attribute();
+        attributes.setName("attributes");
+        attributes.setDisplayName("Attributes");
+        attributes.setLogicalDataType("String");
+        
         table.addAttribute(id);
         table.addAttribute(name);
+        table.addAttribute(description);
+        table.addAttribute(attributes);
         return table;
     }
     

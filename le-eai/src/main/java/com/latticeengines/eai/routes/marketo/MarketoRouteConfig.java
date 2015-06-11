@@ -71,7 +71,7 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
         recipientList(header("leadsUrl"));
         
         from("seda:createActivities?concurrentConsumers=4"). //
-        process(new ActivityToHdfsAvroProcessor());
+        process(new ActivityToAvroProcessor());
         
 
     }

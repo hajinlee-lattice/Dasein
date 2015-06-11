@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.zip.Deflater;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -48,7 +49,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
             DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
             dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);
             try {
-                dataFileWriter.setCodec(CodecFactory.snappyCodec());
+                dataFileWriter.setCodec(CodecFactory.deflateCodec(Deflater.BEST_COMPRESSION));
                 dataFileWriter.create(schema, file);
                 return;
             } catch (IOException e) {
