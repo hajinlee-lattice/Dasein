@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
 
     def TestBulkScoringELQ(self): 
         elq = EloquaRequest();
-        contact_lists = elq.addEloquaContact(15);
+        contact_lists = elq.addEloquaContact(5);
 
         PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_1)
 
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
       
     def TestBulkScoringMKTO(self): 
         mkto = MarketoRequest();
-        leads_list = mkto.addLeadToMarketo(15);
+        leads_list = mkto.addLeadToMarketo(5);
         
         PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_2);
         
@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
     
     def TestHourlyScoringELQ(self):
         elq = EloquaRequest();
-        contact_lists = elq.addEloquaContact(3);
+        contact_lists = elq.addEloquaContact(2);
         
         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_1);
                
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
        
     def TestHourlyScoringMKTO(self):
         mkto = MarketoRequest();
-        leads_list = mkto.addLeadToMarketo(3);
+        leads_list = mkto.addLeadToMarketo(2);
         
         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_2);
         
@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
      
     def TestHourlyScoringELQ_Dante(self):
         elq = EloquaRequest();
-        contact_lists = elq.addEloquaContactForDante(3);        
+        contact_lists = elq.addEloquaContactForDante(2);        
                 
         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_1); 
                   
@@ -82,7 +82,7 @@ class Test(unittest.TestCase):
    
     def TestHourlyScoringMKTO_Dante(self):
         mkto = MarketoRequest();
-        leads_list = mkto.addLeadToMarketoForDante(3);
+        leads_list = mkto.addLeadToMarketoForDante(2);
         print "======> prepare test data:";
         print leads_list;
         

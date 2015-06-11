@@ -205,281 +205,53 @@ class DLCRunner(SessionRunner):
         print "Test status: [%s]" % self.testStatus
         return self.testStatus
 
-class PretzelRunner(SessionRunner):
-
-    def __init__(self, svn_location=PLSEnvironments.svn_location_local, 
-                 build_path=PLSEnvironments.pls_install_dir, 
-                 host=PLSEnvironments.pls_test_server,
-                 logfile=None, exception=False):
-        super(PretzelRunner, self).__init__(host, logfile)
-        self.exception = exception
-        self.topologies = ["EloquaAndSalesforceToEloqua",
-                           "MarketoAndSalesforceToMarketo",
-                           "EloquaAndSalesforceToSalesforce",
-                           "SalesforceAndEloquaToEloqua",
-                           "SalesforceAndEloquaToSalesforce",
-                           "MarketoAndSalesforceToSalesforce",
-                           "SalesforceAndMarketoToMarketo",
-                           "SalesforceAndMarketoToSalesforce",
-                           "SalesforceToSalesforce"]
-        self.svn_location = os.path.expanduser(svn_location)
-        self.build_path = os.path.expanduser(build_path)
-        self.specs_path = os.path.expanduser("%s\PLS_Templates" % build_path)
-        self.revision = 1
-        self.pretzel_tool = os.path.join(self.build_path,"Pretzel", "Install", "bin", "PretzelAdminTool.exe")
-        self.main_py = os.path.join(self.svn_location, "Python script", "main.py")
-        self.build_location = os.path.join(self.build_path, "Pretzel", "PretzelDaemon", "bin", "scripts", "production")
-
-    def isValidTopology(self, topology):
-        if topology in self.topologies:
-            return True
-        return False
-
-    def getMain(self, localCopy=False):
-        # SVN can be both on Linux and Windows, so this way:
-        main_py = self.main_py
-        print main_py
-        if os.path.exists(main_py):
-            print "It exists"
-            build_location = self.build_location
-            try:
-                print build_location
-                self.cpFile(main_py, build_location, localCopy)
-                return True
-            except Exception:
-                e = traceback.format_exc()
-                logging.error("Coping main.py failed: %s" % e)
-                return False
-        else:
-            logging.error("Incorrect path for main.py %s" % main_py)
-            if self.exception:
-                raise "Incorrect path for main.py %s" % main_py
-            return False
-
-    def getSpecs(self, topology, localCopy=False):
-        location = os.path.join(self.svn_location, topology)
-        print location;
-        status = False
-        if not os.path.exists(location):
-            return status
-        #### Get all .specs and  .config files
-        specs_location = os.path.join(self.specs_path, topology)
-        for f in os.listdir(location):
-            if f.endswith(".specs") or f.endswith(".config"):
-                filename = os.path.join(location, f)
-                self.cpFile(filename, specs_location, localCopy)
-                status = True
-        return status
-
-    def generatePretzelCommand(self, command, topology):
-        if command not in ["add", "set"]:
-            logging.error("invalid Pretzel command %s" % command)
-            return None
-        pretzel_tool = self.pretzel_tool
-        specs_location = os.path.join(self.specs_path, topology)
-        # If Pretzel ever become platform independent this will not be needed
-        pretzel_tool = pretzel_tool.replace("/", "\\")
-        specs_location = specs_location.replace("/", "\\")
-        if command == "add":
-            cmd = ("%s Revision -Add -Topology %s -DirectoryPath %s -Description %s" % (pretzel_tool, topology,
-                                                                                        specs_location, topology))
-        elif command == "set":
-            cmd = ("%s Revision -SetProduction -Topology %s -Revision %s" % (pretzel_tool, topology, self.revision))
-        return cmd
-
-    def addTopology(self, topology):
-        if not self.isValidTopology(topology):
-            logging.error("Can't add invalid topology %s" % topology)
-            if self.exception:
-                raise "Can't add invalid topology %s" % topology
-            return False
-        else:
-            cmd = self.generatePretzelCommand("add", topology)
-            return self.runCommand(cmd)
-
-    def setTopologyRevison(self, topology):
-        if not self.isValidTopology(topology):
-            logging.error("Can't set invalid topology %s" % topology)
-            if self.exception:
-                raise "Can't set invalid topology %s" % topology
-            return False
-        else:
-            cmd = self.generatePretzelCommand("set", topology)
-            self.revision += 1
-            return self.runCommand(cmd)
-
-    def testTopology(self, topology):
-        status = True
-        if not self.isValidTopology(topology):
-            logging.error("Can't test invalid topology %s" % topology)
-            if self.exception:
-                raise "Can't test invalid topology %s" % topology
-            return False
-        else:
-            status = status and self.getSpecs(topology)
-            status = status and self.addTopology(topology)
-            self.getStatus()
-            status = status and self.setTopologyRevison(topology)
-            self.getStatus()
-            return status
-    def setupPretzel(self,marketting_app):
-        assert self.getMain()
-        if marketting_app == PLSEnvironments.pls_marketing_app_ELQ:
-            return self.testTopology("EloquaAndSalesforceToEloqua");
-        else:
-            return self.testTopology("MarketoAndSalesforceToMarketo");
-        
-class BardAdminRunner(SessionRunner):
-
-    def __init__(self, bard_path=None, host=PLSEnvironments.pls_test_server, logfile=None, exception=False):
-        super(BardAdminRunner, self).__init__(host, logfile)
-        self.exception = exception
-        self.bard_path = ""
-        if bard_path is not None:
-            self.bard_path = bard_path
-
-    def getModelListInfo(self, output, bard_name=None):
-        output = output.replace("<br/>", "\n")
-        latest_output = output.split("\n")
-        #print latest_output
-        model_info = {}
-        for line in latest_output:
-            if len(line) > 0:
-                if line.startswith("ID:"):
-                    name_index = line.find("Name:")
-                    id_index = line.find("ID:")
-                    if name_index == -1 or id_index == -1:
-                        warning_str =  "Info string incorrectly formatted '%s'" % line
-                        print warning_str
-                        logging.warning(warning_str)
-                    else:
-                        print "~"*20
-                        model_id = line[id_index+4:name_index-1].strip(" ")
-                        model_name = line[name_index+6:]
-                        if bard_name == None:
-                            model_info[model_name] = model_id
-                            print "%s : %s" % (model_name, model_id)
-                        elif model_name.startswith(bard_name):
-                            model_info[model_name] = model_id
-                            print "%s : %s" % (model_name, model_id)
-        return model_info
-
-    def getLatestModelInfo(self,bard_name=None):
-        if len(self.request_text) < 1:
-            warning_str =  "There is nothing in the request_text list!!!"
-            print warning_str
-            logging.error(warning_str)
-            return None 
-        return self.getModelListInfo(self.request_text[-1],bard_name)
-
-    def getModelId(self, name, model_info):
-        if name in model_info:
-            return model_info[name]
-        else:
-            warning_str =  "No such model can be found"
-            print warning_str
-            logging.warning(warning_str)
-            return None
-
-    def getLatestModelId(self,bard_name=None):
-        model_info = self.getLatestModelInfo(bard_name)
-        #print model_info
-        if len(model_info.keys()) < 1:
-            return None
-        if len(model_info.keys()) == 1:
-            return model_info[model_info.keys()[0]]
-        date_dict = {}
-        for name in model_info:
-            try:
-                t = name.split(" ")[0]
-                t = t.split("_")
-                #print t
-                date_key = datetime.strptime("%s %s" % (t[-2], t[-1]), "%Y-%m-%d %H-%M")
-                date_dict[date_key] = model_info[name]
-            except ValueError:
-                e = traceback.format_exc()
-                print "Model name formatting is not incorrect: %s" % name
-                print e
-        if len(date_dict.keys()) > 0:
-            return date_dict[max(date_dict.keys())]
-        else:
-            return None
-        
-
-    def setProperty(self, config_key, config_property, config_value):
-        bard_command = self.bard_path
-        bard_command = "%s ConfigStore -SetProperty -Key %s -Property %s -Value %s" % (bard_command, config_key,
-                                                                                       config_property, config_value)
-        bard_command = bard_command.replace("/", "\\")
-        print(bard_command)
-        return bard_command
-
-    def getDocument(self, config_key):
-        bard_command = self.bard_path
-        bard_command = "%s ConfigStore -GetDocument -Key %s" % (bard_command, config_key)
-        bard_command = bard_command.replace("/", "\\")
-        print(bard_command)
-        return bard_command
-
-    def listModels(self):
-        bard_command = self.bard_path
-        bard_command = "%s Model -List" % bard_command
-        bard_command = bard_command.replace("/", "\\")
-        print(bard_command)
-        return bard_command
-
-    def downloadModels(self):
-        bard_command = self.bard_path
-        bard_command = "%s Model -Download" % bard_command
-        bard_command = bard_command.replace("/", "\\")
-        print(bard_command)
-        return bard_command
-
-    def activateModel(self, model_id):
-        bard_command = self.bard_path
-        bard_command = "%s Model -Activate -ID %s" % (bard_command, model_id)
-        bard_command = bard_command.replace("/", "\\")
-        print(bard_command)
-        return bard_command
-
-    def runSetProperty(self, config_key, config_property, config_value):
-        cmd = self.setProperty(config_key, config_property, config_value)
-        return self.runCommand(cmd)
-
-    def runGetDocument(self, config_key):
-        cmd = self.getDocument(config_key)
-        return self.runCommand(cmd)
-
-    def runActivateModel(self, model_id):
-        cmd = self.activateModel(model_id)
-        return self.runCommand(cmd)
-
-    def runListModels(self):
-        return self.runCommand(self.listModels())
-
-    def runDownloadModels(self):
-        return self.runCommand(self.downloadModels())
-
 class PLSConfigRunner(SessionRunner):
     def __init__(self, pls_url=None, logfile=None, exception=False):
         super(PLSConfigRunner, self).__init__(pls_url, logfile);
         self.exception = exception;
-        self.pls_url=pls_url;
+        if pls_url == None:
+            self.pls_url = PLSEnvironments.pls_tenant_console_url
+        else:
+            self.pls_url=pls_url;
         self.plsUI = webdriver.Firefox();
         
     def plsLogin(self):
         self.plsUI.get(self.pls_url);
         time.sleep(30);
-        self.plsUI.find_element_by_id("username").clear();
-        self.plsUI.find_element_by_id("username").send_keys(PLSEnvironments.pls_server_user);
-        self.plsUI.find_element_by_id("password").clear();
-        self.plsUI.find_element_by_id("password").send_keys(PLSEnvironments.pls_server_pwd);
-        self.plsUI.find_element_by_id("loginButton").click();
-        time.sleep(15);
-        
-        self.plsUI.find_element_by_name("bardConfigStartButton").click();
+        self.plsUI.find_element_by_xpath("//input[@type='text']").clear()
+        self.plsUI.find_element_by_xpath("//input[@type='text']").send_keys(PLSEnvironments.pls_tenant_console_user)
+        self.plsUI.find_element_by_xpath("//input[@type='password']").clear()
+        self.plsUI.find_element_by_xpath("//input[@type='password']").send_keys(PLSEnvironments.pls_tenant_console_pwd)
+        self.plsUI.find_element_by_css_selector("button.btn.btn-primary").click()
+
         time.sleep(30);
         
+    def addNewTenant(self,tenantId,CRMTopology):
+        self.plsLogin()
+        self.plsUI.find_element_by_id("add-new-model-btn").click()
+        time.sleep(2);
+        self.plsUI.find_element_by_name("tenantId").clear()
+        self.plsUI.find_element_by_name("tenantId").send_keys(tenantId)
+        time.sleep(1);
+        self.plsUI.find_element_by_css_selector("div.modal-footer.ng-scope > button.btn.btn-primary").click()
+        time.sleep(5);
+        Select(self.plsUI.find_element_by_xpath("//div[2]/select")).select_by_visible_text(CRMTopology)
+        Select(self.plsUI.find_element_by_xpath("//div[3]/select")).select_by_visible_text("http://bodcdevvint187.dev.lattice.local:8081")
+        self.plsUI.find_element_by_xpath("//input[@type='checkbox']").click()
+
+        self.plsUI.find_element_by_xpath("(//input[@type='text'])[8]").clear()
+        self.plsUI.find_element_by_xpath("(//input[@type='text'])[8]").send_keys("smeng@lattice-engines.com")
+        self.plsUI.find_element_by_xpath("(//input[@type='text'])[16]").clear()
+        self.plsUI.find_element_by_xpath("(//input[@type='text'])[16]").send_keys("10.41.1.247")
+        self.plsUI.find_element_by_xpath("//button[2]").click()
+        time.sleep(5);
+        self.plsUI.find_element_by_css_selector("div.modal-footer.ng-scope > button.btn.btn-primary").click()
+        time.sleep(10);
+        try: self.assertEqual(tenantId, driver.find_element_by_css_selector("tr.k-alt.ng-scope > td > span.ng-binding").text)
+        except AssertionError as e: self.verificationErrors.append(str(e))
+
+
+                
     def plsSFDCCredentials(self):
         self.plsUI.find_element_by_xpath("//input[@value='']").clear();
         self.plsUI.find_element_by_xpath("//input[@value='']").send_keys(PLSEnvironments.pls_SFDC_user);
@@ -861,134 +633,6 @@ class UtilsRunner(SessionRunner):
                     self.cpFile(fname, new_directory, local)
         return relocation_map
 
-class EtlRunner(PretzelRunner):
-
-    def __init__(self, svn_location, etl_dir,
-                 host=PLSEnvironments.pls_test_server,
-                 logfile=None, exception=False):
-        super(EtlRunner, self).__init__(svn_location, ".", ".", host, logfile, exception)
-        self.exception = exception
-        self.svn_location = os.path.expanduser(svn_location)
-        self.etl_dir = os.path.expanduser(etl_dir)
-        self.python_code = ""
-        self.etl_py_filename = "emulatePretzelETL.py"
-
-    def generatePretzelEtlScript(self, tenant, marketting_app, sql_server, scoring_db, dante_db):
-        print "Yeahh!!! Let's write some Python!!!"
-        indent = " " * 4
-        config_filename = "Template.config"
-        specs_filename = "Template.specs"
-    
-        etl_settings = EtlConfig[marketting_app]
-        etl_settings["DeploymentExternalID"] = tenant
-        etl_settings["DataLoaderTenantName"] = tenant
-        
-        etl_settings["ReportsDBDataSource"] = sql_server
-        etl_settings["ReportsDBInitialCatalog"] = tenant
-        etl_settings["ScoringDBDataSource"] = sql_server
-        etl_settings["ScoringDBInitialCatalog"] = scoring_db
-        etl_settings["DanteDBDataSource"] = sql_server
-        etl_settings["DanteDBInitialCatalog"] = dante_db
-    
-        if marketting_app == "Marketo":
-            config_filename = "Template_MKTO.config"
-            specs_filename = "Template_MKTO.specs"
-        if marketting_app == "Eloqua":
-            config_filename = "Template_ELQ.config"
-            specs_filename = "Template_ELQ.specs"
-    
-        # Set footer
-        python_code = "%s\n\n%s\n" % ("import main", "class ETL_Settings:")
-    
-        # Populate ETL_Settings class
-        for param in sorted(etl_settings):
-            value = etl_settings[param]
-            if value != "None":
-                value = '"%s"' % value
-            python_code += "%s%s = %s\n" % (indent, param, value)
-    
-        python_code += "\n%s\n%s%s\n%s%s\n" % ("class Template:",
-                                               indent,'Spec = ""', 
-                                               indent,'Config = ""')
-    
-        # Populate Template class
-        python_code += "\n%s\n" % "target_template = Template()"
-    
-        # Populate Config
-        python_code += "\n%s\n" % ('with open("%s", "r") as configfile :' % config_filename)
-        python_code += "%s%s\n" % (indent, "target_template.Config = configfile.read()")
-    
-        # Populate Spec
-        python_code += "\n%s\n" % ('with open("%s", "r") as configfile :' % specs_filename)
-        python_code += "%s%s\n" % (indent, "target_template.Spec = configfile.read()")
-    
-        # Run ETL
-        python_code += "\n%s\n" % "temp = main.ConfigureDefinition()"
-        python_code += "%s\n" % "returnValue = temp.Run(ETL_Settings(), target_template)"
-    
-        # Save populated Spec file
-        python_code += "\n%s\n" % 'specFile = open("output.specs", "w")'
-        python_code += "%s\n" % "specFile.write(returnValue.Spec)"
-        python_code += "%s\n" % "specFile.close()"
-    
-        # Save populated Config file
-        python_code += "\n%s\n" % 'configFile = open("output.config", "w")'
-        python_code += "%s\n" % "configFile.write(returnValue.Config)"
-        python_code += "%s\n" % "configFile.close()"
-
-        python_code += '\nprint "Ilya\'s Framework rocks!!!"\n'
-        self.python_code = python_code
-        return python_code
-
-    def savePythonFile(self, python_code=None, localCopy=False):
-        if python_code is None:
-            python_code = self.python_code
-        return self.write_to_file(self.etl_py_filename, python_code)
-
-    def copyEtlFiles(self, topology, localCopy=False):
-        etl_dir = os.path.join(self.etl_dir, topology)
-        # Copy "emulatePretzelETL.py"
-        if not os.path.exists(self.etl_py_filename):
-            self.savePythonFile()
-        self.cpFile(self.etl_py_filename, etl_dir, localCopy)
-
-        # Copy main.py
-        self.build_location = etl_dir
-        self.getMain(localCopy)
-
-        # Copy specs
-        self.specs_path = self.etl_dir
-        self.getSpecs(topology, localCopy)
-
-    def verifyOutputExists(self, topology, filename):
-        output = os.path.join(self.etl_dir, topology, filename)
-        output = output.replace("/", "\\")
-        py_eval = "os.path.exists('%s')" % output
-        result = self.getEval(py_eval)
-        return bool(result)
-
-    def runEtlEmulator(self, topology, localCopy=False):
-        work_dir = os.path.join(self.etl_dir, topology)
-        work_dir = work_dir.replace("/", "\\")
-        cmd_dict = {"python %s" % self.etl_py_filename: work_dir}
-        print self.runCommand(cmd_dict, localCopy)
-        print self.verifyOutputExists(topology, "output.specs")
-        print self.verifyOutputExists(topology, "output.config")
-
-    def getConfigString(self, topology):
-        return self.getXmlStirng(topology, "output.config")
-
-    def getSpecsString(self, topology):
-        return self.getXmlStirng(topology, "output.specs")
-
-    def getXmlStirng(self, topology, filename):
-        output = os.path.join(self.etl_dir, topology, filename)
-        output = output.replace("/", "\\")
-        py_eval = "''.join(get_file_content('%s'))" % output
-        print py_eval
-        xml = self.getEval(py_eval)
-        print type(xml)
-        return xml
 
 class JamsRunner(SessionRunner):
     def __init__(self, jams_conn=PLSEnvironments.SQL_JAMS_CFG, logfile=None, exception=False):

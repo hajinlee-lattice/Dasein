@@ -18,6 +18,7 @@ class PLSEnvironments(object):
     pls_server_folder=parser.get('BuildInfo', 'install_dir');
     pls_bard_1=parser.get('BuildInfo', 'tenant');
     pls_bard_2=parser.get('BuildInfo', 'tenant_2');
+    pls_bard_3=parser.get('BuildInfo', 'tenant_3');
     svn_location_local=parser.get('TestSetup', 'svn_location');
     pls_version=parser.get('TestSetup', 'pls_version');
 
@@ -25,9 +26,12 @@ class PLSEnvironments(object):
     dl_server="https://bodcdevvint187.dev.lattice.local:8080/";
     visidb_server="bodcdevvint187.dev.lattice.local";
     
-    
+    pls_tenant_console_url = "http://bodcdevvjty20.dev.lattice.local:8080/#/tenants/"
+    pls_tenant_console_user= "testuser1"
+    pls_tenant_console_pwd = "Lattice1"
     pls_url_1="https://%s/%s" % (pls_server, pls_bard_1);
     pls_url_2="https://%s/%s" % (pls_server, pls_bard_2);
+    pls_url_3="https://%s/%s" % (pls_server, pls_bard_3);
     pls_server_user="admin";
     pls_server_pwd="admin";
     
@@ -43,7 +47,8 @@ class PLSEnvironments(object):
     
     dl_server_user="richard.liu@lattice-engines.com";
     dl_server_pwd="1";
-    dl_dlc_path="%s\\%s\\ScoringDaemon\\ScoringDaemon\\bin\\Services\\DataLoaderShim" % (pls_server_folder, pls_bard_1[3:]);
+    dl_dlc_path="C:\\DLTools"
+#     dl_dlc_path="%s\\%s\\ScoringDaemon\\ScoringDaemon\\bin\\Services\\DataLoaderShim" % (pls_server_folder, pls_bard_1[3:]);
     visidb_dlc_path = "D:\\performanceTest\\DLC"
     
     visidb_server_user="admin";
@@ -79,7 +84,8 @@ class PLSEnvironments(object):
     pls_marketing_app_SFDC="SFDC";
     
     SQL_JAMS_CFG = "DRIVER={SQL Server};SERVER=10.41.1.247;DATABASE=JAMSCFG;uid=dataloader_user;pwd=password";
-    SQL_ScoringDaemon = "DRIVER={SQL Server};SERVER=%s\SQL2012STD;DATABASE=SD_%s;uid=dataloader_prod;pwd=L@ttice2" % (pls_server, pls_bard_1[3:]);
+#     SQL_ScoringDaemon = "DRIVER={SQL Server};SERVER=%s\SQL2012STD;DATABASE=SD_%s;uid=dataloader_prod;pwd=L@ttice2" % (pls_server, pls_bard_1[3:]);
+    SQL_ScoringDaemon = "DRIVER={SQL Server};SERVER=10.41.1.207\SQL2012STD;DATABASE=ScoringDaemon_QA;uid=dataloader_prod;pwd=L@ttice2";
     SQL_BasicDataForIntegrationTest = "DRIVER={SQL Server};SERVER=10.41.1.187\SQL2008;DATABASE=BasicDataForIntegrationTest;uid=dataloader_user;pwd=password";
     SQL_conn_dataloader = "DRIVER={SQL Server};SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % visidb_server;
     SQL_conn_pdMatch = "DRIVER={SQL Server};SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
@@ -91,8 +97,14 @@ class PLSEnvironments(object):
                         "Initial Catalog=PropDataMatchDB;" + \
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_prod;" + \
-                        "Password=L@ttice2;"  
-                        
+                        "Password=L@ttice2;"
+                          
+    SQL_PropDataMatch = "Data Source=bodcprodvsql130;" + \
+                        "Initial Catalog=PropDataMatchDB;" + \
+                        "Persist Security Info=True;" + \
+                        "User ID=dataloader_prod;" + \
+                        "Password=L@ttice2;"
+                                            
     SQL_PropDataForScoring = "Data Source=bodcprodvsql130;" + \
                         "Initial Catalog=PropDataMatchDB;" + \
                         "Persist Security Info=True;" + \
@@ -109,7 +121,11 @@ class PLSEnvironments(object):
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_prod;" + \
                         "Password=L@ttice2;"
-                        
+    SQL_LSSBard = "Data Source=10.41.1.207\SQL2012STD;" + \
+                        "Initial Catalog=ScoringDaemon_QA;" + \
+                        "Persist Security Info=True;" + \
+                        "User ID=dataloader_prod;" + \
+                        "Password=L@ttice2;"                   
     SQL_ReportsDB_DataProvider_ELQ = "Data Source=%s\SQL2012STD;" % pls_server+ \
                         "Initial Catalog=%s;" % pls_bard_1+ \
                         "Persist Security Info=True;" + \
@@ -121,6 +137,23 @@ class PLSEnvironments(object):
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_prod;" + \
                         "Password=L@ttice2;"
+    SFDC_DataProvider = "URL=https://login.salesforce.com/services/Soap/u/29.0;" + \
+                        "User=apeters-widgettech@lattice-engines.com;Password=Happy2010;" + \
+                        "SecurityToken=oIogZVEFGbL3n0qiAp6F66TC;Version=29.0;Timeout=100;" + \
+                        "RetryTimesForTimeout=1;SleepTimeBeforeRetry=60;BatchSize=2000;"
+    Marketo_DataProvider = "URL=https://na-sj02.marketo.com/soap/mktows/2_0;" + \
+                            "UserID=latticeenginessandbox1_9026948050BD016F376AE6;EncryptionKey=41802295835604145500BBDD0011770133777863CA58;" + \
+                            "Timeout=10000;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;" + \
+                            "BatchSize=500;MaxSizeOfErrorBatch=25;"
+    
+    Eloqua_DataProvider = "URL=https://login.eloqua.com/id;" + \
+                            "Company=TechnologyPartnerLatticeEngines;Username=Matt.Sable;Password=Lattice1;" + \
+                            "APIType=SOAP;EntityType=Base;Timeout=300;RetryTimesForTimeout=3;" + \
+                            "SleepTimeBeforeRetry=60;BatchSize=200;MaxSizeOfErrorBatch=25;"
+    
+    EloquaBulk_DataProvider = "URL=https://login.eloqua.com/id;" + \
+                                "Company=TechnologyPartnerLatticeEngines;Username=Matt.Sable;Password=Lattice1;" + \
+                                "Timeout=100;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;BatchSize=2000;"
                         
     mock_ELQ_ELQ_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
                         "Initial Catalog=PLS_ELQ_ELQ_ReleaseQA_20150930;" + \
@@ -139,6 +172,11 @@ class PLSEnvironments(object):
                         "Password=password;"
     mock_MKTO_SFDC_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
                         "Initial Catalog=PLS_MKTO_SFDC_ReleaseQA_20150630;" + \
+                        "Persist Security Info=True;" + \
+                        "User ID=dataloader_user;" + \
+                        "Password=password;"
+    mock_SFDC_SFDC_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
+                        "Initial Catalog=PLS_SFDC_Dataset01;" + \
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_user;" + \
                         "Password=password;"

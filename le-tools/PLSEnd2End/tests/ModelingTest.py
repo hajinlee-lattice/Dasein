@@ -22,13 +22,8 @@ class Test(unittest.TestCase):
         
         # Step 4 - Run LoadGroups and activate Model  
         PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
-        PlsOperations.updateModelingServiceSettings(bardAdminTool);        
-        PlsOperations.activateModel(bardAdminTool,pls_bard);
-#         print "for jams configurations"
-#         jams = JamsRunner();
-#         assert jams.setJamsTenant(pls_bard);
-        #TODO -- add more assertions here
-
+#         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
+#         PlsOperations.activateModel(bardAdminTool,pls_bard);
     
     def testModelingMarketo(self):
         pls_bard = PLSEnvironments.pls_bard_2
@@ -37,14 +32,18 @@ class Test(unittest.TestCase):
         
         # Step 4 - Run LoadGroups and activate Model  
         PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
-        PlsOperations.updateModelingServiceSettings(bardAdminTool);        
-        PlsOperations.activateModel(bardAdminTool,pls_bard);
-#         print "for jams configurations"
-#         jams = JamsRunner();
-#         assert jams.setJamsTenant(pls_bard);
-        #TODO -- add more assertions here
-
-
+#         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
+#         PlsOperations.activateModel(bardAdminTool,pls_bard);
+        
+    def testModelingSFDC(self):
+        pls_bard = PLSEnvironments.pls_bard_3
+        marketting_app = PLSEnvironments.pls_marketing_app_SFDC
+#         bardAdminTool = PLSEnvironments.pls_bardAdminTool_3
+        
+        # Step 4 - Run LoadGroups and activate Model  
+        PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
+#         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
+#         PlsOperations.activateModel(bardAdminTool,pls_bard);
 
 
 if __name__ == "__main__":

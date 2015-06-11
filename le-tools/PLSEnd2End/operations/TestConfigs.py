@@ -32,6 +32,12 @@ ConfigCSV["Eloqua"] = {"Cfg_ColumnsForQA_ELQ.csv":"Cfg_ColumnsForQA",
                        "Cfg_Custom_Attributes.csv":"Cfg_Custom_Attributes",
                        "Cfg_PLS_EventTableQueries.csv":"Cfg_PLS_EventTableQueries"}
 
+ConfigCSV["Salesforce"] = {"Cfg_ColumnsForQA.csv":"Cfg_ColumnsForQA",
+                       "Cfg_LinksToMostRecentSamples.csv":"Cfg_LinksToMostRecentSamples",
+                       "Cfg_PLS_Event.csv":"Cfg_PLS_Event",
+                       "Cfg_Custom_Attributes.csv":"Cfg_Custom_Attributes",
+                       "Cfg_PLS_EventTableQueries.csv":"Cfg_PLS_EventTableQueries"}
+
 EtlConfig = OrderedDict()
 
 EtlConfig["Eloqua"] = {"CrmPassword": "Happy2010",

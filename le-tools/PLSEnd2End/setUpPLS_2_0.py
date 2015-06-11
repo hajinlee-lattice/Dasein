@@ -8,8 +8,8 @@ Created on Mar 25, 2015
 import sys
 from Properties import PLSEnvironments
 from operations import PerformanceHelpers
-from operations.TestHelpers import PLSConfigRunner
-from operations.TestHelpers import PLSConfigRunner
+# from operations.TestHelpers import PLSConfigRunner
+from operations.TestHelpers_2_0 import PLSConfigRunner
 from operations.TestHelpers import DLConfigRunner
 from operations.TestHelpers import PretzelRunner
 from operations.TestRunner import SessionRunner
@@ -28,33 +28,24 @@ def setUpPls():
 #     configureBardTenant(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ)
     configureBardTenant(PLSEnvironments.pls_bard_3, PLSEnvironments.pls_marketing_app_SFDC)
 #     configureBardTenant(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
+#     configureBardTenant("leoSFDCTenant_03","SFDC")
 
 
 
 
 def configureBardTenant(tenant, marketting_app):
-
-    ''' Setting up properties '''
-    if tenant == PLSEnvironments.pls_bard_1:
-        pls_url = PLSEnvironments.pls_url_1
-    elif tenant == PLSEnvironments.pls_bard_2:
-        pls_url = PLSEnvironments.pls_url_2
-    elif tenant ==  PLSEnvironments.pls_bard_3:
-        pls_url = PLSEnvironments.pls_url_3
-    else:
-        logging.error("Tenant provided not found")
-        sys.exit("Invalid Tenant")
- 
-#     ''' Setup Pretzel '''
-#     print "Running Setup"
-#     pretzel = PretzelRunner();
-#     assert pretzel.setupPretzel(marketting_app)
+    
+#     if marketting_app == PLSEnvironments.pls_marketing_app_SFDC:
+#         CRMTopology = "SFDC"
+#     elif marketting_app == PLSEnvironments.pls_marketing_app_MKTO:
+#         CRMTopology = "Marketo"
+#     elif marketting_app == PLSEnvironments.pls_marketing_app_ELQ:
+#         CRMTopology = " Eloqua"
 #     
 #     ''' Configure PLS Credentials '''
 #     print "for PLS Configuration from UI";
-#     plsUI = PLSConfigRunner(pls_url);
-#     print "==>    The PLS URL is: %s" % pls_url;
-#     plsUI.config(marketting_app);
+#     plsUI = PLSConfigRunner();
+#     plsUI.addNewTenant(tenant,CRMTopology);
   
     ''' configure dataLoader settings '''
     print "configure dataloader settings"
