@@ -146,8 +146,8 @@
                         <mapping>
                             <directory>/etc/httpd/conf.d</directory>
                             <filemode>755</filemode>
-                            <username>apache</username>
-                            <groupname>apache</groupname>
+                            <username>root</username>
+                            <groupname>root</groupname>
                             <sources>
                                 <source>
                                     <location>${bin.env.path}/jetty_forward.conf</location>
