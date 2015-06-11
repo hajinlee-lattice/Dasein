@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -67,7 +68,7 @@ public class DataLoaderServiceTestNG extends RemoteFunctionalTestNGBase {
         assertEquals(result.getStatus(), 3);
     }
 
-    @Test(groups = "functional", enabled = true, expectedExceptions = { LedpException.class } )
+    @Test(groups = "functional", enabled = true, expectedExceptions = { LedpException.class })
     public void testSetOutOfSyncSegments() throws Exception {
         List<Segment> segments = new ArrayList<>();
 
@@ -78,5 +79,12 @@ public class DataLoaderServiceTestNG extends RemoteFunctionalTestNGBase {
         segments.add(defaultSegment);
 
         dataLoaderService.setSegments(SEGMENT_TEST_TENANT, TEST_DATALOADER_URL, segments);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testGetTemplateVersion() throws Exception {
+
+        String version = dataLoaderService.getTemplateVersion(SEGMENT_TEST_TENANT, TEST_DATALOADER_URL);
+        Assert.assertEquals(version, "");
     }
 }

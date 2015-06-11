@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 @Component("modelStepYarnProcessor")
 public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
@@ -78,6 +79,9 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
+
+    @Autowired
+    private DataLoaderService dataLoaderService;
 
     @VisibleForTesting
     void setDBConfig(String dbHost, int dbPort, String dbName, String dbUser, String dbPassword, String dbType) {
@@ -303,6 +307,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             model.setTable(commandParameters.getDepivotedEventTable());
         }
         model.setMetadataTable(commandParameters.getMetadataTable());
+        addTemplateVersion(commandParameters);
         model.setTargetsList(commandParameters.getModelTargets());
         model.setKeyCols(commandParameters.getKeyCols());
         model.setCustomer(customer);
@@ -313,6 +318,16 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         model.setFeaturesList(features);
 
         return model;
+    }
+
+    private void addTemplateVersion(ModelCommandParameters commandParameters) {
+        if (commandParameters == null || commandParameters.getModelTargets() == null) {
+            return;
+        }
+        List<String> targets = commandParameters.getModelTargets();
+        String templateVersion = dataLoaderService.getTemplateVersion(commandParameters.getDlTenant(),
+                commandParameters.getDlUrl());
+        targets.add("Template_Version:" + templateVersion);
     }
 
     private String generateProvenanceProperties(ModelCommandParameters commandParameters) {

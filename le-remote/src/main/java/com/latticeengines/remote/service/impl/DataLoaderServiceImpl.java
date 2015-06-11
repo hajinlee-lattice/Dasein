@@ -9,12 +9,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.vdb.SpecParser;
 import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
@@ -28,6 +31,8 @@ import com.latticeengines.remote.exposed.service.Headers;
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
 
+    private static final Log log = LogFactory.getLog(DataLoaderServiceImpl.class);
+
     @VisibleForTesting
     static final String DEFAULT_SEGMENT = "LATTICE_DEFAULT_SEGMENT";
 
@@ -35,6 +40,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String MODELID_PREFIX = "LatticeFunctionExpressionConstant(\"";
     private static final String LATTICE_FUNCTION_EXPRESSION_CONSTANT_SCALAR = "LatticeFunctionExpressionConstantScalar(\"";
     private static final String SEGMENTS_SPEC = "AppData_Segments";
+    private static final String VERSION_SPEC = "Version";
     private static final String SEGMENT_MODELS_SPEC = "AppData_Model_GUID";
     private static final String SPEC_PREFIX = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VisiDBStructures appName=\"\">\n  <workspaces>\n    <workspace name=\"Workspace\">\n      <specs>\nSpecLatticeNamedElements((        \nSpecLatticeNamedElement(\n  SpecLatticeFunction(";
     private static final String SPEC_POSTFIX = "   ,DataTypeUnknown\n   ,SpecFunctionTypeMetric\n   ,SpecFunctionSourceTypeCalculation\n   ,SpecDefaultValueNull\n   ,SpecDescription(\"\")\n  )\n,ContainerElementName(\"AppData_Model_GUID\")\n)\n))\n      </specs>\n    </workspace>\n  </workspaces>\n</VisiDBStructures>";
@@ -254,6 +260,27 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         @Override
         public int compare(Segment o1, Segment o2) {
             return o1.getPriority().compareTo(o2.getPriority());
+        }
+    }
+
+    @Override
+    public String getTemplateVersion(String tenantName, String dlUrl) {
+        String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, VERSION_SPEC));
+        String response = "";
+        try {
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/GetSpecDetails", false,
+                    Headers.getHeaders(), jsonStr);
+            GetSpecResult getSpecResult = JsonUtils.deserialize(response, GetSpecResult.class);
+            if (!getSpecResult.getSuccess().equalsIgnoreCase("true")) {
+                log.warn("Can not get template version! error=" + getSpecResult.getErrorMessage());
+                return "";
+            }
+            SpecParser sp = new SpecParser(getSpecResult.getSpecDetails());
+            return sp.getTemplate();
+
+        } catch (Exception ex) {
+            log.warn("Can not get template version!", ex);
+            return "";
         }
     }
 }

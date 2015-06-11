@@ -21,6 +21,7 @@
         <le.eai.version>1.0.33-SNAPSHOT</le.eai.version>
         <le.camille.version>1.0.33-SNAPSHOT</le.camille.version>
         <le.monitor.version>1.0.33-SNAPSHOT</le.monitor.version>
+        <le.remote.version>1.0.33-SNAPSHOT</le.remote.version>
     </properties>
 
     <parent>
@@ -349,6 +350,11 @@
             <version>${le.monitor.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${le.remote.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
