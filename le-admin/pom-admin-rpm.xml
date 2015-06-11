@@ -116,6 +116,9 @@
                                 <source>
                                     <location>certificates/${jks.name}</location>
                                 </source>
+                                <source>
+                                    <location>src/main/webapp/404.html</location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
@@ -137,6 +140,17 @@
                             <sources>
                                 <source>
                                     <location>${bin.env.path}/.bashrc</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/etc/httpd/conf</directory>
+                            <filemode>755</filemode>
+                            <username>apache</username>
+                            <groupname>apache</groupname>
+                            <sources>
+                                <source>
+                                    <location>${bin.env.path}/httpd.conf</location>
                                 </source>
                             </sources>
                         </mapping>
