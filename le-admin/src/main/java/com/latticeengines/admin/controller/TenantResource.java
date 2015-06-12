@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +30,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
 @RequestMapping(value = "/tenants")
-@PreAuthorize("hasRole('Platform Operations')")
+@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport')")
 public class TenantResource {
 
     @Autowired
