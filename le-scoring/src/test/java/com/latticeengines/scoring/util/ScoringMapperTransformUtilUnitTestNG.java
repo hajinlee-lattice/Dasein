@@ -207,6 +207,16 @@ public class ScoringMapperTransformUtilUnitTestNG {
         }
         return result;
     }
+    
+    @Test(groups = "unit")
+    public void testProcessBitValue() {
+        
+        assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "true").equals("1"));
+        assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "false").equals("0"));
+        assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "2").equals("2"));
+        assertTrue(ScoringMapperTransformUtil.processBitValue("String", "true").equals("true"));
+        assertTrue(ScoringMapperTransformUtil.processBitValue("String", "false").equals("false"));
+    }
 
     @Test(groups = "unit")
     public void testWriteToLeadInputFiles() throws IOException {

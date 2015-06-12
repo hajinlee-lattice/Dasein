@@ -261,8 +261,7 @@ public class ScoringMapperPredictUtilTestNG {
         } catch (LedpException e) {
             assertTrue(e.getCode() == LedpCode.LEDP_200011);
         }
-        //assertTrue(returnedStr.equals("model1model2testEvaluate") || returnedStr.equals("model2model1testEvaluate"),
-        //        "testEvaluate should pass");
+        System.out.println("returnedStr is " + returnedStr) ;
 
         // delete the score.txt file to the current directory
         dest.delete();

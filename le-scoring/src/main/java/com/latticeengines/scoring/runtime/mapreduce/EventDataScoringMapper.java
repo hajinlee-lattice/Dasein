@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
@@ -163,14 +164,14 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             if (leadList != null) {
                 scoring(context,leadList);
             } else { 
-                log.error("The mapper gets zero leads.");
+                log.warn("The mapper gets zero leads.");
             }
             
         } catch (Exception e) {
             String errorMessage = String.format( "TenantId=%s leadnputQueueId+%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
                     tenantId, leadnputQueueId, e.getMessage(), ExceptionUtils.getStackTrace(e));
             log.error(errorMessage);
-            File logFile = new File(logDir + "/scoring.txt");
+            File logFile = new File(logDir + "/" + UUID.randomUUID() + ".err");
             FileUtils.writeStringToFile(logFile, errorMessage);
             throw new LedpException(LedpCode.LEDP_200014, new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e)});
         }
