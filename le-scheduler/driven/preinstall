@@ -1,0 +1,3 @@
+#!/bin/bash
+rm -rf /tmp/usr/lib/hadoop-yarn
+rm -rf /tmp/etc/hadoop/conf
