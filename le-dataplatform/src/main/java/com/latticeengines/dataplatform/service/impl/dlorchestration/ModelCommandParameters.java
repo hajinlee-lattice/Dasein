@@ -205,7 +205,7 @@ public class ModelCommandParameters {
         return modelTargets;
     }
 
-    private void setModelTargets(List<String> modelTargets) {
+    public void setModelTargets(List<String> modelTargets) {
         this.modelTargets = modelTargets;
     }
 
