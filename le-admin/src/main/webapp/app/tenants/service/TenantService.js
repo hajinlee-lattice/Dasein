@@ -71,9 +71,11 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
         }).success(function(data){
             result.resultObj = _.map(data, TenantUtility.convertTenantRecordToGridData);
             defer.resolve(result);
-
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
+            result.success = false;
+            result.errMsg = err.errorMsg;
+            defer.resolve(result);
         });
 
         return defer.promise;
@@ -207,5 +209,6 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
 
         return defer.promise;
     };
+
 });
 

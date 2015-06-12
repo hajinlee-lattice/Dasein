@@ -13,7 +13,8 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
             $scope.tenants = result.resultObj;
             $scope.renderGrid($scope.tenants);
         } else {
-            //TODO:song handle error
+            $scope.showLoadingError = true;
+            $scope.loadingError = result.errMsg;
         }
         $scope.loading = false;
     });

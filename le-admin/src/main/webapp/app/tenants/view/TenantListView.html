@@ -5,6 +5,10 @@
         <h2 class="text-center">Loading tenants data ...</h2>
     </div>
 
+    <div ng-show="showLoadingError">
+        <div class="alert alert-danger">{{loadingError}}</div>
+    </div>
+
     <div kendo-grid="grid"
          k-options="gridOptions"
          k-ng-delay="gridOptions"
