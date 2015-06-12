@@ -23,12 +23,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         List<Map<String, Object>> recommendations = dao.getRecommendations(startId, size);
-        Map<String, Object> result = new HashMap<>();
-        if (recommendations != null && recommendations.size() > 0) {
-            result.put(START_ID_KEY, recommendations.get(0).get(ID_KEY));
-            result.put(END_ID_KEY, recommendations.get(recommendations.size() - 1).get(ID_KEY));
-            result.put(RECORDS_KEY, recommendations);
-        }
+        Map<String, Object> result = wrapResult(recommendations);
         return result;
     }
 
@@ -38,11 +33,26 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         List<Map<String, Object>> plays = dao.getPlays(startId, size);
+        Map<String, Object> result = wrapResult(plays);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getAccountextensions(String tenantName, int startId, int size) {
+        NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
+        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+
+        List<Map<String, Object>> extensions = dao.getAccountExtensions(startId, size);
+        Map<String, Object> result = wrapResult(extensions);
+        return result;
+    }
+
+    private Map<String, Object> wrapResult(List<Map<String, Object>> records) {
         Map<String, Object> result = new HashMap<>();
-        if (plays != null && plays.size() > 0) {
-            result.put(START_ID_KEY, plays.get(0).get(ID_KEY));
-            result.put(END_ID_KEY, plays.get(plays.size() - 1).get(ID_KEY));
-            result.put(RECORDS_KEY, plays);
+        if (records != null && records.size() > 0) {
+            result.put(START_ID_KEY, records.get(0).get(ID_KEY));
+            result.put(END_ID_KEY, records.get(records.size() - 1).get(ID_KEY));
+            result.put(RECORDS_KEY, records);
         }
         return result;
     }

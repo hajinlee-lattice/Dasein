@@ -12,5 +12,7 @@ public interface PlaymakerRecommendationEntityMgr {
     Map<String, Object> getRecommendations(String tenantName, int startId, int size);
 
     Map<String, Object> getPlays(String tenantName, int startId, int size);
+    
+    Map<String, Object> getAccountextensions(String tenantName, int startId, int size);
 
 }

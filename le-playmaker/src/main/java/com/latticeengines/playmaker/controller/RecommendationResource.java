@@ -41,4 +41,15 @@ public class RecommendationResource {
 
         return playmakerRecommendationMgr.getPlays(tenantName, startId, size);
     }
+
+    @RequestMapping(value = "/accountextensions", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get plays")
+    public Map<String, Object> getAccountExtensions(
+            @RequestParam(value = "tenantName", required = false) String tenantName,
+            @RequestParam(value = "startId", required = true) int startId,
+            @RequestParam(value = "size", required = true) int size) {
+
+        return playmakerRecommendationMgr.getAccountextensions(tenantName, startId, size);
+    }
 }

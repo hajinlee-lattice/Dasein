@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
@@ -22,39 +23,33 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     @Autowired
     private PlaymakerRecommendationEntityMgr playMakerRecommendationEntityMgr;
 
-    @Test(groups = "functional", enabled = true)
-    public void getRecommendations() throws Exception {
+    private PlaymakerTenant tenant;
 
-        PlaymakerTenant tenant = getTennat();
+    @BeforeClass
+    public void beforeClass() {
+        tenant = getTennat();
         try {
             playMakerTenantEntityMgr.deleteByTenantName(tenant.getTenantName());
         } catch (Exception ex) {
-
         }
         playMakerTenantEntityMgr.create(tenant);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void getRecommendations() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr
                 .getRecommendations(tenant.getTenantName(), 1, 100);
-
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> recomendations = (List<Map<String, Object>>) result
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
         Assert.assertTrue(recomendations.size() > 0);
 
-//        playMakerTenantEntityMgr.delete(tenant);
     }
 
     @Test(groups = "functional", enabled = true)
     public void getPlays() throws Exception {
-
-        PlaymakerTenant tenant = getTennat();
-        try {
-            playMakerTenantEntityMgr.deleteByTenantName(tenant.getTenantName());
-        } catch (Exception ex) {
-
-        }
-        playMakerTenantEntityMgr.create(tenant);
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getPlays(tenant.getTenantName(), 1, 100);
 
@@ -64,7 +59,21 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
         Assert.assertTrue(plays.size() > 0);
 
-//        playMakerTenantEntityMgr.delete(tenant);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void getAccountExtensions() throws Exception {
+
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountextensions(tenant.getTenantName(), 1,
+                100);
+
+        Assert.assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> plays = (List<Map<String, Object>>) result
+                .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
+        Assert.assertTrue(plays.get(0).containsKey(PlaymakerRecommendationEntityMgr.ID_KEY));
+        Assert.assertTrue(plays.size() > 0);
+
     }
 
     public static PlaymakerTenant getTennat() {

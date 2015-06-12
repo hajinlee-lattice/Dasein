@@ -53,6 +53,14 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
         Assert.assertNotNull(result);
     }
 
+    @Test(groups = "deployment")
+    public void getAccountExtensions() {
+        String url = hostPort + "/playmaker/accountextensions?startId=1&size=100&tenantName=" + tenant.getTenantName();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertNotNull(result);
+    }
+
     public void createTenantWithTenantName() {
         String url = hostPort + "/playmaker/tenants";
         restTemplate.postForObject(url, tenant, Boolean.class);

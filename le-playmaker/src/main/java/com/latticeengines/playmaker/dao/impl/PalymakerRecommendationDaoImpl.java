@@ -24,6 +24,9 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, L.[Likelihood] AS Likelihood, "
                 + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) AS ExpirationDate, "
                 + "L.[Monetary_Value] AS MonetaryValue, M.ISO4217_ID AS MonetaryValueIso4217ID, "
+                + "(SELECT TOP 1 T.[Display_Name] + '|' + T.[Phone_Number] + '|' + T.[Email_Address] + '|' + "
+                + " T.[Address_Street_1] + '|' + T.[City] + '|' + T.[State_Province] + '|' + T.[Country]+ '|' + T.[Zip] "
+                + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
                 + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate FROM [PreLead] L LEFT OUTER JOIN LaunchRun R "
                 + "ON L.[LaunchRun_ID] = R.[LaunchRun_ID] JOIN LEAccount A "
                 + "ON L.Account_ID = A.LEAccount_ID JOIN Priority P "
@@ -55,5 +58,21 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         source.addValue("startId", startId);
 
         return queryForListOfMap(sql, source);
+    }
+
+    @Override
+    public List<Map<String, Object>> getAccountExtensions(int startId, int size) {
+        String sql = "SELECT TOP " + size
+                + " [Item_ID] AS ID, E.* FROM [LEAccount_Extensions] E WHERE Item_ID >= :startId ORDER BY ID";
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("startId", startId);
+
+        List<Map<String, Object>> result = queryForListOfMap(sql, source);
+        if (result != null) {
+            for (Map<String, Object> map : result) {
+                map.remove("Item_ID");
+            }
+        }
+        return result;
     }
 }
