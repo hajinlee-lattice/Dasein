@@ -17,6 +17,7 @@ module.exports = function(grunt) {
             "angular-local-storage": '0.1.5',
             "angular-ui-router": '0.2.13',
             "angular-ui-bootstrap": '0.12.1',
+            qtip2: '2.2.1',
             underscore: '1.8.2',
             webfont: '1.5.16',
 
@@ -81,6 +82,7 @@ module.exports = function(grunt) {
                     'angular-ui-router/<%= app.version["angular-ui-router"] %>/angular-ui-router.js',
                     'angular-ui-bootstrap/<%= app.version["angular-ui-bootstrap"] %>/ui-bootstrap.js',
                     'angular-ui-bootstrap/<%= app.version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.js',
+                    'qtip2/<%= app.version.qtip2 %>/jquery.qtip.js',
                     'underscore.js/<%= app.version.underscore %>/underscore.js',
                     'webfont/<%= app.version.webfont %>/webfontloader.js',
                     'twitter-bootstrap/<%= app.version.bootstrap %>/js/bootstrap.js'
@@ -94,6 +96,7 @@ module.exports = function(grunt) {
                 },
                 src: [
                     'bootswatch/<%= app.version.bootstrap %>/simplex/bootstrap.css',
+                    'qtip2/<%= app.version.qtip2 %>/jquery.qtip.css',
                     'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css',
                     'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css.map'
                 ],
