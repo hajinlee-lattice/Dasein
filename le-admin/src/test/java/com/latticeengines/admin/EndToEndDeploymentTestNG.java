@@ -51,9 +51,9 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
-    private final static String contractId = "EndToEndTest";
     private final static String tenantName = "Global Test Tenant";
     private static String tenantId = "EndToEnd";
+    private static String contractId = "";
 
     @Autowired
     private TenantService tenantService;
@@ -124,6 +124,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         tenantId = testContract + tenantId;
+        contractId = tenantId;
 
         loginAD();
         cleanupZK();
