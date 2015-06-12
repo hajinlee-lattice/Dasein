@@ -124,8 +124,8 @@ class PLSEnvironments(object):
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_user;" + \
                         "Password=password;"
-    SQL_DanteDB_DataProvider = "Data Source=%s\SQL2012STD;" % pls_server + \
-                        "Initial Catalog=DT_%s;" % pls_bard_1[3:]+ \
+    SQL_DanteDB_DataProvider = "Data Source=BODCDEVVQAP27.dev.lattice.local\SQL2012STD;"+ \
+                        "Initial Catalog=DT_ADEDTBDd72041nG28080n154;" + \
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_prod;" + \
                         "Password=L@ttice2;"
