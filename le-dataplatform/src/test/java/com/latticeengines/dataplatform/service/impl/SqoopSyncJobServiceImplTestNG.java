@@ -32,7 +32,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -71,7 +71,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void importDataForFile() throws Exception {
         URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
