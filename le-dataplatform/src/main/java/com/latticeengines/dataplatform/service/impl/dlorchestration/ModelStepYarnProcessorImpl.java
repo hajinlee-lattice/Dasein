@@ -331,7 +331,10 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         List<String> targets = commandParameters.getModelTargets();
         String templateVersion = dataLoaderService.getTemplateVersion(commandParameters.getDlTenant(),
                 commandParameters.getDlUrl());
-        targets.add("Template_Version:" + templateVersion);
+        List<String> newTargets = new ArrayList<>(targets);
+
+        newTargets.add("Template_Version:" + templateVersion);
+        commandParameters.setModelTargets(newTargets);
     }
 
     private String generateProvenanceProperties(ModelCommandParameters commandParameters) {
