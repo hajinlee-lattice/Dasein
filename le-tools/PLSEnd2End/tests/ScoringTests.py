@@ -9,7 +9,9 @@ from operations import LeadCreator
 from operations import PlsOperations
 from operations.LeadCreator import EloquaRequest;
 from operations.LeadCreator import MarketoRequest;
+from operations.LeadCreator import SFDCRequest;
 from operations.TestHelpers import DanteRunner
+from test.test_deque import fail
 
 
 class Test(unittest.TestCase):
@@ -19,7 +21,7 @@ class Test(unittest.TestCase):
         elq = EloquaRequest();
         contact_lists = elq.addEloquaContact(5);
 
-        PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_1)
+        PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_1,PLSEnvironments.pls_marketing_app_ELQ)
 
         contact_lists = elq.getEloquaContact(contact_lists);
 
@@ -30,12 +32,27 @@ class Test(unittest.TestCase):
         mkto = MarketoRequest();
         leads_list = mkto.addLeadToMarketo(5);
         
-        PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_2);
+        PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_2,PLSEnvironments.pls_marketing_app_MKTO);
         
         lead_lists = mkto.getLeadFromMarketo(leads_list); 
         
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
         assert len(lead_faileds)==1, lead_faileds;
+        
+    def TestBulkScoringSFDC(self): 
+        sfdc = SFDCRequest();
+        leads_list = sfdc.addLeadsToSFDC(5);
+        contacts_list = sfdc.addContactsToSFDC(5)
+        
+        PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_3,PLSEnvironments.pls_marketing_app_SFDC);
+        
+        lead_lists = sfdc.getLeadsFromSFDC(leads_list); 
+        contact_lists = sfdc.getContactsFromSFDC(contacts_list);
+        
+        lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",lead_lists);
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",contact_lists);
+        assert len(lead_faileds)==1, lead_faileds;
+        assert len(contact_faileds)==1, contact_faileds;
     
     def TestHourlyScoringELQ(self):
         elq = EloquaRequest();
@@ -62,6 +79,23 @@ class Test(unittest.TestCase):
         assert len(lead_faileds)==1, lead_faileds;
         
         PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_2);
+    
+    def TestHourlyScoringSFDC(self): 
+        sfdc = SFDCRequest();
+        leads_list = sfdc.addLeadsToSFDC(2);
+        contacts_list = sfdc.addContactsToSFDC(2)
+        
+        PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_3,PLSEnvironments.pls_marketing_app_SFDC);
+        
+        lead_lists = sfdc.getLeadsFromSFDC(leads_list); 
+        contact_lists = sfdc.getContactsFromSFDC(contacts_list);
+        
+        lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",lead_lists);
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",contact_lists);
+        assert len(lead_faileds)==1, lead_faileds;
+        assert len(contact_faileds)==1, contact_faileds; 
+        
+        PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_3);
      
     def TestHourlyScoringELQ_Dante(self):
         elq = EloquaRequest();
@@ -98,6 +132,25 @@ class Test(unittest.TestCase):
         danteLead = leads_list[2].values()[0]        
         dr = DanteRunner()
         dr.checkDanteValue(danteLead)
+        
+    def TestHourlyScoringSFDC_Dante(self): 
+        fail
+#         sfdc = SFDCRequest();
+#         leads_list = sfdc.addLeadsToSFDC(2);
+#         contacts_list = sfdc.addContactsToSFDC(2)
+#         
+#         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_3,PLSEnvironments.pls_marketing_app_SFDC);
+#         
+#         lead_lists = sfdc.getLeadsFromSFDC(leads_list); 
+#         contact_lists = sfdc.getContactsFromSFDC(contacts_list);
+#         
+#         lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",lead_lists);
+#         contact_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",contact_lists);
+#         assert len(lead_faileds)==1, lead_faileds;
+#         assert len(contact_faileds)==1, contact_faileds; 
+#         
+#         PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_3);
+        
     def testName(self):
         pass
 

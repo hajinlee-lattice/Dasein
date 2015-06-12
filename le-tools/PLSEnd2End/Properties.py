@@ -5,6 +5,7 @@ Created on Mar 12, 2015
 '''
 
 from ConfigParser import SafeConfigParser
+import platform
 
 class PLSEnvironments(object):
     
@@ -85,7 +86,7 @@ class PLSEnvironments(object):
 
     driverName = "SQL Server"
     platformName = platform.system();
-    if platformName == "Linux" or "Darwin":
+    if platformName == "Linux" or platformName == "Darwin":
         driverName = "FreeTDS";
 
     connStr = "DRIVER={%s};" % driverName;

@@ -13,6 +13,8 @@ from operations.PerformanceHelpers import PerformanceData
 from operations.PerformanceHelpers import VisiDBRollBack
 from operations.TestHelpers import DanteRunner
 from operations.LeadCreator import SFDCRequest
+from operations.LeadCreator import EloquaRequest
+from operations.LeadCreator import MarketoRequest
 
 
 class Test(unittest.TestCase):
@@ -47,7 +49,16 @@ class Test(unittest.TestCase):
         dr = DanteRunner()
         danteLead="00Q8000001aCoGX"
         dr.checkDanteValue(danteLead)
-       
+    def testaddLeadToMarketo(self):
+        mkto = MarketoRequest();
+        print mkto.addLeadToMarketo(3); 
+    def testaddLeadToMarketoForDante(self):
+        mkto = MarketoRequest();
+        print mkto.addLeadToMarketoForDante(3);   
+    def testAddContactsToSFDC(self):
+        sfdc = SFDCRequest();
+        print sfdc.addContactsToSFDC(3)
+           
     def testAddLeadsToSFDC(self):
         sfdc = SFDCRequest();
         print sfdc.addLeadsToSFDC(3)
