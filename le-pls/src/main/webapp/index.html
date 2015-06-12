@@ -10,6 +10,7 @@
     <link href="assets/styles/production.css" rel="stylesheet" type="text/css" />
     <!-- endbuild -->
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.1/jquery.qtip.min.css" rel="stylesheet" type="text/css">
 </head>
 <body data-ng-controller="MainController" class="blue-background">
     <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
@@ -29,7 +30,7 @@
     Use DOMUtil.isIE() to detect internet explorer.
     -->
     <!--[if IE]> <div id="isIE"></div> <![endif]-->
-    
+
     <!-- build:js app/production_@@versionString.js -->
     <!-- vendor -->
     <script src="app/AppCommon/vendor/jquery-2.1.1.js"></script>
@@ -42,11 +43,14 @@
     <script src="app/AppCommon/vendor/d3.v3.js"></script>
     <script src="app/AppCommon/vendor/CryptoJS.js"></script>
     <script src="app/AppCommon/vendor/bootstrap.js"></script>
+    <script src="app/AppCommon/vendor/jquery.qtip.js"></script>
     <script src="app/AppCommon/vendor/alasql.js"></script>
     <script src="app/AppCommon/vendor/date.format.js"></script>
     
     <!-- common -->
     <script src="app/AppCommon/directives/ngEnterDirective.js"></script>
+    <script src="app/AppCommon/directives/ngQtipDirective.js"></script>
+    <script src="app/AppCommon/directives/helperMarkDirective.js"></script>
     <script src="app/AppCommon/utilities/ExceptionOverrideUtility.js"></script>
     <script src="app/AppCommon/utilities/URLUtility.js"></script>
     <script src="app/AppCommon/utilities/ResourceUtility.js"></script>

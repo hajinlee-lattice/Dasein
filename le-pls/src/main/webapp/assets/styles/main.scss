@@ -42,6 +42,14 @@
   display: block;
 }
 
+.has-tooltip {
+  color: #e96339;
+}
+
+.has-tooltip:hover {
+  cursor: pointer;
+}
+
 #topPredictorAttributeHover {
     position: fixed;
     -webkit-transform: translateY(-50%);

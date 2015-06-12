@@ -1,4 +1,5 @@
 angular.module('mainApp.config.controllers.ManageCredentialsController', [
+    'mainApp.appCommon.directives.helperMarkDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.StringUtility',
