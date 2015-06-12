@@ -1,4 +1,5 @@
 var app = angular.module("app.login.controller.LoginCtrl", [
+    'le.common.directives.ngEnterDirective',
     'le.common.util.BrowserStorageUtility',
     "app.login.service.LoginService"
 ]);
@@ -7,7 +8,11 @@ app.controller('LoginCtrl', function($scope, $state, BrowserStorageUtility, Logi
 
     restoreSession();
 
+    $scope.loginInProgress = false;
+
     $scope.onLoginClick = function(){
+        if ($scope.loginInProgress) return;
+        $scope.loginInProgress = true;
         $scope.showLoginError = false;
         BrowserStorageUtility.clear(false);
         login();
@@ -28,6 +33,7 @@ app.controller('LoginCtrl', function($scope, $state, BrowserStorageUtility, Logi
                 $scope.showLoginError = true;
                 $scope.loginErrorMsg = "Authentication failed.";
             }
+            $scope.loginInProgress = false;
         });
     }
 
