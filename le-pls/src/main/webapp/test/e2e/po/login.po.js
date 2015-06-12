@@ -32,7 +32,7 @@ var Login = function() {
         var width = 1100;
         var height = 768;
         browser.driver.manage().window().setSize(width, height);
-        browser.get('/');
+        browser.get('/', 30000);
     }
 
     function isLoginPage() {
