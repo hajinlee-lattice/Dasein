@@ -76,6 +76,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     @Value("${scoring.mapper.logdir}")
     private String scoringMapperLogDir;
 
+    @Value("${scoring.mapper.max.input.split.size}")
+    private String maxInputSplitSize;
+
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
 
@@ -179,6 +182,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getScoringQueueNameForSubmission());
         properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table + "/data");
         properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table + "/scores");
+        properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), maxInputSplitSize);
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);

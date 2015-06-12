@@ -28,20 +28,18 @@ import com.latticeengines.scoring.util.ModelEvaluationResult;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
 import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
 import com.latticeengines.scoring.util.ScoringMapperValidateUtil;
-import com.latticeengines.scoring.util.DatatypeValidationResult;
 
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
     private static final long LEAD_FILE_THRESHOLD = 10000L;
-    private static final int MEMORY_THRESHOLD = 1000000;
 
     private void processLocalizedFiles(Path[] paths, HashSet<String> modelIDs, HashMap<String, String> modelIdMap, HashMap<String, JSONObject> models) throws IOException, ParseException {
-        
+
         JSONObject datatype = null;
         boolean scoringScriptProvided = false;
         boolean datatypeFileProvided = false;
-        
+
         for (Path p : paths) {
             log.info("files" + p);
             log.info(p.getName());
@@ -64,20 +62,20 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 }
             }
         }
-        
+
         // print out the modelIdMap
         for (String modelID : modelIdMap.keySet()) {
             log.info(modelID + ": " + modelIdMap.get(modelID));
         }
 
         log.info("the size of the models is " + models.size());
-        
+
         ScoringMapperValidateUtil.validateLocalizedFiles(scoringScriptProvided, datatypeFileProvided, modelIDs);
         ScoringMapperValidateUtil.validateDatatype(datatype, models);
     }
-    
+
     void scoring(Context context, ArrayList<String> leadList) throws Exception {
-        
+
         @SuppressWarnings("deprecation")
         Path[] paths = context.getLocalCacheFiles();
         // key: modelGuid, value: modelId
@@ -103,7 +101,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             ScoringMapperTransformUtil.manipulateLeadFile(leadInputRecordMap, models, modelIdMap, record);
         }
         log.info("number of lead records is " + numberOfRecords);
-        
+
         Set<String> keys = leadInputRecordMap.keySet();
         int totalRecordSize = 0;
         for (String key : keys) {
@@ -126,7 +124,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         if (numberOfRecords != resultList.size()) {
             throw new LedpException(LedpCode.LEDP_20009, new String[] { String.valueOf(totalRecordSize), String.valueOf(resultList.size()) });
         }
-        
+
         String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
         log.info("outputDir: " + outputPath);
         ScoringMapperPredictUtil.writeToOutputFile(resultList, context.getConfiguration(), outputPath);
@@ -134,46 +132,28 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
     @Override
     public void run(Context context) throws IOException, InterruptedException {
-        
+
         String leadnputQueueId = context.getConfiguration().get(ScoringProperty.LEAD_INPUT_QUEUE_ID.name());
         String logDir = context.getConfiguration().get(ScoringProperty.LEAD_FILE_THRESHOLD.name());
         String tenantId = context.getConfiguration().get(ScoringProperty.TENANT_ID.name());
-        
+
         try {
-            
-            int columnNum;
-            int maxNumOfRows = 0;
-            int count = 0;
-            ArrayList<String> leadList = null;
+            ArrayList<String> leadList = new ArrayList<String>();
             while (context.nextKeyValue()) {
-                count++;
-                if (count == 1) {
-                    columnNum = ScoringMapperTransformUtil.getColumnNumber(context.getCurrentKey().toString());
-                    log.info("The columnNum of the lead record is " + columnNum);
-                    maxNumOfRows = MEMORY_THRESHOLD/columnNum;
-                    leadList = new ArrayList<String>();
-                }
                 leadList.add(context.getCurrentKey().datum().toString());
-                
-                if (count == maxNumOfRows) {
-                    scoring(context, leadList);
-                    count = 0;
-                }
             }
-            
-            if (leadList != null) {
-                scoring(context,leadList);
-            } else { 
+            if (leadList.size() == 0) {
                 log.warn("The mapper gets zero leads.");
+            }else{
+                scoring(context, leadList);
             }
-            
         } catch (Exception e) {
-            String errorMessage = String.format( "TenantId=%s leadnputQueueId+%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
-                    tenantId, leadnputQueueId, e.getMessage(), ExceptionUtils.getStackTrace(e));
+            String errorMessage = String.format("TenantId=%s leadnputQueueId+%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
+                            tenantId, leadnputQueueId, e.getMessage(), ExceptionUtils.getStackTrace(e));
             log.error(errorMessage);
             File logFile = new File(logDir + "/" + UUID.randomUUID() + ".err");
             FileUtils.writeStringToFile(logFile, errorMessage);
-            throw new LedpException(LedpCode.LEDP_200014, new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e)});
+            throw new LedpException(LedpCode.LEDP_200014, new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e) });
         }
     }
 }

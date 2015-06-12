@@ -4,11 +4,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,14 +68,6 @@ public class ScoringMapperTransformUtil {
             toReturn.add(modelId);
         }
         return toReturn;
-    }
-    
-    public static int getColumnNumber(String leadRecord) throws ParseException {
-        int columnNum = 0;
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) parser.parse(leadRecord);
-        columnNum = jsonObject.size();
-        return columnNum;
     }
 
     public static void parseModelFiles(HashMap<String, JSONObject> models, Path path) throws IOException, ParseException {
@@ -304,7 +294,7 @@ public class ScoringMapperTransformUtil {
          *  Decompose the model.json
          *
          */
-        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
+        //HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
         File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
         String modelStr = FileUtils.readFileToString(modelFile);
         JSONObject modelObject;

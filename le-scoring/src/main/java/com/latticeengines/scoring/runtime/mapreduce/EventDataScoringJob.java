@@ -77,8 +77,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());
             AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
-            AvroKeyInputFormat.setMinInputSplitSize(mrJob, 1L);
-            AvroKeyInputFormat.setMaxInputSplitSize(mrJob, 10485760L);
+            AvroKeyInputFormat.setMaxInputSplitSize(mrJob, Long.valueOf(properties.getProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name())));
 
             List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, new HdfsFilenameFilter() {
 

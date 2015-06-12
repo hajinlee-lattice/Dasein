@@ -43,7 +43,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         leadList.add(record3);
         HashSet<String> modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
         assertTrue(modelIDs.size() == 2, "modelIDs should have 2 models");
-        
+
         String recordWithoutLeadID = "{\"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
         leadList.add(recordWithoutLeadID);
         try {
@@ -52,7 +52,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
             assertTrue(e1.getCode() == LedpCode.LEDP_20003);
         }
         leadList.remove(3);
-        
+
         String recordWithoutModelGuid = "{\"ModelingID\": 113880, \"LeadID\": \"1\"}";
         leadList.add(recordWithoutModelGuid);
         try {
@@ -61,16 +61,16 @@ public class ScoringMapperTransformUtilUnitTestNG {
             assertTrue(e1.getCode() == LedpCode.LEDP_20004);
         }
         leadList.remove(3);
-        
+
         String recordWithDuplication = "{\"LeadID\": \"1\", \"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
         leadList.add(recordWithDuplication);
         try {
             modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
         } catch (LedpException e1) {
-            assertTrue(e1.getCode() ==  LedpCode.LEDP_20005);
+            assertTrue(e1.getCode() == LedpCode.LEDP_20005);
         }
     }
-    
+
     @Test(groups = "unit")
     public void testParseDatatypeFile() throws IOException, ParseException {
         URL url = ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc");
@@ -102,7 +102,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
     }
 
-    private boolean compareFiles(String fileName) {
+    private boolean compareFiles(String fileName) throws IOException {
         boolean filesAreSame = false;
         File newFile = new File(MODEL_ID + fileName);
         URL url = ClassLoader.getSystemResource(MODEL_SUPPORTED_FILE_PATH + fileName);
@@ -111,29 +111,27 @@ public class ScoringMapperTransformUtilUnitTestNG {
         return filesAreSame;
     }
 
-    private boolean compareFilesLineByLine(File file1, File file2) {
+    private boolean compareFilesLineByLine(File file1, File file2) throws IOException {
         boolean filesAreSame = true;
-        try {
-            LineNumberReader reader1 = new LineNumberReader(new FileReader(file1));
-            LineNumberReader reader2 = new LineNumberReader(new FileReader(file2));
-            String line1 = reader1.readLine();
-            String line2 = reader2.readLine();
-            while (line1 != null && line2 != null) {
-                if (!line1.equals(line2)) {
-                    System.out.println("File \"" + file1 + "\" and file \"" + file2 + "\" differ at line "
-                            + reader1.getLineNumber() + ":" + "\n" + line1 + "\n" + line2);
-                    filesAreSame = false;
-                    break;
-                }
-                line1 = reader1.readLine();
-                line2 = reader2.readLine();
-            }
-            if ((line1 == null && line2 != null) || (line1 != null && line2 == null)) {
+        LineNumberReader reader1 = new LineNumberReader(new FileReader(file1));
+        LineNumberReader reader2 = new LineNumberReader(new FileReader(file2));
+        String line1 = reader1.readLine();
+        String line2 = reader2.readLine();
+        while (line1 != null && line2 != null) {
+            if (!line1.equals(line2)) {
+                System.out.println("File \"" + file1 + "\" and file \"" + file2 + "\" differ at line "
+                        + reader1.getLineNumber() + ":" + "\n" + line1 + "\n" + line2);
                 filesAreSame = false;
+                break;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            line1 = reader1.readLine();
+            line2 = reader2.readLine();
         }
+        if ((line1 == null && line2 != null) || (line1 != null && line2 == null)) {
+            filesAreSame = false;
+        }
+        reader1.close();
+        reader2.close();
         return filesAreSame;
     }
 
@@ -207,10 +205,10 @@ public class ScoringMapperTransformUtilUnitTestNG {
         }
         return result;
     }
-    
+
     @Test(groups = "unit")
     public void testProcessBitValue() {
-        
+
         assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "true").equals("1"));
         assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "false").equals("0"));
         assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "2").equals("2"));
