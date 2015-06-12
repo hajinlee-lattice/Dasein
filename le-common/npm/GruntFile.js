@@ -36,6 +36,9 @@ module.exports = function(grunt) {
         concat: {
             default: {
                 src: [
+                    'src/directive/ngEnterDirective.js',
+                    'src/directive/ngQtipDirective.js',
+                    'src/directive/helperMarkDirective.js',
                     'src/util/UnderscoreUtility.js',
                     'src/util/BrowserStorageUtility.js'
                 ],
