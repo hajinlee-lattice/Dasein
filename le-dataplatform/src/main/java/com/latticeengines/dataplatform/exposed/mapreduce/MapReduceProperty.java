@@ -8,5 +8,6 @@ public enum MapReduceProperty {
     OUTPUT, //
     QUEUE, //
     CACHE_FILE_PATH, //
-    CACHE_ARCHIVE_PATH;
+    CACHE_ARCHIVE_PATH,
+    MAX_INPUT_SPLIT_SIZE;
 }
