@@ -2,6 +2,7 @@ package com.latticeengines.pls.provisioning;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -58,56 +59,8 @@ public class PLSComponentManager {
             }
         }
 
-        for (String email : superAdminEmails) {
-            User user;
-            try {
-                user = userService.findByEmail(email);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("Finding user with email %s error.", email), e);
-            }
-            if (user == null) {
-                UserRegistration uReg = createAdminUserRegistration(email, AccessLevel.SUPER_ADMIN);
-                try {
-                    userService.createUser(uReg);
-                } catch (Exception e) {
-                    throw new LedpException(LedpCode.LEDP_18028,
-                            String.format("Adding new user %s error.", email), e);
-                }
-            }
-            try {
-                userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), email);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("Assigning SuperAdmin role to %s error.", email), e);
-            }
-        }
-
-        for (String email : internalAdminEmails) {
-            User user;
-            try {
-                user = userService.findByEmail(email);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("Finding user with email %s error.",  email), e);
-            }
-            if (user == null) {
-                UserRegistration uReg = createAdminUserRegistration(email, AccessLevel.INTERNAL_ADMIN);
-                try {
-                    userService.createUser(uReg);
-                } catch (Exception e) {
-                    throw new LedpException(LedpCode.LEDP_18028,
-                            String.format("Adding new user %s error.", email), e);
-                }
-            }
-            try {
-                userService.assignAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant.getId(), email);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("Assigning LatticeAdmin role to %s error.", email), e);
-            }
-        }
-
+        assignAccessLevelByEmails(internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
+        assignAccessLevelByEmails(superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
     }
 
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
@@ -208,6 +161,33 @@ public class PLSComponentManager {
         uReg.setCredentials(creds);
 
         return uReg;
+    }
+
+    private void assignAccessLevelByEmails(Collection<String> emails, AccessLevel accessLevel, String tenantId) {
+        for (String email : emails) {
+            User user;
+            try {
+                user = userService.findByEmail(email);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028,
+                        String.format("Finding user with email %s error.", email), e);
+            }
+            if (user == null) {
+                UserRegistration uReg = createAdminUserRegistration(email, accessLevel);
+                try {
+                    userService.createUser(uReg);
+                } catch (Exception e) {
+                    throw new LedpException(LedpCode.LEDP_18028,
+                            String.format("Adding new user %s error.", email), e);
+                }
+            }
+            try {
+                userService.assignAccessLevel(accessLevel, tenantId, email);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028,
+                        String.format("Assigning SuperAdmin role to %s error.", email), e);
+            }
+        }
     }
 
 }
