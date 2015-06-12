@@ -361,14 +361,14 @@ class DLConfigRunner(SessionRunner):
         self.editDataProviders(tenant, "SQL_LeadScoring", PLSEnvironments.SQL_LeadScoring);
         self.editDataProviders(tenant, "SQL_DanteDB_DataProvider", PLSEnvironments.SQL_DanteDB_DataProvider);
         self.editDataProviders(tenant, "SQL_LSSBard", PLSEnvironments.SQL_LSSBard);
-#         self.editDataProviders(tenant, "SFDC_DataProvider", PLSEnvironments.SFDC_DataProvider);
+        self.editDataProviders(tenant, "SFDC_DataProvider", PLSEnvironments.SFDC_DataProvider);
         
         if PLSEnvironments.pls_marketing_app_ELQ == marketting_app:
             self.editDataProviders(tenant, "SQL_ReportsDB_DataProvider", PLSEnvironments.SQL_ReportsDB_DataProvider_ELQ);
-#             self.editDataProviders(tenant, "Eloqua_DataProvider", PLSEnvironments.Eloqua_DataProvider);
+            self.editDataProviders(tenant, "Eloqua_DataProvider", PLSEnvironments.Eloqua_DataProvider);
         elif PLSEnvironments.pls_marketing_app_MKTO == marketting_app:
             self.editDataProviders(tenant, "SQL_ReportsDB_DataProvider", PLSEnvironments.SQL_ReportsDB_DataProvider_MKTO);  
-#             self.editDataProviders(tenant, "Marketo_DataProvider", PLSEnvironments.Marketo_DataProvider);  
+            self.editDataProviders(tenant, "Marketo_DataProvider", PLSEnvironments.Marketo_DataProvider);  
 
 
     def createMockDataProviders(self, tenant, marketting_app,host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,

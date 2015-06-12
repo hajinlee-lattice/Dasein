@@ -26,7 +26,7 @@ def setUpPls():
 
     ''' configure Bard Tenant -- drop templates, configure DL.. '''
 #     configureBardTenant(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ)
-    configureBardTenant(PLSEnvironments.pls_bard_3, PLSEnvironments.pls_marketing_app_SFDC)
+#     configureBardTenant(PLSEnvironments.pls_bard_3, PLSEnvironments.pls_marketing_app_SFDC)
 #     configureBardTenant(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
 
 
