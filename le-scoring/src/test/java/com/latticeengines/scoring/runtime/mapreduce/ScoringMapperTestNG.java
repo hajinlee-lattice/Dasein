@@ -23,14 +23,19 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.util.CollectionUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
@@ -69,6 +74,15 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
+    @Autowired
+    private DbCreds scoringCreds;
+
+    @Autowired
+    private JdbcTemplate scoringJdbcTemplate;
+
+    @Autowired
+    private MetadataService metadataService;
+
     private String inputLeadsTable;
 
     private String modelPath;
@@ -77,7 +91,13 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
 
     private String scorePath;
 
-    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
+    private static final String scoreResCustomer = "scoreResult";
+
+    private static final String scoreResTable = "scoreResultTable";
+
+    private static final String scoreTargetTable = "Leads_383bd1f3426444929e719380a399b38b";
+
+    private static final String resultJdbcUrl = "jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine;user=root;password=welcome";
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
@@ -86,7 +106,7 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        tenant = dotJoiner.join(customer, customer, "Production");
+        tenant = CustomerSpace.parse(customer).toString();
 
         // upload lead files to HDFS
         URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
@@ -174,6 +194,35 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
             e.printStackTrace();
         }
         return newlist;
+    }
+
+    /**
+     * Don't directly load data from Prod DB, please import data to a dev db before you use this method
+     * @throws Exception
+     */
+
+    @SuppressWarnings("unused")
+    private void loadAvroResultToHdfs() throws Exception{
+        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/"+ CustomerSpace.parse(scoreResCustomer) + "/scoring");
+        scoringJdbcTemplate.setDataSource(new DriverManagerDataSource(resultJdbcUrl));
+        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, scoreResTable))){
+            metadataService.dropTable(scoringJdbcTemplate, scoreResTable);
+        }
+        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, scoreResTable, scoreTargetTable);
+
+        ScoringCommand scoringCommand = new ScoringCommand(scoreResCustomer, ScoringCommandStatus.POPULATED, scoreResTable,
+                0, 4352, new Timestamp(System.currentTimeMillis()));
+        
+        scoringCreds.setJdbcUrl(resultJdbcUrl);
+        // Will load result avros to /user/s-analytics/customers/scoreResult.scoreResult.Production/scoring/scoreResTable/data
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.LOAD_DATA);
+        waitForSuccess(appId, ScoringCommandStep.LOAD_DATA);
+        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path("/user/s-analytics/customers/scoreResult.scoreResult.Production/scoring/scoreResultTable/data/part-m-00000.avro"));
+        for(int i = 0; i < records.size(); i++){
+            if(i == 2)
+                break;
+            System.out.println(records.get(i));
+        }
     }
 
     private boolean compareJsonResults(List<GenericRecord> newResults, List<GenericRecord> oldResults) {

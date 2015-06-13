@@ -17,10 +17,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandLog;
@@ -76,8 +76,6 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private static String tenant;
 
-    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
-
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
     }
@@ -89,7 +87,7 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
             metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
-        tenant = dotJoiner.join(customer, customer, "Production");
+        tenant = CustomerSpace.parse(customer).toString();
         path = customerBaseDir + "/" + tenant + "/scoring";
         HdfsUtils.rmdir(yarnConfiguration, path);
 
