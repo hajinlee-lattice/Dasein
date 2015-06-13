@@ -59,9 +59,9 @@ public abstract class AvroTypeConverter {
             targetType = Long.class;
             DateTimeFormatter dtf = null;
 
-            if (attr.getLogicalDataType().equals("date")) {
+            if (attr.getLogicalDataType().equals("date") || attr.getLogicalDataType().equals("Date")) {
                 dtf = ISODateTimeFormat.dateElementParser();
-            } else if (attr.getLogicalDataType().equals("datetime")) {
+            } else if (attr.getLogicalDataType().equals("datetime") || attr.getLogicalDataType().equals("Timestamp")) {
                 dtf = ISODateTimeFormat.dateTimeParser();
             }
             try {

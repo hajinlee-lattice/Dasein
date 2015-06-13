@@ -14,4 +14,5 @@ public class MarketoImportProperty {
     public static final String SINCEDATETIME = "sinceDateTime";
     public static final String IMPORTCONTEXT = "importContext";
     public static final String ACTIVITYRESULTLIST = "activitiesResultList";
+    public static final String TABLE = "table";
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.ProducerTemplate;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
@@ -29,6 +30,9 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private ProducerTemplate producerTemplate;
     
+    @Autowired
+    private Configuration yarnConfiguration;
+    
     private SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
     private ImportContext ctx = new ImportContext();
     
@@ -38,6 +42,8 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         ctx.setProperty(MarketoImportProperty.CLIENTID, "c98abab9-c62d-4723-8fd4-90ad5b0056f3");
         ctx.setProperty(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
         ctx.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
+        ctx.setProperty(ImportProperty.HADOOPCONFIG, yarnConfiguration);
+        ctx.setProperty(ImportProperty.TARGETPATH, "/tmp");
         
         List<Table> tables = new ArrayList<>();
         Table activityType = createMarketoActivityType();

@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.Table;
 
 public class SetPropertiesFromImportContextProcessor implements Processor {
     
@@ -17,9 +18,21 @@ public class SetPropertiesFromImportContextProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         ImportContext ctx = exchange.getIn().getHeader(MarketoImportProperty.IMPORTCONTEXT, ImportContext.class);
         log.info("Import context properties:");
-        for (Map.Entry<String, Object> entry : ctx.getEntries()) {
-            log.info("Property " + entry.getKey() + " = " + entry.getValue());
-            exchange.setProperty(entry.getKey(), entry.getValue());
+        
+        if (ctx != null) {
+            for (Map.Entry<String, Object> entry : ctx.getEntries()) {
+                log.info("Property " + entry.getKey() + " = " + entry.getValue());
+                exchange.setProperty(entry.getKey(), entry.getValue());
+            }
+            exchange.setProperty(MarketoImportProperty.IMPORTCONTEXT, ctx);
+        } else {
+            log.warn("ImportContext is null.");
+        }
+        
+        Table table = exchange.getIn().getHeader(MarketoImportProperty.TABLE, Table.class);
+        
+        if (table != null) {
+            exchange.setProperty(MarketoImportProperty.TABLE, table);
         }
     }
 }
