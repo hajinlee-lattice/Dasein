@@ -1,4 +1,5 @@
 angular.module('mainApp.config.controllers.ManageCredentialsController', [
+    'mainApp.appCommon.directives.ngQtipDirective',
     'mainApp.appCommon.directives.helperMarkDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
@@ -15,8 +16,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
         var isValid = false;
         switch (type) {
             case "sfdc":
-                isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.Password) &&
-                    !StringUtility.IsEmptyString(credentials.SecurityToken);
+                isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.Password);
                 break;
             case "eloqua":
                 isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.Password) &&
