@@ -83,12 +83,12 @@ public class Attribute implements HasName, HasProperty, Serializable {
         this.physicalDataType = physicalDataType;
     }
 
-    @JsonIgnore
+    @JsonProperty("logical_type")
     public String getLogicalDataType() {
         return logicalDataType;
     }
 
-    @JsonIgnore
+    @JsonProperty("logical_type")
     public void setLogicalDataType(String logicalDataType) {
         this.logicalDataType = logicalDataType;
     }
