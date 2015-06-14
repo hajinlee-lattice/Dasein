@@ -73,7 +73,24 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
         Assert.assertTrue(plays.get(0).containsKey(PlaymakerRecommendationEntityMgr.ID_KEY));
         Assert.assertTrue(plays.size() > 0);
+    }
 
+    @Test(groups = "functional", enabled = true)
+    public void getAccountExtensionSchema() throws Exception {
+
+        List<Map<String, Object>> result = playMakerRecommendationEntityMgr.getAccountExtensionSchema(tenant
+                .getTenantName());
+
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.size() > 0);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void getPlayValues() throws Exception {
+
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getPlayValues(tenant.getTenantName(), 1, 100);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.size() > 0);
     }
 
     public static PlaymakerTenant getTennat() {

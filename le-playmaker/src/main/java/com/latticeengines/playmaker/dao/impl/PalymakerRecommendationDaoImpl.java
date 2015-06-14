@@ -75,4 +75,34 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         }
         return result;
     }
+
+    @Override
+    public List<Map<String, Object>> getAccountExtensionSchema() {
+        String sql = "SELECT C.Column_Name AS Field, C.Column_Type AS Type, C.String_Length AS StringLength, "
+                + "(SELECT TOP 1 S.value FROM ConfigResource S JOIN [ExtensionColumnSpec] "
+                + "ON S.Key_Name = C.Display_Name_Key) AS DisplayName "
+                + "FROM [ExtensionColumnSpec] C JOIN [ExtensionTableSpec] T ON C.Parent_ID = T.ExtensionTableSpec_ID WHERE T.External_ID = 'LEAccount' ";
+
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        List<Map<String, Object>> result = queryForListOfMap(sql, source);
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> getPlayValues(int startId, int size) {
+        String sql = "SELECT TOP "
+                + size
+                + " [Play_ID] AS ID, "
+                + "(SELECT DISTINCT G.Display_Name + '|' as [text()] FROM PlayGroupMap M JOIN PlayGroup G "
+                + "ON M.PlayGroup_ID = G.PlayGroup_ID WHERE M.Play_ID = Play.Play_ID FOR XML PATH ('')) AS PlayGroups, "
+                + "(SELECT DISTINCT S.value + '|' as [text()] FROM [PlayPriorityRuleMap] M "
+                + "JOIN [Priority] P ON M.Priority_ID = P.Priority_ID JOIN ConfigResource S ON P.[Display_Text_Key] = S.Key_Name "
+                + "WHERE M.Play_ID = Play.Play_ID FOR XML PATH (''))  AS Priorities "
+                + "FROM [Play] WHERE [Play_ID] >= :startId ORDER BY ID";
+
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("startId", startId);
+        List<Map<String, Object>> result = queryForListOfMap(sql, source);
+        return result;
+    }
 }

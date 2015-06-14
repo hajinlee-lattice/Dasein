@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.entitymgr;
 
+import java.util.List;
 import java.util.Map;
 
 public interface PlaymakerRecommendationEntityMgr {
@@ -14,5 +15,9 @@ public interface PlaymakerRecommendationEntityMgr {
     Map<String, Object> getPlays(String tenantName, int startId, int size);
     
     Map<String, Object> getAccountextensions(String tenantName, int startId, int size);
+
+    List<Map<String, Object>> getAccountExtensionSchema(String tenantName);
+
+    Map<String, Object> getPlayValues(String tenantName, int startId, int size);
 
 }

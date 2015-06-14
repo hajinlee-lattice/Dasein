@@ -12,4 +12,8 @@ public interface PalymakerRecommendationDao extends GenericDao {
     List<Map<String, Object>> getPlays(int startId, int size);
 
     List<Map<String, Object>> getAccountExtensions(int startId, int size);
+
+    List<Map<String, Object>> getAccountExtensionSchema();
+
+    List<Map<String, Object>> getPlayValues(int startId, int size);
 }

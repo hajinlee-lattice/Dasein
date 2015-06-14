@@ -47,6 +47,25 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         return result;
     }
 
+    @Override
+    public List<Map<String, Object>> getAccountExtensionSchema(String tenantName) {
+        NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
+        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+
+        List<Map<String, Object>> schemas = dao.getAccountExtensionSchema();
+        return schemas;
+    }
+
+    @Override
+    public Map<String, Object> getPlayValues(String tenantName, int startId, int size) {
+        NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
+        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+
+        List<Map<String, Object>> values = dao.getPlayValues(startId, size);
+        Map<String, Object> result = wrapResult(values);
+        return result;
+    }
+
     private Map<String, Object> wrapResult(List<Map<String, Object>> records) {
         Map<String, Object> result = new HashMap<>();
         if (records != null && records.size() > 0) {

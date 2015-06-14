@@ -44,12 +44,31 @@ public class RecommendationResource {
 
     @RequestMapping(value = "/accountextensions", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get plays")
+    @ApiOperation(value = "Get account extensions")
     public Map<String, Object> getAccountExtensions(
             @RequestParam(value = "tenantName", required = false) String tenantName,
             @RequestParam(value = "startId", required = true) int startId,
             @RequestParam(value = "size", required = true) int size) {
 
         return playmakerRecommendationMgr.getAccountextensions(tenantName, startId, size);
+    }
+
+    @RequestMapping(value = "/accountextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get account extensions")
+    public List<Map<String, Object>> getAccountExtensionSchema(
+            @RequestParam(value = "tenantName", required = false) String tenantName) {
+
+        return playmakerRecommendationMgr.getAccountExtensionSchema(tenantName);
+    }
+
+    @RequestMapping(value = "/playvalues", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get flexible play values")
+    public Map<String, Object> getPlayValues(@RequestParam(value = "tenantName", required = false) String tenantName,
+            @RequestParam(value = "startId", required = true) int startId,
+            @RequestParam(value = "size", required = true) int size) {
+
+        return playmakerRecommendationMgr.getPlayValues(tenantName, startId, size);
     }
 }
