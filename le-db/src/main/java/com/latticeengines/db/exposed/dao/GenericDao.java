@@ -9,4 +9,6 @@ public interface GenericDao {
 
     List<Map<String, Object>> queryForListOfMap(String sql, MapSqlParameterSource parameters);
 
+    <T> T queryForObject(String sql, MapSqlParameterSource parameters, Class<T> requiredType);
+
 }

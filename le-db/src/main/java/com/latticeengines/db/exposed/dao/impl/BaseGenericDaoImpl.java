@@ -12,7 +12,7 @@ public class BaseGenericDaoImpl implements GenericDao {
 
     private NamedParameterJdbcTemplate namedJdbcTemplate;
 
-    public  BaseGenericDaoImpl(NamedParameterJdbcTemplate namedJdbcTemplate) {
+    public BaseGenericDaoImpl(NamedParameterJdbcTemplate namedJdbcTemplate) {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
@@ -21,4 +21,9 @@ public class BaseGenericDaoImpl implements GenericDao {
         return namedJdbcTemplate.queryForList(sql, parameters);
     }
 
+    @Override
+    public <T> T queryForObject(String sql, MapSqlParameterSource parameters,
+            Class<T> requiredType) {
+        return namedJdbcTemplate.queryForObject(sql, parameters, requiredType);
+    }
 }
