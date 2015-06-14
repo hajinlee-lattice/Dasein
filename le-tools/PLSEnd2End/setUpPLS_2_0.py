@@ -20,14 +20,14 @@ import logging
 def setUpPls():
 
     ''' Refresh SVN for templates '''
-#     print "Refreshing SVN"
-#     runner = SessionRunner()
-#     print runner.runCommandLocally("svn update", PLSEnvironments.svn_location_local)
+    print "Refreshing SVN"
+    runner = SessionRunner()
+    print runner.runCommandLocally("svn update", PLSEnvironments.svn_location_local)
 
     ''' configure Bard Tenant -- drop templates, configure DL.. '''
 #     configureBardTenant(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ)
-    configureBardTenant(PLSEnvironments.pls_bard_3, PLSEnvironments.pls_marketing_app_SFDC)
-#     configureBardTenant(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
+#     configureBardTenant(PLSEnvironments.pls_bard_3, PLSEnvironments.pls_marketing_app_SFDC)
+    configureBardTenant(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
 #     configureBardTenant("leoSFDCTenant_03","SFDC")
 
 
@@ -50,9 +50,9 @@ def configureBardTenant(tenant, marketting_app):
     ''' configure dataLoader settings '''
     print "configure dataloader settings"
     dlConfig = DLConfigRunner();
-    dlConfig.configDLTables(tenant, marketting_app);
-    dlConfig.createMockDataProviders(tenant, marketting_app);
-    dlConfig.editMockRefreshDataSources(tenant, marketting_app);
+#     dlConfig.configDLTables(tenant, marketting_app);
+#     dlConfig.createMockDataProviders(tenant, marketting_app);
+#     dlConfig.editMockRefreshDataSources(tenant, marketting_app);
     dlConfig.loadCfgTables(tenant, marketting_app);
 #     PerformanceHelpers.createPerformanceDataProviders(tenant, marketting_app); 
      
