@@ -16,4 +16,5 @@ public class MarketoImportProperty {
     public static final String ACTIVITYRESULTLIST = "activitiesResultList";
     public static final String TABLE = "table";
     public static final String AVROCONTAINER = "avroContainer";
+    public static final String DOIMPORT = "doImport";
 }

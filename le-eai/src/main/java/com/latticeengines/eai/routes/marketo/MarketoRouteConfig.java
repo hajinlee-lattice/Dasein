@@ -45,13 +45,19 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
         process(setPropertiesFromImportCtxProcessor). //
         setProperty("loop", constant("direct://getLeadActivities")). //
         dynamicRouter().property("loop"). //
-        to("seda:createActivities?size=10");
+        to("seda:createHdfsFileFromAvro?size=10");
         
         from("direct:getActivityTypes"). //
         process(setPropertiesFromImportCtxProcessor). //
         process(baseUrlProcessor). //
         process(new GenerateActivityTypesUrlProcessor()). //
         recipientList(header("activityTypesUrl")). //
+        choice(). //
+        when(property(MarketoImportProperty.DOIMPORT).isEqualTo(true)). //
+        unmarshal(dataFormat). //
+        process(new ActivityTypeToAvroProcessor(getContext())). //
+        to("seda:createHdfsFileFromAvro?size=10"). //
+        otherwise(). //
         unmarshal(dataFormat);
 
         from("direct:getLeadMetadata"). //
@@ -74,7 +80,7 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
         process(new GenerateLeadsUrlProcessor()). //
         recipientList(header("leadsUrl"));
         
-        from("seda:createActivities?concurrentConsumers=4"). //
+        from("seda:createHdfsFileFromAvro?concurrentConsumers=4"). //
         process(new AvroHdfsProcessor()). //
         recipientList(header("hdfsUri"));
     }

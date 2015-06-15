@@ -66,7 +66,9 @@ public class ActivityImportStrategy extends MarketoImportStrategyBase {
     @Override
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         Set<String> activityTypeIds = new HashSet<>(getActivityTypeIds(filter, false));
+        ctx.setProperty(MarketoImportProperty.DOIMPORT, false);
         Map<String, Object> headers = getHeaders(ctx);
+        
         Map<String, Object> activityTypes = template.requestBodyAndHeaders("direct:getActivityTypes", null, headers, Map.class);
         
         List<Map<String, Object>> activityTypesFromResult = (List) activityTypes.get("result");

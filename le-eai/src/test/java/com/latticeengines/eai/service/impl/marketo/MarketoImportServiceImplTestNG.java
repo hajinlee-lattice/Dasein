@@ -43,6 +43,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/Activity");
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/ActivityType");
         ctx.setProperty(MarketoImportProperty.HOST, "976-KKC-431.mktorest.com");
         ctx.setProperty(MarketoImportProperty.CLIENTID, "c98abab9-c62d-4723-8fd4-90ad5b0056f3");
         ctx.setProperty(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
@@ -78,7 +79,8 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, ctx);
         Thread.sleep(10000L);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity", new HdfsFilenameFilter() {
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
+        List<String> filesForActivity = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity", new HdfsFilenameFilter() {
 
             @Override
             public boolean accept(String file) {
@@ -86,7 +88,17 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
             }
             
         });
-        assertEquals(files.size(), 1);
+        assertEquals(filesForActivity.size(), 1);
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
+        List<String> filesForActivityType = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/ActivityType", new HdfsFilenameFilter() {
+
+            @Override
+            public boolean accept(String file) {
+                return file.endsWith(".avro");
+            }
+            
+        });
+        assertEquals(filesForActivityType.size(), 1);
     }
 
 }

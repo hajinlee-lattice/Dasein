@@ -88,7 +88,8 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity", new HdfsFilenameFilter() {
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
+        List<String> filesForActivity = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity", new HdfsFilenameFilter() {
 
             @Override
             public boolean accept(String file) {
@@ -96,7 +97,17 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
             }
             
         });
-        assertEquals(files.size(), 1);
+        assertEquals(filesForActivity.size(), 1);
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
+        List<String> filesForActivityType = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/ActivityType", new HdfsFilenameFilter() {
+
+            @Override
+            public boolean accept(String file) {
+                return file.endsWith(".avro");
+            }
+            
+        });
+        assertEquals(filesForActivityType.size(), 1);
     }
     
     @Test(groups = { "functional" }, enabled = true)
