@@ -2,10 +2,9 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
     'mainApp.appCommon.services.ThresholdExplorerService',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
-    'mainApp.core.utilities.NavUtility',
     'mainApp.core.services.SessionService'
 ])
-.controller('AdminInfoWidgetController', function ($scope, $rootScope, $http, ResourceUtility, NavUtility, ThresholdExplorerService) {
+.controller('AdminInfoWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.Error = { ShowError: false };
 
@@ -19,16 +18,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
     $scope.exportThresholdClicked = function () {
         var csvRows = ThresholdExplorerService.PrepareExportData(data);
         alasql("SELECT * INTO CSV('performance.csv') FROM ?", [csvRows]);
-    };
-
-    $scope.onBackClicked = function() {
-        var model = {
-            Id: $scope.ModelId,
-            DisplayName: data.ModelDetails.DisplayName,
-            CreatedDate: data.ModelDetails.ConstructionTime,
-            Status: data.ModelDetails.Status
-        };
-        $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, model);
     };
 })
 .directive('adminInfoWidget', function () {
