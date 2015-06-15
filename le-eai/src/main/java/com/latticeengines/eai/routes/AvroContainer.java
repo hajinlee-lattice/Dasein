@@ -29,15 +29,16 @@ public class AvroContainer {
     private GenericRecord record;
     private Schema schema;
     private TypeConverterRegistry typeConverterRegistry;
-    
-    public AvroContainer(SpringCamelContext context, Table table, int counter) {
+
+    public AvroContainer(SpringCamelContext context, Table table) {
         this.typeConverterRegistry = context.getTypeConverterRegistry();
         this.table = table;
         this.schema = table.getSchema();
         if (schema == null) {
             throw new RuntimeException("Schema cannot be null.");
         }
-        this.file = new File(String.format("%s-%s-%d.avro", table.getName(), new SimpleDateFormat("dd-MM-yyyy").format(new Date()), counter));
+        this.file = new File(String.format("%s-%s.avro", table.getName(),
+                new SimpleDateFormat("dd-MM-yyyy").format(new Date())));
 
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
         dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);
@@ -57,7 +58,7 @@ public class AvroContainer {
     public void newRecord() {
         record = new GenericData.Record(schema);
     }
-    
+
     public void endRecord() {
         if (record != null) {
             try {
@@ -67,7 +68,7 @@ public class AvroContainer {
             }
         }
     }
-    
+
     public void endContainer() {
         try {
             dataFileWriter.close();
@@ -75,17 +76,18 @@ public class AvroContainer {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void setValueForAttribute(Attribute attribute, Object value) {
         if (value == null) {
-            record.put(attribute.getName(), AvroTypeConverter.getEmptyValue(Type.valueOf(attribute.getPhysicalDataType())));
+            record.put(attribute.getName(),
+                    AvroTypeConverter.getEmptyValue(Type.valueOf(attribute.getPhysicalDataType())));
         } else {
             Type type = Type.valueOf(attribute.getPhysicalDataType());
             record.put(attribute.getName(),
                     AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, attribute, value));
         }
     }
-    
+
     public File getLocalAvroFile() {
         return file;
     }

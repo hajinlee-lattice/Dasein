@@ -1,6 +1,8 @@
 package com.latticeengines.eai.service.impl.marketo;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -38,6 +42,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/Activity");
         ctx.setProperty(MarketoImportProperty.HOST, "976-KKC-431.mktorest.com");
         ctx.setProperty(MarketoImportProperty.CLIENTID, "c98abab9-c62d-4723-8fd4-90ad5b0056f3");
         ctx.setProperty(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
@@ -69,8 +74,19 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "importMetadata" }, enabled = true)
-    public void importDataAndWriteToHdfs() {
+    public void importDataAndWriteToHdfs() throws Exception {
         marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, ctx);
+        Thread.sleep(10000L);
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity", new HdfsFilenameFilter() {
+
+            @Override
+            public boolean accept(String file) {
+                return file.endsWith(".avro");
+            }
+            
+        });
+        assertEquals(files.size(), 1);
     }
 
 }

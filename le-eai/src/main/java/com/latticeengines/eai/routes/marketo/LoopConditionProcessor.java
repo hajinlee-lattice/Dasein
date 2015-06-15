@@ -17,12 +17,12 @@ public class LoopConditionProcessor implements Processor {
         List<?> list = exchange.getProperty(MarketoImportProperty.ACTIVITYRESULTLIST, List.class);
         Map<String, Object> body = exchange.getIn().getBody(Map.class);
         list.addAll((List) body.get("result"));
-        
+
         String nextPageToken = (String) body.get("nextPageToken");
         log.info("Next page token = " + nextPageToken);
         Boolean hasMoreResults = (Boolean) body.get("moreResult");
         exchange.setProperty(MarketoImportProperty.NEXTPAGETOKEN, nextPageToken);
-        
+
         if (hasMoreResults) {
             log.info("Has more results...");
         } else {

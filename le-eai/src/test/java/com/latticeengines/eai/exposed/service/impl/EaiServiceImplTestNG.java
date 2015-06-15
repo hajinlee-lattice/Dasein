@@ -2,6 +2,7 @@ package com.latticeengines.eai.exposed.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -52,6 +54,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/Activity");
     }
 
     @Test(groups = { "functional", "functional.production" }, enabled = true)
@@ -84,6 +87,16 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity", new HdfsFilenameFilter() {
+
+            @Override
+            public boolean accept(String file) {
+                return file.endsWith(".avro");
+            }
+            
+        });
+        assertEquals(files.size(), 1);
     }
     
     @Test(groups = { "functional" }, enabled = true)

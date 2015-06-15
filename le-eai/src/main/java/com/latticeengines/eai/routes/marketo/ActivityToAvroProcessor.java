@@ -1,7 +1,5 @@
 package com.latticeengines.eai.routes.marketo;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -13,12 +11,10 @@ import org.apache.camel.spring.SpringCamelContext;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.routes.AvroContainer;
-import com.latticeengines.eai.routes.HdfsUriGenerator;
 
 public class ActivityToAvroProcessor implements Processor {
 
     private SpringCamelContext context;
-    private static int numActivityBatches = 1;
 
     public ActivityToAvroProcessor(CamelContext context) {
         this.context = (SpringCamelContext) context;
@@ -35,7 +31,12 @@ public class ActivityToAvroProcessor implements Processor {
             throw new RuntimeException("Table to be imported not available.");
         }
 
-        AvroContainer avroContainer = new AvroContainer(context, table, numActivityBatches++);
+        AvroContainer avroContainer = exchange.getProperty(MarketoImportProperty.AVROCONTAINER, AvroContainer.class);
+
+        if (avroContainer == null) {
+            avroContainer = new AvroContainer(context, table);
+            exchange.setProperty(MarketoImportProperty.AVROCONTAINER, avroContainer);
+        }
         Map<String, Attribute> attrMap = table.getNameAttributeMap();
         for (Map<String, Object> entry : activityList) {
             avroContainer.newRecord();
@@ -49,10 +50,5 @@ public class ActivityToAvroProcessor implements Processor {
             }
             avroContainer.endRecord();
         }
-        avroContainer.endContainer();
-        InputStream avroInputStream = new FileInputStream(avroContainer.getLocalAvroFile());
-        exchange.getIn().setHeader("hdfsUri",
-                new HdfsUriGenerator().getHdfsUri(exchange, table, avroContainer.getLocalAvroFile().getName()));
-        exchange.getIn().setBody(avroInputStream);
     }
 }

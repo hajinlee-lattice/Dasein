@@ -5,6 +5,8 @@ import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.eai.routes.AvroHdfsProcessor;
+
 public class MarketoRouteConfig extends SpringRouteBuilder {
     
     @Value("${eai.max.redeliveries}")
@@ -37,12 +39,13 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
         recipientList(header("activitiesUrl")). //
         unmarshal(dataFormat). //
         process(new LoopConditionProcessor()). //
-        to("seda:createActivities?size=10");
+        process(new ActivityToAvroProcessor(getContext()));
         
         from("direct:getAllLeadActivities"). //
         process(setPropertiesFromImportCtxProcessor). //
         setProperty("loop", constant("direct://getLeadActivities")). //
-        dynamicRouter().property("loop");
+        dynamicRouter().property("loop"). //
+        to("seda:createActivities?size=10");
         
         from("direct:getActivityTypes"). //
         process(setPropertiesFromImportCtxProcessor). //
@@ -72,8 +75,7 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
         recipientList(header("leadsUrl"));
         
         from("seda:createActivities?concurrentConsumers=4"). //
-        process(new ActivityToAvroProcessor(getContext())). //
+        process(new AvroHdfsProcessor()). //
         recipientList(header("hdfsUri"));
-
     }
 }
