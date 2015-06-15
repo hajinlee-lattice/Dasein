@@ -87,6 +87,34 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(newCrmCredential);
     }
 
+    @Test(groups = "functional")
+    public void verifyCredentialWrongPassword() {
+        // sfdc
+        CrmCredential crmCredential = new CrmCredential();
+        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
+        crmCredential.setPassword("nope");
+        crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
+        boolean encounteredException = false;
+        try {
+             crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE, crmCredential);
+        } catch (Exception e) {
+            encounteredException = true;
+        }
+        Assert.assertTrue(encounteredException, "Wrong password should cause exception while validating sfdc.");
+
+        crmCredential = new CrmCredential();
+        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
+        crmCredential.setPassword("nope");
+        crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
+        encounteredException = false;
+        try {
+             crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE, crmCredential);
+        } catch (Exception e) {
+            encounteredException = true;
+        }
+        Assert.assertTrue(encounteredException, "Wrong password should cause exception while validating sfdcsandbox.");
+    }
+
     @Test(groups = "functional", dependsOnMethods = "verifyCredential")
     public void getCredential() {
         CrmCredentialService crmService = new CrmCredentialServiceImpl();

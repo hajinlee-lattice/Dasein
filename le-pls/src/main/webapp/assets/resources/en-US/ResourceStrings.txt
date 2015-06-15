@@ -65,6 +65,7 @@ MANAGE_CRM_CREDENTIALS_BUTTON=Update CRM Credentials
 SYSTEM_SETUP_USER_NAME=Username
 SYSTEM_SETUP_PASSWORD=Password
 SYSTEM_SETUP_SECURITY_TOKEN=Security Token
+SYSTEM_SETUP_SECURITY_TOKEN_Tooltip=Security token is not required if Lattice IP address has been whitelisted in your Salesforce instance
 SYSTEM_SETUP_USER_ID=User ID
 SYSTEM_SETUP_ENCRYPTION_KEY=Encryption Key
 SYSTEM_SETUP_COMPANY=Company
