@@ -261,8 +261,8 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         LOGGER.info("Cleaning up test tenants through internal API");
 
-        final String tenant1Id = contractId + "Tenant1." + contractId + "Tenant1.Production";
-        final String tenant2Id = contractId + "Tenant2." + contractId + "Tenant2.Production";
+        final String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
+        final String tenant2Id = contractId + "PLSTenant2." + contractId + "PLSTenant2.Production";
 
         //==================================================
         // Upload modelsummary if necessary
