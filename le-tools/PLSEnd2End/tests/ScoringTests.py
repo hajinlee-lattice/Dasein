@@ -134,22 +134,21 @@ class Test(unittest.TestCase):
         dr.checkDanteValue(danteLead)
         
     def TestHourlyScoringSFDC_Dante(self): 
-        fail
-#         sfdc = SFDCRequest();
-#         leads_list = sfdc.addLeadsToSFDC(2);
-#         contacts_list = sfdc.addContactsToSFDC(2)
-#         
-#         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_3,PLSEnvironments.pls_marketing_app_SFDC);
-#         
-#         lead_lists = sfdc.getLeadsFromSFDC(leads_list); 
-#         contact_lists = sfdc.getContactsFromSFDC(contacts_list);
-#         
-#         lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",lead_lists);
-#         contact_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",contact_lists);
-#         assert len(lead_faileds)==1, lead_faileds;
-#         assert len(contact_faileds)==1, contact_faileds; 
-#         
-#         PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_3);
+        sfdc = SFDCRequest();
+        leads_list = sfdc.addLeadsToSFDC(2);
+        contacts_list = sfdc.addContactsToSFDC(2)
+         
+        PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_3,PLSEnvironments.pls_marketing_app_SFDC);
+         
+        lead_lists = sfdc.getLeadsFromSFDC(leads_list); 
+        contact_lists = sfdc.getContactsFromSFDC(contacts_list);
+         
+        lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",lead_lists);
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",contact_lists);
+        assert len(lead_faileds)==1, lead_faileds;
+        assert len(contact_faileds)==1, contact_faileds; 
+         
+        PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_3);
         
     def testName(self):
         pass

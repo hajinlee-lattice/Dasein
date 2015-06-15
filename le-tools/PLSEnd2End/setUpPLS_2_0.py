@@ -50,9 +50,9 @@ def configureBardTenant(tenant, marketting_app):
     ''' configure dataLoader settings '''
     print "configure dataloader settings"
     dlConfig = DLConfigRunner();
-#     dlConfig.configDLTables(tenant, marketting_app);
-#     dlConfig.createMockDataProviders(tenant, marketting_app);
-#     dlConfig.editMockRefreshDataSources(tenant, marketting_app);
+    dlConfig.configDLTables(tenant, marketting_app);
+    dlConfig.createMockDataProviders(tenant, marketting_app);
+    dlConfig.editMockRefreshDataSources(tenant, marketting_app);
     dlConfig.loadCfgTables(tenant, marketting_app);
 #     PerformanceHelpers.createPerformanceDataProviders(tenant, marketting_app); 
      
