@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.avro.Schema;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +18,6 @@ import com.foundationdb.sql.parser.Visitable;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
 @Component("activityImportStrategy")
@@ -97,10 +95,7 @@ public class ActivityImportStrategy extends MarketoImportStrategyBase {
             table.addAttribute(newAttribute);
         }
         
-        table = super.importMetadata(template, table, filter, ctx);
-        Schema schema = AvroSchemaBuilder.createSchema("Activity", table);
-        table.setSchema(schema);
-        return table;
+        return super.importMetadata(template, table, filter, ctx);
     }
     
     @Override
