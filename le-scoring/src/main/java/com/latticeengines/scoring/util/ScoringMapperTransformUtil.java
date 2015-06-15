@@ -216,7 +216,6 @@ public class ScoringMapperTransformUtil {
             jsonArray.add(columnObj);
         }
         formattedRecord = jsonObj.toString() + "\n";
-        log.info("The formattedRecord is " + formattedRecord);
         return formattedRecord;
     }
 

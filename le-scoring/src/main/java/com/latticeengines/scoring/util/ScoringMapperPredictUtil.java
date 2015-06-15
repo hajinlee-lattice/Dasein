@@ -253,7 +253,6 @@ public class ScoringMapperPredictUtil {
         String modelName = modelIdMap.get(modelGuid);
         ModelEvaluationResult result = new ModelEvaluationResult(leadId, bucket, lift, modelName, percentile,
                 probability, score, integerScore);
-        log.info("result is " + result);
         return result;
 
     }
