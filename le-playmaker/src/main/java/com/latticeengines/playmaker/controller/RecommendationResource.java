@@ -26,20 +26,40 @@ public class RecommendationResource {
     @ApiOperation(value = "Get recommendations")
     public Map<String, Object> getRecommendations(
             @RequestParam(value = "tenantName", required = false) String tenantName,
-            @RequestParam(value = "startId", required = true) int startId,
-            @RequestParam(value = "size", required = true) int size) {
+            @RequestParam(value = "start", required = true) int start,
+            @RequestParam(value = "offset", required = true) int offset,
+            @RequestParam(value = "maximum", required = true) int maximum) {
 
-        return playmakerRecommendationMgr.getRecommendations(tenantName, startId, size);
+        return playmakerRecommendationMgr.getRecommendations(tenantName, start, offset, maximum);
+    }
+
+    @RequestMapping(value = "/recommendationcount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get recommendation count")
+    public int getRecommendationCount(@RequestParam(value = "tenantName", required = false) String tenantName,
+            @RequestParam(value = "start", required = true) int start) {
+
+        return playmakerRecommendationMgr.getRecommendationCount(tenantName, start);
     }
 
     @RequestMapping(value = "/plays", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get plays")
     public Map<String, Object> getPlays(@RequestParam(value = "tenantName", required = false) String tenantName,
-            @RequestParam(value = "startId", required = true) int startId,
-            @RequestParam(value = "size", required = true) int size) {
+            @RequestParam(value = "start", required = true) int start,
+            @RequestParam(value = "offset", required = true) int offset,
+            @RequestParam(value = "maximum", required = true) int maximum) {
 
-        return playmakerRecommendationMgr.getPlays(tenantName, startId, size);
+        return playmakerRecommendationMgr.getPlays(tenantName, start, offset, maximum);
+    }
+
+    @RequestMapping(value = "/playcount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get play count")
+    public int getPlays(@RequestParam(value = "tenantName", required = false) String tenantName,
+            @RequestParam(value = "start", required = true) int start) {
+
+        return playmakerRecommendationMgr.getPlayCount(tenantName, start);
     }
 
     @RequestMapping(value = "/accountextensions", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -47,10 +67,20 @@ public class RecommendationResource {
     @ApiOperation(value = "Get account extensions")
     public Map<String, Object> getAccountExtensions(
             @RequestParam(value = "tenantName", required = false) String tenantName,
-            @RequestParam(value = "startId", required = true) int startId,
-            @RequestParam(value = "size", required = true) int size) {
+            @RequestParam(value = "start", required = true) int start,
+            @RequestParam(value = "offset", required = true) int offset,
+            @RequestParam(value = "maximum", required = true) int maximum) {
 
-        return playmakerRecommendationMgr.getAccountextensions(tenantName, startId, size);
+        return playmakerRecommendationMgr.getAccountextensions(tenantName, start, offset, maximum);
+    }
+
+    @RequestMapping(value = "/accountextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get account extension count")
+    public int getAccountExtensionCount(@RequestParam(value = "tenantName", required = false) String tenantName,
+            @RequestParam(value = "start", required = true) int start) {
+
+        return playmakerRecommendationMgr.getAccountextensionCount(tenantName, start);
     }
 
     @RequestMapping(value = "/accountextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -66,9 +96,19 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get flexible play values")
     public Map<String, Object> getPlayValues(@RequestParam(value = "tenantName", required = false) String tenantName,
-            @RequestParam(value = "startId", required = true) int startId,
-            @RequestParam(value = "size", required = true) int size) {
+            @RequestParam(value = "start", required = true) int start,
+            @RequestParam(value = "offset", required = true) int offset,
+            @RequestParam(value = "maximum", required = true) int maximum) {
 
-        return playmakerRecommendationMgr.getPlayValues(tenantName, startId, size);
+        return playmakerRecommendationMgr.getPlayValues(tenantName, start, offset, maximum);
+    }
+
+    @RequestMapping(value = "/playvaluecount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get flexible play value count")
+    public int getPlayValues(@RequestParam(value = "tenantName", required = false) String tenantName,
+            @RequestParam(value = "start", required = true) int start) {
+
+        return playmakerRecommendationMgr.getPlayValueCount(tenantName, start);
     }
 }

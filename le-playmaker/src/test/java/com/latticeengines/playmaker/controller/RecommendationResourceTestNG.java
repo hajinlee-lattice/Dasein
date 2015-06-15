@@ -39,26 +39,47 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
 
     @Test(groups = "deployment")
     public void getRecommendations() {
-        String url = hostPort + "/playmaker/recommendations?startId=1&size=100&tenantName=" + tenant.getTenantName();
+        String url = hostPort + "/playmaker/recommendations?start=1&offset=1&maximum=100&tenantName=" + tenant.getTenantName();
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
+    }
+
+    @Test(groups = "deployment")
+    public void getRecommendationCount() {
+        String url = hostPort + "/playmaker/recommendationcount?start=1&tenantName=" + tenant.getTenantName();
+        int result = restTemplate.getForObject(url, Integer.class);
+        Assert.assertTrue(result > 0);
     }
 
     @Test(groups = "deployment")
     public void getPlays() {
-        String url = hostPort + "/playmaker/plays?startId=1&size=100&tenantName=" + tenant.getTenantName();
+        String url = hostPort + "/playmaker/plays?start=1&offset=1&maximum=100&tenantName=" + tenant.getTenantName();
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
     }
 
     @Test(groups = "deployment")
+    public void getPlayCount() {
+        String url = hostPort + "/playmaker/playcount?start=1&tenantName=" + tenant.getTenantName();
+        int result = restTemplate.getForObject(url, Integer.class);
+        Assert.assertNotNull(result > 0);
+    }
+
+    @Test(groups = "deployment")
     public void getAccountExtensions() {
-        String url = hostPort + "/playmaker/accountextensions?startId=1&size=100&tenantName=" + tenant.getTenantName();
+        String url = hostPort + "/playmaker/accountextensions?start=1&offset=1&maximum=100&tenantName=" + tenant.getTenantName();
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
+    }
+
+    @Test(groups = "deployment")
+    public void getAccountExtensionCount() {
+        String url = hostPort + "/playmaker/accountextensioncount?start=1&tenantName=" + tenant.getTenantName();
+        int result = restTemplate.getForObject(url, Integer.class);
+        Assert.assertNotNull(result > 0);
     }
 
     @Test(groups = "deployment")
@@ -72,11 +93,18 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
 
     @Test(groups = "deployment")
     public void getPlayValues() {
-        String url = hostPort + "/playmaker/playvalues?startId=1&size=100&tenantName=" + tenant.getTenantName();
+        String url = hostPort + "/playmaker/playvalues?start=1&offset=1&maximum=100&tenantName=" + tenant.getTenantName();
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.size() > 0);
+    }
+
+    @Test(groups = "deployment")
+    public void getPlayValueCount() {
+        String url = hostPort + "/playmaker/playvaluecount?start=1&tenantName=" + tenant.getTenantName();
+        int result = restTemplate.getForObject(url, Integer.class);
+        Assert.assertTrue(result > 0);
     }
 
     public void createTenantWithTenantName() {
