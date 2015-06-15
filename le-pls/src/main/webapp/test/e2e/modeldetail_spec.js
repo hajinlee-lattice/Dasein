@@ -22,9 +22,13 @@ describe('model detail', function() {
         browser.waitForAngular();
 
         //==================================================
-        // Perform Actions
+        // run through the tests
         //==================================================
-        PerformActions();
+        loggedInAndSelectedModel_performTogglingActions_checkActionsBehavedAsExpected();
+        loggedInAndSelectedModel_navigateBetweenTabs_checkTagsSwitchedAsExpected();
+        assertExportAllLinkIsPresent();
+        loggedInAndSelectedModel_navigateBetweenAttributesViewAndCategoryView_checkActionBehavedAsExpected();
+        loggedInAndSelectedModel_navigateToAttributesViewAndAttributesView_checkStayOnAttributesView();
 
         //==================================================
         // Logout
@@ -33,9 +37,10 @@ describe('model detail', function() {
     });
 
     //==================================================
-    // Perform Actions
+    // Test to perform toggle actions and see that they
+    // behaved as expected
     //==================================================
-    function PerformActions() {
+    function loggedInAndSelectedModel_performTogglingActions_checkActionsBehavedAsExpected() {
         var container = element(by.id("modelDetailContainer"));
 
         checkHeader(container);
@@ -51,6 +56,63 @@ describe('model detail', function() {
         checkMoreDisplayed(container, false);
     }
 
+    function loggedInAndSelectedModel_navigateBetweenTabs_checkTagsSwitchedAsExpected() {
+        var container = element(by.id("modelDetailContainer"));
+        var firstTab = modelTabs.getTabByIndex(0);
+        var secondTab = modelTabs.getTabByIndex(1);
+
+        expect(firstTab.getAttribute('class')).toContain('active');
+        secondTab.click(); sleep();
+        expect(firstTab.getAttribute('class')).not.toContain('active');
+        expect(secondTab.getAttribute('class')).toContain('active');
+        firstTab.click(); sleep();
+        expect(firstTab.getAttribute('class')).toContain('active');
+        expect(secondTab.getAttribute('class')).not.toContain('active');
+    }
+    
+    function assertExportAllLinkIsPresent() {
+        expect(element(by.linkText('EXPORT ALL')).getWebElement().isDisplayed()).toBe(true);
+    }
+    
+    function loggedInAndSelectedModel_navigateBetweenAttributesViewAndCategoryView_checkActionBehavedAsExpected() {
+        assertCategoryViewIsShown();
+        var listAttributes = element.all(by.css('div.attributes ul li'));
+        listAttributes.get(0).click(); sleep();
+        listAttributes.get(0).getText().then(function(attributeAndNumber) {
+            assertAttributesViewIsShownForAttribute(removeNumberFromEndOfAttribute(attributeAndNumber));
+        });
+        element(by.id('donutChartBackButton')).click();
+        browser.waitForAngular();
+        assertCategoryViewIsShown();
+    }
+    
+    function loggedInAndSelectedModel_navigateToAttributesViewAndAttributesView_checkStayOnAttributesView() {
+        var listAttributes = element.all(by.css('div.attributes ul li'));
+        var firstAttribute = listAttributes.get(0);
+        firstAttribute.click(); sleep();
+        listAttributes.get(0).getText().then(function(attributeAndNumber) {
+            assertAttributesViewIsShownForAttribute(removeNumberFromEndOfAttribute(attributeAndNumber));
+        });
+        firstAttribute.click(); sleep();
+        firstAttribute.getText().then(function(attributeAndNumber) {
+            assertAttributesViewIsShownForAttribute(removeNumberFromEndOfAttribute(attributeAndNumber));
+        });
+    }
+    
+    function assertCategoryViewIsShown() {
+        assertExportAllLinkIsPresent();
+        expect(element(by.cssContainingText('h3', 'Attributes per Category')).getWebElement().isDisplayed()).toBe(true);
+    }
+    
+    function assertAttributesViewIsShownForAttribute(attribute) {
+        expect(element(by.id('donutChartBackButton')).getWebElement().isDisplayed()).toBe(true);
+        expect(element(by.id('top-predictor-wrapper')).getText()).toContain(attribute);
+    }
+    
+    function removeNumberFromEndOfAttribute(alphaNum) {
+        return alphaNum.replace(/\d+$/g, '');
+    }
+    
     //==================================================
     // Helpers
     //==================================================
