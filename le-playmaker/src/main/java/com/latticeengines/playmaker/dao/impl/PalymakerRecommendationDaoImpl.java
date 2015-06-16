@@ -1,8 +1,12 @@
 package com.latticeengines.playmaker.dao.impl;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -32,9 +36,36 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         source.addValue("offset", offset);
-        source.addValue("maximum", offset);
+        source.addValue("maximum", maximum);
 
-        return queryForListOfMap(sql, source);
+        List<Map<String, Object>> results = queryForListOfMap(sql, source);
+        convertContacts(results);
+
+        return results;
+    }
+
+    private void convertContacts(List<Map<String, Object>> results) {
+        if (CollectionUtils.isNotEmpty(results)) {
+            for (Map<String, Object> record : results) {
+                String contacts = (String) record.get("Contacts");
+                if (contacts != null) {
+                    String[] contactArray = contacts.split("[|]");
+                    if (contactArray.length >= 8) {
+                        Map<String, Object> contactMap = new HashMap<>();
+                        contactMap.put("Name", contactArray[0]);
+                        contactMap.put("Phone", contactArray[1]);
+                        contactMap.put("Email", contactArray[2]);
+                        contactMap.put("Address", contactArray[3]);
+                        contactMap.put("City", contactArray[4]);
+                        contactMap.put("State", contactArray[5]);
+                        contactMap.put("Country", contactArray[6]);
+                        contactMap.put("ZipCode", contactArray[7]);
+                        record.put("Contacts", contactMap);
+                    }
+
+                }
+            }
+        }
     }
 
     @Override
@@ -70,9 +101,26 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         source.addValue("offset", offset);
-        source.addValue("maximum", offset);
+        source.addValue("maximum", maximum);
 
-        return queryForListOfMap(sql, source);
+        List<Map<String, Object>> results = queryForListOfMap(sql, source);
+        convertToList("PlayGroups", results);
+        convertToList("TargetProducts", results);
+        return results;
+    }
+
+    private void convertToList(String key, List<Map<String, Object>> results) {
+        if (CollectionUtils.isEmpty(results)) {
+            return;
+        }
+        for (Map<String, Object> record : results) {
+            String value = (String) record.get(key);
+            if (value != null) {
+                String[] valueArray = StringUtils.split(value, "|");
+                record.put(key, Arrays.asList(valueArray));
+            }
+        }
+
     }
 
     @Override
@@ -95,7 +143,7 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         source.addValue("offset", offset);
-        source.addValue("maximum", offset);
+        source.addValue("maximum", maximum);
 
         List<Map<String, Object>> result = queryForListOfMap(sql, source);
         if (result != null) {
@@ -143,9 +191,12 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         source.addValue("offset", offset);
-        source.addValue("maximum", offset);
-        List<Map<String, Object>> result = queryForListOfMap(sql, source);
-        return result;
+        source.addValue("maximum", maximum);
+
+        List<Map<String, Object>> results = queryForListOfMap(sql, source);
+        convertToList("PlayGroups", results);
+        convertToList("Priorities", results);
+        return results;
     }
 
     @Override

@@ -39,7 +39,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     public void getRecommendations() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendations(tenant.getTenantName(), 1000,
-                1, 100);
+                0, 100);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> recomendations = (List<Map<String, Object>>) result
@@ -58,7 +58,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     @Test(groups = "functional", enabled = true)
     public void getPlays() throws Exception {
 
-        Map<String, Object> result = playMakerRecommendationEntityMgr.getPlays(tenant.getTenantName(), 1000, 1, 100);
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getPlays(tenant.getTenantName(), 1000, 0, 100);
 
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
