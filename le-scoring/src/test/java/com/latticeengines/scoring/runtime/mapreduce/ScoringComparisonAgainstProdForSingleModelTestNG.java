@@ -90,10 +90,10 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
         // upload lead files to HDFS
         URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
-                + "2Checkout_ScoringComparisonAgainstProdForSingleModelTestNG-00000.avro");
-        URL url3 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
+                + "2Checkout_ScoringComparisonAgainstProdForSingleModelTestNG-00001.avro");
+        URL url2 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
                 + "2Checkout_ScoringComparisonAgainstProdForSingleModelTestNG-00002.avro");
-        URL url4 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
+        URL url3 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
                 + "2Checkout_ScoringComparisonAgainstProdForSingleModelTestNG-00003.avro");
 
         path = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data";
@@ -101,10 +101,10 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         HdfsUtils.mkdir(yarnConfiguration, path);
         String dataPath1 = path + "/1.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url1.getFile(), dataPath1);
-        String dataPath3 = path + "/3.avro";
+        String dataPath2 = path + "/3.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, url2.getFile(), dataPath2);
+        String dataPath3 = path + "/4.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url3.getFile(), dataPath3);
-        String dataPath4 = path + "/4.avro";
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, url4.getFile(), dataPath4);
 
         URL modelSummaryUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/models/" + modelID);
         modelPath = customerBaseDir + "/" + tenant + "/models/" + inputLeadsTable
