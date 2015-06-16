@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class FileSystemServiceImpl implements FileSystemService {
 
     @Override
-    public List<String> filesInDirectory(File dir){
+    public List<String> filesInDirectory(File dir) {
         try {
             if (dir == null || !dir.exists()) {
                 return new ArrayList<>();

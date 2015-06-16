@@ -56,7 +56,8 @@ public class InternalResource extends InternalResourceBase {
     public SelectableConfigurationDocument getServiceOptionalConfigs(
             @RequestParam(value = "component") String component, HttpServletRequest request) {
         checkHeader(request);
-        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields(component, false);
+        final SelectableConfigurationDocument doc =
+                serviceService.getSelectableConfigurationFields(component, false);
         if (doc == null) {
             throw new LedpException(LedpCode.LEDP_19102, new String[]{component});
         }
@@ -90,10 +91,12 @@ public class InternalResource extends InternalResourceBase {
         return tenantService.deleteTenant(contractId, tenantId);
     }
 
-    @RequestMapping(value = "datastore/{option}/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "datastore/{option}/{tenantId}",
+            method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get files of a tenant in datastore")
-    public List<String> getTenantFoldersInDatastore(@PathVariable String option, @PathVariable String tenantId, HttpServletRequest request) {
+    public List<String> getTenantFoldersInDatastore(@PathVariable String option, @PathVariable String tenantId,
+                                                     HttpServletRequest request) {
         checkHeader(request);
         File dir = dataStoreProvider.getTenantFolder(option, tenantId);
         if (dir.exists()) {
@@ -103,27 +106,33 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "datastore/{server}/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "datastore/{server}/{tenantId}", method = RequestMethod.DELETE,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a tenant from datastore")
-    public Boolean deleteTenantInDatastore(@PathVariable String server, @PathVariable String tenantId, HttpServletRequest request) {
+    public Boolean deleteTenantInDatastore(@PathVariable String server, @PathVariable String tenantId,
+                                            HttpServletRequest request) {
         checkHeader(request);
         dataStoreProvider.deleteTenantFolder(server, tenantId);
         return true;
     }
 
-    @RequestMapping(value = "permstore/{option}/{server}/{tenant}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "permstore/{option}/{server}/{tenant}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get file names in permstore")
-    public Boolean hasVDBInPermstore(@PathVariable String option, @PathVariable String server, @PathVariable String tenant, HttpServletRequest request) {
+    public Boolean hasVDBInPermstore(@PathVariable String option, @PathVariable String server,
+                                     @PathVariable String tenant, HttpServletRequest request) {
         checkHeader(request);
         return permStoreProvider.getVDBFolder(option, server.toUpperCase(), tenant).exists();
     }
 
-    @RequestMapping(value = "permstore/{option}/{server}/{tenant}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "permstore/{option}/{server}/{tenant}", method = RequestMethod.DELETE,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete file in permstore")
-    public Boolean deleteVDBInPermstore(@PathVariable String option, @PathVariable String server, @PathVariable String tenant, HttpServletRequest request) {
+    public Boolean deleteVDBInPermstore(@PathVariable String option, @PathVariable String server,
+                                        @PathVariable String tenant, HttpServletRequest request) {
         checkHeader(request);
         permStoreProvider.deleteVDBFolder(option, server.toUpperCase(), tenant);
         return true;

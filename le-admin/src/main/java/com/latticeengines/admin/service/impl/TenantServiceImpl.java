@@ -52,8 +52,7 @@ public class TenantServiceImpl implements TenantService {
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public TenantServiceImpl() {
-    }
+    public TenantServiceImpl() {}
 
     @PostConstruct
     protected void uploadDefaultSpaceConfigAndSchemaByJson() {

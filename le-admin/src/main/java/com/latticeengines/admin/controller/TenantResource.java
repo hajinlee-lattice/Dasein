@@ -61,8 +61,7 @@ public class TenantResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenants for a particular contract id, or all tenants if contractId is null")
-    public List<TenantDocument> getTenants(
-            @RequestParam(value = "contractId", required = false) String contractId) {
+    public List<TenantDocument> getTenants(@RequestParam(value = "contractId", required = false) String contractId) {
         String parsedContractId;
         if (StringUtils.isEmpty(contractId)) {
             parsedContractId = null;
