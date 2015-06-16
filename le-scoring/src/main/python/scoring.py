@@ -54,10 +54,11 @@ def manipulateSupportedFiles(modelID, scoringFiles, leadFiles):
     print os.listdir('.')   
  
 def modelEvaluate(modelID, leadFile):
+    scoringScriptPath = os.path.abspath(SCORING_SCRIPT_NAME)
     #scoringoutputfile name
     outputFile = modelID + SCORING_OUTPUT_PREFIX + leadFile[len(SCORING_INPUT_PREFIX):] + ".txt"
     executable = "/usr/local/bin/python2.7"
-    popen = subprocess.Popen([executable, SCORING_SCRIPT_NAME, leadFile, outputFile], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    popen = subprocess.Popen([executable, scoringScriptPath, leadFile, outputFile], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     s, stderr = popen.communicate()
     print s
     print stderr
