@@ -148,16 +148,13 @@ public class ScoringMapperTransformUtil {
     }
 
     private static String identifyModelGuid(JSONObject leadJsonObject, HashMap<String, String> modelIdMap) {
-
         String modelId = (String) leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN);
-        log.info("the modelId is " + modelId);
         String guid = null;
         Set<String> modelGuidSet = modelIdMap.keySet();
 
         for (String modelGuid : modelGuidSet) {
             if (modelId.contains(modelGuid)) {
                 guid = modelGuid;
-                log.info("modelGuid is found! " + guid);
                 break;
             }
         }
@@ -169,20 +166,6 @@ public class ScoringMapperTransformUtil {
     public static String transformToJsonString(JSONObject leadJsonObject, HashMap<String, JSONObject> models,
             String modelGuid) {
         String formattedRecord = null;
-
-//        if (models == null) {
-//            System.out.println("model");
-//            new Exception("model is null");
-//
-//        } else if (models.get(modelGuid) == null) {
-//            System.out.println("models.get(modelGuid)");
-//            new Exception("models.get(modelGuid) is null");
-//
-//        } else if (models.get(modelGuid).get(INPUT_COLUMN_METADATA) == null) {
-//            System.out.println("models.get(modelGuid).get(INPUT_COLUMN_METADATA)");
-//            new Exception("models.get(modelGuid).get(INPUT_COLUMN_METADATA) is null");
-//        }
-
         JSONArray metadata = (JSONArray) models.get(modelGuid).get(INPUT_COLUMN_METADATA);
 
         // parse the avro file since it is in json format

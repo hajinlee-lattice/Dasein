@@ -23,19 +23,14 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.util.CollectionUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
@@ -45,7 +40,7 @@ import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBas
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.service.impl.ScoringStepYarnProcessorImplTestNG;
 
-public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
+public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFunctionalTestNGBase {
 
     private static final double EPS = 1e-6;
     private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
@@ -74,15 +69,6 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-    @Autowired
-    private DbCreds scoringCreds;
-
-    @Autowired
-    private JdbcTemplate scoringJdbcTemplate;
-
-    @Autowired
-    private MetadataService metadataService;
-
     private String inputLeadsTable;
 
     private String modelPath;
@@ -91,13 +77,7 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
 
     private String scorePath;
 
-    private static final String scoreResCustomer = "scoreResult";
-
-    private static final String scoreResTable = "scoreResultTable";
-
-    private static final String scoreTargetTable = "Leads_383bd1f3426444929e719380a399b38b";
-
-    private static final String resultJdbcUrl = "jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine;user=root;password=welcome";
+    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
@@ -106,25 +86,21 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        tenant = CustomerSpace.parse(customer).toString();
+        tenant = dotJoiner.join(customer, customer, "Production");
 
         // upload lead files to HDFS
         URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
-                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00000.avro");
-        URL url2 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
-                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00001.avro");
+                + "2Checkout_ScoringComparisonAgainstProdForSingleModelTestNG-00000.avro");
         URL url3 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
-                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00002.avro");
+                + "2Checkout_ScoringComparisonAgainstProdForSingleModelTestNG-00002.avro");
         URL url4 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
-                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-part-m-00003.avro");
+                + "2Checkout_ScoringComparisonAgainstProdForSingleModelTestNG-00003.avro");
 
         path = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data";
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/scores";
         HdfsUtils.mkdir(yarnConfiguration, path);
         String dataPath1 = path + "/1.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url1.getFile(), dataPath1);
-        String dataPath2 = path + "/2.avro";
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, url2.getFile(), dataPath2);
         String dataPath3 = path + "/3.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url3.getFile(), dataPath3);
         String dataPath4 = path + "/4.avro";
@@ -140,19 +116,16 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
 
     // compare the results
     private boolean compareEvaluationResults() {
-
         boolean evaluationIsSame = false;
-
         List<GenericRecord> newlist = null;
         List<GenericRecord> oldlist = null;
 
         // load new scores from HDFS
-        newlist = loadHDFSAvroFiles(new Configuration(),
-                "/user/s-analytics/customers/" + tenant + "/scoring/ScoringMapperTestNG_LeadsTable/scores");
+        newlist = loadHDFSAvroFiles(new Configuration(), scorePath);
 
         // load existing scores from testing file
         URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/results/"
-                + "2Checkout_relaunch_Q_PLS_Scoring_Incremental_1336210_2015-05-15_005244-result-part-m-00000.avro");
+                + "2Checkout_ScoringComparisonAgainstProdForSingleModelTestNG-00000.avro");
         String fileName = url.getFile();
         oldlist = loadLocalAvroFiles(fileName);
         evaluationIsSame = compareJsonResults(newlist, oldlist);
@@ -160,6 +133,7 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
     }
 
     private ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
+        System.out.println("hdfsDir is " + hdfsDir);
         ArrayList<GenericRecord> newlist = new ArrayList<GenericRecord>();
         List<String> files = null;
         try {
@@ -194,35 +168,6 @@ public class ScoringMapperTestNG extends ScoringFunctionalTestNGBase {
             e.printStackTrace();
         }
         return newlist;
-    }
-
-    /**
-     * Don't directly load data from Prod DB, please import data to a dev db before you use this method
-     * @throws Exception
-     */
-
-    @SuppressWarnings("unused")
-    private void loadAvroResultToHdfs() throws Exception{
-        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/"+ CustomerSpace.parse(scoreResCustomer) + "/scoring");
-        scoringJdbcTemplate.setDataSource(new DriverManagerDataSource(resultJdbcUrl));
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, scoreResTable))){
-            metadataService.dropTable(scoringJdbcTemplate, scoreResTable);
-        }
-        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, scoreResTable, scoreTargetTable);
-
-        ScoringCommand scoringCommand = new ScoringCommand(scoreResCustomer, ScoringCommandStatus.POPULATED, scoreResTable,
-                0, 4352, new Timestamp(System.currentTimeMillis()));
-        
-        scoringCreds.setJdbcUrl(resultJdbcUrl);
-        // Will load result avros to /user/s-analytics/customers/scoreResult.scoreResult.Production/scoring/scoreResTable/data
-        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.LOAD_DATA);
-        waitForSuccess(appId, ScoringCommandStep.LOAD_DATA);
-        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path("/user/s-analytics/customers/scoreResult.scoreResult.Production/scoring/scoreResultTable/data/part-m-00000.avro"));
-        for(int i = 0; i < records.size(); i++){
-            if(i == 2)
-                break;
-            System.out.println(records.get(i));
-        }
     }
 
     private boolean compareJsonResults(List<GenericRecord> newResults, List<GenericRecord> oldResults) {

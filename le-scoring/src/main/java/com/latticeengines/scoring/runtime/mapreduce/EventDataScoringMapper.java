@@ -143,7 +143,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 leadList.add(context.getCurrentKey().datum().toString());
             }
             if (leadList.size() == 0) {
-                log.warn("The mapper gets zero leads.");
+                log.error("The mapper gets zero leads.");
+                throw new LedpException(LedpCode.LEDP_200015);
             }else{
                 scoring(context, leadList);
             }
