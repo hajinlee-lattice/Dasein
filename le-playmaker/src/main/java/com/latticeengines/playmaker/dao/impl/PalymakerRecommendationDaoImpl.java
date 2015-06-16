@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.dao.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +52,7 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 if (contacts != null) {
                     String[] contactArray = contacts.split("[|]");
                     if (contactArray.length >= 8) {
+                        List<Map<String, Object>> contactList = new ArrayList<>(1);
                         Map<String, Object> contactMap = new HashMap<>();
                         contactMap.put("Name", contactArray[0]);
                         contactMap.put("Phone", contactArray[1]);
@@ -60,7 +62,8 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         contactMap.put("State", contactArray[5]);
                         contactMap.put("Country", contactArray[6]);
                         contactMap.put("ZipCode", contactArray[7]);
-                        record.put("Contacts", contactMap);
+                        contactList.add(contactMap);
+                        record.put("Contacts", contactList);
                     }
 
                 }

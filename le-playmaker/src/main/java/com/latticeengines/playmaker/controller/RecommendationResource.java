@@ -36,7 +36,7 @@ public class RecommendationResource {
     @RequestMapping(value = "/recommendationcount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get recommendation count")
-    public int getRecommendationCount(@RequestParam(value = "tenantName", required = false) String tenantName,
+    public Map<String, Object> getRecommendationCount(@RequestParam(value = "tenantName", required = false) String tenantName,
             @RequestParam(value = "start", required = true) int start) {
 
         return playmakerRecommendationMgr.getRecommendationCount(tenantName, start);
@@ -56,7 +56,7 @@ public class RecommendationResource {
     @RequestMapping(value = "/playcount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get play count")
-    public int getPlays(@RequestParam(value = "tenantName", required = false) String tenantName,
+    public Map<String, Object> getPlays(@RequestParam(value = "tenantName", required = false) String tenantName,
             @RequestParam(value = "start", required = true) int start) {
 
         return playmakerRecommendationMgr.getPlayCount(tenantName, start);
@@ -77,7 +77,7 @@ public class RecommendationResource {
     @RequestMapping(value = "/accountextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account extension count")
-    public int getAccountExtensionCount(@RequestParam(value = "tenantName", required = false) String tenantName,
+    public Map<String, Object> getAccountExtensionCount(@RequestParam(value = "tenantName", required = false) String tenantName,
             @RequestParam(value = "start", required = true) int start) {
 
         return playmakerRecommendationMgr.getAccountextensionCount(tenantName, start);
@@ -106,7 +106,7 @@ public class RecommendationResource {
     @RequestMapping(value = "/playvaluecount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get flexible play value count")
-    public int getPlayValues(@RequestParam(value = "tenantName", required = false) String tenantName,
+    public Map<String, Object> getPlayValues(@RequestParam(value = "tenantName", required = false) String tenantName,
             @RequestParam(value = "start", required = true) int start) {
 
         return playmakerRecommendationMgr.getPlayValueCount(tenantName, start);

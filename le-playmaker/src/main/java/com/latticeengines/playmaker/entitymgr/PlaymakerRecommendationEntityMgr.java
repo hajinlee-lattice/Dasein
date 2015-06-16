@@ -10,6 +10,7 @@ public interface PlaymakerRecommendationEntityMgr {
     public static final String END_KEY = "end";
     public static final String START_KEY = "start";
     public static final String LAST_MODIFIATION_DATE_KEY = "LastModificationDate";
+    public static final String COUNT_KEY = "count";
 
     List<Map<String, Object>> getAccountExtensionSchema(String tenantName);
 
@@ -21,12 +22,12 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum);
 
-    int getRecommendationCount(String tenantName, long start);
+    Map<String, Object> getRecommendationCount(String tenantName, long start);
 
-    int getPlayCount(String tenantName, long start);
+    Map<String, Object> getPlayCount(String tenantName, long start);
 
-    int getAccountextensionCount(String tenantName, long start);
+    Map<String, Object> getAccountextensionCount(String tenantName, long start);
 
-    int getPlayValueCount(String tenantName, long start);
+    Map<String, Object> getPlayValueCount(String tenantName, long start);
 
 }

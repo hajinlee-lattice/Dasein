@@ -28,11 +28,12 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
-    public int getRecommendationCount(String tenantName, long start) {
+    public Map<String, Object> getRecommendationCount(String tenantName, long start) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
         PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
-
-        return dao.getRecommendationCount(start);
+        Map<String, Object> result = new HashMap<>();
+        result.put(COUNT_KEY, dao.getRecommendationCount(start));
+        return result;
     }
 
     @Override
@@ -46,13 +47,15 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
-    public int getPlayCount(String tenantName, long start) {
+    public Map<String, Object> getPlayCount(String tenantName, long start) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
         PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
 
-        return dao.getPlayCount(start);
+        Map<String, Object> result = new HashMap<>();
+        result.put(COUNT_KEY, dao.getPlayCount(start));
+        return result;
     }
-    
+
     @Override
     public Map<String, Object> getAccountextensions(String tenantName, long start, int offset, int maximum) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
@@ -64,13 +67,15 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
-    public int getAccountextensionCount(String tenantName, long start) {
+    public Map<String, Object> getAccountextensionCount(String tenantName, long start) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
         PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
 
-        return dao.getAccountExtensionCount(start);
+        Map<String, Object> result = new HashMap<>();
+        result.put(COUNT_KEY, dao.getAccountExtensionCount(start));
+        return result;
     }
-    
+
     @Override
     public List<Map<String, Object>> getAccountExtensionSchema(String tenantName) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
@@ -91,13 +96,15 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
-    public int getPlayValueCount(String tenantName, long start) {
+    public Map<String, Object> getPlayValueCount(String tenantName, long start) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
         PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
 
-        return dao.getPlayValueCount(start);
+        Map<String, Object> result = new HashMap<>();
+        result.put(COUNT_KEY, dao.getPlayValueCount(start));
+        return result;
     }
-    
+
     private Map<String, Object> wrapResult(List<Map<String, Object>> records) {
         Map<String, Object> result = new HashMap<>();
         if (records != null && records.size() > 0) {

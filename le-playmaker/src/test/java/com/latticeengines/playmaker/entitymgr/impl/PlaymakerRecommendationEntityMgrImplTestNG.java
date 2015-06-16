@@ -51,8 +51,9 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     @Test(groups = "functional", enabled = true)
     public void getRecommendationCount() throws Exception {
 
-        int result = playMakerRecommendationEntityMgr.getRecommendationCount(tenant.getTenantName(), 1000);
-        Assert.assertTrue(result > 0);
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendationCount(tenant.getTenantName(),
+                1000);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -70,9 +71,8 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     @Test(groups = "functional", enabled = true)
     public void getPlayCount() throws Exception {
 
-        int result = playMakerRecommendationEntityMgr.getPlayCount(tenant.getTenantName(), 1000);
-
-        Assert.assertTrue(result > 0);
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getPlayCount(tenant.getTenantName(), 1000);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -92,8 +92,9 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     @Test(groups = "functional", enabled = true)
     public void getAccountExtensionCount() throws Exception {
 
-        int result = playMakerRecommendationEntityMgr.getAccountextensionCount(tenant.getTenantName(), 1000);
-        Assert.assertTrue(result > 0);
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountextensionCount(tenant.getTenantName(),
+                1000);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -118,8 +119,8 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     @Test(groups = "functional", enabled = true)
     public void getPlayValueCount() throws Exception {
 
-        int result = playMakerRecommendationEntityMgr.getPlayValueCount(tenant.getTenantName(), 1000);
-        Assert.assertTrue(result > 0);
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getPlayValueCount(tenant.getTenantName(), 1000);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
     public static PlaymakerTenant getTennat() {

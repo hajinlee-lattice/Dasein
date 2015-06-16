@@ -12,6 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.entitymgr.impl.PlaymakerRecommendationEntityMgrImplTestNG;
 
 @ContextConfiguration(locations = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
@@ -39,7 +40,8 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
 
     @Test(groups = "deployment")
     public void getRecommendations() {
-        String url = hostPort + "/playmaker/recommendations?start=1&offset=1&maximum=100&tenantName=" + tenant.getTenantName();
+        String url = hostPort + "/playmaker/recommendations?start=1&offset=1&maximum=100&tenantName="
+                + tenant.getTenantName();
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
@@ -48,8 +50,9 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
     @Test(groups = "deployment")
     public void getRecommendationCount() {
         String url = hostPort + "/playmaker/recommendationcount?start=1&tenantName=" + tenant.getTenantName();
-        int result = restTemplate.getForObject(url, Integer.class);
-        Assert.assertTrue(result > 0);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
     @Test(groups = "deployment")
@@ -63,13 +66,15 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
     @Test(groups = "deployment")
     public void getPlayCount() {
         String url = hostPort + "/playmaker/playcount?start=1&tenantName=" + tenant.getTenantName();
-        int result = restTemplate.getForObject(url, Integer.class);
-        Assert.assertNotNull(result > 0);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
     @Test(groups = "deployment")
     public void getAccountExtensions() {
-        String url = hostPort + "/playmaker/accountextensions?start=1&offset=1&maximum=100&tenantName=" + tenant.getTenantName();
+        String url = hostPort + "/playmaker/accountextensions?start=1&offset=1&maximum=100&tenantName="
+                + tenant.getTenantName();
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
@@ -78,8 +83,9 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
     @Test(groups = "deployment")
     public void getAccountExtensionCount() {
         String url = hostPort + "/playmaker/accountextensioncount?start=1&tenantName=" + tenant.getTenantName();
-        int result = restTemplate.getForObject(url, Integer.class);
-        Assert.assertNotNull(result > 0);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
     @Test(groups = "deployment")
@@ -93,7 +99,8 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
 
     @Test(groups = "deployment")
     public void getPlayValues() {
-        String url = hostPort + "/playmaker/playvalues?start=1&offset=1&maximum=100&tenantName=" + tenant.getTenantName();
+        String url = hostPort + "/playmaker/playvalues?start=1&offset=1&maximum=100&tenantName="
+                + tenant.getTenantName();
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
@@ -103,8 +110,9 @@ public class RecommendationResourceTestNG extends AbstractTestNGSpringContextTes
     @Test(groups = "deployment")
     public void getPlayValueCount() {
         String url = hostPort + "/playmaker/playvaluecount?start=1&tenantName=" + tenant.getTenantName();
-        int result = restTemplate.getForObject(url, Integer.class);
-        Assert.assertTrue(result > 0);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
     public void createTenantWithTenantName() {
