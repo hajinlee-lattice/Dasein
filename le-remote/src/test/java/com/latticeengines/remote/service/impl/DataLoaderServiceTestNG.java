@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -33,29 +34,36 @@ public class DataLoaderServiceTestNG extends RemoteFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testGetSegments() throws Exception {
         List<Segment> segments = dataLoaderService.getSegments(SEGMENT_TEST_TENANT, TEST_DATALOADER_URL);
-        assertEquals(segments.size(), 4);
+        assertEquals(segments.size(), 3);
+
+        List<String> segmentNames = dataLoaderService.getSegmentNames(SEGMENT_TEST_TENANT, TEST_DATALOADER_URL);
+        assertEquals(segmentNames.size(), 2);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testParseSegmentSpec() throws Exception {
         DataLoaderServiceImpl dataLoaderServiceImpl = new DataLoaderServiceImpl();
-        List<Segment> segments = dataLoaderServiceImpl.parseSegmentSpec(SEGMENTS_WITH_EMPTY_MODELIDS);
+        Map<String, Segment> segments = dataLoaderServiceImpl.parseSegmentSpec(SEGMENTS_WITH_EMPTY_MODELIDS);
         assertEquals(segments.size(), 4);
-        assertEquals(segments.get(0).getModelId(), "");
-        assertEquals(segments.get(3).getModelId(), "defaultModelId");
+        assertEquals(segments.get("ABC1").getModelId(), "");
+        assertEquals(segments.get(DataLoaderServiceImpl.DEFAULT_SEGMENT).getModelId(), "defaultModelId");
     }
 
     @Test(groups = "functional", enabled = true)
     public void testSetSegments() throws Exception {
         List<Segment> segments = new ArrayList<>();
 
-        for (int i = 1; i <= 3; i++) {
-            Segment segment = new Segment();
-            segment.setName("ABC" + i);
-            segment.setModelId("modelID" + i);
-            segment.setPriority(i);
-            segments.add(segment);
-        }
+        Segment segment = new Segment();
+        segment.setName("US");
+        segment.setModelId("US_modelID");
+        segment.setPriority(1);
+        segments.add(segment);
+
+        segment = new Segment();
+        segment.setName("Spain");
+        segment.setModelId("Spain_modelID");
+        segment.setPriority(2);
+        segments.add(segment);
 
         Segment defaultSegment = new Segment();
         defaultSegment.setName(DataLoaderServiceImpl.DEFAULT_SEGMENT);

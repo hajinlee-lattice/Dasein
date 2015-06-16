@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -52,8 +54,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String UNINITIALIZED_MODELID = "";
 
     @VisibleForTesting
-    List<Segment> parseSegmentSpec(String details) {
-        List<Segment> results = new ArrayList<>();
+    Map<String, Segment> parseSegmentSpec(String details) {
+        Map<String, Segment> results = new HashMap<>();
 
         int index = 0;
         int priority = 1;
@@ -77,14 +79,15 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             }
             segment.setModelId(modelId);
             segment.setPriority(priority++);
-            results.add(segment);
+            results.put(segment.getName(), segment);
         }
 
         return results;
     }
 
     public List<Segment> getSegments(String tenantName, String dlUrl) {
-        List<Segment> results = new ArrayList<>();
+        Map<String, Segment> nameToSegments = new HashMap<>();
+        List<Segment> finalResults = new ArrayList<>();
         String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENT_MODELS_SPEC));
         String response = "";
         try {
@@ -96,17 +99,39 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
         GetSpecResult getSpecResult = JsonUtils.deserialize(response, GetSpecResult.class);
         if (getSpecResult.getSuccess().equalsIgnoreCase("true")) {
-            results = parseSegmentSpec(getSpecResult.getSpecDetails());
+            nameToSegments = parseSegmentSpec(getSpecResult.getSpecDetails());
         } else if (getSpecResult.getSuccess().equalsIgnoreCase("false")
                 && getSpecResult.getErrorMessage().contains("does not exist")) {
             // spec does not exist, instantiate with default segment
             Segment segment = new Segment();
             segment.setName(DEFAULT_SEGMENT);
+            segment.setModelId("");
             segment.setPriority(1);
-            results.add(segment);
+            nameToSegments.put(DEFAULT_SEGMENT, segment);
         }
 
-        return results;
+        List<String> segmentNames = getSegmentNames(tenantName, dlUrl);
+        int priority = 1;
+        for (String name : segmentNames) {
+            Segment matchedSegment = nameToSegments.get(name);
+
+            if (matchedSegment == null) {
+                Segment segment = new Segment();
+                segment.setName(name);
+                segment.setModelId("");
+                segment.setPriority(priority);
+                finalResults.add(segment);
+            } else {
+                matchedSegment.setPriority(priority);
+                finalResults.add(matchedSegment);
+            }
+            priority++;
+        }
+        Segment defaultSegment = nameToSegments.get(DEFAULT_SEGMENT);
+        defaultSegment.setPriority(priority);
+        finalResults.add(defaultSegment);
+
+        return finalResults;
     }
 
     private Extract extractValue(String searchString, String targetString, int startIndex) {
@@ -131,15 +156,14 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @VisibleForTesting
-    boolean compareSegments(List<Segment> currentSegments, List<Segment> newSegments) {
-        Set<String> currentSet = new HashSet<>();
+    boolean compareSegments(List<String> currentSegments, List<Segment> newSegments) {
+        Set<String> currentSet = new HashSet<>(currentSegments);
         Set<String> newSet = new HashSet<>();
 
-        for (Segment segment : currentSegments) {
-            currentSet.add(segment.getName());
-        }
         for (Segment segment : newSegments) {
-            newSet.add(segment.getName());
+            if (!segment.getName().equals(DEFAULT_SEGMENT)) {
+                newSet.add(segment.getName());
+            }
         }
         return currentSet.equals(newSet);
     }
@@ -149,7 +173,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         // segments while someone has added new segments on the backend.
         // Therefore, first perform reconciliation; if current set of segments
         // differs from updated set of segments then raise exception.
-        List<Segment> currentSegments = getSegments(tenantName, dlUrl);
+        List<String> currentSegments = getSegmentNames(tenantName, dlUrl);
         if (!compareSegments(currentSegments, segments)) {
             throw new LedpException(LedpCode.LEDP_21003,
                     new String[] { segments.toString(), currentSegments.toString() });
