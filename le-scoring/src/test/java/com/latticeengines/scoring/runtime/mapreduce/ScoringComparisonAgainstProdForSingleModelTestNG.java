@@ -101,9 +101,9 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         HdfsUtils.mkdir(yarnConfiguration, path);
         String dataPath1 = path + "/1.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url1.getFile(), dataPath1);
-        String dataPath2 = path + "/3.avro";
+        String dataPath2 = path + "/2.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url2.getFile(), dataPath2);
-        String dataPath3 = path + "/4.avro";
+        String dataPath3 = path + "/3.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url3.getFile(), dataPath3);
 
         URL modelSummaryUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/models/" + modelID);
