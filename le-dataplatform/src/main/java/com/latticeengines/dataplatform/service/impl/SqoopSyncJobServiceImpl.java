@@ -43,7 +43,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
             List<String> splitCols, String columnsToInclude, int numMappers) {
         return importData(table, targetDir, creds, queue, customer, splitCols, columnsToInclude, numMappers, null);
     }
-    
+
     @Override
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude) {
@@ -57,7 +57,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         long time1 = System.currentTimeMillis();
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
-        ApplicationId appId = super.importData(table, // 
+        ApplicationId appId = super.importData(table, //
                 targetDir, //
                 creds, //
                 queue, //
@@ -89,9 +89,10 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public ApplicationId exportData(String table, //
-            String sourceDir, DbCreds creds, String queue, String customer,
-            int numMappers, String javaColumnTypeMappings) {
+    public ApplicationId exportData(
+            String table, //
+            String sourceDir, DbCreds creds, String queue, String customer, int numMappers,
+            String javaColumnTypeMappings) {
 
         String jobName = jobNameService.createJobName(customer, "sqoop-export");
 
@@ -102,6 +103,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 jobName, //
                 numMappers, //
                 javaColumnTypeMappings, //
+                null, //
                 metadataService, //
                 yarnConfiguration, //
                 false);
@@ -111,7 +113,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     public void eval(String sql, String assignedQueue, String jobName, DbCreds creds) {
         eval(sql, assignedQueue, jobName, metadataService.getJdbcConnectionUrl(creds));
     }
-    
+
     @Override
     public void eval(String sql, String queue, String jobName, String jdbcUrl) {
         List<String> cmds = new ArrayList<>();
@@ -130,7 +132,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         long time1 = System.currentTimeMillis();
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
-        ApplicationId appId = super.importData(table, // 
+        ApplicationId appId = super.importData(table, //
                 targetDir, //
                 creds, //
                 queue, //
@@ -153,6 +155,20 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
             int numMappers, String javaColumnTypeMappings) {
         String jobName = jobNameService.createJobName(customer, "sqoop-export");
 
+        return exportDataSync(table, //
+                sourceDir, //
+                creds, //
+                queue, //
+                jobName, //
+                numMappers, //
+                javaColumnTypeMappings, //
+                null);
+    }
+
+    @Override
+    public ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer,
+            int numMappers, String javaColumnTypeMappings, String exportColumns) {
+        String jobName = jobNameService.createJobName(customer, "sqoop-export");
         return super.exportData(table, //
                 sourceDir, //
                 creds, //
@@ -160,6 +176,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 jobName, //
                 numMappers, //
                 javaColumnTypeMappings, //
+                exportColumns, //
                 metadataService, //
                 yarnConfiguration, //
                 true);

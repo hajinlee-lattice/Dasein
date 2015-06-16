@@ -32,6 +32,7 @@ public class SqoopJobServiceImpl {
             String jobName, //
             int numMappers, //
             String javaColumnTypeMappings, //
+            String exportColumns, //
             MetadataService metadataService, //
             Configuration yarnConfiguration, //
             boolean sync) {
@@ -51,6 +52,10 @@ public class SqoopJobServiceImpl {
         if (javaColumnTypeMappings != null) {
             cmds.add("--map-column-java");
             cmds.add(javaColumnTypeMappings);
+        }
+        if (exportColumns != null) {
+            cmds.add("--columns");
+            cmds.add(exportColumns);
         }
         return runTool(cmds, yarnConfiguration, sync);
     }

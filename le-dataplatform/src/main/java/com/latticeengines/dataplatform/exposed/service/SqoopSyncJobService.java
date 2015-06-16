@@ -28,6 +28,9 @@ public interface SqoopSyncJobService {
     ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers, String javaColumnTypeMappings);
     
     ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers, String javaColumnTypeMappings);
+    
+    ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer,
+            int numMappers, String javaColumnTypeMappings, String exportColumns);
 
     void eval(String sql, String assignedQueue, String jobName, DbCreds creds);
 
