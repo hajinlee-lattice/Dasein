@@ -89,7 +89,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         if (instance.equals("SQL100")) {
             hostAdd = "BODCPRODVSQL100.prod.lattice.local\\SQL100";
         }
-        hostAdd = "10.41.1.250:1433";
+        //hostAdd = "10.41.1.250:1433";
         setToBardDBDataSource(hostAdd);
     }
 

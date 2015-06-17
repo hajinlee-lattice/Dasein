@@ -8,6 +8,7 @@
         <component-name>upgrade</component-name>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <le.common.version>1.0.33-SNAPSHOT</le.common.version>
+        <le.camille.version>1.0.33-SNAPSHOT</le.camille.version>
         <le.dataplatform.version>1.0.33-SNAPSHOT</le.dataplatform.version>
     </properties>
 
@@ -19,6 +20,34 @@
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
+            <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
@@ -153,7 +182,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.latticeengines.upgrade.model.runner.runner.ModelUpgradeRunner</mainClass>
+                            <mainClass>com.latticeengines.upgrade.model.runner.ModelUpgradeRunner</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Class-Path>.</Class-Path>

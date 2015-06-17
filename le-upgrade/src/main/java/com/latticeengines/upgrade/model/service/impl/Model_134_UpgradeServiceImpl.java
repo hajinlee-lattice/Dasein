@@ -15,12 +15,12 @@ public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl{
     public void upgrade() throws Exception{
         List<String> deploymentIds = getDeploymentIDs(VERSION);
         System.out.println(deploymentIds);
-        int i = 0;
+        //int i = 0;
 
         for (String deploymentId : deploymentIds) {
-            i++;
-            if (i > 3)
-                break;
+            //i++;
+            //if (i > 3)
+            //    break;
             setBardDBInfos(deploymentId);
             setToBardDBDataSource();
 

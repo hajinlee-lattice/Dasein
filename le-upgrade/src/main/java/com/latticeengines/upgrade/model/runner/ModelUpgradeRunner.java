@@ -16,7 +16,7 @@ public class ModelUpgradeRunner {
     public ModelUpgradeRunner(){
         @SuppressWarnings("resource")
         ApplicationContext ac = new ClassPathXmlApplicationContext("upgrade-context.xml");
-        this.modelUgprade = (ModelUpgradeService) ac.getBean("model_140_Upgrade");
+        this.modelUgprade = (ModelUpgradeService) ac.getBean("model_134_Upgrade");
     }
 
     public static void main(String[] args) throws IOException, Exception, NoSuchPaddingException {
