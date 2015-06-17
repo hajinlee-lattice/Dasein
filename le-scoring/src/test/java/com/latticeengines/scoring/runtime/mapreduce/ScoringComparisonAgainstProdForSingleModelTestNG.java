@@ -27,7 +27,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
+import org.springframework.jdbc.core.JdbcTemplate;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -39,6 +41,9 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.service.impl.ScoringStepYarnProcessorImplTestNG;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.util.CollectionUtils;
 
 public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFunctionalTestNGBase {
 
@@ -68,6 +73,15 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
+    
+    @Autowired
+    private DbCreds scoringCreds;
+
+    @Autowired
+    private JdbcTemplate scoringJdbcTemplate;
+
+    @Autowired
+    private MetadataService metadataService;
 
     private String inputLeadsTable;
 
@@ -76,8 +90,15 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     private String path;
 
     private String scorePath;
+    
+    private static final String scoreResCustomer = "scoreResult";
 
-    private static final Joiner dotJoiner = Joiner.on('.').skipNulls();
+    private static final String scoreResTable = "scoreResultTable";
+
+    private static final String scoreTargetTable = "Leads_383bd1f3426444929e719380a399b38b";
+
+    private static final String resultJdbcUrl = "jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine;user=root;password=welcome";
+
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
@@ -86,7 +107,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        tenant = dotJoiner.join(customer, customer, "Production");
+        tenant = CustomerSpace.parse(customer).toString();
 
         // upload lead files to HDFS
         URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
@@ -132,8 +153,36 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         return evaluationIsSame;
     }
 
+    /**
+     * Don't directly load data from Prod DB, please import data to a dev db before you use this method
+     * @throws Exception
+     */
+
+    @SuppressWarnings("unused")
+    private void loadAvroResultToHdfs() throws Exception{
+        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/"+ CustomerSpace.parse(scoreResCustomer) + "/scoring");
+        scoringJdbcTemplate.setDataSource(new DriverManagerDataSource(resultJdbcUrl));
+        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, scoreResTable))){
+            metadataService.dropTable(scoringJdbcTemplate, scoreResTable);
+        }
+        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, scoreResTable, scoreTargetTable);
+
+        ScoringCommand scoringCommand = new ScoringCommand(scoreResCustomer, ScoringCommandStatus.POPULATED, scoreResTable,
+                0, 4352, new Timestamp(System.currentTimeMillis()));
+        
+        scoringCreds.setJdbcUrl(resultJdbcUrl);
+        // Will load result avros to /user/s-analytics/customers/scoreResult.scoreResult.Production/scoring/scoreResTable/data
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.LOAD_DATA);
+        waitForSuccess(appId, ScoringCommandStep.LOAD_DATA);
+        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path("/user/s-analytics/customers/scoreResult.scoreResult.Production/scoring/scoreResultTable/data/part-m-00000.avro"));
+        for(int i = 0; i < records.size(); i++){
+            if(i == 2)
+                break;
+            System.out.println(records.get(i));
+        }
+    }
+    
     private ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
-        System.out.println("hdfsDir is " + hdfsDir);
         ArrayList<GenericRecord> newlist = new ArrayList<GenericRecord>();
         List<String> files = null;
         try {
