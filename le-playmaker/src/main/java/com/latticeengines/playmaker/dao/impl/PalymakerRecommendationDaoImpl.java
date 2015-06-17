@@ -96,7 +96,7 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "DATEDIFF(s,'19700101 00:00:00:000', [Last_Modification_Date]) AS LastModificationDate, "
                 + "(SELECT DISTINCT G.Display_Name + '|' as [text()] FROM PlayGroupMap M JOIN PlayGroup G "
                 + "ON M.PlayGroup_ID = G.PlayGroup_ID WHERE M.Play_ID = Play.Play_ID FOR XML PATH ('')) AS PlayGroups, "
-                + "(SELECT DISTINCT P.Display_Name + '|' as [text()] "
+                + "(SELECT DISTINCT P.Display_Name + '|' + P.[External_Name] + '|' as [text()] "
                 + "FROM [ProductGroupMap] M JOIN Product P ON M.Product_ID = P.Product_ID "
                 + "WHERE M.[ProductGroup_ID] = Play.[Target_ProductGroup_ID] FOR XML PATH ('')) AS TargetProducts "
                 + getPlayFromWhereClause()
@@ -108,8 +108,29 @@ public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
         convertToList("PlayGroups", results);
-        convertToList("TargetProducts", results);
+        convertToMapList("TargetProducts", results);
         return results;
+    }
+
+    private void convertToMapList(String key, List<Map<String, Object>> results) {
+        if (CollectionUtils.isEmpty(results)) {
+            return;
+        }
+        for (Map<String, Object> record : results) {
+            String value = (String) record.get(key);
+            if (value != null) {
+                String[] valueArray = StringUtils.split(value, "|");
+                int len = valueArray.length / 2 * 2;
+                List<Map<String, Object>> valueList = new ArrayList<>();
+                for (int i = 0; i < len - 1; i += 2) {
+                    Map<String, Object> valueMap = new HashMap<>();
+                    valueMap.put("DisplayName", valueArray[i]);
+                    valueMap.put("ExternalName", valueArray[i + 1]);
+                    valueList.add(valueMap);
+                }
+                record.put(key, valueList);
+            }
+        }
     }
 
     private void convertToList(String key, List<Map<String, Object>> results) {
