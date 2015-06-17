@@ -65,8 +65,8 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant createTestTenant(){
         Tenant tenant = new Tenant();
-        tenant.setId("PLS_COMPONENT_TEST_TENANT");
-        tenant.setName("Pls component test tenant");
+        tenant.setId("PLS_COMPONENT_MANAGER_TEST_TENANT");
+        tenant.setName("Pls component manager test tenant");
         return tenant;
     }
 
