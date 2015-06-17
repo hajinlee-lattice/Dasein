@@ -29,8 +29,8 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
     private static final BatonService batonService = new BatonServiceImpl();
     private static final String serviceName = "PLS";
     private static final String tenantName = "PLS Component Test Tenant";
-    private static final String contractId = "PLSComponentTestNG";
-    private static final String tenantId = "PLSTestTenant";
+    private static final String contractId = "PLSComponentTest";
+    private static final String tenantId = "PLSComponentTest";
     private static final String spaceID = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
     private static final String testAdminUsername = "pls-installer-tester@lattice-engines.com";
 
