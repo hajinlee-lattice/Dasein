@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwritter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -40,6 +41,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
     private final BatonService batonService = new BatonServiceImpl();
+    private final String SPACE_CONFIG_NODE = LatticeComponent.spaceConfigNode;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -49,6 +51,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private ComponentOrchestrator orchestrator;
+
+    @Autowired
+    private DefaultConfigOverwritter overwritter;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -62,7 +67,9 @@ public class TenantServiceImpl implements TenantService {
             String metadataJson = "space_metadata.json";
             String serviceName = "SpaceConfiguration";
             LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
+            overwritter.overwriteDefaultSpaceConfig();
         }
+
     }
 
     @Override
@@ -180,7 +187,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public DocumentDirectory getSpaceConfigSchema() {
-        return batonService.getConfigurationSchema("SpaceConfiguration");
+        return batonService.getConfigurationSchema(SPACE_CONFIG_NODE);
     }
 
     @Override
@@ -206,7 +213,7 @@ public class TenantServiceImpl implements TenantService {
     private boolean setupSpaceConfiguration(String contractId, String tenantId, DocumentDirectory spaceConfig) {
         Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
                 contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID)
-                .append(new Path("/SpaceConfiguration"));
+                .append(new Path("/" + SPACE_CONFIG_NODE));
         return batonService.loadDirectory(spaceConfig, spaceConfigPath);
     }
 
