@@ -44,7 +44,7 @@ public class CrmCredentialResource {
         
         if ((verifyOnly == null || !verifyOnly) && (isProduction == null || isProduction)) {
             CrmConfig crmConfig = new CrmConfig();
-            crmConfig.setCrmCredential(crmCredential);
+            crmConfig.setCrmCredential(newCrmCredential);
             crmConfigService.config(crmType, tenantId, crmConfig);
         }
 
