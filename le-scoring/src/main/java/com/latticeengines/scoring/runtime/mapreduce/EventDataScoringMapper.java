@@ -24,7 +24,7 @@ import org.json.simple.parser.ParseException;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.scoring.util.ModelEvaluationResult;
+import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
 import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
 import com.latticeengines.scoring.util.ScoringMapperValidateUtil;
@@ -84,7 +84,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
         // key: modelGuid, value: list of lead records
         HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
-        ArrayList<ModelEvaluationResult> resultList = null;
+        ArrayList<ScoreOutput> resultList = null;
 
         // Preprocess the leads
         HashSet<String> modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);

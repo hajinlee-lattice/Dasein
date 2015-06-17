@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 
 public class ScoringMapperPredictUtilTestNG {
 
@@ -63,29 +64,29 @@ public class ScoringMapperPredictUtilTestNG {
         HashMap<String, String> modelIdMap = new HashMap<String, String>();
         modelIdMap.put(modelID, modelID);
 
-        ArrayList<ModelEvaluationResult> resultList = null;
+        ArrayList<ScoreOutput> resultList = null;
         resultList = ScoringMapperPredictUtil.processScoreFiles(leadInputRecordMap, models, modelIdMap, 1000);
 
-        ArrayList<ModelEvaluationResult> expectedResultList = new ArrayList<ModelEvaluationResult>();
-        ModelEvaluationResult result1 = new ModelEvaluationResult("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
+        ArrayList<ScoreOutput> expectedResultList = new ArrayList<>();
+        ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
                 4.88519256666, modelID, 100, 0.05822784810126582, 0.0777755757027, 6);
-        ModelEvaluationResult result2 = new ModelEvaluationResult("47358ca2-a549-4765-a7f7-a7637a565343", "Highest",
+        ScoreOutput result2 = new ScoreOutput("47358ca2-a549-4765-a7f7-a7637a565343", "Highest",
                 4.88519256666, modelID, 100, 0.05822784810126582, 0.0394015516631, 6);
-        ModelEvaluationResult result3 = new ModelEvaluationResult("4821a01c-5a4c-4633-9122-5d050c064d43", "Highest",
+        ScoreOutput result3 = new ScoreOutput("4821a01c-5a4c-4633-9122-5d050c064d43", "Highest",
                 2.65499596014, modelID, 98, 0.03164556962025317, 0.0267911548364, 3);
-        ModelEvaluationResult result4 = new ModelEvaluationResult("50d2fcf4-3dbb-46cf-80a3-c1ac96106b07", "Highest",
+        ScoreOutput result4 = new ScoreOutput("50d2fcf4-3dbb-46cf-80a3-c1ac96106b07", "Highest",
                 2.12399676811, modelID, 95, 0.02531645569620253, 0.0242481348343, 3);
-        ModelEvaluationResult result5 = new ModelEvaluationResult("510c48cd-4672-4b91-ad3b-3f904b100913", "High",
+        ScoreOutput result5 = new ScoreOutput("510c48cd-4672-4b91-ad3b-3f904b100913", "High",
                 1.76999730676, modelID, 91, 0.02109704641350211, 0.022526096794, 2);
-        ModelEvaluationResult result6 = new ModelEvaluationResult("936a6661-c745-4922-a32b-bde68ada894d", "High",
+        ScoreOutput result6 = new ScoreOutput("936a6661-c745-4922-a32b-bde68ada894d", "High",
                 1.69919741449, modelID, 84, 0.020253164556962026, 0.0189333568863, 2);
-        ModelEvaluationResult result7 = new ModelEvaluationResult("93d16654-72db-4ca5-adb5-64e12ef54215", "High",
+        ScoreOutput result7 = new ScoreOutput("93d16654-72db-4ca5-adb5-64e12ef54215", "High",
                 1.5778261706, modelID, 81, 0.018806509945750453, 0.0175358841357, 2);
-        ModelEvaluationResult result8 = new ModelEvaluationResult("baf39fe9-a184-4a83-9399-45208560dbe4", "High",
+        ScoreOutput result8 = new ScoreOutput("baf39fe9-a184-4a83-9399-45208560dbe4", "High",
                 1.48679773768, modelID, 75, 0.017721518987341773, 0.0148266449465, 2);
-        ModelEvaluationResult result9 = new ModelEvaluationResult("cd7de65c-b2af-42a5-85af-491cf8503747", "Medium",
+        ScoreOutput result9 = new ScoreOutput("cd7de65c-b2af-42a5-85af-491cf8503747", "Medium",
                 1.15302681698, modelID, 65, 0.013743218806509945, 0.01244724204371, 1);
-        ModelEvaluationResult result10 = new ModelEvaluationResult("fd6be1aa-95aa-45b2-adbb-3125a01acf84", "Medium",
+        ScoreOutput result10 = new ScoreOutput("fd6be1aa-95aa-45b2-adbb-3125a01acf84", "Medium",
                 1.06199838406, modelID, 62, 0.012658227848101266, 0.01185827291902, 1);
         expectedResultList.add(result1);
         expectedResultList.add(result2);
@@ -103,13 +104,13 @@ public class ScoringMapperPredictUtilTestNG {
         dest.delete();
     }
 
-    private boolean resultListsAreSame(ArrayList<ModelEvaluationResult> list1, ArrayList<ModelEvaluationResult> list2) {
+    private boolean resultListsAreSame(ArrayList<ScoreOutput> list1, ArrayList<ScoreOutput> list2) {
         boolean isSame = true;
         for (int i = 0; i < list1.size(); i++) {
-            ModelEvaluationResult result1 = list1.get(i);
+            ScoreOutput result1 = list1.get(i);
             boolean hasMatchingResult = false;
             for (int j = 0; j < list2.size(); j++) {
-                ModelEvaluationResult result2 = list2.get(j);
+                ScoreOutput result2 = list2.get(j);
                 if (resultIsSame(result1, result2)) {
                     hasMatchingResult = true;
                     break;
@@ -126,16 +127,16 @@ public class ScoringMapperPredictUtilTestNG {
 
     @Test(groups = "unit")
     public void testWriteToOutputFile() throws IllegalArgumentException, Exception {
-        ArrayList<ModelEvaluationResult> expectedResultList = new ArrayList<ModelEvaluationResult>();
-        ModelEvaluationResult result1 = new ModelEvaluationResult("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
+        ArrayList<ScoreOutput> expectedResultList = new ArrayList<ScoreOutput>();
+        ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
                 4.88519256666, modelID, 100, 0.05822784810126582, 0.0777755757027, 6);
-        ModelEvaluationResult result2 = new ModelEvaluationResult("47358ca2-a549-4765-a7f7-a7637a565343", "Highest",
+        ScoreOutput result2 = new ScoreOutput("47358ca2-a549-4765-a7f7-a7637a565343", "Highest",
                 4.88519256666, modelID, 100, 0.05822784810126582, 0.0394015516631, 6);
-        ModelEvaluationResult result3 = new ModelEvaluationResult("4821a01c-5a4c-4633-9122-5d050c064d43", "Highest",
+        ScoreOutput result3 = new ScoreOutput("4821a01c-5a4c-4633-9122-5d050c064d43", "Highest",
                 2.65499596014, modelID, 98, 0.03164556962025317, 0.0267911548364, 3);
-        ModelEvaluationResult result4 = new ModelEvaluationResult("50d2fcf4-3dbb-46cf-80a3-c1ac96106b07", "Highest",
+        ScoreOutput result4 = new ScoreOutput("50d2fcf4-3dbb-46cf-80a3-c1ac96106b07", "Highest",
                 2.12399676811, modelID, 95, 0.02531645569620253, 0.0242481348343, 3);
-        ModelEvaluationResult result5 = new ModelEvaluationResult("510c48cd-4672-4b91-ad3b-3f904b100913", "High",
+        ScoreOutput result5 = new ScoreOutput("510c48cd-4672-4b91-ad3b-3f904b100913", "High",
                 1.76999730676, modelID, 91, 0.02109704641350211, 0.022526096794, 2);
         expectedResultList.add(result1);
         expectedResultList.add(result2);
@@ -169,12 +170,12 @@ public class ScoringMapperPredictUtilTestNG {
         File file = new File("temp.avro");
         FileUtils.copyInputStreamToFile(is, file);
 
-        SpecificDatumReader<ModelEvaluationResult> reader = new SpecificDatumReader<ModelEvaluationResult>(
-                ModelEvaluationResult.class);
-        DataFileReader<ModelEvaluationResult> dataFileReader = new DataFileReader<ModelEvaluationResult>(file, reader);
-        ArrayList<ModelEvaluationResult> generatedResultList = new ArrayList<ModelEvaluationResult>();
-        ModelEvaluationResult result = null;
-        System.out.println("print out the ModelEvaluationResults");
+        SpecificDatumReader<ScoreOutput> reader = new SpecificDatumReader<ScoreOutput>(
+                ScoreOutput.class);
+        DataFileReader<ScoreOutput> dataFileReader = new DataFileReader<ScoreOutput>(file, reader);
+        ArrayList<ScoreOutput> generatedResultList = new ArrayList<ScoreOutput>();
+        ScoreOutput result = null;
+        System.out.println("print out the ScoreOutputs");
         while (dataFileReader.hasNext()) {
             result = dataFileReader.next();
             System.out.println(result);
@@ -195,7 +196,7 @@ public class ScoringMapperPredictUtilTestNG {
         }
     }
 
-    private boolean resultIsSame(ModelEvaluationResult result1, ModelEvaluationResult result2) {
+    private boolean resultIsSame(ScoreOutput result1, ScoreOutput result2) {
         double eps = 1e-6;
         boolean isSame = true;
         if (!compareTwoCharSequences(result1.getLeadID(), result2.getLeadID())) {
@@ -207,7 +208,7 @@ public class ScoringMapperPredictUtilTestNG {
         if ((result1.getLift() - result2.getLift()) >= eps) {
             isSame = false;
         }
-        if (!compareTwoCharSequences(result1.getPlayDisplayName(), result2.getPlayDisplayName())) {
+        if (!compareTwoCharSequences(result1.getPlay_Display_Name(), result2.getPlay_Display_Name())) {
             isSame = false;
         }
         if (result1.getPercentile() != result2.getPercentile()) {

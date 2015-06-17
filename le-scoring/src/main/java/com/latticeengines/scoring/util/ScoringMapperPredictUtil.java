@@ -25,6 +25,7 @@ import org.json.simple.JSONObject;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 
 public class ScoringMapperPredictUtil {
@@ -86,21 +87,20 @@ public class ScoringMapperPredictUtil {
         if (errors.length() != 0) {
             throw new LedpException(LedpCode.LEDP_200011, new String[] { errors.toString() });
         }
-        
+
         return strs.toString();
     }
 
-    public static void writeToOutputFile(ArrayList<ModelEvaluationResult> resultList, Configuration yarnConfiguration,
+    public static void writeToOutputFile(ArrayList<ScoreOutput> resultList, Configuration yarnConfiguration,
             String outputPath) throws Exception {
 
         String fileName = UUID.randomUUID() + ".avro";
         File outputFile = new File(fileName);
-        DatumWriter<ModelEvaluationResult> userDatumWriter = new SpecificDatumWriter<ModelEvaluationResult>();
-        DataFileWriter<ModelEvaluationResult> dataFileWriter = new DataFileWriter<ModelEvaluationResult>(
-                userDatumWriter);
+        DatumWriter<ScoreOutput> userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
+        DataFileWriter<ScoreOutput> dataFileWriter = new DataFileWriter<ScoreOutput>(userDatumWriter);
 
         for (int i = 0; i < resultList.size(); i++) {
-            ModelEvaluationResult result = resultList.get(i);
+            ScoreOutput result = resultList.get(i);
             if (i == 0) {
                 dataFileWriter.create(result.getSchema(), outputFile);
             }
@@ -111,13 +111,12 @@ public class ScoringMapperPredictUtil {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/" + fileName);
     }
 
-    public static ArrayList<ModelEvaluationResult> processScoreFiles(
-            HashMap<String, ArrayList<String>> leadInputRecordMap, HashMap<String, JSONObject> models,
-            HashMap<String, String> modelIdMap, long threshold) throws IOException {
-        
+    public static ArrayList<ScoreOutput> processScoreFiles(HashMap<String, ArrayList<String>> leadInputRecordMap,
+            HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, long threshold) throws IOException {
+
         Set<String> modelGuidSet = leadInputRecordMap.keySet();
         // list of HashMap<leadID: score>
-        ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
+        ArrayList<ScoreOutput> resultList = new ArrayList<ScoreOutput>();
         for (String modelGuid : modelGuidSet) {
             log.info("modelGuid is " + modelGuid);
             // key: leadID, value: raw score
@@ -130,7 +129,7 @@ public class ScoringMapperPredictUtil {
             }
             Set<String> keySet = scores.keySet();
             for (String key : keySet) {
-                ModelEvaluationResult result = getResult(modelIdMap, modelGuid, key, model, scores.get(key));
+                ScoreOutput result = getResult(modelIdMap, modelGuid, key, model, scores.get(key));
                 resultList.add(result);
             }
         }
@@ -138,13 +137,12 @@ public class ScoringMapperPredictUtil {
     }
 
     private static void readScoreFile(String modelGuid, int index, HashMap<String, Double> scores) throws IOException {
-        
+
         String fileName = modelGuid + SCORING_OUTPUT_PREFIX + index + ".txt";
         File f = new File(fileName);
         if (!f.exists()) {
             throw new LedpException(LedpCode.LEDP_200012, new String[] { fileName });
         }
-        
 
         List<String> lines = FileUtils.readLines(f);
         for (String line : lines) {
@@ -156,7 +154,7 @@ public class ScoringMapperPredictUtil {
         }
     }
 
-    private static ModelEvaluationResult getResult(HashMap<String, String> modelIdMap, String modelGuid, String leadId,
+    private static ScoreOutput getResult(HashMap<String, String> modelIdMap, String modelGuid, String leadId,
             JSONObject model, double score) {
         Double probability = null;
 
@@ -251,8 +249,8 @@ public class ScoringMapperPredictUtil {
 
         Integer integerScore = (int) (probability != null ? Math.round(probability * 100) : Math.round(score * 100));
         String modelName = modelIdMap.get(modelGuid);
-        ModelEvaluationResult result = new ModelEvaluationResult(leadId, bucket, lift, modelName, percentile,
-                probability, score, integerScore);
+        ScoreOutput result = new ScoreOutput(leadId, bucket, lift, modelName, percentile, probability, score,
+                integerScore);
         return result;
 
     }
@@ -272,18 +270,18 @@ public class ScoringMapperPredictUtil {
         // System.out.println(ele.toString());
         // }
 
-        ModelEvaluationResult result1 = new ModelEvaluationResult("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
+        ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
                 4.88519256666, "modelID", 100, 0.05822784810126582, 0.0777755757027, 6);
-        ArrayList<ModelEvaluationResult> resultList = new ArrayList<ModelEvaluationResult>();
+        ArrayList<ScoreOutput> resultList = new ArrayList<>();
         resultList.add(result1);
         String fileName = "/Users/ygao/test/test.avro";
         File outputFile = new File(fileName);
-        DatumWriter<ModelEvaluationResult> userDatumWriter = new SpecificDatumWriter<ModelEvaluationResult>();
-        DataFileWriter<ModelEvaluationResult> dataFileWriter = new DataFileWriter<ModelEvaluationResult>(
+        DatumWriter<ScoreOutput> userDatumWriter = new SpecificDatumWriter<>();
+        DataFileWriter<ScoreOutput> dataFileWriter = new DataFileWriter<>(
                 userDatumWriter);
 
         for (int i = 0; i < resultList.size(); i++) {
-            ModelEvaluationResult result = resultList.get(i);
+            ScoreOutput result = resultList.get(i);
             try {
                 if (i == 0) {
                     dataFileWriter.create(result.getSchema(), outputFile);
@@ -299,15 +297,15 @@ public class ScoringMapperPredictUtil {
             e.printStackTrace();
         }
 
-        SpecificDatumReader<ModelEvaluationResult> reader = new SpecificDatumReader<ModelEvaluationResult>(
-                ModelEvaluationResult.class);
-        DataFileReader<ModelEvaluationResult> dataFileReader = null;
+        SpecificDatumReader<ScoreOutput> reader = new SpecificDatumReader<ScoreOutput>(
+                ScoreOutput.class);
+        DataFileReader<ScoreOutput> dataFileReader = null;
         try {
-            dataFileReader = new DataFileReader<ModelEvaluationResult>(outputFile, reader);
+            dataFileReader = new DataFileReader<ScoreOutput>(outputFile, reader);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ModelEvaluationResult result = null;
+        ScoreOutput result = null;
         while (dataFileReader.hasNext()) {
             result = dataFileReader.next();
             System.out.println(result);
