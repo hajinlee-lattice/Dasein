@@ -234,7 +234,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
                 String key = oldResult.get("LeadID").toString() + oldResult.get("Play_Display_Name").toString();
                 if (!resultMap.containsKey(key)) {
                     System.out.println(key);
-                    System.err.println("keys are the same");
+                    System.err.println("keys are not the same");
                     resultsAreSame = false;
                     break;
                 } else {
