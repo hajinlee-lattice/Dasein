@@ -17,12 +17,4 @@ public class BOMUtils {
                 ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE));
     }
 
-    public static boolean hasBOM(InputStream ins) throws IOException {
-        BOMInputStream bomIn = new BOMInputStream(ins, ByteOrderMark.UTF_8,
-                ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
-                ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE
-        );
-        return bomIn.hasBOM();
-    }
-
 }
