@@ -1,9 +1,10 @@
 package com.latticeengines.oauth2.service;
 
-import org.springframework.security.core.userdetails.User;
+import java.util.List;
+import java.util.Map;
 
 public interface UserService {
 
-    User findByUserName(String userName);
+    List<Map<String, Object>> findByUserName(String userName);
 
 }

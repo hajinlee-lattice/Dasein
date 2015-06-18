@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.service.impl;
+package com.latticeengines.oauth2.service;
 
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
@@ -8,8 +8,9 @@ public class OAuthUser extends User implements UserDetails {
 
     private static final long serialVersionUID = 242742594459972345L;
 
-    public OAuthUser(String userName, String password) {
-        super(userName, password, AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+    public OAuthUser(String userName, String password, Boolean enabled) {
+        super(userName, password, enabled, true, true, true, AuthorityUtils
+                .commaSeparatedStringToAuthorityList("ROLE_USER"));
     }
 
 }
