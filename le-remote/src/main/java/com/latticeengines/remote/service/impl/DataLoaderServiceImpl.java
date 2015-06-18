@@ -288,26 +288,25 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     public InstallResult installVisiDBStructureFile(InstallTemplateRequest request, String dlUrl) {
         String jsonStr = JsonUtils.serialize(request);
-        String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/InstallVisiDBStructureFile_Sync",
-                    false, Headers.getHeaders(), jsonStr);
+            String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
+                    dlUrl + "/DLRestService/InstallVisiDBStructureFile_Sync", false, Headers.getHeaders(), jsonStr);
+            return JsonUtils.deserialize(response, InstallResult.class);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21002, ex);
         }
-        return JsonUtils.deserialize(response, InstallResult.class);
     }
 
     public InstallResult installDataLoaderConfigFile(InstallTemplateRequest request, String dlUrl) {
         String jsonStr = JsonUtils.serialize(request);
-        String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(
+            String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
                     dlUrl + "/DLRestService/InstallConfigFile_Sync", false, Headers.getHeaders(), jsonStr);
+            return JsonUtils.deserialize(response, InstallResult.class);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21004, ex);
         }
-        return JsonUtils.deserialize(response, InstallResult.class);
+
     }
 
     public InstallResult getDLTenantSettings(GetVisiDBDLRequest getRequest, String dlUrl) {
