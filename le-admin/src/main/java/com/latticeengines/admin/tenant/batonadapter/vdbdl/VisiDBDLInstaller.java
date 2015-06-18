@@ -142,7 +142,4 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
     private void createDataStoreFolder(String dataStoreFolder, String dmDeployment) {
         dataStoreProvider.createTenantFolder(dataStoreFolder, dmDeployment);
     }
-
-
-
 }

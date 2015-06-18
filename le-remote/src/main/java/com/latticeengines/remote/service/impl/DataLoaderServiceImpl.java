@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.vdb.SpecParser;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
+import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
@@ -317,6 +318,18 @@ public class DataLoaderServiceImpl implements DataLoaderService {
                     true, Headers.getHeaders(), jsonString);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21005, ex);
+        }
+        return JsonUtils.deserialize(response, InstallResult.class);
+    }
+
+    public InstallResult deleteDLTenant(DeleteVisiDBDLRequest request, String dlUrl, boolean retry) {
+        String jsonStr = JsonUtils.serialize(request);
+        String response = "";
+        try{ 
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
+                retry, Headers.getHeaders(), jsonStr);
+        }catch (IOException ex) {
+               throw new LedpException(LedpCode.LEDP_21007, ex);
         }
         return JsonUtils.deserialize(response, InstallResult.class);
     }

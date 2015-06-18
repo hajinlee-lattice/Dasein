@@ -3,6 +3,7 @@ package com.latticeengines.remote.exposed.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
+import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
@@ -25,5 +26,7 @@ public interface DataLoaderService {
     InstallResult getDLTenantSettings(GetVisiDBDLRequest getRequest, String dlUrl);
 
     InstallResult createDLTenant(CreateVisiDBDLRequest postRequest, String dlUrl);
+
+    InstallResult deleteDLTenant(DeleteVisiDBDLRequest request, String dlUrl, boolean retry);
 
 }

@@ -63,14 +63,14 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
-        visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
+        visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
         visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
     }
 
     @AfterClass(groups = {"deployment", "functional"})
     @Override
     public void tearDown() throws Exception {
-        visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
+        visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
         visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
         super.tearDown();
     }
@@ -100,7 +100,7 @@ public class VisiDBTemplateComponentTestNG extends BatonAdapterDeploymentTestNGB
 
         state = waitForSuccess(getServiceName());
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
-        response = visiDBDLComponentTestNG.deleteVisiDBDLTenant(tenant);
+        response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 3);
     }
 

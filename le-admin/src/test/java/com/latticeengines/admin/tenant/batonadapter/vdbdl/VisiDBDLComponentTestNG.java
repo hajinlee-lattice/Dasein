@@ -1,11 +1,9 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -17,8 +15,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -27,6 +23,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.Constants;
 
 @Component
@@ -34,6 +31,9 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private DataLoaderService dataLoaderService;
 
     @Value("${admin.test.dl.url}")
     private String dlUrl;
@@ -70,14 +70,14 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
-        deleteVisiDBDLTenant(tenant);
+        deleteVisiDBDLTenantWithRetry(tenant);
         clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
     }
 
-    @AfterClass(groups = {"deployment", "functional"})
+    @AfterClass(groups = { "deployment", "functional" })
     @Override
     public void tearDown() throws Exception {
-        deleteVisiDBDLTenant(tenant);
+        deleteVisiDBDLTenantWithRetry(tenant);
         clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
         super.tearDown();
     }
@@ -113,16 +113,17 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
         verifyTenant(tenant, dlUrl);
         // verify permstore and datastore
-        Assert.assertEquals(magicRestTemplate.getForObject(
-                url + "datastore/" + dataStoreServer + "/" + tenantId, List.class).size(), 3);
+        Assert.assertEquals(
+                magicRestTemplate.getForObject(url + "datastore/" + dataStoreServer + "/" + tenantId, List.class)
+                        .size(), 3);
         // verify auto filled visidbname and tenantalias
-        SerializableDocumentDirectory configured =
-                tenantService.getTenantServiceConfig(contractId, tenantId, getServiceName());
+        SerializableDocumentDirectory configured = tenantService.getTenantServiceConfig(contractId, tenantId,
+                getServiceName());
         SerializableDocumentDirectory.Node node = configured.getNodeAtPath("/TenantAlias");
         Assert.assertEquals(node.getData(), tenantId);
         node = configured.getNodeAtPath("/VisiDB/VisiDBName");
         Assert.assertEquals(node.getData(), tenantId);
-        deleteVisiDBDLTenant(tenant);
+        deleteVisiDBDLTenantWithRetry(tenant);
     }
 
     @Test(groups = "functional")
@@ -143,51 +144,29 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         }
     }
 
-    public InstallResult deleteVisiDBDLTenant(String tenant) throws IOException {
+    public InstallResult deleteVisiDBDLTenantWithRetry(String tenant){
         DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
-        String jsonStr = JsonUtils.serialize(request);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
-                false, getHeaders(), jsonStr);
-        return JsonUtils.deserialize(response, InstallResult.class);
-    }
-
-    public InstallResult deleteVisiDBDLTenantWithRetry(String tenant) throws IOException, InterruptedException {
-        int numOfRetry = 5;
-        InstallResult response;
-        do {
-            response = deleteVisiDBDLTenant(tenant);
-            numOfRetry--;
-            Thread.sleep(2000L);
-        } while(numOfRetry >0 &&
-                (response.getStatus() != 5 || !response.getErrorMessage().contains("does not exist")));
+        InstallResult response = dataLoaderService.deleteDLTenant(request, dlUrl, true);
         return response;
-    }
-
-    public int getTenantStatus(GetVisiDBDLRequest getRequest, String dlUrl) {
-        // setup magic rest template
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
-        String response =
-                magicRestTemplate.postForObject(dlUrl + "/DLRestService/GetDLTenantSettings", getRequest, String.class);
-        InstallResult result = JsonUtils.deserialize(response, InstallResult.class);
-        return result.getStatus();
     }
 
     public void verifyTenant(String tenant, String dlUrl, boolean expectToExists) {
         GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant);
         if (expectToExists) {
-            Assert.assertEquals(getTenantStatus(getRequest, dlUrl), 3);
+            Assert.assertEquals(dataLoaderService.getDLTenantSettings(getRequest, dlUrl).getStatus(), 3);
         } else {
-            Assert.assertEquals(getTenantStatus(getRequest, dlUrl), 5);
+            Assert.assertEquals(dataLoaderService.getDLTenantSettings(getRequest, dlUrl).getStatus(), 5);
         }
     }
 
-    public void verifyTenant(String tenant, String dlUrl) { verifyTenant(tenant, dlUrl, true); }
+    public void verifyTenant(String tenant, String dlUrl) {
+        verifyTenant(tenant, dlUrl, true);
+    }
 
     public void clearDatastore(String dataStoreOption, String permStoreOption, String visiDBServerName, String tenant) {
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         String url = String.format("%s/admin/internal/", getRestHostPort());
         magicRestTemplate.delete(url + "datastore/" + dataStoreOption + "/" + tenant);
         magicRestTemplate.delete(url + "permstore/" + permStoreOption + "/" + visiDBServerName + "/" + tenant);
@@ -195,14 +174,6 @@ public class VisiDBDLComponentTestNG extends BatonAdapterDeploymentTestNGBase {
         Boolean permStoreExists = magicRestTemplate.getForObject(url + "permstore/" + permStoreOption + "/"
                 + visiDBServerName + "/" + tenant, Boolean.class);
         Assert.assertFalse(permStoreExists);
-    }
-
-    public List<BasicNameValuePair> getHeaders(){
-        List<BasicNameValuePair> headers = new ArrayList<>();
-        headers.add(new BasicNameValuePair("MagicAuthentication", "Security through obscurity!"));
-        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
-        headers.add(new BasicNameValuePair("Accept", "application/json"));
-        return headers;
     }
 
     @Override
