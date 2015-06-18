@@ -17,8 +17,9 @@ public class EmailTemplateBuilder {
     private String htmlTemplate;
 
     public EmailTemplateBuilder(Template template) throws IOException {
+        String tmpFile = template.templateFile();
         htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(template.templateFile()));
+                .getResourceAsStream(tmpFile));
     }
 
     public EmailTemplateBuilder replaceToken(String token, String value) {
@@ -60,7 +61,7 @@ public class EmailTemplateBuilder {
         PLS_EXISTING_INTERNAL_USER("old_user.html"),
         PLS_FORGET_PASSWORD("forget_password.html");
 
-        private final static String templateRoot = "com/latticeengines/pls/service/";
+        private final static String templateRoot = "com/latticeengines/security/";
         private final String templateFile;
 
         Template(String tmpFile) {
