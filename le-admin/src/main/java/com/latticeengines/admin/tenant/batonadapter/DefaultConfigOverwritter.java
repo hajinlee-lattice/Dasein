@@ -19,6 +19,8 @@ import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 @Component
 public class DefaultConfigOverwritter {
 
+    private final String listDelimiter = ",";
+
     @Value("${admin.overwrite.dl.url:DEFAULT}")
     private String dlUrl;
 
@@ -51,7 +53,7 @@ public class DefaultConfigOverwritter {
             SelectableConfigurationField patch = new SelectableConfigurationField();
             patch.setNode("/DL_Address");
             patch.setDefaultOption(dlUrl);
-            patch.setOptions(Arrays.asList(dlUrlOptions.split(",")));
+            patch.setOptions(Arrays.asList(dlUrlOptions.split(listDelimiter)));
             serviceService.patchDefaultConfigWithOptions(LatticeComponent.spaceConfigNode, patch);
         }
     }
@@ -60,10 +62,10 @@ public class DefaultConfigOverwritter {
     public void overwriteDefaultConfigInPLS() {
         ObjectMapper mapper = new ObjectMapper();
         List<String> adminEmailList = new ArrayList<>();
-        if (plsSuperAdmins != null && !plsSuperAdmins.equals("DEFAULT")) {
+        if (isToBeOverwritten(plsSuperAdmins)) {
             List<String> emailList = new ArrayList<>();
-            for (String email: Arrays.asList(plsSuperAdmins.split(","))) {
-                if (!StringUtils.isEmpty(email)) { emailList.add(email); }
+            for (String email: Arrays.asList(plsSuperAdmins.split(listDelimiter))) {
+                if (!StringUtils.isEmpty(email)) emailList.add(email);
             }
             try {
                 serviceService.patchDefaultConfig(PLSComponent.componentName, "/SuperAdminEmails",
@@ -74,10 +76,10 @@ public class DefaultConfigOverwritter {
             }
         }
 
-        if (plsLatticeAdmins != null && !plsLatticeAdmins.equals("DEFAULT")) {
+        if (isToBeOverwritten(plsLatticeAdmins)) {
             List<String> emailList = new ArrayList<>();
-            for (String email: Arrays.asList(plsLatticeAdmins.split(","))) {
-                if (!StringUtils.isEmpty(email)) { emailList.add(email); }
+            for (String email: Arrays.asList(plsLatticeAdmins.split(listDelimiter))) {
+                if (!StringUtils.isEmpty(email)) emailList.add(email);
             }
             emailList.removeAll(adminEmailList);
             try {
@@ -108,12 +110,12 @@ public class DefaultConfigOverwritter {
         SelectableConfigurationField patch = new SelectableConfigurationField();
         patch.setNode("/VisiDB/PermanentStore");
         patch.setDefaultOption(vdbPermstore);
-        patch.setOptions(Arrays.asList(vdbPermstoreOptions.split(",")));
+        patch.setOptions(Arrays.asList(vdbPermstoreOptions.split(listDelimiter)));
         serviceService.patchDefaultConfigWithOptions(VisiDBDLComponent.componentName, patch);
     }
 
     private boolean isToBeOverwritten(String value) {
-        return value != null && !value.equals("DEFAULT");
+        return value != null && !"DEFAULT".equals(value);
     }
 
 }
