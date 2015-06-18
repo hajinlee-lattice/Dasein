@@ -32,12 +32,12 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.service.TenantService;
-import com.latticeengines.pls.service.impl.EmailUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.exception.LoginException;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
@@ -66,7 +66,7 @@ public class UserResource {
     private TenantService tenantService;
 
     @Autowired
-    private EmailUtils emailUtils;
+    private EmailService emailService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -182,9 +182,9 @@ public class UserResource {
                     loginUsername, user.getUsername(), tenantId));
 
             if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                emailUtils.sendNewExternalUserEmail(user, tempPass);
+                emailService.sendPLSNewExternalUserEmail(user, tempPass);
             } else {
-                emailUtils.sendNewInternalUserEmail(tenant, user, tempPass);
+                emailService.sendPLSNewInternalUserEmail(tenant, user, tempPass);
             }
         }
         return response;
@@ -283,9 +283,9 @@ public class UserResource {
                 if (newUser && tenant != null && user != null) {
                     if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) ||
                             targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                        emailUtils.sendExistingExternalUserEmail(tenant, user);
+                        emailService.sendPLSExistingExternalUserEmail(tenant, user);
                     } else {
-                        emailUtils.sendExistingInternalUserEmail(tenant, user);
+                        emailService.sendPLSExistingInternalUserEmail(tenant, user);
                     }
                 }
             } else {

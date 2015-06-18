@@ -21,17 +21,19 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
-import com.latticeengines.domain.exposed.pls.UserDocument.UserResult.User;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
 import com.latticeengines.security.exposed.exception.LoginException;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -48,6 +50,12 @@ public class LoginResource {
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private UserService userService;
+
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Login to Lattice external application")
@@ -55,7 +63,9 @@ public class LoginResource {
         LoginDocument doc = new LoginDocument();
 
         try {
-            Ticket ticket = globalAuthenticationService.authenticateUser(creds.getUsername().toLowerCase(), creds.getPassword());
+            Ticket ticket = globalAuthenticationService.authenticateUser(
+                    creds.getUsername().toLowerCase(),
+                    creds.getPassword());
 
             doc.setRandomness(ticket.getRandomness());
             doc.setUniqueness(ticket.getUniqueness());
@@ -92,7 +102,7 @@ public class LoginResource {
             doc.setSuccess(true);
 
             UserResult result = doc.new UserResult();
-            User user = result.new User();
+            UserResult.User user = result.new User();
             user.setDisplayName(session.getDisplayName());
             user.setEmailAddress(session.getEmailAddress());
             user.setIdentifier(session.getIdentifier());
@@ -116,13 +126,17 @@ public class LoginResource {
     @ResponseBody
     @ApiOperation(value = "Reset password and send an email")
     public boolean forgotPassword(@RequestBody AttributeMap attrMap) {
-        return globalUserManagementService.forgotLatticeCredentials(attrMap.get("Username"));
+        String username = attrMap.get("Username");
+        String tempPass = globalUserManagementService.resetLatticeCredentials(username);
+        User user = userService.findByUsername(username);
+        emailService.sendPLSForgetPasswordEmail(user, tempPass);
+        return true;
     }
 
     class TenantNameSorter implements Comparator<Tenant> {
 
-        public int compare(Tenant aTenant, Tenant anotherTenant) {
-            return aTenant.getName().compareTo(anotherTenant.getName());
+        public int compare(Tenant oneTenant, Tenant anotherTenant) {
+            return oneTenant.getName().compareTo(anotherTenant.getName());
         }
 
     }
