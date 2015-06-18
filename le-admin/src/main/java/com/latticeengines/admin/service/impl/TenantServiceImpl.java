@@ -40,8 +40,10 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
+    private static final String spaceConfigNode = LatticeComponent.spaceConfigNode;
+    private static final String danteFeatureFlag = "Dante";
+
     private final BatonService batonService = new BatonServiceImpl();
-    private final String SPACE_CONFIG_NODE = LatticeComponent.spaceConfigNode;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -90,7 +92,7 @@ public class TenantServiceImpl implements TenantService {
         }
 
         List<SerializableDocumentDirectory> configSDirs = tenantRegistration.getConfigDirectories();
-        if (configSDirs == null) { return true; }
+        if (configSDirs == null) return true;
         Map<String, Map<String, String>> props = new HashMap<>();
         for (SerializableDocumentDirectory configSDir: configSDirs) {
             String serviceName = configSDir.getRootPath().substring(1);
@@ -175,19 +177,23 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
-        SerializableDocumentDirectory rawDir = tenantEntityMgr.getTenantServiceConfig(contractId, tenantId, serviceName);
+    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName)
+    {
+        SerializableDocumentDirectory rawDir =
+                tenantEntityMgr.getTenantServiceConfig(contractId, tenantId, serviceName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadata(metaDir);
         return rawDir;
     }
 
     @Override
-    public SpaceConfiguration getDefaultSpaceConfig() { return tenantEntityMgr.getDefaultSpaceConfig(); }
+    public SpaceConfiguration getDefaultSpaceConfig() {
+        return tenantEntityMgr.getDefaultSpaceConfig();
+    }
 
     @Override
     public DocumentDirectory getSpaceConfigSchema() {
-        return batonService.getConfigurationSchema(SPACE_CONFIG_NODE);
+        return batonService.getConfigurationSchema(spaceConfigNode);
     }
 
     @Override
@@ -195,36 +201,39 @@ public class TenantServiceImpl implements TenantService {
         return setupSpaceConfiguration(contractId, tenantId, spaceConfig.toDocumentDirectory());
     }
 
+    private boolean setupSpaceConfiguration(String contractId, String tenantId, DocumentDirectory spaceConfig) {
+        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID)
+                .append(new Path("/" + spaceConfigNode));
+        return batonService.loadDirectory(spaceConfig, spaceConfigPath);
+    }
+
+
     @Override
     public boolean danteIsEnabled(String contracId, String tenantId) {
         TenantDocument tenant = getTenant(contracId, tenantId);
         String str = tenant.getSpaceInfo().featureFlags;
-        if (!str.contains("Dante")) { return false; }
+        if (!str.contains(danteFeatureFlag)) return false;
 
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode json = mapper.readTree(str);
-            return json.get("Dante").asBoolean();
+            return json.get(danteFeatureFlag).asBoolean();
         } catch (Exception e) {
             return false;
         }
     }
 
-    private boolean setupSpaceConfiguration(String contractId, String tenantId, DocumentDirectory spaceConfig) {
-        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID)
-                .append(new Path("/" + SPACE_CONFIG_NODE));
-        return batonService.loadDirectory(spaceConfig, spaceConfigPath);
-    }
-
-
-    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {
-        if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR))
+    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2,
+                                                       String serviceName) {
+        if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR)) {
             return BootstrapState.constructErrorState(
                     0, 0, "At least one of the components encountered an error : " + serviceName);
+        }
 
-        if (state1.state.equals(BootstrapState.State.INITIAL) || state2.state.equals(BootstrapState.State.INITIAL))
+        if (state1.state.equals(BootstrapState.State.INITIAL) || state2.state.equals(BootstrapState.State.INITIAL)) {
             return BootstrapState.createInitialState();
+        }
 
         return BootstrapState.constructOKState(state2.installedVersion);
     }
