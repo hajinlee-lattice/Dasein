@@ -77,7 +77,7 @@
         </div>
 
         <!-- Forgot Password success -->
-        <div class="form-signin" data-ng-show="!showLoginForm && resetPasswordSuccess">
+        <div class="form-signin" data-ng-show="!showLoginForm && resetPasswordSuccess && !showForgotPassword">
             <h2 class="form-signin-heading">{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_TITLE') }}</h2>
             <p><strong>{{ email }}</strong></p>
             <p>{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_BODY') }}</p>
