@@ -90,14 +90,8 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     private String path;
 
     private String scorePath;
-    
-    private static final String scoreResCustomer = "scoreResult";
 
     private static final String scoreResTable = "scoreResultTable";
-
-    private static final String scoreTargetTable = "Leads_383bd1f3426444929e719380a399b38b";
-
-    private static final String resultJdbcUrl = "jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine;user=root;password=welcome";
 
 
     @BeforeMethod(groups = "functional")
@@ -134,7 +128,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         String filePath = modelPath + "/model.json";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
     }
-
+    
     // compare the results
     private boolean compareEvaluationResults() {
         boolean evaluationIsSame = false;
@@ -155,31 +149,29 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
     /**
      * Don't directly load data from Prod DB, please import data to a dev db before you use this method
+     * resultJdbcUrl should be something like "jdbc:sqlserver://10.41.1.207\\SQL2012STD;databaseName=ScoringDaemon_QA;user=$$USER$$;password=$$PASSWD$$"
      * @throws Exception
      */
 
     @SuppressWarnings("unused")
-    private void loadAvroResultToHdfs() throws Exception{
-        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/"+ CustomerSpace.parse(scoreResCustomer) + "/scoring");
+    private List<GenericRecord> loadAvroResultToHdfs(String customerName, String scoreTargetTable, String resultJdbcUrl) throws Exception{
+        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/"+ CustomerSpace.parse(customerName) + "/scoring");
         scoringJdbcTemplate.setDataSource(new DriverManagerDataSource(resultJdbcUrl));
         if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, scoreResTable))){
             metadataService.dropTable(scoringJdbcTemplate, scoreResTable);
         }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, scoreResTable, scoreTargetTable);
 
-        ScoringCommand scoringCommand = new ScoringCommand(scoreResCustomer, ScoringCommandStatus.POPULATED, scoreResTable,
+        ScoringCommand scoringCommand = new ScoringCommand(customerName, ScoringCommandStatus.POPULATED, scoreResTable,
                 0, 4352, new Timestamp(System.currentTimeMillis()));
         
         scoringCreds.setJdbcUrl(resultJdbcUrl);
-        // Will load result avros to /user/s-analytics/customers/scoreResult.scoreResult.Production/scoring/scoreResTable/data
+        // Will load result avros to /user/s-analytics/customers/customerName.customerName.Production/scoring/scoreResTable/data
         ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.LOAD_DATA);
         waitForSuccess(appId, ScoringCommandStep.LOAD_DATA);
-        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path("/user/s-analytics/customers/scoreResult.scoreResult.Production/scoring/scoreResultTable/data/part-m-00000.avro"));
-        for(int i = 0; i < records.size(); i++){
-            if(i == 2)
-                break;
-            System.out.println(records.get(i));
-        }
+        String hdfsDir = "/user/s-analytics/customers/" + CustomerSpace.parse(customerName) + "/scoring/scoreResultTable/data/";
+        List<GenericRecord> records = loadHDFSAvroFiles(yarnConfiguration, hdfsDir);
+        return records;
     }
     
     private ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
@@ -192,9 +184,11 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
             e.printStackTrace();
         }
         for (String file : files) {
-            try {
-                List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
-                newlist.addAll(list);
+            try { 
+                if (file.toLowerCase().endsWith(".avro")) {
+                    List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
+                    newlist.addAll(list);
+                }
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -239,7 +233,8 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
                 GenericRecord oldResult = oldResults.get(i);
                 String key = oldResult.get("LeadID").toString() + oldResult.get("Play_Display_Name").toString();
                 if (!resultMap.containsKey(key)) {
-                    System.out.println("key has not the same");
+                    System.out.println(key);
+                    System.err.println("keys are the same");
                     resultsAreSame = false;
                     break;
                 } else {
@@ -310,6 +305,18 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
         // compare the results
         assertTrue(compareEvaluationResults());
+    }
+    
+    public void loadAndCompare() throws Exception {
+        // need to customize the url
+        String resultJdbcUrl = "jdbc:sqlserver://10.41.1.207\\SQL2012STD;databaseName=ScoringDaemon_QA;user=Dataloader_Prod;password=@@@";
+        String customer1 = "c1";
+        String customer2 = "c2";
+        String table1 = "Cision_QA_results";
+        String table2 = "Cision_Prod_results";
+        List<GenericRecord> records1 =loadAvroResultToHdfs(customer1, table1, resultJdbcUrl);
+        List<GenericRecord> records2 =loadAvroResultToHdfs(customer2, table2, resultJdbcUrl);
+        assertTrue(compareJsonResults(records1, records2));
     }
 
     private void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {
