@@ -57,6 +57,7 @@ public class VisiDBDLComponent extends LatticeComponent {
         installer.setDryrun(dryrun);
         ((VisiDBDLInstaller)installer).setTenantService(tenantService);
         ((VisiDBDLInstaller)installer).setDataStoreProvider(dataStoreProvider);
+        ((VisiDBDLInstaller)installer).setDataloaderService(dataLoaderService);
         return installer;
     }
 
