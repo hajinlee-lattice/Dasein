@@ -71,7 +71,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 yarnConfiguration, //
                 false);
         long time2 = System.currentTimeMillis();
-        log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));
+        log.info(String.format("Time for %s load submission = %d ms.", table, (time2 - time1)));
         return appId;
     }
 
