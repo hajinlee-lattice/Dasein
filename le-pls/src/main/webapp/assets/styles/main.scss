@@ -43,7 +43,12 @@
 }
 
 .has-tooltip {
-  color: #e96339;
+  color: #999;
+}
+
+.security-token-tooltip {
+  position: relative;
+  float: right;
 }
 
 .has-tooltip:hover {
