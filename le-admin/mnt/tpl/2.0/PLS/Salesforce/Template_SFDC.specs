@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<VisiDBStructures appName="Tmpl_LP_Trunk_SFDC_Main">
+<VisiDBStructures appName="">
   <workspaces>
     <workspace name="Workspace">
       <specs>
@@ -261,13 +261,9 @@ SpecLatticeNamedElements(
               )
             )
           )
-        , LatticeAddressSetPi(
-            LatticeAddressExpressionAtomic(
-              LatticeAddressAtomicIdentifier(
-                ContainerElementName(
-                  "SFDC_Lead_Contact_ID"
-                )
-              )
+        , LatticeAddressSetIdentifier(
+            ContainerElementName(
+              "Alias_AllLeadTable"
             )
           )
         )
@@ -509,8 +505,27 @@ SpecLatticeNamedElements(
                   )
                 )
               )
-            , LatticeFunctionExpressionConstantNull(
-                DataTypeBit
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "NOT"
+                )
+              , LatticeFunctionExpression(
+                  LatticeFunctionOperatorIdentifier(
+                    "IsNullValue"
+                  )
+                , LatticeFunctionIdentifier(
+                    ContainerElementNameTableQualifiedName(
+                      LatticeSourceTableIdentifier(
+                        ContainerElementName(
+                          "Sys_LatticeSystemID"
+                        )
+                      )
+                    , ContainerElementName(
+                        "Lattice_System_ID"
+                      )
+                    )
+                  )
+                )
               )
             )
           )
@@ -527,74 +542,6 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "SelectedForScoringIncr_Timestamp"
-      )
-    )
-  ,
-    SpecLatticeNamedElement(
-      SpecLatticeAliasDeclaration(
-        LatticeAddressSetFcn(
-          LatticeFunctionExpression(
-            LatticeFunctionOperatorIdentifier(
-              "Less"
-            )
-          , LatticeFunctionIdentifier(
-              ContainerElementName(
-                "SFDC_Contact_ID_RankForScoring_Contact"
-              )
-            )
-          , LatticeFunctionIdentifier(
-              ContainerElementName(
-                "Const_MaxNumberOfContactsToScore"
-              )
-            )
-          )
-        , LatticeAddressSetPi(
-            LatticeAddressExpressionAtomic(
-              LatticeAddressAtomicIdentifier(
-                ContainerElementName(
-                  "SFDC_Lead_Contact_ID"
-                )
-              )
-            )
-          )
-        )
-      )
-    , ContainerElementName(
-        "SelectedForScoringIncr_Timestamp_Contact"
-      )
-    )
-  ,
-    SpecLatticeNamedElement(
-      SpecLatticeAliasDeclaration(
-        LatticeAddressSetFcn(
-          LatticeFunctionExpression(
-            LatticeFunctionOperatorIdentifier(
-              "Less"
-            )
-          , LatticeFunctionIdentifier(
-              ContainerElementName(
-                "SFDC_Lead_ID_RankForScoring_Lead"
-              )
-            )
-          , LatticeFunctionIdentifier(
-              ContainerElementName(
-                "Const_MaxNumberOfLeadsToScore"
-              )
-            )
-          )
-        , LatticeAddressSetPi(
-            LatticeAddressExpressionAtomic(
-              LatticeAddressAtomicIdentifier(
-                ContainerElementName(
-                  "SFDC_Lead_Contact_ID"
-                )
-              )
-            )
-          )
-        )
-      )
-    , ContainerElementName(
-        "SelectedForScoringIncr_Timestamp_Lead"
       )
     )
   ,
@@ -859,6 +806,144 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "HAVING_ScoreDate_IsNotNULL"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetFcn(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "OR"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "IsNull"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "Less"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "SFDC_Contact_ID_RankForScoring_Contact"
+                  )
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "Const_MaxNumberOfContactsToScore"
+                  )
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "FALSE", DataTypeBit
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "NOT"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IsNullValue"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "Sys_LatticeSystemID"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Lattice_System_ID"
+                    )
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "SFDC_Lead_Contact_ID"
+                )
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "SelectedForScoringIncr_Timestamp_Contact"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetFcn(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "OR"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "IsNull"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "Less"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "SFDC_Lead_ID_RankForScoring_Lead"
+                  )
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "Const_MaxNumberOfLeadsToScore"
+                  )
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "FALSE", DataTypeBit
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "NOT"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IsNullValue"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "Sys_LatticeSystemID"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Lattice_System_ID"
+                    )
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetPi(
+            LatticeAddressExpressionAtomic(
+              LatticeAddressAtomicIdentifier(
+                ContainerElementName(
+                  "SFDC_Lead_Contact_ID"
+                )
+              )
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "SelectedForScoringIncr_Timestamp_Lead"
       )
     )
   ,
@@ -30872,33 +30957,129 @@ SpecLatticeNamedElements(
               )
             )
           )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "From_SFDC_AnnualRevenue"
-            )
-          , LatticeFunctionIdentifier(
+          SpecQueryNamedFunctionMetadata(
+            SpecQueryNamedFunctionExpression(
               ContainerElementName(
-                "SFDC_AnnualRevenue"
+                "From_SFDC_AnnualRevenue"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "SFDC_AnnualRevenue"
+                )
+              )
+            )
+          , SpecExtractDetails(
+              (
+                SpecExtractDetail(
+                  "DisplayName", "Annual Revenue (SFDC)"
+                )
+              , SpecExtractDetail(
+                  "Description", "Annual Revenue (SFDC)"
+                )
+              , SpecExtractDetail(
+                  "ApprovedUsage", StringList(
+                    "ModelAndAllInsights"
+                  )
+                )
+              , SpecExtractDetail(
+                  "FundamentalType", "currency"
+                )
+              , SpecExtractDetail(
+                  "StatisticalType", "ratio"
+                )
+              , SpecExtractDetail(
+                  "Tags", StringList(
+                    "Internal"
+                  )
+                )
+              , SpecExtractDetail(
+                  "DisplayDiscretizationStrategy", "{\"geometric\": { \"minValue\":100000,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}"
+                )
+              , SpecExtractDetail(
+                  "Category", "Lead Information"
+                )
               )
             )
           )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "From_SFDC_CompanySize"
-            )
-          , LatticeFunctionIdentifier(
+          SpecQueryNamedFunctionMetadata(
+            SpecQueryNamedFunctionExpression(
               ContainerElementName(
-                "SFDC_CompanySize"
+                "From_SFDC_CompanySize"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "SFDC_CompanySize"
+                )
+              )
+            )
+          , SpecExtractDetails(
+              (
+                SpecExtractDetail(
+                  "DisplayName", "Company Size (SFDC)"
+                )
+              , SpecExtractDetail(
+                  "Description", "Company Size (SFDC)"
+                )
+              , SpecExtractDetail(
+                  "ApprovedUsage", StringList(
+                    "ModelAndAllInsights"
+                  )
+                )
+              , SpecExtractDetail(
+                  "FundamentalType", "numeric"
+                )
+              , SpecExtractDetail(
+                  "StatisticalType", "ratio"
+                )
+              , SpecExtractDetail(
+                  "Tags", StringList(
+                    "Internal"
+                  )
+                )
+              , SpecExtractDetail(
+                  "DisplayDiscretizationStrategy", "{\"geometric\": { \"minValue\":10,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}"
+                )
+              , SpecExtractDetail(
+                  "Category", "Lead Information"
+                )
               )
             )
           )
-          SpecQueryNamedFunctionExpression(
-            ContainerElementName(
-              "From_SFDC_LeadSource"
-            )
-          , LatticeFunctionIdentifier(
+          SpecQueryNamedFunctionMetadata(
+            SpecQueryNamedFunctionExpression(
               ContainerElementName(
-                "SFDC_LeadSource"
+                "From_SFDC_LeadSource"
+              )
+            , LatticeFunctionIdentifier(
+                ContainerElementName(
+                  "SFDC_LeadSource"
+                )
+              )
+            )
+          , SpecExtractDetails(
+              (
+                SpecExtractDetail(
+                  "DisplayName", "Lead Source (SFDC)"
+                )
+              , SpecExtractDetail(
+                  "Description", "Lead Source (SFDC)"
+                )
+              , SpecExtractDetail(
+                  "ApprovedUsage", StringList(
+                    "ModelAndAllInsights"
+                  )
+                )
+              , SpecExtractDetail(
+                  "StatisticalType", "nominal"
+                )
+              , SpecExtractDetail(
+                  "Tags", StringList(
+                    "Internal"
+                  )
+                )
+              , SpecExtractDetail(
+                  "Category", "Lead Information"
+                )
               )
             )
           )

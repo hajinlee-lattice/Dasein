@@ -6,15 +6,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.admin.dynamicopts.impl.TemplateProvider;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
+import com.latticeengines.admin.util.BOMUtils;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -76,10 +74,7 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
         File dataloaderTemplate = new File(templateProvider.getTemplate(version, topology) + ".config");
 
         try {
-            String str = IOUtils.toString(new BOMInputStream(new FileInputStream(dataloaderTemplate),
-                    false, ByteOrderMark.UTF_8,
-                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
-                    ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE));
+            String str = BOMUtils.toString(new FileInputStream(dataloaderTemplate));
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
             InstallResult response = dataLoaderService.installDataLoaderConfigFile(request, dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {

@@ -252,7 +252,7 @@ SpecLatticeNamedElements(
           )
         , LatticeAddressSetIdentifier(
             ContainerElementName(
-              "Alias_AllLeadID"
+              "Alias_AllLeadTable"
             )
           )
         )
@@ -434,36 +434,6 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "SelectedForConsideration"
-      )
-    )
-  ,
-    SpecLatticeNamedElement(
-      SpecLatticeAliasDeclaration(
-        LatticeAddressSetFcn(
-          LatticeFunctionExpression(
-            LatticeFunctionOperatorIdentifier(
-              "Less"
-            )
-          , LatticeFunctionIdentifier(
-              ContainerElementName(
-                "ELQ_Contact_ContactID_RankForScoring"
-              )
-            )
-          , LatticeFunctionIdentifier(
-              ContainerElementName(
-                "Max_MaxNumberOfLeadsToScore"
-              )
-            )
-          )
-        , LatticeAddressSetIdentifier(
-            ContainerElementName(
-              "Alias_AllLeadID"
-            )
-          )
-        )
-      )
-    , ContainerElementName(
-        "SelectedForScoringIncr_Timestamp"
       )
     )
   ,
@@ -691,6 +661,71 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "HAVING_ScoreDate_IsNotNULL"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeAliasDeclaration(
+        LatticeAddressSetFcn(
+          LatticeFunctionExpression(
+            LatticeFunctionOperatorIdentifier(
+              "OR"
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "IsNull"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "Less"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "ELQ_Contact_ContactID_RankForScoring"
+                  )
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementName(
+                    "Max_MaxNumberOfLeadsToScore"
+                  )
+                )
+              )
+            , LatticeFunctionExpressionConstant(
+                "FALSE", DataTypeBit
+              )
+            )
+          , LatticeFunctionExpression(
+              LatticeFunctionOperatorIdentifier(
+                "NOT"
+              )
+            , LatticeFunctionExpression(
+                LatticeFunctionOperatorIdentifier(
+                  "IsNullValue"
+                )
+              , LatticeFunctionIdentifier(
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "Sys_LatticeSystemID"
+                      )
+                    )
+                  , ContainerElementName(
+                      "Lattice_System_ID"
+                    )
+                  )
+                )
+              )
+            )
+          )
+        , LatticeAddressSetIdentifier(
+            ContainerElementName(
+              "Alias_AllLeadID"
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "SelectedForScoringIncr_Timestamp"
       )
     )
   ,

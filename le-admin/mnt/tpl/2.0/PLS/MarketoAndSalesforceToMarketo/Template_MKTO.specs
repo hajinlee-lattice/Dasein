@@ -306,7 +306,7 @@ SpecLatticeNamedElements(
           )
         , LatticeAddressSetIdentifier(
             ContainerElementName(
-              "Alias_AllLeadID"
+              "Alias_AllLeadTable"
             )
           )
         )
@@ -1775,26 +1775,6 @@ SpecLatticeNamedElements(
       SpecLatticeBinder(
         SpecBoundName(
           ContainerElementName(
-            "MKTO_ActivityRecord_Import"
-          )
-        , NameTypeImportTable
-        )
-      , SpecBoundName(
-          ContainerElementName(
-            "MKTO_ActivityRecord_Validation"
-          )
-        , NameTypeSourceTable
-        )
-      )
-    , ContainerElementName(
-        "Binder_I2S_T_MKTO_ActivityRecord_Import_MKTO_ActivityRecord_Validation"
-      )
-    )
-  ,
-    SpecLatticeNamedElement(
-      SpecLatticeBinder(
-        SpecBoundName(
-          ContainerElementName(
             "MKTO_ActivityRecord_Import_Extract_2"
           )
         , NameTypeExtract
@@ -1808,6 +1788,46 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Binder_E2I_T_MKTO_ActivityRecord_Import_Extract_2_MKTO_ActivityRecord_Import"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeBinder(
+        SpecBoundName(
+          ContainerElementName(
+            "MKTO_ActivityRecord_Validation_Import"
+          )
+        , NameTypeImportTable
+        )
+      , SpecBoundName(
+          ContainerElementName(
+            "MKTO_ActivityRecord_Validation"
+          )
+        , NameTypeSourceTable
+        )
+      )
+    , ContainerElementName(
+        "Binder_I2S_T_MKTO_ActivityRecord_Validation_Import_MKTO_ActivityRecord_Validation"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeBinder(
+        SpecBoundName(
+          ContainerElementName(
+            "MKTO_ActivityRecord_Validation_Import_Extract_34"
+          )
+        , NameTypeExtract
+        )
+      , SpecBoundName(
+          ContainerElementName(
+            "MKTO_ActivityRecord_Validation_Import"
+          )
+        , NameTypeImportTable
+        )
+      )
+    , ContainerElementName(
+        "Binder_E2I_T_MKTO_ActivityRecord_Validation_Import_Extract_34_MKTO_ActivityRecord_Validation_Import"
       )
     )
   ,
@@ -6144,6 +6164,94 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "MKTO_ActivityRecord_Diagnostic_Import_Extract_2"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeExtract(
+        SpecColumnBindings(
+          (
+            SpecColumnBinding(
+              ContainerElementName(
+                "id"
+              )
+            , 1000000000000000000000000002891
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "activityDateTime"
+              )
+            , 1000000000000000000000000002896
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "activityType"
+              )
+            , 1000000000000000000000000002901
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "mktgAssetName"
+              )
+            , 1000000000000000000000000002910
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "campaign"
+              )
+            , 1000000000000000000000000002919
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "personName"
+              )
+            , 1000000000000000000000000002928
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "mktPersonId"
+              )
+            , 1000000000000000000000000002937
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "foreignSysId"
+              )
+            , 1000000000000000000000000002942
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "orgName"
+              )
+            , 1000000000000000000000000002951
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "foreignSysOrgId"
+              )
+            , 1000000000000000000000000002960
+            )
+          )
+        )
+      , SpecImportDate(
+          "2015-06-16 17:55:40"
+        )
+      , SpecEffectiveDate(
+          "2015-06-16 17:55:40"
+        )
+      , SpecExtractDetails(
+          (
+            SpecExtractDetail(
+              "TableName", "MKTO_ActivityRecord_Validation_Import"
+            )
+          , SpecExtractDetail(
+              "Rows", "0"
+            )
+          )
+        )
+      )
+    , ContainerElementName(
+        "MKTO_ActivityRecord_Validation_Import_Extract_34"
       )
     )
   ,
@@ -22746,6 +22854,96 @@ SpecLatticeNamedElements(
       )
     , ContainerElementName(
         "Cfg_LinksToMostRecentSamples_Import"
+      )
+    )
+  ,
+    SpecLatticeNamedElement(
+      SpecLatticeImportTable(
+        SpecSourceAggregationRuleMostRecent(
+          SpecTotalOrderEffectiveDate
+        )
+      , SpecColumnBindings(
+          (
+            SpecColumnBinding(
+              ContainerElementName(
+                "id"
+              )
+            , DataTypeLong
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "activityDateTime"
+              )
+            , DataTypeDateTime
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "activityType"
+              )
+            , DataTypeNVarChar(
+                510
+              )
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "mktgAssetName"
+              )
+            , DataTypeNVarChar(
+                1022
+              )
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "campaign"
+              )
+            , DataTypeNVarChar(
+                1022
+              )
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "personName"
+              )
+            , DataTypeNVarChar(
+                510
+              )
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "mktPersonId"
+              )
+            , DataTypeLong
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "foreignSysId"
+              )
+            , DataTypeNVarChar(
+                100
+              )
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "orgName"
+              )
+            , DataTypeNVarChar(
+                1022
+              )
+            )
+          , SpecColumnBinding(
+              ContainerElementName(
+                "foreignSysOrgId"
+              )
+            , DataTypeNVarChar(
+                100
+              )
+            )
+          )
+        )
+      , SpecSourceFilterNone
+      )
+    , ContainerElementName(
+        "MKTO_ActivityRecord_Validation_Import"
       )
     )
   ,
@@ -44529,8 +44727,15 @@ SpecLatticeNamedElements(
               )
             , DataTypeLong, SpecFieldTypeAttribute(
                 LatticeAddressAtomicIdentifier(
-                  ContainerElementName(
-                    "MKTO_ActivityRecord_ID"
+                  ContainerElementNameTableQualifiedName(
+                    LatticeSourceTableIdentifier(
+                      ContainerElementName(
+                        "MKTO_ActivityRecord_Validation"
+                      )
+                    )
+                  , ContainerElementName(
+                      "MKTO_ActivityRecord_ID"
+                    )
                   )
                 )
               , SpecConstructiveIsConstructive, FunctionAggregationOperator(
@@ -44576,10 +44781,7 @@ SpecLatticeNamedElements(
                   "activityDateTime"
                 )
               )
-            , SpecEndpointTypeNone, SpecDefaultValue(
-                ""
-              )
-            , SpecKeyAggregation(
+            , SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(
                 SpecColumnAggregationRuleFunction(
                   "Max"
                 )
