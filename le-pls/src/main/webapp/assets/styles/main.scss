@@ -387,6 +387,25 @@ Model-detail
 User-list
 */
 
+#edit-user-modal ul {
+  padding: 0 6em;
+}
+#edit-user-modal li {
+  margin-bottom: 1.5em;
+}
+#edit-user-modal label, #add-user-modal input, #add-user-modal select {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+#edit-user-modal label {
+  font-family: 'ProximaNova-Semibold';
+  text-transform: uppercase;
+}
+#edit-user-modal input {
+  padding: 6px;
+}
+
 .user-list {
   width: 800px;
 
