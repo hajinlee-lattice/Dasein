@@ -11,9 +11,9 @@ public class PLSInstaller extends LatticeComponentInstaller {
     public PLSInstaller() { super(PLSComponent.componentName); }
 
     @Override
-    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
-        if (!serviceName.equals(PLSComponent.componentName)) { return; }
+    public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
         componentManager.provisionTenant(space, configDir);
+        return configDir;
     }
 
     public void setComponentManager(PLSComponentManager manager) {

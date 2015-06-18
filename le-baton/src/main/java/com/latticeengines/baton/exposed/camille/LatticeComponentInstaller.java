@@ -30,7 +30,7 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
     }
 
     // the true installation steps other than writing to Camille
-    protected abstract void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir);
+    protected abstract DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir);
 
     public void setDryrun(boolean dryrun) { this.dryrun = dryrun; }
 
@@ -40,7 +40,7 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
         DocumentDirectory dir = sDir.getDocumentDirectory();
         dir.makePathsLocal();
 
-        if (!dryrun) { installCore(space, serviceName, dataVersion, dir); }
+        if (!dryrun) { dir = installComponentAndModifyConfigDir(space, serviceName, dataVersion, dir); }
 
         CustomerSpaceServiceBootstrapManager.reset(serviceName, space);
         return dir;

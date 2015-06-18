@@ -32,7 +32,7 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
     }
 
     @Override
-    protected void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
+    protected DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
 
         BardJamsTenant tenant = pupulateTenant(space, configDir);
         BardJamsTenant oldTenant = bardJamsEntityMgr.findByTenant(tenant);
@@ -52,6 +52,8 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
             log.info("Failed to create BardJams tenant=" + tenant);
             throw new LedpException(LedpCode.LEDP_18027);
         }
+
+        return configDir;
 
     }
 

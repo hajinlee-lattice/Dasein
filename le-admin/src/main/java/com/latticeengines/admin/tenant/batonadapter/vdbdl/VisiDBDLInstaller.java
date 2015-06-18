@@ -52,7 +52,8 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
     }
 
     @Override
-    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
+    public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName,
+                                                                int dataVersion, DocumentDirectory configDir) {
         String dmDeployment = space.getTenantId();
         String contractExternalID = space.getContractId();
 
@@ -133,6 +134,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
             } else {
                 throw new LedpException(LedpCode.LEDP_18032, new String[] { StringEscapeUtils.escapeJava(errorMessage) });
             }
+            return configDir;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18032, e);
         }

@@ -53,7 +53,8 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
     }
 
     @Override
-    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
+    public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName,
+                                                                int dataVersion, DocumentDirectory configDir) {
         String dmDeployment = space.getTenantId();
         String contractExternalID = space.getContractId();
 
@@ -90,6 +91,8 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18038, e);
         }
+
+        return configDir;
     }
 
     public InstallResult installDataloaderTemplate(InstallTemplateRequest request, List<BasicNameValuePair> headers,

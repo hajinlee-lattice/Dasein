@@ -53,7 +53,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
     }
 
     @Override
-    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
+    public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
         String dmDeployment = space.getTenantId();
         String contractExternalID = space.getContractId();
 
@@ -90,6 +90,8 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18036, e);
         }
+
+        return configDir;
     }
 
     public InstallResult installVisiDBTemplate(InstallTemplateRequest request, List<BasicNameValuePair> headers,
