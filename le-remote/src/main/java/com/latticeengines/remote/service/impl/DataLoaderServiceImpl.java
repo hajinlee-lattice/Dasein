@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -35,10 +35,12 @@ import com.latticeengines.remote.exposed.service.Headers;
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
 
-    private static final Log log = LogFactory.getLog(DataLoaderServiceImpl.class);
+    private static final String GET_SPEC_DETAILS = "/GetSpecDetails";
 
     @VisibleForTesting
     static final String DEFAULT_SEGMENT = "LATTICE_DEFAULT_SEGMENT";
+
+    private static final Log log = LogFactory.getLog(DataLoaderServiceImpl.class);
 
     private static final String SEGMENT_PREFIX = "DefnSegment_";
     private static final String MODELID_PREFIX = "LatticeFunctionExpressionConstant(\"";
@@ -55,9 +57,103 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String SEGMENTNAME_TOKEN = "{SEGMENT_NAME}";
     private static final String UNINITIALIZED_MODELID = "";
 
+    public List<String> getSegmentNames(String tenantName, String dlUrl) {
+        List<String> result = Collections.emptyList();
+        String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENTS_SPEC));
+        String response = "";
+        try {
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + GET_SPEC_DETAILS, false,
+                    Headers.getHeaders(), jsonStr);
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21002, ex);
+        }
+
+        GetSpecResult getSpecResult = JsonUtils.deserialize(response, GetSpecResult.class);
+
+        if (getSpecResult.getSuccess().equalsIgnoreCase("true")) {
+            String details = getSpecResult.getSpecDetails();
+            int start = details.indexOf(LATTICE_FUNCTION_EXPRESSION_CONSTANT_SCALAR)
+                    + LATTICE_FUNCTION_EXPRESSION_CONSTANT_SCALAR.length();
+            int end = details.indexOf("\"", start);
+
+            if (end > start) {
+                String segmentStr = details.substring(start, end);
+                String[] segments = segmentStr.split(";");
+                result = Arrays.asList(segments);
+            }
+        }
+
+        return result;
+    }
+
+    public List<Segment> getSegments(String tenantName, String dlUrl) {
+        List<Segment> finalResults = new ArrayList<>();
+        LinkedHashMap<String, Segment> nameToSegments = getNameToSegmentMap(tenantName, dlUrl);
+
+        LinkedHashSet<String> segmentNames = new LinkedHashSet<>(getSegmentNames(tenantName, dlUrl));
+        List<String> notYetPrioritizedSegmentNames = new ArrayList<>();
+        for (String name : segmentNames) {
+            if (!nameToSegments.containsKey(name)) {
+                notYetPrioritizedSegmentNames.add(name);
+            }
+        }
+
+        int priority = 1;
+        for (String name : nameToSegments.keySet()) {
+            if (segmentNames.contains(name)) {
+                Segment matchedSegment = nameToSegments.get(name);
+                matchedSegment.setPriority(priority);
+                finalResults.add(matchedSegment);
+            }
+            priority++;
+        }
+
+        for (String name : notYetPrioritizedSegmentNames) {
+            Segment segment = new Segment();
+            segment.setName(name);
+            segment.setModelId("");
+            segment.setPriority(priority++);
+            finalResults.add(segment);
+        }
+
+        Segment defaultSegment = nameToSegments.get(DEFAULT_SEGMENT);
+        defaultSegment.setPriority(priority);
+        finalResults.add(defaultSegment);
+
+        return finalResults;
+    }
+
+    private LinkedHashMap<String, Segment> getNameToSegmentMap(String tenantName, String dlUrl) {
+        LinkedHashMap<String, Segment> nameToSegments = new LinkedHashMap<>();
+
+        String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENT_MODELS_SPEC));
+        String response = "";
+        try {
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + GET_SPEC_DETAILS, false,
+                    Headers.getHeaders(), jsonStr);
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21002, ex);
+        }
+
+        GetSpecResult getSpecResult = JsonUtils.deserialize(response, GetSpecResult.class);
+        if ("true".equalsIgnoreCase(getSpecResult.getSuccess())) {
+            nameToSegments = parseSegmentSpec(getSpecResult.getSpecDetails());
+        } else if ("false".equalsIgnoreCase(getSpecResult.getSuccess())
+                && getSpecResult.getErrorMessage().contains("does not exist")) {
+            // spec does not exist, instantiate with default segment
+            Segment segment = new Segment();
+            segment.setName(DEFAULT_SEGMENT);
+            segment.setModelId("");
+            segment.setPriority(1);
+            nameToSegments.put(DEFAULT_SEGMENT, segment);
+        }
+
+        return nameToSegments;
+    }
+
     @VisibleForTesting
-    Map<String, Segment> parseSegmentSpec(String details) {
-        Map<String, Segment> results = new HashMap<>();
+    LinkedHashMap<String,Segment> parseSegmentSpec(String details) {
+        LinkedHashMap<String, Segment> results = new LinkedHashMap<>();
 
         int index = 0;
         int priority = 1;
@@ -87,55 +183,6 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return results;
     }
 
-    public List<Segment> getSegments(String tenantName, String dlUrl) {
-        Map<String, Segment> nameToSegments = new HashMap<>();
-        List<Segment> finalResults = new ArrayList<>();
-        String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENT_MODELS_SPEC));
-        String response = "";
-        try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/GetSpecDetails", false,
-                    Headers.getHeaders(), jsonStr);
-        } catch (IOException ex) {
-            throw new LedpException(LedpCode.LEDP_21002, ex);
-        }
-
-        GetSpecResult getSpecResult = JsonUtils.deserialize(response, GetSpecResult.class);
-        if (getSpecResult.getSuccess().equalsIgnoreCase("true")) {
-            nameToSegments = parseSegmentSpec(getSpecResult.getSpecDetails());
-        } else if (getSpecResult.getSuccess().equalsIgnoreCase("false")
-                && getSpecResult.getErrorMessage().contains("does not exist")) {
-            // spec does not exist, instantiate with default segment
-            Segment segment = new Segment();
-            segment.setName(DEFAULT_SEGMENT);
-            segment.setModelId("");
-            segment.setPriority(1);
-            nameToSegments.put(DEFAULT_SEGMENT, segment);
-        }
-
-        List<String> segmentNames = getSegmentNames(tenantName, dlUrl);
-        int priority = 1;
-        for (String name : segmentNames) {
-            Segment matchedSegment = nameToSegments.get(name);
-
-            if (matchedSegment == null) {
-                Segment segment = new Segment();
-                segment.setName(name);
-                segment.setModelId("");
-                segment.setPriority(priority);
-                finalResults.add(segment);
-            } else {
-                matchedSegment.setPriority(priority);
-                finalResults.add(matchedSegment);
-            }
-            priority++;
-        }
-        Segment defaultSegment = nameToSegments.get(DEFAULT_SEGMENT);
-        defaultSegment.setPriority(priority);
-        finalResults.add(defaultSegment);
-
-        return finalResults;
-    }
-
     private Extract extractValue(String searchString, String targetString, int startIndex) {
         int index = targetString.indexOf(searchString, startIndex);
         Extract extract = null;
@@ -157,18 +204,6 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return extract;
     }
 
-    @VisibleForTesting
-    boolean compareSegments(List<String> currentSegments, List<Segment> newSegments) {
-        Set<String> currentSet = new HashSet<>(currentSegments);
-        Set<String> newSet = new HashSet<>();
-
-        for (Segment segment : newSegments) {
-            if (!segment.getName().equals(DEFAULT_SEGMENT)) {
-                newSet.add(segment.getName());
-            }
-        }
-        return currentSet.equals(newSet);
-    }
 
     public InstallResult setSegments(String tenantName, String dlUrl, List<Segment> segments) {
         // There is a potential for data loss if user is viewing and modifying
@@ -218,6 +253,26 @@ public class DataLoaderServiceImpl implements DataLoaderService {
                     result.getErrorMessage() });
         }
         return result;
+    }
+
+    @VisibleForTesting
+    boolean compareSegments(List<String> currentSegments, List<Segment> newSegments) {
+        Set<String> currentSet = new HashSet<>(currentSegments);
+        Set<String> newSet = new HashSet<>();
+
+        for (Segment segment : newSegments) {
+            if (!segment.getName().equals(DEFAULT_SEGMENT)) {
+                newSet.add(segment.getName());
+            }
+        }
+        return currentSet.equals(newSet);
+    }
+
+    private class SegmentComparator implements Comparator<Segment> {
+        @Override
+        public int compare(Segment o1, Segment o2) {
+            return o1.getPriority().compareTo(o2.getPriority());
+        }
     }
 
     private String marshallDefaultSegmentSpec(Segment segment) {
@@ -278,35 +333,6 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return JsonUtils.deserialize(response, InstallResult.class);
     }
 
-    public List<String> getSegmentNames(String tenantName, String dlUrl) {
-        List<String> result = Collections.emptyList();
-        String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENTS_SPEC));
-        String response = "";
-        try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/GetSpecDetails", false,
-                    Headers.getHeaders(), jsonStr);
-        } catch (IOException ex) {
-            throw new LedpException(LedpCode.LEDP_21002, ex);
-        }
-
-        GetSpecResult getSpecResult = JsonUtils.deserialize(response, GetSpecResult.class);
-
-        if (getSpecResult.getSuccess().equalsIgnoreCase("true")) {
-            String details = getSpecResult.getSpecDetails();
-            int start = details.indexOf(LATTICE_FUNCTION_EXPRESSION_CONSTANT_SCALAR)
-                    + LATTICE_FUNCTION_EXPRESSION_CONSTANT_SCALAR.length();
-            int end = details.indexOf("\"", start);
-
-            if (end > start) {
-                String segmentStr = details.substring(start, end);
-                String[] segments = segmentStr.split(";");
-                result = Arrays.asList(segments);
-            }
-        }
-
-        return result;
-    }
-
     private class Extract {
         private String value;
         private int postIndex;
@@ -318,22 +344,15 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         }
     }
 
-    private class SegmentComparator implements Comparator<Segment> {
-        @Override
-        public int compare(Segment o1, Segment o2) {
-            return o1.getPriority().compareTo(o2.getPriority());
-        }
-    }
-
     @Override
     public String getTemplateVersion(String tenantName, String dlUrl) {
         String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, VERSION_SPEC));
         String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/GetSpecDetails", false,
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + GET_SPEC_DETAILS, false,
                     Headers.getHeaders(), jsonStr);
             GetSpecResult getSpecResult = JsonUtils.deserialize(response, GetSpecResult.class);
-            if (!getSpecResult.getSuccess().equalsIgnoreCase("true")) {
+            if (!"true".equalsIgnoreCase(getSpecResult.getSuccess())) {
                 log.warn("Can not get template version! error=" + getSpecResult.getErrorMessage());
                 return "";
             }

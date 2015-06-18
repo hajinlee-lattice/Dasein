@@ -53,17 +53,17 @@ public class DataLoaderServiceTestNG extends RemoteFunctionalTestNGBase {
     public void testSetSegments() throws Exception {
         List<Segment> segments = new ArrayList<>();
 
-        Segment segment = new Segment();
-        segment.setName("US");
-        segment.setModelId("US_modelID");
-        segment.setPriority(1);
-        segments.add(segment);
+        Segment segmentUS = new Segment();
+        segmentUS.setName("US");
+        segmentUS.setModelId("US_modelID");
+        segmentUS.setPriority(2);
+        segments.add(segmentUS);
 
-        segment = new Segment();
-        segment.setName("Spain");
-        segment.setModelId("Spain_modelID");
-        segment.setPriority(2);
-        segments.add(segment);
+        Segment segmentSpain = new Segment();
+        segmentSpain.setName("Spain");
+        segmentSpain.setModelId("Spain_modelID");
+        segmentSpain.setPriority(1);
+        segments.add(segmentSpain);
 
         Segment defaultSegment = new Segment();
         defaultSegment.setName(DataLoaderServiceImpl.DEFAULT_SEGMENT);
@@ -74,6 +74,22 @@ public class DataLoaderServiceTestNG extends RemoteFunctionalTestNGBase {
 
         assertNull(result.getErrorMessage());
         assertEquals(result.getStatus(), 3);
+
+        List<Segment> retrievedSegments = dataLoaderService.getSegments(SEGMENT_TEST_TENANT, TEST_DATALOADER_URL);
+        assertEquals(retrievedSegments.get(0).getName(), "Spain");
+        assertEquals(retrievedSegments.get(1).getName(), "US");
+        assertEquals(retrievedSegments.get(2).getName(), DataLoaderServiceImpl.DEFAULT_SEGMENT);
+
+        segmentUS.setPriority(1);
+        segmentSpain.setPriority(2);
+        result = dataLoaderService.setSegments(SEGMENT_TEST_TENANT, TEST_DATALOADER_URL, segments);
+        assertNull(result.getErrorMessage());
+        assertEquals(result.getStatus(), 3);
+
+        retrievedSegments = dataLoaderService.getSegments(SEGMENT_TEST_TENANT, TEST_DATALOADER_URL);
+        assertEquals(retrievedSegments.get(0).getName(), "US");
+        assertEquals(retrievedSegments.get(1).getName(), "Spain");
+        assertEquals(retrievedSegments.get(2).getName(), DataLoaderServiceImpl.DEFAULT_SEGMENT);
     }
 
     @Test(groups = "functional", enabled = true, expectedExceptions = { LedpException.class })
