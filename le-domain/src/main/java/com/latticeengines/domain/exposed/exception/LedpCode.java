@@ -153,7 +153,10 @@ public enum LedpCode {
     LEDP_21006("Problem creating DataLoader tenant via DataLoader REST: {0}"),
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"),
-    LEDP_22001("Can not find DB connection info for tenant {0}");
+    LEDP_22001("Can not find DB connection info for tenant {0}"),
+
+    // le-oauth2
+    LEDP_23000("Can not find user: {0}");
 
     private String message;
 
@@ -165,4 +168,3 @@ public enum LedpCode {
         return message;
     }
 }
-
