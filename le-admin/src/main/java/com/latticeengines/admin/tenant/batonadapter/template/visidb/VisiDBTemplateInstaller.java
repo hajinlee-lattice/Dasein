@@ -4,21 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.message.BasicNameValuePair;
 
 import com.latticeengines.admin.dynamicopts.impl.TemplateProvider;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -28,7 +24,7 @@ import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.remote.exposed.service.Headers;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
@@ -37,6 +33,8 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
     private TenantService tenantService;
 
     private TemplateProvider templateProvider;
+
+    private DataLoaderService dataLoaderService;
 
     private static final int SUCCESS = 3;
 
@@ -50,6 +48,10 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
     public void setTemplateProvider(TemplateProvider templateProvider) {
         this.templateProvider = templateProvider;
+    }
+
+    public void setDataloaderService(DataLoaderService dataLoaderService) {
+        this.dataLoaderService = dataLoaderService;
     }
 
     @Override
@@ -79,7 +81,7 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
                     ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
                     ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE));
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);
-            InstallResult response = installVisiDBTemplate(request, Headers.getHeaders(), dlUrl);
+            InstallResult response = dataLoaderService.installVisiDBStructureFile(request, dlUrl);
             if (response != null && response.getStatus() == SUCCESS) {
                 log.info("Template " + topology.name() + " has successfully been installed!");
             } else {
@@ -92,13 +94,5 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         }
 
         return configDir;
-    }
-
-    public InstallResult installVisiDBTemplate(InstallTemplateRequest request, List<BasicNameValuePair> headers,
-            String dlUrl) throws IOException {
-        String jsonStr = JsonUtils.serialize(request);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl
-                + "/DLRestService/InstallVisiDBStructureFile_Sync", false, headers, jsonStr);
-        return JsonUtils.deserialize(response, InstallResult.class);
     }
 }

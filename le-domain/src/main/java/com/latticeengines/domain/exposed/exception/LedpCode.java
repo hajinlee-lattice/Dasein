@@ -148,7 +148,9 @@ public enum LedpCode {
     LEDP_21001("Problem installing segment spec; DataLoader result code: {0}, error message {1}"),
     LEDP_21002("Problem installing VisiDB structure file via DataLoader REST: {0}"),
     LEDP_21003("Problem updating segments. Updated segment names {0} does not match existing segment names {1}"),
-    
+    LEDP_21004("Problem installing DataLoader config file via DataLoader REST: {0}"),
+    LEDP_21005("Problem getting DataLoader tenant settings via DataLoader REST: {0}"),
+    LEDP_21006("Problem creating DataLoader tenant via DataLoader REST: {0}"),
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"),
     LEDP_22001("Can not find DB connection info for tenant {0}");

@@ -11,6 +11,7 @@ import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 @Component("visiDBDLComponent")
 public class VisiDBDLComponent extends LatticeComponent {
@@ -23,6 +24,9 @@ public class VisiDBDLComponent extends LatticeComponent {
 
     @Autowired
     private DefaultConfigOverwritter overwritter;
+
+    @Autowired
+    private DataLoaderService dataLoaderService;
 
     @Value("${admin.vdbdl.dryrun}")
     private boolean dryrun;

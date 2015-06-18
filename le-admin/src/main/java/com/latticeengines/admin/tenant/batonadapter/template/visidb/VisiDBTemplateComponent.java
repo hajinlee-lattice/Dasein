@@ -15,6 +15,7 @@ import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 @Component
 public class VisiDBTemplateComponent extends LatticeComponent {
@@ -31,6 +32,9 @@ public class VisiDBTemplateComponent extends LatticeComponent {
 
     @Autowired
     private VisiDBDLComponent visiDBDLComponent;
+
+    @Autowired
+    private DataLoaderService dataLoaderService;
 
     @Value("${admin.vdb.tpl.dryrun}")
     private boolean dryrun;
@@ -55,6 +59,7 @@ public class VisiDBTemplateComponent extends LatticeComponent {
         installer.setDryrun(dryrun);
         ((VisiDBTemplateInstaller)installer).setTenantService(tenantService);
         ((VisiDBTemplateInstaller)installer).setTemplateProvider(templateProvider);
+        ((VisiDBTemplateInstaller)installer).setDataloaderService(dataLoaderService);
         return installer;
     }
 

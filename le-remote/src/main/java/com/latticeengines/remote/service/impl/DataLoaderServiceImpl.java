@@ -20,6 +20,8 @@ import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.vdb.SpecParser;
+import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
+import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
@@ -236,6 +238,42 @@ public class DataLoaderServiceImpl implements DataLoaderService {
                     false, Headers.getHeaders(), jsonStr);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21002, ex);
+        }
+        return JsonUtils.deserialize(response, InstallResult.class);
+    }
+
+    public InstallResult installDataLoaderConfigFile(InstallTemplateRequest request, String dlUrl) {
+        String jsonStr = JsonUtils.serialize(request);
+        String response = "";
+        try {
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(
+                    dlUrl + "/DLRestService/InstallConfigFile_Sync", false, Headers.getHeaders(), jsonStr);
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21004, ex);
+        }
+        return JsonUtils.deserialize(response, InstallResult.class);
+    }
+
+    public InstallResult getDLTenantSettings(GetVisiDBDLRequest getRequest, String dlUrl) {
+        String jsonString = JsonUtils.serialize(getRequest);
+        String response = "";
+        try {
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/GetDLTenantSettings",
+                    true, Headers.getHeaders(), jsonString);
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21005, ex);
+        }
+        return JsonUtils.deserialize(response, InstallResult.class);
+    }
+
+    public InstallResult createDLTenant(CreateVisiDBDLRequest postRequest, String dlUrl) {
+        String jsonString = JsonUtils.serialize(postRequest);
+        String response = "";
+        try {
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/CreateDLTenant", false,
+                    Headers.getHeaders(), jsonString);
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21006, ex);
         }
         return JsonUtils.deserialize(response, InstallResult.class);
     }
