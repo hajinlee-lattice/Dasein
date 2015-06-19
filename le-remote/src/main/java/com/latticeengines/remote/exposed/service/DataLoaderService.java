@@ -7,8 +7,6 @@ import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
-import com.latticeengines.domain.exposed.pls.CrmConfig;
-import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.Segment;
 
 public interface DataLoaderService {
@@ -30,9 +28,5 @@ public interface DataLoaderService {
     InstallResult createDLTenant(CreateVisiDBDLRequest postRequest, String dlUrl);
 
     InstallResult deleteDLTenant(DeleteVisiDBDLRequest request, String dlUrl, boolean retry);
-
-    void verifyCredentials(String crmType, CrmCredential crmCredential, boolean isProduction, String dlUrl);
-
-    void updateDataProvider(String crmType, String plsTenantId, CrmConfig crmConfig, String dlUrl);
 
 }

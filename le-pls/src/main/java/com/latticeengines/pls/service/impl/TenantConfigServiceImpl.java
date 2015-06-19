@@ -49,7 +49,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
                     customerSpace.getContractId(), customerSpace.getTenantId(),
                     customerSpace.getSpaceId()).append(new Path("/SpaceConfiguration/DL_Address"));
-            return camille.get(path).getData();
+            return camille.get(path).getData() + "/DLRestService";
         } catch (Exception ex) {
             log.error("Can not get tenant's data loader address from ZK", ex);
             return defaultDataLoaderUrl;

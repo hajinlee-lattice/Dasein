@@ -7,8 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -20,8 +18,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -56,7 +52,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         parameters.put("contractExternalID", "PLSTestContract");
         parameters.put("createNewVisiDB", "true");
 
-        excuteHttpRequest(url, parameters);
+        ((CrmConfigServiceImpl) crmService).excuteHttpRequest(url, parameters);
 
         url = dataLoaderUrl + "/InstallVisiDBStructureFile_Sync";
         uploadFile(url, tenant, "Template_MKTO.specs");
@@ -75,7 +71,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         String jsonStr = JsonUtils.serialize(request);
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, getHeaders(), jsonStr);
 
-        Assert.assertEquals(checkStatus(response), true);
+        Assert.assertEquals(((CrmConfigServiceImpl) crmService).checkStatus(response), true);
     }
 
     public List<BasicNameValuePair> getHeaders() {
@@ -92,7 +88,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("tenantName", tenant);
         parameters.put("deleteVisiDBOption", "3");
-        excuteHttpRequest(url, parameters);
+        ((CrmConfigServiceImpl) crmService).excuteHttpRequest(url, parameters);
     }
 
     @Test(groups = "functional")
@@ -118,31 +114,5 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmConfig.setCrmCredential(crmCredential);
         crmService.config("sfdc", "PLSTestContract." + tenant + ".Production", crmConfig);
 
-    }
-
-    void excuteHttpRequest(String url, Map<String, Object> parameters) {
-
-        try {
-            String jsonStr = JsonUtils.serialize(parameters);
-            String response = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, getHeaders(), jsonStr);
-            checkStatus(response);
-        } catch (Exception ex) {
-            throw new LedpException(LedpCode.LEDP_18035, ex, new String[] { ex.getMessage() });
-        }
-    }
-
-    boolean checkStatus(String status) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(status);
-        Long statusCode = (Long) jsonObject.get("Status");
-        if (statusCode != null && statusCode == 3L) {
-            return true;
-        }
-        Boolean isSuccessful = (Boolean) jsonObject.get("Success");
-        if (isSuccessful != null && isSuccessful) {
-            return true;
-        }
-        String errorMsg = (String) jsonObject.get("ErrorMessage");
-        throw new RuntimeException(errorMsg);
     }
 }

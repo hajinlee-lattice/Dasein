@@ -53,6 +53,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void verifyCredential() {
+
         // sfdc
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
@@ -102,9 +103,9 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertTrue(encounteredException, "Wrong password should cause exception while validating sfdc.");
 
         crmCredential = new CrmCredential();
-        crmCredential.setUserName("tsanghavi@lattice-engines.com.sandbox2");
+        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("nope");
-        crmCredential.setSecurityToken("5aGieJUACRPQ21CG3nUwn8iz");
+        crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         encounteredException = false;
         try {
             crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE, crmCredential);
@@ -112,6 +113,31 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
             encounteredException = true;
         }
         Assert.assertTrue(encounteredException, "Wrong password should cause exception while validating sfdcsandbox.");
+
+        crmCredential = new CrmCredential();
+        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
+        crmCredential.setPassword("Happy2010");
+        crmCredential.setSecurityToken("");
+        encounteredException = false;
+        try {
+             crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE, crmCredential);
+        } catch (Exception e) {
+            encounteredException = true;
+        }
+        Assert.assertTrue(encounteredException, "Missing security token should cause exception while validating sfdc.");
+
+        crmCredential = new CrmCredential();
+        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
+        crmCredential.setPassword("Happy2010");
+        crmCredential.setSecurityToken("");
+        encounteredException = false;
+        try {
+            crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE, crmCredential);
+        } catch (Exception e) {
+            encounteredException = true;
+        }
+        Assert.assertTrue(encounteredException,
+                "Missing security token should cause exception while validating sfdcsandbox.");
     }
 
     @Test(groups = "functional", dependsOnMethods = "verifyCredential")
