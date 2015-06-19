@@ -25,6 +25,7 @@ public class SpaceLifecycleManager {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
+    @SuppressWarnings("deprecation")
     public static void create(String contractId, String tenantId, String spaceId, CustomerSpaceInfo info)
             throws Exception {
 
@@ -83,6 +84,7 @@ public class SpaceLifecycleManager {
                 PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId));
     }
 
+    @SuppressWarnings("deprecation")
     public static CustomerSpaceInfo getInfo(String contractId, String tenantId, String spaceId) throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId, spaceId);
         Camille c = CamilleEnvironment.getCamille();
