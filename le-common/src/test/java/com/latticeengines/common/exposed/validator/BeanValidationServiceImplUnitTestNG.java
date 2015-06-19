@@ -21,6 +21,7 @@ public class BeanValidationServiceImplUnitTestNG {
         @AllowedValues(values = { ALLOWED_VALUE_1, ALLOWED_VALUE_2 })
         protected String attr1;
 
+        @SuppressWarnings("unused")
         protected String attr2;
     }
 
