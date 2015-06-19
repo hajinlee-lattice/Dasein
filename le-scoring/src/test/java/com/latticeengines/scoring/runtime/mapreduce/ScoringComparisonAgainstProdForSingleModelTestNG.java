@@ -28,11 +28,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
@@ -42,6 +46,7 @@ import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBas
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.service.impl.ScoringStepYarnProcessorImplTestNG;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
+
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.util.CollectionUtils;
 
@@ -177,18 +182,26 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     private ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
         ArrayList<GenericRecord> newlist = new ArrayList<GenericRecord>();
         List<String> files = null;
+
+        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
+            @Override
+            public boolean accept(String path) {
+                return path.endsWith(".avro");
+            }
+        };
         try {
-            files = HdfsUtils.getFilesForDir(configuration, hdfsDir);
+            files = HdfsUtils.getFilesForDir(configuration, hdfsDir, filter);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        if (files.size() == 0) {
+            throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
+        }
         for (String file : files) {
             try { 
-                if (file.toLowerCase().endsWith(".avro")) {
-                    List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
-                    newlist.addAll(list);
-                }
+                List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
+                newlist.addAll(list);
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
