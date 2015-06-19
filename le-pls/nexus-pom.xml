@@ -411,12 +411,12 @@
             <version>1.4.7</version>
         </dependency>
     </dependencies>
-    
+
     <distributionManagement>
         <repository>
             <id>deployment</id>
-            <name>Public Repositories</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/groups/public/</url>
+            <name>Releases</name>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases/</url>
         </repository>
     </distributionManagement>
 

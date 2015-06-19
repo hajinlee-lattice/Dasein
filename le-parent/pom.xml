@@ -58,6 +58,22 @@
                 <checksumPolicy>fail</checksumPolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>release</id>
+            <name>LE Maven REPOSITORY</name>
+            <layout>default</layout>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+        </repository>
     </repositories>
     <!-- set up to use LE local Nexus Repository for maven plugins -->
     <pluginRepositories>
