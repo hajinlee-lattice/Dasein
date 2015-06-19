@@ -71,10 +71,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        String orgId = getSfdcOrgId(crmCredential);
+        String orgId = getSfdcOrgId(crmCredential, isProduction);
         newCrmCredential.setOrgId(orgId);
         crmCredential.setOrgId(orgId);
-        verifySfdcFromDataLoader(crmType, crmCredential, tenantConfigService.getDLRestServiceAddress(tenantId));
+        verifySfdcFromDataLoader(crmType, crmCredential, tenantConfigService.getDLRestServiceAddress(tenantId),
+                isProduction);
         writeToZooKeeper(crmType, tenantId, isProduction, crmCredential, true);
 
         return newCrmCredential;
@@ -123,16 +124,26 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         excuteHttpRequest(url, parameters);
     }
 
-    private void verifySfdcFromDataLoader(String crmType, CrmCredential crmCredential, String DLUrl) {
+    private void verifySfdcFromDataLoader(String crmType, CrmCredential crmCredential, String DLUrl,
+            Boolean isProduction) {
         String url = DLUrl + "/ValidateExternalAPICredentials";
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("token", crmCredential.getSecurityToken());
         if (StringUtils.isEmpty(crmCredential.getUrl())) {
-            crmCredential.setUrl(sfdcLoginUrl);
+            String sfdcUrl = getSFDCMappedURL(sfdcLoginUrl, isProduction);
+            crmCredential.setUrl(sfdcUrl);
         }
         setCommonParameters(crmType, crmCredential, parameters);
         excuteHttpRequest(url, parameters);
+    }
+
+    private String getSFDCMappedURL(String sfdcUrl, Boolean isProduction) {
+        if (Boolean.FALSE.equals(isProduction)) {
+            return sfdcUrl.replace("://login", "://test");
+        } else {
+            return sfdcUrl;
+        }
     }
 
     private void setCommonParameters(String crmType, CrmCredential crmCredential, Map<String, String> parameters) {
@@ -151,9 +162,10 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             if (!checkStatus(status)) {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(status);
-                for (JsonNode node: jNode.get("Value")) {
+                for (JsonNode node : jNode.get("Value")) {
                     if (node.get("Key").asText().equals("Info")) {
-                        throw new RuntimeException(String.format("CRM verification failed: %s", node.get("Value").asText()));
+                        throw new RuntimeException(String.format("CRM verification failed: %s", node.get("Value")
+                                .asText()));
                     }
                 }
                 throw new RuntimeException("CRM verification failed for an unknonw reason.");
@@ -224,8 +236,9 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
                 customerSpace.getSpaceId(), spaceInfo);
     }
 
-    private String getSfdcOrgId(CrmCredential crmCredential) {
-        String url = "https://login.salesforce.com/services/oauth2/token";
+    private String getSfdcOrgId(CrmCredential crmCredential, Boolean isProduction) {
+
+        String url = getSFDCMappedURL("https://login.salesforce.com/services/oauth2/token", isProduction);
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
         parameters.add("grant_type", "password");
         parameters.add("client_id", "3MVG9fMtCkV6eLhdjB5FspKNuLjXBEL0Qe1dDCYZTL.z0kfLUbkW4Tj0XV_x395LX7F_1XOjoaQ==");
@@ -285,9 +298,10 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             docPath = addExtraPath(crmType, docPath, isProduction);
 
             Camille camille = CamilleEnvironment.getCamille();
-            if (camille.exists(docPath)) camille.delete(docPath);
-            log.info(String.format("Removing %s.%s credentials from tenant %s.", crmType,
-                    isProduction ? "Production" : "Sandbox", tenantId));
+            if (camille.exists(docPath))
+                camille.delete(docPath);
+            log.info(String.format("Removing %s.%s credentials from tenant %s.", crmType, isProduction ? "Production"
+                    : "Sandbox", tenantId));
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18031, ex);
         }

@@ -64,12 +64,12 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
 
         crmCredential = new CrmCredential();
-        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
+        crmCredential.setUserName("tsanghavi@lattice-engines.com.sandbox2");
         crmCredential.setPassword("Happy2010");
-        crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
+        crmCredential.setSecurityToken("5aGieJUACRPQ21CG3nUwn8iz");
         newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE,
                 crmCredential);
-        Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
+        Assert.assertEquals(newCrmCredential.getOrgId(), "00DM0000001dg3uMAA");
 
         // marketo
         crmCredential = new CrmCredential();
