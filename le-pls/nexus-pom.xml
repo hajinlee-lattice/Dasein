@@ -415,14 +415,9 @@
     <distributionManagement>
         <repository>
             <id>deployment</id>
-            <name>Releases</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases/</url>
+            <name>Public Repositories</name>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/groups/public/</url>
         </repository>
-        <snapshotRepository>
-            <id>deployment</id>
-            <name>Snapshots</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
     </distributionManagement>
 
 </project>
