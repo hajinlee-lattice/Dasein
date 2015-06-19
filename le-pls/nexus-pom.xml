@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-pls</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>le-${component-name}</name>
 
     <properties>
@@ -206,48 +206,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.parent.groupId}</groupId>
-                            <version>${project.parent.version}</version>
-                            <file>
-                                ${project.build.directory}/${project.artifactId}-${project.parent.version}.jar
-                            </file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                            <url>${project.distributionManagement.repository.url}</url>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.parent.groupId}</groupId>
-                            <version>${project.parent.version}</version>
-                            <file>${project.build.directory}/${project.artifactId}-${project.parent.version}.jar</file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            
         </plugins>
     </build>
 
@@ -453,11 +412,16 @@
         </dependency>
     </dependencies>
     
-     <distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>deployment</id>
+            <name>Releases</name>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases/</url>
+        </repository>
         <snapshotRepository>
             <id>deployment</id>
             <name>Snapshots</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/groups/public/</url>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
