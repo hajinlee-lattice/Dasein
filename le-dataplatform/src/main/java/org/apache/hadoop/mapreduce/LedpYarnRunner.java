@@ -19,6 +19,7 @@ import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
+@SuppressWarnings("deprecation")
 public class LedpYarnRunner extends YARNRunner {
     private static final Log log = LogFactory.getLog(LedpYarnRunner.class);
 
@@ -34,7 +35,6 @@ public class LedpYarnRunner extends YARNRunner {
         super(conf, resMgrDelegate, clientCache);
     }
 
-    @SuppressWarnings("deprecation")
     public ApplicationSubmissionContext createApplicationSubmissionContext(Configuration jobConf, String jobSubmitDir,
             Credentials ts) throws IOException {
         ApplicationSubmissionContext appCtx = super.createApplicationSubmissionContext(jobConf, jobSubmitDir, ts);
