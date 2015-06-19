@@ -105,14 +105,13 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential = new CrmCredential();
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("nope");
-        crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         encounteredException = false;
         try {
              crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE, crmCredential);
         } catch (Exception e) {
             encounteredException = true;
         }
-        Assert.assertTrue(encounteredException, "Wrong password should cause exception while validating sfdcsandbox.");
+        Assert.assertTrue(encounteredException, "Missing security token should cause exception while validating sfdcsandbox.");
     }
 
     @Test(groups = "functional", dependsOnMethods = "verifyCredential")
