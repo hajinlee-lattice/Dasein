@@ -105,6 +105,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential = new CrmCredential();
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("Happy2010");
+        crmCredential.setSecurityToken("");
         encounteredException = false;
         try {
              crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE, crmCredential);
