@@ -45,6 +45,21 @@ class Test(unittest.TestCase):
         sss = PLSEnvironments.pls_SFDC_url
         print sss[0:sss.find("services")]
 
+    def testAddAnonymousLeadsToElq(self):
+        elq = EloquaRequest()
+        resp = elq.addAnonymousContact()
+        print resp
+        
+    def addEloquaContactInCanada(self):
+        elq = EloquaRequest()
+        resp = elq.addEloquaContactWithCountry("Canada")
+        print resp
+        
+    def addEloquaContactInUS(self):
+        elq = EloquaRequest()
+        resp = elq.addEloquaContactWithCountry("United States")
+        print resp
+         
     def testCheckDanteValue(self):
         dr = DanteRunner()
         danteLead="00Q8000001aCoGX"

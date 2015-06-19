@@ -179,6 +179,35 @@ class EloquaRequest():
                     break;
         return contact_lists
     
+    def addEloquaContactWithCountry(self,country):
+        domains = getDomains(PLSEnvironments.pls_marketing_app_ELQ, 1);
+        contact_lists={};
+        failed = 0;
+        sequence = getSequence();
+        
+        for domain in domains:
+            email = getRandomMail(domain[0]);
+            
+            new_contact = {"emailAddress": email,
+                       "firstName": random_str(),
+                       "lastName": random_str(),
+                       "country": country,
+                       }
+            response = self.post("/data/contact", new_contact)            
+
+            if response:
+                if response.status_code == 201:
+                    created_id=json.loads(response.text)["id"];
+                    print "==>    " + created_id + "    " + email;
+                    contact_lists[created_id] = email;
+                    recordNewAdded(sequence, PLSEnvironments.pls_marketing_app_ELQ,"Contact", created_id, email);
+                if response.status_code == 409:
+                    print "Contact already exists - pick another one:    " + email;  
+            else:
+                failed += 1;
+                if failed>3:
+                    break;
+        return contact_lists
     def addEloquaContactForDante(self,leads_number=3):
         domains = getDomains(PLSEnvironments.pls_marketing_app_ELQ, leads_number);
         
@@ -216,6 +245,21 @@ class EloquaRequest():
                 if failed>3:
                     break;
         return [contact_lists,sfdc_contacts,sfdc_leads];
+    
+    def addAnonymousContact(self):
+        email = getRandomMail("unknownvisitor.elq")
+        response = self.createNewContact(email, 
+                                                random_str(), 
+                                                random_str())
+        if response:
+                if response.status_code == 201:
+                    created_id=json.loads(response.text)["id"];
+                    print "==>    " + created_id + "    " + email;
+                if response.status_code == 409:
+                    print "Contact already exists - pick another one:    " + email;  
+        else:
+            print "we can't create anonymous contact for you."
+        
     
     def getEloquaContact(self,contact_ids={}):
         contacts = [{}]
