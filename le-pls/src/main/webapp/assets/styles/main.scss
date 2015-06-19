@@ -556,6 +556,18 @@ table.existing-user-info tr td {
 }
 
 /*
+Forms for System SetUp Page
+================================================================== */
+
+.formSF, .form-title, .formMT {
+  border-right: none;
+}
+
+.formSF, .formMT {
+  border-left: #ccc solid 1px;
+}
+
+/*
 Spinner
 */
 .loader {
