@@ -36,11 +36,10 @@ import com.latticeengines.remote.exposed.service.Headers;
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
 
-    private static final String GET_SPEC_DETAILS = "/GetSpecDetails";
-
     @VisibleForTesting
     static final String DEFAULT_SEGMENT = "LATTICE_DEFAULT_SEGMENT";
 
+    private static final String GET_SPEC_DETAILS = "/GetSpecDetails";
     private static final Log log = LogFactory.getLog(DataLoaderServiceImpl.class);
 
     private static final String SEGMENT_PREFIX = "DefnSegment_";
@@ -58,6 +57,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String SEGMENTNAME_TOKEN = "{SEGMENT_NAME}";
     private static final String UNINITIALIZED_MODELID = "";
 
+    @Override
     public List<String> getSegmentNames(String tenantName, String dlUrl) {
         List<String> result = Collections.emptyList();
         String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENTS_SPEC));
@@ -87,6 +87,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return result;
     }
 
+    @Override
     public List<Segment> getSegments(String tenantName, String dlUrl) {
         List<Segment> finalResults = new ArrayList<>();
         LinkedHashMap<String, Segment> nameToSegments = getNameToSegmentMap(tenantName, dlUrl);
@@ -153,7 +154,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @VisibleForTesting
-    LinkedHashMap<String,Segment> parseSegmentSpec(String details) {
+    LinkedHashMap<String, Segment> parseSegmentSpec(String details) {
         LinkedHashMap<String, Segment> results = new LinkedHashMap<>();
 
         int index = 0;
@@ -205,8 +206,10 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return extract;
     }
 
-
+    @Override
     public InstallResult setSegments(String tenantName, String dlUrl, List<Segment> segments) {
+        dlUrl = addDLRestServiceIfNecessary(dlUrl);
+
         // There is a potential for data loss if user is viewing and modifying
         // segments while someone has added new segments on the backend.
         // Therefore, first perform reconciliation; if current set of segments
@@ -286,22 +289,28 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return Strings.isNullOrEmpty(segment.getModelId()) ? UNINITIALIZED_MODELID : segment.getModelId();
     }
 
+    @Override
     public InstallResult installVisiDBStructureFile(InstallTemplateRequest request, String dlUrl) {
+        dlUrl = addDLRestServiceIfNecessary(dlUrl);
+
         String jsonStr = JsonUtils.serialize(request);
         try {
             String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
-                    dlUrl + "/DLRestService/InstallVisiDBStructureFile_Sync", false, Headers.getHeaders(), jsonStr);
+                    dlUrl + "/InstallVisiDBStructureFile_Sync", false, Headers.getHeaders(), jsonStr);
             return JsonUtils.deserialize(response, InstallResult.class);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21002, ex);
         }
     }
 
+    @Override
     public InstallResult installDataLoaderConfigFile(InstallTemplateRequest request, String dlUrl) {
+        dlUrl = addDLRestServiceIfNecessary(dlUrl);
+
         String jsonStr = JsonUtils.serialize(request);
         try {
             String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
-                    dlUrl + "/DLRestService/InstallConfigFile_Sync", false, Headers.getHeaders(), jsonStr);
+                    dlUrl + "/InstallConfigFile_Sync", false, Headers.getHeaders(), jsonStr);
             return JsonUtils.deserialize(response, InstallResult.class);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21004, ex);
@@ -309,11 +318,14 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     }
 
+    @Override
     public InstallResult getDLTenantSettings(GetVisiDBDLRequest getRequest, String dlUrl) {
+        dlUrl = addDLRestServiceIfNecessary(dlUrl);
+
         String jsonString = JsonUtils.serialize(getRequest);
         String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/GetDLTenantSettings",
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/GetDLTenantSettings",
                     true, Headers.getHeaders(), jsonString);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21005, ex);
@@ -321,11 +333,14 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return JsonUtils.deserialize(response, InstallResult.class);
     }
 
+    @Override
     public InstallResult deleteDLTenant(DeleteVisiDBDLRequest request, String dlUrl, boolean retry) {
+        dlUrl = addDLRestServiceIfNecessary(dlUrl);
+
         String jsonStr = JsonUtils.serialize(request);
         String response = "";
         try{ 
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/DeleteDLTenant",
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DeleteDLTenant",
                 retry, Headers.getHeaders(), jsonStr);
         }catch (IOException ex) {
                throw new LedpException(LedpCode.LEDP_21007, ex);
@@ -333,11 +348,14 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return JsonUtils.deserialize(response, InstallResult.class);
     }
 
+    @Override
     public InstallResult createDLTenant(CreateVisiDBDLRequest postRequest, String dlUrl) {
+        dlUrl = addDLRestServiceIfNecessary(dlUrl);
+
         String jsonString = JsonUtils.serialize(postRequest);
         String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DLRestService/CreateDLTenant", false,
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/CreateDLTenant", false,
                     Headers.getHeaders(), jsonString);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21006, ex);
@@ -358,6 +376,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     public String getTemplateVersion(String tenantName, String dlUrl) {
+        dlUrl = addDLRestServiceIfNecessary(dlUrl);
+
         String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, VERSION_SPEC));
         String response = "";
         try {
@@ -374,6 +394,14 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         } catch (Exception ex) {
             log.warn("Can not get template version! tenantName=" + tenantName + " dlUrl=" + dlUrl, ex);
             return "";
+        }
+    }
+
+    private String addDLRestServiceIfNecessary(String dlUrl) {
+        if (dlUrl.endsWith("/DLRestService")) {
+            return dlUrl;
+        } else {
+            return dlUrl + "/DLRestService";
         }
     }
 }
