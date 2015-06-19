@@ -9,12 +9,15 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
@@ -29,9 +32,12 @@ import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.CrmConfig;
+import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.remote.exposed.service.Headers;
+import com.latticeengines.remote.util.CrmUtils;
 
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
@@ -39,8 +45,17 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     @VisibleForTesting
     static final String DEFAULT_SEGMENT = "LATTICE_DEFAULT_SEGMENT";
 
-    private static final String GET_SPEC_DETAILS = "/GetSpecDetails";
     private static final Log log = LogFactory.getLog(DataLoaderServiceImpl.class);
+
+    private static final String DL_REST_SERVICE = "/DLRestService";
+    private static final String GET_SPEC_DETAILS = "/GetSpecDetails";
+    private static final String INSTALL_VISIDB_STRUC_SYNC = "/InstallVisiDBStructureFile_Sync";
+    private static final String INSTALL_CONFIG_SYNC = "/InstallConfigFile_Sync";
+    private static final String GET_TENANT_SETTINGS = "/GetDLTenantSettings";
+    private static final String CREATE_TENANT = "/CreateDLTenant";
+    private static final String DELETE_TENANT = "/DeleteDLTenant";
+    private static final String VALIDATE_CREDS = "/ValidateExternalAPICredentials";
+    private static final String UPDATE_DATA_PROVIDER = "/UpdateDataProvider";
 
     private static final String SEGMENT_PREFIX = "DefnSegment_";
     private static final String MODELID_PREFIX = "LatticeFunctionExpressionConstant(\"";
@@ -61,10 +76,9 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     public List<String> getSegmentNames(String tenantName, String dlUrl) {
         List<String> result = Collections.emptyList();
         String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENTS_SPEC));
-        String response = "";
+        String response;
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + GET_SPEC_DETAILS, false,
-                    Headers.getHeaders(), jsonStr);
+            response = callDLRestService(dlUrl, GET_SPEC_DETAILS, jsonStr);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21002, ex);
         }
@@ -129,10 +143,9 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         LinkedHashMap<String, Segment> nameToSegments = new LinkedHashMap<>();
 
         String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENT_MODELS_SPEC));
-        String response = "";
+        String response;
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + GET_SPEC_DETAILS, false,
-                    Headers.getHeaders(), jsonStr);
+            response = callDLRestService(dlUrl, GET_SPEC_DETAILS, jsonStr);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21002, ex);
         }
@@ -208,8 +221,6 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     public InstallResult setSegments(String tenantName, String dlUrl, List<Segment> segments) {
-        dlUrl = addDLRestServiceIfNecessary(dlUrl);
-
         // There is a potential for data loss if user is viewing and modifying
         // segments while someone has added new segments on the backend.
         // Therefore, first perform reconciliation; if current set of segments
@@ -291,12 +302,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     public InstallResult installVisiDBStructureFile(InstallTemplateRequest request, String dlUrl) {
-        dlUrl = addDLRestServiceIfNecessary(dlUrl);
-
-        String jsonStr = JsonUtils.serialize(request);
         try {
-            String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
-                    dlUrl + "/InstallVisiDBStructureFile_Sync", false, Headers.getHeaders(), jsonStr);
+            String response = callDLRestService(dlUrl, INSTALL_VISIDB_STRUC_SYNC, request);
             return JsonUtils.deserialize(response, InstallResult.class);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21002, ex);
@@ -305,12 +312,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     public InstallResult installDataLoaderConfigFile(InstallTemplateRequest request, String dlUrl) {
-        dlUrl = addDLRestServiceIfNecessary(dlUrl);
-
-        String jsonStr = JsonUtils.serialize(request);
         try {
-            String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
-                    dlUrl + "/InstallConfigFile_Sync", false, Headers.getHeaders(), jsonStr);
+            String response = callDLRestService(dlUrl, INSTALL_CONFIG_SYNC, request);
             return JsonUtils.deserialize(response, InstallResult.class);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21004, ex);
@@ -320,47 +323,32 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     public InstallResult getDLTenantSettings(GetVisiDBDLRequest getRequest, String dlUrl) {
-        dlUrl = addDLRestServiceIfNecessary(dlUrl);
-
-        String jsonString = JsonUtils.serialize(getRequest);
-        String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/GetDLTenantSettings",
-                    true, Headers.getHeaders(), jsonString);
+            String response = callDLRestService(dlUrl, GET_TENANT_SETTINGS, getRequest);
+            return JsonUtils.deserialize(response, InstallResult.class);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21005, ex);
         }
-        return JsonUtils.deserialize(response, InstallResult.class);
     }
 
     @Override
     public InstallResult deleteDLTenant(DeleteVisiDBDLRequest request, String dlUrl, boolean retry) {
-        dlUrl = addDLRestServiceIfNecessary(dlUrl);
-
-        String jsonStr = JsonUtils.serialize(request);
-        String response = "";
-        try{ 
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/DeleteDLTenant",
-                retry, Headers.getHeaders(), jsonStr);
+        try{
+            String response = callDLRestService(dlUrl, DELETE_TENANT, request);
+            return JsonUtils.deserialize(response, InstallResult.class);
         }catch (IOException ex) {
                throw new LedpException(LedpCode.LEDP_21007, ex);
         }
-        return JsonUtils.deserialize(response, InstallResult.class);
     }
 
     @Override
     public InstallResult createDLTenant(CreateVisiDBDLRequest postRequest, String dlUrl) {
-        dlUrl = addDLRestServiceIfNecessary(dlUrl);
-
-        String jsonString = JsonUtils.serialize(postRequest);
-        String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + "/CreateDLTenant", false,
-                    Headers.getHeaders(), jsonString);
+            String response = callDLRestService(dlUrl, CREATE_TENANT, postRequest);
+            return JsonUtils.deserialize(response, InstallResult.class);
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21006, ex);
         }
-        return JsonUtils.deserialize(response, InstallResult.class);
     }
 
     private class Extract {
@@ -376,13 +364,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     public String getTemplateVersion(String tenantName, String dlUrl) {
-        dlUrl = addDLRestServiceIfNecessary(dlUrl);
-
-        String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, VERSION_SPEC));
-        String response = "";
         try {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + GET_SPEC_DETAILS, false,
-                    Headers.getHeaders(), jsonStr);
+            String response = callDLRestService(dlUrl, GET_SPEC_DETAILS, new GetSpecRequest(tenantName, VERSION_SPEC));
             GetSpecResult getSpecResult = JsonUtils.deserialize(response, GetSpecResult.class);
             if (!"true".equalsIgnoreCase(getSpecResult.getSuccess())) {
                 log.warn("Can not get template version! error=" + getSpecResult.getErrorMessage());
@@ -397,11 +380,74 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         }
     }
 
-    private String addDLRestServiceIfNecessary(String dlUrl) {
-        if (dlUrl.endsWith("/DLRestService")) {
-            return dlUrl;
-        } else {
-            return dlUrl + "/DLRestService";
+    @Override
+    public void verifyCredentials(String crmType, CrmCredential crmCredential, boolean isProduction, String dlUrl) {
+        try {
+            Map<String, String> paramerters = CrmUtils.verificationParameters(crmType, crmCredential, isProduction);
+            String response = callDLRestService(dlUrl, VALIDATE_CREDS, paramerters);
+            if (!CrmUtils.checkVerificationStatus(response)) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jNode = mapper.readTree(response);
+                for (JsonNode node: jNode.get("Value")) {
+                    if (node.get("Key").asText().equals("Info")) {
+                        throw new RuntimeException(String.format("CRM verification failed: %s",
+                                node.get("Value").asText()));
+                    }
+                }
+                throw new RuntimeException("CRM verification failed for an unknonw reason.");
+            }
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_18030, ex);
         }
+    }
+
+    @Override
+    public void updateDataProvider(String crmType, String plsTenantId, CrmConfig crmConfig, String dlUrl) {
+        if (crmType.equals(CrmUtils.CRM_ELOQUA)) {
+            crmConfig.setDataProviderName("Eloqua_DataProvider");
+            Map<String, Object> parameters = CrmUtils.dataProviderParameters(crmType, plsTenantId, crmConfig);
+            executeUpdateDataProviderRequest(dlUrl, parameters);
+
+            crmConfig.setDataProviderName("Eloqua_Bulk_DataProvider");
+            parameters = CrmUtils.dataProviderParameters(crmType, plsTenantId, crmConfig);
+            executeUpdateDataProviderRequest(dlUrl, parameters);
+            return;
+        }
+
+        if (crmType.equals(CrmUtils.CRM_MARKETO)) {
+            crmConfig.setDataProviderName("Marketo_DataProvider");
+            Map<String, Object> parameters = CrmUtils.dataProviderParameters(crmType, plsTenantId, crmConfig);
+            executeUpdateDataProviderRequest(dlUrl, parameters);
+        }
+
+        if (crmType.equals(CrmUtils.CRM_SFDC)) {
+            crmConfig.setDataProviderName("SFDC_DataProvider");
+            Map<String, Object> parameters = CrmUtils.dataProviderParameters(crmType, plsTenantId, crmConfig);
+            executeUpdateDataProviderRequest(dlUrl, parameters);
+        }
+    }
+
+    private void executeUpdateDataProviderRequest(String dlUrl, Map<String, Object> parameters) {
+        try {
+            String response = callDLRestService(dlUrl, UPDATE_DATA_PROVIDER, parameters);
+            CrmUtils.checkUpdateDataProviderStatus(response);
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_18035, ex, new String[] { ex.getMessage() });
+        }
+    }
+
+    private String callDLRestService(String dlUrl, String endpoint, Object payload) throws IOException {
+        if (!dlUrl.endsWith(DL_REST_SERVICE)) {
+            dlUrl += DL_REST_SERVICE;
+        }
+
+        if (payload instanceof String) {
+            return HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
+                    Headers.getHeaders(), ( String ) payload);
+        } else {
+            return HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
+                    Headers.getHeaders(), JsonUtils.serialize(payload));
+        }
+
     }
 }
