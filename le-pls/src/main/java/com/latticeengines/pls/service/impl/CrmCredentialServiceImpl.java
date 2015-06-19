@@ -1,30 +1,22 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.ZooDefs;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.CipherUtils;
-import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -36,21 +28,18 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 @Component("crmService")
 public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private static final Log log = LogFactory.getLog(CrmCredentialServiceImpl.class);
 
-    @Value("${pls.dataloader.sfdc.login.url}")
-    private String sfdcLoginUrl;
-    @Value("${pls.dataloader.marketo.login.url}")
-    private String marketoLoginUrl;
-    @Value("${pls.dataloader.eloqua.login.url}")
-    private String eloquaLoginUrl;
-
     @Autowired
     TenantConfigServiceImpl tenantConfigService;
+
+    @Autowired
+    DataLoaderService dataLoaderService;
 
     @Override
     public CrmCredential verifyCredential(String crmType, String tenantId, Boolean isProduction,
@@ -71,11 +60,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        String orgId = getSfdcOrgId(crmCredential, isProduction);
+        String orgId = getSfdcOrgId(crmCredential);
         newCrmCredential.setOrgId(orgId);
         crmCredential.setOrgId(orgId);
-        verifySfdcFromDataLoader(crmType, crmCredential, tenantConfigService.getDLRestServiceAddress(tenantId),
-                isProduction);
+        String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
+        dataLoaderService.verifyCredentials(crmType, crmCredential, isProduction, dlUrl);
         writeToZooKeeper(crmType, tenantId, isProduction, crmCredential, true);
 
         return newCrmCredential;
@@ -84,7 +73,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     private CrmCredential updateMarketoConfig(String crmType, String tenantId, CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        verifyMarketoFromDataLoader(crmType, crmCredential, tenantConfigService.getDLRestServiceAddress(tenantId));
+        String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
+        dataLoaderService.verifyCredentials(crmType, crmCredential, true, dlUrl);
         writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
         return newCrmCredential;
@@ -93,94 +83,12 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private CrmCredential updateEloquaConfig(String crmType, String tenantId, CrmCredential crmCredential) {
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        verifyEloquaFromDataLoader(crmType, crmCredential, tenantConfigService.getDLRestServiceAddress(tenantId));
+        String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
+        dataLoaderService.verifyCredentials(crmType, crmCredential, true, dlUrl);
         writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
         return newCrmCredential;
 
-    }
-
-    private void verifyEloquaFromDataLoader(String crmType, CrmCredential crmCredential, String DLUrl) {
-
-        String url = DLUrl + "/ValidateExternalAPICredentials";
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("company", crmCredential.getCompany());
-        if (StringUtils.isEmpty(crmCredential.getUrl())) {
-            crmCredential.setUrl(eloquaLoginUrl);
-        }
-        setCommonParameters(crmType, crmCredential, parameters);
-        excuteHttpRequest(url, parameters);
-
-    }
-
-    private void verifyMarketoFromDataLoader(String crmType, CrmCredential crmCredential, String DLUrl) {
-        String url = DLUrl + "/ValidateExternalAPICredentials";
-
-        Map<String, String> parameters = new HashMap<>();
-        if (StringUtils.isEmpty(crmCredential.getUrl())) {
-            crmCredential.setUrl(marketoLoginUrl);
-        }
-        setCommonParameters(crmType, crmCredential, parameters);
-        excuteHttpRequest(url, parameters);
-    }
-
-    private void verifySfdcFromDataLoader(String crmType, CrmCredential crmCredential, String DLUrl,
-            Boolean isProduction) {
-        String url = DLUrl + "/ValidateExternalAPICredentials";
-
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("token", crmCredential.getSecurityToken());
-        if (StringUtils.isEmpty(crmCredential.getUrl())) {
-            String sfdcUrl = getSFDCMappedURL(sfdcLoginUrl, isProduction);
-            crmCredential.setUrl(sfdcUrl);
-        }
-        setCommonParameters(crmType, crmCredential, parameters);
-        excuteHttpRequest(url, parameters);
-    }
-
-    private String getSFDCMappedURL(String sfdcUrl, Boolean isProduction) {
-        if (Boolean.FALSE.equals(isProduction)) {
-            return sfdcUrl.replace("://login", "://test");
-        } else {
-            return sfdcUrl;
-        }
-    }
-
-    private void setCommonParameters(String crmType, CrmCredential crmCredential, Map<String, String> parameters) {
-        parameters.put("type", crmType);
-        parameters.put("user", crmCredential.getUserName());
-        parameters.put("password", crmCredential.getPassword());
-        parameters.put("url", crmCredential.getUrl());
-    }
-
-    private void excuteHttpRequest(String url, Map<String, String> parameters) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("MagicAuthentication", "Security through obscurity!");
-        headers.put("charset", "utf-8");
-        try {
-            String status = HttpWithRetryUtils.executePostRequest(url, parameters, headers);
-            if (!checkStatus(status)) {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode jNode = mapper.readTree(status);
-                for (JsonNode node : jNode.get("Value")) {
-                    if (node.get("Key").asText().equals("Info")) {
-                        throw new RuntimeException(String.format("CRM verification failed: %s", node.get("Value")
-                                .asText()));
-                    }
-                }
-                throw new RuntimeException("CRM verification failed for an unknonw reason.");
-            }
-        } catch (Exception ex) {
-            throw new LedpException(LedpCode.LEDP_18030, ex);
-        }
-    }
-
-    private boolean checkStatus(String status) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(status);
-        JSONArray jsonArray = (JSONArray) jsonObject.get("Value");
-        JSONObject result = (JSONObject) jsonArray.get(0);
-        return "Effective".equals(result.get("Key")) && "true".equals(result.get("Value"));
     }
 
     private void writeToZooKeeper(String crmType, String tenantId, Boolean isProduction, CrmCredential crmCredential,
@@ -236,9 +144,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
                 customerSpace.getSpaceId(), spaceInfo);
     }
 
-    private String getSfdcOrgId(CrmCredential crmCredential, Boolean isProduction) {
-
-        String url = getSFDCMappedURL("https://login.salesforce.com/services/oauth2/token", isProduction);
+    private String getSfdcOrgId(CrmCredential crmCredential) {
+        String url = "https://login.salesforce.com/services/oauth2/token";
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
         parameters.add("grant_type", "password");
         parameters.add("client_id", "3MVG9fMtCkV6eLhdjB5FspKNuLjXBEL0Qe1dDCYZTL.z0kfLUbkW4Tj0XV_x395LX7F_1XOjoaQ==");
@@ -298,10 +205,9 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             docPath = addExtraPath(crmType, docPath, isProduction);
 
             Camille camille = CamilleEnvironment.getCamille();
-            if (camille.exists(docPath))
-                camille.delete(docPath);
-            log.info(String.format("Removing %s.%s credentials from tenant %s.", crmType, isProduction ? "Production"
-                    : "Sandbox", tenantId));
+            if (camille.exists(docPath)) camille.delete(docPath);
+            log.info(String.format("Removing %s.%s credentials from tenant %s.", crmType,
+                    isProduction ? "Production" : "Sandbox", tenantId));
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18031, ex);
         }
