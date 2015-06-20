@@ -1,7 +1,10 @@
 package com.latticeengines.upgrade.model.service;
 
+import java.util.Map;
+
 public interface ModelUpgradeService {
 
-    public void upgrade() throws Exception;
+    void upgrade() throws Exception;
 
+    void execute(String command, Map<String, Object> parameters);
 }

@@ -1,6 +1,8 @@
 package com.latticeengines.upgrade.model.service.impl;
 
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -44,6 +46,12 @@ public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl{
             String path = "/user/s-analytics/customers/" + CustomerSpace.parse(dlTenantName) + "/models/NoEventTableForUpradedModel/" + uuid
                     + "/1430367698445_0045/model.json";
             HdfsUtils.writeToFile(yarnConfiguration, path, modelContent);
+    }
+
+    @Override
+    public void execute(String command, Map<String, Object> parameters) {
+        System.out.println(VERSION + " upgrader is about to execute: " + command);
+        System.out.println("Check autowried: " + user);
     }
 
 }

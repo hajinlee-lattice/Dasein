@@ -18,7 +18,7 @@ import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 
 @Component("modelUpgrade")
-public class ModelUpgradeServiceImpl implements ModelUpgradeService {
+abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     @Autowired
     protected DataSource dataSourceUpgrade;
@@ -145,4 +145,6 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 //        return null;
 //    }
 
+    @Override
+    abstract public void execute(String command, Map<String, Object> parameters);
 }
