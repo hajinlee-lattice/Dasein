@@ -79,7 +79,13 @@ public class ModelUpgradeRunner {
             }
             String command = ns.getString("command");
 
+            System.out.println("\n\n========================================");
+            System.out.println("Model upgrader");
+            System.out.println("========================================\n");
+
             modelUpgrade.execute(command, ns.getAttrs());
+
+            System.out.println("\n\n========================================\n");
 
         } catch (ArgumentParserException e) {
             parser.handleError(e);
