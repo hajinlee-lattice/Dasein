@@ -43,7 +43,7 @@ public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl{
             String modelContent = getModelContent(activeModelKey);
 
             String uuid = StringUtils.remove(modelGuid, "ms__").substring(0, 36);
-            String path = "/user/s-analytics/customers/" + CustomerSpace.parse(dlTenantName) + "/models/NoEventTableForUpradedModel/" + uuid
+            String path = "/user/s-analytics/customers/" + CustomerSpace.parse(dlTenantName) + "/models/NoEventTableForUpgradedModel/" + uuid
                     + "/1430367698445_0045/model.json";
             HdfsUtils.writeToFile(yarnConfiguration, path, modelContent);
     }
@@ -51,7 +51,8 @@ public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl{
     @Override
     public void execute(String command, Map<String, Object> parameters) {
         System.out.println(VERSION + " upgrader is about to execute: " + command);
-        System.out.println("Check autowried: " + user);
+        System.out.println("Check srcYarnMgr: " + srcYarnMgr.defaultFs());
+        System.out.println("Check destYarnMgr: " + destYarnMgr.defaultFs());
     }
 
 }

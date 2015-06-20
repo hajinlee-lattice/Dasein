@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -27,7 +28,14 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     protected JdbcTemplate upgradeJdbcTemlate;
 
     @Autowired
+    @Qualifier("dest")
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected SrcYarnMgr srcYarnMgr;
+
+    @Autowired
+    protected DestYarnMgr destYarnMgr;
 
     @Value("${upgrade.dao.tenant.model.info.jdbc}")
     protected String tenantModelInfoJDBC;

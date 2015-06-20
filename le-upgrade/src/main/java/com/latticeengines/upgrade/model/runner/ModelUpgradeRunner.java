@@ -45,9 +45,9 @@ public class ModelUpgradeRunner {
     }
 
     private static String commandHelper() {
-        String helper = "command to be executed:\n";
-        helper += "modelinfo: populate ModelInfo table\n";
-        helper += "cparts: copy artifacts from 1-id to 3-id folder\n";
+        String helper = "command to be executed:";
+        helper += "\nmodelinfo: populate ModelInfo table";
+        helper += "\ncparts:    copy artifacts from 1-id to 3-id folder";
         return helper;
     }
 
