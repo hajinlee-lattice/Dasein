@@ -89,6 +89,12 @@ public class ModelUpgradeRunner {
 
         } catch (ArgumentParserException e) {
             parser.handleError(e);
+
+            System.out.println("\n\n========================================");
+            System.out.println("Model upgrader help");
+            System.out.println("========================================\n");
+            parser.printHelp();
+            System.out.println("\n\n========================================\n");
         }
     }
 }
