@@ -9,10 +9,10 @@
 
     <properties>
         <component-name>playmaker</component-name>
-        <le.common.version>1.0.33-SNAPSHOT</le.common.version>
-        <le.domain.version>1.0.33-SNAPSHOT</le.domain.version>
-        <le.db.version>1.0.33-SNAPSHOT</le.db.version>
-        <le.security.version>1.0.33-SNAPSHOT</le.security.version>
+        <le.common.version>1.0.34-SNAPSHOT</le.common.version>
+        <le.domain.version>1.0.34-SNAPSHOT</le.domain.version>
+        <le.db.version>1.0.34-SNAPSHOT</le.db.version>
+        <le.security.version>1.0.34-SNAPSHOT</le.security.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.33-SNAPSHOT</version>
+        <version>1.0.34-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
