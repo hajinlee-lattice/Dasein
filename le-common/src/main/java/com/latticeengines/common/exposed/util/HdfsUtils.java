@@ -70,6 +70,12 @@ public class HdfsUtils {
         fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
     }
 
+    public static final void copyHdfsToLocal(Configuration configuration, String hdfsPath, String localPath)
+            throws Exception {
+        FileSystem fs = FileSystem.get(configuration);
+        fs.copyToLocalFile(new Path(hdfsPath), new Path(localPath));
+    }
+
     public static final void writeToFile(Configuration configuration, String hdfsPath, String contents)
             throws Exception {
         FileSystem fs = FileSystem.get(configuration);

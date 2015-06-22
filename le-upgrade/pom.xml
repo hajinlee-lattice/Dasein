@@ -50,10 +50,6 @@
                                         ${maxpermsize}
                                     </argLine>
                                     <skip>false</skip>
-                                    <includes>
-                                        <include>${functional.classes.include}</include>
-                                        <exclude>${functional.classes.exclude}</exclude>
-                                    </includes>
                                     <groups>${functional.groups}</groups>
                                 </configuration>
                             </execution>
