@@ -6,5 +6,5 @@ public interface UpgradeService {
 
     void switchToVersion(String version);
 
-    void execute(String command, Map<String, Object> parameters);
+    void execute(String command, Map<String, Object> parameters) throws Exception;
 }

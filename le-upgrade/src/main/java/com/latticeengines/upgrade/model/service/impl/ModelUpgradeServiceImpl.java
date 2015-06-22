@@ -137,6 +137,16 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
     }
 
+    protected void copyCustomerModelToTupleId(String customer, String modelGuid) throws Exception {
+        System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer).toString()));
+        yarnManager.createTupleIdCustomerRootIfNotExist(customer);
+        System.out.println("OK");
+
+        System.out.print("Copying model files to the destination folder ... ");
+        yarnManager.copyModelFromSingularToTupleId(customer, modelGuid);
+        System.out.println("OK");
+    }
+
     @Override
-    abstract public void execute(String command, Map<String, Object> parameters) throws Exception;;
+    abstract public void execute(String command, Map<String, Object> parameters) throws Exception;
 }

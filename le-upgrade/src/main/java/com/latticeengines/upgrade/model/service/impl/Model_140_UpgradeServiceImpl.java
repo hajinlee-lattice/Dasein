@@ -38,6 +38,12 @@ public class Model_140_UpgradeServiceImpl extends ModelUpgradeServiceImpl {
     @Override
     public void execute(String command, Map<String, Object> parameters) throws Exception {
         System.out.println(VERSION + " upgrader is about to execute: " + command);
+        if ("cp_model".equals(command)) {
+            copyCustomerModelToTupleId(
+                    (String) parameters.get("customer"),
+                    (String) parameters.get("model")
+            );
+        }
     }
 
 }

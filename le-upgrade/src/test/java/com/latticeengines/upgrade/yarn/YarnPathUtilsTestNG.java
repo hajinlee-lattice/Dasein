@@ -4,9 +4,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class YarnPathUtilsUnitTestNG {
-    private static final String CUSTOMER_BASE = "/user/s-analytics/customers";
-    private static final String CUSTOMER = "Lattice_Relaunch";
+import com.latticeengines.upgrade.functionalframework.UpgradeFunctionalTestNGBase;
+
+public class YarnPathUtilsTestNG extends UpgradeFunctionalTestNGBase {
 
     private String path;
 
@@ -20,19 +20,25 @@ public class YarnPathUtilsUnitTestNG {
     @Test(groups = {"unit", "functional"})
     public void testParseEventTable() throws Exception {
         String eventTable = YarnPathUtils.parseEventTable(path);
-        Assert.assertEquals(eventTable, "Q_PLS_Modeling_Lattice_Relaunch");
+        Assert.assertEquals(eventTable, EVENT_TABLE);
     }
 
     @Test(groups = {"unit", "functional"})
     public void testParseContainerId() throws Exception {
-        String eventTable = YarnPathUtils.parseContainerId(path);
-        Assert.assertEquals(eventTable, "1425511391553_3443");
+        String containerId = YarnPathUtils.parseContainerId(path);
+        Assert.assertEquals(containerId, "1425511391553_3443");
     }
 
     @Test(groups = {"unit", "functional"})
     public void testParseModelGuid() throws Exception {
-        String eventTable = YarnPathUtils.parseModelGuid(path);
-        Assert.assertEquals(eventTable, "ms__b99ddcc6-7ecb-45a0-b128-9664b51c1ce9-PLSModel");
+        String modelGuid = YarnPathUtils.parseModelGuid(path);
+        Assert.assertEquals(modelGuid, MODEL_GUID);
+    }
+
+    @Test(groups = {"unit", "functional"})
+    public void testExtractUuid() throws Exception {
+        String uuid = YarnPathUtils.extractUuid(MODEL_GUID);
+        Assert.assertEquals(uuid, UUID);
     }
 
     @Test(groups = {"unit", "functional"})
@@ -54,24 +60,24 @@ public class YarnPathUtilsUnitTestNG {
 
     @Test(groups = {"unit", "functional"})
     public void testConstructPath() throws Exception {
-        String customerRoot = YarnPathUtils.constructTupleIdCustomerRoot(CUSTOMER_BASE, CUSTOMER);
+        String customerRoot = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, CUSTOMER);
         Assert.assertEquals(customerRoot, "/user/s-analytics/customers/Lattice_Relaunch.Lattice_Relaunch.Production");
 
-        String modelsRoot = YarnPathUtils.constructTupleIdModelsRoot(CUSTOMER_BASE, CUSTOMER);
+        String modelsRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER);
         Assert.assertEquals(modelsRoot,
                 "/user/s-analytics/customers/Lattice_Relaunch.Lattice_Relaunch.Production/models");
 
-        String dataRoot = YarnPathUtils.constructTupleIdDataRoot(CUSTOMER_BASE, CUSTOMER);
+        String dataRoot = YarnPathUtils.constructTupleIdDataRoot(customerBase, CUSTOMER);
         Assert.assertEquals(dataRoot,
                 "/user/s-analytics/customers/Lattice_Relaunch.Lattice_Relaunch.Production/data");
 
-        customerRoot = YarnPathUtils.constructSingularIdCustomerRoot(CUSTOMER_BASE, CUSTOMER);
+        customerRoot = YarnPathUtils.constructSingularIdCustomerRoot(customerBase, CUSTOMER);
         Assert.assertEquals(customerRoot, "/user/s-analytics/customers/Lattice_Relaunch");
 
-        modelsRoot = YarnPathUtils.constructSingularIdModelsRoot(CUSTOMER_BASE, CUSTOMER);
+        modelsRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, CUSTOMER);
         Assert.assertEquals(modelsRoot, "/user/s-analytics/customers/Lattice_Relaunch/models");
 
-        dataRoot = YarnPathUtils.constructSingularIdDataRoot(CUSTOMER_BASE, CUSTOMER);
+        dataRoot = YarnPathUtils.constructSingularIdDataRoot(customerBase, CUSTOMER);
         Assert.assertEquals(dataRoot, "/user/s-analytics/customers/Lattice_Relaunch/data");
     }
 

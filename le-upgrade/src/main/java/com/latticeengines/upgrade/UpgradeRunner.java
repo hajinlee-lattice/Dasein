@@ -38,13 +38,18 @@ public class UpgradeRunner {
         parser.addArgument("-c", "--customer")
                 .dest("customer")
                 .type(String.class)
-                .help("customer (tenantId). required except for \"modelinfo\"");
+                .help("customer (tenantId).");
+
+        parser.addArgument("-m", "--modelguid")
+                .dest("model")
+                .type(String.class)
+                .help("model guid.");
     }
 
     private static ArgumentChoice getCommandChoice() {
         return new CollectionArgumentChoice<>(
                 "modelinfo",
-                "cp_ctmr",
+                "cp_model",
                 "upgrade"
         );
     }
@@ -52,7 +57,7 @@ public class UpgradeRunner {
     private static String commandHelper() {
         String helper = "command to be executed:";
         helper += "\nmodelinfo:    populate ModelInfo table for all tenants";
-        helper += "\ncp_ctmr:   copy customer files from 1-id to 3-id folder in hdfs";
+        helper += "\ncp_model:     copy files associated with a model to 3-id folder in hdfs";
         helper += "\nupgrade:      end to end upgrade a tenant";
         return helper;
     }
@@ -64,6 +69,10 @@ public class UpgradeRunner {
 
         if (!"modelinfo".equals(ns.getString("command")) && ns.getString("customer") == null) {
             throw new IllegalArgumentException("Missing customer (tenantId).");
+        }
+
+        if ("cp_model".equals(ns.getString("command")) && ns.getString("model") == null) {
+            throw new IllegalArgumentException("Missing model guid.");
         }
 
     }

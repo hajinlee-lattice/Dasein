@@ -10,16 +10,19 @@ public class YarnPathUtils {
     private YarnPathUtils() {}
 
     public static String parseEventTable(String hdfsPath) {
+        hdfsPath = stripoutProtocal(hdfsPath);
         String[] tokens = hdfsPath.split("/");
         return tokens[6];
     }
 
     public static String parseContainerId(String hdfsPath) {
+        hdfsPath = stripoutProtocal(hdfsPath);
         String[] tokens = hdfsPath.split("/");
         return tokens[8];
     }
 
     public static String parseModelGuid(String hdfsPath) {
+        hdfsPath = stripoutProtocal(hdfsPath);
         String[] tokens = hdfsPath.split("/");
         String uuid = tokens[7];
         return constructModelGuidFromUuid(uuid);
@@ -71,6 +74,19 @@ public class YarnPathUtils {
             return path.replaceFirst(customer, CustomerSpace.parse(customer).getTenantId());
         }
         throw new IllegalArgumentException("No customer token can be found from the path " + path);
+    }
+
+    public static String extractUuid(String modelGuid) {
+        Pattern pattern = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        Matcher matcher = pattern.matcher(modelGuid);
+        if (matcher.find()) {
+            return matcher.group(0);
+        }
+        throw new IllegalArgumentException("Cannot find uuid pattern in the model GUID " + modelGuid);
+    }
+
+    private static String stripoutProtocal(String hdfsPath) {
+        return hdfsPath.replaceFirst("[^:]*://[^/]*/", "/");
     }
 
 }
