@@ -41,4 +41,8 @@ public class ModelDecryptor {
         }
         return key;
     }
+    
+    public static void main(String[] args) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, IOException{
+        System.out.println(decrypt(""));
+    }
 }

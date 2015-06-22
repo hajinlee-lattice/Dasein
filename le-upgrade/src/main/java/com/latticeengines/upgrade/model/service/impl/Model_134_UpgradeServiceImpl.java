@@ -27,8 +27,11 @@ public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl{
             setToBardDBDataSource();
 
             String activeModelKey = getActiveModelKey();
-            if(activeModelKey.equals(""))
+            if(activeModelKey.equals("")){
+                upgradeJdbcTemlate.setDataSource(dataSourceUpgrade);
+                System.out.println("_______________________________________");
                 continue;
+            }
             modelGuid = StringUtils.remove(activeModelKey, "Model_");
 
             //uploadModelToHdfs(activeModelKey);

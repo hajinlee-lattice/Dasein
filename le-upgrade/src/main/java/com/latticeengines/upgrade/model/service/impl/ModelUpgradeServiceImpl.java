@@ -112,6 +112,9 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 "select value from KeyValueStore where [Key] = 'ModelInfoDocument'", String.class);
         JsonNode jn = new ObjectMapper().readTree(ModelDecryptor.decrypt(modelInfo)).get("ActiveModelKeys");
         if (jn.size() != 1) {
+            for(int i = 0; i < jn.size(); i++){
+                System.out.println(jn.get(i).asText());
+            }
             System.out.println(dlTenantName + " does not have 1 active models");
             return "";
         }
@@ -124,14 +127,11 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         return ModelDecryptor.decrypt(encryptedModelContent);
     }
 
-
-
     protected void populateTenantModelInfo() {
         DataSource infoDataSource = new DriverManagerDataSource(tenantModelInfoJDBC, user, pass);
         upgradeJdbcTemlate.setDataSource(infoDataSource);
         upgradeJdbcTemlate.execute("IF NOT EXISTS (SELECT * FROM TenantModel_Info where TenantName = \'" + dlTenantName
-                + //
-                "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
+                + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
 //    protected String findModelPath(String customer, String uuid) throws Exception {
