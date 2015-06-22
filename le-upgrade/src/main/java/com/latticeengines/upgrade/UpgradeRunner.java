@@ -34,21 +34,26 @@ public class UpgradeRunner {
                 .choices(new CollectionArgumentChoice<>("1.3.4", "1.4.0"))
                 .setDefault("1.3.4")
                 .help("version before upgrade: 1.3.4 or 1.4.0");
+
+        parser.addArgument("-c", "--customer")
+                .dest("customer")
+                .type(String.class)
+                .help("customer (tenantId). required except for \"modelinfo\"");
     }
 
     private static ArgumentChoice getCommandChoice() {
         return new CollectionArgumentChoice<>(
                 "modelinfo",
-                "cparts",
+                "cp_ctmr",
                 "upgrade"
         );
     }
 
     private static String commandHelper() {
         String helper = "command to be executed:";
-        helper += "\nmodelinfo: populate ModelInfo table for all tenants";
-        helper += "\ncparts:    copy artifacts from 1-id to 3-id folder";
-        helper += "\nupgrade:   end to end upgrade a tenant";
+        helper += "\nmodelinfo:    populate ModelInfo table for all tenants";
+        helper += "\ncp_ctmr:   copy customer files from 1-id to 3-id folder in hdfs";
+        helper += "\nupgrade:      end to end upgrade a tenant";
         return helper;
     }
 

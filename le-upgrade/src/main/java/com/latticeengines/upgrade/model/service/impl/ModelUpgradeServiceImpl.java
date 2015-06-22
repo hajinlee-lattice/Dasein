@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
@@ -126,25 +127,16 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
-//    protected String findModelPath(String customer, String uuid) throws Exception {
-//        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + "/" + customer
-//                + "/models", new HdfsFileFilter() {
-//            public boolean accept(FileStatus fileStatus) {
-//                if (fileStatus == null) {
-//                    return false;
-//                }
-//                Pattern p = Pattern.compile(".*model.json");
-//                Matcher matcher = p.matcher(fileStatus.getPath().getName());
-//                return matcher.matches();
-//            }
-//        });
-//        for (String path : paths) {
-//            if (path.contains(uuid))
-//                return path;
-//        }
-//        return null;
-//    }
+    protected void copyCustomerToTupleId(String customer) throws Exception {
+        System.out.print(String.format("Deleting destination folder %s ...", CustomerSpace.parse(customer).toString()));
+        yarnManager.deleteTupleIdCustomerRoot(customer);
+        System.out.println("OK");
+
+        System.out.print("Copying hdfs files to the destination folder ...");
+        yarnManager.copyCustomerFromSingularToTupleId(customer);
+        System.out.println("OK");
+    }
 
     @Override
-    abstract public void execute(String command, Map<String, Object> parameters);
+    abstract public void execute(String command, Map<String, Object> parameters) throws Exception;;
 }

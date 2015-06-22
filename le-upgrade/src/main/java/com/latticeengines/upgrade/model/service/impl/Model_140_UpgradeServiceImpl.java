@@ -36,7 +36,7 @@ public class Model_140_UpgradeServiceImpl extends ModelUpgradeServiceImpl {
     }
 
     @Override
-    public void execute(String command, Map<String, Object> parameters) {
+    public void execute(String command, Map<String, Object> parameters) throws Exception {
         System.out.println(VERSION + " upgrader is about to execute: " + command);
     }
 
