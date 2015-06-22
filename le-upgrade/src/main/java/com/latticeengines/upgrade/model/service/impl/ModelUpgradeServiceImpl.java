@@ -128,11 +128,11 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     protected void copyCustomerToTupleId(String customer) throws Exception {
-        System.out.print(String.format("Deleting destination folder %s ...", CustomerSpace.parse(customer).toString()));
+        System.out.print(String.format("Deleting destination folder %s ... ", CustomerSpace.parse(customer).toString()));
         yarnManager.deleteTupleIdCustomerRoot(customer);
         System.out.println("OK");
 
-        System.out.print("Copying hdfs files to the destination folder ...");
+        System.out.print("Copying hdfs files to the destination folder ... ");
         yarnManager.copyCustomerFromSingularToTupleId(customer);
         System.out.println("OK");
     }

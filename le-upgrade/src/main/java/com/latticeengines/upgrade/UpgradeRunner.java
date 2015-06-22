@@ -59,16 +59,24 @@ public class UpgradeRunner {
 
     private void validateArguments(Namespace ns) {
         if (ns == null) {
-            throw new IllegalArgumentException("Failed to parse input arguments");
+            throw new IllegalArgumentException("Failed to parse input arguments.");
         }
+
+        if (!"modelinfo".equals(ns.getString("command")) && ns.getString("customer") == null) {
+            throw new IllegalArgumentException("Missing customer (tenantId).");
+        }
+
     }
 
     private void handleException(Exception e) {
         if (e instanceof ArgumentParserException) {
             parser.handleError((ArgumentParserException) e);
+        } else {
+            parser.printUsage();
+            System.out.println("error: " + e.getMessage());
         }
 
-        System.out.println("\n\n========================================");
+        System.out.println("\n========================================");
         System.out.println("Upgrader help");
         System.out.println("========================================\n");
         parser.printHelp();
