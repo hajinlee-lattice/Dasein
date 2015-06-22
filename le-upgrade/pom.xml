@@ -188,7 +188,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.latticeengines.upgrade.model.runner.ModelUpgradeRunner</mainClass>
+                            <mainClass>com.latticeengines.upgrade.UpgradeRunner</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Class-Path>.</Class-Path>
