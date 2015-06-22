@@ -1,10 +1,9 @@
-package com.latticeengines.upgrade.model.service.impl;
+package com.latticeengines.upgrade.yarn;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.upgrade.functionalframework.UpgradeFunctionalTestNGBase;
-import com.latticeengines.upgrade.yarn.DestYarnMgr;
 
 public class DestYarnMgrTestNG extends UpgradeFunctionalTestNGBase {
 
