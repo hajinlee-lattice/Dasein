@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
-@Component
+@Component("srcYarnMgr")
 public class SrcYarnMgr extends YarnManager {
 
     @Autowired
