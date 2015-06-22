@@ -39,26 +39,10 @@ public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl{
         }
     }
 
-//    private void uploadModelToHdfs(String activeModelKey) throws Exception{
-//            System.out.println("uploading model for: " + dlTenantName);
-//            String modelContent = getModelContent(activeModelKey);
-//
-//            String uuid = StringUtils.remove(modelGuid, "ms__").substring(0, 36);
-//            String path = "/user/s-analytics/customers/" + CustomerSpace.parse(dlTenantName) + "/models/NoEventTableForUpgradedModel/" + uuid
-//                    + "/1430367698445_0045/model.json";
-//            HdfsUtils.writeToFile(yarnConfiguration, path, modelContent);
-//    }
-
     @Override
     public void execute(String command, Map<String, Object> parameters) throws Exception {
         System.out.println(VERSION + " upgrader is about to execute: " + command);
-        if ("cp_model".equals(command)) {
-            copyCustomerModelToTupleId(
-                    (String) parameters.get("customer"),
-                    (String) parameters.get("model")
-            );
-        }
-
+        super.execute(command, parameters);
     }
 
 }

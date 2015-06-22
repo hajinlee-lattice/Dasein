@@ -87,6 +87,31 @@ public class YarnManager {
         copyHdfsToHdfs(srcRoot, destRoot);
     }
 
+    public void copyDataFromSingularToTupleId(String customer) throws Exception {
+        String srcRoot = YarnPathUtils.constructSingularIdDataRoot(customerBase, customer);
+        String destRoot = YarnPathUtils.constructTupleIdDataRoot(customerBase, customer);
+
+        if (!HdfsUtils.fileExists(yarnConfiguration, srcRoot)) {
+            throw new IllegalStateException(String.format("The data path %s does not exist.", srcRoot));
+        }
+
+        String eventTableWithData = findAvaiableEventData(customer);
+        if (eventTableWithData != null) {
+            srcRoot += "/" + eventTableWithData;
+            destRoot += "/" + eventTableWithData;
+
+            try {
+                HdfsUtils.rmdir(yarnConfiguration, destRoot);
+            } catch (Exception e) {
+                // ignore
+            }
+
+            copyHdfsToHdfs(srcRoot, destRoot);
+        } else {
+            throw new IllegalStateException(String.format("Customer %s does not have data.", customer));
+        }
+    }
+
     private void copyHdfsToHdfs(String src, String dest) throws Exception {
         String tmpLocalDir = "tmp" + UUID.randomUUID();
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpLocalDir);
@@ -94,8 +119,8 @@ public class YarnManager {
         FileUtils.deleteQuietly(new File(tmpLocalDir));
     }
 
-    public String findAvaiableEventData(String customer) throws Exception {
-        String dataRoot = YarnPathUtils.constructTupleIdDataRoot(customerBase, customer);
+    private String findAvaiableEventData(String customer) throws Exception {
+        String dataRoot = YarnPathUtils.constructSingularIdDataRoot(customerBase, customer);
 
         if (!HdfsUtils.fileExists(yarnConfiguration, dataRoot)) {
             throw new IllegalStateException(String.format("The data path %s does not exist.", dataRoot));

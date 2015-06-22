@@ -50,15 +50,17 @@ public class UpgradeRunner {
         return new CollectionArgumentChoice<>(
                 "modelinfo",
                 "cp_model",
+                "cp_data",
                 "upgrade"
         );
     }
 
     private static String commandHelper() {
         String helper = "command to be executed:";
-        helper += "\nmodelinfo:    populate ModelInfo table for all tenants";
-        helper += "\ncp_model:     copy files associated with a model to 3-id folder in hdfs";
-        helper += "\nupgrade:      end to end upgrade a tenant";
+        helper += "\nmodelinfo: populate ModelInfo table for all tenants";
+        helper += "\ncp_model:  copy files associated with a model to 3-id folder in hdfs";
+        helper += "\ncp_data:   copy a data folder to 3-id folder in hdfs";
+        helper += "\nupgrade:   end to end upgrade a tenant";
         return helper;
     }
 

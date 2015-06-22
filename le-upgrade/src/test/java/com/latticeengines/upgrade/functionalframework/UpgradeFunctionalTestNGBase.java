@@ -10,7 +10,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 @ContextConfiguration(locations = { "classpath:test-upgrade-context.xml" })
 public class UpgradeFunctionalTestNGBase  extends AbstractTestNGSpringContextTests {
 
-    protected static final String CUSTOMER_BASE = "/user/s-analytics/customers";
     protected static final String CUSTOMER = "Lattice_Relaunch";
     protected static final String MODEL_GUID = "ms__b99ddcc6-7ecb-45a0-b128-9664b51c1ce9-PLSModel";
     protected static final String UUID = "b99ddcc6-7ecb-45a0-b128-9664b51c1ce9";
