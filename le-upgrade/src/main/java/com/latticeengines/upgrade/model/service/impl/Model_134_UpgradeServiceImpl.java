@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 @Component("model_134_Upgrade")
 public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl{
@@ -41,21 +39,19 @@ public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl{
         }
     }
 
-    private void uploadModelToHdfs(String activeModelKey) throws Exception{
-            System.out.println("uploading model for: " + dlTenantName);
-            String modelContent = getModelContent(activeModelKey);
-
-            String uuid = StringUtils.remove(modelGuid, "ms__").substring(0, 36);
-            String path = "/user/s-analytics/customers/" + CustomerSpace.parse(dlTenantName) + "/models/NoEventTableForUpgradedModel/" + uuid
-                    + "/1430367698445_0045/model.json";
-            HdfsUtils.writeToFile(yarnConfiguration, path, modelContent);
-    }
+//    private void uploadModelToHdfs(String activeModelKey) throws Exception{
+//            System.out.println("uploading model for: " + dlTenantName);
+//            String modelContent = getModelContent(activeModelKey);
+//
+//            String uuid = StringUtils.remove(modelGuid, "ms__").substring(0, 36);
+//            String path = "/user/s-analytics/customers/" + CustomerSpace.parse(dlTenantName) + "/models/NoEventTableForUpgradedModel/" + uuid
+//                    + "/1430367698445_0045/model.json";
+//            HdfsUtils.writeToFile(yarnConfiguration, path, modelContent);
+//    }
 
     @Override
     public void execute(String command, Map<String, Object> parameters) {
         System.out.println(VERSION + " upgrader is about to execute: " + command);
-        System.out.println("Check srcYarnMgr: " + srcYarnMgr.defaultFs());
-        System.out.println("Check destYarnMgr: " + destYarnMgr.defaultFs());
     }
 
 }

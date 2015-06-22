@@ -5,9 +5,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -17,8 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
-import com.latticeengines.upgrade.yarn.DestYarnMgr;
-import com.latticeengines.upgrade.yarn.SrcYarnMgr;
+import com.latticeengines.upgrade.yarn.YarnManager;
 
 @Component("modelUpgrade")
 abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
@@ -30,14 +27,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     protected JdbcTemplate upgradeJdbcTemlate;
 
     @Autowired
-    @Qualifier("dest")
-    protected Configuration yarnConfiguration;
-
-    @Autowired
-    protected SrcYarnMgr srcYarnMgr;
-
-    @Autowired
-    protected DestYarnMgr destYarnMgr;
+    protected YarnManager yarnManager;
 
     @Value("${upgrade.dao.tenant.model.info.jdbc}")
     protected String tenantModelInfoJDBC;

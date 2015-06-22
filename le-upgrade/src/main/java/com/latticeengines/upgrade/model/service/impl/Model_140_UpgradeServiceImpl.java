@@ -38,8 +38,6 @@ public class Model_140_UpgradeServiceImpl extends ModelUpgradeServiceImpl {
     @Override
     public void execute(String command, Map<String, Object> parameters) {
         System.out.println(VERSION + " upgrader is about to execute: " + command);
-        System.out.println("Check srcYarnMgr: " + srcYarnMgr.defaultFs());
-        System.out.println("Check destYarnMgr: " + destYarnMgr.defaultFs());
     }
 
 }
