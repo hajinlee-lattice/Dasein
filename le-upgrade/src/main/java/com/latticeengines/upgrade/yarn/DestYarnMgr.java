@@ -1,4 +1,6 @@
-package com.latticeengines.upgrade.model.service.impl;
+package com.latticeengines.upgrade.yarn;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,17 +9,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DestYarnMgr {
+public class DestYarnMgr extends YarnManager {
 
     @Autowired
     @Qualifier(value = "dest")
-    private Configuration yarnConfiguration;
+    private Configuration destYarnConfig;
 
     @Value("${dataplatform.customer.basedir}")
-    protected String customerBase;
+    private String destCustomerBase;
 
-    public String defaultFs() {
-        return yarnConfiguration.get("fs.defaultFS");
+    @PostConstruct
+    private void wireUpProperties() {
+        this.yarnConfiguration = this.destYarnConfig;
+        this.customerBase = this.destCustomerBase;
     }
 
     public String constructModelDir(String customer, String uuid) throws Exception {

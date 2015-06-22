@@ -35,8 +35,10 @@ public class UpgradeServiceImpl implements UpgradeService {
 
     @Override
     public void execute(String command, Map<String, Object> parameters) {
-        System.out.println("sending command to model upgrader.");
+        System.out.println("Sending command to model upgrader ...");
         this.modelUpgrader.execute(command, parameters);
+
+        //System.out.println("sending command to tenant upgrader ...");
     }
 
 }

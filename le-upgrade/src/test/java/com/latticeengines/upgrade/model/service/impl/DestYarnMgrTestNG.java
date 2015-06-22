@@ -6,6 +6,8 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.testng.annotations.Test;
 
+import com.latticeengines.upgrade.yarn.DestYarnMgr;
+
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-upgrade-context.xml" })
 public class DestYarnMgrTestNG {

@@ -1,8 +1,10 @@
-package com.latticeengines.upgrade.model.service.impl;
+package com.latticeengines.upgrade.yarn;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -14,17 +16,19 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
 @Component
-public class SrcYarnMgr {
+public class SrcYarnMgr extends YarnManager {
 
     @Autowired
     @Qualifier(value = "src")
-    private Configuration yarnConfiguration;
+    private Configuration srcYarnConfig;
 
     @Value("${upgarde.src.dp.customer.basedir}")
-    protected String customerBase;
+    protected String srcCustomerBase;
 
-    public String defaultFs() {
-        return yarnConfiguration.get("fs.defaultFS");
+    @PostConstruct
+    private void wireUpProperties() {
+        this.yarnConfiguration = this.srcYarnConfig;
+        this.customerBase = srcCustomerBase;
     }
 
     public String findModelPath(String customer, String uuid) throws Exception {

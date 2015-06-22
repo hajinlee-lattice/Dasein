@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
+import com.latticeengines.upgrade.yarn.DestYarnMgr;
+import com.latticeengines.upgrade.yarn.SrcYarnMgr;
 
 @Component("modelUpgrade")
 abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {

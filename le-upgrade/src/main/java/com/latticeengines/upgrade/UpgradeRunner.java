@@ -39,15 +39,35 @@ public class UpgradeRunner {
     private static ArgumentChoice getCommandChoice() {
         return new CollectionArgumentChoice<>(
                 "modelinfo",
-                "cparts"
+                "cparts",
+                "upgrade"
         );
     }
 
     private static String commandHelper() {
         String helper = "command to be executed:";
-        helper += "\nmodelinfo: populate ModelInfo table";
+        helper += "\nmodelinfo: populate ModelInfo table for all tenants";
         helper += "\ncparts:    copy artifacts from 1-id to 3-id folder";
+        helper += "\nupgrade:   end to end upgrade a tenant";
         return helper;
+    }
+
+    private void validateArguments(Namespace ns) {
+        if (ns == null) {
+            throw new IllegalArgumentException("Failed to parse input arguments");
+        }
+    }
+
+    private void handleException(Exception e) {
+        if (e instanceof ArgumentParserException) {
+            parser.handleError((ArgumentParserException) e);
+        }
+
+        System.out.println("\n\n========================================");
+        System.out.println("Upgrader help");
+        System.out.println("========================================\n");
+        parser.printHelp();
+        System.out.println("\n\n========================================\n");
     }
 
     public UpgradeRunner(){
@@ -67,12 +87,14 @@ public class UpgradeRunner {
 
             Namespace ns = parser.parseArgs(args);
 
+            validateArguments(ns);
+
             String version = ns.getString("version");
 
             if (version.startsWith("1.4")) {
                 upgrader.switchToVersion("1.4.0");
             } else {
-                upgrader.switchToVersion("1.3.4");
+                upgrader.switchToVersion(version);
             }
             String command = ns.getString("command");
 
@@ -84,14 +106,8 @@ public class UpgradeRunner {
 
             System.out.println("\n\n========================================\n");
 
-        } catch (ArgumentParserException e) {
-            parser.handleError(e);
-
-            System.out.println("\n\n========================================");
-            System.out.println("Upgrader help");
-            System.out.println("========================================\n");
-            parser.printHelp();
-            System.out.println("\n\n========================================\n");
+        } catch (ArgumentParserException|IllegalArgumentException e) {
+            handleException(e);
         }
     }
 }
