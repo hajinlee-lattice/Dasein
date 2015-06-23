@@ -1,6 +1,7 @@
 package com.latticeengines.upgrade.yarn;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -196,8 +197,22 @@ public class YarnManager {
                     Pattern p = Pattern.compile(".*json");
                     String filePath = fileStatus.getPath().getName();
                     Matcher matcher = p.matcher(filePath);
-                    return (matcher.matches() &&
-                            !filePath.contains("enhancements") && !filePath.contains("diagnostics"));
+                    return (matcher.matches() && !shouldExclude(filePath));
+                }
+
+                private boolean shouldExclude(String path) {
+                    List<String> blacklist = Arrays.asList(
+                            "enhancements",
+                            "modelsummary",
+                            "diagnostics",
+                            "/1/",
+                            "DataComposition",
+                            "ScoreDerivation"
+                    );
+                    for (String token: blacklist) {
+                        if (path.contains(token)) return true;
+                    }
+                    return false;
                 }
             });
             for (String path : paths) {
