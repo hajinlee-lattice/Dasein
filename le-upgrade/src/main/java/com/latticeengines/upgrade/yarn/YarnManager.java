@@ -140,7 +140,7 @@ public class YarnManager {
     }
 
     private void copyHdfsToHdfsWithDestCleared(String src, String dest) {
-        String tmpLocalDir = "tmp" + UUID.randomUUID();
+        String tmpLocalDir = "tmp/" + UUID.randomUUID();
         try {
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpLocalDir);
             HdfsUtils.copyLocalToHdfs(yarnConfiguration, tmpLocalDir, dest);
