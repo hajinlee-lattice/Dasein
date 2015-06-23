@@ -176,8 +176,8 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         String modelGuid = tenantModelJdbcManager.getModelToUpgrade(customer);
         System.out.println(String.format("\n(%s, %s): ", customer, modelGuid));
 
-        System.out.print("    Source model folder exists? ... ");
-        if (yarnManager.srcModelPathExists(customer, modelGuid)) {
+        System.out.print("    Model json exists? ... ");
+        if (yarnManager.modelJsonExistsInSingularId(customer, modelGuid)) {
             System.out.println("YES");
         } else {
             System.out.println("NO");
@@ -185,7 +185,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
 
         System.out.print("    Enhanced modelsummary exists? ... ");
-        if (yarnManager.modelSummaryExists(customer, modelGuid)) {
+        if (yarnManager.modelSummaryExistsInSingularId(customer, modelGuid)) {
             System.out.println("YES");
         } else {
             System.out.println("NO");

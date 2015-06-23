@@ -107,7 +107,7 @@ public class YarnManager {
         }
     }
 
-    public boolean srcModelPathExists(String customer, String modelGuid) {
+    public boolean modelJsonExistsInSingularId(String customer, String modelGuid) {
         String uuid = YarnPathUtils.extractUuid(modelGuid);
         try {
             String srcModelJsonFullPath = findModelPath(customer, uuid);
@@ -117,17 +117,7 @@ public class YarnManager {
         }
     }
 
-    public boolean destModelPathExists(String customer, String modelGuid) {
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
-        String srcModelJsonFullPath = findModelPath(customer, uuid);
-        String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
-        String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);
-        String destPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer)
-                + "/" + eventTable + "/" + uuid + "/" + containerId;
-        return hdfsPathExists(destPath);
-    }
-
-    public boolean modelSummaryExists(String customer, String modelGuid) {
+    public boolean modelSummaryExistsInSingularId(String customer, String modelGuid) {
         String uuid = YarnPathUtils.extractUuid(modelGuid);
         String srcModelJsonFullPath = findModelPath(customer, uuid);
         String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
@@ -137,6 +127,8 @@ public class YarnManager {
                 + "/enhancements/modelsummary.json";
         return hdfsPathExists(destPath);
     }
+
+    public void generateModelSummary(String customer, String modelGuid) { }
 
     private boolean hdfsPathExists(String path) {
         try {
@@ -202,8 +194,10 @@ public class YarnManager {
                         return false;
                     }
                     Pattern p = Pattern.compile(".*json");
-                    Matcher matcher = p.matcher(fileStatus.getPath().getName());
-                    return matcher.matches();
+                    String filePath = fileStatus.getPath().getName();
+                    Matcher matcher = p.matcher(filePath);
+                    return (matcher.matches() &&
+                            !filePath.contains("enhancements") && !filePath.contains("diagnostics"));
                 }
             });
             for (String path : paths) {
@@ -215,4 +209,5 @@ public class YarnManager {
             throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
         }
     }
+
 }

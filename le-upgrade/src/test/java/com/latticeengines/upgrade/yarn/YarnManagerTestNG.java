@@ -79,6 +79,12 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
                 String.format("data for customer %s cannot be found at %s.", CUSTOMER, dataPath));
     }
 
+//    @Test(groups = "functional")
+//    public void testGenerateModelSummary() {
+//        yarnManager.generateModelSummary(CUSTOMER, MODEL_GUID);
+//        Assert.fail();
+//    }
+
 }
 
 
