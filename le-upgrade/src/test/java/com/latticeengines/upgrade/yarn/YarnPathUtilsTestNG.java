@@ -13,8 +13,10 @@ public class YarnPathUtilsTestNG extends UpgradeFunctionalTestNGBase {
     @BeforeClass(groups = {"unit", "functional"})
     public void setup() {
         path = "/user/s-analytics/customers";
-        path += "/Lattice_Relaunch/models";
-        path += "/Q_PLS_Modeling_Lattice_Relaunch/b99ddcc6-7ecb-45a0-b128-9664b51c1ce9/1425511391553_3443";
+        path += "/Nutanix_PLS132/models";
+        path += "/Q_PLS_Modeling_Nutanix_PLS132";
+        path += "/5d074f72-c8f0-4d53-aebc-912fb066daa0";
+        path += "/1416355548818_20011";
     }
 
     @Test(groups = {"unit", "functional"})
@@ -26,7 +28,7 @@ public class YarnPathUtilsTestNG extends UpgradeFunctionalTestNGBase {
     @Test(groups = {"unit", "functional"})
     public void testParseContainerId() throws Exception {
         String containerId = YarnPathUtils.parseContainerId(path);
-        Assert.assertEquals(containerId, "1425511391553_3443");
+        Assert.assertEquals(containerId, CONTAINER_ID);
     }
 
     @Test(groups = {"unit", "functional"})
@@ -61,24 +63,24 @@ public class YarnPathUtilsTestNG extends UpgradeFunctionalTestNGBase {
     @Test(groups = {"unit", "functional"})
     public void testConstructPath() throws Exception {
         String customerRoot = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, CUSTOMER);
-        Assert.assertEquals(customerRoot, "/user/s-analytics/customers/Lattice_Relaunch.Lattice_Relaunch.Production");
+        Assert.assertEquals(customerRoot, "/user/s-analytics/customers/" + TUPLE_ID);
 
         String modelsRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER);
         Assert.assertEquals(modelsRoot,
-                "/user/s-analytics/customers/Lattice_Relaunch.Lattice_Relaunch.Production/models");
+                "/user/s-analytics/customers/" + TUPLE_ID + "/models");
 
         String dataRoot = YarnPathUtils.constructTupleIdDataRoot(customerBase, CUSTOMER);
         Assert.assertEquals(dataRoot,
-                "/user/s-analytics/customers/Lattice_Relaunch.Lattice_Relaunch.Production/data");
+                "/user/s-analytics/customers/" + TUPLE_ID + "/data");
 
         customerRoot = YarnPathUtils.constructSingularIdCustomerRoot(customerBase, CUSTOMER);
-        Assert.assertEquals(customerRoot, "/user/s-analytics/customers/Lattice_Relaunch");
+        Assert.assertEquals(customerRoot, "/user/s-analytics/customers/" + CUSTOMER);
 
         modelsRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, CUSTOMER);
-        Assert.assertEquals(modelsRoot, "/user/s-analytics/customers/Lattice_Relaunch/models");
+        Assert.assertEquals(modelsRoot, "/user/s-analytics/customers/" + CUSTOMER + "/models");
 
         dataRoot = YarnPathUtils.constructSingularIdDataRoot(customerBase, CUSTOMER);
-        Assert.assertEquals(dataRoot, "/user/s-analytics/customers/Lattice_Relaunch/data");
+        Assert.assertEquals(dataRoot, "/user/s-analytics/customers/" + CUSTOMER + "/data");
     }
 
 }
