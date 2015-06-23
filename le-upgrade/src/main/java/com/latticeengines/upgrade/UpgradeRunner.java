@@ -1,11 +1,15 @@
 package com.latticeengines.upgrade;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.upgrade.service.UpgradeService;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.impl.choice.CollectionArgumentChoice;
 import net.sourceforge.argparse4j.inf.ArgumentChoice;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -44,11 +48,19 @@ public class UpgradeRunner {
                 .dest("model")
                 .type(String.class)
                 .help("model guid.");
+
+        parser.addArgument("-a", "--all")
+                .dest("all")
+                .action(Arguments.storeConst())
+                .setConst(true)
+                .setDefault(false)
+                .help("all customers and their active models.");
     }
 
     private static ArgumentChoice getCommandChoice() {
         return new CollectionArgumentChoice<>(
                 "modelinfo",
+                "list",
                 "cp_model",
                 "cp_data",
                 "upgrade"
@@ -58,10 +70,19 @@ public class UpgradeRunner {
     private static String commandHelper() {
         String helper = "command to be executed:";
         helper += "\nmodelinfo: populate ModelInfo table for all tenants";
+        helper += "\nlist:      list (tenant, model) pairs to be upgraded";
         helper += "\ncp_model:  copy files associated with a model to 3-id folder in hdfs";
         helper += "\ncp_data:   copy a data folder to 3-id folder in hdfs";
         helper += "\nupgrade:   end to end upgrade a tenant";
         return helper;
+    }
+
+    private List<String> cmdsNeedCustomer() {
+        return Arrays.asList("cp_model", "cp_data", "upgrade");
+    }
+
+    private List<String> cmdsNeedModel() {
+        return Arrays.asList("cp_model");
     }
 
     private void validateArguments(Namespace ns) {
@@ -69,14 +90,17 @@ public class UpgradeRunner {
             throw new IllegalArgumentException("Failed to parse input arguments.");
         }
 
-        if (!"modelinfo".equals(ns.getString("command")) && ns.getString("customer") == null) {
+        if (cmdsNeedCustomer().contains(ns.getString("command")) &&
+                !ns.getBoolean("all") &&
+                ns.getString("customer") == null ) {
             throw new IllegalArgumentException("Missing customer (tenantId).");
         }
 
-        if ("cp_model".equals(ns.getString("command")) && ns.getString("model") == null) {
+        if (cmdsNeedModel().contains(ns.getString("command")) &&
+                !ns.getBoolean("all") &&
+                ns.getString("model") == null ) {
             throw new IllegalArgumentException("Missing model guid.");
         }
-
     }
 
     private void handleException(Exception e) {

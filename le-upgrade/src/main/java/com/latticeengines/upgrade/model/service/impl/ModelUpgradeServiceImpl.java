@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
@@ -26,6 +27,9 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     @Autowired
     protected JdbcTemplate upgradeJdbcTemlate;
+
+    @Autowired
+    protected TenantModelJdbcManager tenantModelJdbcManager;
 
     @Autowired
     protected YarnManager yarnManager;
@@ -121,10 +125,11 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     protected void populateTenantModelInfo() {
-        DataSource infoDataSource = new DriverManagerDataSource(tenantModelInfoJDBC, user, pass);
-        upgradeJdbcTemlate.setDataSource(infoDataSource);
-        upgradeJdbcTemlate.execute("IF NOT EXISTS (SELECT * FROM TenantModel_Info where TenantName = \'" + dlTenantName
-                + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
+        tenantModelJdbcManager.populateTenantModelInfo(dlTenantName, modelGuid);
+//        DataSource infoDataSource = new DriverManagerDataSource(tenantModelInfoJDBC, user, pass);
+//        upgradeJdbcTemlate.setDataSource(infoDataSource);
+//        upgradeJdbcTemlate.execute("IF NOT EXISTS (SELECT * FROM TenantModel_Info where TenantName = \'" + dlTenantName
+//                + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
     private void copyCustomerToTupleId(String customer) {
@@ -157,12 +162,46 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
     }
 
+    private void listTenantModel() {
+        System.out.print("Retrieving list of tenants to be upgraded ... ");
+        List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
+        System.out.println("OK");
+
+        for (String tenant: tenants) {
+            printUpgradeStatusOfCustomer(tenant);
+        }
+    }
+
+    private void printUpgradeStatusOfCustomer(String customer) {
+        String modelGuid = tenantModelJdbcManager.getModelToUpgrade(customer);
+        System.out.println(String.format("\n(%s, %s): ", customer, modelGuid));
+
+        System.out.print("    Source model folder exists? ... ");
+        if (yarnManager.srcModelPathExists(customer, modelGuid)) {
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+            return;
+        }
+
+        System.out.print("    Enhanced modelsummary exists? ... ");
+        if (yarnManager.modelSummaryExists(customer, modelGuid)) {
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+        }
+    }
+
     @Override
     public void execute(String command, Map<String, Object> parameters) {
         String customer = (String) parameters.get("customer");
         String model = (String) parameters.get("model");
+        Boolean all = (Boolean) parameters.get("all");
 
         switch (command) {
+            case "list":
+                listTenantModel();
+                break;
             case "cp_customer":
                 copyCustomerToTupleId(customer);
                 break;

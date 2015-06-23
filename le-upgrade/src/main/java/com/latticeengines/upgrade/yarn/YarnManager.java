@@ -17,7 +17,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-@Component
+@Component("yarnManager")
 public class YarnManager {
 
     @Autowired
@@ -82,13 +82,7 @@ public class YarnManager {
         srcRoot += "/" + eventTable + "/" + uuid + "/" + containerId;
         destRoot += "/" + eventTable + "/" + uuid + "/" + containerId;
 
-        try {
-            HdfsUtils.rmdir(yarnConfiguration, destRoot);
-        } catch (Exception e) {
-            // ignore
-        }
-
-        copyHdfsToHdfs(srcRoot, destRoot);
+        copyHdfsToHdfsWithDestCleared(srcRoot, destRoot);
     }
 
     public void copyDataFromSingularToTupleId(String customer) {
@@ -101,19 +95,47 @@ public class YarnManager {
 
         String eventTableWithData = findAvaiableEventData(customer);
         if (eventTableWithData != null) {
-            srcRoot += "/" + eventTableWithData;
-            destRoot += "/" + eventTableWithData;
+            String src = srcRoot + "/" + eventTableWithData;
+            String dest = destRoot + "/" + eventTableWithData;
+            copyHdfsToHdfsWithDestCleared(src, dest);
 
-            try {
-                HdfsUtils.rmdir(yarnConfiguration, destRoot);
-            } catch (Exception e) {
-                // ignore
-            }
-
-            copyHdfsToHdfs(srcRoot, destRoot);
+            src = srcRoot + "/EventMetadata";
+            dest = destRoot + "/EventMetadata";
+            copyHdfsToHdfsWithDestCleared(src, dest);
         } else {
             throw new IllegalStateException(String.format("Customer %s does not have data.", customer));
         }
+    }
+
+    public boolean srcModelPathExists(String customer, String modelGuid) {
+        String uuid = YarnPathUtils.extractUuid(modelGuid);
+        try {
+            String srcModelJsonFullPath = findModelPath(customer, uuid);
+            return srcModelJsonFullPath != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean destModelPathExists(String customer, String modelGuid) {
+        String uuid = YarnPathUtils.extractUuid(modelGuid);
+        String srcModelJsonFullPath = findModelPath(customer, uuid);
+        String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
+        String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);
+        String destPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer)
+                + "/" + eventTable + "/" + uuid + "/" + containerId;
+        return hdfsPathExists(destPath);
+    }
+
+    public boolean modelSummaryExists(String customer, String modelGuid) {
+        String uuid = YarnPathUtils.extractUuid(modelGuid);
+        String srcModelJsonFullPath = findModelPath(customer, uuid);
+        String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
+        String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);
+        String destPath = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer)
+                + "/" + eventTable + "/" + uuid + "/" + containerId
+                + "/enhancements/modelsummary.json";
+        return hdfsPathExists(destPath);
     }
 
     private boolean hdfsPathExists(String path) {
@@ -122,6 +144,18 @@ public class YarnManager {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000,
                     "Cannot check if path " + path + " exists in hdfs.", e);
+        }
+    }
+
+    private void copyHdfsToHdfsWithDestCleared(String src, String dest) {
+        String tmpLocalDir = "tmp" + UUID.randomUUID();
+        try {
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpLocalDir);
+            HdfsUtils.copyLocalToHdfs(yarnConfiguration, tmpLocalDir, dest);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24000, "Failed to copy file from one src to dest path.", e);
+        } finally {
+            FileUtils.deleteQuietly(new File(tmpLocalDir));
         }
     }
 
@@ -167,7 +201,7 @@ public class YarnManager {
                     if (fileStatus == null) {
                         return false;
                     }
-                    Pattern p = Pattern.compile(".*model.json");
+                    Pattern p = Pattern.compile(".*json");
                     Matcher matcher = p.matcher(fileStatus.getPath().getName());
                     return matcher.matches();
                 }
@@ -181,9 +215,4 @@ public class YarnManager {
             throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
         }
     }
-
-//    private void uploadModelToHdfs(String dlTenantName, String modelGuid, String modelContent) throws Exception{
-//        String path = constructTupleIdModelDir(dlTenantName, modelGuid) + "model.json";
-//        HdfsUtils.writeToFile(yarnConfiguration, path, modelContent);
-//    }
 }
