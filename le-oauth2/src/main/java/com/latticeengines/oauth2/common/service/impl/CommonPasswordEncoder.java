@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.service.impl;
+package com.latticeengines.oauth2.common.service.impl;
 
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;

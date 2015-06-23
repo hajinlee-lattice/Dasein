@@ -1,9 +1,8 @@
-package com.latticeengines.oauth2.service.impl;
+package com.latticeengines.oauth2.resourceserver;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,11 +16,10 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 @EnableResourceServer
 public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
-    private static final String HU_REST_RESOURCE_ID = "rest_api";
+    private static final String PLAYMAKER_REST_RESOURCE_ID = "playmaker_api";
 
-    @Autowired
-    @Qualifier("dataSource")
-    DataSource dataSource;
+    @Resource(name = "dataSourceOauth2")
+    private DataSource dataSource;
 
     @Bean
     public TokenStore tokenStore() {
@@ -30,7 +28,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
-        resources.resourceId(HU_REST_RESOURCE_ID).stateless(false);
+        resources.resourceId(PLAYMAKER_REST_RESOURCE_ID).stateless(false);
     }
 
     @Override

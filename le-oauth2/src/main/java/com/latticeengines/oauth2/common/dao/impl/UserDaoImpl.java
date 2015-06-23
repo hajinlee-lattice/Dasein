@@ -1,16 +1,15 @@
-package com.latticeengines.oauth2.dao.impl;
+package com.latticeengines.oauth2.common.dao.impl;
 
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
-import com.latticeengines.oauth2.dao.UserDao;
+import com.latticeengines.oauth2.common.dao.UserDao;
 
-@Component
+//@Component
 public class UserDaoImpl extends BaseGenericDaoImpl implements UserDao {
 
     public UserDaoImpl(NamedParameterJdbcTemplate namedJdbcTemplate) {

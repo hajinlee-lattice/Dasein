@@ -1,22 +1,21 @@
-package com.latticeengines.oauth2.service.impl;
+package com.latticeengines.oauth2.common.service.impl;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.oauth2.service.UserService;
+import com.latticeengines.oauth2.common.service.UserService;
 
 @Component
 public class UserServiceImpl implements UserService {
 
-    @Autowired
+    @Resource(name = "dataSourceOauth2")
     private DataSource dataSource;
 
-    @Autowired
-    private JdbcUserDetailsManager jdbcManager;
+    private JdbcUserDetailsManager jdbcManager = new JdbcUserDetailsManager();
 
     @Override
     public UserDetails findByUserName(String userName) {

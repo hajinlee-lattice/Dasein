@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.service.impl;
+package com.latticeengines.oauth2.common.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,7 @@ public class GlobalAuthenticationConfig extends GlobalAuthenticationConfigurerAd
 
     @Override
     public void init(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(oAuthUserDetailService).passwordEncoder(commonPasswordEncoder);
+        auth.userDetailsService(oAuthUserDetailService);
 
     }
 }

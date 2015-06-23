@@ -1,12 +1,18 @@
-package com.latticeengines.oauth2.service.impl;
+package com.latticeengines.oauth2.authserver;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -17,13 +23,20 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
 @Configuration
 @EnableAuthorizationServer
+@EnableWebSecurity
+@EnableAutoConfiguration
+@ImportResource(value = { "oauth2-authserver-context.xml", "oauth2-properties-context.xml" })
 public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
-    @Autowired
-    DataSource dataSource;
+    @Resource(name = "dataSourceOauth2")
+    private DataSource dataSource;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private AuthenticationManager auth;
+
+    public static void main(String[] args) {
+        SpringApplication.run(OAuth2AuthorizationServerConfig.class, args);
+    }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -72,7 +85,7 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.tokenStore(tokenStore()).authenticationManager(authenticationManager);
+        endpoints.tokenStore(tokenStore()).authenticationManager(auth);
 
     }
 

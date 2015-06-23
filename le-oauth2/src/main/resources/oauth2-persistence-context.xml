@@ -22,38 +22,32 @@
 
     <tx:annotation-driven transaction-manager="transactionManager" />
 
-    <!-- DAOs for Playmaker -->
-    <bean id="dataSourcePlaymaker"
+    <bean id="dataSourceOauth2"
         class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${playmaker.datasource.driver}" />
-        <property name="url" value="${playmaker.datasource.url}" />
-        <property name="username" value="${playmaker.datasource.user}" />
+        <property name="driverClassName" value="${oauth2.datasource.driver}" />
+        <property name="url" value="${oauth2.datasource.url}" />
+        <property name="username" value="${oauth2.datasource.user}" />
         <property name="password"
-            value="${playmaker.datasource.password.encrypted}" />
+            value="${oauth2.datasource.password.encrypted}" />
     </bean>
 
-    <bean id="sessionFactoryPlaymaker"
+    <bean id="sessionFactoryOauth2"
         class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="dataSourcePlaymaker" />
+        <property name="dataSource" ref="dataSourceOauth2" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
         <property name="hibernateProperties">
             <props>
-                <prop key="hibernate.dialect">${playmaker.datasource.dialect}
+                <prop key="hibernate.dialect">${oauth2.datasource.dialect}
                 </prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.globally_quoted_identifiers">true</prop>
             </props>
         </property>
     </bean>
-    <bean id="transactionManagerPlaymaker"
+   <!--  <bean id="transactionManagerOauth2"
         class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-        p:sessionFactory-ref="sessionFactoryPlaymaker">
-        <qualifier value="playmaker" />
-    </bean>
-
-    <bean id="playmakerTenantDao"
-        class="com.latticeengines.playmaker.dao.impl.PlaymakerTenantDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPlaymaker" />
-    </bean>
+        p:sessionFactory-ref="sessionFactoryOauth2">
+        <qualifier value="oauth2" />
+    </bean> -->
 
 </beans>

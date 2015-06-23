@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.service.impl;
+package com.latticeengines.oauth2.common.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.oauth2.service.OAuthUser;
-import com.latticeengines.oauth2.service.UserService;
+import com.latticeengines.oauth2.common.service.OAuthUser;
+import com.latticeengines.oauth2.common.service.UserService;
 
 @Component
 public class OAuthUserDetailService implements UserDetailsService {

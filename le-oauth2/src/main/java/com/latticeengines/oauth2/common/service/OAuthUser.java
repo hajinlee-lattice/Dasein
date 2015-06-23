@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.service;
+package com.latticeengines.oauth2.common.service;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
