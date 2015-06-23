@@ -43,9 +43,15 @@ public class TenantModelJdbcManager {
         return tenants;
     }
 
-    public String getModelToUpgrade(String dlTenantName) {
-        return upgradeJdbcTemlate.queryForObject(
-                "SELECT TOP 1 ModelGUID FROM TenantModel_Info WHERE TenantName = \'" + dlTenantName + "\'", String.class);
+    public List<String> getActiveModels(String dlTenantName) {
+        List<Map<String, Object>> results = upgradeJdbcTemlate.queryForList(
+                "SELECT ModelGUID FROM TenantModel_Info WHERE TenantName = \'" + dlTenantName + "\'"
+        );
+        List<String> models = new ArrayList<>();
+        for (Map<String, Object> entry: results) {
+            models.add(( String ) entry.get("ModelGUID"));
+        }
+        return models;
     }
 
     public void populateTenantModelInfo(String dlTenantName, String modelGuid) {

@@ -168,28 +168,36 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
 
         for (String tenant: tenants) {
-            printUpgradeStatusOfCustomer(tenant);
+            printPreUpgradeStatusOfCustomer(tenant);
         }
     }
 
-    private void printUpgradeStatusOfCustomer(String customer) {
-        String modelGuid = tenantModelJdbcManager.getModelToUpgrade(customer);
-        System.out.println(String.format("\n(%s, %s): ", customer, modelGuid));
+    private void printPreUpgradeStatusOfCustomer(String customer) {
+        List<String> modelGuids = tenantModelJdbcManager.getActiveModels(customer);
 
-        System.out.print("    Model json exists? ... ");
-        if (yarnManager.modelJsonExistsInSingularId(customer, modelGuid)) {
-            System.out.println("YES");
-        } else {
-            System.out.println("NO");
-            return;
+        for (String modelGuid: modelGuids) {
+            System.out.println(String.format("\n(%s, %s): ", customer, modelGuid));
+
+            System.out.print("    Model json exists in singular Id? ... ");
+            if (yarnManager.modelJsonExistsInSingularId(customer, modelGuid)) {
+                System.out.println("YES");
+            } else {
+                System.out.println("NO");
+                continue;
+            }
+
+            System.out.print("    Enhanced modelsummary exists? ....... ");
+            if (yarnManager.modelSummaryExistsInSingularId(customer, modelGuid)) {
+                System.out.println("YES");
+            } else {
+                System.out.println("NO");
+            }
         }
 
-        System.out.print("    Enhanced modelsummary exists? ... ");
-        if (yarnManager.modelSummaryExistsInSingularId(customer, modelGuid)) {
-            System.out.println("YES");
-        } else {
-            System.out.println("NO");
+        if (modelGuids.isEmpty()) {
+            System.out.println(String.format("\nCustomer %s does not have any active model", customer));
         }
+
     }
 
     @Override

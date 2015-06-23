@@ -20,9 +20,9 @@ public class JdbcManagerTestNG extends UpgradeFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testGetModelToBeUpgraded() {
-        String modelGuid = tenantModelJdbcManager.getModelToUpgrade(CUSTOMER);
-        Assert.assertEquals(modelGuid, MODEL_GUID);
+    public void testGetActiveModels() {
+        List<String> modelGuids = tenantModelJdbcManager.getActiveModels(CUSTOMER);
+        Assert.assertEquals(modelGuids.get(0), MODEL_GUID);
     }
 
 }
