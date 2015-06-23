@@ -20,7 +20,7 @@ public class ModelUpgradeRunner {
     private ModelUpgradeService upgrader140;
 
     static {
-        parser = ArgumentParsers.newArgumentParser("upgarde");
+        parser = ArgumentParsers.newArgumentParser("upgrade");
 
         parser.description("Upgrade tenants from 1.3.4 or 1.4 to 2.0");
 

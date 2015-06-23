@@ -41,8 +41,8 @@ public class ModelDecryptor {
         }
         return key;
     }
-    
+
     public static void main(String[] args) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, IOException{
-        System.out.println(decrypt(""));
+        System.out.println(decrypt("a4e4mzJIOkkXBBT3o4FT8YA8TXx/DpPCG7ULrxPCRumr0HQ1TRXGMf6bcFgcefU/wR3rP6TI1DW+FZCVxRE6/olQksA3WV4DcdC5tEtnxaIdBAPW0kIt9viuVi/HACZLdqEKRCeT8hLSK0Nsoi02PD+dVxb2j4uFNLoBC1f7L2ZPdWOALBPW4FHhsSvSEGtW5HfiHPxWiX5YjUWaAOEUUw=="));
     }
 }
