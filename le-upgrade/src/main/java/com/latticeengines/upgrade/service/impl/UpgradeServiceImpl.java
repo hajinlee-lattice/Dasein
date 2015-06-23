@@ -34,7 +34,7 @@ public class UpgradeServiceImpl implements UpgradeService {
     }
 
     @Override
-    public void execute(String command, Map<String, Object> parameters) throws Exception {
+    public void execute(String command, Map<String, Object> parameters) {
         System.out.println("Sending command to model upgrader ...");
         this.modelUpgrader.execute(command, parameters);
 

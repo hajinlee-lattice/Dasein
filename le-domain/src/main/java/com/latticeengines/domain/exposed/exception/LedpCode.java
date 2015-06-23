@@ -157,7 +157,10 @@ public enum LedpCode {
     LEDP_22001("Can not find DB connection info for tenant {0}"),
 
     // le-oauth2
-    LEDP_23000("Can not find user: {0}");
+    LEDP_23000("Can not find user: {0}"),
+
+    // le-upgrade
+    LEDP_24000("Yarn operation exception: {0}");
 
     private String message;
 

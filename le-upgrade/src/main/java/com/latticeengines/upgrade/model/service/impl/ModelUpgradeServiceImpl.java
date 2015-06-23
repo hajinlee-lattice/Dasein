@@ -127,7 +127,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
-    private void copyCustomerToTupleId(String customer) throws Exception {
+    private void copyCustomerToTupleId(String customer) {
         System.out.print(String.format("Deleting destination folder %s ... ", CustomerSpace.parse(customer).toString()));
         yarnManager.deleteTupleIdCustomerRoot(customer);
         System.out.println("OK");
@@ -137,7 +137,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
     }
 
-    private void copyCustomerModelToTupleId(String customer, String modelGuid) throws Exception {
+    private void copyCustomerModelToTupleId(String customer, String modelGuid) {
         System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer).toString()));
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
@@ -147,7 +147,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
     }
 
-    private void copyCustomerDataToTupleId(String customer) throws Exception {
+    private void copyCustomerDataToTupleId(String customer) {
         System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer).toString()));
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
@@ -158,7 +158,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     @Override
-    public void execute(String command, Map<String, Object> parameters) throws Exception {
+    public void execute(String command, Map<String, Object> parameters) {
         String customer = (String) parameters.get("customer");
         String model = (String) parameters.get("model");
 
