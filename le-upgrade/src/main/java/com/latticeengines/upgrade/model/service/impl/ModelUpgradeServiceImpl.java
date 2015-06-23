@@ -142,14 +142,16 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
     }
 
-    private void copyCustomerModelToTupleId(String customer, String modelGuid) {
+    private void copyCustomerModelsToTupleId(String customer, String modelGuid) {
         System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer).toString()));
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
 
         System.out.print("Copying model files to the destination folder ... ");
-        yarnManager.copyModelFromSingularToTupleId(customer, modelGuid);
+        yarnManager.copyModelsFromSingularToTupleId(customer);
         System.out.println("OK");
+
+        yarnManager.fixModelName(customer, modelGuid);
     }
 
     private void copyCustomerDataToTupleId(String customer) {
@@ -214,7 +216,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 copyCustomerToTupleId(customer);
                 break;
             case "cp_model":
-                copyCustomerModelToTupleId(customer, model);
+                copyCustomerModelsToTupleId(customer, model);
                 break;
             case "cp_data":
                 copyCustomerDataToTupleId(customer);

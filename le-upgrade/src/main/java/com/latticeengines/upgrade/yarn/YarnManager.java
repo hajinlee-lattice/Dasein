@@ -1,6 +1,7 @@
 package com.latticeengines.upgrade.yarn;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -68,7 +70,7 @@ public class YarnManager {
         copyHdfsToHdfs(srcRoot, destRoot);
     }
 
-    public void copyModelFromSingularToTupleId(String customer, String modelGuid) {
+    public void copyModelsFromSingularToTupleId(String customer) {
         String srcRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
         String destRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer);
 
@@ -76,14 +78,24 @@ public class YarnManager {
             throw new IllegalStateException(String.format("The source path %s does not exist.", srcRoot));
         }
 
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
-        String srcModelJsonFullPath = findModelPath(customer, uuid);
-        String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
-        String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);
-        srcRoot += "/" + eventTable + "/" + uuid + "/" + containerId;
-        destRoot += "/" + eventTable + "/" + uuid + "/" + containerId;
+        if (hdfsPathExists(destRoot)) {
+            throw new IllegalStateException(String.format("The destination path %s already exists.", destRoot));
+        }
 
-        copyHdfsToHdfsWithDestCleared(srcRoot, destRoot);
+        copyHdfsToHdfs(srcRoot, destRoot);
+    }
+
+    public void fixModelName(String customer, String modelGuid) {
+        String uuid = YarnPathUtils.extractUuid(modelGuid);
+        String srcModelJsonFullPath = findModelPath(CustomerSpace.parse(customer).toString(), uuid);
+        if (!srcModelJsonFullPath.endsWith("model.json")) {
+            String newModelJsonFullPath = srcModelJsonFullPath.replace(".json", "_model.json");
+            try {
+                HdfsUtils.moveFile(yarnConfiguration, srcModelJsonFullPath, newModelJsonFullPath);
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_24000, "Failed to move file from one src to dest path.", e);
+            }
+        }
     }
 
     public void copyDataFromSingularToTupleId(String customer) {

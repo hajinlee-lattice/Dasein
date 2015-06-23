@@ -61,8 +61,8 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCopyModel() throws Exception {
-        yarnManager.copyModelFromSingularToTupleId(CUSTOMER, MODEL_GUID);
-
+        yarnManager.copyModelsFromSingularToTupleId(CUSTOMER);
+        yarnManager.fixModelName(CUSTOMER, MODEL_GUID);
         String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER)
                 + "/" + EVENT_TABLE + "/" + UUID + "/" + CONTAINER_ID;
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath),
@@ -71,7 +71,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCopyData() throws Exception {
-        yarnManager.copyModelFromSingularToTupleId(CUSTOMER, MODEL_GUID);
+        yarnManager.copyModelsFromSingularToTupleId(CUSTOMER);
 
         String dataPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER)
                 + "/" + EVENT_TABLE;
