@@ -146,11 +146,13 @@ public class YarnManager {
 
         try {
             List<String> eventsWithData = HdfsUtils.getFilesForDir(yarnConfiguration, dataRoot);
-            if (eventsWithData != null && !eventsWithData.isEmpty()) {
-                return YarnPathUtils.parseEventTable(eventsWithData.get(0));
-            } else {
-                return null;
+            if (eventsWithData != null && eventsWithData.size() >= 2) {
+                for (String event: eventsWithData) {
+                    if (!"EventMetadata".equals(event))
+                        return YarnPathUtils.parseEventTable(eventsWithData.get(0));
+                }
             }
+            return null;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000, "Cannot find the data folder for customer" + customer, e);
         }
