@@ -60,7 +60,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        String orgId = getSfdcOrgId(crmCredential);
+        String orgId = getSfdcOrgId(crmCredential, isProduction);
         newCrmCredential.setOrgId(orgId);
         crmCredential.setOrgId(orgId);
         String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
@@ -144,8 +144,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
                 customerSpace.getSpaceId(), spaceInfo);
     }
 
-    private String getSfdcOrgId(CrmCredential crmCredential) {
+    private String getSfdcOrgId(CrmCredential crmCredential, boolean isProduction) {
         String url = "https://login.salesforce.com/services/oauth2/token";
+        if (!isProduction) {
+            url = url.replace("://login", "://test");
+        }
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
         parameters.add("grant_type", "password");
         parameters.add("client_id", "3MVG9fMtCkV6eLhdjB5FspKNuLjXBEL0Qe1dDCYZTL.z0kfLUbkW4Tj0XV_x395LX7F_1XOjoaQ==");
