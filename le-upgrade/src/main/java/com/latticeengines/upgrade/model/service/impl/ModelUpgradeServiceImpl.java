@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.upgrade.UpgradeRunner;
 import com.latticeengines.upgrade.domain.BardInfo;
 import com.latticeengines.upgrade.jdbc.AuthoritativeDBJdbcManager;
@@ -36,6 +38,12 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     @Autowired
     protected YarnManager yarnManager;
 
+    private static final String BARD_DB = "Bard DB";
+    
+    private static final String VISIDB_DL = "VisiDBDL";
+    
+    private static final String CUSTOMER_NAME = "CustomerName";
+
     @Value("${dataplatform.customer.basedir}")
     protected String customerBase;
 
@@ -58,16 +66,16 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     public void setInfos(List<BardInfo> infos) throws Exception {
         for (BardInfo bardInfo : infos) {
-            if (bardInfo.getDisplayName().equals("Bard DB")) {
+            if (bardInfo.getDisplayName().equals(BARD_DB)) {
                 bardDB = bardInfo.getName();
                 System.out.println(bardDB);
                 instance = bardInfo.getInstance();
                 System.out.println("instance: " + instance);
-            } else if (bardInfo.getDisplayName().equals("VisiDBDL")) {
+            } else if (bardInfo.getDisplayName().equals(VISIDB_DL)) {
                 String settings = bardInfo.getSettings();
                 JsonNode parentNode = new ObjectMapper().readTree(settings);
                 for (JsonNode node : parentNode) {
-                    if (node.get("Key").asText().equals("CustomerName")) {
+                    if (node.get("Key").asText().equals(CUSTOMER_NAME)) {
                         dlTenantName = node.get("Value").asText();
                         System.out.println("tenant name: " + dlTenantName);
                     }
@@ -86,7 +94,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 bardJdbcManager.init(bardDB, instance);
                 activeModelKeyList = bardJdbcManager.getActiveModelKey();
             }catch(Exception e){
-                
+                throw new LedpException(LedpCode.LEDP_24001, e);
             }
             if(activeModelKeyList.size() == 1){
                 modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");

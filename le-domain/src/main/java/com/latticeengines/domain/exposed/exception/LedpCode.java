@@ -160,7 +160,8 @@ public enum LedpCode {
     LEDP_23000("Can not find user: {0}"),
 
     // le-upgrade
-    LEDP_24000("Yarn operation exception: {0}");
+    LEDP_24000("Yarn operation exception: {0}"),
+    LEDP_24001("Jdbc operation exception: {0}");
 
     private String message;
 
