@@ -134,7 +134,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 //                + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
-    private void copyCustomerModelToTupleId(String customer, String modelGuid) {
+    private void copyCustomerModelsToTupleId(String customer, String modelGuid) {
         System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer).toString()));
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
@@ -143,7 +143,9 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         yarnManager.copyModelsFromSingularToTupleId(customer);
         System.out.println("OK");
 
+        System.out.print("Fix model.json filenames ... ");
         yarnManager.fixModelName(customer, modelGuid);
+        System.out.println("OK");
     }
 
     private void listTenantModel() {
@@ -232,7 +234,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 }
                 break;
             case UpgradeRunner.CMD_CP_MODELS:
-                copyCustomerModelToTupleId(customer, model);
+                copyCustomerModelsToTupleId(customer, model);
                 break;
             default:
                 // handled by version specific upgrader

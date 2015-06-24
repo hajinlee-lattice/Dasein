@@ -34,31 +34,6 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, customerRoot));
     }
 
-    @Test(groups = "functional", expectedExceptions = IllegalStateException.class)
-    public void testCopyCustomerNullSrc() throws Exception {
-        yarnManager.copyCustomerFromSingularToTupleId("nope");
-    }
-
-    @Test(groups = "functional", expectedExceptions = IllegalStateException.class)
-    public void testCopyCustomerExistingDest() throws Exception {
-        String customerRoot = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, CUSTOMER);
-        HdfsUtils.mkdir(yarnConfiguration, customerRoot);
-        yarnManager.copyCustomerFromSingularToTupleId(CUSTOMER);
-    }
-
-    @Test(groups = "functional")
-    public void testCopyCustomer() throws Exception {
-        yarnManager.copyCustomerFromSingularToTupleId(CUSTOMER);
-
-        String modelsRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER);
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelsRoot),
-                String.format("models folder for customer %s has not been created.", CUSTOMER));
-
-        String dataRoot = YarnPathUtils.constructTupleIdDataRoot(customerBase, CUSTOMER);
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, dataRoot),
-                String.format("data folder for customer %s has not been created.", CUSTOMER));
-    }
-
     @Test(groups = "functional")
     public void testCopyModel() throws Exception {
         yarnManager.copyModelsFromSingularToTupleId(CUSTOMER);
