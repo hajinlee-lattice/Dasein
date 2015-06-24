@@ -23,20 +23,22 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.util.CollectionUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.google.common.base.Joiner;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
@@ -45,10 +47,6 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.service.impl.ScoringStepYarnProcessorImplTestNG;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
-
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.util.CollectionUtils;
 
 public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFunctionalTestNGBase {
 
@@ -158,7 +156,6 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
      * @throws Exception
      */
 
-    @SuppressWarnings("unused")
     private List<GenericRecord> loadAvroResultToHdfs(String customerName, String scoreTargetTable, String resultJdbcUrl) throws Exception{
         HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/"+ CustomerSpace.parse(customerName) + "/scoring");
         scoringJdbcTemplate.setDataSource(new DriverManagerDataSource(resultJdbcUrl));
