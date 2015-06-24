@@ -45,9 +45,14 @@ public class TenantModelJdbcManager {
         return uuids;
     }
 
-    public void populateTenantModelInfo(String dlTenantName, String modelGuid) {
+    public void populateExternalTenantModelInfo(String dlTenantName, String modelGuid) {
         tenantModelInfoJdbcTemlate.execute("IF NOT EXISTS (SELECT * FROM TenantModel_Info where TenantName = \'" + dlTenantName
                 + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
+    }
+    
+    public void populateInternalTenantModelInfo(String dlTenantName, String modelGuid) {
+        tenantModelInfoJdbcTemlate.execute("IF NOT EXISTS (SELECT * FROM TenantModel_Info where TenantName = \'" + dlTenantName
+                + "\') insert into TenantModel_Info_Internal values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
     public boolean modelIsActive(String dlTenantName, String modelGuid) {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -39,9 +40,9 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     protected YarnManager yarnManager;
 
     private static final String BARD_DB = "Bard DB";
-    
+
     private static final String VISIDB_DL = "VisiDBDL";
-    
+
     private static final String CUSTOMER_NAME = "CustomerName";
 
     @Value("${dataplatform.customer.basedir}")
@@ -53,14 +54,14 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     protected String dlTenantName;
 
-    protected String modelGuid;
-
     protected String version;
+
+    private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
 
     public abstract void upgrade() throws Exception;
 
     @Override
-    public void setVersion(String version){
+    public void setVersion(String version) {
         this.version = version;
     }
 
@@ -85,30 +86,43 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     protected void populateTenantModelInfo() {
-        List<String> activeModelKeyList = new ArrayList<>();
         List<String> deploymentIds = authoritativeDBJdbcManager.getDeploymentIDs(version);
         for (String deploymentId : deploymentIds) {
-            try{
-                List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDBInfos(deploymentId);
-                setInfos(bardInfos);
-                bardJdbcManager.init(bardDB, instance);
-                activeModelKeyList = bardJdbcManager.getActiveModelKey();
-            }catch(Exception e){
-                throw new LedpException(LedpCode.LEDP_24001, e);
-            }
-            if(activeModelKeyList.size() == 1){
-                modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
-                tenantModelJdbcManager.populateTenantModelInfo(dlTenantName, modelGuid);
-            }else{
-                
-            }
+            List<String> activeModelKeyList = getActiveModelKeyList(deploymentId);
+            populateTenantModelInfo(activeModelKeyList);
             System.out.println("_______________________________________");
         }
-        
+    }
+
+    private List<String> getActiveModelKeyList(String deploymentId) {
+        try {
+            List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDBInfos(deploymentId);
+            setInfos(bardInfos);
+            bardJdbcManager.init(bardDB, instance);
+            return bardJdbcManager.getActiveModelKey();
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24001, e);
+        }
+    }
+
+    private void populateTenantModelInfo(List<String> activeModelKeyList) {
+        if (activeModelKeyList.size() == 1) {
+            String modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
+            tenantModelJdbcManager.populateExternalTenantModelInfo(dlTenantName, modelGuid);
+        } else if (activeModelKeyList.size() == 0) {
+            tenantModelJdbcManager.populateInternalTenantModelInfo(dlTenantName, "No Active Model been found!");
+        } else {
+            List<String> keys = new ArrayList<>();
+            for (String activeModelKey : activeModelKeyList) {
+                keys.add(StringUtils.remove(activeModelKey, "Model_"));
+            }
+            tenantModelJdbcManager.populateInternalTenantModelInfo(dlTenantName, commaJoiner.join(keys));
+        }
     }
 
     private void copyCustomerModelsToTupleId(String customer, String modelGuid) {
-        System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer).toString()));
+        System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer)
+                .toString()));
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
 
@@ -126,7 +140,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
         System.out.println("OK");
 
-        for (String tenant: tenants) {
+        for (String tenant : tenants) {
             printModelsInTable(tenant);
         }
     }
@@ -136,7 +150,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
         System.out.println("OK");
 
-        for (String tenant: tenants) {
+        for (String tenant : tenants) {
             printModelsInHdfs(tenant);
         }
     }
@@ -144,7 +158,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     private void printModelsInTable(String customer) {
         List<String> modelGuids = tenantModelJdbcManager.getActiveModels(customer);
 
-        for (String modelGuid: modelGuids) {
+        for (String modelGuid : modelGuids) {
             printPreUpgradeStatusOfCustomerModel(customer, modelGuid);
         }
 
@@ -156,7 +170,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     private void printModelsInHdfs(String customer) {
         List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
 
-        for (String uuid: uuids) {
+        for (String uuid : uuids) {
             String modelGuid = YarnPathUtils.constructModelGuidFromUuid(uuid);
             printPreUpgradeStatusOfCustomerModel(customer, modelGuid);
         }
@@ -199,22 +213,22 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         Boolean all = (Boolean) parameters.get("all");
 
         switch (command) {
-            case "list":
-                if (all) {
-                    listTenantModelInHdfs();
-                } else {
-                    listTenantModel();
-                }
-                break;
-            case UpgradeRunner.CMD_MODEL_INFO:
-                populateTenantModelInfo();
-                break;
-            case UpgradeRunner.CMD_CP_MODELS:
-                copyCustomerModelsToTupleId(customer, model);
-                break;
-            default:
-                // handled by version specific upgrader
-                break;
+        case "list":
+            if (all) {
+                listTenantModelInHdfs();
+            } else {
+                listTenantModel();
+            }
+            break;
+        case UpgradeRunner.CMD_MODEL_INFO:
+            populateTenantModelInfo();
+            break;
+        case UpgradeRunner.CMD_CP_MODELS:
+            copyCustomerModelsToTupleId(customer, model);
+            break;
+        default:
+            // handled by version specific upgrader
+            break;
         }
 
     };

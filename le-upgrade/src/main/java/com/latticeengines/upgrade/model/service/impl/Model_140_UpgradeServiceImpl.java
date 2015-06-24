@@ -30,7 +30,7 @@ public class Model_140_UpgradeServiceImpl extends ModelUpgradeServiceImpl {
                 System.out.println("_______________________________________");
                 continue;
             }
-            modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
+            String modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
 
             //uploadModelToHdfs(activeModelKey);
             populateTenantModelInfo();
