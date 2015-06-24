@@ -1,8 +1,10 @@
 package com.latticeengines.upgrade.model.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,16 +14,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.upgrade.UpgradeRunner;
 import com.latticeengines.upgrade.domain.BardInfo;
+import com.latticeengines.upgrade.jdbc.AuthoritativeDBJdbcManager;
+import com.latticeengines.upgrade.jdbc.BardJdbcManager;
 import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
 @Component("modelUpgrade")
-abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
+public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     @Autowired
     protected TenantModelJdbcManager tenantModelJdbcManager;
+
+    @Autowired
+    protected AuthoritativeDBJdbcManager authoritativeDBJdbcManager;
+
+    @Autowired
+    protected BardJdbcManager bardJdbcManager;
 
     @Autowired
     protected YarnManager yarnManager;
@@ -37,7 +47,13 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     protected String modelGuid;
 
-    public void upgrade() throws Exception {
+    protected String version;
+
+    public abstract void upgrade() throws Exception;
+
+    @Override
+    public void setVersion(String version){
+        this.version = version;
     }
 
     public void setInfos(List<BardInfo> infos) throws Exception {
@@ -60,10 +76,27 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
     }
 
-
-
     protected void populateTenantModelInfo() {
-        tenantModelJdbcManager.populateTenantModelInfo(dlTenantName, modelGuid);
+        List<String> activeModelKeyList = new ArrayList<>();
+        List<String> deploymentIds = authoritativeDBJdbcManager.getDeploymentIDs(version);
+        for (String deploymentId : deploymentIds) {
+            try{
+                List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDBInfos(deploymentId);
+                setInfos(bardInfos);
+                bardJdbcManager.init(bardDB, instance);
+                activeModelKeyList = bardJdbcManager.getActiveModelKey();
+            }catch(Exception e){
+                
+            }
+            if(activeModelKeyList.size() == 1){
+                modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
+                tenantModelJdbcManager.populateTenantModelInfo(dlTenantName, modelGuid);
+            }else{
+                
+            }
+            System.out.println("_______________________________________");
+        }
+        
     }
 
     private void copyCustomerModelsToTupleId(String customer, String modelGuid) {
@@ -164,6 +197,9 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 } else {
                     listTenantModel();
                 }
+                break;
+            case UpgradeRunner.CMD_MODEL_INFO:
+                populateTenantModelInfo();
                 break;
             case UpgradeRunner.CMD_CP_MODELS:
                 copyCustomerModelsToTupleId(customer, model);
