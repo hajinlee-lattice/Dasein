@@ -20,15 +20,31 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-    <bean id="dataSourceUpgrade" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="tenantModelInfoDataSource"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${upgrade.dao.datasource.driver}" />
-        <property name="url" value="${upgrade.dao.datasource.url}" />
+        <property name="url" value="${upgrade.dao.tenant.model.info.jdbc}" />
         <property name="username" value="${upgrade.dao.datasource.user}" />
-        <property name="password" value="${upgrade.dao.datasource.password.encrypted}" />
+        <property name="password"
+            value="${upgrade.dao.datasource.password.encrypted}" />
     </bean>
 
-    <bean id="upgradeJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
-        p:dataSource-ref="dataSourceUpgrade">
+    <bean id="tenantModelInfoJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+        p:dataSource-ref="tenantModelInfoDataSource">
+    </bean>
+
+    <bean id="authoritativeDBDataSource"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${upgrade.dao.datasource.driver}" />
+        <property name="url"
+            value="${upgrade.dao.authoritativedb.datasource.jdbc}" />
+        <property name="username" value="${upgrade.dao.datasource.user}" />
+        <property name="password"
+            value="${upgrade.dao.datasource.password.encrypted}" />
+    </bean>
+
+    <bean id="authoritativeDBJdbcTemlate" class="org.springframework.jdbc.core.JdbcTemplate"
+        p:dataSource-ref="authoritativeDBDataSource">
     </bean>
 
 </beans>

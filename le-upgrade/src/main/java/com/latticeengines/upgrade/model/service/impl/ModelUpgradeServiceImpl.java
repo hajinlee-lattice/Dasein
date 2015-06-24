@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.upgrade.UpgradeRunner;
 import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
-import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
@@ -26,9 +24,6 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     @Autowired
     protected DataSource dataSourceUpgrade;
-
-    @Autowired
-    protected JdbcTemplate upgradeJdbcTemlate;
 
     @Autowired
     protected TenantModelJdbcManager tenantModelJdbcManager;
@@ -59,19 +54,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     public void upgrade() throws Exception {
     }
 
-    protected List<String> getDeploymentIDs(String version) {
-        return upgradeJdbcTemlate.queryForList("select LEDeployment_ID from LEDeployment where " //
-                + "deployment_type = 9 and isactive = 1 and Current_Version='" + version + "'", String.class);
-    }
-
-    protected void setBardDBInfos(String deploymentId) throws Exception {
-        List<Map<String, Object>> infosList = upgradeJdbcTemlate
-                .queryForList("select Display_Name, Instance, Name, Settings from LEComponent where " //
-                        + "LEDeployment_ID = " + deploymentId);
-        setBardDBInfos(infosList);
-    }
-
-    protected void setBardDBInfos(List<Map<String, Object>> infosList) throws Exception {
+    public void setBardDBInfos(List<Map<String, Object>> infosList) throws Exception {
         for (Map<String, Object> infos : infosList) {
             if (infos.get("Display_Name").equals("Bard DB")) {
                 bardDB = (String) infos.get("Name");
@@ -91,40 +74,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
     }
 
-    protected void setToBardDBDataSource(){
-        String hostAdd = "BODCPRODVSQL200.prod.lattice.local\\SQL200";
-        if (instance.equals("SQL100")) {
-            hostAdd = "BODCPRODVSQL100.prod.lattice.local\\SQL100";
-        }
-        //hostAdd = "10.41.1.250:1433";
-        setToBardDBDataSource(hostAdd);
-    }
 
-    private void setToBardDBDataSource(String hostAdd){
-        DataSource bardDBDataSource = new DriverManagerDataSource("jdbc:sqlserver://" + hostAdd + ";databaseName="
-                + bardDB, user, pass);
-        upgradeJdbcTemlate.setDataSource(bardDBDataSource);
-    }
-
-    protected String getActiveModelKey() throws Exception {
-        String modelInfo = upgradeJdbcTemlate.queryForObject(
-                "select value from KeyValueStore where [Key] = 'ModelInfoDocument'", String.class);
-        JsonNode jn = new ObjectMapper().readTree(ModelDecryptor.decrypt(modelInfo)).get("ActiveModelKeys");
-        if (jn.size() != 1) {
-            for(int i = 0; i < jn.size(); i++){
-                System.out.println(jn.get(i).asText());
-            }
-            System.out.println(dlTenantName + " does not have 1 active models");
-            return "";
-        }
-        return jn.path(0).asText();
-    }
-
-    protected String getModelContent(String activeModelKey) throws Exception{
-        String encryptedModelContent = upgradeJdbcTemlate.queryForObject(
-              "select value from KeyValueStore where [Key] = '" + activeModelKey + "'", String.class);
-        return ModelDecryptor.decrypt(encryptedModelContent);
-    }
 
     protected void populateTenantModelInfo() {
         tenantModelJdbcManager.populateTenantModelInfo(dlTenantName, modelGuid);

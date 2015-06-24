@@ -4,13 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
@@ -19,25 +14,10 @@ import com.latticeengines.upgrade.yarn.YarnPathUtils;
 public class TenantModelJdbcManager {
 
     @Autowired
-    private JdbcTemplate upgradeJdbcTemlate;
-
-    @Value("${upgrade.dao.tenant.model.info.jdbc}")
-    private String tenantModelInfoJDBC;
-
-    @Value("${upgrade.dao.datasource.user}")
-    private String user;
-
-    @Value("${upgrade.dao.datasource.password.encrypted}")
-    private String pass;
-
-    @PostConstruct
-    private void setJDBCDataSource() {
-        DataSource infoDataSource = new DriverManagerDataSource(tenantModelInfoJDBC, user, pass);
-        upgradeJdbcTemlate.setDataSource(infoDataSource);
-    }
+    private JdbcTemplate tenantModelInfoJdbcTemlate;
 
     public List<String> getTenantsToUpgrade() {
-        List<Map<String, Object>> results = upgradeJdbcTemlate.queryForList("SELECT TenantName FROM TenantModel_Info");
+        List<Map<String, Object>> results = tenantModelInfoJdbcTemlate.queryForList("SELECT TenantName FROM TenantModel_Info");
         List<String> tenants = new ArrayList<>();
         for (Map<String, Object> entry: results) {
             tenants.add(( String ) entry.get("TenantName"));
@@ -46,7 +26,7 @@ public class TenantModelJdbcManager {
     }
 
     public List<String> getActiveModels(String dlTenantName) {
-        List<Map<String, Object>> results = upgradeJdbcTemlate.queryForList(
+        List<Map<String, Object>> results = tenantModelInfoJdbcTemlate.queryForList(
                 "SELECT ModelGUID FROM TenantModel_Info WHERE TenantName = \'" + dlTenantName + "\'"
         );
         List<String> models = new ArrayList<>();
@@ -66,7 +46,7 @@ public class TenantModelJdbcManager {
     }
 
     public void populateTenantModelInfo(String dlTenantName, String modelGuid) {
-        upgradeJdbcTemlate.execute("IF NOT EXISTS (SELECT * FROM TenantModel_Info where TenantName = \'" + dlTenantName
+        tenantModelInfoJdbcTemlate.execute("IF NOT EXISTS (SELECT * FROM TenantModel_Info where TenantName = \'" + dlTenantName
                 + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
