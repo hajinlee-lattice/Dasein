@@ -18,8 +18,12 @@ import net.sourceforge.argparse4j.inf.Namespace;
 
 public class UpgradeRunner {
 
-    private static ArgumentParser parser;
+    public static final String CMD_MODEL_INFO = "modelinfo";
+    public static final String CMD_LIST = "list";
+    public static final String CMD_CP_MODELS = "cp_models";
+    public static final String CMD_UPGRADE = "upgrade";
 
+    private static ArgumentParser parser;
     private UpgradeService upgrader;
 
     static {
@@ -47,41 +51,42 @@ public class UpgradeRunner {
         parser.addArgument("-m", "--modelguid")
                 .dest("model")
                 .type(String.class)
-                .help("model guid.");
+                .help("model guid or uuid.");
 
         parser.addArgument("-a", "--all")
                 .dest("all")
                 .action(Arguments.storeConst())
                 .setConst(true)
                 .setDefault(false)
-                .help("all customers and their active models.");
+                .help("show all models in hdsf, or upgarde all customers in ModelInfo table.");
     }
 
     private static ArgumentChoice getCommandChoice() {
         return new CollectionArgumentChoice<>(
-                "modelinfo",
-                "list",
-                "cp_model",
-                "upgrade"
+                CMD_MODEL_INFO,
+                CMD_LIST,
+                CMD_CP_MODELS,
+                CMD_UPGRADE
         );
     }
 
     private static String commandHelper() {
         String helper = "command to be executed:";
-        helper += "\nmodelinfo: populate ModelInfo table for all tenants";
-        helper += "\nlist:      list (tenant, model) pairs to be upgraded. With the flag -a or --all it shows all models in hdfs";
-        helper += "\ncp_model:  copy files associated with ONE model to 3-id folder in hdfs." +
-                " Use the flag -a or --all to copy ALL models in hdfs for ONE customer.";
-        helper += "\nupgrade:   end to end upgrade a tenant";
+        helper += "\n " + CMD_MODEL_INFO + ":    populate ModelInfo table for all tenants";
+        helper += "\n " + CMD_LIST + ":    list (tenant, model) pairs to be upgraded. " +
+                "With the flag -a or --all it shows all models in hdfs";
+        helper += "\n " + CMD_CP_MODELS + ":    copy ALL models of ONE customer to 3-id folder in hdfs. " +
+                "Also fix the filename of model.json.";
+        helper += "\n " + CMD_UPGRADE + ":    end to end upgrade a tenant";
         return helper;
     }
 
     private List<String> cmdsNeedCustomer() {
-        return Arrays.asList("cp_model", "upgrade");
+        return Arrays.asList(CMD_CP_MODELS, "upgrade");
     }
 
     private List<String> cmdsNeedModel() {
-        return Arrays.asList("cp_model");
+        return Arrays.asList(CMD_CP_MODELS);
     }
 
     private void validateArguments(Namespace ns) {
@@ -89,15 +94,15 @@ public class UpgradeRunner {
             throw new IllegalArgumentException("Failed to parse input arguments.");
         }
 
-        if (cmdsNeedCustomer().contains(ns.getString("command")) &&
-                !ns.getBoolean("all") &&
-                ns.getString("customer") == null ) {
+        String command = ns.getString("command");
+
+        if (cmdsNeedCustomer().contains(command) &&
+                !ns.getBoolean("all") && ns.getString("customer") == null ) {
             throw new IllegalArgumentException("Missing customer (tenantId).");
         }
 
-        if (cmdsNeedModel().contains(ns.getString("command")) &&
-                !ns.getBoolean("all") &&
-                ns.getString("model") == null ) {
+        if (cmdsNeedModel().contains(command) &&
+                !ns.getBoolean("all") && ns.getString("model") == null ) {
             throw new IllegalArgumentException("Missing model guid.");
         }
     }

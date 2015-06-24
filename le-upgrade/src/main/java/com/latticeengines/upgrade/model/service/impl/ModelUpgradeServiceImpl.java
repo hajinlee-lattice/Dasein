@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.upgrade.UpgradeRunner;
 import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
@@ -230,7 +231,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                     listTenantModel();
                 }
                 break;
-            case "cp_model":
+            case UpgradeRunner.CMD_CP_MODELS:
                 copyCustomerModelToTupleId(customer, model);
                 break;
             default:
