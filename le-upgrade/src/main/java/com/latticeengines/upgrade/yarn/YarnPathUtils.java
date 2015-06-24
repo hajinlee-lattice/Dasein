@@ -21,6 +21,13 @@ public class YarnPathUtils {
         return tokens[8];
     }
 
+    public static String parseUuid(String hdfsPath) {
+        hdfsPath = stripoutProtocal(hdfsPath);
+        String[] tokens = hdfsPath.split("/");
+        String uuid = tokens[7];
+        return uuid;
+    }
+
     public static String parseModelGuid(String hdfsPath) {
         hdfsPath = stripoutProtocal(hdfsPath);
         String[] tokens = hdfsPath.split("/");

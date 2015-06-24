@@ -25,6 +25,18 @@ public class JdbcManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertEquals(modelGuids.get(0), MODEL_GUID);
     }
 
+    @Test(groups = "functional")
+    public void testGetUuids() {
+        List<String> uuids = tenantModelJdbcManager.getActiveUuids(CUSTOMER);
+        Assert.assertEquals(uuids.get(0), UUID);
+    }
+
+    @Test(groups = "functional")
+    public void testModelIsActive() {
+        Assert.assertTrue(tenantModelJdbcManager.modelIsActive(CUSTOMER, MODEL_GUID));
+        Assert.assertTrue(tenantModelJdbcManager.modelIsActive(CUSTOMER, UUID));
+        Assert.assertFalse(tenantModelJdbcManager.modelIsActive(CUSTOMER, java.util.UUID.randomUUID().toString()));
+    }
 }
 
 

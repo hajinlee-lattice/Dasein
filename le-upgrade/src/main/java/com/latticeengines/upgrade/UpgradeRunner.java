@@ -49,6 +49,13 @@ public class UpgradeRunner {
                 .type(String.class)
                 .help("model guid.");
 
+        parser.addArgument("--list-all")
+                .dest("listAll")
+                .action(Arguments.storeConst())
+                .setConst(true)
+                .setDefault(false)
+                .help("show all models in hdfs. optional to the command \"list\", default to false.");
+
         parser.addArgument("-a", "--all")
                 .dest("all")
                 .action(Arguments.storeConst())

@@ -2,6 +2,7 @@ package com.latticeengines.upgrade.yarn;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -141,6 +142,15 @@ public class YarnManager {
         return hdfsPathExists(destPath);
     }
 
+    public List<String> findAllUuidsInSingularId(String customer) {
+        List<String> paths = findAllModelPathsInSingularId(customer);
+        List<String> uuids = new ArrayList<>();
+        for (String path: paths) {
+            uuids.add(YarnPathUtils.parseUuid(path));
+        }
+        return uuids;
+    }
+
     public void generateModelSummary(String customer, String modelGuid) { }
 
     private boolean hdfsPathExists(String path) {
@@ -193,11 +203,16 @@ public class YarnManager {
             }
             return null;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000, "Cannot find the data folder for customer" + customer, e);
+            throw new LedpException(LedpCode.LEDP_24000, "Cannot find the data folder for customer " + customer, e);
         }
     }
 
-    private String findModelPath(String customer, String uuid) {
+    private List<String> findAllModelPathsInSingularId(String customer) {
+        String modelsRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
+        if (!hdfsPathExists(modelsRoot)) {
+            return new ArrayList<>();
+        }
+
         try {
             List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + "/" + customer
                     + "/models", new HdfsUtils.HdfsFileFilter() {
@@ -217,9 +232,9 @@ public class YarnManager {
                             "enhancements",
                             "modelsummary",
                             "diagnostics",
-                            "/1/",
                             "DataComposition",
-                            "ScoreDerivation"
+                            "ScoreDerivation",
+                            "/1/"
                     );
                     for (String token: blacklist) {
                         if (path.contains(token)) return true;
@@ -227,14 +242,20 @@ public class YarnManager {
                     return false;
                 }
             });
-            for (String path : paths) {
-                if (path.contains(uuid))
-                    return path;
-            }
-            return null;
+            return paths;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
+            throw new LedpException(LedpCode.LEDP_24000, "Cannot find all model jsons for customer " + customer, e);
         }
+    }
+
+    private String findModelPath(String customer, String uuid) {
+        List<String> paths = findAllModelPathsInSingularId(customer);
+        for (String path : paths) {
+            if (path.contains(uuid))
+                return path;
+        }
+        RuntimeException e = new RuntimeException("No model json with specific uuid can be found.");
+        throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
     }
 
 }

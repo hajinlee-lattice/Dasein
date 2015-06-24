@@ -18,6 +18,7 @@ import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
+import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
 @Component("modelUpgrade")
 abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
@@ -170,47 +171,86 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
 
         for (String tenant: tenants) {
-            printPreUpgradeStatusOfCustomer(tenant);
+            printModelsInTable(tenant);
         }
     }
 
-    private void printPreUpgradeStatusOfCustomer(String customer) {
+    private void listTenantModelInHdfs() {
+        System.out.print("Retrieving list of tenants to be upgraded ... ");
+        List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
+        System.out.println("OK");
+
+        for (String tenant: tenants) {
+            printModelsInHdfs(tenant);
+        }
+    }
+
+    private void printModelsInTable(String customer) {
         List<String> modelGuids = tenantModelJdbcManager.getActiveModels(customer);
 
         for (String modelGuid: modelGuids) {
-            System.out.println(String.format("\n(%s, %s): ", customer, modelGuid));
-
-            System.out.print("    Model json exists in singular Id? ... ");
-            if (yarnManager.modelJsonExistsInSingularId(customer, modelGuid)) {
-                System.out.println("YES");
-            } else {
-                System.out.println("NO");
-                continue;
-            }
-
-            System.out.print("    Enhanced modelsummary exists? ....... ");
-            if (yarnManager.modelSummaryExistsInSingularId(customer, modelGuid)) {
-                System.out.println("YES");
-            } else {
-                System.out.println("NO");
-            }
+            printPreUpgradeStatusOfCustomerModel(customer, modelGuid);
         }
 
         if (modelGuids.isEmpty()) {
             System.out.println(String.format("\nCustomer %s does not have any active model", customer));
         }
+    }
 
+    private void printModelsInHdfs(String customer) {
+        List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
+
+        for (String uuid: uuids) {
+            String modelGuid = YarnPathUtils.constructModelGuidFromUuid(uuid);
+            printPreUpgradeStatusOfCustomerModel(customer, modelGuid);
+        }
+
+        if (uuids.isEmpty()) {
+            System.out.println(String.format("\nCustomer %s does not have any model in hdfs.", customer));
+        }
+    }
+
+    private void printPreUpgradeStatusOfCustomerModel(String customer, String modelGuid) {
+        System.out.println(String.format("\n(%s, %s): ", customer, modelGuid));
+
+        System.out.print("    Model is active? .................... ");
+        if (tenantModelJdbcManager.modelIsActive(customer, modelGuid)) {
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+        }
+
+        System.out.print("    Model json exists in singular Id? ... ");
+        if (yarnManager.modelJsonExistsInSingularId(customer, modelGuid)) {
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+            return;
+        }
+
+        System.out.print("    Modelsummary already exists? ........ ");
+        if (yarnManager.modelSummaryExistsInSingularId(customer, modelGuid)) {
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+        }
     }
 
     @Override
     public void execute(String command, Map<String, Object> parameters) {
         String customer = (String) parameters.get("customer");
         String model = (String) parameters.get("model");
+        Boolean listAll = (Boolean) parameters.get("listAll");
+
         Boolean all = (Boolean) parameters.get("all");
 
         switch (command) {
             case "list":
-                listTenantModel();
+                if (listAll) {
+                    listTenantModelInHdfs();
+                } else {
+                    listTenantModel();
+                }
                 break;
             case "cp_customer":
                 copyCustomerToTupleId(customer);
