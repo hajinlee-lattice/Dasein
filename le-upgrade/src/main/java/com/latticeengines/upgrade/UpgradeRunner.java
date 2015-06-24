@@ -49,13 +49,6 @@ public class UpgradeRunner {
                 .type(String.class)
                 .help("model guid.");
 
-        parser.addArgument("--list-all")
-                .dest("listAll")
-                .action(Arguments.storeConst())
-                .setConst(true)
-                .setDefault(false)
-                .help("show all models in hdfs. optional to the command \"list\", default to false.");
-
         parser.addArgument("-a", "--all")
                 .dest("all")
                 .action(Arguments.storeConst())
@@ -69,7 +62,6 @@ public class UpgradeRunner {
                 "modelinfo",
                 "list",
                 "cp_model",
-                "cp_data",
                 "upgrade"
         );
     }
@@ -77,15 +69,15 @@ public class UpgradeRunner {
     private static String commandHelper() {
         String helper = "command to be executed:";
         helper += "\nmodelinfo: populate ModelInfo table for all tenants";
-        helper += "\nlist:      list (tenant, model) pairs to be upgraded";
-        helper += "\ncp_model:  copy files associated with a model to 3-id folder in hdfs";
-        helper += "\ncp_data:   copy a data folder to 3-id folder in hdfs";
+        helper += "\nlist:      list (tenant, model) pairs to be upgraded. With the flag -a or --all it shows all models in hdfs";
+        helper += "\ncp_model:  copy files associated with ONE model to 3-id folder in hdfs." +
+                " Use the flag -a or --all to copy ALL models in hdfs for ONE customer.";
         helper += "\nupgrade:   end to end upgrade a tenant";
         return helper;
     }
 
     private List<String> cmdsNeedCustomer() {
-        return Arrays.asList("cp_model", "cp_data", "upgrade");
+        return Arrays.asList("cp_model", "upgrade");
     }
 
     private List<String> cmdsNeedModel() {

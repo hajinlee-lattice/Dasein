@@ -56,21 +56,6 @@ public class YarnManager {
         return hdfsPathExists(customerPath);
     }
 
-    public void copyCustomerFromSingularToTupleId(String customer) {
-        String srcRoot = YarnPathUtils.constructSingularIdCustomerRoot(customerBase, customer);
-        String destRoot = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, customer);
-
-        if (!hdfsPathExists(srcRoot)) {
-            throw new IllegalStateException(String.format("The source path %s does not exist.", srcRoot));
-        }
-
-        if (hdfsPathExists(destRoot)) {
-            throw new IllegalStateException(String.format("The destination path %s already exists.", destRoot));
-        }
-
-        copyHdfsToHdfs(srcRoot, destRoot);
-    }
-
     public void copyModelsFromSingularToTupleId(String customer) {
         String srcRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
         String destRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer);
@@ -96,28 +81,6 @@ public class YarnManager {
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_24000, "Failed to move file from one src to dest path.", e);
             }
-        }
-    }
-
-    public void copyDataFromSingularToTupleId(String customer) {
-        String srcRoot = YarnPathUtils.constructSingularIdDataRoot(customerBase, customer);
-        String destRoot = YarnPathUtils.constructTupleIdDataRoot(customerBase, customer);
-
-        if (!hdfsPathExists(srcRoot)) {
-            throw new IllegalStateException(String.format("The data path %s does not exist.", srcRoot));
-        }
-
-        String eventTableWithData = findAvaiableEventData(customer);
-        if (eventTableWithData != null) {
-            String src = srcRoot + "/" + eventTableWithData;
-            String dest = destRoot + "/" + eventTableWithData;
-            copyHdfsToHdfsWithDestCleared(src, dest);
-
-            src = srcRoot + "/EventMetadata";
-            dest = destRoot + "/EventMetadata";
-            copyHdfsToHdfsWithDestCleared(src, dest);
-        } else {
-            throw new IllegalStateException(String.format("Customer %s does not have data.", customer));
         }
     }
 
@@ -162,7 +125,7 @@ public class YarnManager {
         }
     }
 
-    private void copyHdfsToHdfsWithDestCleared(String src, String dest) {
+    private void copyHdfsToHdfs(String src, String dest) {
         String tmpLocalDir = "tmp/" + UUID.randomUUID();
         try {
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpLocalDir);
@@ -174,37 +137,14 @@ public class YarnManager {
         }
     }
 
-    private void copyHdfsToHdfs(String src, String dest) {
-        String tmpLocalDir = "tmp" + UUID.randomUUID();
-        try {
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpLocalDir);
-            HdfsUtils.copyLocalToHdfs(yarnConfiguration, tmpLocalDir, dest);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000, "Failed to copy file from one src to dest path.", e);
-        } finally {
-            FileUtils.deleteQuietly(new File(tmpLocalDir));
+    private String findModelPath(String customer, String uuid) {
+        List<String> paths = findAllModelPathsInSingularId(customer);
+        for (String path : paths) {
+            if (path.contains(uuid))
+                return path;
         }
-    }
-
-    private String findAvaiableEventData(String customer) {
-        String dataRoot = YarnPathUtils.constructSingularIdDataRoot(customerBase, customer);
-
-        if (!hdfsPathExists(dataRoot)) {
-            throw new IllegalStateException(String.format("The data path %s does not exist.", dataRoot));
-        }
-
-        try {
-            List<String> eventsWithData = HdfsUtils.getFilesForDir(yarnConfiguration, dataRoot);
-            if (eventsWithData != null && eventsWithData.size() >= 2) {
-                for (String event: eventsWithData) {
-                    if (!"EventMetadata".equals(event))
-                        return YarnPathUtils.parseEventTable(eventsWithData.get(0));
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000, "Cannot find the data folder for customer " + customer, e);
-        }
+        RuntimeException e = new RuntimeException("No model json with specific uuid can be found.");
+        throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
     }
 
     private List<String> findAllModelPathsInSingularId(String customer) {
@@ -246,16 +186,6 @@ public class YarnManager {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000, "Cannot find all model jsons for customer " + customer, e);
         }
-    }
-
-    private String findModelPath(String customer, String uuid) {
-        List<String> paths = findAllModelPathsInSingularId(customer);
-        for (String path : paths) {
-            if (path.contains(uuid))
-                return path;
-        }
-        RuntimeException e = new RuntimeException("No model json with specific uuid can be found.");
-        throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
     }
 
 }

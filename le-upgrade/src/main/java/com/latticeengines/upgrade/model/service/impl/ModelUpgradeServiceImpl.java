@@ -133,17 +133,7 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 //                + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
-    private void copyCustomerToTupleId(String customer) {
-        System.out.print(String.format("Deleting destination folder %s ... ", CustomerSpace.parse(customer).toString()));
-        yarnManager.deleteTupleIdCustomerRoot(customer);
-        System.out.println("OK");
-
-        System.out.print("Copying hdfs files to the destination folder ... ");
-        yarnManager.copyCustomerFromSingularToTupleId(customer);
-        System.out.println("OK");
-    }
-
-    private void copyCustomerModelsToTupleId(String customer, String modelGuid) {
+    private void copyCustomerModelToTupleId(String customer, String modelGuid) {
         System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer).toString()));
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
@@ -153,16 +143,6 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
 
         yarnManager.fixModelName(customer, modelGuid);
-    }
-
-    private void copyCustomerDataToTupleId(String customer) {
-        System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer).toString()));
-        yarnManager.createTupleIdCustomerRootIfNotExist(customer);
-        System.out.println("OK");
-
-        System.out.print("Copying data files to the destination folder ... ");
-        yarnManager.copyDataFromSingularToTupleId(customer);
-        System.out.println("OK");
     }
 
     private void listTenantModel() {
@@ -240,26 +220,18 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     public void execute(String command, Map<String, Object> parameters) {
         String customer = (String) parameters.get("customer");
         String model = (String) parameters.get("model");
-        Boolean listAll = (Boolean) parameters.get("listAll");
-
         Boolean all = (Boolean) parameters.get("all");
 
         switch (command) {
             case "list":
-                if (listAll) {
+                if (all) {
                     listTenantModelInHdfs();
                 } else {
                     listTenantModel();
                 }
                 break;
-            case "cp_customer":
-                copyCustomerToTupleId(customer);
-                break;
             case "cp_model":
-                copyCustomerModelsToTupleId(customer, model);
-                break;
-            case "cp_data":
-                copyCustomerDataToTupleId(customer);
+                copyCustomerModelToTupleId(customer, model);
                 break;
             default:
                 // handled by version specific upgrader
