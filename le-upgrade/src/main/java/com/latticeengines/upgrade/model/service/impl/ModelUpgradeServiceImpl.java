@@ -25,15 +25,6 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     @Autowired
     protected YarnManager yarnManager;
 
-    @Value("${upgrade.dao.tenant.model.info.jdbc}")
-    protected String tenantModelInfoJDBC;
-
-    @Value("${upgrade.dao.datasource.user}")
-    protected String user;
-
-    @Value("${upgrade.dao.datasource.password.encrypted}")
-    protected String pass;
-
     @Value("${dataplatform.customer.basedir}")
     protected String customerBase;
 
