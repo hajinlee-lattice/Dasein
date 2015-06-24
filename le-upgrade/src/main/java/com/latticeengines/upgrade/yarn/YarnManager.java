@@ -16,13 +16,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 @Component("yarnManager")
 public class YarnManager {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String MODEL_NAME = "PLSModel";
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -72,8 +79,7 @@ public class YarnManager {
     }
 
     public void fixModelName(String customer, String modelGuid) {
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
-        String srcModelJsonFullPath = findModelPath(CustomerSpace.parse(customer).toString(), uuid);
+        String srcModelJsonFullPath = findModelPathInTuple(customer, modelGuid);
         if (!srcModelJsonFullPath.endsWith("model.json")) {
             String newModelJsonFullPath = srcModelJsonFullPath.replace(".json", "_model.json");
             try {
@@ -85,9 +91,8 @@ public class YarnManager {
     }
 
     public boolean modelJsonExistsInSingularId(String customer, String modelGuid) {
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
         try {
-            String srcModelJsonFullPath = findModelPath(customer, uuid);
+            String srcModelJsonFullPath = findModelPathInSingular(customer, modelGuid);
             return srcModelJsonFullPath != null;
         } catch (Exception e) {
             return false;
@@ -95,13 +100,8 @@ public class YarnManager {
     }
 
     public boolean modelSummaryExistsInSingularId(String customer, String modelGuid) {
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
-        String srcModelJsonFullPath = findModelPath(customer, uuid);
-        String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
-        String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);
-        String destPath = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer)
-                + "/" + eventTable + "/" + uuid + "/" + containerId
-                + "/enhancements/modelsummary.json";
+        String modelFolder = findModelFolderPathInSingular(customer, modelGuid);
+        String destPath = modelFolder + "/enhancements/modelsummary.json";
         return hdfsPathExists(destPath);
     }
 
@@ -114,7 +114,33 @@ public class YarnManager {
         return uuids;
     }
 
-    public void generateModelSummary(String customer, String modelGuid) { }
+    public void uploadModelsummary(String customer, String modelGuid, JsonNode summary) {
+        String modelFolder = findModelFolderPathInTuple(customer, modelGuid);
+        String path = modelFolder + "/enhancements/modelsummary.json";
+        try {
+            HdfsUtils.writeToFile(yarnConfiguration, path, summary.toString());
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24000, "Failed to upload modelsummary.json", e);
+        }
+    }
+
+    public JsonNode generateModelSummary(String customer, String modelGuid) {
+        JsonNode json = readModelAsJson(customer, modelGuid);
+        Long constructionTime = getTimestampFromModelJson(json);
+        String srcModelJsonFullPath = findModelPathInSingular(customer, modelGuid);
+        String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
+        String lookupId = String.format("%s|%s|%s", customer, eventTable, YarnPathUtils.extractUuid(modelGuid));
+
+        ObjectNode detail = objectMapper.createObjectNode();
+        detail.put("Name", MODEL_NAME);
+        detail.put("ConstructionTime", constructionTime/1000L);
+        detail.put("LookupId", lookupId);
+
+        ObjectNode summary = objectMapper.createObjectNode();
+        summary.set("ModelDetail", detail);
+
+        return summary;
+    }
 
     private boolean hdfsPathExists(String path) {
         try {
@@ -137,7 +163,49 @@ public class YarnManager {
         }
     }
 
-    private String findModelPath(String customer, String uuid) {
+    private Long getTimestampFromModelJson(JsonNode json) {
+        JsonNode constructionJson = json.get("Summary").get("ConstructionInfo").get("ConstructionTime");
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            ModelingMetadata.DateTime dateTime = mapper.treeToValue(constructionJson, ModelingMetadata.DateTime.class);
+            return convertModelingTimestampToLong(dateTime);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24000, "Failed to parse construction time.", e);
+        }
+    }
+
+    private JsonNode readModelAsJson(String customer, String modelGuid) {
+        String uuid = YarnPathUtils.extractUuid(modelGuid);
+        String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
+        try {
+            String jsonContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, srcModelJsonFullPath);
+            return objectMapper.readTree(jsonContent);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24000,
+                    "Failed to read the content of model.json for model " + modelGuid, e);
+        }
+    }
+
+    private String findModelFolderPathInTuple(String customer, String modelGuid) {
+        String singularPath = findModelFolderPathInSingular(customer, modelGuid);
+        return YarnPathUtils.substituteByTupleId(singularPath);
+    }
+
+    private String findModelFolderPathInSingular(String customer, String modelGuid) {
+        String uuid = YarnPathUtils.extractUuid(modelGuid);
+        String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
+        String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
+        String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);
+        String modelsRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
+        return modelsRoot + "/" + eventTable + "/" + uuid + "/" + containerId;
+    }
+
+    private String findModelPathInTuple(String customer, String modelGuid) {
+        return findModelPathInSingular(CustomerSpace.parse(customer).toString(), modelGuid);
+    }
+
+    private String findModelPathInSingular(String customer, String modelGuid) {
+        String uuid = YarnPathUtils.extractUuid(modelGuid);
         List<String> paths = findAllModelPathsInSingularId(customer);
         for (String path : paths) {
             if (path.contains(uuid))
@@ -185,6 +253,16 @@ public class YarnManager {
             return paths;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000, "Cannot find all model jsons for customer " + customer, e);
+        }
+    }
+
+    private Long convertModelingTimestampToLong(ModelingMetadata.DateTime dateTime) {
+        Pattern pattern = Pattern.compile("[0-9]+");
+        Matcher matcher = pattern.matcher(dateTime.getDateTime());
+        if (matcher.find()) {
+            return Long.valueOf(matcher.group(0));
+        } else {
+            return 0L;
         }
     }
 
