@@ -62,6 +62,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
                 Boolean.TRUE, crmCredential);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
 
+        // beware that password might change for this sandbox user
         crmCredential = new CrmCredential();
         crmCredential.setUserName("tsanghavi@lattice-engines.com.sandbox2");
         crmCredential.setPassword("Happy2010");
