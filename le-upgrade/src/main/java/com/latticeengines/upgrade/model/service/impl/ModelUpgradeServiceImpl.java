@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.upgrade.UpgradeRunner;
+import com.latticeengines.upgrade.domain.BardInfo;
 import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
@@ -39,15 +40,15 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     public void upgrade() throws Exception {
     }
 
-    public void setBardDBInfos(List<Map<String, Object>> infosList) throws Exception {
-        for (Map<String, Object> infos : infosList) {
-            if (infos.get("Display_Name").equals("Bard DB")) {
-                bardDB = (String) infos.get("Name");
+    public void setInfos(List<BardInfo> infos) throws Exception {
+        for (BardInfo bardInfo : infos) {
+            if (bardInfo.getDisplayName().equals("Bard DB")) {
+                bardDB = bardInfo.getName();
                 System.out.println(bardDB);
-                instance = (String) infos.get("Instance");
+                instance = bardInfo.getInstance();
                 System.out.println("instance: " + instance);
-            } else if (infos.get("Display_Name").equals("VisiDBDL")) {
-                String settings = (String) infos.get("Settings");
+            } else if (bardInfo.getDisplayName().equals("VisiDBDL")) {
+                String settings = bardInfo.getSettings();
                 JsonNode parentNode = new ObjectMapper().readTree(settings);
                 for (JsonNode node : parentNode) {
                     if (node.get("Key").asText().equals("CustomerName")) {

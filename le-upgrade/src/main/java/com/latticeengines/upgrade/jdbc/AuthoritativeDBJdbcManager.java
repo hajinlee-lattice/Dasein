@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.upgrade.domain.BardInfo;
 
 @Component("authoritativeDBJdbcManager")
 public class AuthoritativeDBJdbcManager {
@@ -18,10 +21,10 @@ public class AuthoritativeDBJdbcManager {
                 + "deployment_type = 9 and isactive = 1 and Current_Version='" + version + "'", String.class);
     }
 
-    public List<Map<String, Object>> getBardDBInfos(String deploymentId) throws Exception {
-        List<Map<String, Object>> infosList = authoritativeDBJdbcTemlate
-                .queryForList("select Display_Name, Instance, Name, Settings from LEComponent where " //
-                        + "LEDeployment_ID = " + deploymentId);
+    public List<BardInfo> getBardDBInfos(String deploymentId) throws Exception {
+        List<BardInfo> infosList = authoritativeDBJdbcTemlate
+                .query("select Display_Name, Instance, Name, Settings from LEComponent where " //
+                        + "LEDeployment_ID = " + deploymentId, new BeanPropertyRowMapper<BardInfo>(BardInfo.class));
         return infosList;
     }
 

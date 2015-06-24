@@ -33,7 +33,7 @@ public class BardJdbcManager {
         if (instance.equals("SQL100")) {
             hostAddr = SQLServer100;
         }
-        //hostAdd = "10.41.1.250:1433";
+        hostAddr = "10.41.1.250:1433";
         return hostAddr;
     }
 
