@@ -52,6 +52,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private List<Predictor> predictors = new ArrayList<>();
     private Double rocScore;
     private String lookupId;
+    private Boolean detailsOnly = false;
     private Boolean downloaded = false;
     private Boolean uploaded = false;
     private Long trainingRowCount;
@@ -171,7 +172,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.rocScore = rocScore;
     }
 
-    //@JsonIgnore //TODO:song cannot ignore because of the POST API in ModelsummariesResource
+    //@JsonIgnore // cannot ignore because of the POST API in ModelsummariesResource
     @JsonProperty("LookupId")
     @Column(name = "LOOKUP_ID", nullable = false)
     public String getLookupId() {
@@ -204,6 +205,17 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("Uploaded")
     public void setUploaded(Boolean uploaded) {
         this.uploaded = uploaded;
+    }
+
+    @JsonProperty("DetailsOnly")
+    @Column(name = "DETAILS_ONLY", nullable = false)
+    public Boolean isDetailsOnly() {
+        return detailsOnly;
+    }
+
+    @JsonProperty("DetailsOnly")
+    public void setDetailsOnly(Boolean detailsOnly) {
+        this.detailsOnly = detailsOnly;
     }
 
     @JsonProperty("TrainingRowCount")
