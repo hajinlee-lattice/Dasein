@@ -106,7 +106,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     private String scoringModelPath;
 
     private String modelGuid;
-    
+
     private String containerId;
 
     private String scoringDataPath;
@@ -136,7 +136,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/scores";
     }
-   
+
     @Test(groups = "functional")
     public void modelScoreAndCompare() throws Exception {
         prepareDataForModeling();
@@ -145,7 +145,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         scoring();
         assertTrue(compareEvaluationResults());
     }
-    
+
     private boolean compareEvaluationResults() throws Exception {
         boolean resultsAreSame = false;
         // locate the scored.txt after modeling is done
@@ -156,12 +156,12 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         resultsAreSame = compareModelingAndScoringResults(modelingResults, scoringResults);
         return resultsAreSame;
     }
-    
+
     private Map<String, Double> getModelingResults() throws Exception {
-        
+
         String modelingResultsPath = modelingModelPath + modelGuid + "/" + containerId;
         System.out.println("modelingResultsPath is " + modelingResultsPath);
-        
+
         HdfsFilenameFilter filter = new HdfsFilenameFilter() {
             @Override
             public boolean accept(String path) {
@@ -172,13 +172,13 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         if (files.size() != 1) {
             throw new FileNotFoundException("modelingResult is not found.");
         }
-        
+
         Map<String, Double> modelingResults = new HashMap<String, Double>();
         String resultString = HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0));
         String[] rows = resultString.split("\n");
         for (String row : rows) {
             String[] columns = row.split(",");
-            assert(columns.length == 2);
+            assert (columns.length == 2);
             String leadId = columns[0];
             Double score = Double.valueOf(columns[1]);
             modelingResults.put(leadId, score);
@@ -186,8 +186,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         return modelingResults;
     }
 
-    private Map<String, Double> getScoringResults()
-    {
+    private Map<String, Double> getScoringResults() {
         List<GenericRecord> resultList = loadHDFSAvroFiles(new Configuration(), scorePath);
         Map<String, Double> scoringResults = new HashMap<String, Double>();
         for (GenericRecord result : resultList) {
@@ -197,7 +196,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         }
         return scoringResults;
     }
-    
+
     private ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
         ArrayList<GenericRecord> newlist = new ArrayList<GenericRecord>();
         List<String> files = null;
@@ -218,7 +217,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
             throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
         }
         for (String file : files) {
-            try { 
+            try {
                 List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
                 newlist.addAll(list);
             } catch (Exception e) {
@@ -228,8 +227,9 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         }
         return newlist;
     }
-    
-    private boolean compareModelingAndScoringResults(Map<String, Double> modelingResults, Map<String, Double> scoringResults) {
+
+    private boolean compareModelingAndScoringResults(Map<String, Double> modelingResults,
+            Map<String, Double> scoringResults) {
         if (modelingResults.size() != scoringResults.size()) {
             System.err.println("the size of the results is not the same");
             return false;
@@ -237,10 +237,11 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         for (String leadId : modelingResults.keySet()) {
             String leadIdWithoutZeros = leadId;
             Double modelingResult = modelingResults.get(leadId);
-            // get rid of the zeros after the digits since modeling makes leadId double
+            // get rid of the zeros after the digits since modeling makes leadId
+            // double
             if (leadId.contains(".")) {
                 leadIdWithoutZeros = leadId.substring(0, leadId.indexOf("."));
-                assertTrue(Double.parseDouble(leadIdWithoutZeros) - Double.parseDouble(leadId) < EPS, 
+                assertTrue(Double.parseDouble(leadIdWithoutZeros) - Double.parseDouble(leadId) < EPS,
                         "The leadIdWithoutZeros should be the same as leadId");
             }
             if (!scoringResults.containsKey(leadIdWithoutZeros)) {
@@ -249,14 +250,15 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
             } else {
                 Double scoringResult = scoringResults.get(leadIdWithoutZeros);
                 if (modelingResult.compareTo(scoringResult) != 0) {
-                    System.err.println("For " + leadIdWithoutZeros + ", " + scoringResult + " does not match with " + modelingResult);
+                    System.err.println("For " + leadIdWithoutZeros + ", " + scoringResult + " does not match with "
+                            + modelingResult);
                     return false;
                 }
             }
         }
         return true;
     }
-    
+
     // upload necessary files to the directory
     @SuppressWarnings("unchecked")
     private void prepareDataForModeling() throws Exception {
@@ -446,13 +448,13 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         log.info(step + ": appId succeeded: " + appId.toString());
     }
 
-     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
-     public void afterEachTest() {
-     try {
-     HdfsUtils.rmdir(yarnConfiguration, path);
-     } catch (Exception e) {
-     log.error(e.getMessage());
-     }
-     }
+//    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+//    public void afterEachTest() {
+//        try {
+//            HdfsUtils.rmdir(yarnConfiguration, path);
+//        } catch (Exception e) {
+//            log.error(e.getMessage());
+//        }
+//    }
 
 }
