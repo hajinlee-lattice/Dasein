@@ -3,11 +3,8 @@ package com.latticeengines.upgrade.model.service.impl;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,9 +18,6 @@ import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
 @Component("modelUpgrade")
 abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
-
-    @Autowired
-    protected DataSource dataSourceUpgrade;
 
     @Autowired
     protected TenantModelJdbcManager tenantModelJdbcManager;
@@ -78,10 +72,6 @@ abstract public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     protected void populateTenantModelInfo() {
         tenantModelJdbcManager.populateTenantModelInfo(dlTenantName, modelGuid);
-//        DataSource infoDataSource = new DriverManagerDataSource(tenantModelInfoJDBC, user, pass);
-//        upgradeJdbcTemlate.setDataSource(infoDataSource);
-//        upgradeJdbcTemlate.execute("IF NOT EXISTS (SELECT * FROM TenantModel_Info where TenantName = \'" + dlTenantName
-//                + "\') insert into TenantModel_Info values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
     private void copyCustomerModelsToTupleId(String customer, String modelGuid) {
