@@ -122,4 +122,31 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 0);
     }
+
+    @Test(groups = "functional")
+    public void downloadDetailsOnlyModelSummary() throws Exception {
+        Tenant tenant = new Tenant();
+        tenant.setId("TENANT1");
+        tenant.setName("TENANT1");
+        tenantEntityMgr.create(tenant);
+
+        String dir = modelingServiceHdfsBaseDir
+                + "/TENANT1/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
+        URL modelSummaryUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/modelsummary-detailsonly.json");
+
+        HdfsUtils.mkdir(yarnConfiguration, dir);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
+
+        modelSummaryDownloadService.executeInternal(null);
+
+        setupSecurityContext(tenant);
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+        assertEquals(summaries.size(), 1);
+
+        modelSummaryDownloadService.executeInternal(null);
+        summaries = modelSummaryEntityMgr.findAll();
+        // No new summaries should have been created
+        assertEquals(summaries.size(), 1);
+    }
 }
