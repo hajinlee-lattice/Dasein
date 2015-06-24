@@ -61,7 +61,7 @@ import com.latticeengines.scoring.service.impl.ScoringStepYarnProcessorImplTestN
 
 public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImplTestNG.class);
+    private static final double EPS = 1e-6;
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
@@ -237,9 +237,11 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         for (String leadId : modelingResults.keySet()) {
             String leadIdWithoutZeros = leadId;
             Double modelingResult = modelingResults.get(leadId);
-            // get rid of the zeros after the digits
+            // get rid of the zeros after the digits since modeling makes leadId double
             if (leadId.contains(".")) {
                 leadIdWithoutZeros = leadId.substring(0, leadId.indexOf("."));
+                assertTrue(Double.parseDouble(leadIdWithoutZeros) - Double.parseDouble(leadId) < EPS, 
+                        "The leadIdWithoutZeros should be the same as leadId");
             }
             if (!scoringResults.containsKey(leadIdWithoutZeros)) {
                 System.err.println(leadIdWithoutZeros + " is missing.");
@@ -247,7 +249,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
             } else {
                 Double scoringResult = scoringResults.get(leadIdWithoutZeros);
                 if (modelingResult.compareTo(scoringResult) != 0) {
-                    System.err.println(scoringResult + " does not match with " + modelingResult);
+                    System.err.println("For " + leadIdWithoutZeros + ", " + scoringResult + " does not match with " + modelingResult);
                     return false;
                 }
             }
