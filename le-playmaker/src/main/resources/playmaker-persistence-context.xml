@@ -23,7 +23,7 @@
     <tx:annotation-driven transaction-manager="transactionManager" />
 
     <!-- DAOs for Playmaker -->
-    <bean id="dataSourcePlaymaker"
+    <bean id="dataSourcePlaymaker" 
         class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${playmaker.datasource.driver}" />
         <property name="url" value="${playmaker.datasource.url}" />

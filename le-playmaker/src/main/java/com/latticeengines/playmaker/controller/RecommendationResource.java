@@ -4,6 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.web.SpringBootServletInitializer;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,8 +21,21 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "Playmaker recommendation api", description = "REST resource for getting playmaker recomendationss")
+@Configuration
+@EnableAutoConfiguration
 @RestController
-public class RecommendationResource {
+@ImportResource(value = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
+@RequestMapping(value = "/playmaker")
+public class RecommendationResource extends SpringBootServletInitializer {
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(RecommendationResource.class);
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(RecommendationResource.class, args);
+    }
 
     @Autowired
     private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;
@@ -36,7 +55,8 @@ public class RecommendationResource {
     @RequestMapping(value = "/recommendationcount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get recommendation count")
-    public Map<String, Object> getRecommendationCount(@RequestParam(value = "tenantName", required = false) String tenantName,
+    public Map<String, Object> getRecommendationCount(
+            @RequestParam(value = "tenantName", required = false) String tenantName,
             @RequestParam(value = "start", required = true) int start) {
 
         return playmakerRecommendationMgr.getRecommendationCount(tenantName, start);
@@ -77,7 +97,8 @@ public class RecommendationResource {
     @RequestMapping(value = "/accountextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account extension count")
-    public Map<String, Object> getAccountExtensionCount(@RequestParam(value = "tenantName", required = false) String tenantName,
+    public Map<String, Object> getAccountExtensionCount(
+            @RequestParam(value = "tenantName", required = false) String tenantName,
             @RequestParam(value = "start", required = true) int start) {
 
         return playmakerRecommendationMgr.getAccountextensionCount(tenantName, start);
