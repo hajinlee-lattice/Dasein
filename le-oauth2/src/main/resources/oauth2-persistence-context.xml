@@ -22,7 +22,7 @@
 
     <tx:annotation-driven transaction-manager="transactionManager" />
 
-    <bean id="dataSourceOauth2"
+    <bean id="dataSourceOauth2" primary="true"
         class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${oauth2.datasource.driver}" />
         <property name="url" value="${oauth2.datasource.url}" />
