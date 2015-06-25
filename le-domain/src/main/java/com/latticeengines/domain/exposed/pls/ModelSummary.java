@@ -52,7 +52,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private List<Predictor> predictors = new ArrayList<>();
     private Double rocScore;
     private String lookupId;
-    private Boolean detailsOnly = false;
+    private Boolean incomplete = false;
     private Boolean downloaded = false;
     private Boolean uploaded = false;
     private Long trainingRowCount;
@@ -207,15 +207,15 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.uploaded = uploaded;
     }
 
-    @JsonProperty("DetailsOnly")
-    @Column(name = "DETAILS_ONLY", nullable = false)
-    public Boolean isDetailsOnly() {
-        return detailsOnly;
+    @JsonProperty("Incomplete")
+    @Column(name = "INCOMPLETE", nullable = false)
+    public Boolean isIncomplete() {
+        return incomplete;
     }
 
-    @JsonProperty("DetailsOnly")
-    public void setDetailsOnly(Boolean detailsOnly) {
-        this.detailsOnly = detailsOnly;
+    @JsonProperty("Incomplete")
+    public void setIncomplete(Boolean incomplete) {
+        this.incomplete = incomplete;
     }
 
     @JsonProperty("TrainingRowCount")

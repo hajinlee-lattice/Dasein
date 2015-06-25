@@ -82,6 +82,11 @@ public class ModelSummaryParser {
         }
         summary.setId(String.format("ms__%s-%s", uuid, name));
 
+        if (!(json.has("Predictors") && json.has("Segmentations") &&
+                json.has("TopSample") && json.has("BottomSample"))) {
+            summary.setIncomplete(true);
+        }
+
         try {
             if (json.has("Tenant")) {
                 summary.setTenant(mapper.treeToValue(json.get("Tenant"), Tenant.class));
