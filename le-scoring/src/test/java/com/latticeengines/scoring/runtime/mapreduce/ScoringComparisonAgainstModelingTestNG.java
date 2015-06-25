@@ -141,11 +141,170 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     public void modelScoreAndCompare() throws Exception {
         prepareDataForModeling();
         modeling();
-        prepareDataAndModelForScoring();
+        prepareDataForScoring();
         scoring();
         assertTrue(compareEvaluationResults());
     }
 
+    // upload necessary files to the directory
+    @SuppressWarnings("unchecked")
+    private void prepareDataForModeling() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, path);
+        HdfsUtils.mkdir(yarnConfiguration, samplePath);
+        HdfsUtils.mkdir(yarnConfiguration, metadataPath);
+
+        String schemaPath = dataPath + "schema-mulesoft.avsc";
+        File schemaFile = new File("../le-dataplatform/src/test/python/data/schema-mulesoft.avsc");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, schemaFile.getAbsolutePath(), schemaPath);
+
+        String testDataPath = samplePath + "s100Test-mulesoft.avro";
+        File testDataFile = new File("../le-dataplatform/src/test/python/data/s100Test-mulesoft.avro");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, testDataFile.getAbsolutePath(), testDataPath);
+
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, testDataFile.getAbsolutePath(), dataPath);
+
+        String trainingDataPath = samplePath + "s100Training-mulesoft.avro";
+        File trainingDataFile = new File("../le-dataplatform/src/test/python/data/s100Training-mulesoft.avro");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, trainingDataFile.getAbsolutePath(), trainingDataPath);
+
+        String metadataMulesoftPath = metadataPath + "metadata-mulesoft.avsc";
+        File metadataMulesoftFile = new File("../le-dataplatform/src/test/python/data/metadata-mulesoft.avsc");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, metadataMulesoftFile.getAbsolutePath(), metadataMulesoftPath);
+
+        // make up the contents of diagnostics.json to let it pass the
+        // validation step
+        JSONObject summaryObj = new JSONObject();
+        JSONObject sampleSizeObj = new JSONObject();
+        sampleSizeObj.put("SampleSize", 20000);
+        summaryObj.put("Summary", sampleSizeObj);
+        String diagnosticFilePath = metadataPath + "diagnostics.json";
+        HdfsUtils.writeToFile(yarnConfiguration, diagnosticFilePath, summaryObj.toString());
+
+        String profileMulesoftScoringPath = metadataPath + "profile-mulesoft-scoring.avro";
+        File profileMulesoftScoringFile = new File(
+                "../le-dataplatform/src/test/python/data/profile-mulesoft-scoring.avro");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, profileMulesoftScoringFile.getAbsolutePath(),
+                profileMulesoftScoringPath);
+    }
+
+    private void modeling() throws Exception {
+        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
+        randomForestAlgorithm.setPriority(0);
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
+        randomForestAlgorithm.setSampleName("s100");
+
+        ModelDefinition modelDef = new ModelDefinition();
+        modelDef.setName("Model1");
+        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
+
+        model = createModel(modelDef);
+        submitModel();
+    }
+
+    private void prepareDataForScoring() throws Exception {
+        modelGuid = getModelGuid();
+        containerId = getContainerId();
+        System.out.println("modelGuid is " + modelGuid);
+        String modelId = "ms__" + modelGuid + "-PLS_model";
+
+        File scoringLeadFile = addColumnsToTestDataFile(modelId);
+        scoringDataPath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data/1.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoringLeadFile.getAbsolutePath(), scoringDataPath);
+    }
+
+    private String getModelGuid() throws Exception {
+        List<String> dirList = HdfsUtils.getFilesForDir(yarnConfiguration, modelingModelPath);
+        assertTrue(dirList.size() == 1, "There should be only one model generated.");
+        String dir = dirList.get(0);
+        return dir.substring(dirList.get(0).lastIndexOf('/') + 1);
+    }
+    
+    private String getContainerId() throws Exception {
+        List<String> topDirs;
+        topDirs = HdfsUtils.getFilesForDir(yarnConfiguration, modelingModelPath + modelGuid);
+        String dir = topDirs.get(0);
+        return dir.substring(dir.lastIndexOf("/") + 1);
+    }
+
+    private File addColumnsToTestDataFile(String modelId) throws IllegalArgumentException, Exception {
+        String testDataPath = samplePath + "s100Test-mulesoft.avro";
+        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(testDataPath));
+
+        // schema.avsc is the schema combined the leadID and Model_GUID columns
+        URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/avro/schema.avsc");
+        Schema schema = new Schema.Parser().parse(new File(url.getFile()));
+        File outputFile = File.createTempFile("inputLeads", ".avro");
+        DatumWriter<GenericRecord> userDatumWriter = new SpecificDatumWriter<GenericRecord>();
+        DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<GenericRecord>(userDatumWriter);
+
+        for (int i = 0; i < records.size(); i++) {
+            GenericRecord result = records.get(i);
+            if (i == 0) {
+                dataFileWriter.create(schema, outputFile);
+            }
+            GenericRecord record = new GenericData.Record(schema);
+            int modelingId = (int) result.get("ModelingID");
+            record.put("LeadID", String.valueOf(modelingId));
+            record.put("Model_GUID", modelId);
+            for (int j = 0; j < result.getSchema().getFields().size(); j++) {
+                String key = result.getSchema().getFields().get(j).name();
+                record.put(key, result.get(key));
+            }
+            dataFileWriter.append(record);
+        }
+        dataFileWriter.close();
+        return outputFile;
+    }
+
+    private Model createModel(ModelDefinition modelDef) {
+        Model m = new Model();
+        m.setModelDefinition(modelDef);
+        m.setName("Model Submission1");
+        m.setTable("Q_PLS_ModelingMulesoft_Relaunch");
+        m.setMetadataTable("EventMetadata");
+        m.setTargetsList(Arrays.<String> asList(new String[] { "P1_Event" }));
+        m.setKeyCols(Arrays.<String> asList(new String[] { "ModelingID" }));
+        m.setCustomer(getCustomer());
+        m.setDataFormat("avro");
+
+        return m;
+    }
+
+    public String getCustomer() {
+        return tenant;
+    }
+
+    public void submitModel() throws Exception {
+        List<String> features = modelingService.getFeatures(model, false);
+        model.setFeaturesList(features);
+
+        List<ApplicationId> appIds = modelingService.submitModel(model);
+
+        for (ApplicationId appId : appIds) {
+            FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+            assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+            JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
+            String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
+            String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
+            assertNotNull(modelContents);
+        }
+    }
+
+    private void scoring() throws Exception {
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
+                0, 4352, new Timestamp(System.currentTimeMillis()));
+        scoringCommandEntityMgr.create(scoringCommand);
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
+        waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
+    }
+
+    private void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        log.info(step + ": appId succeeded: " + appId.toString());
+    }
+    
     private boolean compareEvaluationResults() throws Exception {
         boolean resultsAreSame = false;
         // locate the scored.txt after modeling is done
@@ -158,6 +317,11 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     }
 
     private Map<String, Double> getModelingResults() throws Exception {
+        
+//        /// for debug purpose only
+//        modelGuid = "afdb76d3-cfbb-4a86-8920-d81a60d5a708";
+//        containerId = "1434414458763_0077";
+//        ///
 
         String modelingResultsPath = modelingModelPath + modelGuid + "/" + containerId;
         System.out.println("modelingResultsPath is " + modelingResultsPath);
@@ -237,6 +401,8 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         for (String leadId : modelingResults.keySet()) {
             String leadIdWithoutZeros = leadId;
             Double modelingResult = modelingResults.get(leadId);
+            System.out.println("For modeling, the leadId is " + leadId +
+                    ", and the modelingResult is " + modelingResult);
             // get rid of the zeros after the digits since modeling makes leadId
             // double
             if (leadId.contains(".")) {
@@ -245,208 +411,22 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
                         "The leadIdWithoutZeros should be the same as leadId");
             }
             if (!scoringResults.containsKey(leadIdWithoutZeros)) {
-                System.err.println(leadIdWithoutZeros + " is missing.");
+                System.err.println("In scoringResults, the leadId:" + leadIdWithoutZeros + " is missing.");
                 return false;
             } else {
                 Double scoringResult = scoringResults.get(leadIdWithoutZeros);
                 if (modelingResult.compareTo(scoringResult) != 0) {
-                    System.err.println("For " + leadIdWithoutZeros + ", " + scoringResult + " does not match with "
-                            + modelingResult);
+                    System.err.println("For " + leadIdWithoutZeros + ", the scoringResult:" + scoringResult + " does not match with that of "
+                            + modelingResult + " in modeling");
                     return false;
                 }
+                System.out.println("For scoring, the leadId is " + leadId +
+                        ", and the scoringResult is " + modelingResult);
             }
         }
         return true;
     }
 
-    // upload necessary files to the directory
-    @SuppressWarnings("unchecked")
-    private void prepareDataForModeling() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, path);
-        HdfsUtils.mkdir(yarnConfiguration, samplePath);
-        HdfsUtils.mkdir(yarnConfiguration, metadataPath);
-
-        String schemaPath = dataPath + "schema-mulesoft.avsc";
-        File schemaFile = new File("../le-dataplatform/src/test/python/data/schema-mulesoft.avsc");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, schemaFile.getAbsolutePath(), schemaPath);
-
-        String testDataPath = samplePath + "s100Test-mulesoft.avro";
-        File testDataFile = new File("../le-dataplatform/src/test/python/data/s100Test-mulesoft.avro");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, testDataFile.getAbsolutePath(), testDataPath);
-
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, testDataFile.getAbsolutePath(), dataPath);
-
-        String trainingDataPath = samplePath + "s100Training-mulesoft.avro";
-        File trainingDataFile = new File("../le-dataplatform/src/test/python/data/s100Training-mulesoft.avro");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, trainingDataFile.getAbsolutePath(), trainingDataPath);
-
-        String metadataMulesoftPath = metadataPath + "metadata-mulesoft.avsc";
-        File metadataMulesoftFile = new File("../le-dataplatform/src/test/python/data/metadata-mulesoft.avsc");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, metadataMulesoftFile.getAbsolutePath(), metadataMulesoftPath);
-
-        // make up the contents of diagnostics.json to let it pass the
-        // validation step
-        JSONObject summaryObj = new JSONObject();
-        JSONObject sampleSizeObj = new JSONObject();
-        sampleSizeObj.put("SampleSize", 20000);
-        summaryObj.put("Summary", sampleSizeObj);
-        String diagnosticFilePath = metadataPath + "diagnostics.json";
-        HdfsUtils.writeToFile(yarnConfiguration, diagnosticFilePath, summaryObj.toString());
-
-        String profileMulesoftScoringPath = metadataPath + "profile-mulesoft-scoring.avro";
-        File profileMulesoftScoringFile = new File(
-                "../le-dataplatform/src/test/python/data/profile-mulesoft-scoring.avro");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, profileMulesoftScoringFile.getAbsolutePath(),
-                profileMulesoftScoringPath);
-    }
-
-    private void modeling() throws Exception {
-        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
-        randomForestAlgorithm.setPriority(0);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
-        randomForestAlgorithm.setSampleName("s100");
-
-        ModelDefinition modelDef = new ModelDefinition();
-        modelDef.setName("Model1");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
-
-        model = createModel(modelDef);
-        submitModel();
-    }
-
-    private void prepareDataAndModelForScoring() throws Exception {
-        prepareDataForScoring();
-        prepareModelForScoring();
-    }
-
-    private void prepareDataForScoring() throws Exception {
-        modelGuid = getModelGuid();
-        System.out.println("modelGuid is " + modelGuid);
-        String modelId = "ms__" + modelGuid + "-PLS_model";
-
-        File scoringLeadFile = addColumnsToTestDataFile(modelId);
-        scoringDataPath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data/1.avro";
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoringLeadFile.getAbsolutePath(), scoringDataPath);
-    }
-
-    private String getModelGuid() throws Exception {
-        List<String> dirList = HdfsUtils.getFilesForDir(yarnConfiguration, modelingModelPath);
-        assertTrue(dirList.size() == 1, "There should be only one model generated.");
-        String dir = dirList.get(0);
-        return dir.substring(dirList.get(0).lastIndexOf('/') + 1);
-    }
-
-    private File addColumnsToTestDataFile(String modelId) throws IllegalArgumentException, Exception {
-        String testDataPath = samplePath + "s100Test-mulesoft.avro";
-        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(testDataPath));
-
-        // schema.avsc is the schema combined the leadID and Model_GUID columns
-        URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/avro/schema.avsc");
-        Schema schema = new Schema.Parser().parse(new File(url.getFile()));
-        File outputFile = File.createTempFile("inputLeads", ".avro");
-        DatumWriter<GenericRecord> userDatumWriter = new SpecificDatumWriter<GenericRecord>();
-        DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<GenericRecord>(userDatumWriter);
-
-        for (int i = 0; i < records.size(); i++) {
-            GenericRecord result = records.get(i);
-            if (i == 0) {
-                dataFileWriter.create(schema, outputFile);
-            }
-            GenericRecord record = new GenericData.Record(schema);
-            int modelingId = (int) result.get("ModelingID");
-            record.put("LeadID", String.valueOf(modelingId));
-            record.put("Model_GUID", modelId);
-            for (int j = 0; j < result.getSchema().getFields().size(); j++) {
-                String key = result.getSchema().getFields().get(j).name();
-                record.put(key, result.get(key));
-            }
-            dataFileWriter.append(record);
-        }
-        dataFileWriter.close();
-        return outputFile;
-    }
-
-    private void prepareModelForScoring() throws Exception {
-        List<String> topDirs;
-        topDirs = HdfsUtils.getFilesForDir(yarnConfiguration, modelingModelPath);
-        String topDir = topDirs.get(0);
-        List<String> secondDirs = HdfsUtils.getFilesForDir(yarnConfiguration, topDir);
-        String dir = secondDirs.get(0);
-        containerId = dir.substring(dir.lastIndexOf("/") + 1);
-
-        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
-            @Override
-            public boolean accept(String path) {
-                return path.endsWith("_model.json");
-            }
-        };
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir, filter);
-        if (files.size() == 0) {
-            throw new FileNotFoundException("model.json is not found.");
-        }
-
-        FileSystem fs = FileSystem.get(yarnConfiguration);
-        File temp = File.createTempFile("model", ".json");
-        for (String file : files) {
-            System.out.println("file is " + file);
-            fs.copyToLocalFile(new Path(file), new Path(temp.getAbsolutePath()));
-        }
-
-        scoringModelPath = customerBaseDir + "/" + tenant + "/models/" + inputLeadsTable + "/" + modelGuid + "/"
-                + containerId;
-        HdfsUtils.mkdir(yarnConfiguration, scoringModelPath);
-        String filePath = scoringModelPath + "/model.json";
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, temp.getAbsolutePath(), filePath);
-    }
-
-    private Model createModel(ModelDefinition modelDef) {
-        Model m = new Model();
-        m.setModelDefinition(modelDef);
-        m.setName("Model Submission1");
-        m.setTable("Q_PLS_ModelingMulesoft_Relaunch");
-        m.setMetadataTable("EventMetadata");
-        m.setTargetsList(Arrays.<String> asList(new String[] { "P1_Event" }));
-        m.setKeyCols(Arrays.<String> asList(new String[] { "ModelingID" }));
-        m.setCustomer(getCustomer());
-        m.setDataFormat("avro");
-
-        return m;
-    }
-
-    public String getCustomer() {
-        return tenant;
-    }
-
-    public void submitModel() throws Exception {
-        List<String> features = modelingService.getFeatures(model, false);
-        model.setFeaturesList(features);
-
-        List<ApplicationId> appIds = modelingService.submitModel(model);
-
-        for (ApplicationId appId : appIds) {
-            FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-            assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
-            JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
-            String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
-            String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
-            assertNotNull(modelContents);
-        }
-    }
-
-    private void scoring() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
-                0, 4352, new Timestamp(System.currentTimeMillis()));
-        scoringCommandEntityMgr.create(scoringCommand);
-        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
-        waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
-    }
-
-    private void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        log.info(step + ": appId succeeded: " + appId.toString());
-    }
 
 //    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
 //    public void afterEachTest() {
