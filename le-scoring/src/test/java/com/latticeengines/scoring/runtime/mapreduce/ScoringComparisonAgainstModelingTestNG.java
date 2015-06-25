@@ -190,7 +190,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     private void modeling() throws Exception {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=0");
         randomForestAlgorithm.setSampleName("s100");
 
         ModelDefinition modelDef = new ModelDefinition();
@@ -427,14 +427,13 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         return true;
     }
 
-
-//    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
-//    public void afterEachTest() {
-//        try {
-//            HdfsUtils.rmdir(yarnConfiguration, path);
-//        } catch (Exception e) {
-//            log.error(e.getMessage());
-//        }
-//    }
+    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    public void afterEachTest() {
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, path);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
 
 }
