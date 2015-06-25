@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.DateTime;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.upgrade.functionalframework.UpgradeFunctionalTestNGBase;
 
@@ -85,6 +86,12 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertTrue(detail.has("Name"), "ModelDetail should have Name");
         Assert.assertTrue(detail.has("ConstructionTime"), "ModelDetail should have ConstructionTime");
         Assert.assertTrue(detail.has("LookupId"), "ModelDetail should have LookupId");
+
+        try {
+            new DateTime(detail.get("ConstructionTime").asLong());
+        } catch (Exception e) {
+            Assert.fail("Cannot parse ConstructionTime to a DateTime.", e);
+        }
     }
 
 }

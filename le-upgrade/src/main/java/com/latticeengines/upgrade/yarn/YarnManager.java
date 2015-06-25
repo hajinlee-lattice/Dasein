@@ -257,7 +257,7 @@ public class YarnManager {
     }
 
     private Long convertModelingTimestampToLong(ModelingMetadata.DateTime dateTime) {
-        Pattern pattern = Pattern.compile("[0-9]+");
+        Pattern pattern = Pattern.compile("\\d+");
         Matcher matcher = pattern.matcher(dateTime.getDateTime());
         if (matcher.find()) {
             return Long.valueOf(matcher.group(0));
