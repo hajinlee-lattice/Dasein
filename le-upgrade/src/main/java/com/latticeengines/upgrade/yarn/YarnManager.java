@@ -130,7 +130,8 @@ public class YarnManager {
         Long constructionTime = getTimestampFromModelJson(json);
         String srcModelJsonFullPath = findModelPathInSingular(customer, modelGuid);
         String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
-        String lookupId = String.format("%s|%s|%s", customer, eventTable, YarnPathUtils.extractUuid(modelGuid));
+        String tupleId = CustomerSpace.parse(customer).toString();
+        String lookupId = String.format("%s|%s|%s", tupleId, eventTable, YarnPathUtils.extractUuid(modelGuid));
 
         ObjectNode detail = objectMapper.createObjectNode();
         detail.put("Name", MODEL_NAME);
