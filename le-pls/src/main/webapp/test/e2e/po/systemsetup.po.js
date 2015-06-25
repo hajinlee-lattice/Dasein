@@ -35,11 +35,11 @@ var SystemSetup = function() {
     this.enterValidSfdcSandboxCredentials = function() {
         //element(by.css('.js-crm-sandbox-edit-button')).click();
         element(by.model('crmSandboxCredentials.UserName')).clear();
-        element(by.model('crmSandboxCredentials.UserName')).sendKeys("apeters-widgettech@lattice-engines.com");
+        element(by.model('crmSandboxCredentials.UserName')).sendKeys("tsanghavi@lattice-engines.com.sandbox2");
         element(by.model('crmSandboxCredentials.Password')).clear();
         element(by.model('crmSandboxCredentials.Password')).sendKeys("Happy2010");
         element(by.model('crmSandboxCredentials.SecurityToken')).clear();
-        element(by.model('crmSandboxCredentials.SecurityToken')).sendKeys("oIogZVEFGbL3n0qiAp6F66TC");
+        element(by.model('crmSandboxCredentials.SecurityToken')).sendKeys("5aGieJUACRPQ21CG3nUwn8iz");
         element(by.css('.js-crm-sandbox-save-button')).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
