@@ -30,6 +30,7 @@ public class YarnManager {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String MODEL_NAME = "PLSModel";
+    private static final String TEMPFOLDER = "tmp";
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -152,14 +153,14 @@ public class YarnManager {
     }
 
     private void copyHdfsToHdfs(String src, String dest) {
-        String tmpLocalDir = "tmp/" + UUID.randomUUID();
+        String tmpLocalDir = TEMPFOLDER + "/" + UUID.randomUUID();
         try {
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpLocalDir);
             HdfsUtils.copyLocalToHdfs(yarnConfiguration, tmpLocalDir, dest);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000, "Failed to copy file from one src to dest path.", e);
         } finally {
-            FileUtils.deleteQuietly(new File(tmpLocalDir));
+            FileUtils.deleteQuietly(new File(TEMPFOLDER));
         }
     }
 
