@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.service.UpgradeService;
+import com.latticeengines.upgrade.tenant.service.TenantUpgradeService;
 
 @Component("upgrader")
 public class UpgradeServiceImpl implements UpgradeService {
@@ -22,6 +23,9 @@ public class UpgradeServiceImpl implements UpgradeService {
     @Qualifier("model_140_Upgrade")
     private ModelUpgradeService modelUpgrader140;
 
+    @Autowired
+    private TenantUpgradeService tenantUpgrader;
+
     @Override
     public void switchToVersion(String version) {
         if ("1.3.4".equals(version)) {
@@ -34,11 +38,14 @@ public class UpgradeServiceImpl implements UpgradeService {
     }
 
     @Override
-    public void execute(String command, Map<String, Object> parameters) {
+    public boolean execute(String command, Map<String, Object> parameters) {
         System.out.println("Sending command to model upgrader ...");
-        this.modelUpgrader.execute(command, parameters);
+        boolean handled = this.modelUpgrader.execute(command, parameters);
+        if (handled) return true;
 
-        //System.out.println("sending command to tenant upgrader ...");
+        System.out.println("Sending command to tenant upgrader ...");
+        this.tenantUpgrader.execute(command, parameters);
+        return true;
     }
 
 }

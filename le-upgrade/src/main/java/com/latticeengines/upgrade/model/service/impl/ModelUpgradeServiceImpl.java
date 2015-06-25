@@ -207,7 +207,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     @Override
-    public void execute(String command, Map<String, Object> parameters) {
+    public boolean execute(String command, Map<String, Object> parameters) {
         String customer = (String) parameters.get("customer");
         String model = (String) parameters.get("model");
         Boolean all = (Boolean) parameters.get("all");
@@ -219,17 +219,17 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
             } else {
                 listTenantModel();
             }
-            break;
+            return true;
         case UpgradeRunner.CMD_MODEL_INFO:
             populateTenantModelInfo();
-            break;
+            return true;
         case UpgradeRunner.CMD_CP_MODELS:
             copyCustomerModelsToTupleId(customer, model);
-            break;
+            return true;
         default:
             // handled by version specific upgrader
-            break;
+            return false;
         }
 
-    };
+    }
 }

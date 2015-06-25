@@ -39,10 +39,14 @@ public class Model_140_UpgradeServiceImpl extends ModelUpgradeServiceImpl {
     }
 
     @Override
-    public void execute(String command, Map<String, Object> parameters) {
+    public boolean execute(String command, Map<String, Object> parameters) {
         System.out.println(VERSION + " upgrader is about to execute: " + command);
         this.setVersion(VERSION);
-        super.execute(command, parameters);
+        boolean handledByParentUpgrader = super.execute(command, parameters);
+        if (!handledByParentUpgrader) {
+            return true;
+        }
+        return false;
     }
 
 }

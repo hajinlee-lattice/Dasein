@@ -1,13 +1,11 @@
 package com.latticeengines.upgrade.model.service;
 
-import java.util.Map;
+import com.latticeengines.upgrade.service.CommandExecutor;
 
-public interface ModelUpgradeService {
+public interface ModelUpgradeService extends CommandExecutor {
 
     void upgrade() throws Exception;
 
     void setVersion(String version);
-
-    void execute(String command, Map<String, Object> parameters);
 
 }
