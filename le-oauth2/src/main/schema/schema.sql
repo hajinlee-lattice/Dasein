@@ -19,7 +19,8 @@ CREATE TABLE [dbo].[TENANT](
     [JDBC_DRIVER] [nvarchar](256) NOT NULL,
     [JDBC_URL] [nvarchar](256) NOT NULL,
     [JDBC_USERNAME] [nvarchar](256) NOT NULL,
-    [JDBC_PASSWORD] [nvarchar](256) NOT NULL
+    [JDBC_PASSWORD] [nvarchar](256) NOT NULL,
+    [enabled] [bit] NULL
 ) ON [PRIMARY]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [tenant_name_idx] ON [dbo].[TENANT] 
