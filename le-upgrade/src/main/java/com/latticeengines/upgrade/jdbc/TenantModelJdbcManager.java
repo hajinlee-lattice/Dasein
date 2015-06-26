@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
-@Component("jdbcManager")
+@Component("tenantModelJdbcManager")
 public class TenantModelJdbcManager {
 
     @Autowired
