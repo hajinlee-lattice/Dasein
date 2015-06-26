@@ -401,8 +401,6 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         for (String leadId : modelingResults.keySet()) {
             String leadIdWithoutZeros = leadId;
             Double modelingResult = modelingResults.get(leadId);
-            System.out.println("For modeling, the leadId is " + leadId +
-                    ", and the modelingResult is " + modelingResult);
             // get rid of the zeros after the digits since modeling makes leadId
             // double
             if (leadId.contains(".")) {
@@ -411,17 +409,15 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
                         "The leadIdWithoutZeros should be the same as leadId");
             }
             if (!scoringResults.containsKey(leadIdWithoutZeros)) {
-                System.err.println("In scoringResults, the leadId:" + leadIdWithoutZeros + " is missing.");
+                System.err.println("In scoringResults, the leadId: " + leadIdWithoutZeros + " is missing.");
                 return false;
             } else {
                 Double scoringResult = scoringResults.get(leadIdWithoutZeros);
                 if (modelingResult.compareTo(scoringResult) != 0) {
-                    System.err.println("For " + leadIdWithoutZeros + ", the scoringResult:" + scoringResult + " does not match with that of "
+                    System.err.println("For " + leadIdWithoutZeros + ", the scoringResult: " + scoringResult + " does not match with that of "
                             + modelingResult + " in modeling");
                     return false;
                 }
-                System.out.println("For scoring, the leadId is " + leadId +
-                        ", and the scoringResult is " + modelingResult);
             }
         }
         return true;
