@@ -6,6 +6,8 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
+import com.latticeengines.domain.exposed.admin.CRMTopology;
+
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-upgrade-context.xml" })
 public class UpgradeFunctionalTestNGBase  extends AbstractTestNGSpringContextTests {
@@ -18,8 +20,8 @@ public class UpgradeFunctionalTestNGBase  extends AbstractTestNGSpringContextTes
     protected static final String CONTAINER_ID = "1416355548818_20011";
 
     protected static final String DL_URL = "https://data-pls.lattice-engines.com/Dataloader_PLS";
+    protected static final CRMTopology TOPOLOGY = CRMTopology.MARKETO;
 
     @Value("${dataplatform.customer.basedir}")
     protected String customerBase;
-
 }
