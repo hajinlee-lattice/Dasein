@@ -68,7 +68,7 @@ public class ModelSummaryParser {
         summary.setTotalConversionCount(getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
         summary.setIncomplete(isIncomplete(json));
-        
+
         String uuid;
         try {
             Pattern uuidPattern = Pattern.compile("[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}");

@@ -137,6 +137,30 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
     }
 
+    /**
+     * This should happen after copy models from singular to tuple ID path
+     * Before the modelsummary.json get downloaded by PLS
+     */
+    private void upgradeModelSummayForCustomerModel(String customer, String modelGuid) {
+        System.out.print("Check if modelsummary already in tupleId path ...");
+        boolean exists = yarnManager.modelSummaryExistsInTupleId(customer, modelGuid);
+        System.out.println(exists ? "YES" : "NO");
+
+        if (!exists) {
+            System.out.print("Generating modelsummary based on model.json ...");
+            JsonNode jsonNode = yarnManager.generateModelSummary(customer, modelGuid);
+            System.out.println("OK");
+
+            System.out.print("Uploading modelsummary to tupleId path ...");
+            yarnManager.uploadModelsummary(customer, modelGuid, jsonNode);
+            System.out.println("OK");
+        }
+
+        System.out.print("Fixing lookupID in modelsummary ...");
+        yarnManager.fixModelsummaryLookupId(customer, modelGuid);
+        System.out.println("OK");
+    }
+
     private void listTenantModel() {
         System.out.print("Retrieving list of tenants to be upgraded ... ");
         List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
