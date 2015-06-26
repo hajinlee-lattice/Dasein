@@ -2,6 +2,8 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -46,8 +48,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     @Override
     protected InputStream getFileInputStream() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        InputStream is = fs.open(new Path(filePath));
-        return is;
+        return fs.open(new Path(filePath));
     }
 
     private String getFilePath() throws Exception {
@@ -57,9 +58,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         String tokens[] = lookupId.split("\\|");
 
         // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
-        StringBuilder pathBuilder = new StringBuilder(modelingServiceHdfsBaseDir).append(tokens[0]).append("/models/");
-        pathBuilder.append(tokens[1]).append("/").append(tokens[2]);
-
+        final String uuid = extractUuid(tokens[2]);
         HdfsUtils.HdfsFileFilter fileFilter = new HdfsUtils.HdfsFileFilter() {
             @Override
             public boolean accept(FileStatus file) {
@@ -68,15 +67,24 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
                 }
 
                 String name = file.getPath().getName().toString();
-                return name.matches(filter);
+                return name.contains(uuid) && name.matches(filter);
             }
         };
 
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, pathBuilder.toString(), fileFilter);
+        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, modelingServiceHdfsBaseDir, fileFilter);
         if (CollectionUtils.isEmpty(paths)) {
             throw new LedpException(LedpCode.LEDP_18023);
         }
         return paths.get(0);
+    }
+
+    private static String extractUuid(String modelGuid) {
+        Pattern pattern = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        Matcher matcher = pattern.matcher(modelGuid);
+        if (matcher.find()) {
+            return matcher.group(0);
+        }
+        throw new IllegalArgumentException("Cannot find uuid pattern in the model GUID " + modelGuid);
     }
 
     public static class DownloadRequestBuilder {
