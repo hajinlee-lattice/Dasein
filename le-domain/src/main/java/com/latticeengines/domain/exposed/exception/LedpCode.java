@@ -162,7 +162,8 @@ public enum LedpCode {
     // le-upgrade
     LEDP_24000("Yarn operation exception: {0}"),
     LEDP_24001("Jdbc operation exception: {0}"),
-    LEDP_24002("DL operation exception: {0}");
+    LEDP_24002("DL operation exception: {0}"),
+    LEDP_24003("PLS operation exception: {0}");
 
     private String message;
 
