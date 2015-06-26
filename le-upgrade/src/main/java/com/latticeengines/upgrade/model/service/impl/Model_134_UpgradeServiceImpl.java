@@ -20,7 +20,7 @@ public class Model_134_UpgradeServiceImpl extends ModelUpgradeServiceImpl {
         this.setVersion(VERSION);
         boolean handledByParentUpgrader = super.execute(command, parameters);
         if (!handledByParentUpgrader) {
-            return true;
+            return false;
         }
         return false;
     }

@@ -122,7 +122,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         tenantModelJdbcManager.populateInternalTenantModelInfo(dlTenantName, modelGuid);
     }
 
-    private void copyCustomerModelsToTupleId(String customer, String modelGuid) {
+    private void copyCustomerModelsToTupleId(String customer) {
         System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer)
                 .toString()));
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
@@ -132,9 +132,13 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         yarnManager.copyModelsFromSingularToTupleId(customer);
         System.out.println("OK");
 
-        System.out.print("Fix model.json filenames ... ");
-        yarnManager.fixModelName(customer, modelGuid);
-        System.out.println("OK");
+        System.out.println("Fix model.json filenames ... ");
+        List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
+        for (String uuid: uuids) {
+            System.out.print("    " + uuid + " ... ");
+            yarnManager.fixModelName(customer, uuid);
+            System.out.println("OK");
+        }
     }
 
     /**
@@ -235,11 +239,10 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     @Override
     public boolean execute(String command, Map<String, Object> parameters) {
         String customer = (String) parameters.get("customer");
-        String model = (String) parameters.get("model");
         Boolean all = (Boolean) parameters.get("all");
 
         switch (command) {
-        case "list":
+        case UpgradeRunner.CMD_LIST:
             if (all) {
                 listTenantModelInHdfs();
             } else {
@@ -250,7 +253,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
             populateTenantModelInfo();
             return true;
         case UpgradeRunner.CMD_CP_MODELS:
-            copyCustomerModelsToTupleId(customer, model);
+            copyCustomerModelsToTupleId(customer);
             return true;
         default:
             // handled by version specific upgrader

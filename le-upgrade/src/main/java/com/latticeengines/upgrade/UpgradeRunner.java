@@ -21,6 +21,7 @@ public class UpgradeRunner {
     public static final String CMD_MODEL_INFO = "modelinfo";
     public static final String CMD_LIST = "list";
     public static final String CMD_CP_MODELS = "cp_models";
+    public static final String CMD_REGISTER_ZK = "register_zk";
     public static final String CMD_UPGRADE = "upgrade";
 
     private static ArgumentParser parser;
@@ -48,11 +49,6 @@ public class UpgradeRunner {
                 .type(String.class)
                 .help("customer (tenantId).");
 
-        parser.addArgument("-m", "--modelguid")
-                .dest("model")
-                .type(String.class)
-                .help("model guid or uuid.");
-
         parser.addArgument("-a", "--all")
                 .dest("all")
                 .action(Arguments.storeConst())
@@ -66,6 +62,7 @@ public class UpgradeRunner {
                 CMD_MODEL_INFO,
                 CMD_LIST,
                 CMD_CP_MODELS,
+                CMD_REGISTER_ZK,
                 CMD_UPGRADE
         );
     }
@@ -77,16 +74,13 @@ public class UpgradeRunner {
                 "With the flag -a or --all it shows all models in hdfs";
         helper += "\n " + CMD_CP_MODELS + ":    copy ALL models of ONE customer to 3-id folder in hdfs. " +
                 "Also fix the filename of model.json.";
+        helper += "\n " + CMD_REGISTER_ZK + ":    register a tenant in ZK.";
         helper += "\n " + CMD_UPGRADE + ":    end to end upgrade a tenant";
         return helper;
     }
 
     private List<String> cmdsNeedCustomer() {
-        return Arrays.asList(CMD_CP_MODELS, "upgrade");
-    }
-
-    private List<String> cmdsNeedModel() {
-        return Arrays.asList(CMD_CP_MODELS);
+        return Arrays.asList(CMD_CP_MODELS, CMD_REGISTER_ZK, CMD_UPGRADE);
     }
 
     private void validateArguments(Namespace ns) {
@@ -99,11 +93,6 @@ public class UpgradeRunner {
         if (cmdsNeedCustomer().contains(command) &&
                 !ns.getBoolean("all") && ns.getString("customer") == null ) {
             throw new IllegalArgumentException("Missing customer (tenantId).");
-        }
-
-        if (cmdsNeedModel().contains(command) &&
-                !ns.getBoolean("all") && ns.getString("model") == null ) {
-            throw new IllegalArgumentException("Missing model guid.");
         }
     }
 

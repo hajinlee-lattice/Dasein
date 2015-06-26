@@ -9,6 +9,7 @@
         <component-name>upgrade</component-name>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <le.common.version>1.0.34-SNAPSHOT</le.common.version>
+        <le.remote.version>1.0.34-SNAPSHOT</le.remote.version>
         <le.camille.version>1.0.34-SNAPSHOT</le.camille.version>
         <le.dataplatform.version>1.0.34-SNAPSHOT</le.dataplatform.version>
     </properties>
@@ -88,6 +89,11 @@
                     <artifactId>logback-classic</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${le.remote.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

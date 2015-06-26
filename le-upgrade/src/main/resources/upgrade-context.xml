@@ -13,5 +13,6 @@
     <import resource="classpath:upgrade-properties-context.xml" />
     <import resource="classpath:upgrade-persistence-context.xml" />
     <import resource="classpath:dataplatform-yarn-config-context.xml" />
+    <import resource="classpath:remote-context.xml"/>
 
 </beans>

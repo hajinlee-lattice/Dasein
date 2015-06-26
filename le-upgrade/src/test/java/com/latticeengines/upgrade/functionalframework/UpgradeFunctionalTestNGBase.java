@@ -17,6 +17,8 @@ public class UpgradeFunctionalTestNGBase  extends AbstractTestNGSpringContextTes
     protected static final String EVENT_TABLE = "Q_PLS_Modeling_Nutanix_PLS132";
     protected static final String CONTAINER_ID = "1416355548818_20011";
 
+    protected static final String DL_URL = "https://data-pls.lattice-engines.com/Dataloader_PLS";
+
     @Value("${dataplatform.customer.basedir}")
     protected String customerBase;
 

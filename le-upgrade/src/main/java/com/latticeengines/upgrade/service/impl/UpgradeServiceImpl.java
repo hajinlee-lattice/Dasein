@@ -43,7 +43,7 @@ public class UpgradeServiceImpl implements UpgradeService {
         boolean handled = this.modelUpgrader.execute(command, parameters);
         if (handled) return true;
 
-        System.out.println("Sending command to tenant upgrader ...");
+        System.out.println("\n\nSending command to tenant upgrader ...");
         this.tenantUpgrader.execute(command, parameters);
         return true;
     }
