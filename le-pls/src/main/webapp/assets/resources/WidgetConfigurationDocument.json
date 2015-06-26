@@ -129,6 +129,7 @@
 									"NameProperty" : "DisplayName",
 									"StatusProperty" : "Status",
 									"CreatedDateProperty" : "CreatedDate",
+									"IncompleteProperty" : "Incomplete",
 									"Widgets" : []
 								}
 							]

@@ -39,6 +39,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     $scope.displayName = data[widgetConfig.NameProperty];
     $scope.isActive = data[widgetConfig.StatusProperty] === "Active";
     $scope.createdDate = data[widgetConfig.CreatedDateProperty];
+    var incomplete = data[widgetConfig.IncompleteProperty];
     
     $scope.modelNameEditClick = function ($event) {
         if ($event != null) {
@@ -59,7 +60,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         var targetElement = $($event.target);
         if (targetElement.hasClass("fa-trash-o") || targetElement.hasClass("delete-model")) {
             DeleteModelModal.show($scope.data.Id);
-        } else if (!$scope.nameStatus.editing) {
+        } else if (!$scope.nameStatus.editing && !incomplete) {
             $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
         }
     };
