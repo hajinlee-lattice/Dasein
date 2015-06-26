@@ -21,7 +21,8 @@ public class ZooKeeperManager {
     private BatonService batonService;
 
     public void registerTenant(String tenantId) {
-        CustomerSpaceProperties properties = new CustomerSpaceProperties(tenantId, DESCRIPTION, null, null);
+        String name = CustomerSpace.parse(tenantId).getTenantId();
+        CustomerSpaceProperties properties = new CustomerSpaceProperties(name, DESCRIPTION, null, null);
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
         batonService.createTenant(tenantId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, spaceInfo);
     }
