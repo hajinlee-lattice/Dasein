@@ -32,10 +32,10 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, YarnPathUtils.constructSingularIdCustomerRoot(customerBase, CUSTOMER));
         String modelHdfsPath = YarnPathUtils.constructSingularIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE
                 + "/" + UUID + "/" + CONTAINER_ID + "/";
-        modelFileName = "PLSModel_2015-03-05_18-30.json";
-        HdfsUtils.writeToFile(yarnConfiguration, modelHdfsPath + modelFileName, constructModelContent());
+        modelFileName = "PLSModel_2015-03-05_18-30";
+        HdfsUtils.writeToFile(yarnConfiguration, modelHdfsPath + modelFileName + ".json", constructModelContent());
     }
-    
+
     private String constructModelContent(){
         ObjectMapper objectMapper = new ObjectMapper();
         ModelingMetadata.DateTime dateTime = new ModelingMetadata.DateTime();
@@ -68,7 +68,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         yarnManager.fixModelName(CUSTOMER, MODEL_GUID);
         String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
                 + UUID + "/" + CONTAINER_ID;
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath + "/" + StringUtils.remove(modelFileName, ".json") + "_model.json"),
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath + "/" + modelFileName + "_model.json"),
                 String.format("model name %s for customer %s cannot be fixed at %s.", MODEL_GUID, CUSTOMER, modelPath));
     }
 
