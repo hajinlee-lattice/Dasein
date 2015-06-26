@@ -39,12 +39,12 @@ public class UpgradeServiceImpl implements UpgradeService {
 
     @Override
     public boolean execute(String command, Map<String, Object> parameters) {
-        System.out.println("Sending command to model upgrader ...");
-        boolean handled = this.modelUpgrader.execute(command, parameters);
-        if (handled) return true;
-
-        System.out.println("\n\nSending command to tenant upgrader ...");
+        System.out.println("Sending command to tenant upgrader ...");
         this.tenantUpgrader.execute(command, parameters);
+
+        System.out.println("\n\nSending command to model upgrader ...");
+        this.modelUpgrader.execute(command, parameters);
+
         return true;
     }
 
