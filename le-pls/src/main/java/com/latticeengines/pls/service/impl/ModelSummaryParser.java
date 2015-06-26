@@ -67,7 +67,8 @@ public class ModelSummaryParser {
         summary.setTestConversionCount(getOrDefault(details.get("TestingConversions"), Long.class, 0L));
         summary.setTotalConversionCount(getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
-
+        summary.setIncomplete(isIncomplete(json));
+        
         String uuid;
         try {
             Pattern uuidPattern = Pattern.compile("[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}");
@@ -81,11 +82,6 @@ public class ModelSummaryParser {
             uuid = UUID.randomUUID().toString();
         }
         summary.setId(String.format("ms__%s-%s", uuid, name));
-
-        if (!(json.has("Predictors") && json.has("Segmentations") &&
-                json.has("TopSample") && json.has("BottomSample"))) {
-            summary.setIncomplete(true);
-        }
 
         try {
             if (json.has("Tenant")) {
@@ -131,5 +127,14 @@ public class ModelSummaryParser {
         Matcher matcher = pattern.matcher(nameDatetime);
         matcher.find();
         return nameDatetime.substring(0, matcher.start() - 1);
+    }
+
+    public boolean isIncomplete(JsonNode summaryJson) {
+        return !(summaryJson.has("Segmentations") &&
+                summaryJson.has("Predictors") &&
+                summaryJson.has("ModelDetails") &&
+                summaryJson.has("TopSample") &&
+                summaryJson.has("BottomSample") &&
+                summaryJson.has("EventTableProvenance"));
     }
 }

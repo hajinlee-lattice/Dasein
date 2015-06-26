@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
@@ -32,7 +33,8 @@ public class ModelSummaryParserTestNG {
         assertEquals(summary.getTotalConversionCount().longValue(), 873L);
         assertEquals(summary.getRocScore(), 0.9341374179555253);
         assertEquals(summary.getId(), "ms__8195dcf1-0898-4ad3-b94d-0d0f806e979e-PLSModel-Eloqua");
-        
+        assertFalse(summary.isIncomplete(), "This model summary shouldn't be incomplete.");
+
         String decompressedDetails = new String(CompressionUtils.decompressByteArray(summary.getDetails().getData()));
         assertEquals(decompressedDetails, data);
     }
