@@ -16,6 +16,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import sun.misc.BASE64Decoder;
 
+@SuppressWarnings("restriction")
 public class ModelDecryptor {
 
     public static String decrypt(String encryptedContent) throws IOException, NoSuchAlgorithmException,

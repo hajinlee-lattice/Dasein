@@ -2,8 +2,6 @@ package com.latticeengines.upgrade.model.service.impl;
 
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import com.latticeengines.upgrade.domain.BardInfo;
 
@@ -32,7 +30,6 @@ public class Model_140_UpgradeServiceImpl extends ModelUpgradeServiceImpl {
                 System.out.println("_______________________________________");
                 continue;
             }
-            String modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
 
             //uploadModelToHdfs(activeModelKey);
             populateTenantModelInfo();
