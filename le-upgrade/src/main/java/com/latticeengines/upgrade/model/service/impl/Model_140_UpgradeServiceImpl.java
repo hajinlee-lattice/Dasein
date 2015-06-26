@@ -14,6 +14,8 @@ public class Model_140_UpgradeServiceImpl extends ModelUpgradeServiceImpl {
 
     @Override
     public void upgrade() throws Exception{
+        setVersion(VERSION);
+        populateTenantModelInfo();
         List<String> deploymentIds = authoritativeDBJdbcManager.getDeploymentIDs(VERSION);
         System.out.println(deploymentIds);
         int i = 0;

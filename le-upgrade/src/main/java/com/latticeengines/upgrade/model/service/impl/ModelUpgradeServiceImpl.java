@@ -106,18 +106,20 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     private void populateTenantModelInfo(List<String> activeModelKeyList) {
+        String modelGuid = "";
         if (activeModelKeyList.size() == 1) {
-            String modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
+            modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
             tenantModelJdbcManager.populateExternalTenantModelInfo(dlTenantName, modelGuid);
         } else if (activeModelKeyList.size() == 0) {
-            tenantModelJdbcManager.populateInternalTenantModelInfo(dlTenantName, "No Active Model been found!");
+            modelGuid = "No Active Model been found!";
         } else {
             List<String> keys = new ArrayList<>();
             for (String activeModelKey : activeModelKeyList) {
                 keys.add(StringUtils.remove(activeModelKey, "Model_"));
             }
-            tenantModelJdbcManager.populateInternalTenantModelInfo(dlTenantName, commaJoiner.join(keys));
+            modelGuid = commaJoiner.join(keys);
         }
+        tenantModelJdbcManager.populateInternalTenantModelInfo(dlTenantName, modelGuid);
     }
 
     private void copyCustomerModelsToTupleId(String customer, String modelGuid) {
