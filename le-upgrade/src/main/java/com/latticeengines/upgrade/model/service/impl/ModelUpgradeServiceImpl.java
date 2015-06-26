@@ -159,10 +159,6 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
             yarnManager.uploadModelsummary(customer, modelGuid, jsonNode);
             System.out.println("OK");
         }
-
-        System.out.print("Fixing lookupID in modelsummary ...");
-        yarnManager.fixModelsummaryLookupId(customer, modelGuid);
-        System.out.println("OK");
     }
 
     private void listTenantModel() {

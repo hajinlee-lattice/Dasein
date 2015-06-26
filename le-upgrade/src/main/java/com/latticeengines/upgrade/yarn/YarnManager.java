@@ -121,27 +121,6 @@ public class YarnManager {
         return uuids;
     }
 
-    public void fixModelsummaryLookupId(String customer, String modelGuid) {
-        String modelPath = findModelPathInTuple(customer, modelGuid);
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
-        String eventTable = YarnPathUtils.parseEventTable(modelPath);
-        String tupleId = CustomerSpace.parse(customer).toString();
-        String newLookupId = String.format("%s|%s|%s", tupleId, eventTable, uuid);
-
-        JsonNode summaryJson = readModelSummaryInTuplePathAsJson(customer, modelGuid);
-        JsonNode details = summaryJson.get("ModelDetails");
-        String oldLookupId = details.get("LookupID").asText();
-
-        String finalContent = summaryJson.toString().replace(oldLookupId, newLookupId);
-
-        try {
-            String path = findModelFolderPathInTuple(customer, modelGuid) + "/enhancements/modelsummary.json";
-            HdfsUtils.writeToFile(yarnConfiguration, path, finalContent);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000, "Failed to upload modelsummary.json", e);
-        }
-    }
-
     public void uploadModelsummary(String customer, String modelGuid, JsonNode summary) {
         String modelFolder = findModelFolderPathInTuple(customer, modelGuid);
         String path = modelFolder + "/enhancements/modelsummary.json";
@@ -211,18 +190,6 @@ public class YarnManager {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000,
                     "Failed to read the content of model.json for model " + modelGuid, e);
-        }
-    }
-
-    private JsonNode readModelSummaryInTuplePathAsJson(String customer, String modelGuid) {
-        String modelSummayFullPath = findModelFolderPathInTuple(customer, modelGuid)
-                + "/enhancements/modelsummary.json";
-        try {
-            String jsonContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelSummayFullPath);
-            return objectMapper.readTree(jsonContent);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000,
-                    "Failed to read the content of modelsummary.json for model " + modelGuid, e);
         }
     }
 
