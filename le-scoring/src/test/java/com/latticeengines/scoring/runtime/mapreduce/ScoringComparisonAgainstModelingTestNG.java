@@ -20,10 +20,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumWriter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -57,7 +54,6 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
-import com.latticeengines.scoring.service.impl.ScoringStepYarnProcessorImplTestNG;
 
 public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTestNGBase {
 
@@ -102,8 +98,6 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     private Model model = null;
 
     private String modelingModelPath;
-
-    private String scoringModelPath;
 
     private String modelGuid;
 
