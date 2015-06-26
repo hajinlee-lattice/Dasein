@@ -1,16 +1,19 @@
 package com.latticeengines.upgrade.yarn;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.util.DateTime;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.upgrade.functionalframework.UpgradeFunctionalTestNGBase;
 
 public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
@@ -21,43 +24,55 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @BeforeMethod(groups = "functional")
-    public void beforeEach() throws Exception {
+    private String modelFileName;
+
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
         yarnManager.deleteTupleIdCustomerRoot(CUSTOMER);
+        HdfsUtils.rmdir(yarnConfiguration, YarnPathUtils.constructSingularIdCustomerRoot(customerBase, CUSTOMER));
+        String modelHdfsPath = YarnPathUtils.constructSingularIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE
+                + "/" + UUID + "/" + CONTAINER_ID + "/";
+        modelFileName = "PLSModel_2015-03-05_18-30.json";
+        HdfsUtils.writeToFile(yarnConfiguration, modelHdfsPath + modelFileName, constructModelContent());
+    }
+    
+    private String constructModelContent(){
+        ObjectMapper objectMapper = new ObjectMapper();
+        ModelingMetadata.DateTime dateTime = new ModelingMetadata.DateTime();
+        dateTime.setDateTime("/Date(1435181458818)/");
+        ObjectNode constructionTime = objectMapper.createObjectNode();
+        constructionTime.putPOJO("ConstructionTime", dateTime.toString());
+        ObjectNode constructionInfo = objectMapper.createObjectNode();
+        constructionInfo.putPOJO("ConstructionInfo", constructionTime);
+        ObjectNode summary = objectMapper.createObjectNode();
+        summary.putPOJO("Summary", constructionInfo);
+        return summary.toString();
     }
 
-    @AfterMethod(groups = "functional")
-    public void afterEach() throws Exception {
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
         yarnManager.deleteTupleIdCustomerRoot(CUSTOMER);
-    }
-
-    @Test(groups = "functional")
-    public void testDeleteTupleIdPath() throws Exception {
-        String customerRoot = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, CUSTOMER);
-        Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, customerRoot));
     }
 
     @Test(groups = "functional")
     public void testCopyModel() throws Exception {
         yarnManager.copyModelsFromSingularToTupleId(CUSTOMER);
-        yarnManager.fixModelName(CUSTOMER, MODEL_GUID);
-        String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER)
-                + "/" + EVENT_TABLE + "/" + UUID + "/" + CONTAINER_ID;
+        String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
+                + UUID + "/" + CONTAINER_ID;
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath),
                 String.format("model %s for customer %s cannot be found at %s.", MODEL_GUID, CUSTOMER, modelPath));
     }
 
-    @Test(groups = "functional")
-    public void testCopyData() throws Exception {
-        yarnManager.copyModelsFromSingularToTupleId(CUSTOMER);
-
-        String dataPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER)
-                + "/" + EVENT_TABLE;
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, dataPath),
-                String.format("data for customer %s cannot be found at %s.", CUSTOMER, dataPath));
+    @Test(groups = "functional", dependsOnMethods = { "testCopyModel" })
+    public void testFixModelName() throws Exception {
+        yarnManager.fixModelName(CUSTOMER, MODEL_GUID);
+        String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
+                + UUID + "/" + CONTAINER_ID;
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath + "/" + StringUtils.remove(modelFileName, ".json") + "_model.json"),
+                String.format("model name %s for customer %s cannot be fixed at %s.", MODEL_GUID, CUSTOMER, modelPath));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = { "testFixModelName" })
     public void testGenerateModelSummary() {
         JsonNode summary = yarnManager.generateModelSummary(CUSTOMER, MODEL_GUID);
         Assert.assertTrue(summary.has("ModelDetail"), "modelsummary.json should have ModelDetail");
@@ -68,13 +83,13 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertTrue(detail.has("LookupId"), "ModelDetail should have LookupId");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = { "testGenerateModelSummary" })
     public void testUploadModelSummary() throws Exception {
         JsonNode summary = yarnManager.generateModelSummary(CUSTOMER, MODEL_GUID);
         yarnManager.uploadModelsummary(CUSTOMER, MODEL_GUID, summary);
 
-        String summaryPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER)
-                + "/" + EVENT_TABLE + "/" + UUID + "/" + CONTAINER_ID + "/enhancements/modelsummary.json";
+        String summaryPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
+                + UUID + "/" + CONTAINER_ID + "/enhancements/modelsummary.json";
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, summaryPath), "Cannot find uploaded modelsummary.");
 
         ObjectMapper mapper = new ObjectMapper();
@@ -94,6 +109,10 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         }
     }
 
+    @Test(groups = "functional", dependsOnMethods = { "testUploadModelSummary" })
+    public void testDeleteTupleIdPath() throws Exception {
+        String customerRoot = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, CUSTOMER);
+        yarnManager.deleteTupleIdCustomerRoot(CUSTOMER);
+        Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, customerRoot));
+    }
 }
-
-

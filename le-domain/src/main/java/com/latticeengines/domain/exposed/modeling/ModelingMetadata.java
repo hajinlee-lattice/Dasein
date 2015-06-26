@@ -59,6 +59,10 @@ public class ModelingMetadata {
         public void setOffsetMinutes(int offsetMinutes) {
             this.offsetMinutes = offsetMinutes;
         }
+        
+        public String toString(){
+            return "{\"DateTime\":\"" + dateTime + "\",\"OffsetMinutes\":" + offsetMinutes+"}";
+        }
     }
 
 
