@@ -50,8 +50,7 @@ public class TenantModelJdbcManager {
                 + " values (\'" + dlTenantName + "\', \'" + modelGuid + "\')");
     }
 
-    public boolean modelIsActive(String dlTenantName, String modelGuid) {
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
+    public boolean modelIsActive(String dlTenantName, String uuid) {
         List<String> uuids = getActiveUuids(dlTenantName);
         return uuids.contains(uuid);
     }

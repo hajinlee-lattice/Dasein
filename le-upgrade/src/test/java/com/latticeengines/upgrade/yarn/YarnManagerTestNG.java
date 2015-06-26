@@ -1,6 +1,5 @@
 package com.latticeengines.upgrade.yarn;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -65,7 +64,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCopyModel" })
     public void testFixModelName() throws Exception {
-        yarnManager.fixModelName(CUSTOMER, MODEL_GUID);
+        yarnManager.fixModelName(CUSTOMER, UUID);
         String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
                 + UUID + "/" + CONTAINER_ID;
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath + "/" + modelFileName + "_model.json"),
@@ -74,7 +73,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testFixModelName" })
     public void testGenerateModelSummary() {
-        JsonNode summary = yarnManager.generateModelSummary(CUSTOMER, MODEL_GUID);
+        JsonNode summary = yarnManager.generateModelSummary(CUSTOMER, UUID);
         Assert.assertTrue(summary.has("ModelDetail"), "modelsummary.json should have ModelDetail");
 
         JsonNode detail = summary.get("ModelDetail");
@@ -85,8 +84,8 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testGenerateModelSummary" })
     public void testUploadModelSummary() throws Exception {
-        JsonNode summary = yarnManager.generateModelSummary(CUSTOMER, MODEL_GUID);
-        yarnManager.uploadModelsummary(CUSTOMER, MODEL_GUID, summary);
+        JsonNode summary = yarnManager.generateModelSummary(CUSTOMER, UUID);
+        yarnManager.uploadModelsummary(CUSTOMER, UUID, summary);
 
         String summaryPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
                 + UUID + "/" + CONTAINER_ID + "/enhancements/modelsummary.json";

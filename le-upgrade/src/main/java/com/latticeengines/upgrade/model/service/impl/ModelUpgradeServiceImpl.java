@@ -141,22 +141,29 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
     }
 
+    private void upgradeModelSummaryForCustomerModels(String customer){
+        List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
+        for(String uuid : uuids){
+            upgradeModelSummayForCustomerModel(customer, uuid);
+        }
+    }
+
     /**
      * This should happen after copy models from singular to tuple ID path
      * Before the modelsummary.json get downloaded by PLS
      */
-    private void upgradeModelSummayForCustomerModel(String customer, String modelGuid) {
+    private void upgradeModelSummayForCustomerModel(String customer, String uuid) {
         System.out.print("Check if modelsummary already in tupleId path ...");
-        boolean exists = yarnManager.modelSummaryExistsInTupleId(customer, modelGuid);
+        boolean exists = yarnManager.modelSummaryExistsInTupleId(customer, uuid);
         System.out.println(exists ? "YES" : "NO");
 
         if (!exists) {
             System.out.print("Generating modelsummary based on model.json ...");
-            JsonNode jsonNode = yarnManager.generateModelSummary(customer, modelGuid);
+            JsonNode jsonNode = yarnManager.generateModelSummary(customer, uuid);
             System.out.println("OK");
 
             System.out.print("Uploading modelsummary to tupleId path ...");
-            yarnManager.uploadModelsummary(customer, modelGuid, jsonNode);
+            yarnManager.uploadModelsummary(customer, uuid, jsonNode);
             System.out.println("OK");
         }
     }
@@ -185,7 +192,8 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         List<String> modelGuids = tenantModelJdbcManager.getActiveModels(customer);
 
         for (String modelGuid : modelGuids) {
-            printPreUpgradeStatusOfCustomerModel(customer, modelGuid);
+            String uuid = YarnPathUtils.extractUuid(modelGuid);
+            printPreUpgradeStatusOfCustomerModel(customer, uuid);
         }
 
         if (modelGuids.isEmpty()) {
@@ -197,8 +205,8 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
 
         for (String uuid : uuids) {
-            String modelGuid = YarnPathUtils.constructModelGuidFromUuid(uuid);
-            printPreUpgradeStatusOfCustomerModel(customer, modelGuid);
+            //String modelGuid = YarnPathUtils.constructModelGuidFromUuid(uuid);
+            printPreUpgradeStatusOfCustomerModel(customer, uuid);
         }
 
         if (uuids.isEmpty()) {
@@ -206,18 +214,17 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
     }
 
-    private void printPreUpgradeStatusOfCustomerModel(String customer, String modelGuid) {
-        System.out.println(String.format("\n(%s, %s): ", customer, modelGuid));
-
+    private void printPreUpgradeStatusOfCustomerModel(String customer, String uuid) {
+        System.out.println(String.format("\n(%s, %s): ", customer, uuid));
         System.out.print("    Model is active? .................... ");
-        if (tenantModelJdbcManager.modelIsActive(customer, modelGuid)) {
+        if (tenantModelJdbcManager.modelIsActive(customer, uuid)) {
             System.out.println("YES");
         } else {
             System.out.println("NO");
         }
 
         System.out.print("    Model json exists in singular Id? ... ");
-        if (yarnManager.modelJsonExistsInSingularId(customer, modelGuid)) {
+        if (yarnManager.modelJsonExistsInSingularId(customer, uuid)) {
             System.out.println("YES");
         } else {
             System.out.println("NO");
@@ -225,7 +232,8 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
 
         System.out.print("    Modelsummary already exists? ........ ");
-        if (yarnManager.modelSummaryExistsInSingularId(customer, modelGuid)) {
+        
+        if (yarnManager.modelSummaryExistsInSingularId(customer, uuid)) {
             System.out.println("YES");
         } else {
             System.out.println("NO");
@@ -250,6 +258,10 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
             return true;
         case UpgradeRunner.CMD_CP_MODELS:
             copyCustomerModelsToTupleId(customer);
+            return true;
+        case UpgradeRunner.CMD_UPGRADE:
+            copyCustomerModelsToTupleId(customer);
+            upgradeModelSummaryForCustomerModels(customer);
             return true;
         default:
             // handled by version specific upgrader

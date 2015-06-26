@@ -21,7 +21,7 @@ public class BardJdbcManagerTestNG extends UpgradeFunctionalTestNGBase{
     }
 
     @Test(groups = "functional")
-    public void testFourActiveModelKey() throws Exception {
+    public void testFourActiveModelKeys() throws Exception {
         bardJdbcManager.init("PayPalPLS_DB_BARD", "");
         List<String> activeModelKey = bardJdbcManager.getActiveModelKey();
         Assert.assertTrue(activeModelKey.size() == 4, "Didn't find exactly 4 active models.");

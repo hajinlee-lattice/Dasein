@@ -79,8 +79,8 @@ public class YarnManager {
         copyHdfsToHdfs(srcRoot, destRoot);
     }
 
-    public void fixModelName(String customer, String modelGuid) {
-        String srcModelJsonFullPath = findModelPathInTuple(customer, modelGuid);
+    public void fixModelName(String customer, String uuid) {
+        String srcModelJsonFullPath = findModelPathInTuple(customer, uuid);
         if (!srcModelJsonFullPath.endsWith("model.json")) {
             String newModelJsonFullPath = srcModelJsonFullPath.replace(".json", "_model.json");
             try {
@@ -91,23 +91,23 @@ public class YarnManager {
         }
     }
 
-    public boolean modelJsonExistsInSingularId(String customer, String modelGuid) {
+    public boolean modelJsonExistsInSingularId(String customer, String uuid) {
         try {
-            String srcModelJsonFullPath = findModelPathInSingular(customer, modelGuid);
+            String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
             return srcModelJsonFullPath != null;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public boolean modelSummaryExistsInSingularId(String customer, String modelGuid) {
-        String modelFolder = findModelFolderPathInSingular(customer, modelGuid);
+    public boolean modelSummaryExistsInSingularId(String customer, String uuid) {
+        String modelFolder = findModelFolderPathInSingular(customer, uuid);
         String destPath = modelFolder + "/enhancements/modelsummary.json";
         return hdfsPathExists(destPath);
     }
 
-    public boolean modelSummaryExistsInTupleId(String customer, String modelGuid) {
-        String modelFolder = findModelFolderPathInTuple(customer, modelGuid);
+    public boolean modelSummaryExistsInTupleId(String customer, String uuid) {
+        String modelFolder = findModelFolderPathInTuple(customer, uuid);
         String destPath = modelFolder + "/enhancements/modelsummary.json";
         return hdfsPathExists(destPath);
     }
@@ -121,8 +121,8 @@ public class YarnManager {
         return uuids;
     }
 
-    public void uploadModelsummary(String customer, String modelGuid, JsonNode summary) {
-        String modelFolder = findModelFolderPathInTuple(customer, modelGuid);
+    public void uploadModelsummary(String customer, String uuid, JsonNode summary) {
+        String modelFolder = findModelFolderPathInTuple(customer, uuid);
         String path = modelFolder + "/enhancements/modelsummary.json";
         try {
             HdfsUtils.writeToFile(yarnConfiguration, path, summary.toString());
@@ -131,12 +131,12 @@ public class YarnManager {
         }
     }
 
-    public JsonNode generateModelSummary(String customer, String modelGuid) {
-        JsonNode json = readModelAsJson(customer, modelGuid);
+    public JsonNode generateModelSummary(String customer, String uuid) {
+        JsonNode json = readModelAsJson(customer, uuid);
         Long constructionTime = getTimestampFromModelJson(json);
-        String srcModelJsonFullPath = findModelPathInSingular(customer, modelGuid);
+        String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
         String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
-        String lookupId = String.format("%s|%s|%s", customer, eventTable, YarnPathUtils.extractUuid(modelGuid));
+        String lookupId = String.format("%s|%s|%s", customer, eventTable, YarnPathUtils.extractUuid(uuid));
 
         ObjectNode detail = objectMapper.createObjectNode();
         detail.put("Name", MODEL_NAME);
@@ -181,25 +181,24 @@ public class YarnManager {
         }
     }
 
-    private JsonNode readModelAsJson(String customer, String modelGuid) {
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
+    private JsonNode readModelAsJson(String customer, String uuid) {
         String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
         try {
             String jsonContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, srcModelJsonFullPath);
             return objectMapper.readTree(jsonContent);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000,
-                    "Failed to read the content of model.json for model " + modelGuid, e);
+                    "Failed to read the content of model.json for model " + YarnPathUtils.constructModelGuidFromUuid(uuid), e);
         }
     }
 
-    private String findModelFolderPathInTuple(String customer, String modelGuid) {
-        String singularPath = findModelFolderPathInSingular(customer, modelGuid);
+    private String findModelFolderPathInTuple(String customer, String uuid) {
+        String singularPath = findModelFolderPathInSingular(customer, uuid);
         return YarnPathUtils.substituteByTupleId(singularPath);
     }
 
-    private String findModelFolderPathInSingular(String customer, String modelGuid) {
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
+    private String findModelFolderPathInSingular(String customer, String uuid) {
+        //String uuid = YarnPathUtils.extractUuid(modelGuid);
         String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
         String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
         String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);
@@ -207,12 +206,11 @@ public class YarnManager {
         return modelsRoot + "/" + eventTable + "/" + uuid + "/" + containerId;
     }
 
-    private String findModelPathInTuple(String customer, String modelGuid) {
-        return findModelPathInSingular(CustomerSpace.parse(customer).toString(), modelGuid);
+    private String findModelPathInTuple(String customer, String uuid) {
+        return findModelPathInSingular(CustomerSpace.parse(customer).toString(), uuid);
     }
 
-    private String findModelPathInSingular(String customer, String modelGuid) {
-        String uuid = YarnPathUtils.extractUuid(modelGuid);
+    private String findModelPathInSingular(String customer, String uuid) {
         List<String> paths = findAllModelPathsInSingularId(customer);
         for (String path : paths) {
             if (path.contains(uuid))
