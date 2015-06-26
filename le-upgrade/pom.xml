@@ -11,6 +11,7 @@
         <le.common.version>1.0.34-SNAPSHOT</le.common.version>
         <le.remote.version>1.0.34-SNAPSHOT</le.remote.version>
         <le.camille.version>1.0.34-SNAPSHOT</le.camille.version>
+        <le.baton.version>1.0.34-SNAPSHOT</le.baton.version>
         <le.dataplatform.version>1.0.34-SNAPSHOT</le.dataplatform.version>
     </properties>
 
@@ -160,6 +161,34 @@
                 <exclusion>
                     <groupId>org.python</groupId>
                     <artifactId>jython-standalone</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-baton</artifactId>
+            <version>${le.baton.version}</version>
+            <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
