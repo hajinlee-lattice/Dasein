@@ -19,6 +19,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -38,6 +39,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFileProviderServiceTestNG.class);
+    private static final String TENANT_ID = "TENANT1";
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -57,7 +59,6 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
-
     private String modelId;
 
     @BeforeClass(groups = { "functional" })
@@ -66,25 +67,23 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         setupUsers();
 
         Tenant tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
+        tenant1.setId(TENANT_ID);
+        tenant1.setName(TENANT_ID);
         tenantService.discardTenant(tenant1);
         tenantService.registerTenant(tenant1);
 
-        setupDbWithEloquaSMB("TENANT1", "TENANT1");
+        setupDbWithEloquaSMB(TENANT_ID, TENANT_ID);
 
-        Tenant tenant = tenantEntityMgr.findByTenantId("TENANT1");
+        Tenant tenant = tenantEntityMgr.findByTenantId(TENANT_ID);
         setupSecurityContext(tenant);
 
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
         ModelSummary summary = summaries.get(0);
-
-        String tokens[] = summary.getLookupId().split("\\|");
-        String dir = modelingServiceHdfsBaseDir + "/" + tokens[0] + "/models/" + tokens[1] + "/" + tokens[2] + "/container_01/";
+        modelId = summary.getId();
+        String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/ANY_TABLE/" + modelId + "/container_01/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
-        modelId = summary.getId();
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/diagnostics.json");
@@ -96,6 +95,12 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/rf_model.txt");
 
     }
+
+    @AfterClass(groups = { "functional" })
+    public void teardown() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);
+    }
+
 
     @Test(groups = { "functional" }, dataProvider = "dataFileProvider", enabled = true)
     public void downloadFile(final String mimeType, final String filter) {

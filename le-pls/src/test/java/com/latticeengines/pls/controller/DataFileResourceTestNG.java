@@ -37,6 +37,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFileResourceTestNG.class);
+    private static final String TENANT_ID = "TENANT1";
+    private static final String UUID = "8195dcf1-0898-4ad3-b94d-0d0f806e979e";
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
@@ -55,18 +57,17 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         setupUsers();
 
         Tenant tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
+        tenant1.setId(TENANT_ID);
+        tenant1.setName(TENANT_ID);
         tenantService.discardTenant(tenant1);
         tenantService.registerTenant(tenant1);
-        userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, "TENANT1",
-                SUPER_ADMIN_USERNAME);
+        userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, TENANT_ID, SUPER_ADMIN_USERNAME);
 
-        setupDbWithEloquaSMB("TENANT1", "TENANT1");
+        setupDbWithEloquaSMB(TENANT_ID, TENANT_ID);
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestingTenant.getId());
         String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1/models/Q_PLS_Modeling_TENANT1/8195dcf1-0898-4ad3-b94d-0d0f806e979e/1423547416066_0001/";
+                + "/" + TENANT_ID + "/models/Q_PLS_Modeling_TENANT1/" + UUID + "/1423547416066_0001/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
@@ -83,15 +84,16 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @AfterClass(groups = { "functional", "deployment" })
     public void teardown() throws Exception {
-        userService.resignAccessLevel("TENANT1", SUPER_ADMIN_USERNAME);
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
+        userService.resignAccessLevel(TENANT_ID, SUPER_ADMIN_USERNAME);
+        Tenant tenant1 = tenantService.findByTenantId(TENANT_ID);
         tenantService.discardTenant(tenant1);
+        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvider")
     public void dataFileResource(String fileType, final String mimeType) {
-        Tenant tenantToAttach = tenantService.findByTenantId("TENANT1");
+        Tenant tenantToAttach = tenantService.findByTenantId(TENANT_ID);
         UserDocument uDoc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
         useSessionDoc(uDoc);
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);

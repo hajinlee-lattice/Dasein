@@ -1,7 +1,10 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -51,36 +54,47 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     }
 
     private String getFilePath() throws Exception {
-
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        String lookupId = summary.getLookupId();
-        String tokens[] = lookupId.split("\\|");
+        String customer = summary.getTenant().getId();
+        final String uuid = extractUuid(modelId);
 
         // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
-        StringBuilder singularIdPathBuilder = new StringBuilder(modelingServiceHdfsBaseDir).append(tokens[0]).append("/models/");
-        singularIdPathBuilder.append(tokens[1]).append("/").append(tokens[2]);
-        String customer = CustomerSpace.parse(tokens[0]).toString();
-        StringBuilder tupleIdPathBuilder = new StringBuilder(modelingServiceHdfsBaseDir).append(customer).append("/models/");
-        tupleIdPathBuilder.append(tokens[1]).append("/").append(tokens[2]);
-
         HdfsUtils.HdfsFileFilter fileFilter = new HdfsUtils.HdfsFileFilter() {
             @Override
             public boolean accept(FileStatus file) {
                 if (file == null) {
                     return false;
                 }
-
-                String name = file.getPath().getName().toString();
-                return name.matches(filter);
+                String name = file.getPath().getName();
+                String path = file.getPath().toString();
+                return name.matches(filter) && path.contains(uuid);
             }
         };
 
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, tupleIdPathBuilder.toString(), fileFilter);
-        paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, singularIdPathBuilder.toString(), fileFilter));
+        String singularIdPath = modelingServiceHdfsBaseDir + customer + "/models/";
+        List<String> paths = new ArrayList<>();
+        if (HdfsUtils.fileExists(yarnConfiguration, singularIdPath)) {
+            paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, singularIdPath, fileFilter));
+        }
+
+        customer = CustomerSpace.parse(customer).toString();
+        String tupleIdPath = modelingServiceHdfsBaseDir + customer + "/models/";
+        if (HdfsUtils.fileExists(yarnConfiguration, tupleIdPath)) {
+            paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, tupleIdPath, fileFilter));
+        }
         if (CollectionUtils.isEmpty(paths)) {
             throw new LedpException(LedpCode.LEDP_18023);
         }
         return paths.get(0);
+    }
+
+    public static String extractUuid(String modelGuid) {
+        Pattern pattern = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        Matcher matcher = pattern.matcher(modelGuid);
+        if (matcher.find()) {
+            return matcher.group(0);
+        }
+        throw new IllegalArgumentException("Cannot find uuid pattern in the model GUID " + modelGuid);
     }
 
     public static class DownloadRequestBuilder {
