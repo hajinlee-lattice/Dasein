@@ -409,7 +409,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             executeUpdateDataProviderRequest(dlUrl, parameters);
 
             crmConfig.setDataProviderName("Eloqua_Bulk_DataProvider");
-            parameters = CrmUtils.dataProviderParameters("EloquaBulk", plsTenantId, crmConfig);
+            parameters = CrmUtils.dataProviderParameters(CrmUtils.CRM_ELOQUA_BULK, plsTenantId, crmConfig);
             executeUpdateDataProviderRequest(dlUrl, parameters);
             return;
         }

@@ -25,8 +25,8 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private CrmCredentialService crmService;
 
-    private final String contractId = "PLSTestContract";
-    private final String tenantId = "PLSCrmConfigTestTenant";
+    private final String contractId = "PLSCrmConfig";
+    private final String tenantId = "PLSCrmConfig";
     private final String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
     private final String fullId = String.format("%s.%s.%s", contractId, tenantId, spaceId);
 

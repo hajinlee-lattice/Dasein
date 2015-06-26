@@ -21,6 +21,7 @@ public class CrmUtils {
     public static final String CRM_SFDC = CRMTopology.SFDC.getName().toLowerCase();
     public static final String CRM_MARKETO = CRMTopology.MARKETO.getName().toLowerCase();
     public static final String CRM_ELOQUA = CRMTopology.ELOQUA.getName().toLowerCase();
+    public static final String CRM_ELOQUA_BULK = "EloquaBulk";
 
     private static final Map<String, String> loginUrls = new HashMap<>();
 
@@ -58,7 +59,7 @@ public class CrmUtils {
         parameters.put("tenantName", space.getTenantId());
         parameters.put("tryConnect", "false");
 
-        if (crmType.equals(CRM_ELOQUA)) {
+        if (crmType.equals(CRM_ELOQUA) || crmType.endsWith(CRM_ELOQUA_BULK)) {
             Map<String, String> values = new HashMap<>();
             values.put("URL", loginUrls.get(CRM_ELOQUA));
             values.put("Username", crmConfig.getCrmCredential().getUserName());
