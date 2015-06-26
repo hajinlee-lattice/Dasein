@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.upgrade.functionalframework.UpgradeFunctionalTestNGBase;
 
-public class JdbcManagerTestNG extends UpgradeFunctionalTestNGBase {
+public class TenantModelJdbcManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Autowired
     private TenantModelJdbcManager tenantModelJdbcManager;

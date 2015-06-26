@@ -29,12 +29,16 @@ public class BardJdbcManager {
     @Value("${upgrade.dao.datasource.password.encrypted}")
     protected String pass;
 
+    @Value("${upgrade.dao.bard.db.address.test}")
+    private String useTestAddress;
+
     private String getHostAddress(String instance) {
+        if(Boolean.valueOf(useTestAddress.toLowerCase()))
+            return "10.41.1.250:1433";
         String hostAddr = SQLServer200;
         if (instance.equals("SQL100")) {
             hostAddr = SQLServer100;
         }
-        hostAddr = "10.41.1.250:1433";
         return hostAddr;
     }
 
