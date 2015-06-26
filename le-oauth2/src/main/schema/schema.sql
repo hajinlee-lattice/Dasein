@@ -12,31 +12,15 @@ GO
 CREATE TABLE [dbo].[TENANT](
     [PID] [bigint] IDENTITY(1,1) NOT NULL,
     [TENANT_NAME] [nvarchar](256) NOT NULL,
-    [USER_NAME] [nvarchar](256) NULL,
-    [AUTH_CODE] [nvarchar](256) NULL,
-    [ACCESS_TOKEN] [nvarchar](256) NULL,
     [EXTERNAL_ID] [nvarchar](256) NULL,
     [JDBC_DRIVER] [nvarchar](256) NOT NULL,
     [JDBC_URL] [nvarchar](256) NOT NULL,
     [JDBC_USERNAME] [nvarchar](256) NOT NULL,
     [JDBC_PASSWORD] [nvarchar](256) NOT NULL,
-    [enabled] [bit] NULL
 ) ON [PRIMARY]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [tenant_name_idx] ON [dbo].[TENANT] 
 ([TENANT_NAME] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE UNIQUE NONCLUSTERED INDEX [username_idx] ON [dbo].[TENANT] 
-([USER_NAME] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE UNIQUE NONCLUSTERED INDEX [auth_code_idx] ON [dbo].[TENANT] 
-([AUTH_CODE] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE UNIQUE NONCLUSTERED INDEX [access_token_idx] ON [dbo].[TENANT] 
-([ACCESS_TOKEN] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 GO
 
@@ -67,7 +51,7 @@ CREATE TABLE [dbo].[oauth_access_token](
     [authentication] [varbinary](max) NULL,
     [refresh_token] [varchar](256) NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-CREATE NONCLUSTERED INDEX [token_id_idx] ON [dbo].[oauth_access_token] 
+CREATE UNIQUE NONCLUSTERED INDEX [token_id_idx] ON [dbo].[oauth_access_token] 
 ([token_id] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 GO
@@ -192,7 +176,7 @@ INSERT INTO [oauth2_dev].[dbo].[oauth_client_details]
            ,[additional_information]
            ,[autoapprove])
      VALUES
-           ('lattice-trusted-client', 'playmaker_api', 'secret', 'read', 'password,authorization_code,refresh_token', 'https://www.lattice-engines.com/?key=value',
+           ('lattice-trusted-client', 'playmaker_api', 'secret', 'read', 'authorization_code,refresh_token,client_credentials', NULL,
             'ROLE_CLIENT', NULL, NULL, NULL, 'false')
 GO
 INSERT INTO [oauth2_dev].[dbo].[users]
