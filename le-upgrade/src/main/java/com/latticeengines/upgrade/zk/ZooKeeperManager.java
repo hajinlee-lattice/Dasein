@@ -1,12 +1,9 @@
 package com.latticeengines.upgrade.zk;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -22,15 +19,6 @@ public class ZooKeeperManager {
     private static final String SPACE_CONFIG = "/SpaceConfiguration";
     @Autowired
     private BatonService batonService;
-
-    private String podId;
-    private Camille camille;
-
-    @PostConstruct
-    private void readCamilleEnvironment() {
-        podId = CamilleEnvironment.getPodId();
-        camille = CamilleEnvironment.getCamille();
-    }
 
     public void registerTenant(String tenantId) {
         CustomerSpaceProperties properties = new CustomerSpaceProperties(tenantId, DESCRIPTION, null, null);
