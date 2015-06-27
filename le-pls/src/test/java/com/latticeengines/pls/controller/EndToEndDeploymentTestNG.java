@@ -11,6 +11,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
@@ -104,14 +106,19 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         return new ModelingServiceExecutor(bldr);
     }
 
+    @Test(groups = "deployment", enabled = true)
+    public void cleanupHdfs(String tenant, String modelName) throws Exception {
+        LOGGER.info(String.format("Cleanup HDFS folder for tenant %s", modelName, tenant));
+        FileSystem fs = FileSystem.get(yarnConfiguration);
+        fs.delete(new Path(String.format("%s/%s", modelingServiceHdfsBaseDir, tenant)), true);
+    }
     
-    @Test(groups = "deployment", enabled = true, dataProvider = "modelMetadataProvider")
+    @Test(groups = "deployment", enabled = true, dataProvider = "modelMetadataProvider", dependsOnMethods = { "cleanupHdfs" })
     public void runPipeline(String tenant, String modelName, String metadataSuffix, String tableName) throws Exception {
         LOGGER.info(String.format(
                 "Running pipeline for model %s in tenant %s using table %s",
                 modelName, tenant, tableName));
         ModelingServiceExecutor executor = buildModel(tenant, modelName, metadataSuffix, tableName);
-        executor.init();
         executor.runPipeline();
     }
     
