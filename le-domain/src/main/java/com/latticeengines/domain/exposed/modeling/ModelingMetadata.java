@@ -6,18 +6,18 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ModelingMetadata {
-    
+
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
-    
+
     public static class KV {
         private String key;
         private String value;
-        
+
         @JsonProperty("Key")
         public String getKey() {
             return key;
         }
-        
+
         @JsonProperty("Key")
         public void setKey(String key) {
             this.key = key;
@@ -35,16 +35,16 @@ public class ModelingMetadata {
         
         
     }
-    
+
     public static class DateTime {
         private String dateTime;
         private int offsetMinutes;
-        
+
         @JsonProperty("DateTime")
         public String getDateTime() {
             return dateTime;
         }
-        
+
         @JsonProperty("DateTime")
         public void setDateTime(String dateTime) {
             this.dateTime = dateTime;
@@ -59,7 +59,7 @@ public class ModelingMetadata {
         public void setOffsetMinutes(int offsetMinutes) {
             this.offsetMinutes = offsetMinutes;
         }
-        
+
         public String toString(){
             return "{\"DateTime\":\"" + dateTime + "\",\"OffsetMinutes\":" + offsetMinutes+"}";
         }
@@ -81,12 +81,12 @@ public class ModelingMetadata {
         private String statisticalType;
         private List<String> tags;
         private String dataQuality;
-        
+
         @JsonProperty("ApprovedUsage")
         public List<String> getApprovedUsage() {
             return approvedUsage;
         }
-        
+
         @JsonProperty("ApprovedUsage")
         public void setApprovedUsage(List<String> approvedUsage) {
             this.approvedUsage = approvedUsage;
