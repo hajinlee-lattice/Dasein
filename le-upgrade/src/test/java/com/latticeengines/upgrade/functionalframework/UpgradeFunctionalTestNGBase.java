@@ -1,12 +1,22 @@
 package com.latticeengines.upgrade.functionalframework;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.security.exposed.Constants;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-upgrade-context.xml" })
@@ -22,6 +32,38 @@ public class UpgradeFunctionalTestNGBase  extends AbstractTestNGSpringContextTes
     protected static final String DL_URL = "https://data-pls.lattice-engines.com/Dataloader_PLS";
     protected static final CRMTopology TOPOLOGY = CRMTopology.MARKETO;
 
+    protected static RestTemplate magicRestTemplate = new RestTemplate();
+    protected static MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader
+            = new MagicAuthenticationHeaderHttpRequestInterceptor("");
+
     @Value("${dataplatform.customer.basedir}")
     protected String customerBase;
+
+    static {
+        // setup magic rest template
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+    }
+
+    private static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+
+        private String headerValue;
+
+        public MagicAuthenticationHeaderHttpRequestInterceptor(String headerValue) {
+            this.headerValue = headerValue;
+        }
+
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+                throws IOException {
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
+            requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
+
+            return execution.execute(requestWrapper, body);
+        }
+
+        public void setAuthValue(String headerValue) {
+            this.headerValue = headerValue;
+        }
+    }
 }
