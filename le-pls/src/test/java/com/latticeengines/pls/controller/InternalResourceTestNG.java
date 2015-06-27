@@ -3,11 +3,8 @@ package com.latticeengines.pls.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.util.URIUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -20,7 +17,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -33,27 +29,20 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.TenantService;
-import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
-import com.latticeengines.security.exposed.service.UserService;
 
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -87,7 +76,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test(groups = "functional")
-    public void update() {
+    public void updateModelSummary() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
@@ -117,7 +106,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test(groups = "functional")
-    public void updateNotExists() {
+    public void updateupdateModelSummaryNotExists() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
@@ -141,88 +130,6 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         Status status = restTemplate.getForObject(url, Status.class);
         Assert.assertNotNull(status);
     }
-
-    @SuppressWarnings("rawtypes")
-    @Test(groups = "functional")
-    public void deleteTestingUsers() throws URIException {
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
-
-        for (int i = 0; i < 3; i++) {
-            String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
-            makeSureUserDoesNotExist(username);
-            createUser(username, username, "Test", "Tester");
-            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
-        }
-
-        String pattern = URIUtil.encodeQuery("tester_[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}@test.com");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        HttpEntity<JsonNode> requestEntity = new HttpEntity<>(null, headers);
-        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
-                getRestAPIHostPort() + "/pls/internal/users?tenants=[\"" + tenant.getId() + "\"]&namepattern=" + pattern,
-                HttpMethod.DELETE,
-                requestEntity,
-                ResponseDocument.class
-        );
-        ResponseDocument response = responseEntity.getBody();
-        Assert.assertTrue(response.isSuccess());
-
-        boolean cleaned = true;
-        for (User user: userService.getUsers(tenant.getId())) {
-            if (user.getUsername().matches(pattern)) {
-                cleaned = false;
-            }
-            makeSureUserDoesNotExist(user.getUsername());
-        }
-
-        Assert.assertTrue(cleaned);
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Test(groups = "functional")
-    public void updateUserAccessLevels() throws URIException {
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
-
-        for (int i = 0; i < 3; i++) {
-            String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
-            makeSureUserDoesNotExist(username);
-            createUser(username, username, "Test", "Tester");
-            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
-        }
-
-        String pattern = URIUtil.encodeQuery("tester_[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}@test.com");
-
-        UserUpdateData data = new UserUpdateData();
-        data.setAccessLevel(AccessLevel.INTERNAL_ADMIN.name());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
-
-        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
-                getRestAPIHostPort() + "/pls/internal/users?tenants=[\"" + tenant.getId() + "\"]&namepattern=" + pattern,
-                HttpMethod.PUT,
-                requestEntity,
-                ResponseDocument.class
-        );
-        ResponseDocument response = responseEntity.getBody();
-        Assert.assertTrue(response.isSuccess());
-
-        boolean allUpdated = true;
-        for (User user: userService.getUsers(tenant.getId())) {
-            if (user.getUsername().matches(pattern)) {
-                allUpdated = allUpdated && user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name());
-            }
-            makeSureUserDoesNotExist(user.getUsername());
-        }
-        Assert.assertTrue(allUpdated);
-    }
-
 
     @SuppressWarnings("rawtypes")
     @Test(groups = "functional")

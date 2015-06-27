@@ -3,14 +3,11 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,7 +33,6 @@ import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -46,7 +41,6 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
-import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
@@ -125,134 +119,6 @@ public class InternalResource extends InternalResourceBase {
         }
         return response;
     }
-
-    @RequestMapping(value = "/users",
-        method = RequestMethod.DELETE, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Delete users. Mainly for cleaning up testing users.")
-    public SimpleBooleanResponse deleteUsers(
-        @RequestParam(value = "namepattern") String namePattern,
-        @RequestParam(value = "tenants") String tenantIds,
-        HttpServletRequest request
-    ) throws URIException {
-        checkHeader(request);
-        String decodedNamePattern = URIUtil.decode(namePattern);
-
-        List<String> tenants = new ArrayList<>();
-
-        JsonNode tenantNodes;
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            tenantNodes = mapper.readTree(tenantIds);
-        } catch (IOException e) {
-            return SimpleBooleanResponse.getFailResponse(
-                    Collections.singletonList("Could not parse the tenant id array.")
-            );
-        }
-        for (JsonNode node : tenantNodes) {
-            tenants.add(node.asText());
-        }
-
-        for (String tid: tenants) {
-            LOGGER.info(String.format(
-                    "Deleting users matching %s from the tenant %s using the internal API",
-                    decodedNamePattern, tid
-            ));
-            for (User user : userService.getUsers(tid)) {
-                if (user.getUsername().matches(decodedNamePattern)) {
-                    userService.deleteUser(tid, user.getUsername());
-                    LOGGER.info(String.format(
-                            "User %s has been deleted from the tenant %s through the internal API",
-                            user.getUsername(), tid
-                    ));
-                }
-            }
-        }
-
-        return SimpleBooleanResponse.getSuccessResponse();
-    }
-
-
-    @RequestMapping(value = "/users",
-            method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Update users. Mainly for upgrade from old GrantedRights to new AccessLevel.")
-    public SimpleBooleanResponse updateUsers(
-            @RequestParam(value = "namepattern") String namePattern,
-            @RequestParam(value = "tenants") String tenantIds,
-            @RequestBody UserUpdateData userUpdateData,
-            HttpServletRequest request
-    ) throws URIException {
-        checkHeader(request);
-        String decodedNamePattern = URIUtil.decode(namePattern);
-        AccessLevel accessLevel = null;
-        if (userUpdateData.getAccessLevel() != null) {
-            accessLevel = AccessLevel.valueOf(userUpdateData.getAccessLevel());
-        }
-        String oldPassword = null;
-        if (userUpdateData.getOldPassword() != null) {
-            oldPassword = DigestUtils.sha256Hex(userUpdateData.getOldPassword());
-        }
-        String newPassword = null;
-        if (userUpdateData.getNewPassword() != null) {
-            newPassword = DigestUtils.sha256Hex(userUpdateData.getNewPassword());
-        }
-
-        List<String> tenants = new ArrayList<>();
-
-        JsonNode tenantNodes;
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            tenantNodes = mapper.readTree(tenantIds);
-        } catch (IOException e) {
-            return SimpleBooleanResponse.getFailResponse(
-                    Collections.singletonList("Could not parse the tenant id array.")
-            );
-        }
-        for (JsonNode node : tenantNodes) {
-            tenants.add(node.asText());
-        }
-
-        for (String tid: tenants) {
-            LOGGER.info(String.format(
-                    "Updating users matching %s in the tenant %s using the internal API",
-                    decodedNamePattern, tid
-            ));
-
-            for (User user : userService.getUsers(tid)) {
-                if (user.getUsername().matches(decodedNamePattern)) {
-                    if (accessLevel != null) {
-                        userService.assignAccessLevel(accessLevel, tid, user.getUsername());
-                        LOGGER.info(String.format(
-                                "User %s has been updated to %s for the tenant %s through the internal API",
-                                user.getUsername(), accessLevel.name(), tid
-                        ));
-                    }
-                    if (oldPassword != null && newPassword != null) {
-                        Ticket ticket = globalAuthenticationService.authenticateUser(user.getUsername(), oldPassword);
-
-                        Credentials oldCreds = new Credentials();
-                        oldCreds.setUsername(user.getUsername());
-                        oldCreds.setPassword(oldPassword);
-
-                        Credentials newCreds = new Credentials();
-                        newCreds.setUsername(user.getUsername());
-                        newCreds.setPassword(newPassword);
-                        globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
-
-                        LOGGER.info(String.format(
-                                "The password of user %s has been updated through the internal API", user.getUsername()
-                        ));
-
-                        globalAuthenticationService.discard(ticket);
-                    }
-                }
-            }
-        }
-
-        return SimpleBooleanResponse.getSuccessResponse();
-    }
-
 
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody

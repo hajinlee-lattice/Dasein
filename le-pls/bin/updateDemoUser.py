@@ -8,12 +8,12 @@ def updateUser(params):
     print 'Connecting to the host ...'
 
     print 'Updating the user ...'
-    qpars = 'tenants=\["' + params["tenant"] + '"\]&namepattern=' + urllib.quote_plus(params["username"])
+    qpars = 'tenant=' + urllib.quote_plus(params["tenant"]) + '&username=' + urllib.quote_plus(params["username"])
     data = {"AccessLevel": params["accesslevel"], "OldPassword": params["oldpassword"],
              "NewPassword": params["newpassword"]}
 
     payload = json.dumps(data)
-    fullUrl = params['hostwithprotocal'] + "/pls/internal/users?" + qpars
+    fullUrl = params['hostwithprotocal'] + "/pls/admin/users?" + qpars
     cmd = ["curl", "--insecure", "-H", "Content-Type: application/json", "-H",
            "MagicAuthentication: Security through obscurity!", "-X", "PUT",
            "-d",  payload, fullUrl]

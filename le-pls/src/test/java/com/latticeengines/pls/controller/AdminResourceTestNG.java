@@ -9,14 +9,23 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.commons.httpclient.URIException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.pls.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -25,8 +34,10 @@ import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 
 public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -37,6 +48,9 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -148,7 +162,80 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         assertFalse(result);
         assertNull(globalUserManagementService.getUserByEmail("ron@lattice-engines.com"));
     }
-    
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = { "functional", "deployment" })
+    public void updateUserAccessLevels() throws URIException {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+
+        String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
+        makeSureUserDoesNotExist(username);
+        createUser(username, username, "Test", "Tester");
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
+
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(AccessLevel.INTERNAL_ADMIN.name());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+
+        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
+                getRestAPIHostPort() + "/pls/admin/users?tenant=" + tenant.getId() + "&username=" + username,
+                HttpMethod.PUT,
+                requestEntity,
+                ResponseDocument.class
+        );
+        ResponseDocument response = responseEntity.getBody();
+        Assert.assertTrue(response.isSuccess());
+
+        AccessLevel accessLevel = userService.getAccessLevel(tenant.getId(), username);
+        Assert.assertEquals(accessLevel, AccessLevel.INTERNAL_ADMIN);
+        makeSureUserDoesNotExist(username);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = { "functional", "deployment" })
+    public void updateUserAccessLevelsWrongArgs() throws URIException {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+
+        String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
+        makeSureUserDoesNotExist(username);
+        createUser(username, username, "Test", "Tester");
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
+
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(AccessLevel.INTERNAL_ADMIN.name());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+
+        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
+                getRestAPIHostPort() + "/pls/admin/users?tenant=" + tenant.getId() + "&username=nope",
+                HttpMethod.PUT,
+                requestEntity,
+                ResponseDocument.class
+        );
+        ResponseDocument response = responseEntity.getBody();
+        Assert.assertFalse(response.isSuccess(), "Update user with wrong username should fail.");
+
+        responseEntity = restTemplate.exchange(
+                getRestAPIHostPort() + "/pls/admin/users?tenant=nope&username=" + username,
+                HttpMethod.PUT,
+                requestEntity,
+                ResponseDocument.class
+        );
+        response = responseEntity.getBody();
+        Assert.assertFalse(response.isSuccess(), "Update user with wrong tenant should fail.");
+
+        makeSureUserDoesNotExist(username);
+    }
+
     @DataProvider(name = "userRegistrationDataProviderBadArgs")
     public static Object[][] userRegistrationDataProviderBadArgs() {
         User user = getUser();
