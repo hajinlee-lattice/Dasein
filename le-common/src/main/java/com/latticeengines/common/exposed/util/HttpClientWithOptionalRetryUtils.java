@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
@@ -24,7 +24,7 @@ public class HttpClientWithOptionalRetryUtils {
     private static String parseHttpResponse(HttpResponse response) throws IllegalStateException, IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
 
-        String output = "";
+        String output;
         StringBuilder responseMessage = new StringBuilder("");
         while ((output = br.readLine()) != null) {
             responseMessage.append(output);
@@ -34,7 +34,7 @@ public class HttpClientWithOptionalRetryUtils {
     }
 
     public static String sendGetRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,
-            BasicNameValuePair... params) throws ClientProtocolException, IOException {
+            BasicNameValuePair... params) throws IOException {
 
         StringBuilder parameterizedRequestUrl = new StringBuilder(requestUrl);
 
@@ -53,7 +53,7 @@ public class HttpClientWithOptionalRetryUtils {
     }
 
     public static String sendPostRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,
-            String payload) throws ClientProtocolException, IOException {
+            String payload) throws IOException {
         HttpPost httpPost = new HttpPost(requestUrl);
         for (BasicNameValuePair basicNameValuePair : headers) {
             httpPost.setHeader(basicNameValuePair.getName(), basicNameValuePair.getValue());
@@ -62,6 +62,20 @@ public class HttpClientWithOptionalRetryUtils {
         httpPost.setEntity(new StringEntity(payload));
 
         HttpResponse response = executeHttpClient(retry ? MAX_RETRIES : 0, httpPost);
+
+        return parseHttpResponse(response);
+    }
+
+    public static String sendPutRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,
+                                         String payload) throws IOException {
+        HttpPut httpPut = new HttpPut(requestUrl);
+        for (BasicNameValuePair basicNameValuePair : headers) {
+            httpPut.setHeader(basicNameValuePair.getName(), basicNameValuePair.getValue());
+        }
+
+        httpPut.setEntity(new StringEntity(payload));
+
+        HttpResponse response = executeHttpClient(retry ? MAX_RETRIES : 0, httpPut);
 
         return parseHttpResponse(response);
     }
