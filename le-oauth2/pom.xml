@@ -14,10 +14,10 @@
         <le.common.version>1.0.34-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.34-SNAPSHOT</le.domain.version>
         <le.db.version>1.0.34-SNAPSHOT</le.db.version>
-        <le.security.version>1.0.34-SNAPSHOT</le.security.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
         <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
+		<jetty.version>9.1.1.v20140108</jetty.version>
         <start-class>com.latticeengines.oauth2.authserver.OAuth2AuthorizationServerBoot</start-class>
         <java.version>1.7</java.version>
     </properties>
@@ -317,12 +317,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.boot.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-            <version>${spring.boot.version}</version>
-            <scope>provided</scope>
+            <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
