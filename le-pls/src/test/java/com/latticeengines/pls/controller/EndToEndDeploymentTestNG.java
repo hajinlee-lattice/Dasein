@@ -140,7 +140,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @DataProvider(name = "modelMetadataProvider")
     public static Object[][] getModelMetadataProvider() {
         return new Object[][] { //
-                { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant1" }, //
+                { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant2" }, //
                 { tenant, "PLSModel-Eloqua2", "eloqua2", "Q_PLS_Modeling_Tenant2" }
         };
     }
