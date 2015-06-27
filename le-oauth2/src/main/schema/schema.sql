@@ -161,6 +161,18 @@ CREATE UNIQUE NONCLUSTERED INDEX [username_idx] ON [dbo].[users]
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 GO
 
+INSERT INTO [oauth2_dev].[dbo].[TENANT]
+           ([TENANT_NAME]
+           ,[EXTERNAL_ID]
+           ,[JDBC_DRIVER]
+           ,[JDBC_URL]
+           ,[JDBC_USERNAME]
+           ,[JDBC_PASSWORD])
+     VALUES
+           ('playmaker', 'externalId2', 'com.microsoft.sqlserver.jdbc.SQLServerDriver',
+           'jdbc:sqlserver://10.41.1.82\sql2012std;databaseName=ADEDTBDd70064747nA26263627n1',
+           'playmaker', 'playmaker')
+GO
 INSERT INTO [oauth2_dev].[dbo].[authorities] ([username], [authority]) VALUES ('marissa', 'ROLE_USER')
 GO
 INSERT INTO [oauth2_dev].[dbo].[oauth_client_details]
