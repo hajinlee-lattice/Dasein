@@ -94,6 +94,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
             t.setMustChangePassword(ticket.isMustChangePassword());
             t.setRandomness(ticket.getRandomness().getValue());
             t.setUniqueness(ticket.getUniquness().intern());
+            t.setPasswordLastModified(convertTicksToMilliseconds(ticket.getPasswordLastModifiedInTicks()));
 
             List<Tenant> tenants = new ArrayList<>();
 
@@ -121,6 +122,12 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
             t.setId(tenant.getIdentifier().getValue());
             return t;
         }
+    }
+
+    private static long convertTicksToMilliseconds(long ticks) {
+        long januaryFirst1970 = 621355968000000000L;
+        long milliSecTo100NanoSec = 10000L;
+        return (ticks - januaryFirst1970) / milliSecTo100NanoSec;
     }
 
 }

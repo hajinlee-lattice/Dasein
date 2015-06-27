@@ -88,6 +88,7 @@ public class LoginDocument {
     public class LoginResult {
         private List<Tenant> tenants;
         private boolean mustChangePassword;
+        private long passwordLastModified;
 
         public LoginResult() {
 
@@ -111,6 +112,14 @@ public class LoginDocument {
         @JsonProperty("MustChangePassword")
         public void setMustChangePassword(boolean mustChangePassword) {
             this.mustChangePassword = mustChangePassword;
+        }
+
+        @JsonProperty("PasswordLastModified")
+        public long getPasswordLastModified() { return passwordLastModified; }
+
+        @JsonProperty("PasswordLastModified")
+        public void setPasswordLastModified(long passwordLastModified) {
+            this.passwordLastModified = passwordLastModified;
         }
 
     }

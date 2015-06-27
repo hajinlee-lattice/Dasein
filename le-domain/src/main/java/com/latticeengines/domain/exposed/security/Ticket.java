@@ -12,6 +12,7 @@ public class Ticket {
     private String randomness;
     private List<Tenant> tenants;
     private boolean mustChangePassword;
+    private long passwordLastModified;
     
     public Ticket() {
         
@@ -58,11 +59,19 @@ public class Ticket {
         return mustChangePassword;
     }
     
+    @JsonProperty("PasswordLastModified")
+    public void setPasswordLastModified(long passwordLastModified) { this.passwordLastModified = passwordLastModified; }
+
+    @JsonProperty("PasswordLastModified")
+    public long getPasswordLastModified() {
+        return passwordLastModified;
+    }
+
     @JsonProperty("MustChangePassword")
     public void setMustChangePassword(boolean mustChangePassword) {
         this.mustChangePassword = mustChangePassword;
     }
-    
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

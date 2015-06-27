@@ -73,6 +73,7 @@ public class LoginResource {
 
             LoginResult result = doc.new LoginResult();
             result.setMustChangePassword(ticket.isMustChangePassword());
+            result.setPasswordLastModified(ticket.getPasswordLastModified());
             List<Tenant> sortedTenants = new ArrayList<>(ticket.getTenants());
             Collections.sort(sortedTenants, new TenantNameSorter());
             result.setTenants(sortedTenants);
