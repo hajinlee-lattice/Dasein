@@ -87,9 +87,9 @@
                     <mappings>
                         <mapping>
                             <directory>/etc/hadoop/conf</directory>
-                            <filemode>744</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
+                            <filemode>755</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
                             <sources>
                                 <source>
                                     <location>${driven.properties.path}/cascading-service.properties</location>
