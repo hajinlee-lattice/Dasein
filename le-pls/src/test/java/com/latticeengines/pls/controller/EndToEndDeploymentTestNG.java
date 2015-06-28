@@ -65,9 +65,6 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
             tenantToAttach = testingTenants.get(0);
         }
         tenant = tenantToAttach.getId();
-
-        FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path(String.format("%s/%s", modelingServiceHdfsBaseDir, tenant)), true);
     }
     
     private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table) throws Exception {
@@ -108,8 +105,15 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
         return new ModelingServiceExecutor(bldr);
     }
-    
-    @Test(groups = "deployment", enabled = true, dataProvider = "modelMetadataProvider")
+
+    @Test(groups = "deployment", enabled = true)
+    public void cleanupHdfs() throws Exception {
+        LOGGER.info(String.format("Cleanup HDFS folder for tenant %s", tenant));
+        FileSystem fs = FileSystem.get(yarnConfiguration);
+        fs.delete(new Path(String.format("%s/%s", modelingServiceHdfsBaseDir, tenant)), true);
+    }
+
+    @Test(groups = "deployment", enabled = true, dataProvider = "modelMetadataProvider", dependsOnMethods = { "cleanupHdfs" })
     public void runPipeline(String tenant, String modelName, String metadataSuffix, String tableName) throws Exception {
         LOGGER.info(String.format(
                 "Running pipeline for model %s in tenant %s using table %s",
