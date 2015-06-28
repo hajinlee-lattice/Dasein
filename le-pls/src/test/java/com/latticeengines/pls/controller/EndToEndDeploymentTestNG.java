@@ -11,6 +11,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
@@ -63,6 +65,8 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
             tenantToAttach = testingTenants.get(0);
         }
         tenant = tenantToAttach.getId();
+        FileSystem fs = FileSystem.get(yarnConfiguration);
+        fs.delete(new Path(String.format("%s/%s", modelingServiceHdfsBaseDir, tenant)), true);
     }
     
     private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table) throws Exception {

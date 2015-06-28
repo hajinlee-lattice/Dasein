@@ -52,7 +52,8 @@ public class ModelingServiceExecutor {
 
     public void init() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path(String.format("%s/%s", modelingServiceHdfsBaseDir, builder.getCustomer())), true);
+        fs.delete(new Path(String.format("%s/%s/data/%s",
+                modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getTable())), true);
     }
 
     public void runPipeline() throws Exception {
