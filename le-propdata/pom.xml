@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
@@ -21,6 +23,13 @@
         <le.dataflow.version>1.0.34-SNAPSHOT</le.dataflow.version>
         <le.dataplatform.version>1.0.34-SNAPSHOT</le.dataplatform.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>conjars</id>
+            <url>http://conjars.org/repo</url> <!-- for Driven plug-in -->
+        </repository>
+    </repositories>
 
     <profiles>
         <profile>
@@ -145,7 +154,11 @@
             <version>5.1.30</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>driven</groupId>
+            <artifactId>driven-plugin</artifactId>
+            <version>1.2-eap-11</version>
+        </dependency>
     </dependencies>
 
 </project>
