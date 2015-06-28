@@ -23,7 +23,7 @@
         <module>le-dataplatform</module>
         <module>le-dataflow</module>
         <module>le-perf</module>
-        <module>le-schedular</module>
+        <module>le-scheduler</module>
         <module>le-security</module>
         <module>le-monitor</module>
         <module>le-camille</module>
