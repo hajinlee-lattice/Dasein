@@ -54,7 +54,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         parameters.put("visiDBName", tenant);
         parameters.put("dmDeployment", tenant);
         parameters.put("contractExternalID", "PLSTestContract");
-        parameters.put("createNewVisiDB", "true");
+        parameters.put("createNewVisiDB", "false");
 
         excuteHttpRequest(url, parameters);
 
@@ -121,7 +121,6 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     void excuteHttpRequest(String url, Map<String, Object> parameters) {
-
         try {
             String jsonStr = JsonUtils.serialize(parameters);
             String response = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, getHeaders(), jsonStr);
