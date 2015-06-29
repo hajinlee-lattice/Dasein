@@ -24,7 +24,7 @@ public class TenantResourceTestNG extends AbstractTestNGSpringContextTests {
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
         restTemplate = new RestTemplate();
-        tenant = PlaymakerTenantEntityMgrImplTestNG.getTennat();
+        tenant = PlaymakerTenantEntityMgrImplTestNG.getTenant();
 
         try {
             deleteTenantWithTenantName();

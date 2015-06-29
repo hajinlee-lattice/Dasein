@@ -1,19 +1,16 @@
 package com.latticeengines.playmaker.dao;
 
-import org.springframework.security.oauth2.provider.ClientDetails;
+import com.latticeengines.playmaker.service.impl.ExtendedClientDetails;
 
 public interface PlaymakerOauth2DbDao {
 
-    ClientDetails getClientByClientId(String clientId);
+    ExtendedClientDetails getClientByClientId(String clientId);
 
-    void createClient(ClientDetails clientDetails);
+    void createClient(ExtendedClientDetails clientDetails);
 
     void deleteClientByClientId(String clientId);
 
-    void updateClient(ClientDetails clientDetails);
+    void updateClient(ExtendedClientDetails clientDetails);
 
     String findTenantByTokenId(String tokenId);
-
-    void updateClientSecret(String clientId, String clientSecret);
-
 }

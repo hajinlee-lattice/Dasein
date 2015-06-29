@@ -26,4 +26,9 @@ public class BaseGenericDaoImpl implements GenericDao {
             Class<T> requiredType) {
         return namedJdbcTemplate.queryForObject(sql, parameters, requiredType);
     }
+    
+    @Override
+    public void update(String sql, MapSqlParameterSource parameters) {
+        namedJdbcTemplate.update(sql, parameters);
+    }
 }
