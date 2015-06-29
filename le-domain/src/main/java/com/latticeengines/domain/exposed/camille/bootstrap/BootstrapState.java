@@ -38,10 +38,25 @@ public class BootstrapState extends VersionedDocument {
         return toReturn;
     }
 
+    public static BootstrapState constructMigratedState() {
+        BootstrapState toReturn = new BootstrapState();
+        toReturn.state = State.MIGRATED;
+        toReturn.desiredVersion = -1;
+        toReturn.installedVersion = -1;
+        toReturn.errorMessage = "This tenant was migrated from an earlier version.";
+        return toReturn;
+    }
+
     public BootstrapState() {
     }
 
     public enum State {
+        /**
+         * Bootstrap has never been run. The tenant was migrated from an earlier version.
+         * None of component level configuration is known.
+         */
+        MIGRATED,
+
         /**
          * Bootstrap has not run.
          */
