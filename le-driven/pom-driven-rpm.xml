@@ -88,8 +88,8 @@
                         <mapping>
                             <directory>/etc/hadoop/conf</directory>
                             <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>hdfs</username>
+                            <groupname>hadoop</groupname>
                             <sources>
                                 <source>
                                     <location>${driven.properties.path}/cascading-service.properties</location>
