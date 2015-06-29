@@ -93,7 +93,6 @@ JAVA_HOME=/usr/java/default
 
 JAVA_OPTIONS=(-Xms1g -Xmx22g -XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty -DJOB_PROPDIR=/etc/ledp -DDATAPLATFORM_PROPDIR=/etc/ledp -DDATAFLOW_PROPDIR=/etc/ledp -DPROPDATA_PROPDIR=/etc/ledp -DSCORING_PROPDIR=/etc/ledp -DDELLEBI_PROPDIR=/etc/ledp -DPLS_PROPDIR=/etc/ledp)
 JAVA_OPTIONS+=(-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099)
-JAVA_OPTIONS+=(-Dcascading.management.document.service.apikey=F8C0B7A5B7264146A6DB235E932E7CD1)
 
 usage()
 {
