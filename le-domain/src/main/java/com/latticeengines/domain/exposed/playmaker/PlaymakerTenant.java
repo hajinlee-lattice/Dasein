@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,6 +22,7 @@ public class PlaymakerTenant implements HasPid {
 
     private Long pid;
     private String tenantName;
+    private String tenantPassword;
     private String externalId;
     private String jdbcDriver;
     private String jdbcUrl;
@@ -52,6 +54,16 @@ public class PlaymakerTenant implements HasPid {
     @JsonProperty("TenantName")
     public void setTenantName(String tenantName) {
         this.tenantName = tenantName;
+    }
+
+    @Transient
+    @JsonProperty("TenantPassword")
+    public String getTenantPassword() {
+        return tenantPassword;
+    }
+
+    public void setTenantPassword(String tenantPassword) {
+        this.tenantPassword = tenantPassword;
     }
 
     @JsonProperty("ExternalId")
@@ -109,4 +121,14 @@ public class PlaymakerTenant implements HasPid {
         this.jdbcPassword = jdbcPassword;
     }
 
+    public void copyFrom(PlaymakerTenant tenant) {
+        if (tenant != null) {
+            this.tenantName = tenant.getTenantName();
+            this.externalId = tenant.getExternalId();
+            this.jdbcDriver = tenant.getJdbcDriver();
+            this.jdbcUrl = tenant.getJdbcUrl();
+            this.jdbcUserName = tenant.getJdbcUserName();
+            this.jdbcPassword = tenant.getJdbcPassword();
+        }
+    }
 }
