@@ -18,13 +18,6 @@
         <le.scheduler.version>1.0.34-SNAPSHOT</le.scheduler.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>conjars.org</id>
-            <url>http://conjars.org/repo</url>
-        </repository>
-    </repositories>
-
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
