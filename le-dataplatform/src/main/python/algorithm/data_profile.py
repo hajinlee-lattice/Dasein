@@ -555,7 +555,8 @@ def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features
     diagnostics["Summary"] = summary
     diagnostics["MetadataDiagnostics"] = metadataDiagnostics
     diagnostics["ColumnDiagnostics"] = dataDiagnostics
-    
+    diagnostics["Version"] = "2.0"
+
     with open(modelDir + "diagnostics.json", "wb") as fp:
         json.dump(diagnostics, fp)
 
