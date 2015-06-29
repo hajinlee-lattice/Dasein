@@ -234,6 +234,7 @@ module.exports = function (grunt) {
                         '<%= pls.app %>/app/AppCommon/vendor/angular/angular-resource.js',
                         '<%= pls.app %>/app/AppCommon/vendor/angular/angular-route.js',
                         '<%= pls.app %>/app/AppCommon/vendor/angular/angular-sanitize.js',
+                        '<%= pls.app %>/app/AppCommon/vendor/ui-bootstrap-jpls-0.13.0.js',
                         '<%= pls.app %>/app/AppCommon/vendor/underscore.js',
                         '<%= pls.app %>/app/AppCommon/vendor/jstorage.js',
                         '<%= pls.app %>/app/AppCommon/vendor/d3.v3.js',

@@ -24,6 +24,17 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     this._widgetConfigDocumentStorageKey = "GriotWidgetConfigDocument";
     this._widgetConfigDocument = null; // actual client session object
     
+    this._sessionLastActiveTimestampStorageKey = "GriotSessionLastActiveTimestamp";
+    
+    this.setSessionLastActiveTimestamp = function(timeStamp) {
+        $.jStorage.set(this._sessionLastActiveTimestampStorageKey, timeStamp);
+    };
+    
+    this.getSessionLastActiveTimestamp = function() {
+        $.jStorage.reInit();
+        return $.jStorage.get(this._sessionLastActiveTimestampStorageKey);
+    };
+    
     this.setTokenDocument = function (data, successHandler) {
         this._setProperty(data, successHandler, "_tokenDocument", "_tokenDocumentStorageKey");
     };
@@ -87,7 +98,8 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     this.getWidgetConfigDocument = function () {
         return this._getProperty("_widgetConfigDocument", "_widgetConfigDocumentStorageKey");
     };
-        // Helper method to set a property
+
+    // Helper method to set a property
     // by adding it to local storage and then calling a success handler.
     this._setProperty = function (data, successHandler, propStorageObjName, propStorageKeyName) {
         if (this[propStorageKeyName]) {
@@ -109,6 +121,7 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     this._getProperty = function (propStorageObjName, propStorageKeyName) {
         if (propStorageObjName && propStorageKeyName) {
             if (this[propStorageObjName] == null) {
+                $.jStorage.reInit();
                 var fromStorage = $.jStorage.get(this[propStorageKeyName]);
                 this[propStorageObjName] = fromStorage || null;
             }

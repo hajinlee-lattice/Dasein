@@ -1,16 +1,16 @@
 //Initial load of the application    
 var mainApp = angular.module('mainApp', [
+    'ui.bootstrap',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.core.services.HelpService',
     'mainApp.login.services.LoginService',
-    'mainApp.core.services.SessionService',
     'mainApp.config.services.ConfigService',
     'mainApp.login.controllers.LoginController',
     'mainApp.core.controllers.MainViewController',
-    'mainApp.login.controllers.LoginController'
+    'mainApp.appCommon.modals.SimpleModal'
 ])
 
 .config(['$httpProvider', function($httpProvider) {
@@ -26,22 +26,29 @@ var mainApp = angular.module('mainApp', [
     $httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
 }])
 
-.controller('MainController', function ($scope, $http, $rootScope, $compile, BrowserStorageUtility, ResourceUtility,
-    EvergageUtility, ResourceStringsService, HelpService, LoginService, SessionService, ConfigService) {
+.controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
+    EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
     $scope.showFooter = true;
+    $scope.sessionExpired = false;
     
-    // Handle when the copyright footer should be shown
-    $scope.$on("ShowFooterEvent", function (event, data) {
-        $scope.showFooter = data;
-        if ($scope.showFooter === true) {
-            $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
-            $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
+    var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30000;
+    var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 14.5 * 60 * 1000;  // 14.5 minutes
+    var TIME_INTERVAL_WARNING_BEFORE_LOGOUT = 30000;
+    
+    var inactivityCheckingPromise = null;
+    var warningModalInstance = null;
+    
+    var config = { attributes: true, childList: true, characterData: true, subtree: true };
+    var observer = new MutationObserver(function(mutations) {
+        /** This check is because we do not want the opening of the warning modal to cause session to refresh */
+        if (!warningModalInstance) {
+            refreshSessionLastActiveTimeStamp();
         }
     });
     
     ResourceStringsService.GetResourceStrings().then(function(result) {
         var previousSession = BrowserStorageUtility.getClientSession();
-        if (previousSession != null) {
+        if (previousSession != null && ! hasSessionTimedOut()) {
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
             $scope.showFooter = false;
@@ -51,7 +58,11 @@ var mainApp = angular.module('mainApp', [
                 $compile($("#mainView").html(html))(scope);
             });
         }
-        
+    });
+
+    $scope.$on("LoggedIn", function() {
+        startObservingDocumentBody();
+        startCheckingIfSessionIsInactive();
     });
     
     $scope.refreshPreviousSession = function (tenant) {
@@ -69,15 +80,27 @@ var mainApp = angular.module('mainApp', [
                     });
                     
                     $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
+                    
+                    startObservingDocumentBody();
+                    startCheckingIfSessionIsInactive();
                 }
             },
             
             // Fail
             function (data, status) {
-                
+
             }
         );
     };
+    
+    // Handle when the copyright footer should be shown
+    $scope.$on("ShowFooterEvent", function (event, data) {
+        $scope.showFooter = data;
+        if ($scope.showFooter === true) {
+            $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
+            $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
+        }
+    });
     
     $scope.getLocaleSpecificResourceStrings = function (locale) {
         ResourceStringsService.GetResourceStrings(locale).then(function(result) {
@@ -102,6 +125,75 @@ var mainApp = angular.module('mainApp', [
             });
         });
     };
+    
+    function refreshSessionLastActiveTimeStamp() {
+        BrowserStorageUtility.setSessionLastActiveTimestamp(Date.now());
+    }
+    
+    function startObservingDocumentBody() {
+        observer.observe(document.body, config);
+    };
+    
+    function hasSessionTimedOut() {
+        return Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >=
+            TIME_INTERVAL_INACTIVITY_BEFORE_WARNING + TIME_INTERVAL_WARNING_BEFORE_LOGOUT;
+    }
+
+    function openWarningModal() {
+        warningModalInstance = $modal.open({
+            animation: true,
+            backdrop: false,
+            scope: $scope,
+            templateUrl: 'app/core/views/WarningModal.html'
+        });
+
+        $scope.refreshSession = function() {
+            closeWarningModalAndSetInstanceToNull();
+            refreshSessionLastActiveTimeStamp();
+            startCheckingIfSessionIsInactive();
+        };
+    };
+    
+    function checkIfSessionIsInactiveEveryInterval() {
+        if (Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >= TIME_INTERVAL_INACTIVITY_BEFORE_WARNING) {
+            if (!warningModalInstance) {
+                cancelCheckingIfSessionIsInactive();
+                openWarningModal();
+            }
+            $timeout(callWhenWarningModalExpires, TIME_INTERVAL_WARNING_BEFORE_LOGOUT);
+        }
+    }
+
+    function startCheckingIfSessionIsInactive() {
+        inactivityCheckingPromise = $interval(checkIfSessionIsInactiveEveryInterval, TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS);
+    }
+    
+    function cancelCheckingIfSessionIsInactive() {
+        $interval.cancel(inactivityCheckingPromise);
+    }
+
+    function callWhenWarningModalExpires() {
+        if (hasSessionTimedOut()) {
+            $scope.sessionExpired = true;
+            /** This line is actually necessary. Otherwise, user doesn't get properly logged out when tenant selection modal is up */
+            hideTenantSelectionModal();
+            LoginService.Logout();
+        } else {
+            if (warningModalInstance) {
+                closeWarningModalAndSetInstanceToNull();
+            }
+            startCheckingIfSessionIsInactive();
+        }
+    }
+
+    function hideTenantSelectionModal() {
+        $("#modalContainer").modal('hide');
+    }
+    
+    function closeWarningModalAndSetInstanceToNull() {
+        warningModalInstance.close();
+        warningModalInstance = null;
+    }
 });
 
 mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {

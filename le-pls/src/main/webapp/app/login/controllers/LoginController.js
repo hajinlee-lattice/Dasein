@@ -64,6 +64,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             $scope.loginMessage = null;
             if (result != null && result.Success === true) {
                 //$scope.directToPassword = result.Result.MustChangePassword; -- turned off for PLS 1.4
+                $rootScope.$broadcast("LoggedIn");
                 $scope.directToPassword = false;
                 $scope.handleTenantSelection(result.Result.Tenants); 
             } else {
