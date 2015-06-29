@@ -1,4 +1,4 @@
-package com.latticeengines.playmaker.service.impl;
+package com.latticeengines.oauth2.common.service;
 
 import org.joda.time.DateTime;
 import org.springframework.security.oauth2.provider.ClientDetails;

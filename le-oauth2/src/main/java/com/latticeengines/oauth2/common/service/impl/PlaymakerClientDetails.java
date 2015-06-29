@@ -1,7 +1,9 @@
-package com.latticeengines.playmaker.service.impl;
+package com.latticeengines.oauth2.common.service.impl;
 
 import org.joda.time.DateTime;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
+
+import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
 
 public class PlaymakerClientDetails extends BaseClientDetails implements ExtendedClientDetails {
 

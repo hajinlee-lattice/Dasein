@@ -11,9 +11,9 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
+import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
+import com.latticeengines.oauth2.common.service.impl.PlaymakerClientDetails;
 import com.latticeengines.playmaker.dao.PlaymakerOauth2DbDao;
-import com.latticeengines.playmaker.service.impl.ExtendedClientDetails;
-import com.latticeengines.playmaker.service.impl.PlaymakerClientDetails;
 
 public class PlaymakerOauth2DbDaoImpl extends BaseGenericDaoImpl implements PlaymakerOauth2DbDao {
 

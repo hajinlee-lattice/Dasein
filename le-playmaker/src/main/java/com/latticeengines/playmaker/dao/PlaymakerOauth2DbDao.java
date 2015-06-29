@@ -1,6 +1,6 @@
 package com.latticeengines.playmaker.dao;
 
-import com.latticeengines.playmaker.service.impl.ExtendedClientDetails;
+import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
 
 public interface PlaymakerOauth2DbDao {
 

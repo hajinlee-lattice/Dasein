@@ -9,9 +9,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
 import com.latticeengines.playmaker.dao.PlaymakerOauth2DbDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
-import com.latticeengines.playmaker.service.impl.ExtendedClientDetails;
 
 @ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
 public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {

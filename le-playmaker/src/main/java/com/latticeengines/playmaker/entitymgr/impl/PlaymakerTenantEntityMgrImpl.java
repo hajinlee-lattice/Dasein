@@ -21,11 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
+import com.latticeengines.oauth2.common.service.impl.PlaymakerClientDetails;
 import com.latticeengines.playmaker.dao.PalymakerTenantDao;
 import com.latticeengines.playmaker.dao.PlaymakerOauth2DbDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
-import com.latticeengines.playmaker.service.impl.ExtendedClientDetails;
-import com.latticeengines.playmaker.service.impl.PlaymakerClientDetails;
 
 @Component("playmakerTenantEntityMgr")
 public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
