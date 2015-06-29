@@ -22,6 +22,7 @@ public class UpgradeRunner {
     public static final String CMD_LIST = "list";
     public static final String CMD_CP_MODELS = "cp_models";
     public static final String CMD_REGISTER_ZK = "register_zk";
+    public static final String CMD_REGISTER_PLS = "register_pls";
     public static final String CMD_UPGRADE = "upgrade";
 
     private static ArgumentParser parser;
@@ -63,6 +64,7 @@ public class UpgradeRunner {
                 CMD_LIST,
                 CMD_CP_MODELS,
                 CMD_REGISTER_ZK,
+                CMD_REGISTER_PLS,
                 CMD_UPGRADE
         );
     }
@@ -75,12 +77,13 @@ public class UpgradeRunner {
         helper += "\n " + CMD_CP_MODELS + ":    copy ALL models of ONE customer to 3-id folder in hdfs. " +
                 "Also fix the filename of model.json.";
         helper += "\n " + CMD_REGISTER_ZK + ":    register a tenant in ZK.";
+        helper += "\n " + CMD_REGISTER_PLS + ":    register a tenant in PLS/GA.";
         helper += "\n " + CMD_UPGRADE + ":    end to end upgrade a tenant";
         return helper;
     }
 
     private List<String> cmdsNeedCustomer() {
-        return Arrays.asList(CMD_CP_MODELS, CMD_REGISTER_ZK, CMD_UPGRADE);
+        return Arrays.asList(CMD_CP_MODELS, CMD_REGISTER_ZK, CMD_REGISTER_PLS, CMD_UPGRADE);
     }
 
     private void validateArguments(Namespace ns) {
