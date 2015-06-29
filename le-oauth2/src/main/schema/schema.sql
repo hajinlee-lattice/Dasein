@@ -161,6 +161,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [username_idx] ON [dbo].[users]
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 GO
 
+/*
 INSERT INTO [oauth2_dev].[dbo].[TENANT]
            ([TENANT_NAME]
            ,[EXTERNAL_ID]
@@ -188,8 +189,8 @@ INSERT INTO [oauth2_dev].[dbo].[oauth_client_details]
            ,[additional_information]
            ,[autoapprove])
      VALUES
-           ('lattice-trusted-client', 'playmaker_api', 'secret', 'read', 'authorization_code,refresh_token,client_credentials', NULL,
-            'ROLE_CLIENT', NULL, NULL, NULL, 'false')
+           ('playmaker-trusted-client', 'playmaker_api', 'secret', 'read', 'authorization_code,refresh_token,client_credentials', NULL,
+            'PLAYMAKER_ROLE_CLIENT', NULL, NULL, NULL, 'false')
 GO
 INSERT INTO [oauth2_dev].[dbo].[users]
            ([username]
@@ -197,6 +198,7 @@ INSERT INTO [oauth2_dev].[dbo].[users]
            ,[enabled])
      VALUES ('testuser1@latticeengines.com', 'Lattice1',    1)
 GO
+*/
 
 SET ANSI_PADDING OFF
 GO
