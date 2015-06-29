@@ -28,7 +28,6 @@
         <le.db.version>1.0.34-SNAPSHOT</le.db.version>
         <le.dataflow.version>1.0.34-SNAPSHOT</le.dataflow.version>
         <le.dataplatform.version>1.0.34-SNAPSHOT</le.dataplatform.version>
-        <cascading.driven.version>1.2-eap-11</cascading.driven.version>
     </properties>
 
     <profiles>
@@ -147,11 +146,6 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>driven</groupId>
-            <artifactId>driven-plugin</artifactId>
-            <version>${cascading.driven.version}</version>
         </dependency>
 	    <dependency>
             <groupId>mysql</groupId>
