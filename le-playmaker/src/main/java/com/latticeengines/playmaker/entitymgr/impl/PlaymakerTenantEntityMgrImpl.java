@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.playmaker.dao.PalymakerTenantDao;
 import com.latticeengines.playmaker.dao.PlaymakerOauth2DbDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
-import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 
 @Component("playmakerTenantEntityMgr")
 public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
@@ -65,7 +64,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
         } else {
             clientDetails = getNewClientDetails(tenant);
             playmakerOauth2DbDao.updateClient(clientDetails);
-            playmakerOauth2DbDao.updateClientSecret(tenant.getTenantName(), getClientSecret());
+            playmakerOauth2DbDao.updateClientSecret(tenant.getTenantName(), clientDetails.getClientSecret());
         }
         tenant.setTenantPassword(clientDetails.getClientSecret());
         return tenant;
