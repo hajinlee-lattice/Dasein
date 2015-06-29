@@ -1,19 +1,24 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.playmaker.dao.PlaymakerOauth2DbDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
-@ContextConfiguration(locations = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
 public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private PlaymakerTenantEntityMgr playMakerEntityMgr;
+
+    @Autowired
+    private PlaymakerOauth2DbDao playmakerOauth2DbDao;
 
     @Test(groups = "functional", enabled = true)
     public void testCRUD() throws Exception {
@@ -24,25 +29,33 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
         } catch (Exception ex) {
 
         }
-        playMakerEntityMgr.create(tenant);
+        PlaymakerTenant result = playMakerEntityMgr.create(tenant);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getTenantPassword());
+
+        ClientDetails clientDetails = playmakerOauth2DbDao.getClientByClientId(tenant.getTenantName());
+        Assert.assertNotNull(clientDetails);
+        Assert.assertEquals(clientDetails.getClientId(), tenant.getTenantName());
+        Assert.assertTrue(clientDetails.getAuthorizedGrantTypes().contains("client_credentials"));
+
         tenant.setExternalId("externalId2");
         playMakerEntityMgr.executeUpdate(tenant);
-        PlaymakerTenant tenant2 = playMakerEntityMgr.findByTenantName("tenantName");
+        PlaymakerTenant tenant2 = playMakerEntityMgr.findByTenantName("playmaker");
         Assert.assertNotNull(tenant2);
 
-        playMakerEntityMgr.delete(tenant);
+        // playMakerEntityMgr.delete(tenant);
 
     }
 
     public static PlaymakerTenant getTennat() {
         PlaymakerTenant tenant = new PlaymakerTenant();
-        tenant.setExternalId("externalId");
+        tenant.setExternalId("playmaker");
         tenant.setJdbcDriver("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        tenant.setJdbcPassword("jdbcPassword");
-        tenant.setJdbcUrl("jdbc:sqlserver://10.41.1.250:1437;databaseName=playmaker_dev");
-        tenant.setJdbcUserName("jdbcUserName");
-        tenant.setTenantName("tenantName");
+        tenant.setJdbcPassword("playmaker");
+        tenant.setJdbcUrl("jdbc:sqlserver://10.41.1.82\\sql2012std;databaseName=ADEDTBDd70064747nA26263627n1");
+        tenant.setJdbcUserName("playmaker");
+        tenant.setTenantName("playmaker");
         return tenant;
     }
-
 }

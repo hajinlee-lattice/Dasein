@@ -24,8 +24,8 @@ public class TenantResource {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a playmaker API tenant")
-    public void createTenant(@RequestBody PlaymakerTenant tenant) {
-        playmakerEntityMgr.create(tenant);
+    public PlaymakerTenant createTenant(@RequestBody PlaymakerTenant tenant) {
+        return playmakerEntityMgr.create(tenant);
     }
 
     @RequestMapping(value = "/{tenantName}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -40,7 +40,11 @@ public class TenantResource {
     @ResponseBody
     @ApiOperation(value = "Get a playmaker tenant")
     public PlaymakerTenant getTenant(@PathVariable String tenantName) {
-        return playmakerEntityMgr.findByTenantName(tenantName);
+        PlaymakerTenant tenant = playmakerEntityMgr.findByTenantName(tenantName);
+        if (tenant != null) {
+            return tenant;
+        }
+        return new PlaymakerTenant();
     }
 
     @RequestMapping(value = "/{tenantName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
