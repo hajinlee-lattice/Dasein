@@ -53,8 +53,8 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         parameters.put("visiDBLocation", "ServerName=127.0.0.1");
         parameters.put("visiDBName", tenant);
         parameters.put("dmDeployment", tenant);
-        parameters.put("contractExternalID", "PLSTestContract");
-        parameters.put("createNewVisiDB", "false");
+        parameters.put("contractExternalID", tenant);
+        parameters.put("createNewVisiDB", "true");
 
         excuteHttpRequest(url, parameters);
 
