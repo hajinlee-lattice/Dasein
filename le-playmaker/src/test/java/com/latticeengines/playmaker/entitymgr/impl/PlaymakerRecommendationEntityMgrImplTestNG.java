@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
-@ContextConfiguration(locations = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
 public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
@@ -26,6 +26,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     private PlaymakerTenant tenant;
 
     @BeforeClass
+    @Test(groups = "functional", enabled = true)
     public void beforeClass() {
         tenant = getTennat();
         try {
