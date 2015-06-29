@@ -132,7 +132,7 @@ var mainApp = angular.module('mainApp', [
     
     function startObservingDocumentBody() {
         observer.observe(document.body, config);
-    };
+    }
     
     function hasSessionTimedOut() {
         return Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >=
@@ -152,7 +152,7 @@ var mainApp = angular.module('mainApp', [
             refreshSessionLastActiveTimeStamp();
             startCheckingIfSessionIsInactive();
         };
-    };
+    }
     
     function checkIfSessionIsInactiveEveryInterval() {
         if (Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >= TIME_INTERVAL_INACTIVITY_BEFORE_WARNING) {
