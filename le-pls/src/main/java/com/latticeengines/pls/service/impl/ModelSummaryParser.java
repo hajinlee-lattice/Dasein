@@ -69,19 +69,12 @@ public class ModelSummaryParser {
         summary.setConstructionTime(constructionTime);
         summary.setIncomplete(isIncomplete(json));
 
-        String uuid;
-        try {
-            Pattern uuidPattern = Pattern.compile("[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}");
-            Matcher matcher = uuidPattern.matcher(lookupId);
-            if(matcher.find()) {
-                uuid = lookupId.substring(matcher.start());
-            } else {
-                uuid = UUID.randomUUID().toString();
-            }
-        } catch (Exception e) {
-            uuid = UUID.randomUUID().toString();
+        if (details.has("ModelID")) {
+            summary.setId(details.get("ModelID").asText());
+        } else {
+            String uuid = UUID.randomUUID().toString();
+            summary.setId(String.format("ms__%s-%s", uuid, name));
         }
-        summary.setId(String.format("ms__%s-%s", uuid, name));
 
         try {
             if (json.has("Tenant")) {
