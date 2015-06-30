@@ -73,6 +73,10 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
             case (UpgradeRunner.CMD_REGISTER_PLS):
                 registerCustomerInPLS(customer);
                 return true;
+            case (UpgradeRunner.CMD_UPGRADE):
+                registerCustomerInPLS(customer);
+                registerCustomerInZK(customer);
+                return true;
             default:
                 return false;
         }
