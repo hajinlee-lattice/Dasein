@@ -36,6 +36,10 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
         System.out.print("Upload space configuration to ZK ... ");
         zooKeeperManager.uploadSpaceConfiguration(customer, spaceConfiguration);
         System.out.println("OK");
+
+        System.out.print("Set Bootstrap stat to MIGRATED ... ");
+        zooKeeperManager.setBootstrapStateToMigrate(customer);
+        System.out.println("OK");
     }
 
     private void registerCustomerInPLS(String customer) {

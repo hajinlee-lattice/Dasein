@@ -1,11 +1,12 @@
 package com.latticeengines.upgrade.zk;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -17,6 +18,7 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.upgrade.functionalframework.UpgradeFunctionalTestNGBase;
 
 public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
@@ -45,16 +47,6 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
         if (camille.exists(contractRoot)) camille.delete(contractRoot);
     }
 
-    @BeforeMethod(groups = "functional")
-    public void beforeEach() throws Exception {
-        teardown();
-    }
-
-    @AfterMethod(groups = "functional")
-    public void afterEach() throws Exception {
-        teardown();
-    }
-
     @Test(groups = "functional")
     public void registerTenant() throws Exception {
         zooKeeperManager.registerTenant(CUSTOMER);
@@ -69,10 +61,8 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
                 String.format("Idempotent test failed: space %s does not exist in ZK.", CustomerSpace.parse(CUSTOMER)));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = "registerTenant")
     public void uploadSpaceConfiguration() throws Exception {
-        zooKeeperManager.registerTenant(CUSTOMER);
-
         SpaceConfiguration spaceConfiguration = new SpaceConfiguration();
         spaceConfiguration.setDlAddress(DL_URL);
         spaceConfiguration.setTopology(TOPOLOGY);
@@ -86,5 +76,18 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertEquals(newSpaceConfig.getDlAddress(), DL_URL);
         Assert.assertEquals(newSpaceConfig.getTopology(), TOPOLOGY);
         Assert.assertEquals(newSpaceConfig.getProduct(), LatticeProduct.LPA);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "registerTenant")
+    public void setBootstrapState() throws Exception {
+        zooKeeperManager.setBootstrapStateToMigrate(CUSTOMER);
+
+        List<String> components = Arrays.asList(
+                "PLS", "VisiDBDL", "VisiDBTemplate", "DLTemplate", "BardJams"
+        );
+        for (String component: components) {
+            BootstrapState state = batonService.getTenantServiceBootstrapState(CUSTOMER, CUSTOMER, SPACE, component);
+            Assert.assertEquals(state.state, BootstrapState.State.MIGRATED);
+        }
     }
 }
