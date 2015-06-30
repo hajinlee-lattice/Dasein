@@ -57,7 +57,7 @@
     </bean>
 
     <bean id="playmakerOauth2DbDao"
-        class="com.latticeengines.playmaker.dao.impl.PlaymakerOauth2DbDaoImpl">
+        class="com.latticeengines.oauth2.common.dao.impl.OAuthClientDaoImpl">
         <constructor-arg ref="dataSourcePlaymaker" />
     </bean>
 </beans>
