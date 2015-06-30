@@ -145,12 +145,11 @@ describe('TenantUtility tests', function (){
                     "displayName": "LPA_Marketo",
                     "description": "A LPA solution for Marketo in TopologyDev",
                     "sfdcOrgId": null,
-                    "sandboxSfdcOrgId": null,
-                    "product": "LPA",
-                    "topology": "MARKETO"
+                    "sandboxSfdcOrgId": null
                 }, "featureFlags": "{\"Dante\":false}"
             },
             "CustomerSpace": {"contractId": "TopologyDev", "tenantId": "Marketo", "spaceId": "Production"},
+            "SpaceConfiguration": {"Product": "Lead Prioritization", "Topology": "Marketo"},
             "BootstrapState": {"state": "INITIAL", "desiredVersion": -1, "installedVersion": -1, "errorMessage": null}
         };
 
@@ -159,7 +158,7 @@ describe('TenantUtility tests', function (){
         expect(record.TenantId).toEqual("Marketo");
         expect(record.ContractId).toEqual("TopologyDev");
         expect(record.Status).toEqual("New");
-        expect(record.Product).toEqual("LPA");
+        expect(record.Product).toEqual("Lead Prioritization");
         expect(record.CreatedDate).toEqual(new Date("2015-05-05T19:38:02.618Z"));
         expect(record.LastModifiedDate).toEqual(new Date("2015-05-05T19:38:02.643Z"));
     });
