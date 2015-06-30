@@ -18,12 +18,18 @@ angular.module('mainApp.core.controllers.MainViewController', [
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, NavUtility, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
     var directToPassword = $scope.directToPassword;
-    if (directToPassword) {
+    if (directToPassword || isPasswordLastModifiedLongerThanNinetyDaysAgo()) {
         createUpdatePasswordView();
     } else {
         createModelListView();
     }
-    
+
+    function isPasswordLastModifiedLongerThanNinetyDaysAgo() {
+        var MILLISECOND_PER_DAY = 24 * 60 * 60 * 1000;
+        var numDaysAgoPasswordLastModified = Math.floor((Date.now() - $scope.passwordLastModifiedTimestamp) / MILLISECOND_PER_DAY) ;
+        return numDaysAgoPasswordLastModified >= 90;
+    }
+
     // Handle Initial View
     $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
         var scope = $rootScope.$new();

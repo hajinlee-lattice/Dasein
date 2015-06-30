@@ -35,10 +35,11 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.showForgotPassword = false;
     $scope.forgotPasswordUsername = "";
     $scope.forgotPasswordErrorMessage = "";
-    
+    $scope.passwordLastModifiedTimestamp = "";
+
     // Initialize Evergage as an anonymous user
     EvergageUtility.Initialize({
-        userID: null, 
+        userID: null,
         title: null,
         datasetPrefix: "pls",
         company: null
@@ -64,9 +65,10 @@ angular.module('mainApp.login.controllers.LoginController', [
             $scope.loginMessage = null;
             if (result != null && result.Success === true) {
                 //$scope.directToPassword = result.Result.MustChangePassword; -- turned off for PLS 1.4
+                $scope.passwordLastModifiedTimestamp = result.Result.PasswordLastModified;
                 $rootScope.$broadcast("LoggedIn");
                 $scope.directToPassword = false;
-                $scope.handleTenantSelection(result.Result.Tenants); 
+                $scope.handleTenantSelection(result.Result.Tenants);
             } else {
                 // Need to fail gracefully if we get no service response at all
                 if (result == null) {
@@ -125,6 +127,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             $http.get('./app/core/views/MainView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 scope.directToPassword = $scope.directToPassword || false;
+                scope.passwordLastModifiedTimestamp = $scope.passwordLastModifiedTimestamp;
                 $compile($("#mainView").html(html))(scope);
             });
         });
