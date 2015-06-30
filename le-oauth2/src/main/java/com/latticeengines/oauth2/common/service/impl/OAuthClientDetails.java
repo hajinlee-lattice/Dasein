@@ -5,12 +5,12 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 
 import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
 
-public class PlaymakerClientDetails extends BaseClientDetails implements ExtendedClientDetails {
+public class OAuthClientDetails extends BaseClientDetails implements ExtendedClientDetails {
 
-    public PlaymakerClientDetails() {
+    public OAuthClientDetails() {
     }
 
-    public PlaymakerClientDetails(BaseClientDetails base) {
+    public OAuthClientDetails(BaseClientDetails base) {
         setClientId(base.getClientId());
         setClientSecret(base.getClientSecret());
         setScope(base.getScope());

@@ -1,8 +1,8 @@
-package com.latticeengines.playmaker.dao;
+package com.latticeengines.oauth2.common.dao;
 
 import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
 
-public interface PlaymakerOauth2DbDao {
+public interface OAuthClientDao {
 
     ExtendedClientDetails getClientByClientId(String clientId);
 

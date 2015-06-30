@@ -21,10 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2.common.dao.OAuthClientDao;
 import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
-import com.latticeengines.oauth2.common.service.impl.PlaymakerClientDetails;
+import com.latticeengines.oauth2.common.service.impl.OAuthClientDetails;
 import com.latticeengines.playmaker.dao.PalymakerTenantDao;
-import com.latticeengines.playmaker.dao.PlaymakerOauth2DbDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 @Component("playmakerTenantEntityMgr")
@@ -36,7 +36,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     private PalymakerTenantDao tenantDao;
 
     @Autowired
-    private PlaymakerOauth2DbDao playmakerOauth2DbDao;
+    private OAuthClientDao playmakerOauth2DbDao;
 
     @Value("${oauth2.client_secret_expiration_days}")
     private int clientSecretExpirationDays;
@@ -77,7 +77,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     }
 
     ExtendedClientDetails getNewClientDetails(PlaymakerTenant tenant) {
-        PlaymakerClientDetails clientDetails = new PlaymakerClientDetails();
+        OAuthClientDetails clientDetails = new OAuthClientDetails();
         clientDetails.setClientId(tenant.getTenantName());
 
         Set<GrantedAuthority> authorities = new HashSet<>();

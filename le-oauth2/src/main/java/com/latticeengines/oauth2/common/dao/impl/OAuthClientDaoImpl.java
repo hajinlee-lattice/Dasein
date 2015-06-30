@@ -1,4 +1,4 @@
-package com.latticeengines.playmaker.dao.impl;
+package com.latticeengines.oauth2.common.dao.impl;
 
 import java.util.Date;
 
@@ -11,15 +11,15 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
+import com.latticeengines.oauth2.common.dao.OAuthClientDao;
 import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
-import com.latticeengines.oauth2.common.service.impl.PlaymakerClientDetails;
-import com.latticeengines.playmaker.dao.PlaymakerOauth2DbDao;
+import com.latticeengines.oauth2.common.service.impl.OAuthClientDetails;
 
-public class PlaymakerOauth2DbDaoImpl extends BaseGenericDaoImpl implements PlaymakerOauth2DbDao {
+public class OAuthClientDaoImpl extends BaseGenericDaoImpl implements OAuthClientDao {
 
     private JdbcClientDetailsService clientDetailService;
 
-    public PlaymakerOauth2DbDaoImpl(DataSource dataSource) {
+    public OAuthClientDaoImpl(DataSource dataSource) {
         super(new NamedParameterJdbcTemplate(dataSource));
         clientDetailService = new JdbcClientDetailsService(dataSource);
     }
@@ -57,7 +57,7 @@ public class PlaymakerOauth2DbDaoImpl extends BaseGenericDaoImpl implements Play
     }
 
     private ExtendedClientDetails loadExtendedColumns(BaseClientDetails clientDetails) {
-        PlaymakerClientDetails toReturn = new PlaymakerClientDetails(clientDetails);
+        OAuthClientDetails toReturn = new OAuthClientDetails(clientDetails);
 
         String sql = "SELECT client_secret_expiration FROM oauth_client_details WHERE client_id = :clientId";
         MapSqlParameterSource source = new MapSqlParameterSource();

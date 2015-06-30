@@ -9,8 +9,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2.common.dao.OAuthClientDao;
 import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
-import com.latticeengines.playmaker.dao.PlaymakerOauth2DbDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
@@ -20,7 +20,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
     private PlaymakerTenantEntityMgr playMakerEntityMgr;
 
     @Autowired
-    private PlaymakerOauth2DbDao playmakerOauth2DbDao;
+    private OAuthClientDao playmakerOauth2DbDao;
 
     @Test(groups = "functional", enabled = true)
     public void testCRUD() throws Exception {
