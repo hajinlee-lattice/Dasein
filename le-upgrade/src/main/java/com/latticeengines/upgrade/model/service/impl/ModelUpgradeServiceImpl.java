@@ -173,8 +173,12 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
         System.out.println("OK");
 
+        List<String> summaries = new ArrayList<>();
         for (String tenant : tenants) {
-            printModelsInTable(tenant);
+            summaries.add(printModelsInTable(tenant));
+        }
+        for (String summary: summaries) {
+            System.out.println(summary);
         }
     }
 
@@ -183,41 +187,55 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
         System.out.println("OK");
 
+        List<String> summaries = new ArrayList<>();
         for (String tenant : tenants) {
-            printModelsInHdfs(tenant);
+            summaries.add(printModelsInHdfs(tenant));
+        }
+        System.out.println("");
+        for (String summary: summaries) {
+            System.out.println(summary);
         }
     }
 
-    private void printModelsInTable(String customer) {
+    private String printModelsInTable(String customer) {
         List<String> modelGuids = tenantModelJdbcManager.getActiveModels(customer);
 
+        ModelStatistics aggregator = new ModelStatistics();
         for (String modelGuid : modelGuids) {
             String uuid = YarnPathUtils.extractUuid(modelGuid);
-            printPreUpgradeStatusOfCustomerModel(customer, uuid);
+            printPreUpgradeStatusOfCustomerModel(customer, uuid, aggregator);
         }
 
         if (modelGuids.isEmpty()) {
             System.out.println(String.format("\nCustomer %s does not have any active model", customer));
         }
+
+        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, %2d modelsummary.json.",
+                customer, modelGuids.size(), aggregator.activeModels, aggregator.modelJsons, aggregator.modelSummeries);
     }
 
-    private void printModelsInHdfs(String customer) {
+    private String printModelsInHdfs(String customer) {
         List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
 
+        ModelStatistics aggregator = new ModelStatistics();
         for (String uuid : uuids) {
-            //String modelGuid = YarnPathUtils.constructModelGuidFromUuid(uuid);
-            printPreUpgradeStatusOfCustomerModel(customer, uuid);
+            printPreUpgradeStatusOfCustomerModel(customer, uuid, aggregator);
         }
 
         if (uuids.isEmpty()) {
             System.out.println(String.format("\nCustomer %s does not have any model in hdfs.", customer));
         }
+
+        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, %2d modelsummary.json.",
+                customer, uuids.size(), aggregator.activeModels, aggregator.modelJsons, aggregator.modelSummeries);
+
     }
 
-    private void printPreUpgradeStatusOfCustomerModel(String customer, String uuid) {
+    private void printPreUpgradeStatusOfCustomerModel(String customer, String uuid, ModelStatistics statistics) {
         System.out.println(String.format("\n(%s, %s): ", customer, uuid));
         System.out.print("    Model is active? .................... ");
         if (tenantModelJdbcManager.modelIsActive(customer, uuid)) {
+            statistics.activeModels++;
             System.out.println("YES");
         } else {
             System.out.println("NO");
@@ -225,6 +243,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
         System.out.print("    Model json exists in singular Id? ... ");
         if (yarnManager.modelJsonExistsInSingularId(customer, uuid)) {
+            statistics.modelJsons++;
             System.out.println("YES");
         } else {
             System.out.println("NO");
@@ -234,10 +253,17 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.print("    Modelsummary already exists? ........ ");
         
         if (yarnManager.modelSummaryExistsInSingularId(customer, uuid)) {
+            statistics.modelSummeries++;
             System.out.println("YES");
         } else {
             System.out.println("NO");
         }
+    }
+
+    private class ModelStatistics {
+        public int activeModels = 0;
+        public int modelJsons = 0;
+        public int modelSummeries = 0;
     }
 
     @Override
@@ -267,6 +293,5 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
             // handled by version specific upgrader
             return false;
         }
-
     }
 }

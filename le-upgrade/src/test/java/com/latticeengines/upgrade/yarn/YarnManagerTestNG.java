@@ -28,9 +28,9 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         yarnManager.deleteTupleIdCustomerRoot(CUSTOMER);
-        HdfsUtils.rmdir(yarnConfiguration, YarnPathUtils.constructSingularIdCustomerRoot(customerBase, CUSTOMER));
         String modelHdfsPath = YarnPathUtils.constructSingularIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE
                 + "/" + UUID + "/" + CONTAINER_ID + "/";
+        HdfsUtils.rmdir(yarnConfiguration, modelHdfsPath);
         modelFileName = "PLSModel_2015-03-05_18-30";
         HdfsUtils.writeToFile(yarnConfiguration, modelHdfsPath + modelFileName + ".json", constructModelContent());
     }
