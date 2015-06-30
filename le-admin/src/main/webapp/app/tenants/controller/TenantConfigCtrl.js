@@ -317,9 +317,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     }
 
     function changeComponentToMessage(component) {
-        if (component.hasOwnProperty("State")
-            && component.State.hasOwnProperty("errorMessage")
-            && component.State.errorMessage !== "") {
+        if (component.hasOwnProperty("State") &&
+            component.State.hasOwnProperty("errorMessage") &&
+            component.State.errorMessage !== "") {
             component.Message = component.State.errorMessage;
         }
         return component;
