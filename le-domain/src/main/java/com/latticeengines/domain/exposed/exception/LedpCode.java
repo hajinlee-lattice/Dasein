@@ -114,6 +114,8 @@ public enum LedpCode {
     LEDP_18036("Install VisiDB Template Failed: {0}"), //
     LEDP_18037("Template {0} is not supported."), //
     LEDP_18038("Install DL Template Failed: {0}"), //
+    LEDP_18039("Salesforce URL with name {0} not found."), //
+    LEDP_18040("The URL field is empty of Salesforce URL with name {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
