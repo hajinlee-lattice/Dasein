@@ -47,7 +47,7 @@ public class ModelSummaryParser {
 
         JsonNode details = json.get("ModelDetails");
 
-        String name = getOrDefault(details.get("Name"), String.class, "PLSModel");
+        String name = getOrDefault(details.get("Name"), String.class, "PLS");
         Long constructionTime;
         try {
             long currentMillis = details.get("ConstructionTime").asLong() * 1000;
@@ -71,6 +71,9 @@ public class ModelSummaryParser {
 
         if (details.has("ModelID")) {
             summary.setId(details.get("ModelID").asText());
+        } else if (details.has("LookupID")) {
+            String uuid = details.get("LookupID").asText().split("\\|")[2];
+            summary.setId(String.format("ms__%s-%s", uuid, name));
         } else {
             String uuid = UUID.randomUUID().toString();
             summary.setId(String.format("ms__%s-%s", uuid, name));
