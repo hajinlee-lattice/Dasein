@@ -13,11 +13,9 @@ public interface PlaymakerTenantEntityMgr {
 
     PlaymakerTenant findByKey(PlaymakerTenant tenant);
 
-    void delete(PlaymakerTenant tenant);
-
     PlaymakerTenant findByTenantName(String tenantName);
 
-    boolean deleteByTenantName(String tenantName);
+    void deleteByTenantName(String tenantName);
 
     void updateByTenantName(PlaymakerTenant tenant);
 

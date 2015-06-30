@@ -29,6 +29,19 @@ public class PlaymakerTenant implements HasPid {
     private String jdbcUserName;
     private String jdbcPassword;
 
+    public PlaymakerTenant() {
+        super();
+    }
+
+    public PlaymakerTenant(PlaymakerTenant tenant) {
+        this.tenantName = tenant.tenantName;
+        this.externalId = tenant.externalId;
+        this.jdbcDriver = tenant.jdbcDriver;
+        this.jdbcUrl = tenant.jdbcUrl;
+        this.jdbcUserName = tenant.jdbcUserName;
+        this.jdbcPassword = tenant.jdbcPassword;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore

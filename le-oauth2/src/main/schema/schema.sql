@@ -84,6 +84,7 @@ CREATE TABLE [dbo].[oauth_client_details](
     [refresh_token_validity] [int] NULL,
     [additional_information] [varchar](4096) NULL,
     [autoapprove] [varchar](256) NULL,
+    [client_secret_expiration] [datetime] NULL
 ) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [client_id_idx] ON [dbo].[oauth_client_details] 
@@ -174,8 +175,11 @@ INSERT INTO [oauth2_dev].[dbo].[TENANT]
            'jdbc:sqlserver://10.41.1.82\sql2012std;databaseName=ADEDTBDd70064747nA26263627n1',
            'playmaker', 'playmaker')
 GO
+
 INSERT INTO [oauth2_dev].[dbo].[authorities] ([username], [authority]) VALUES ('marissa', 'ROLE_USER')
 GO
+*/
+
 INSERT INTO [oauth2_dev].[dbo].[oauth_client_details]
            ([client_id]
            ,[resource_ids]
@@ -189,8 +193,8 @@ INSERT INTO [oauth2_dev].[dbo].[oauth_client_details]
            ,[additional_information]
            ,[autoapprove])
      VALUES
-           ('playmaker-trusted-client', 'playmaker_api', 'secret', 'read', 'authorization_code,refresh_token,client_credentials', NULL,
-            'PLAYMAKER_ROLE_CLIENT', NULL, NULL, NULL, 'false')
+           ('playmaker-admin', 'playmaker_api', 'slk4G111Msd8', 'read,write', 'authorization_code,refresh_token,client_credentials', NULL,
+            'ROLE_PLAYMAKER_ADMIN', NULL, NULL, NULL, 'false')
 GO
 INSERT INTO [oauth2_dev].[dbo].[users]
            ([username]
@@ -198,7 +202,7 @@ INSERT INTO [oauth2_dev].[dbo].[users]
            ,[enabled])
      VALUES ('testuser1@latticeengines.com', 'Lattice1',    1)
 GO
-*/
+
 
 SET ANSI_PADDING OFF
 GO

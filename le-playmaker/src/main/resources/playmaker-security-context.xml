@@ -10,20 +10,12 @@
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
     <import resource="classpath:playmaker-properties-context.xml" />
-    <import resource="classpath:playmaker-persistence-context.xml"/>
-     <import resource="classpath:oauth2-context.xml"/>
-    <!-- <import resource="classpath:security-context.xml"/> <import resource="classpath:security-provider-context.xml"/> -->
+    <import resource="classpath:playmaker-persistence-context.xml" />
+    <import resource="classpath:oauth2-context.xml" />
 
     <context:component-scan base-package="com.latticeengines.playmaker">
         <context:exclude-filter type="assignable"
             expression="com.latticeengines.playmaker.swagger.SwaggerConfig" />
     </context:component-scan>
 
-<!--     <security:http use-expressions="true" pattern="/playmaker/**"
-        authentication-manager-ref="authenticationManager"
-        entry-point-ref="restAuthenticationEntryPoint" create-session="stateless">
-        <security:custom-filter ref="restActiveDirectoryServicesFilter"
-            before="PRE_AUTH_FILTER" />
-    </security:http>
- -->
 </beans>

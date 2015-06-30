@@ -50,7 +50,7 @@ public class TenantResource {
     @RequestMapping(value = "/{tenantName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete playmaker tenant")
-    public boolean deleteTenant(@PathVariable String tenantName) {
-        return playmakerEntityMgr.deleteByTenantName(tenantName);
+    public void deleteTenant(@PathVariable String tenantName) {
+        playmakerEntityMgr.deleteByTenantName(tenantName);
     }
 }

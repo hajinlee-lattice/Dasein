@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
@@ -35,8 +36,10 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
         // define URL patterns to enable OAuth2 security
 
-        http.requestMatchers().antMatchers("/playmaker/**").and().authorizeRequests().antMatchers("/playmaker/**")
-                .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_CLIENT'))");
+        http.requestMatchers().antMatchers("/playmaker/**", "/tenants/**").and().authorizeRequests()
+                .antMatchers("/playmaker/**")
+                .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))")
+                .antMatchers(HttpMethod.POST, "/tenants").permitAll().antMatchers("/tenants/**")
+                .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))");
     }
-
 }

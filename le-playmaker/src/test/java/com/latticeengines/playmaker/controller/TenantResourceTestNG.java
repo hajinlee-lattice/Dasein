@@ -1,54 +1,55 @@
 package com.latticeengines.playmaker.controller;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.playmaker.entitymgr.impl.PlaymakerTenantEntityMgrImplTestNG;
+import com.latticeengines.playmaker.functionalframework.BasePlaymakerFunctionalTestNG;
 
-@ContextConfiguration(locations = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
-public class TenantResourceTestNG extends AbstractTestNGSpringContextTests {
-
-    @Value("${playmaker.api.hostport}")
-    private String hostPort;
+public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
 
     private RestTemplate restTemplate = null;
 
-    private PlaymakerTenant tenant;
-
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
+        super.beforeClass();
         restTemplate = new RestTemplate();
-        tenant = PlaymakerTenantEntityMgrImplTestNG.getTenant();
-
-        try {
-            deleteTenantWithTenantName();
-        } catch (Exception ex) {
-            System.out.println("Warning=" + ex.getMessage());
-        }
     }
 
     @Test(groups = "deployment")
-    public void createTenantWithTenantName() {
-        String url = hostPort + "/playmaker/tenants";
-        restTemplate.postForObject(url, tenant, Boolean.class);
-
-        url = hostPort + "/playmaker/tenants/" + tenant.getTenantName();
-        PlaymakerTenant newTenant = restTemplate.getForObject(url, PlaymakerTenant.class);
+    public void createTenantWithTenantNameByNonAdmin() {
+        String url = apiHostPort + "/tenants";
+        PlaymakerTenant newTenant = restTemplate.postForObject(url, tenant, PlaymakerTenant.class);
         Assert.assertNotNull(newTenant);
+
+        try {
+            newTenant = restTemplate.getForObject(url, PlaymakerTenant.class);
+        } catch (Exception ex) {
+            Assert.assertEquals(ex.getMessage(), "401 Unauthorized");
+        }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantName")
+    @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
+    public void createTenantWithTenantNameByAdmin() {
+        String url = apiHostPort + "/tenants";
+        PlaymakerTenant newTenant = adminRestTemplate.postForObject(url, tenant, PlaymakerTenant.class);
+        Assert.assertNotNull(newTenant);
+        Assert.assertNotNull(newTenant.getTenantPassword());
+        Assert.assertTrue(newTenant.getTenantPassword().length() > 4);
+        System.out.println("Tenant name=" + newTenant.getTenantName() + " password=" + newTenant.getTenantPassword());
+        url = apiHostPort + "/tenants/" + tenant.getTenantName();
+        tenant = adminRestTemplate.getForObject(url, PlaymakerTenant.class);
+        Assert.assertNotNull(tenant);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
     public void updateTenantWithTenantName() {
-        String url = hostPort + "/playmaker/tenants/" + tenant.getTenantName();
+        String url = apiHostPort + "/tenants/" + tenant.getTenantName();
         tenant.setExternalId("externalId2");
-        restTemplate.put(url, tenant);
-        PlaymakerTenant newTenant = restTemplate.getForObject(url, PlaymakerTenant.class);
+        adminRestTemplate.put(url, tenant);
+        PlaymakerTenant newTenant = adminRestTemplate.getForObject(url, PlaymakerTenant.class);
         Assert.assertNotNull(newTenant);
         Assert.assertEquals(newTenant.getExternalId(), "externalId2");
 
@@ -56,9 +57,9 @@ public class TenantResourceTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "deployment", dependsOnMethods = "updateTenantWithTenantName")
     public void deleteTenantWithTenantName() {
-        String url = hostPort + "/playmaker/tenants/tenantName";
-        restTemplate.delete(url);
-        PlaymakerTenant newTenant = restTemplate.getForObject(url, PlaymakerTenant.class);
-        Assert.assertNull(newTenant);
+        String url = apiHostPort + "/tenants/" + tenant.getTenantName();
+        adminRestTemplate.delete(url);
+        PlaymakerTenant newTenant = adminRestTemplate.getForObject(url, PlaymakerTenant.class);
+        Assert.assertNull(newTenant.getTenantName());
     }
 }

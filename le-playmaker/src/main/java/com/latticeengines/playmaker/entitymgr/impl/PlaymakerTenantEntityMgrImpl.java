@@ -81,7 +81,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
         clientDetails.setClientId(tenant.getTenantName());
 
         Set<GrantedAuthority> authorities = new HashSet<>();
-        GrantedAuthority authority = new SimpleGrantedAuthority("PLAYMAKER_ROLE_CLIENT");
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_PLAYMAKER_CLIENT");
         authorities.add(authority);
         clientDetails.setAuthorities(authorities);
 
@@ -121,13 +121,6 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
     @Override
     @Transactional(value = "playmaker")
-    public void delete(PlaymakerTenant tenant) {
-        tenantDao.deleteByTenantName(tenant.getTenantName());
-        playmakerOauth2DbDao.deleteClientByClientId(tenant.getTenantName());
-    }
-
-    @Override
-    @Transactional(value = "playmaker")
     public PlaymakerTenant findByKey(PlaymakerTenant tenant) {
         return tenantDao.findByKey(tenant);
     }
@@ -154,8 +147,9 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
     @Override
     @Transactional(value = "playmaker")
-    public boolean deleteByTenantName(String tenantName) {
-        return tenantDao.deleteByTenantName(tenantName);
+    public void deleteByTenantName(String tenantName) {
+        tenantDao.deleteByTenantName(tenantName);
+        playmakerOauth2DbDao.deleteClientByClientId(tenantName);
     }
 
     @Override
