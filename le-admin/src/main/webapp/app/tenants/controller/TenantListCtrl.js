@@ -54,6 +54,14 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
             pageable: pageable,
             selectable: "row",
             filterable: {
+                operators: {
+                    string: {
+                        contains: "Contains",
+                        doesnotcontain: "Does not contain",
+                        eq: "Is equal to",
+                        neq: "Is not equal to"
+                    }
+                },
                 extra: false
             },
             columns: [

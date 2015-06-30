@@ -43,7 +43,7 @@ public class BootstrapState extends VersionedDocument {
         toReturn.state = State.MIGRATED;
         toReturn.desiredVersion = -1;
         toReturn.installedVersion = -1;
-        toReturn.errorMessage = "This tenant was migrated from an earlier version.";
+        toReturn.errorMessage = "This component was migrated from an earlier version.";
         return toReturn;
     }
 

@@ -9,12 +9,11 @@ app.service('TenantUtility', function(_){
             TenantId: record.CustomerSpace.tenantId,
             ContractId: record.CustomerSpace.contractId,
             DisplayName: record.TenantInfo.properties.displayName,
+            Product: record.SpaceConfiguration.Product,
             Status: record.BootstrapState.state,
             CreatedDate: new Date(record.TenantInfo.properties.created),
             LastModifiedDate: new Date(record.TenantInfo.properties.lastModified)
         };
-        var spaceInfo = record.CustomerSpaceInfo;
-        result.Product = spaceInfo.properties.product;
 
         if (result.Status === 'ERROR') {
             console.warn("ERROR in the tenant " + result.TenantId + " : " + record.BootstrapState.errorMessage);
@@ -118,6 +117,9 @@ app.service('TenantUtility', function(_){
             case this.getStatusDisplayName('ERROR'):
                 return '<i class="fa fa-times-circle text-danger component-status"></i> ' +
                     '<span class="text-danger">' + this.getStatusDisplayName('ERROR') + '</span>';
+            case this.getStatusDisplayName('MIGRATED'):
+                return '<i class="fa fa-arrow-circle-up text-muted component-status"></i> ' +
+                    '<span class="text-muted">' + this.getStatusDisplayName('MIGRATED') + '</span>';
             case this.getStatusDisplayName('UNKNOWN'):
                 return '<i class="fa fa-question-circle text-muted component-status"></i> ' +
                     '<span class="text-muted">' + this.getStatusDisplayName('UNKNOWN') + '</span>';
@@ -162,6 +164,8 @@ app.service('TenantUtility', function(_){
                 return "New";
             case "ERROR":
                 return "Installation Failed";
+            case "MIGRATED":
+                return "Migrated";
             case "UNKNOWN":
                 /* falls through */
             default:

@@ -231,6 +231,11 @@ public class TenantServiceImpl implements TenantService {
                     0, 0, "At least one of the components encountered an error : " + serviceName);
         }
 
+        if (state1.state.equals(BootstrapState.State.MIGRATED) || state2.state.equals(BootstrapState.State.MIGRATED)) {
+            return BootstrapState.constructMigratedState();
+        }
+
+
         if (state1.state.equals(BootstrapState.State.INITIAL) || state2.state.equals(BootstrapState.State.INITIAL)) {
             return BootstrapState.createInitialState();
         }
