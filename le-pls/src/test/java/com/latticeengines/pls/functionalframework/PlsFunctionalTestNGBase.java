@@ -83,6 +83,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@test.lattice-engines.ext";
     protected static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@test.lattice-engines.ext";
 
+    protected static final String BISAP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000WjNY";
+    protected static final String BISLP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000Kk28";
+
     private static HashMap<AccessLevel, User> testingUsers;
     private static HashMap<AccessLevel, UserDocument> testingUserSessions;
     protected static List<Tenant> testingTenants;

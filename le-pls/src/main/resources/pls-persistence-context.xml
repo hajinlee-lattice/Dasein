@@ -71,4 +71,7 @@
         <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
 
+    <bean id="salesforceURLDao" class="com.latticeengines.pls.dao.impl.SalesforceURLDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPLS" />
+    </bean>
 </beans>
