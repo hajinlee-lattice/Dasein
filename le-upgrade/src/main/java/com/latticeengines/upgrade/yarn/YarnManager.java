@@ -31,6 +31,7 @@ public class YarnManager {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String MODEL_NAME = "PLSModel";
     private static final String TEMPFOLDER = "tmp";
+    private static final String MS_PATH = "/enhancements/modelsummary.json";
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -102,13 +103,13 @@ public class YarnManager {
 
     public boolean modelSummaryExistsInSingularId(String customer, String uuid) {
         String modelFolder = findModelFolderPathInSingular(customer, uuid);
-        String destPath = modelFolder + "/enhancements/modelsummary.json";
+        String destPath = modelFolder + MS_PATH;
         return hdfsPathExists(destPath);
     }
 
     public boolean modelSummaryExistsInTupleId(String customer, String uuid) {
         String modelFolder = findModelFolderPathInTuple(customer, uuid);
-        String destPath = modelFolder + "/enhancements/modelsummary.json";
+        String destPath = modelFolder + MS_PATH;
         return hdfsPathExists(destPath);
     }
 
@@ -123,7 +124,7 @@ public class YarnManager {
 
     public void uploadModelsummary(String customer, String uuid, JsonNode summary) {
         String modelFolder = findModelFolderPathInTuple(customer, uuid);
-        String path = modelFolder + "/enhancements/modelsummary.json";
+        String path = modelFolder + MS_PATH;
         try {
             HdfsUtils.writeToFile(yarnConfiguration, path, summary.toString());
         } catch (Exception e) {
@@ -140,6 +141,7 @@ public class YarnManager {
 
         ObjectNode detail = objectMapper.createObjectNode();
         detail.put("Name", MODEL_NAME);
+        detail.put("ModelID", YarnPathUtils.constructModelGuidFromUuid(uuid));
         detail.put("ConstructionTime", constructionTime/1000L);
         detail.put("LookupId", lookupId);
 
@@ -188,7 +190,7 @@ public class YarnManager {
             return objectMapper.readTree(jsonContent);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000,
-                    "Failed to read the content of model.json for model " + YarnPathUtils.constructModelGuidFromUuid(uuid), e);
+                    "Failed to read the content of model.json for model " + uuid, e);
         }
     }
 
@@ -198,7 +200,6 @@ public class YarnManager {
     }
 
     private String findModelFolderPathInSingular(String customer, String uuid) {
-        //String uuid = YarnPathUtils.extractUuid(modelGuid);
         String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
         String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
         String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);

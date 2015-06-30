@@ -1,5 +1,6 @@
 package com.latticeengines.upgrade.tenant.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.upgrade.UpgradeRunner;
 import com.latticeengines.upgrade.dl.DataLoaderManager;
+import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.pls.PlsGaManager;
 import com.latticeengines.upgrade.tenant.service.TenantUpgradeService;
+import com.latticeengines.upgrade.yarn.YarnPathUtils;
 import com.latticeengines.upgrade.zk.ZooKeeperManager;
 
 @Component
@@ -23,6 +26,9 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
 
     @Autowired
     private PlsGaManager plsGaManager;
+
+    @Autowired
+    private TenantModelJdbcManager tenantModelJdbcManager;
 
     private void registerCustomerInZK(String customer) {
         System.out.println(String.format("\nThe customer being registered in ZK ... ... ... ... %s", customer));
@@ -55,6 +61,24 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
         System.out.println("OK");
     }
 
+    private void updateModelsActivity(String customer) {
+        System.out.println(String.format("\nUpdating models activity status for ... ... ... ... %s", customer));
+
+        System.out.print("Gettting models downloaded to PLS ... ");
+        List<String> modelIds =plsGaManager.getModelIds(customer);
+        System.out.println("OK");
+
+        System.out.println("Setting status of active models ... ");
+        for (String modelId: modelIds) {
+            String uuid = YarnPathUtils.extractUuid(modelId);
+            if (tenantModelJdbcManager.modelIsActive(customer, uuid)) {
+                System.out.print(String.format("Setting model %s to ACTIVE ... ", modelId));
+                plsGaManager.setModelActivity(modelId, true);
+                System.out.println("OK");
+            }
+        }
+    }
+
     private SpaceConfiguration fetchSpaceConfigurationFromDL(String customer) {
         System.out.print("Fetching info from DataLoader (this is slow) ... ");
         SpaceConfiguration spaceConfiguration = dataLoaderManager.constructSpaceConfiguration(customer);
@@ -76,6 +100,9 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
             case (UpgradeRunner.CMD_UPGRADE):
                 registerCustomerInPLS(customer);
                 registerCustomerInZK(customer);
+                return true;
+            case (UpgradeRunner.CMD_UPDATE_ACTIVE):
+                updateModelsActivity(customer);
                 return true;
             default:
                 return false;

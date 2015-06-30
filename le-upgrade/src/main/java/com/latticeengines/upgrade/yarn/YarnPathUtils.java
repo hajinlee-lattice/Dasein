@@ -24,19 +24,11 @@ public class YarnPathUtils {
     public static String parseUuid(String hdfsPath) {
         hdfsPath = stripoutProtocal(hdfsPath);
         String[] tokens = hdfsPath.split("/");
-        String uuid = tokens[7];
-        return uuid;
-    }
-
-    public static String parseModelGuid(String hdfsPath) {
-        hdfsPath = stripoutProtocal(hdfsPath);
-        String[] tokens = hdfsPath.split("/");
-        String uuid = tokens[7];
-        return constructModelGuidFromUuid(uuid);
+        return tokens[7];
     }
 
     public static String constructModelGuidFromUuid(String uuid) {
-        return "ms__" + uuid + "-PLSModel";
+        return "ms__" + uuid + "-PLS";
     }
 
     public static String constructTupleIdCustomerRoot(String customerBase, String customer) {

@@ -33,7 +33,7 @@ public class TenantModelJdbcManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testModelIsActive() {
-        Assert.assertTrue(tenantModelJdbcManager.modelIsActive(CUSTOMER, UUID));
+        Assert.assertTrue(tenantModelJdbcManager.modelIsActive(CUSTOMER, MODEL_GUID));
         Assert.assertTrue(tenantModelJdbcManager.modelIsActive(CUSTOMER, UUID));
         Assert.assertFalse(tenantModelJdbcManager.modelIsActive(CUSTOMER, java.util.UUID.randomUUID().toString()));
     }

@@ -38,12 +38,6 @@ public class YarnPathUtilsTestNG extends UpgradeFunctionalTestNGBase {
     }
 
     @Test(groups = {"unit", "functional"})
-    public void testParseModelGuid() throws Exception {
-        String modelGuid = YarnPathUtils.parseModelGuid(path);
-        Assert.assertEquals(modelGuid, MODEL_GUID);
-    }
-
-    @Test(groups = {"unit", "functional"})
     public void testExtractUuid() throws Exception {
         String uuid = YarnPathUtils.extractUuid(MODEL_GUID);
         Assert.assertEquals(uuid, UUID);

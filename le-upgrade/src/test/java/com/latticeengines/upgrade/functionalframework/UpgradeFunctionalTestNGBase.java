@@ -33,8 +33,11 @@ public class UpgradeFunctionalTestNGBase  extends AbstractTestNGSpringContextTes
     protected static final CRMTopology TOPOLOGY = CRMTopology.MARKETO;
 
     protected static RestTemplate magicRestTemplate = new RestTemplate();
+    protected static RestTemplate restTemplate = new RestTemplate();
     protected static MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader
             = new MagicAuthenticationHeaderHttpRequestInterceptor("");
+    protected static AuthorizationHeaderHttpRequestInterceptor addAuthHeader
+            = new AuthorizationHeaderHttpRequestInterceptor("");
 
     @Value("${dataplatform.customer.basedir}")
     protected String customerBase;
@@ -58,6 +61,28 @@ public class UpgradeFunctionalTestNGBase  extends AbstractTestNGSpringContextTes
                 throws IOException {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
             requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
+
+            return execution.execute(requestWrapper, body);
+        }
+
+        public void setAuthValue(String headerValue) {
+            this.headerValue = headerValue;
+        }
+    }
+
+    protected static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+
+        private String headerValue;
+
+        public AuthorizationHeaderHttpRequestInterceptor(String headerValue) {
+            this.headerValue = headerValue;
+        }
+
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+                throws IOException {
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
+            requestWrapper.getHeaders().add(Constants.AUTHORIZATION, headerValue);
 
             return execution.execute(requestWrapper, body);
         }
