@@ -22,6 +22,9 @@ public class RecommendationRetryAspect {
     @Around("execution(public * com.latticeengines.playmaker.entitymgr.impl.PlaymakerRecommendationEntityMgrImpl.*(..)) && args(tenantName, ..)")
     public Object playMakerRecommendationApiRetry(ProceedingJoinPoint joinPoint, String tenantName) throws Throwable {
 
+        log.info("Recommendation method=" + joinPoint.getSignature().toShortString() + " tenantName=" + tenantName
+                + " threadName=" + Thread.currentThread().getName());
+
         Object retVal = null;
         int retries = 2;
         while (retries > 0) {
