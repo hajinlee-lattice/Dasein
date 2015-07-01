@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.aspect;
 
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,22 +23,29 @@ public class RecommendationRetryAspect {
     @Around("execution(public * com.latticeengines.playmaker.entitymgr.impl.PlaymakerRecommendationEntityMgrImpl.*(..)) && args(tenantName, ..)")
     public Object playMakerRecommendationApiRetry(ProceedingJoinPoint joinPoint, String tenantName) throws Throwable {
 
-        log.info("Recommendation method=" + joinPoint.getSignature().toShortString() + " tenantName=" + tenantName
-                + " threadName=" + Thread.currentThread().getName());
-
-        Object retVal = null;
-        int retries = 2;
-        while (retries > 0) {
-            try {
-                retVal = joinPoint.proceed();
-                return retVal;
-            } catch (Exception ex) {
-                log.warn("There's exception happening!, retries=" + retries, ex);
-                templateFactory.removeTemplate(tenantName);
-                retries--;
+        long startTime = System.currentTimeMillis();
+        try {
+            Object retVal = null;
+            int retries = 2;
+            while (retries > 0) {
+                try {
+                    retVal = joinPoint.proceed();
+                    return retVal;
+                } catch (Exception ex) {
+                    log.warn("There's exception happening!, retries=" + retries, ex);
+                    templateFactory.removeTemplate(tenantName);
+                    retries--;
+                }
             }
+
+            throw new LedpException(LedpCode.LEDP_22007);
+
+        } finally {
+            long endTime = System.currentTimeMillis();
+            log.info(String.format("Recommendation method=%s tenantName=%s threadName=%s, ElapsedTime=%s", joinPoint
+                    .getSignature().toShortString(), tenantName, Thread.currentThread().getName(), DurationFormatUtils
+                    .formatDuration(endTime - startTime, "HH:mm:ss:SS")));
         }
 
-        throw new LedpException(LedpCode.LEDP_22007);
     }
 }

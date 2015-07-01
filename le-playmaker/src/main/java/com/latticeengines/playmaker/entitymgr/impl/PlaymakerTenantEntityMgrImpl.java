@@ -73,6 +73,8 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
             playmakerOauth2DbDao.updateClient(clientDetails);
         }
         tenant.setTenantPassword(clientDetails.getClientSecret());
+
+        log.info("Created the following tenantName=" + tenant.getTenantName());
         return tenant;
     }
 
@@ -150,13 +152,14 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     public void deleteByTenantName(String tenantName) {
         tenantDao.deleteByTenantName(tenantName);
         playmakerOauth2DbDao.deleteClientByClientId(tenantName);
+        log.info("Deleted the following tenantName=" + tenantName);
     }
 
     @Override
     @Transactional(value = "playmaker")
     public void updateByTenantName(PlaymakerTenant tenant) {
         tenantDao.updateByTenantName(tenant);
-
+        log.info("Updated the following tenantName=" + tenant.getTenantName());
     }
 
     @Override
