@@ -70,6 +70,39 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <webAppConfig>
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
+                            </webAppConfig>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>com.latticeengines.registerBootstrappers</name>
+                                    <value>true</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm-commons</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>javax.mail</groupId>
+                                <artifactId>mail</artifactId>
+                                <version>1.4.7</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -79,6 +112,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
+            <exclusions>
+            	<exclusion>
+	        		<groupId>org.slf4j</groupId>
+	        		<artifactId>slf4j-log4j12</artifactId>
+    			</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -99,6 +138,12 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-cassandra</artifactId>
             <version>1.1.0.RELEASE</version>
+            <exclusions>
+            	<exclusion>
+	        		<groupId>org.slf4j</groupId>
+	        		<artifactId>slf4j-log4j12</artifactId>
+    			</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -152,6 +197,17 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.30</version>
             <scope>test</scope>
+            <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.mangofactory</groupId>
+            <artifactId>swagger-springmvc</artifactId>
+            <version>0.9.4</version>
         </dependency>
     </dependencies>
 
