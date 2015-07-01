@@ -2,6 +2,9 @@
 rm -rf /opt/jetty/webapps/le-pls-*.war
 rm -rf /etc/ledp/pls.properties
 rm -rf /opt/jetty/bin/jetty.sh
+rm -rf /opt/jetty/start.ini
+rm -rf /opt/jetty/etc/jetty.xml
+rm -rf /opt/jetty/etc/jetty-rewrite.xml
 rm -rf /home/yarn/.bashrc
 adduser yarn
 groupadd yarn
@@ -11,4 +14,4 @@ chmod -R 755 /var/log/ledp
 chmod -R 755 /home/yarn/logs
 chown -R yarn:yarn /var/log/ledp
 chown -R yarn:yarn /home/yarn/logs
-chown -R yarn:yarn /opt/jetty/logs
+chown -R yarn:yarn /opt/jetty

@@ -144,6 +144,31 @@
                             </sources>
                         </mapping>
                         <mapping>
+                            <directory>/opt/jetty/etc</directory>
+                            <filemode>755</filemode>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
+                            <sources>
+                                <source>
+                                    <location>${bin.env.path}/jetty.xml</location>
+                                </source>
+                                <source>
+                                    <location>${bin.env.path}/jetty-rewrite.xml</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/opt/jetty</directory>
+                            <filemode>755</filemode>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
+                            <sources>
+                                <source>
+                                    <location>${bin.env.path}/start.ini</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
                             <directory>/home/yarn</directory>
                             <filemode>700</filemode>
                             <username>yarn</username>
