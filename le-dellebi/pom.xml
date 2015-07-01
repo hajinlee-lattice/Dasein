@@ -6,25 +6,19 @@
     <packaging>jar</packaging>
     <name>le-${component-name}</name>
 
-    <repositories>
-        <repository>
-            <id>conjars.org</id>
-            <url>http://conjars.org/repo</url>
-        </repository>
-    </repositories>
-
-
     <properties>
         <component-name>dellebi</component-name>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <camel.version>2.14.0</camel.version>
         <cameljcifs.version>2.13.2</cameljcifs.version>
         <cascading.version>2.5.0</cascading.version>
+        <cascading.driven.version>1.2-eap-11</cascading.driven.version>
         <le.common.version>1.0.34-SNAPSHOT</le.common.version>
         <le.scheduler.version>1.0.34-SNAPSHOT</le.scheduler.version>
         <le.dataplatform.version>1.0.34-SNAPSHOT</le.dataplatform.version>
         <jetty.version>6.1.26</jetty.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
+        <mysql.driver.version>5.1.35</mysql.driver.version>
     </properties>
 
     <parent>
@@ -91,6 +85,11 @@
             <groupId>cascading</groupId>
             <artifactId>cascading-hadoop2-mr1</artifactId>
             <version>${cascading.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>driven</groupId>
+            <artifactId>driven-plugin</artifactId>
+            <version>${cascading.driven.version}</version>
         </dependency>
          <dependency>
             <groupId>org.apache.camel</groupId>
@@ -253,6 +252,13 @@
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
             <version>4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.driver.version}</version>
+            <scope>test</scope>
         </dependency>
         
    </dependencies>
