@@ -49,13 +49,13 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void registerTenant() throws Exception {
-        zooKeeperManager.registerTenant(CUSTOMER);
+        zooKeeperManager.registerTenantIfNotExist(CUSTOMER);
         Path spacePath = PathBuilder.buildCustomerSpacePath(podId, CUSTOMER, CUSTOMER, SPACE);
         Assert.assertTrue(camille.exists(spacePath),
                 String.format("The space %s does not exist in ZK.", CustomerSpace.parse(CUSTOMER)));
 
         // idempotent
-        zooKeeperManager.registerTenant(CUSTOMER);
+        zooKeeperManager.registerTenantIfNotExist(CUSTOMER);
         spacePath = PathBuilder.buildCustomerSpacePath(podId, CUSTOMER, CUSTOMER, SPACE);
         Assert.assertTrue(camille.exists(spacePath),
                 String.format("Idempotent test failed: space %s does not exist in ZK.", CustomerSpace.parse(CUSTOMER)));

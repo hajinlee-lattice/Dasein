@@ -14,6 +14,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleTransaction;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
+import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -46,9 +47,15 @@ public class ZooKeeperManager {
         camille = CamilleEnvironment.getCamille();
     }
 
-    public void registerTenant(String tenantId) {
-        String name = CustomerSpace.parse(tenantId).getTenantId();
-        CustomerSpaceProperties properties = new CustomerSpaceProperties(name, DESCRIPTION, null, null);
+    public void registerTenantIfNotExist(String tenantId) {
+        CustomerSpace space = CustomerSpace.parse(tenantId);
+        try {
+            TenantLifecycleManager.exists(space.getContractId(), space.getTenantId());
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24004,
+                    String.format("Failed to check if tenant %s alread exists.", space.getContractId()), e);
+        }
+        CustomerSpaceProperties properties = new CustomerSpaceProperties(space.getTenantId(), DESCRIPTION, null, null);
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
         batonService.createTenant(tenantId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, spaceInfo);
     }
@@ -68,9 +75,11 @@ public class ZooKeeperManager {
             CamilleTransaction transaction = new CamilleTransaction();
             Path serviceDirectoryPath = servicesPath.append(component);
             try {
-                camille.upsert(serviceDirectoryPath.parent(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                camille.upsert(serviceDirectoryPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                BootstrapStateUtil.initializeState(serviceDirectoryPath, transaction, MIGRATED);
+                if (!camille.exists(serviceDirectoryPath)) {
+                    camille.upsert(serviceDirectoryPath.parent(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                    camille.upsert(serviceDirectoryPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                    BootstrapStateUtil.initializeState(serviceDirectoryPath, transaction, MIGRATED);
+                }
                 transaction.commit();
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_24004, "Failed to set BootstrapState for " + component, e);

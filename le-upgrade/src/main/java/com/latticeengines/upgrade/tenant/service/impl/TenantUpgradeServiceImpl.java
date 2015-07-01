@@ -34,7 +34,7 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
         System.out.println(String.format("\nThe customer being registered in ZK ... ... ... ... %s", customer));
 
         System.out.print("Creating tenant in ZK ... ");
-        zooKeeperManager.registerTenant(customer);
+        zooKeeperManager.registerTenantIfNotExist(customer);
         System.out.println("OK");
 
         SpaceConfiguration spaceConfiguration = fetchSpaceConfigurationFromDL(customer);
