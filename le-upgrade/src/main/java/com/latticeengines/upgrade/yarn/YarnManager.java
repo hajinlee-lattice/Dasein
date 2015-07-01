@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -149,6 +150,13 @@ public class YarnManager {
         summary.set("ModelDetail", detail);
 
         return summary;
+    }
+
+    public DateTime getModelCreationDate(String customer, String modelGuid) {
+        String uuid = YarnPathUtils.extractUuid(modelGuid);
+        JsonNode json = readModelAsJson(customer, uuid);
+        Long constructionTime = getTimestampFromModelJson(json);
+        return new DateTime(constructionTime);
     }
 
     private boolean hdfsPathExists(String path) {

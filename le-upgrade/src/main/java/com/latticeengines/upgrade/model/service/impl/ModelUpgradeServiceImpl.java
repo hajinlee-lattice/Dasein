@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.joda.time.format.DateTimeFormat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +25,7 @@ import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
+
 
 @Component("modelUpgrade")
 public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
@@ -57,6 +60,7 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     protected String version;
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
+    private static final DateTimeFormatter FMT = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     public abstract void upgrade() throws Exception;
 
@@ -249,6 +253,9 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
             System.out.println("NO");
             return;
         }
+
+        System.out.print("    Model was created at ................ ");
+        System.out.println(FMT.print(yarnManager.getModelCreationDate(customer, uuid)));
 
         System.out.print("    Modelsummary already exists? ........ ");
         
