@@ -30,7 +30,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
 @RequestMapping(value = "/tenants")
-@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport')")
+@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport') or hasRole('QA')")
 public class TenantResource {
 
     @Autowired

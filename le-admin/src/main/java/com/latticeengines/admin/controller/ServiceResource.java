@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "serviceadmin", description = "REST resource for managing Lattice services across all tenants")
 @RestController
 @RequestMapping(value = "/services")
-@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport')")
+@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport') or hasRole('QA')")
 public class ServiceResource {
 
     @Autowired
