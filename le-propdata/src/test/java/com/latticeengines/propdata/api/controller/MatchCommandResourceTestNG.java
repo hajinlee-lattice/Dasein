@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.propdata.ResponseID;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })
-public class MatchCommandResourceTest extends AbstractTestNGSpringContextTests{
+public class MatchCommandResourceTestNG extends AbstractTestNGSpringContextTests{
 
 	@Value("${propdata.api.hostport}")
     private String hostPort;
@@ -31,7 +31,7 @@ public class MatchCommandResourceTest extends AbstractTestNGSpringContextTests{
 
 	private RestTemplate restTemplate = new RestTemplate();
 	
-	@Test
+	@Test(groups =  "functional")
 	public void testMatchCommands() {
 		Object sourceTable = new String("PayPal_matching_elements_small");
 		Object destTables = new String("Alexa_Source|DerivedColumns");
