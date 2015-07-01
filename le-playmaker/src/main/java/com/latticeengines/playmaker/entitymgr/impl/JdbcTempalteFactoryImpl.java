@@ -48,6 +48,13 @@ public class JdbcTempalteFactoryImpl implements JdbcTempalteFactory {
         return template;
     }
 
+    public void removeTemplate(String tenantName) {
+
+        synchronized (jdbcTempates) {
+            jdbcTempates.remove(tenantName);
+        }
+    }
+
     private ComboPooledDataSource getDataSource(String tenantName) {
 
         PlaymakerTenant tenant = tenantEntityMgr.findByTenantName(tenantName);
