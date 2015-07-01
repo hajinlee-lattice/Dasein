@@ -1,6 +1,7 @@
 package com.latticeengines.upgrade.jdbc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,8 +25,15 @@ public class TenantModelJdbcManager {
     }
 
     public List<String> getActiveModels(String dlTenantName) {
-        List<String> models = tenantModelInfoJdbcTemlate.queryForList("SELECT ModelGUID FROM "
+        List<String> lists = tenantModelInfoJdbcTemlate.queryForList("SELECT ModelGUID FROM "
                 + INTERNAL_TENANT_MODEL_TABLE + " WHERE TenantName = \'" + dlTenantName + "\'", String.class);
+        List<String> models = new ArrayList<>();
+        for (String list: lists) {
+            if (!list.contains("No Active Model")) {
+                models.addAll(Arrays.asList(list.split(",")));
+            }
+
+        }
         return models;
     }
 
