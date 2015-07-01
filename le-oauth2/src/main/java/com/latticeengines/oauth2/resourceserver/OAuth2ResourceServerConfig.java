@@ -36,10 +36,11 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
         // define URL patterns to enable OAuth2 security
 
-        http.requestMatchers().antMatchers("/playmaker/**", "/tenants/**").and().authorizeRequests()
-                .antMatchers("/playmaker/**")
+        http.requestMatchers().antMatchers("/playmaker/**", "/tenants/**", "/api-docs/**", "/swagger/**").and()
+                .authorizeRequests().antMatchers("/playmaker/**")
                 .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))")
                 .antMatchers(HttpMethod.POST, "/tenants").permitAll().antMatchers("/tenants/**")
-                .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))");
+                .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))")
+                .antMatchers("/api-docs", "/api-docs/**", "/swagger/**").permitAll();
     }
 }
