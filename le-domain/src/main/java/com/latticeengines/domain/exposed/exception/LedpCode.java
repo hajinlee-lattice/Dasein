@@ -162,6 +162,7 @@ public enum LedpCode {
     LEDP_22004("Access token does not have token key!"),
     LEDP_22005("Failed to get tenant!"),
     LEDP_22006("Failed to get tenant from DB!"),
+    LEDP_22007("Failed to get recommendations after retry."),
 
     // le-oauth2
     LEDP_23000("Can not find user: {0}"),
