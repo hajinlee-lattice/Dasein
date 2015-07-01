@@ -2,6 +2,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'ngRoute',
     'mainApp.appCommon.directives.ngEnterDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
@@ -13,7 +14,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
-.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, NavUtility, ServiceErrorUtility, EvergageUtility,
+.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, ServiceErrorUtility, EvergageUtility,
     BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal) {
     
     $("body").addClass("login-body");
@@ -35,7 +36,6 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.showForgotPassword = false;
     $scope.forgotPasswordUsername = "";
     $scope.forgotPasswordErrorMessage = "";
-    $scope.passwordLastModifiedTimestamp = "";
 
     // Initialize Evergage as an anonymous user
     EvergageUtility.Initialize({
@@ -64,10 +64,9 @@ angular.module('mainApp.login.controllers.LoginController', [
             $scope.loginInProgess = false;
             $scope.loginMessage = null;
             if (result != null && result.Success === true) {
-                //$scope.directToPassword = result.Result.MustChangePassword; -- turned off for PLS 1.4
+                $scope.directToPassword = result.Result.MustChangePassword;
                 $scope.passwordLastModifiedTimestamp = result.Result.PasswordLastModified;
                 $rootScope.$broadcast("LoggedIn");
-                $scope.directToPassword = false;
                 $scope.handleTenantSelection(result.Result.Tenants);
             } else {
                 // Need to fail gracefully if we get no service response at all
@@ -126,8 +125,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             $rootScope.$broadcast("ShowFooterEvent", true);
             $http.get('./app/core/views/MainView.html').success(function (html) {
                 var scope = $rootScope.$new();
-                scope.directToPassword = $scope.directToPassword || false;
-                scope.passwordLastModifiedTimestamp = $scope.passwordLastModifiedTimestamp;
+                scope.directToPassword = $scope.directToPassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo($scope.passwordLastModifiedTimestamp);
                 $compile($("#mainView").html(html))(scope);
             });
         });

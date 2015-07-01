@@ -61,8 +61,18 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
+        if ($scope.mandatePasswordChange) {
+            clearChangePasswordField();
+        } else {
+            $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
+        }
     };
+    
+    function clearChangePasswordField() {
+        $scope.oldPassword = "";
+        $scope.newPassword = "";
+        $scope.confirmPassword = "";
+    }
     
     $scope.closeErrorClick = function ($event) {
         if ($event != null) {

@@ -15,24 +15,19 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.models.controllers.MultipleModelSetupController'
 ])
 
-.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, NavUtility, ConfigService) {
+.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
-    var directToPassword = $scope.directToPassword;
-    if (directToPassword || isPasswordLastModifiedLongerThanNinetyDaysAgo()) {
+
+    if ($scope.directToPassword) {
         createUpdatePasswordView();
     } else {
         createModelListView();
     }
 
-    function isPasswordLastModifiedLongerThanNinetyDaysAgo() {
-        var MILLISECOND_PER_DAY = 24 * 60 * 60 * 1000;
-        var numDaysAgoPasswordLastModified = Math.floor((Date.now() - $scope.passwordLastModifiedTimestamp) / MILLISECOND_PER_DAY) ;
-        return numDaysAgoPasswordLastModified >= 90;
-    }
-
     // Handle Initial View
     $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
         var scope = $rootScope.$new();
+        scope.mandatePasswordChange = $scope.directToPassword;
         $compile($("#mainHeaderView").html(html))(scope);
     });
     
@@ -68,6 +63,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Fetch the view and make it Angular aware
         $http.get('./app/login/views/UpdatePasswordView.html').success(function (html) {
             var scope = $rootScope.$new();
+            scope.mandatePasswordChange = true;
             $compile($("#mainContentView").html(html))(scope);
         });
     }

@@ -263,6 +263,7 @@ module.exports = function (grunt) {
                         '<%= pls.app %>/app/AppCommon/utilities/TrackingConstantsUtility.js',
                         '<%= pls.app %>/app/AppCommon/utilities/StringUtility.js',
                         '<%= pls.app %>/app/AppCommon/utilities/UnderscoreUtility.js',
+                        '<%= pls.app %>/app/AppCommon/utilities/TimestampIntervalUtility.js',
                         '<%= pls.app %>/app/AppCommon/modals/SimpleModal.js',
                         '<%= pls.app %>/app/AppCommon/services/WidgetFrameworkService.js',
                         '<%= pls.app %>/app/AppCommon/services/PlayTileService.js',

@@ -4,6 +4,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.core.services.HelpService',
     'mainApp.login.services.LoginService',
@@ -27,7 +28,7 @@ var mainApp = angular.module('mainApp', [
 }])
 
 .controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
+    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
     
@@ -48,7 +49,13 @@ var mainApp = angular.module('mainApp', [
     
     ResourceStringsService.GetResourceStrings().then(function(result) {
         var previousSession = BrowserStorageUtility.getClientSession();
-        if (previousSession != null && ! hasSessionTimedOut()) {
+        if (BrowserStorageUtility.getLoginDocument() && mustUserChangePassword(BrowserStorageUtility.getLoginDocument())) {
+            $http.get('./app/core/views/MainView.html').success(function (html) {
+                var scope = $rootScope.$new();
+                scope.directToPassword = true;
+                $compile($("#mainView").html(html))(scope);
+            });
+        } else if (previousSession != null && ! hasSessionTimedOut()) {
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
             $scope.showFooter = false;
@@ -125,6 +132,10 @@ var mainApp = angular.module('mainApp', [
             });
         });
     };
+    
+    function mustUserChangePassword(loginDocument) {
+        return loginDocument.MustChangePassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
+    }
     
     function refreshSessionLastActiveTimeStamp() {
         BrowserStorageUtility.setSessionLastActiveTimestamp(Date.now());
