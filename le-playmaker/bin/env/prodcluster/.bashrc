@@ -18,4 +18,3 @@ HADOOP_MAPRED_HOME=/usr/current/hadoop-mapreduce-client
 HADOOP_CONF=--lib=/etc/hadoop/conf
 SQOOP_HOME=/usr/hdp/current/sqoop-server
 export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64/jre
-export MODEL_DL_QUARTZ_ENABLED=disabled
