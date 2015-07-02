@@ -163,7 +163,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [username_idx] ON [dbo].[users]
 GO
 
 /*
-INSERT INTO [oauth2_dev].[dbo].[TENANT]
+INSERT INTO [dbo].[TENANT]
            ([TENANT_NAME]
            ,[EXTERNAL_ID]
            ,[JDBC_DRIVER]
@@ -176,11 +176,11 @@ INSERT INTO [oauth2_dev].[dbo].[TENANT]
            'playmaker', 'playmaker')
 GO
 
-INSERT INTO [oauth2_dev].[dbo].[authorities] ([username], [authority]) VALUES ('marissa', 'ROLE_USER')
+INSERT INTO [dbo].[authorities] ([username], [authority]) VALUES ('marissa', 'ROLE_USER')
 GO
 */
 
-INSERT INTO [oauth2_dev].[dbo].[oauth_client_details]
+INSERT INTO [dbo].[oauth_client_details]
            ([client_id]
            ,[resource_ids]
            ,[client_secret]
@@ -196,7 +196,7 @@ INSERT INTO [oauth2_dev].[dbo].[oauth_client_details]
            ('playmaker-admin', 'playmaker_api', 'slk4G111Msd8', 'read,write', 'authorization_code,refresh_token,client_credentials', NULL,
             'ROLE_PLAYMAKER_ADMIN', NULL, NULL, NULL, 'false')
 GO
-INSERT INTO [oauth2_dev].[dbo].[users]
+INSERT INTO [dbo].[users]
            ([username]
            ,[password]
            ,[enabled])
