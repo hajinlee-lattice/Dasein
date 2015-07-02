@@ -1,5 +1,3 @@
 #!/bin/bash -x
-
-rm -rf /home/yarn/logs/*
-
 echo "finishing"
+service jetty restart > /opt/jetty/logs/start.log 2>&1
