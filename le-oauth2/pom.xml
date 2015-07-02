@@ -28,25 +28,6 @@
         <version>1.2.4.RELEASE</version>
     </parent>
 
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>LE Maven REPOSITORY</name>
-            <layout>default</layout>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/groups/public</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-                <checksumPolicy>fail</checksumPolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-
 
     <build>
         <plugins>
