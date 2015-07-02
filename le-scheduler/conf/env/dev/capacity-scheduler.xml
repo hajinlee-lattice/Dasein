@@ -23,7 +23,7 @@
     
     <property>
       <name>yarn.scheduler.capacity.root.Modeling.capacity</name>
-      <value>50</value>
+      <value>30</value>
     </property>
     
     <property>
@@ -38,7 +38,7 @@
     
     <property>
       <name>yarn.scheduler.capacity.root.Modeling.user-limit-factor</name>
-      <value>2</value>
+      <value>4</value>
     </property>
     
     <property>
@@ -63,7 +63,7 @@
     
     <property>
       <name>yarn.scheduler.capacity.root.queues</name>
-      <value>Scoring,Modeling,PropData</value>
+      <value>Scoring,Modeling,PropData,Default</value>
     </property>
     
     <property>
@@ -84,6 +84,26 @@
     <property>
       <name>yarn.scheduler.capacity.root.Scoring.user-limit-factor</name>
       <value>2</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Default.capacity</name>
+      <value>20</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Default.maximum-capacity</name>
+      <value>20</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Default.state</name>
+      <value>RUNNING</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Default.user-limit-factor</name>
+      <value>1</value>
     </property>
     
   </configuration>
