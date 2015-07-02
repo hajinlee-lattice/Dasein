@@ -259,7 +259,8 @@ def runEndHourlyScoring(tenant):
     return runScoringGroups(tenant, load_groups);
 
 def runHourlyDanteProcess(tenant):
-    load_groups = ["LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
+#     load_groups = ["LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"]; 
+    load_groups = ["PushToReportsDB", "InsightsAllSteps"];   
     return runScoringGroups(tenant, load_groups);
 
 def runBulkScoring(tenant,app=None):
