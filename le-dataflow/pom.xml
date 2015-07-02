@@ -12,7 +12,7 @@
         <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
         <avro.version>1.7.7</avro.version>
         <cascading.version>2.5.0</cascading.version>
-        <cascading.driven.version>1.2-eap-11</cascading.driven.version>
+        <cascading.driven.version>1.2</cascading.driven.version>
         <le.common.version>1.0.34-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.34-SNAPSHOT</le.domain.version>
         <le.scheduler.version>1.0.34-SNAPSHOT</le.scheduler.version>
