@@ -22,4 +22,29 @@
         <module>le-oauth2</module>
         <module>le-playmaker</module>
     </modules>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>LE Maven REPOSITORY</name>
+            <layout>default</layout>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+    <distributionManagement>
+        <repository>
+            <id>com.latticeengines.local</id>
+            <name>Local</name>
+            <url>file://${user.home}/.m2/repository</url>
+        </repository>
+    </distributionManagement>
 </project>
