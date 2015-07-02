@@ -11,7 +11,7 @@
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <camel.version>2.14.0</camel.version>
         <cameljcifs.version>2.13.2</cameljcifs.version>
-        <cascading.version>2.7.0</cascading.version>
+        <cascading.version>2.5.0</cascading.version>
         <cascading.driven.version>1.2</cascading.driven.version>
         <le.common.version>1.0.34-SNAPSHOT</le.common.version>
         <le.scheduler.version>1.0.34-SNAPSHOT</le.scheduler.version>
