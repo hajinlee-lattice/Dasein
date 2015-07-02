@@ -11,6 +11,13 @@
         <le.rpm.version>1.0.34-SNAPSHOT</le.rpm.version>
     </properties>
 
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>1.0.34-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
     <profiles>
         <profile>
             <id>qa</id>
