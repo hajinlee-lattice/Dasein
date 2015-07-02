@@ -52,6 +52,13 @@
             </snapshots>
         </repository>
     </repositories>
+    <distributionManagement>
+        <repository>
+            <id>com.latticeengines.local</id>
+            <name>Local</name>
+            <url>file://${user.home}/.m2/repository</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>
