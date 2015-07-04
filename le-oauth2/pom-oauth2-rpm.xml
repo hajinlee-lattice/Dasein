@@ -63,13 +63,14 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <file>/opt/jetty/webapps/ROOT.war</file>
+                            <directory>/opt/jetty/webapps</directory>
                             <filemode>755</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>target/le-oauth2-${le.rpm.version}.war</location>
+                                    <destination>ROOT.war</destination>
                                 </source>
                             </sources>
                         </mapping>
