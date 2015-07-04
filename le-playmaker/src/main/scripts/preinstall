@@ -1,5 +1,6 @@
 #!/bin/bash
 rm -rf /opt/jetty/webapps/le-playmaker-*.war
+rm -rf /opt/jetty/webapps/ROOT.war
 rm -rf /etc/ledp/playmaker.properties
 rm -rf /etc/ledp/oauth2.properties
 rm -rf /opt/jetty/bin/jetty.sh

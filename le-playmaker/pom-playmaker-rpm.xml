@@ -68,7 +68,7 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/opt/jetty/webapps</directory>
+                            <directory>/opt/jetty/webapps/ROOT.war</directory>
                             <filemode>755</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
