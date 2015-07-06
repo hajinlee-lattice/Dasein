@@ -8,6 +8,15 @@
     <packaging>pom</packaging>
     <name>Lattice Playmaker Module</name>
 
+    <properties>
+        <maven.surefire.version>2.12.3</maven.surefire.version>
+        <functional.classes.include>**/*TestNG.java</functional.classes.include>
+        <functional.classes.exclude>**/*UnitTestNG.java</functional.classes.exclude>
+        <functional.groups>functional</functional.groups>
+        <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize>
+        <jetty.version>9.1.1.v20140108</jetty.version>
+    </properties>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>

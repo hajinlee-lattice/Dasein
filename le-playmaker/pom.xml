@@ -15,15 +15,9 @@
         <le.domain.version>1.0.34-SNAPSHOT</le.domain.version>
         <le.db.version>1.0.34-SNAPSHOT</le.db.version>
         <le.oauth2.version>1.0.34-SNAPSHOT</le.oauth2.version>
-        <maven.surefire.version>2.12.3</maven.surefire.version>
-        <functional.classes.include>**/*TestNG.java</functional.classes.include>
-        <functional.classes.exclude>**/*UnitTestNG.java</functional.classes.exclude>
-        <functional.groups>functional</functional.groups>
-        <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize>
         <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
         <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
         <spring.version>4.1.6.RELEASE</spring.version>
-        <jetty.version>9.1.1.v20140108</jetty.version>
         <start-class>com.latticeengines.playmaker.controller.RecommendationResource</start-class>
         <java.version>1.7</java.version>
     </properties>
