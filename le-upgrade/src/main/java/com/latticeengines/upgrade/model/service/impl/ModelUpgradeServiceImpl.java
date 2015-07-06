@@ -144,6 +144,8 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
         for(String uuid : uuids){
             upgradeModelSummayForCustomerModel(customer, uuid);
+
+            //TODO:song there will be another step to make early 1.4 summaries unclickable
         }
     }
 
@@ -157,13 +159,19 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println(exists ? "YES" : "NO");
 
         if (!exists) {
-            System.out.print("Generating modelsummary based on model.json ...");
-            JsonNode jsonNode = yarnManager.generateModelSummary(customer, uuid);
-            System.out.println("OK");
+            System.out.print("Check if the model is active ...");
+            boolean active = tenantModelJdbcManager.modelIsActive(customer, uuid);
+            System.out.println(active ? "YES" : "NO");
 
-            System.out.print("Uploading modelsummary to tupleId path ...");
-            yarnManager.uploadModelsummary(customer, uuid, jsonNode);
-            System.out.println("OK");
+            if (active) {
+                System.out.print("Generating modelsummary based on model.json ...");
+                JsonNode jsonNode = yarnManager.generateModelSummary(customer, uuid);
+                System.out.println("OK");
+
+                System.out.print("Uploading modelsummary to tupleId path ...");
+                yarnManager.uploadModelsummary(customer, uuid, jsonNode);
+                System.out.println("OK");
+            }
         }
     }
 
