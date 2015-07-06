@@ -19,7 +19,7 @@ public class DomainFeatureTableDaoImpl extends BaseDaoImpl<DomainFeatureTable>
         Class<DomainFeatureTable> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Lookup_ID = :lookupID", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("LookupID", lookupID);
+        query.setString("lookupID", lookupID);
 		List list = query.list();
 		if (list.size() == 0) {
             return null;

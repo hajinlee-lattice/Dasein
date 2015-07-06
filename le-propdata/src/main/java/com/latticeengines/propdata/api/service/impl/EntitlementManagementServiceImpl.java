@@ -65,7 +65,7 @@ public class EntitlementManagementServiceImpl implements EntitlementManagementSe
 	public Long assignColumnToDerivedEntitlementPackage(Long packageID,
 			String extensionName, String sourceTableName) {
 		DataColumnMap dc = new DataColumnMap();
-		entitlementDerivedEntityMgr.getDataColumn(extensionName, sourceTableName);
+		dc = entitlementDerivedEntityMgr.getDataColumn(extensionName, sourceTableName);
 		return entitlementDerivedEntityMgr.assignDerivedColumnToPackage(packageID, dc); 
 	}
 
@@ -73,7 +73,7 @@ public class EntitlementManagementServiceImpl implements EntitlementManagementSe
 	public void removeColumnFromDerivedEntitlementPackage(Long packageID,
 			String extensionName, String sourceTableName) {
 		DataColumnMap dc = new DataColumnMap();
-		entitlementDerivedEntityMgr.getDataColumn(extensionName, sourceTableName);
+		dc = entitlementDerivedEntityMgr.getDataColumn(extensionName, sourceTableName);
 		entitlementDerivedEntityMgr.removeDerivedColumnFromPackage(packageID, dc); 
 		
 	}

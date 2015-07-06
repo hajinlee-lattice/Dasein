@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.api.controller;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 import java.util.List;
 
@@ -15,15 +14,16 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.propdata.DataColumnMap;
 import com.latticeengines.domain.exposed.propdata.EntitlementPackages;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackageMap;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackages;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackageMap;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackages;
-import com.latticeengines.domain.exposed.propdata.ResponseID;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })
@@ -38,7 +38,7 @@ public class EntitlementManagementResourceTest extends AbstractTestNGSpringConte
 
 	private RestTemplate restTemplate = new RestTemplate();
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(groups = "functional")
 	public void testDerivedAttributePackage() {
 		Object sourcePackageName = new String("Test");
@@ -48,56 +48,65 @@ public class EntitlementManagementResourceTest extends AbstractTestNGSpringConte
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Accept", "application/json");
 	    HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-		ResponseEntity<ResponseID> packageID = restTemplate.exchange(getRestAPIHostPort() 
-				+ "/PropData/entitlements/source/", HttpMethod.PUT
-				,requestEntity,ResponseID.class,sourcePackageName,sourcePackageDescription
-				,isDefault);
+	    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+	    		+ "/PropData/entitlements/derived/")
+	            .queryParam("packageName", sourcePackageName)
+	            .queryParam("packageDescription", sourcePackageDescription)
+	            .queryParam("isDefault", isDefault);
+	    ResponseEntity<ResponseDocument> packageID = restTemplate.exchange(builder.build().encode().toUri()
+				,HttpMethod.PUT,requestEntity,ResponseDocument.class);
 	    assertNotNull(packageID);
 	    
 	    List<EntitlementPackages> packages = restTemplate.getForObject(getRestAPIHostPort() 
 	    		+ "/PropData/entitlements/derived/",List.class);
-	    assertNotNull(packages);
+	    assertFalse(packages.isEmpty());
 	    
 	    Object sourceTableName = new String("Alexa_Source");
-		Object extensionName = new String("Language");
-		ResponseEntity<ResponseID> columnID = restTemplate.exchange(
-				getRestAPIHostPort() + "/PropData/entitlements/derived/column/" 
-				+ packageID.getBody().getID(), HttpMethod.PUT
-				,requestEntity,ResponseID.class,extensionName,sourceTableName);
+		Object extensionName = new String("AlexaLanguage");
+		builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+				+ "/PropData/entitlements/derived/column/" + packageID.getBody().getResult())
+	            .queryParam("sourceTableName", sourceTableName)
+	            .queryParam("extensionName", extensionName);
+		ResponseEntity<ResponseDocument> columnID = restTemplate.exchange(
+				builder.build().encode().toUri(), HttpMethod.PUT
+				,requestEntity,ResponseDocument.class);
 	    assertNotNull(columnID);
 	    
 	    List<DataColumnMap> columns = restTemplate.getForObject(getRestAPIHostPort() 
 	    		+ "/PropData/entitlements/derived/details/" 
-	    		+ packageID.getBody().getID(),List.class);
-	    assertNotNull(columns);
+	    		+ packageID.getBody().getResult(),List.class);
+	    assertFalse(columns.isEmpty());
 	    
 	    Object contractID = new String("Test");
-		ResponseEntity<ResponseID> customerID = restTemplate.exchange(
+	    ResponseEntity<ResponseDocument> customerID = restTemplate.exchange(
 				getRestAPIHostPort() + "/PropData/entitlements/derived/customer/" 
-				+ packageID.getBody().getID() + "/" + contractID, HttpMethod.PUT
-				,requestEntity,ResponseID.class);
+				+ packageID.getBody().getResult() + "/" + contractID, HttpMethod.PUT
+				,requestEntity,ResponseDocument.class);
 	    assertNotNull(customerID);
 	    
 	    packages = restTemplate.getForObject(getRestAPIHostPort() 
 	    		+ "/PropData/entitlements/derived/Test",List.class);
-	    assertNotNull(packages);
+	    assertFalse(packages.isEmpty());
 	      
 	    packages = restTemplate.getForObject(getRestAPIHostPort() 
 	    		+ "/PropData/entitlements/derived/abc",List.class);
-	    assertNull(packages);
+	    assertTrue(packages.isEmpty());
 	    
 		restTemplate.delete(
 				getRestAPIHostPort() + "/PropData/entitlements/derived/customer/" 
-				+ packageID.getBody().getID() + "/" + contractID);
+				+ packageID.getBody().getResult() + "/" + contractID);
 
+		builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+				+ "/PropData/entitlements/derived/column/" 
+						+ packageID.getBody().getResult())
+	            .queryParam("extensionName", extensionName)
+	            .queryParam("sourceTableName", sourceTableName);
 		restTemplate.delete(
-				getRestAPIHostPort() + "/PropData/entitlements/derived/column/" 
-				+ packageID.getBody().getID()
-				,extensionName,sourceTableName);
+				builder.build().encode().toUri());
 	
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(groups = "functional")
 	public void createSourcePackage() {
 		Object packageName = new String("Test");
@@ -107,51 +116,62 @@ public class EntitlementManagementResourceTest extends AbstractTestNGSpringConte
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Accept", "application/json");
 	    HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-		ResponseEntity<ResponseID> packageID = restTemplate.exchange(getRestAPIHostPort() 
-				+ "/PropData/entitlements/derived/", HttpMethod.PUT
-				,requestEntity,ResponseID.class,packageName,packageDescription,isDefault);
+	    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+	    		+ "/PropData/entitlements/source/")
+	            .queryParam("sourcePackageName", packageName)
+	            .queryParam("sourcePackageDescription", packageDescription)
+	            .queryParam("isDefault", isDefault);
+	    ResponseEntity<ResponseDocument> packageID = restTemplate.exchange(
+				builder.build().encode().toUri(), HttpMethod.PUT
+				,requestEntity,ResponseDocument.class);
 	    assertNotNull(packageID);
 	    
 	    List<EntitlementSourcePackages> packages 
 	    	= restTemplate.getForObject(getRestAPIHostPort() + "/PropData/entitlements/source/"
 	    	,List.class);
-	    assertNotNull(packages);
+	    assertFalse(packages.isEmpty());
 	    
 	    Object lookupID = new String("Alexa_Source");
-		ResponseEntity<ResponseID> sourceID = restTemplate.exchange(
-				getRestAPIHostPort() + "/PropData/source/source/" + packageID.getBody().getID()
-				, HttpMethod.PUT,requestEntity,ResponseID.class,lookupID);
+	    builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+	    		+ "/PropData/entitlements/source/source/" + packageID.getBody().getResult())
+	            .queryParam("lookupID", lookupID);
+	    ResponseEntity<ResponseDocument> sourceID = restTemplate.exchange(
+				builder.build().encode().toUri()
+				, HttpMethod.PUT,requestEntity,ResponseDocument.class);
 	    assertNotNull(sourceID);
 	    
 	    List<EntitlementSourcePackageMap> sourcePackageMap 
 		    = restTemplate.getForObject(getRestAPIHostPort() 
-		    + "/PropData/entitlements/source/details/" + packageID.getBody().getID(),List.class);
-	    assertNotNull(sourcePackageMap);
+		    + "/PropData/entitlements/source/details/" + packageID.getBody().getResult(),List.class);
+	    assertFalse(sourcePackageMap.isEmpty());
 	    
 	    Object contractID = new String("Test");
-		ResponseEntity<ResponseID> customerID = restTemplate.exchange(
-				getRestAPIHostPort() + "/source/customer/" + packageID.getBody().getID() 
-				+ "/" + contractID, HttpMethod.PUT,requestEntity,ResponseID.class);
+	    ResponseEntity<ResponseDocument> customerID = restTemplate.exchange(
+				getRestAPIHostPort() + "/PropData/entitlements/source/customer/" + packageID.getBody().getResult() 
+				+ "/" + contractID, HttpMethod.PUT,requestEntity,ResponseDocument.class);
 	    assertNotNull(customerID);
 	    
 	    packages = restTemplate.getForObject(getRestAPIHostPort() 
 	    		+ "/PropData/entitlements/source/Test",List.class);
-	    assertNotNull(packages);
+	    assertFalse(packages.isEmpty());
 	      
 	    packages = restTemplate.getForObject(getRestAPIHostPort() 
 	    		+ "/PropData/entitlements/source/abc",List.class);
-	    assertNull(packages);
+	    assertTrue(packages.isEmpty());
 	    
 		restTemplate.delete(
 				getRestAPIHostPort() + "/PropData/entitlements/source/customer/" 
-				+ packageID.getBody().getID() + "/" + contractID);
+				+ packageID.getBody().getResult() + "/" + contractID);
 
+		builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+	    		+ "/PropData/entitlements/source/source/" 
+	    				+ packageID.getBody().getResult())
+	    				.queryParam("lookupID", lookupID);
 		restTemplate.delete(
-				getRestAPIHostPort() + "/PropData/entitlements/derived/column/" 
-				+ packageID.getBody().getID(),lookupID);
+				builder.build().encode().toUri());
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(groups = "functional")
 	public void createSourceColumnPackage() {
 		  Object sourceColumnPackageName = new String("Test");
@@ -161,51 +181,63 @@ public class EntitlementManagementResourceTest extends AbstractTestNGSpringConte
 	      headers.add("Content-Type", "application/json");
 	      headers.add("Accept", "application/json");
 	      HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-		  ResponseEntity<ResponseID> packageID = restTemplate.exchange(getRestAPIHostPort() 
-				  + "/PropData/entitlements/columns/", HttpMethod.PUT
-				  ,requestEntity,ResponseID.class,sourceColumnPackageName
-				  ,sourceColumnPackageDescription,isDefault);
+	      UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+		    		+ "/PropData/entitlements/columns/")
+		            .queryParam("sourceColumnPackageName", sourceColumnPackageName)
+		            .queryParam("sourceColumnPackageDescription", sourceColumnPackageDescription)
+		            .queryParam("isDefault", isDefault);
+	      ResponseEntity<ResponseDocument> packageID = restTemplate.exchange(
+				  builder.build().encode().toUri(), HttpMethod.PUT
+				  ,requestEntity,ResponseDocument.class);
 	      assertNotNull(packageID);
 	      
 	      List<EntitlementSourceColumnsPackages> packages 
 	      		= restTemplate.getForObject(getRestAPIHostPort() + "/PropData/entitlements/columns/"
 	      		,List.class);
-	      assertNotNull(packages);
+	      assertFalse(packages.isEmpty());
 	      
 	      Object lookupID = new String("Alexa_Source");
 		  Object columnName = new String("Language");
-		  ResponseEntity<ResponseID> columnID = restTemplate.exchange(
-				  getRestAPIHostPort() + "/PropData/columns/column/" + packageID.getBody().getID()
-				  , HttpMethod.PUT,requestEntity,ResponseID.class,lookupID,columnName);
+		  builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+		    		+ "/PropData/entitlements/columns/column/" + packageID.getBody().getResult())
+		            .queryParam("lookupID", lookupID)
+		            .queryParam("columnName", columnName);
+		  ResponseEntity<ResponseDocument> columnID = restTemplate.exchange(
+				  builder.build().encode().toUri()
+				  ,HttpMethod.PUT,requestEntity,ResponseDocument.class);
 	      assertNotNull(columnID);
 	      
 	      List<EntitlementSourceColumnsPackageMap> columns 
 	      		= restTemplate.getForObject(getRestAPIHostPort() 
-	      		+ "/PropData/entitlements/columns/details/" + packageID.getBody().getID()
+	      		+ "/PropData/entitlements/columns/details/" + packageID.getBody().getResult()
 	      		,List.class);
-	      assertNotNull(columns);
+	      assertFalse(columns.isEmpty());
 	      
 	      Object contractID = new String("Test");
-		  ResponseEntity<ResponseID> customerID = restTemplate.exchange(
-				getRestAPIHostPort() + "/columns/customer/" + packageID.getBody().getID() + "/" 
+		  ResponseEntity<ResponseDocument> customerID = restTemplate.exchange(
+				getRestAPIHostPort() + "/PropData/entitlements/columns/customer/" + packageID.getBody().getResult() + "/" 
 				+ contractID, HttpMethod.PUT
-				,requestEntity,ResponseID.class);
+				,requestEntity,ResponseDocument.class);
 	      assertNotNull(customerID);
 	      
 	      packages = restTemplate.getForObject(getRestAPIHostPort() 
 	    		  + "/PropData/entitlements/columns/Test",List.class);
-	      assertNotNull(packages);
+	      assertFalse(packages.isEmpty());
 	      
 	      packages = restTemplate.getForObject(getRestAPIHostPort() 
 	    		  + "/PropData/entitlements/columns/abc",List.class);
-	      assertNull(packages);
+	      assertTrue(packages.isEmpty());
 	      
 		  restTemplate.delete(
 				getRestAPIHostPort() + "/PropData/entitlements/columns/customer/" 
-				+ packageID.getBody().getID() + "/" + contractID);
+				+ packageID.getBody().getResult() + "/" + contractID);
 		  
+		  builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() 
+		    		+ "/PropData/entitlements/columns/column/" 
+		    				+ packageID.getBody().getResult())
+		            .queryParam("lookupID", lookupID)
+		            .queryParam("columnName", columnName);
 		  restTemplate.delete(
-				getRestAPIHostPort() + "/PropData/entitlements/derived/column/" 
-				+ packageID.getBody().getID(),lookupID,columnName);
+				  builder.build().encode().toUri());
 	}
 }

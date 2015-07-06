@@ -64,7 +64,7 @@ public class EntitlementManagementResource {
     	
     	Long id = entitlementManagementService.createDerivedEntitlementPackage(packageName,packageDescription,isDefault);
         
-        return new ResponseID(id);
+        return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/derived/column/{packageID}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -76,7 +76,7 @@ public class EntitlementManagementResource {
         
     	Long id =  entitlementManagementService.assignColumnToDerivedEntitlementPackage(packageID,extensionName,sourceTableName);
     
-    	return new ResponseID(id);
+    	return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/derived/column/{packageID}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -96,7 +96,7 @@ public class EntitlementManagementResource {
     		@PathVariable String contractID){
         
     	Long id = entitlementManagementService.assignCustomerToDerivedEntitlementPackage(packageID,contractID);
-    	return new ResponseID(id);
+    	return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/derived/customer/{packageID}/{contractID}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -142,7 +142,7 @@ public class EntitlementManagementResource {
         
     	Long id = entitlementManagementService.createSourceEntitlementPackage(sourcePackageName,sourcePackageDescription,isDefault);
     
-    	return new ResponseID(id);
+    	return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/source/source/{sourcePackageID}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -153,7 +153,7 @@ public class EntitlementManagementResource {
         
     	Long id = entitlementManagementService.assignSourceToEntitlementPackage(sourcePackageID,lookupID);
     
-    	return new ResponseID(id);
+    	return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/source/source/{sourcePackageID}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -172,7 +172,7 @@ public class EntitlementManagementResource {
     		@PathVariable String contractID){
         
     	Long id = entitlementManagementService.assignCustomerToSourceEntitlementPackage(sourcePackageID,contractID);
-    	return new ResponseID(id);
+    	return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/source/customer/{sourcePackageID}/{contractID}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -220,7 +220,7 @@ public class EntitlementManagementResource {
     								   @RequestParam(value="isDefault", required=false) Boolean isDefault){
         
     	Long id = entitlementManagementService.createSourceColumnEntitlementPackage(sourceColumnPackageName,sourceColumnPackageDescription,isDefault);
-    	return new ResponseID(id);
+    	return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/columns/column/{sourceColumnPackageID}"
@@ -232,7 +232,7 @@ public class EntitlementManagementResource {
     									 @RequestParam(value="columnName", required=true) String columnName){
         
     	Long id = entitlementManagementService.assignSourceColumnToEntitlementPackage(sourceColumnPackageID,lookupID,columnName);
-    	return new ResponseID(id);
+    	return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/columns/column/{sourceColumnPackageID}"
@@ -254,7 +254,7 @@ public class EntitlementManagementResource {
     		@PathVariable String contractID){
         
     	Long id = entitlementManagementService.assignCustomerToSourceColumnEntitlementPackage(sourceColumnPackageID,contractID);
-    	return new ResponseID(id);
+    	return new ResponseID(true,null,id);
     }
     
     @RequestMapping(value = "/columns/customer/{sourceColumnPackageID}/{contractID}"

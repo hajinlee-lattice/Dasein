@@ -65,7 +65,7 @@ public class EntitlementSourceEntityMgrImpl implements EntitlementSourceEntityMg
 			results.add(entitlementSourcePackagesDao
 					.findByKey(EntitlementSourcePackages.class, contractMap.getSourcePackage_ID()));
 		}
-		return results;
+		return (List<EntitlementSourcePackages>)results;
 	}
 
 	@Override

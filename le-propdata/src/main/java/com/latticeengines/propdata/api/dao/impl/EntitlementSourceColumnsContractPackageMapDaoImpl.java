@@ -41,7 +41,7 @@ public class EntitlementSourceColumnsContractPackageMapDaoImpl extends
 		Session session = getSessionFactory().getCurrentSession();
         Class<EntitlementSourceColumnsContractPackageMap> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Contract_ID = :externalID"
-        		+ " AND SourceColumnsPackage_ID = packageID:", entityClz.getSimpleName());
+        		+ " AND SourceColumnsPackage_ID = :packageID", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("externalID", externalID);
         query.setLong("packageID", packageID);

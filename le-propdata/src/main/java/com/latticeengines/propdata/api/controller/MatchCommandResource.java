@@ -32,7 +32,7 @@ public class MatchCommandResource {
     	String status = 
     			matchCommandService.getMatchCommandStatus(commandID,matchClient);
     	
-    	return new ResponseCommandStatus(status);
+    	return new ResponseCommandStatus(true,null,status);
     }
 
     @RequestMapping(value = "", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -51,6 +51,6 @@ public class MatchCommandResource {
         Long commandID = matchCommandService
         		.createMatchCommand(sourceTable,destTables,contractExternalID,matchClient);
         
-        return new ResponseID(commandID);
+        return new ResponseID(true,null,commandID);
     }
 }

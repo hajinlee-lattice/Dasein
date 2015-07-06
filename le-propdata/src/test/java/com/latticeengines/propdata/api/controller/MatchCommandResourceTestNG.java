@@ -15,8 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.ResponseCommandStatus;
-import com.latticeengines.domain.exposed.propdata.ResponseID;
+import com.latticeengines.domain.exposed.pls.ResponseDocument;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })
@@ -31,6 +30,7 @@ public class MatchCommandResourceTestNG extends AbstractTestNGSpringContextTests
 
 	private RestTemplate restTemplate = new RestTemplate();
 	
+	@SuppressWarnings("rawtypes")
 	@Test(groups =  "functional")
 	public void testMatchCommands() {
 		Object sourceTable = new String("PayPal_matching_elements_small");
@@ -47,8 +47,9 @@ public class MatchCommandResourceTestNG extends AbstractTestNGSpringContextTests
 	            .queryParam("contractExternalID", contractExternalID)
 	            .queryParam("matchClient", matchClient);
 	    
-		ResponseEntity<ResponseID> responseID = restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.PUT
-				,requestEntity,ResponseID.class);
+	    ResponseEntity<ResponseDocument> responseID = 
+				restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.PUT
+				,requestEntity,ResponseDocument.class);
 	    assertNotNull(responseID);
 	    
 	    try {
@@ -57,8 +58,10 @@ public class MatchCommandResourceTestNG extends AbstractTestNGSpringContextTests
 			e.printStackTrace();
 		}
 	    
-	    ResponseCommandStatus commandStatus = 
-	    		restTemplate.getForObject(getRestAPIHostPort() + "/PropData/matchcommands/" + responseID.getBody().getID(),ResponseCommandStatus.class);
+	    ResponseDocument commandStatus = 
+	    		restTemplate.getForObject(getRestAPIHostPort() 
+	    				+ "/PropData/matchcommands/" + responseID.getBody().getResult()
+	    				,ResponseDocument.class);
 	      assertNotNull(commandStatus);
 	}
 	
