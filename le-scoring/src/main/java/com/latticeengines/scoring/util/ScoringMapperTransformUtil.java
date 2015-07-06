@@ -51,8 +51,8 @@ public class ScoringMapperTransformUtil {
 
         for (String lead : leadList) {
             leadJsonObject = (JSONObject) jsonParser.parse(lead);
-            String leadId = (String) leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
-            String modelId = (String) leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN);
+            String leadId = String.valueOf(leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN));
+            String modelId = String.valueOf(leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN));
             if (leadId == null) {
                 throw new LedpException(LedpCode.LEDP_20003);
             }
@@ -98,7 +98,7 @@ public class ScoringMapperTransformUtil {
 
     public static void writeScoringScript(String modelGuid, JSONObject modelObject) throws IOException {
 
-        String scriptContent = (String) modelObject.get(MODEL_SCRIPT);
+        String scriptContent = String.valueOf(modelObject.get(MODEL_SCRIPT));
         String fileName = modelGuid + SCORING_SCRIPT_NAME;
         log.info("fileName is " + fileName);
         File file = new File(fileName);
@@ -112,7 +112,7 @@ public class ScoringMapperTransformUtil {
             JSONObject compressedFile = (JSONObject) compressedSupportedFiles.get(i);
             String compressedFileName = modelGuid + compressedFile.get("Key");
             log.info("compressedFileName is " + compressedFileName);
-            decodeBase64ThenDecompressToFile((String) compressedFile.get("Value"), compressedFileName);
+            decodeBase64ThenDecompressToFile(String.valueOf(compressedFile.get("Value")), compressedFileName);
         }
 
     }
@@ -148,7 +148,7 @@ public class ScoringMapperTransformUtil {
     }
 
     private static String identifyModelGuid(JSONObject leadJsonObject, HashMap<String, String> modelIdMap) {
-        String modelId = (String) leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN);
+        String modelId = String.valueOf(leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN));
         String guid = null;
         Set<String> modelGuidSet = modelIdMap.keySet();
 
@@ -170,7 +170,7 @@ public class ScoringMapperTransformUtil {
 
         // parse the avro file since it is in json format
         JSONObject jsonObj = new JSONObject();
-        String leadId = (String) leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
+        String leadId = String.valueOf(leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN));
 
         JSONArray jsonArray = new JSONArray();
         jsonObj.put("value", jsonArray);
@@ -183,13 +183,13 @@ public class ScoringMapperTransformUtil {
             String type = null;
             // get key
             JSONObject obj = (JSONObject) metadata.get(i);
-            String key = (String) obj.get("Name");
+            String key = String.valueOf(obj.get("Name"));
             columnObj.put("Key", key);
             type = (Long) obj.get("ValueType") == 0 ? "Float" : "String";
             // should treat sqoop null as empty
             String typeAndValue = "";
             if (leadJsonObject.get(key) != null) {
-                String value = leadJsonObject.get(key).toString();
+                String value = String.valueOf(leadJsonObject.get(key));
                 String processedValue = processBitValue(type, value);
                 typeAndValue = String.format("%s|\'%s\'", type, processedValue);
             } else {

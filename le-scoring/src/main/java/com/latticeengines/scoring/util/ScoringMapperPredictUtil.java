@@ -195,7 +195,7 @@ public class ScoringMapperPredictUtil {
                 Double lowerBound = (Double) range.get(BUCKETS_MINIMUMSCORE);
                 Double upperBound = (Double) range.get(BUCKETS_MAXIMUMSCORE);
                 if (value != null && betweenBounds(value, lowerBound, upperBound)) {
-                    bucket = (String) range.get(BUCKETS_NAME);
+                    bucket = String.valueOf(range.get(BUCKETS_NAME));
                     break;
                 }
             }
