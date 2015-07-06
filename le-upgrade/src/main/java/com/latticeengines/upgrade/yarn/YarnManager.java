@@ -102,6 +102,10 @@ public class YarnManager {
         }
     }
 
+    public boolean modelSummaryIsCompleteInSingularId(String customer, String uuid) {
+        return modelSummaryIsComplete(readModelSummaryAsJson(customer, uuid));
+    }
+
     public boolean modelSummaryExistsInSingularId(String customer, String uuid) {
         String modelFolder = findModelFolderPathInSingular(customer, uuid);
         String destPath = modelFolder + MS_PATH;
@@ -200,6 +204,21 @@ public class YarnManager {
             throw new LedpException(LedpCode.LEDP_24000,
                     "Failed to read the content of model.json for model " + uuid, e);
         }
+    }
+
+    private JsonNode readModelSummaryAsJson(String customer, String uuid) {
+        String srcJsonFullPath = findModelFolderPathInSingular(customer, uuid) + MS_PATH;
+        try {
+            String jsonContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, srcJsonFullPath);
+            return objectMapper.readTree(jsonContent);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24000,
+                    "Failed to read the content of model.json for model " + uuid, e);
+        }
+    }
+
+    private boolean modelSummaryIsComplete(JsonNode json) {
+        return json.has("ModelDetails");
     }
 
     private String findModelFolderPathInTuple(String customer, String uuid) {

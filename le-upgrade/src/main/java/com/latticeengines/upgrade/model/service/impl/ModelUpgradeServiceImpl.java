@@ -158,20 +158,29 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         boolean exists = yarnManager.modelSummaryExistsInTupleId(customer, uuid);
         System.out.println(exists ? "YES" : "NO");
 
+        boolean toBeGenerated;
         if (!exists) {
             System.out.print("Check if the model is active ...");
             boolean active = tenantModelJdbcManager.modelIsActive(customer, uuid);
             System.out.println(active ? "YES" : "NO");
 
-            if (active) {
-                System.out.print("Generating modelsummary based on model.json ...");
-                JsonNode jsonNode = yarnManager.generateModelSummary(customer, uuid);
-                System.out.println("OK");
+            toBeGenerated = active;
+        } else {
+            System.out.print("Check if the modelsummary is complete ...");
+            boolean complete = yarnManager.modelSummaryIsCompleteInSingularId(customer, uuid);
+            System.out.println(complete ? "YES" : "NO");
 
-                System.out.print("Uploading modelsummary to tupleId path ...");
-                yarnManager.uploadModelsummary(customer, uuid, jsonNode);
-                System.out.println("OK");
-            }
+            toBeGenerated = !complete;
+        }
+
+        if (toBeGenerated) {
+            System.out.print("Generating modelsummary based on model.json ...");
+            JsonNode jsonNode = yarnManager.generateModelSummary(customer, uuid);
+            System.out.println("OK");
+
+            System.out.print("Uploading modelsummary to tupleId path ...");
+            yarnManager.uploadModelsummary(customer, uuid, jsonNode);
+            System.out.println("OK");
         }
     }
 

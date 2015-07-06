@@ -71,7 +71,12 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
                 String.format("model name %s for customer %s cannot be fixed at %s.", MODEL_GUID, CUSTOMER, modelPath));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testFixModelName" })
+    @Test(groups = "functional", dependsOnMethods = { "testCopyModel" })
+    public void testCheckModelSummary() {
+        Assert.assertFalse(yarnManager.modelSummaryExistsInSingularId(CUSTOMER, UUID), "modelsummary should not exists");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCheckModelSummary" })
     public void testGenerateModelSummary() {
         JsonNode summary = yarnManager.generateModelSummary(CUSTOMER, UUID);
         Assert.assertTrue(summary.has("ModelDetail"), "modelsummary.json should have ModelDetail");
