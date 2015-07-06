@@ -1,6 +1,6 @@
 package com.latticeengines.upgrade.tenant.service;
 
-import com.latticeengines.upgrade.service.CommandExecutor;
+import com.latticeengines.upgrade.service.UpgradeService;
 
-public interface TenantUpgradeService extends CommandExecutor {
+public interface TenantUpgradeService extends UpgradeService {
 }

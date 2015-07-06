@@ -1,6 +1,7 @@
 package com.latticeengines.upgrade.service;
 
-public interface UpgradeService extends CommandExecutor {
+import java.util.Map;
 
-    void switchToVersion(String version);
+public interface UpgradeService {
+    boolean execute(String command, Map<String, Object> parameters);
 }

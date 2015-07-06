@@ -26,9 +26,8 @@ import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
-
-@Component("modelUpgrade")
-public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
+@Component("modelUpgrader")
+public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     @Autowired
     protected TenantModelJdbcManager tenantModelJdbcManager;
@@ -48,6 +47,8 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     private static final String CUSTOMER_NAME = "CustomerName";
 
+    private static final String[] VERSIONS = new String[]{"1.3.4", "1.4.0"};
+
     @Value("${dataplatform.customer.basedir}")
     protected String customerBase;
 
@@ -57,17 +58,8 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     protected String dlTenantName;
 
-    protected String version;
-
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
     private static final DateTimeFormatter FMT = DateTimeFormat.forPattern("yyyy-MM-dd");
-
-    public abstract void upgrade() throws Exception;
-
-    @Override
-    public void setVersion(String version) {
-        this.version = version;
-    }
 
     public void setInfos(List<BardInfo> infos) throws Exception {
         for (BardInfo bardInfo : infos) {
@@ -90,7 +82,10 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     protected void populateTenantModelInfo() {
-        List<String> deploymentIds = authoritativeDBJdbcManager.getDeploymentIDs(version);
+        List<String> deploymentIds = new ArrayList<>();
+        for (String version : VERSIONS) {
+            deploymentIds.addAll(authoritativeDBJdbcManager.getDeploymentIDs(version));
+        }
         for (String deploymentId : deploymentIds) {
             List<String> activeModelKeyList = getActiveModelKeyList(deploymentId);
             populateTenantModelInfo(activeModelKeyList);
@@ -297,7 +292,6 @@ public abstract class ModelUpgradeServiceImpl implements ModelUpgradeService {
             upgradeModelSummaryForCustomerModels(customer);
             return true;
         default:
-            // handled by version specific upgrader
             return false;
         }
     }

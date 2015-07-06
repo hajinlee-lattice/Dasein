@@ -15,7 +15,7 @@ import com.latticeengines.upgrade.tenant.service.TenantUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
 import com.latticeengines.upgrade.zk.ZooKeeperManager;
 
-@Component
+@Component("tenantUpgrader")
 public class TenantUpgradeServiceImpl implements TenantUpgradeService {
 
     @Autowired

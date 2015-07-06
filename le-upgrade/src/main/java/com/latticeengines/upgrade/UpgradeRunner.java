@@ -40,12 +40,6 @@ public class UpgradeRunner {
                 .choices(getCommandChoice())
                 .help(commandHelper());
 
-        parser.addArgument("-v", "--version")
-                .dest("version")
-                .choices(new CollectionArgumentChoice<>("1.3.4", "1.4.0"))
-                .setDefault("1.3.4")
-                .help("version before upgrade: 1.3.4 or 1.4.0");
-
         parser.addArgument("-c", "--customer")
                 .dest("customer")
                 .type(String.class)
@@ -136,13 +130,6 @@ public class UpgradeRunner {
 
             validateArguments(ns);
 
-            String version = ns.getString("version");
-
-            if (version.startsWith("1.4")) {
-                upgrader.switchToVersion("1.4.0");
-            } else {
-                upgrader.switchToVersion(version);
-            }
             String command = ns.getString("command");
 
             System.out.println("\n\n========================================");
