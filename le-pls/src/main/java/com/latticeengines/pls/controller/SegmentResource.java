@@ -64,6 +64,7 @@ public class SegmentResource {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
+    @Deprecated
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
@@ -84,6 +85,7 @@ public class SegmentResource {
         return segments;
     }
 
+    @Deprecated
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a segment")
@@ -99,6 +101,7 @@ public class SegmentResource {
         }
     }
 
+    @Deprecated
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a segment")
@@ -115,6 +118,7 @@ public class SegmentResource {
         }
     }
 
+    @Deprecated
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a segment")
