@@ -1,0 +1,10 @@
+#!/bin/bash
+echo "postinstalling now"
+
+cd /opt
+chown -R yarn:yarn /opt/jetty
+cd /etc/init.d
+ln -s /opt/jetty2/bin/jetty.sh jetty2
+chkconfig --add jetty2
+chkconfig --level 345 jetty2 on
+
