@@ -1,6 +1,6 @@
 package com.latticeengines.pls.controller;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,10 +92,10 @@ public class SegmentResource {
             segmentService.createSegment(segment, request);
             return SimpleBooleanResponse.getSuccessResponse();
         } catch (LedpException e) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.<String> asList(new String[] { e.getMessage() }));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.<String> asList(new String[] { ExceptionUtils
-                    .getFullStackTrace(e) }));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(ExceptionUtils
+                    .getFullStackTrace(e)));
         }
     }
 
@@ -108,10 +108,10 @@ public class SegmentResource {
             segmentEntityMgr.delete(segment);
             return SimpleBooleanResponse.getSuccessResponse();
         } catch (LedpException e) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.<String> asList(new String[] { e.getMessage() }));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.<String> asList(new String[] { ExceptionUtils
-                    .getFullStackTrace(e) }));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(ExceptionUtils
+                    .getFullStackTrace(e)));
         }
     }
 
@@ -123,10 +123,10 @@ public class SegmentResource {
             segmentService.update(segmentName, newSegment);
             return SimpleBooleanResponse.getSuccessResponse();
         } catch (LedpException e) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.<String> asList(new String[] { e.getMessage() }));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.<String> asList(new String[] { ExceptionUtils
-                    .getFullStackTrace(e) }));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(ExceptionUtils
+                    .getFullStackTrace(e)));
         }
     }
 
@@ -156,10 +156,10 @@ public class SegmentResource {
 
             return SimpleBooleanResponse.getSuccessResponse();
         } catch (LedpException e) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.<String> asList(new String[] { e.getMessage() }));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.<String> asList(new String[] { ExceptionUtils
-                    .getFullStackTrace(e) }));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(ExceptionUtils
+                    .getFullStackTrace(e)));
         }
     }
 
