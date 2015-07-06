@@ -9,7 +9,6 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
