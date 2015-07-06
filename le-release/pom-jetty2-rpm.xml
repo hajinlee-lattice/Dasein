@@ -45,6 +45,18 @@
                                 </source>
                             </sources>
                         </mapping>
+                        <mapping>
+                            <directory>/opt/jetty2/etc</directory>
+                            <filemode>775</filemode>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
+                            <sources>
+                                <source>
+                                    <location>src/main/resources/jetty2/jetty.xml</location>
+                                    <targetArchitecture>x86_64</targetArchitecture>
+                                </source>
+                            </sources>
+                        </mapping>
                     </mappings>
                     <preremoveScriptlet>
                         <scriptFile>src/main/scripts/jetty2/preremove</scriptFile>
