@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.exception;
 
+//@formatter:off
 public enum LedpCode {
     // Low level errors: 00000-09999
     LEDP_00000("Could not create hdfs dir {0}."), //
@@ -157,15 +158,12 @@ public enum LedpCode {
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"),
     LEDP_22001("Can not find DB connection info for tenant {0}"),
-    LEDP_22002("Tenant exists, but there's not client id, tenant name={0}"),
+    LEDP_22002("Tenant exists, but there's no such oauth user, tenant name={0}"),
     LEDP_22003("Access token does not exist!"),
     LEDP_22004("Access token does not have token key!"),
     LEDP_22005("Failed to get tenant!"),
     LEDP_22006("Failed to get tenant from DB!"),
     LEDP_22007("Failed to get recommendations after retry."),
-
-    // le-oauth2
-    LEDP_23000("Can not find user: {0}"),
 
     // le-upgrade
     LEDP_24000("Yarn operation exception: {0}"),
@@ -184,3 +182,4 @@ public enum LedpCode {
         return message;
     }
 }
+//@formatter:on

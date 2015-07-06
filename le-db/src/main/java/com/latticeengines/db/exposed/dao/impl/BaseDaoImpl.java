@@ -2,9 +2,12 @@ package com.latticeengines.db.exposed.dao.impl;
 
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.stereotype.Repository;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -24,7 +27,8 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
     }
 
     /**
-     * Class presentation of the entity object that the subclass Dao is working with.
+     * Class presentation of the entity object that the subclass Dao is working
+     * with.
      */
     protected abstract Class<T> getEntityClass();
 
@@ -32,7 +36,8 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
     }
 
     /**
-     * This is a generic create for the ORM layer. This should work for all entity types.
+     * This is a generic create for the ORM layer. This should work for all
+     * entity types.
      * 
      */
     @Override
@@ -48,12 +53,16 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
     }
 
     /**
-     * Either create(Object) or update(Object) the given instance, depending upon resolution of the unsaved-value checks (see the manual for discussion of
-     * unsaved-value checking). This operation cascades to associated instances if the association is mapped with cascade="save-update"
+     * Either create(Object) or update(Object) the given instance, depending
+     * upon resolution of the unsaved-value checks (see the manual for
+     * discussion of unsaved-value checking). This operation cascades to
+     * associated instances if the association is mapped with
+     * cascade="save-update"
      * 
      * 
      * @param entity
-     *            - Parameters: object - a transient or detached instance containing new or updated state
+     *            - Parameters: object - a transient or detached instance
+     *            containing new or updated state
      * 
      */
     @Override
@@ -107,5 +116,9 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
         Class<T> entityClz = getEntityClass();
         Query query = session.createQuery("delete from " + entityClz.getSimpleName());
         query.executeUpdate();
+    }
+
+    protected DataSource getDataSource() {
+        return SessionFactoryUtils.getDataSource(getSessionFactory());
     }
 }

@@ -8,9 +8,9 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.oauth2.common.dao.OAuthClientDao;
-import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
+import com.latticeengines.oauth2.common.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
@@ -20,7 +20,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
     private PlaymakerTenantEntityMgr playMakerEntityMgr;
 
     @Autowired
-    private OAuthClientDao playmakerOauth2DbDao;
+    private OAuthUserEntityMgr users;
 
     @Test(groups = "functional", enabled = true)
     public void testCRUD() throws Exception {
@@ -36,20 +36,26 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getTenantPassword());
 
-        ExtendedClientDetails clientDetails = playmakerOauth2DbDao.getClientByClientId(tenant.getTenantName());
-        Assert.assertNotNull(clientDetails);
-        Assert.assertEquals(clientDetails.getClientId(), tenant.getTenantName());
-        Assert.assertTrue(clientDetails.getAuthorizedGrantTypes().contains("client_credentials"));
-        Assert.assertNotNull(clientDetails.getClientSecretExpiration());
-        Assert.assertTrue(clientDetails.getClientSecretExpiration().isAfter(DateTime.now(DateTimeZone.UTC)));
+        OAuthUser user = users.get(tenant.getTenantName());
+        Assert.assertNotNull(user);
+        Assert.assertEquals(user.getUserId(), tenant.getTenantName());
+        Assert.assertNotNull(user.getPasswordExpiration());
+        Assert.assertTrue(user.getPasswordExpiration().after(DateTime.now(DateTimeZone.UTC).toDate()));
 
         tenant.setExternalId("externalId2");
         playMakerEntityMgr.executeUpdate(tenant);
-        PlaymakerTenant tenant2 = playMakerEntityMgr.findByTenantName("playmaker");
-        Assert.assertNotNull(tenant2);
+        result = playMakerEntityMgr.findByTenantName("playmaker");
+        Assert.assertNotNull(result);
 
-        // playMakerEntityMgr.delete(tenant);
+        playMakerEntityMgr.deleteByTenantName(tenant.getTenantName());
+        result = playMakerEntityMgr.findByTenantName("playmaker");
+        Assert.assertNull(result);
 
+        user = users.get(user.getUserId());
+        Assert.assertNull(user);
+
+        tenant = getTenant();
+        result = playMakerEntityMgr.create(tenant);
     }
 
     public static PlaymakerTenant getTenant() {

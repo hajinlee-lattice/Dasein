@@ -1,9 +1,6 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,19 +8,15 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
-import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.oauth2.common.dao.OAuthClientDao;
-import com.latticeengines.oauth2.common.service.ExtendedClientDetails;
-import com.latticeengines.oauth2.common.service.impl.OAuthClientDetails;
+import com.latticeengines.oauth2.common.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.playmaker.dao.PalymakerTenantDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
@@ -36,10 +29,10 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     private PalymakerTenantDao tenantDao;
 
     @Autowired
-    private OAuthClientDao playmakerOauth2DbDao;
+    private OAuthUserEntityMgr users;
 
-    @Value("${oauth2.client_secret_expiration_days}")
-    private int clientSecretExpirationDays;
+    @Value("${oauth2.password_expiration_days}")
+    private int passwordExpirationDays;
 
     @Override
     @Transactional(value = "playmaker")
@@ -59,66 +52,49 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
             tenantDao.update(tenantInDb);
         }
 
-        ExtendedClientDetails clientDetails = null;
+        OAuthUser user = null;
         try {
-            clientDetails = playmakerOauth2DbDao.getClientByClientId(tenant.getTenantName());
+            user = users.get(tenant.getTenantName());
         } catch (Exception ex) {
-            log.info("Client does not exist! client Id=" + tenant.getTenantName());
+            log.info("OAuth user does not exist! userId=" + tenant.getTenantName());
         }
-        if (clientDetails == null) {
-            clientDetails = getNewClientDetails(tenant);
-            playmakerOauth2DbDao.createClient(clientDetails);
+        if (user == null) {
+            user = getNewOAuthUser(tenant);
+            users.create(user);
         } else {
-            clientDetails = getNewClientDetails(tenant);
-            playmakerOauth2DbDao.updateClient(clientDetails);
+            log.info("Generating new password for tenant " + tenant.getTenantName());
+            // Generate new password
+            user.setPassword(generatePassword());
+            user.setPasswordExpiration(getPasswordExpiration(tenant.getTenantName()));
+            users.update(user);
         }
-        tenant.setTenantPassword(clientDetails.getClientSecret());
+        tenant.setTenantPassword(user.getPassword());
 
-        log.info("Created the following tenantName=" + tenant.getTenantName());
+        log.info("Created/Updated the following tenantName=" + tenant.getTenantName());
         return tenant;
     }
 
-    ExtendedClientDetails getNewClientDetails(PlaymakerTenant tenant) {
-        OAuthClientDetails clientDetails = new OAuthClientDetails();
-        clientDetails.setClientId(tenant.getTenantName());
+    private OAuthUser getNewOAuthUser(PlaymakerTenant tenant) {
+        OAuthUser user = new OAuthUser();
+        user.setUserId(tenant.getTenantName());
+        user.setPassword(generatePassword());
+        user.setPasswordExpiration(getPasswordExpiration(tenant.getTenantName()));
 
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_PLAYMAKER_CLIENT");
-        authorities.add(authority);
-        clientDetails.setAuthorities(authorities);
-
-        List<String> grantedTypes = new ArrayList<>();
-        grantedTypes.add("authorization_code");
-        grantedTypes.add("refresh_token");
-        grantedTypes.add("client_credentials");
-        grantedTypes.add(TENANT_PASSWORD_KEY);
-        clientDetails.setAuthorizedGrantTypes(grantedTypes);
-
-        Set<String> scopes = new HashSet<>();
-        scopes.add("read");
-        clientDetails.setScope(scopes);
-
-        Set<String> resourceIds = new HashSet<>();
-        resourceIds.add("playmaker_api");
-        clientDetails.setResourceIds(resourceIds);
-
-        clientDetails.setClientSecret(getClientSecret());
-        clientDetails.setClientSecretExpiration(getClientSecretExpiration(tenant.getTenantName()));
-        return clientDetails;
+        return user;
     }
 
-    private String getClientSecret() {
+    private String generatePassword() {
         RandomValueStringGenerator generator = new RandomValueStringGenerator(12);
         return generator.generate();
     }
 
-    private DateTime getClientSecretExpiration(String tenantId) {
-        if (clientSecretExpirationDays <= 0) {
-            log.info(String.format(
-                    "oauth2.client_secret_expiration_days <= 0.  Disabling expiration for tenant with id=%s", tenantId));
+    private Date getPasswordExpiration(String tenantId) {
+        if (passwordExpirationDays <= 0) {
+            log.info(String.format("oauth2.password_expiration_days <= 0.  Disabling expiration for tenant with id=%s",
+                    tenantId));
             return null;
         }
-        return DateTime.now(DateTimeZone.UTC).plusDays(clientSecretExpirationDays);
+        return DateTime.now(DateTimeZone.UTC).plusDays(passwordExpirationDays).toDate();
     }
 
     @Override
@@ -132,13 +108,13 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     public PlaymakerTenant findByTenantName(String tenantName) {
         PlaymakerTenant tenant = tenantDao.findByTenantName(tenantName);
         if (tenant != null) {
-            ClientDetails clientDetails = null;
+            OAuthUser user = null;
             try {
-                clientDetails = playmakerOauth2DbDao.getClientByClientId(tenantName);
+                user = users.get(tenantName);
             } catch (Exception ex) {
             }
-            if (clientDetails != null) {
-                tenant.setTenantPassword(clientDetails.getClientSecret());
+            if (user != null) {
+                tenant.setTenantPassword(user.getPassword());
             } else {
                 throw new LedpException(LedpCode.LEDP_22002, new String[] { tenantName });
             }
@@ -151,7 +127,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     @Transactional(value = "playmaker")
     public void deleteByTenantName(String tenantName) {
         tenantDao.deleteByTenantName(tenantName);
-        playmakerOauth2DbDao.deleteClientByClientId(tenantName);
+        users.delete(tenantName);
         log.info("Deleted the following tenantName=" + tenantName);
     }
 
@@ -164,6 +140,10 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
     @Override
     public String findTenantByTokenId(String tokenId) {
-        return playmakerOauth2DbDao.findTenantByTokenId(tokenId);
+        OAuthUser user = users.getByAccessToken(tokenId);
+        if (user != null) {
+            return user.getUserId();
+        }
+        return null;
     }
 }

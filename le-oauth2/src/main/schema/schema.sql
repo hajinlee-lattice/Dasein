@@ -83,8 +83,7 @@ CREATE TABLE [dbo].[oauth_client_details](
     [access_token_validity] [int] NULL,
     [refresh_token_validity] [int] NULL,
     [additional_information] [varchar](4096) NULL,
-    [autoapprove] [varchar](256) NULL,
-    [client_secret_expiration] [datetime] NULL
+    [autoapprove] [varchar](256) NULL
 ) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [client_id_idx] ON [dbo].[oauth_client_details] 
@@ -148,19 +147,6 @@ CREATE NONCLUSTERED INDEX [token_id_idx] ON [dbo].[oauth_refresh_token]
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[users]') AND type in (N'U'))
-DROP TABLE [dbo].[users]
-GO
-CREATE TABLE [dbo].[users](
-    [username] [varchar](256) NULL,
-    [password] [varchar](256) NULL,
-    [enabled] [bit] NULL
-) ON [PRIMARY]
-GO
-CREATE UNIQUE NONCLUSTERED INDEX [username_idx] ON [dbo].[users] 
-([username] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
 
 /*
 INSERT INTO [dbo].[TENANT]
@@ -193,14 +179,21 @@ INSERT INTO [dbo].[oauth_client_details]
            ,[additional_information]
            ,[autoapprove])
      VALUES
-           ('playmaker-admin', 'playmaker_api', 'slk4G111Msd8', 'read,write', 'authorization_code,refresh_token,client_credentials', NULL,
+           ('playmaker', 'playmaker_api', NULL, 'read,write', 'password,refresh_token', NULL,
             'ROLE_PLAYMAKER_ADMIN', NULL, NULL, NULL, 'false')
 GO
-INSERT INTO [dbo].[users]
-           ([username]
-           ,[password]
-           ,[enabled])
-     VALUES ('testuser1@latticeengines.com', 'Lattice1',    1)
+
+
+CREATE TABLE [OAuthUser](
+	[PID] [bigint] IDENTITY(1,1) NOT NULL,
+	[UserId] [nvarchar](256) NOT NULL,
+	[Password] [nvarchar](256) NOT NULL,
+	[PasswordExpiration] [datetime] NULL
+) 
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX IX_UserId ON [OAuthUser] (UserId)
+
 GO
 
 
