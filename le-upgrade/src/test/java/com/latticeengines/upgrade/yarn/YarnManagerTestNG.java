@@ -114,6 +114,12 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUploadModelSummary" })
+    public void testDeleteModelSummary() throws Exception {
+        yarnManager.deleteModelSummaryInTupleId(CUSTOMER, UUID);
+        Assert.assertFalse(yarnManager.modelSummaryExistsInTupleId(CUSTOMER, UUID), "modelsummary should be deleted.");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testDeleteModelSummary" })
     public void testDeleteTupleIdPath() throws Exception {
         String customerRoot = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, CUSTOMER);
         yarnManager.deleteTupleIdCustomerRoot(CUSTOMER);

@@ -106,6 +106,18 @@ public class YarnManager {
         return modelSummaryIsComplete(readModelSummaryAsJson(customer, uuid));
     }
 
+    public void deleteModelSummaryInTupleId(String customer, String uuid) {
+        if (modelSummaryExistsInTupleId(customer, uuid)) {
+            String modelFolder = findModelFolderPathInTuple(customer, uuid);
+            String destPath = modelFolder + MS_PATH;
+            try {
+                HdfsUtils.rmdir(yarnConfiguration, destPath);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_24000, "Failed to delete modelsummary.json", e);
+            }
+        }
+    }
+
     public boolean modelSummaryExistsInSingularId(String customer, String uuid) {
         String modelFolder = findModelFolderPathInSingular(customer, uuid);
         String destPath = modelFolder + MS_PATH;
