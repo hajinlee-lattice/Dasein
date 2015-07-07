@@ -317,12 +317,14 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             }
             log.info("Uploading today's aggregation data=" + sourceDir);
             String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+            truncateNewTable(assignedQueue);
+
             DbCreds.Builder builder = new DbCreds.Builder();
-            builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
-                    .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+            builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
+                    .password(targetJdbcPassword).dbType(targetJdbcType);
             DbCreds creds = new DbCreds(builder);
-            propDataJobService.exportDataSync(getTableNew(), getOutputDir(sourceDir), creds, assignedQueue, getJobName()
-                    + "-uploadAggregationData", numMappers, null);
+            propDataJobService.exportDataSync(getTableNew(), getOutputDir(sourceDir), creds, assignedQueue,
+                    getJobName() + "-uploadAggregationData", numMappers, null);
 
             swapTargetTables(assignedQueue);
             uploadTodayRawData(today);
@@ -335,6 +337,12 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             throw new LedpException(LedpCode.LEDP_00002, ex);
         }
         return response;
+    }
+
+    private void truncateNewTable(String assignedQueue) {
+        String sql = "TRUNCATE TABLE " + getTableNew();
+        propDataJobService.eval(sql, assignedQueue, getJobName() + "-truncateNewTable",
+                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
     }
 
     private String getOutputDir(String sourceDir) {
@@ -362,8 +370,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         String connectionString = getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword);
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
-                .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
+                .password(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
         // propDataJobService.eval("DROP TABLE" + tableName, assignedQueue,
         // getJobName() + "-uploadRawData0", 1,
