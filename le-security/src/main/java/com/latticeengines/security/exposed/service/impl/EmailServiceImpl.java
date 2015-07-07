@@ -3,12 +3,11 @@ package com.latticeengines.security.exposed.service.impl;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.annotation.PostConstruct;
 import javax.mail.Multipart;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.security.EmailSettings;
@@ -23,43 +22,8 @@ public class EmailServiceImpl implements EmailService {
 
     private static final Log log = LogFactory.getLog(EmailUtils.class);
 
-    private static EmailSettings emailsettings;
-
-    @Value("${security.emailsettings.from}")
-    private String EMAIL_FROM;
-
-    @Value("${security.emailsettings.server}")
-    private String EMAIL_SERVER;
-
-    @Value("${security.emailsettings.username}")
-    private String EMAIL_USERNAME;
-
-    @Value("${security.emailsettings.password}")
-    private String EMAIL_PASSWORD;
-
-    @Value("${security.emailsettings.port}")
-    private int EMAIL_PORT;
-
-    @Value("${security.emailsettings.useSSL}")
-    private boolean EMAIL_USESSL;
-
-    @Value("${security.emailsettings.useSTARTTLS}")
-    private boolean EMAIL_USESTARTTLS;
-
-    @Value("${pls.api.hostport}")
-    private String PLS_HOSTPORT;
-
-    @PostConstruct
-    private void setupDefaultEmailSettings() {
-        emailsettings = new EmailSettings();
-        emailsettings.setFrom(EMAIL_FROM);
-        emailsettings.setServer(EMAIL_SERVER);
-        emailsettings.setUsername(EMAIL_USERNAME);
-        emailsettings.setPassword(EMAIL_PASSWORD);
-        emailsettings.setPort(EMAIL_PORT);
-        emailsettings.setUseSSL(EMAIL_USESSL);
-        emailsettings.setUseSTARTTLS(EMAIL_USESTARTTLS);
-    }
+    @Autowired
+    private EmailSettings emailsettings;
 
     @Override
     public void sendSimpleEmail(String subject, Object content, String contentType,
@@ -73,7 +37,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSNewInternalUserEmail(Tenant tenant, User user, String password) {
+    public void sendPLSNewInternalUserEmail(Tenant tenant, User user, String password, String hostport) {
         try {
 
             EmailTemplateBuilder builder =
@@ -86,7 +50,7 @@ public class EmailServiceImpl implements EmailService {
                             tenant.getName()));
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
-            builder.replaceToken("{{url}}", PLS_HOSTPORT);
+            builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Welcome to Lead Prioritization", mp, Collections.singleton(user.getEmail()));
@@ -96,7 +60,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSNewExternalUserEmail(User user, String password) {
+    public void sendPLSNewExternalUserEmail(User user, String password, String hostport) {
         try {
             EmailTemplateBuilder builder =
                     new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_NEW_EXTERNAL_USER);
@@ -108,7 +72,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{tenantname}}", "&nbsp;");
             builder.replaceToken("{{password}}", password);
-            builder.replaceToken("{{url}}", PLS_HOSTPORT);
+            builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp, Collections.singleton(user.getEmail()));
@@ -118,7 +82,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSExistingInternalUserEmail(Tenant tenant, User user) {
+    public void sendPLSExistingInternalUserEmail(Tenant tenant, User user, String hostport) {
         try {
             EmailTemplateBuilder builder =
                     new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_EXISTING_INTERNAL_USER);
@@ -126,7 +90,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
             builder.replaceToken("{{tenantname}}",tenant.getName());
-            builder.replaceToken("{{url}}", PLS_HOSTPORT);
+            builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp, Collections.singleton(user.getEmail()));
@@ -136,7 +100,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSExistingExternalUserEmail(Tenant tenant, User user) {
+    public void sendPLSExistingExternalUserEmail(Tenant tenant, User user, String hostport) {
         try {
             EmailTemplateBuilder builder =
                     new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_EXISTING_EXTERNAL_USER);
@@ -144,7 +108,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
             builder.replaceToken("{{tenantname}}",tenant.getName());
-            builder.replaceToken("{{url}}", PLS_HOSTPORT);
+            builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp, Collections.singleton(user.getEmail()));
@@ -154,7 +118,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSForgetPasswordEmail(User user, String password) {
+    public void sendPLSForgetPasswordEmail(User user, String password, String hostport) {
         try {
             EmailTemplateBuilder builder =
                     new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_FORGET_PASSWORD);
@@ -163,7 +127,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{lastname}}", user.getLastName());
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
-            builder.replaceToken("{{url}}", PLS_HOSTPORT);
+            builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lattice Password Reset", mp, Collections.singleton(user.getEmail()));

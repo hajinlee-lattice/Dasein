@@ -14,14 +14,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.ResetPasswordRequest;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -126,11 +127,16 @@ public class LoginResource {
     @RequestMapping(value = "/forgotpassword", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset password and send an email")
-    public boolean forgotPassword(@RequestBody AttributeMap attrMap) {
-        String username = attrMap.get("Username");
+    public boolean forgotPassword(@RequestBody ResetPasswordRequest request) {
+        String username = request.getUsername();
         String tempPass = globalUserManagementService.resetLatticeCredentials(username);
-        User user = userService.findByUsername(username);
-        emailService.sendPLSForgetPasswordEmail(user, tempPass);
+
+        if (LatticeProduct.LPA.equals(request.getProduct())) {
+            User user = userService.findByUsername(username);
+            String host = request.getHostPort();
+            emailService.sendPLSForgetPasswordEmail(user, tempPass, host);
+        }
+
         return true;
     }
 

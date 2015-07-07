@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,6 +68,9 @@ public class UserResource {
 
     @Autowired
     private EmailService emailService;
+
+    @Value("${pls.api.hostport}")
+    private String apiHostPort;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -182,9 +186,9 @@ public class UserResource {
                     loginUsername, user.getUsername(), tenantId));
 
             if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                emailService.sendPLSNewExternalUserEmail(user, tempPass);
+                emailService.sendPLSNewExternalUserEmail(user, tempPass, apiHostPort);
             } else {
-                emailService.sendPLSNewInternalUserEmail(tenant, user, tempPass);
+                emailService.sendPLSNewInternalUserEmail(tenant, user, tempPass, apiHostPort);
             }
         }
         return response;
@@ -283,9 +287,9 @@ public class UserResource {
                 if (newUser && tenant != null && user != null) {
                     if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) ||
                             targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                        emailService.sendPLSExistingExternalUserEmail(tenant, user);
+                        emailService.sendPLSExistingExternalUserEmail(tenant, user, apiHostPort);
                     } else {
-                        emailService.sendPLSExistingInternalUserEmail(tenant, user);
+                        emailService.sendPLSExistingInternalUserEmail(tenant, user, apiHostPort);
                     }
                 }
             } else {

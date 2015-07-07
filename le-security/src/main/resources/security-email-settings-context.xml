@@ -8,7 +8,14 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <context:component-scan base-package="com.latticeengines.security" />
-    <import resource="classpath:security-email-settings-context.xml"/>
-
+    <bean id="emailSettings" class="com.latticeengines.domain.exposed.security.EmailSettings">
+        <property name="from" value="${security.emailsettings.from:no-reply@lattice-engines.com}" />
+        <property name="server" value="${security.emailsettings.server:smtprelay.lattice.local}" />
+        <property name="username" value="${security.emailsettings.username:build@lattice-engines.com}" />
+        <property name="password" value="${security.emailsettings.password:ryTy2wEiaw51Le9qTXxx3w==}" />
+        <property name="port" value="${security.emailsettings.port:25}" />
+        <property name="useSSL" value="${security.emailsettings.useSSL:false}" />
+        <property name="useSTARTTLS" value="${security.emailsettings.useSTARTTLS:false}" />
+    </bean>
+    
 </beans>

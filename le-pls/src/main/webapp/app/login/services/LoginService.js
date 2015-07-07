@@ -6,7 +6,7 @@ angular.module('mainApp.login.services.LoginService', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.services.SessionService'
 ])
-.service('LoginService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService) {
+.service('LoginService', function ($http, $q, $location, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService) {
     
     this.Login = function (username, password) {
         var deferred = $q.defer();
@@ -87,7 +87,7 @@ angular.module('mainApp.login.services.LoginService', [
         $http({
             method: 'PUT',
             url: "/pls/forgotpassword/",
-            data: {Username: username},
+            data: {Username: username, Product: "Lead Prioritization", HostPort: this.getHostPort()},
             headers: {"Content-Type": "application/json"}
         })
         .success(function(data, status, headers, config) {
@@ -180,4 +180,16 @@ angular.module('mainApp.login.services.LoginService', [
 
         return deferred.promise;
     };
+
+    this.getHostPort = function() {
+        var host = $location.host();
+        var protocal = $location.protocol();
+        var port = $location.port();
+        if (port == 80) {
+            return protocal + "://" + host;
+        } else {
+            return protocal + "://" + host + ":" + port;
+        }
+    }
+
 });

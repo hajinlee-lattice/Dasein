@@ -13,6 +13,7 @@
     <import resource="classpath:pls-properties-context.xml"/>
     <import resource="classpath:pls-camille-context.xml"/>
     <import resource="classpath:security-provider-context.xml"/>
+    <import resource="classpath:security-email-settings-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
 

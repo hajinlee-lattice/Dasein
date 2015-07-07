@@ -13,13 +13,13 @@ public interface EmailService {
 
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients);
 
-    void sendPLSNewInternalUserEmail(Tenant tenant, User user, String password);
+    void sendPLSNewInternalUserEmail(Tenant tenant, User user, String password, String hostport);
 
-    void sendPLSNewExternalUserEmail(User user, String password);
+    void sendPLSNewExternalUserEmail(User user, String password, String hostport);
 
-    void sendPLSExistingInternalUserEmail(Tenant tenant, User user);
+    void sendPLSExistingInternalUserEmail(Tenant tenant, User user, String hostport);
 
-    void sendPLSExistingExternalUserEmail(Tenant tenant, User user);
+    void sendPLSExistingExternalUserEmail(Tenant tenant, User user, String hostport);
 
-    void sendPLSForgetPasswordEmail(User user, String password);
+    void sendPLSForgetPasswordEmail(User user, String password, String hostport);
 }
