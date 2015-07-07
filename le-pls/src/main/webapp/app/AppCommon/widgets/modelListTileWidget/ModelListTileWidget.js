@@ -8,10 +8,11 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.models.services.ModelService',
-    'mainApp.models.modals.DeleteModelModal'
+    'mainApp.models.modals.DeleteModelModal',
+    'mainApp.models.modals.StaleModelModal'
 ])
 .controller('ModelListTileWidgetController', function ($scope, $rootScope, $element, ResourceUtility, BrowserStorageUtility, RightsUtility, DateTimeFormatUtility,
-    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal) {
+    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
@@ -62,6 +63,8 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             DeleteModelModal.show($scope.data.Id);
         } else if (!$scope.nameStatus.editing && !incomplete) {
             $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
+        } else if (!$scope.nameStatus.editing && incomplete) {
+        	StaleModelModal.show($scope.data.Id);
         }
     };
     
