@@ -47,4 +47,16 @@
         p:dataSource-ref="authoritativeDBDataSource">
     </bean>
 
+    <bean id="plsDataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${upgrade.dao.pls.driver}" />
+        <property name="url" value="${upgrade.dao.pls.jdbc}" />
+        <property name="username" value="${upgrade.dao.pls.user}" />
+        <property name="password" value="${upgrade.dao.pls.password.encrypted}" />
+    </bean>
+
+    <bean id="plsJdbcTemlate" class="org.springframework.jdbc.core.JdbcTemplate"
+          p:dataSource-ref="plsDataSource">
+    </bean>
+
 </beans>

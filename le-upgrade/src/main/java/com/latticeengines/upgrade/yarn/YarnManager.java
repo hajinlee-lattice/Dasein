@@ -102,10 +102,6 @@ public class YarnManager {
         }
     }
 
-    public boolean modelSummaryIsCompleteInSingularId(String customer, String uuid) {
-        return modelSummaryIsComplete(readModelSummaryAsJson(customer, uuid));
-    }
-
     public void deleteModelSummaryInTupleId(String customer, String uuid) {
         if (modelSummaryExistsInTupleId(customer, uuid)) {
             String modelFolder = findModelFolderPathInTuple(customer, uuid);
@@ -150,6 +146,10 @@ public class YarnManager {
     }
 
     public JsonNode generateModelSummary(String customer, String uuid) {
+        return generateModelSummary(customer, uuid, MODEL_NAME);
+    }
+
+    public JsonNode generateModelSummary(String customer, String uuid, String name) {
         JsonNode json = readModelAsJson(customer, uuid);
         Long constructionTime = getTimestampFromModelJson(json);
         String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
@@ -157,7 +157,7 @@ public class YarnManager {
         String lookupId = String.format("%s|%s|%s", customer, eventTable, YarnPathUtils.extractUuid(uuid));
 
         ObjectNode detail = objectMapper.createObjectNode();
-        detail.put("Name", MODEL_NAME);
+        detail.put("Name", name);
         detail.put("ModelID", YarnPathUtils.constructModelGuidFromUuid(uuid));
         detail.put("ConstructionTime", constructionTime/1000L);
         detail.put("LookupId", lookupId);
@@ -218,21 +218,6 @@ public class YarnManager {
         }
     }
 
-    private JsonNode readModelSummaryAsJson(String customer, String uuid) {
-        String srcJsonFullPath = findModelFolderPathInSingular(customer, uuid) + MS_PATH;
-        try {
-            String jsonContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, srcJsonFullPath);
-            return objectMapper.readTree(jsonContent);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000,
-                    "Failed to read the content of model.json for model " + uuid, e);
-        }
-    }
-
-    private boolean modelSummaryIsComplete(JsonNode json) {
-        return json.has("ModelDetails");
-    }
-
     private String findModelFolderPathInTuple(String customer, String uuid) {
         String singularPath = findModelFolderPathInSingular(customer, uuid);
         return YarnPathUtils.substituteByTupleId(singularPath);
@@ -267,7 +252,7 @@ public class YarnManager {
         }
 
         try {
-            List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + "/" + customer
+            return HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + "/" + customer
                     + "/models", new HdfsUtils.HdfsFileFilter() {
                 @Override
                 public boolean accept(FileStatus fileStatus) {
@@ -295,7 +280,6 @@ public class YarnManager {
                     return false;
                 }
             });
-            return paths;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24000, "Cannot find all model jsons for customer " + customer, e);
         }

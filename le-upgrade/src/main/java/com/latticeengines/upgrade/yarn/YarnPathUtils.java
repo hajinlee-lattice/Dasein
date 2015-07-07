@@ -28,7 +28,7 @@ public class YarnPathUtils {
     }
 
     public static String constructModelGuidFromUuid(String uuid) {
-        return "ms__" + uuid + "-PLS";
+        return "ms__" + uuid + "-PLSModel";
     }
 
     public static String constructTupleIdCustomerRoot(String customerBase, String customer) {

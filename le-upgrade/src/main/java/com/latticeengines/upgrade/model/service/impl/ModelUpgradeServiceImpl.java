@@ -21,6 +21,7 @@ import com.latticeengines.upgrade.UpgradeRunner;
 import com.latticeengines.upgrade.domain.BardInfo;
 import com.latticeengines.upgrade.jdbc.AuthoritativeDBJdbcManager;
 import com.latticeengines.upgrade.jdbc.BardJdbcManager;
+import com.latticeengines.upgrade.jdbc.PlsMultiTenantJdbcManager;
 import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
@@ -30,16 +31,19 @@ import com.latticeengines.upgrade.yarn.YarnPathUtils;
 public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     @Autowired
-    protected TenantModelJdbcManager tenantModelJdbcManager;
+    private TenantModelJdbcManager tenantModelJdbcManager;
 
     @Autowired
-    protected AuthoritativeDBJdbcManager authoritativeDBJdbcManager;
+    private AuthoritativeDBJdbcManager authoritativeDBJdbcManager;
 
     @Autowired
-    protected BardJdbcManager bardJdbcManager;
+    private BardJdbcManager bardJdbcManager;
 
     @Autowired
-    protected YarnManager yarnManager;
+    private PlsMultiTenantJdbcManager plsMultiTenantJdbcManager;
+
+    @Autowired
+    private YarnManager yarnManager;
 
     private static final String BARD_DB = "Bard DB";
 
@@ -50,13 +54,13 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     private static final String[] VERSIONS = new String[]{"1.3.4", "1.4.0"};
 
     @Value("${dataplatform.customer.basedir}")
-    protected String customerBase;
+    private String customerBase;
 
-    protected String bardDB;
+    private String bardDB;
 
-    protected String instance;
+    private String instance;
 
-    protected String dlTenantName;
+    private String dlTenantName;
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
     private static final DateTimeFormatter FMT = DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -111,7 +115,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     private void populateTenantModelInfo(List<String> activeModelKeyList) {
-        String modelGuid = "";
+        String modelGuid;
         if (activeModelKeyList.size() == 1) {
             modelGuid = StringUtils.remove(activeModelKeyList.get(0), "Model_");
             tenantModelJdbcManager.populateExternalTenantModelInfo(dlTenantName, modelGuid);
@@ -166,24 +170,33 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         boolean active = tenantModelJdbcManager.modelIsActive(customer, uuid);
         System.out.println(active ? "YES" : "NO");
 
-        boolean toBeGenerated = active;
-        if (exists) {
-            System.out.print("Check if the modelsummary is complete ...");
-            boolean complete = yarnManager.modelSummaryIsCompleteInSingularId(customer, uuid);
-            System.out.println(complete ? "YES" : "NO");
+        System.out.print("Check if the modelsummary was generated in 1.4 ...");
+        boolean in1_4 = plsMultiTenantJdbcManager.hasUuid(uuid);
+        System.out.println(in1_4 ? "YES" : "NO");
 
-            if (!complete) {
-                System.out.print("Deleting existing incomplete modelsummary ...");
-                yarnManager.deleteModelSummaryInTupleId(customer, uuid);
-                System.out.println("OK");
-            }
+        boolean toBeDeleted = exists && !in1_4;
+        boolean toBeGenerated = active || in1_4;
 
-            toBeGenerated = active && !complete;
+        if (toBeDeleted) {
+            System.out.print("Deleting existing incomplete modelsummary ...");
+            yarnManager.deleteModelSummaryInTupleId(customer, uuid);
+            System.out.println("OK");
         }
 
         if (toBeGenerated) {
-            System.out.print("Generating incomplete modelsummary based on model.json ...");
-            JsonNode jsonNode = yarnManager.generateModelSummary(customer, uuid);
+            System.out.print("Deleting modelsummaries with the same uuid in PLS_MultiTenant DB ...");
+            plsMultiTenantJdbcManager.deleteByUuid(uuid);
+            System.out.println("OK");
+
+            String name = plsMultiTenantJdbcManager.findNameByUuid(uuid);
+            JsonNode jsonNode;
+            if (StringUtils.isEmpty(name)) {
+                System.out.print("Generating incomplete modelsummary based on model.json ...");
+                jsonNode = yarnManager.generateModelSummary(customer, uuid);
+            } else {
+                System.out.print("Generating incomplete modelsummary based on model.json using name " + name + "...");
+                jsonNode = yarnManager.generateModelSummary(customer, uuid, name);
+            }
             System.out.println("OK");
 
             System.out.print("Uploading modelsummary to tupleId path ...");
