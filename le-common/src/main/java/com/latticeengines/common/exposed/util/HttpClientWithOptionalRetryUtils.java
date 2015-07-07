@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -76,6 +77,18 @@ public class HttpClientWithOptionalRetryUtils {
         httpPut.setEntity(new StringEntity(payload));
 
         HttpResponse response = executeHttpClient(retry ? MAX_RETRIES : 0, httpPut);
+
+        return parseHttpResponse(response);
+    }
+
+    public static String sendDeleteRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers)
+            throws IOException {
+        HttpDelete httpDelete = new HttpDelete(requestUrl);
+        for (BasicNameValuePair basicNameValuePair : headers) {
+            httpDelete.setHeader(basicNameValuePair.getName(), basicNameValuePair.getValue());
+        }
+
+        HttpResponse response = executeHttpClient(retry ? MAX_RETRIES : 0, httpDelete);
 
         return parseHttpResponse(response);
     }

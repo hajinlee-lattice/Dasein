@@ -133,6 +133,17 @@ public class PlsGaManager {
         return ids;
     }
 
+    public void deleteTenantWithSingularId(String customer) {
+        String tenantId = CustomerSpace.parse(customer).getTenantId();
+        try {
+            String url = plsApiHost + "/pls/admin/tenants/" + tenantId;
+            HttpClientWithOptionalRetryUtils.sendDeleteRequest(url, false, headers);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24003,
+                    String.format("Failed to delete the old customer %s.", customer), e);
+        }
+    }
+
     private List<BasicNameValuePair> loginAndAttach(String customer) throws IOException {
         String url = plsApiHost + "/pls/login";
         Credentials credentials = new Credentials();
