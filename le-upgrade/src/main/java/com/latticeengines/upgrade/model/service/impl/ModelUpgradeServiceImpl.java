@@ -62,10 +62,11 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     private static final DateTimeFormatter FMT = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     public void setInfos(List<BardInfo> infos) throws Exception {
+        dlTenantName = "Unknown";
         for (BardInfo bardInfo : infos) {
             if (bardInfo.getDisplayName().equals(BARD_DB)) {
                 bardDB = bardInfo.getName();
-                System.out.println(bardDB);
+                System.out.println("BardDB: " + bardDB);
                 instance = bardInfo.getInstance();
                 System.out.println("instance: " + instance);
             } else if (bardInfo.getDisplayName().equals(VISIDB_DL)) {
@@ -74,11 +75,11 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 for (JsonNode node : parentNode) {
                     if (node.get("Key").asText().equals(CUSTOMER_NAME)) {
                         dlTenantName = node.get("Value").asText();
-                        System.out.println("tenant name: " + dlTenantName);
                     }
                 }
             }
         }
+        System.out.println("tenant name: " + dlTenantName);
     }
 
     protected void populateTenantModelInfo() {
@@ -87,6 +88,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             deploymentIds.addAll(authoritativeDBJdbcManager.getDeploymentIDs(version));
         }
         for (String deploymentId : deploymentIds) {
+            System.out.println("_______________________________________");
             try {
                 List<String> activeModelKeyList = getActiveModelKeyList(deploymentId);
                 populateTenantModelInfo(activeModelKeyList);
@@ -148,8 +150,6 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
         for(String uuid : uuids){
             upgradeModelSummayForCustomerModel(customer, uuid);
-
-            //TODO:song there will be another step to make early 1.4 summaries unclickable
         }
     }
 
