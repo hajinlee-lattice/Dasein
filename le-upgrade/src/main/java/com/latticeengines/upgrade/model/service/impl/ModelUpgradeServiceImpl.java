@@ -87,8 +87,12 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             deploymentIds.addAll(authoritativeDBJdbcManager.getDeploymentIDs(version));
         }
         for (String deploymentId : deploymentIds) {
-            List<String> activeModelKeyList = getActiveModelKeyList(deploymentId);
-            populateTenantModelInfo(activeModelKeyList);
+            try {
+                List<String> activeModelKeyList = getActiveModelKeyList(deploymentId);
+                populateTenantModelInfo(activeModelKeyList);
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
             System.out.println("_______________________________________");
         }
     }
