@@ -23,9 +23,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     var percentLeads = _.map(chartData, function(d){ return TopPredictorService.FormatPercent(d.percentTotal); });
     percentLeads = TopPredictorService.SumToOne(percentLeads);
     
-    $scope.generateAttributeName = function() { return $sce.trustAsHtml('<h4 style="border-left: ' + $scope.attributeColor + 
+    $scope.generateAttributeName = function() { 
+        return $sce.trustAsHtml('<h4 style="border-left: ' + $scope.attributeColor + 
     		' solid 6px;" title="' + $scope.attributeName + '">' + $scope.attributeName + '</h4>' + '<p title="' +  
-    		$scope.attributeDescription + '">' + $scope.attributeDescription+ '</p>');
+    		$scope.attributeDescription + '">' + decodeURIComponent(escape($scope.attributeDescription)) + '</p>');
     };
 
     var chart,
@@ -50,6 +51,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             path = $scope.selectedPath[0][0],
             donutRect = donut.getBoundingClientRect(),
             pathRect = path.getBoundingClientRect(),
+            center = donutRect.left + (donutRect.width >> 1),
             top = (pathRect.top - donutRect.top + (pathRect.height >> 1)) / donutRect.height;
         
         // Adjust height of tail pseudo-element to anchor to path element
@@ -65,11 +67,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         hoverElem.css("top", donutRect.top + (donutRect.height >> 1));
 
         if (xPos > 0) {
-            hoverElem.css("left", pathRect.left + pathRect.width + 10);
+            hoverElem.css("left", center + width - 5);
             attributeHover.removeClass("attribute-hover-left-arrow");
             attributeHover.addClass("attribute-hover-right-arrow");
         } else {
-            hoverElem.css("left", pathRect.left - 360);
+            hoverElem.css("left", center - width + 15 - 360);
             attributeHover.removeClass("attribute-hover-right-arrow");
             attributeHover.addClass("attribute-hover-left-arrow");
         }
