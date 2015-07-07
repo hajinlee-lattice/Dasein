@@ -247,8 +247,9 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             System.out.println(String.format("\nCustomer %s does not have any active model", customer));
         }
 
-        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, %2d modelsummary.json.",
-                customer, modelGuids.size(), aggregator.activeModels, aggregator.modelJsons, aggregator.modelSummeries);
+        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, %2d modelsummary.json, " +
+                        "%2d modelsummaries in PLS 1.4 DB.", customer, modelGuids.size(), aggregator.activeModels,
+                aggregator.modelJsons, aggregator.modelSummeries, aggregator.summariesIn1_4);
     }
 
     private String printModelsInHdfs(String customer) {
@@ -263,8 +264,9 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             System.out.println(String.format("\nCustomer %s does not have any model in hdfs.", customer));
         }
 
-        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, %2d modelsummary.json.",
-                customer, uuids.size(), aggregator.activeModels, aggregator.modelJsons, aggregator.modelSummeries);
+        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, %2d modelsummary.json, " +
+                        "%2d modelsummaries in PLS 1.4 DB.", customer, uuids.size(), aggregator.activeModels,
+                aggregator.modelJsons, aggregator.modelSummeries, aggregator.summariesIn1_4);
 
     }
 
@@ -291,9 +293,16 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println(FMT.print(yarnManager.getModelCreationDate(customer, uuid)));
 
         System.out.print("    Modelsummary already exists? ........ ");
-        
         if (yarnManager.modelSummaryExistsInSingularId(customer, uuid)) {
             statistics.modelSummeries++;
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+        }
+
+        System.out.print("    Modelsummary in on PLS 1.4 DB? ........ ");
+        if (plsMultiTenantJdbcManager.hasUuid(uuid)) {
+            statistics.summariesIn1_4++;
             System.out.println("YES");
         } else {
             System.out.println("NO");
@@ -304,6 +313,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         public int activeModels = 0;
         public int modelJsons = 0;
         public int modelSummeries = 0;
+        public int summariesIn1_4 = 0;
     }
 
     @Override
