@@ -1,6 +1,5 @@
 package com.latticeengines.upgrade.jdbc;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,20 +21,18 @@ public class PlsMultiTenantJdbcManager {
     private JdbcTemplate plsJdbcTemlate;
 
     private static final String MODEL_SUMMARY_TABLE = "MODEL_SUMMARY";
-    private static Set<String> modelIds;
+    private static Set<String> uuids = new HashSet<>();
 
     @PostConstruct
     private void getModelGuids() {
         List<String> ids = plsJdbcTemlate.queryForList("SELECT ID FROM " + MODEL_SUMMARY_TABLE, String.class);
-        List<String> guids = new ArrayList<>();
         for (String id: ids) {
-            guids.add(YarnPathUtils.extractUuid(id));
+            uuids.add(YarnPathUtils.extractUuid(id));
         }
-        modelIds = new HashSet<>(guids);
     }
 
     public boolean hasUuid(String modelGuidOrUuid) {
-        return modelIds.contains(YarnPathUtils.extractUuid(modelGuidOrUuid));
+        return uuids.contains(YarnPathUtils.extractUuid(modelGuidOrUuid));
     }
 
     public String findNameByUuid(String uuid) {
