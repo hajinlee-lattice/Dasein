@@ -22,6 +22,9 @@ public class TenantConfigServiceImpl implements TenantConfigService {
 
     private static final Log log = LogFactory.getLog(TenantConfigServiceImpl.class);
     private static final BatonService batonService = new BatonServiceImpl();
+    private static final String SPACE_CONFIGURATION_ZNODE = "/SpaceConfiguration";
+    private static final String TOPOLOGY_ZNODE = "/Topology";
+    private static final String DL_ADDRESS_ZNODE = "/DL_Address";
 
     @Value("${pls.dataloader.rest.api}")
     private String defaultDataLoaderUrl;
@@ -33,7 +36,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
             Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
                     customerSpace.getContractId(), customerSpace.getTenantId(),
-                    customerSpace.getSpaceId()).append(new Path("/SpaceConfiguration/Topology"));
+                    customerSpace.getSpaceId()).append(new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
             return camille.get(path).getData();
         } catch (Exception ex) {
             log.error("Can not get tenant's topology", ex);
@@ -48,7 +51,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
             Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
                     customerSpace.getContractId(), customerSpace.getTenantId(),
-                    customerSpace.getSpaceId()).append(new Path("/SpaceConfiguration/DL_Address"));
+                    customerSpace.getSpaceId()).append(new Path(SPACE_CONFIGURATION_ZNODE + DL_ADDRESS_ZNODE));
             return camille.get(path).getData();
         } catch (Exception ex) {
             log.error("Can not get tenant's data loader address from ZK", ex);
