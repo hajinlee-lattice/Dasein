@@ -7,26 +7,11 @@ from optparse import OptionParser, OptionGroup
 
 def construct_option_parser():
     parser = OptionParser()
-
-    # required options
     parser.add_option("-o", "--hostport", dest="hostport", default="http://bodcprodjty221.prod.lattice.local",
                       help='default = http://bodcprodjty221.prod.lattice.local')
-    parser.add_option("-c", "--command", dest="command", help='list, add, remove, update')
-
-    parser.add_option_group(construct_add_remove_option_group(parser))
-    parser.add_option_group(construct_update_option_group(parser))
+    parser.add_option("-c", "--command", dest="command", help='list, add, remove, setdefault')
+    parser.add_option("-s", "--server", dest="server", help='the server to be added/removed, or set to be default')
     return parser
-
-def construct_add_remove_option_group(parser):
-    group = OptionGroup(parser, "Options for add/rm")
-    group.add_option("-s", "--server", dest="server", help='the server to be added/removed')
-    return group
-
-def construct_update_option_group(parser):
-    group = OptionGroup(parser, "Options for update")
-    group.add_option("-S", "--servers", dest="servers", help='the list of available servers')
-    group.add_option("-d", "--default", dest="default", help='the default server')
-    return group
 
 class CmdHandler:
     def __init__(self, options):
@@ -44,8 +29,6 @@ class CmdHandler:
         self.node = None
 
         self.server = options['server']
-        self.servers = options['servers']
-        self.default = options['default']
 
     def check_conn(self):
         sys.stdout.write("Pinging host %s://%s ... " % (self.protocol, self.host))
@@ -60,7 +43,7 @@ class CmdHandler:
             'list': self.list,
             'add': self.add,
             'remove': self.remove,
-            'update': self.update
+            'setdefault': self.set_default
         }
         if self.cmd in cmd_map:
             cmd_map[self.cmd]()
@@ -79,43 +62,34 @@ class CmdHandler:
             return
 
         sys.stdout.write("Adding %s to the server list in ZK ... " % self.server)
-        if not self.add_server_to_options():
+        if not self.update_node_by_addding_server():
             return
 
-        self.conn.request("PUT", "/admin/internal/services/options?component=VisiDBDL", json.dumps(self.node),
-                          self.headers)
-        response = self.conn.getresponse()
-        print response.status, response.reason, "\n", response.read(), "\n"
-
-        if response.status == 200:
-            self.list()
+        self.executeHttpPut()
 
     def remove(self):
         if self.server is None:
-            print "Please specify the server name to be added!"
+            print "Please specify the server name to be removed!"
             return
 
         sys.stdout.write("Removing %s to the server list in ZK ... " % self.server)
-        if not self.rm_server_from_options():
+        if not self.update_node_by_rm_server():
             return
 
-        self.conn.request("PUT", "/admin/internal/services/options?component=VisiDBDL", json.dumps(self.node),
-                          self.headers)
-        response = self.conn.getresponse()
-        print response.status, response.reason, "\n", response.read(), "\n"
+        self.executeHttpPut()
 
-        if response.status == 200:
-            self.list()
-
-    def update(self):
-        if self.servers is None and self.default is None:
-            print "Please specify the server list or the default server!"
+    def set_default(self):
+        if self.server is None:
+            print "Please specify the default server!"
             return
 
-        sys.stdout.write("Updating the servers list and default server in ZK ... ")
-        if not self.update_servers_and_default():
+        sys.stdout.write("Updating the default server in ZK ... ")
+        if not self.update_node_by_default_server():
             return
 
+        self.executeHttpPut()
+
+    def executeHttpPut(self):
         self.conn.request("PUT", "/admin/internal/services/options?component=VisiDBDL", json.dumps(self.node),
                           self.headers)
         response = self.conn.getresponse()
@@ -135,7 +109,7 @@ class CmdHandler:
 
         self.node = nodes[0]
 
-    def add_server_to_options(self):
+    def update_node_by_addding_server(self):
         if self.node is None:
             self.refresh()
 
@@ -144,29 +118,35 @@ class CmdHandler:
         self.node['Options'] = list(options)
         return True
 
-    def rm_server_from_options(self):
+    def update_node_by_rm_server(self):
         if self.node is None:
             self.refresh()
 
         options = set(self.node['Options'])
 
         if self.server not in options:
-            print "ERROR: %s is not in the current server list!" % self.server
+            print "ERROR: %s is not in the current server list." % self.server
+            return False
+
+        if len(options) <= 1:
+            print "ERROR: Cannot remove the only server from the list."
             return False
 
         options.remove(self.server)
         self.node['Options'] = list(options)
+        self.node['DefaultOption'] = list(options)[0]
         return True
 
-    def update_servers_and_default(self):
+    def update_node_by_default_server(self):
         if self.node is None:
             self.refresh()
 
-        if self.servers is not None:
-            self.node['Options'] = list(set(self.servers))
+        options = set(self.node['Options'])
+        if self.server not in options:
+            print "ERROR: %s is not in the current server list." % self.server
+            return False
 
-        if self.default is not None:
-            self.node['DefaultOption'] = self.default
+        self.node['DefaultOption'] = self.server
 
         return True
 
