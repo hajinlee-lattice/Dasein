@@ -54,9 +54,9 @@ class Finalize(State):
             json.dump(jsonDict, fp)
             
     def invokeModelPredictorsExtraction(self, mediator):
-        modelJSONFilePath = mediator.modelLocalDir + mediator.name+ "_model.json"
+        modelJSONFilePath = mediator.modelLocalDir + mediator.name + "_model.json"
         csvFilePath = mediator.modelLocalDir + mediator.name+ "_model.csv"
-        subprocess.call([sys.executable, 'modelpredictorextraction.py', modelJSONFilePath, csvFilePath])
+        subprocess.call([sys.executable, 'modelpredictorextraction.py', modelJSONFilePath, csvFilePath, 'metadata.avsc'])
 
     def writeReadoutSample(self, mediator):
         csvFilePath = mediator.modelLocalDir + mediator.name + "_readoutsample.csv"

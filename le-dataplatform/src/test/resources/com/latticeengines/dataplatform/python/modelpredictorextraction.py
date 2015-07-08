@@ -15,9 +15,8 @@ def main(argv):
     
     ModelJSONFilePath = sys.argv[1]
     CSVFilePath = sys.argv[2]
-    debugFlag = ''
-    if len(sys.argv) > 3:
-        debugFlag = sys.argv[3].lower()
+    MetadataFile = sys.argv[3]
+
     nameArray = []
     sumArray = []
  
@@ -25,6 +24,14 @@ def main(argv):
         ModelJSON=myfile.read().replace('\n', '')
         
     contentJSON = json.loads(ModelJSON)
+
+    with open(MetadataFile, "r") as metadataFile:
+        configMetadataFile = metadataFile.read().replace('\n', '')
+    configMetadataElements = json.loads(configMetadataFile)["Metadata"]
+
+    columnNameToMetadataElement = dict()
+    for configMetadataElement in configMetadataElements:
+        columnNameToMetadataElement[configMetadataElement["ColumnName"]] = configMetadataElement
 
     if contentJSON["AverageProbability"] is None:
         print "-------------------------------------------"
@@ -47,10 +54,7 @@ def main(argv):
         return 1
     
     with open (CSVFilePath, "w") as csvFile:
-        if debugFlag == "-debug":
-            csvFile.write("Column Name,Attribute Name,Category,FundamentalType,Predictive Power,Attribute Value,Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads,ApprovedUsage\n")
-        else:        
-            csvFile.write("Attribute Name,Category,FundamentalType,Predictive Power,Attribute Value,Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads\n")
+        csvFile.write("Original Column Name,Attribute Name,Category,FundamentalType,Predictive Power,Attribute Value,Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads,ApprovedUsage,Tags,StatisticalType,Attribute Description,DataSource\n")
             
         #This section calculates the total #leads for each predictor. Ideally it should be the same for each predictor, but there seem to be some exceptions
         siddata = sorted(contentJSON["Summary"]["Predictors"], key=operator.itemgetter('Name'))
@@ -68,17 +72,16 @@ def main(argv):
         #dictArray is a list of dictionaries with attributeName = #Total Leads
 
         for predictor in contentJSON["Summary"]["Predictors"]:
-            if predictor["ApprovedUsage"] in ["None","Model"] and debugFlag != "-debug": continue;
             otherPredictorElements = []
             for predictorElement in predictor["Elements"]:
                 if isMergeWithOther(predictor, predictorElement, dictArray):
                     otherPredictorElements.append(predictorElement)
                     continue
-                writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predictor, predictorElement)
+                writePredictorElement(len, averageProb, csvFile, dictArray, predictor, predictorElement, columnNameToMetadataElement)
                 
             if (len(otherPredictorElements)  > 0):
                 mergedPredictorElement = mergePredictorElements(otherPredictorElements, averageProb)
-                writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predictor, mergedPredictorElement)
+                writePredictorElement(len, averageProb, csvFile, dictArray, predictor, mergedPredictorElement, columnNameToMetadataElement)
 
 def mergePredictorElements(otherElements, averageProb):
     mergedElement = dict()
@@ -116,31 +119,27 @@ def isMergeWithOther(predictor, element, dictArray):
             return True if freq < 0.01 else False
     return True
                                                  
-def writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predictor, predictorElement):
-    if debugFlag == "-debug":
-        if 'Name' in predictor:
-            csvFile.write('"')
-            csvFile.write(unicode(predictor["Name"]).replace('"', '""'))
-            csvFile.write('"')
-        csvFile.write(",")
-    if 'DisplayName' in predictor:
-        csvFile.write('"')
-        csvFile.write(unicode(predictor["DisplayName"]).replace('"', '""'))
-        csvFile.write('"')
+def writePredictorElement(len, averageProb, csvFile, dictArray, predictor, predictorElement, columnNameToMetadataElement):
+    columnName = predictor["Name"]
+
+    csvFile.write('"' + unicode(columnName).replace('"', '""') + '"')
     csvFile.write(",")
-    if 'Category' in predictor:
-        csvFile.write('"')
-        csvFile.write(unicode(predictor["Category"]).replace('"', '""'))
-        csvFile.write('"')
+    
+    if predictor["DisplayName"]:
+        csvFile.write('"' + unicode(predictor["DisplayName"]).replace('"', '""') + '"')
     csvFile.write(",")
-    if 'FundamentalType' in predictor:
-        csvFile.write('"')
-        csvFile.write(unicode(predictor["FundamentalType"]).replace('"', '""'))
-        csvFile.write('"')
+
+    if predictor["Category"]:
+        csvFile.write('"' + unicode(predictor["Category"]).replace('"', '""') + '"')
     csvFile.write(",")
-    if 'UncertaintyCoefficient' in predictor:
-        csvFile.write('"' + unicode(predictor["UncertaintyCoefficient"]) + '"')
+
+    if predictor["FundamentalType"]:
+        csvFile.write('"' + unicode(predictor["FundamentalType"]).replace('"', '""') + '"')
     csvFile.write(",")
+
+    csvFile.write('"' + unicode(predictor["UncertaintyCoefficient"]) + '"')
+    csvFile.write(",")
+
     length = 0
     if predictorElement["Values"] is not None:
         length = len(predictorElement["Values"])
@@ -166,18 +165,21 @@ def writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predi
                     csvFile.write(';')
         
         csvFile.write(']",')
+
     if 'Lift' in predictorElement:
         csvFile.write(unicode(averageProb * predictorElement["Lift"]))
     csvFile.write(",")
     if 'Lift' in predictorElement:
         csvFile.write(unicode(predictorElement["Lift"]))
     csvFile.write(",")
+
     if predictor['Name'] in dictArray.keys():
         if dictArray[predictor['Name']] is None:
             csvFile.write("notFound")
         else:
             csvFile.write('"' + str(dictArray[predictor['Name']]) + '"') #write total #leads to csvFile
     csvFile.write(",")
+
     if 'Count' in predictorElement:
         if predictorElement["Count"] is None:
             csvFile.write("null")
@@ -185,17 +187,30 @@ def writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predi
             csvFile.write(unicode(predictorElement["Count"]))
             csvFile.write(",")
             csvFile.write(unicode(predictorElement["Count"] / float(dictArray[predictor['Name']])))
+
     csvFile.write(",")
-    if debugFlag == "-debug":
-        if 'DisplayName' in predictor:
-            csvFile.write('"')
-            csvFile.write(unicode(predictor["ApprovedUsage"]).replace('"', '""'))
-            csvFile.write('"')
+    if predictor["ApprovedUsage"]:
+        csvFile.write('"' + unicode(predictor["ApprovedUsage"]).replace('"', '""') + '"')
+    csvFile.write(",")
+
+    if columnName in columnNameToMetadataElement:
+        extraMetadataInformation = columnNameToMetadataElement[columnName]
+
+        csvFile.write('"' + unicode(extraMetadataInformation["Tags"]).replace('"', '""') + '"')
+        csvFile.write(",")
+
+        csvFile.write('"' + unicode(extraMetadataInformation["StatisticalType"]).replace('"', '""') + '"')
+        csvFile.write(",")
+
+        csvFile.write('"' + unicode(extraMetadataInformation["Description"]).replace('"', '""') + '"')
+        csvFile.write(",")
+
+        csvFile.write('"' + unicode(extraMetadataInformation["DataSource"]).replace('"', '""') + '"')
+
     csvFile.write("\n")
 
-
 def mapBinaryValue(predictor, val):
-    if 'FundamentalType' not in predictor:
+    if not predictor["FundamentalType"]:
         return val
     fundamentalType = predictor["FundamentalType"].upper()
     if fundamentalType != "BOOLEAN":
