@@ -5,9 +5,9 @@
     <artifactId>le-domain</artifactId>
     <packaging>jar</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</url>
 	</scm>
 
     <name>le-${component-name}</name>
@@ -15,7 +15,7 @@
     <properties>
         <component-name>domain</component-name>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
-        <le.common.version>1.0.34-SNAPSHOT</le.common.version>
+        <le.common.version>1.0.34</le.common.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
@@ -23,7 +23,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.34-SNAPSHOT</version>
+        <version>1.0.34</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

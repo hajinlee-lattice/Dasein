@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-propdata</artifactId>
-    <version>1.0.34-SNAPSHOT</version>
+    <version>1.0.34</version>
     <name>le-${component-name}</name>
     <description>LE PropData</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.34-SNAPSHOT</version>
+        <version>1.0.34</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -25,9 +23,9 @@
 
     <properties>
         <component-name>propdata</component-name>
-        <le.db.version>1.0.34-SNAPSHOT</le.db.version>
-        <le.dataflow.version>1.0.34-SNAPSHOT</le.dataflow.version>
-        <le.dataplatform.version>1.0.34-SNAPSHOT</le.dataplatform.version>
+        <le.db.version>1.0.34</le.db.version>
+        <le.dataflow.version>1.0.34</le.dataflow.version>
+        <le.dataplatform.version>1.0.34</le.dataplatform.version>
     </properties>
 
     <profiles>

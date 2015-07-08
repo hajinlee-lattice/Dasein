@@ -4,17 +4,17 @@
 	<artifactId>le-web</artifactId>
 	<packaging>pom</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</url>
 	</scm>
 
-	<version>1.0.34-SNAPSHOT</version>
+	<version>1.0.34</version>
 	
 	<parent>
 		<groupId>com.latticeengines</groupId>
 		<artifactId>le-parent</artifactId>
-		<version>1.0.34-SNAPSHOT</version>
+		<version>1.0.34</version>
 		<relativePath>../le-parent</relativePath>
 	</parent>
 	
