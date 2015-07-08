@@ -321,6 +321,10 @@ Model-detail
   color: #D96D00;
 }
 
+#adminInfoTable {
+  box-shadow: none;
+}
+
 .model-admin-info table tbody tr:last-of-type {
   border-bottom: #ccc solid 1px;
 }
@@ -336,7 +340,7 @@ Model-detail
 .panel-body.model-admin-info {
   margin-top: 0;
   padding-top: 4em;
-  padding-bottom: 3em;
+  padding-bottom: 0;
 }
 
 .model-mgmt p, .model-mgmt h4 {
