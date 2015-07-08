@@ -5,7 +5,9 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.upgrade.UpgradeRunner;
+import com.latticeengines.upgrade.jdbc.PlsMultiTenantJdbcManager;
 import com.latticeengines.upgrade.pls.PlsGaManager;
 import com.latticeengines.upgrade.tenant.service.TenantUpgradeService;
 
@@ -15,6 +17,9 @@ public class TenantCleanupServiceImpl implements TenantUpgradeService {
     @Autowired
     private PlsGaManager plsGaManager;
 
+    @Autowired
+    private PlsMultiTenantJdbcManager plsMultiTenantJdbcManager;
+
     private void deleteSingularIdPLSTenant(String customer) {
         System.out.println(String.format("\nThe old customer being deleted from PLS ... ... ... ... %s", customer));
 
@@ -23,8 +28,18 @@ public class TenantCleanupServiceImpl implements TenantUpgradeService {
         System.out.println("OK");
     }
 
+    private void deleteModelSummariesForNewTenant(String customer) {
+        System.out.println(String.format("\nRemoving modelsummaries in the new tenant for ... ... ... ... %s", customer));
+
+        System.out.print("Removing modelsummaries in PLS_MultiTenant DB ... ");
+        String tenantId = CustomerSpace.parse(customer).toString();
+        plsMultiTenantJdbcManager.deleteModelSummariesByTenantId(tenantId);
+        System.out.println("OK");
+    }
+
     private void upgrade(String customer) {
         deleteSingularIdPLSTenant(customer);
+        deleteModelSummariesForNewTenant(customer);
     }
 
     @Override

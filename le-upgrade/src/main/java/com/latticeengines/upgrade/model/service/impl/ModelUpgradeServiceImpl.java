@@ -175,7 +175,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println(in1_4 ? "YES" : "NO");
 
         boolean toBeDeleted = exists && !in1_4;
-        boolean toBeGenerated = active || in1_4;
+        boolean toBeGenerated = active && !in1_4;
 
         if (toBeDeleted) {
             System.out.print("Deleting existing incomplete modelsummary ...");
@@ -185,7 +185,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
         if (toBeGenerated) {
             System.out.print("Deleting modelsummaries with the same uuid in PLS_MultiTenant DB ...");
-            plsMultiTenantJdbcManager.deleteByUuid(uuid);
+            plsMultiTenantJdbcManager.deleteModelSummariesByUuid(uuid);
             System.out.println("OK");
 
             String name = plsMultiTenantJdbcManager.findNameByUuid(uuid);

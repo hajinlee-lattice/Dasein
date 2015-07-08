@@ -20,6 +20,7 @@ public class PlsMultiTenantJdbcManager {
     @Qualifier("plsJdbcTemlate")
     private JdbcTemplate plsJdbcTemlate;
 
+    private static final String TENANT_TABLE = "TENANT";
     private static final String MODEL_SUMMARY_TABLE = "MODEL_SUMMARY";
     private static Set<String> uuids = new HashSet<>();
 
@@ -41,8 +42,16 @@ public class PlsMultiTenantJdbcManager {
                 "SELECT NAME FROM " + MODEL_SUMMARY_TABLE + " WHERE ID = \'" + modelId + "\'", String.class);
     }
 
-    public void deleteByUuid(String modelId) {
+    public void deleteModelSummariesByUuid(String modelId) {
         String uuid = YarnPathUtils.extractUuid(modelId);
         plsJdbcTemlate.execute("DELETE FROM " + MODEL_SUMMARY_TABLE + " WHERE ID LIKE \'%" + uuid + "%\'");
+    }
+
+    public void deleteModelSummariesByTenantId(String tenantId) {
+        plsJdbcTemlate.execute("DELETE summary " +
+                "FROM " + MODEL_SUMMARY_TABLE + " AS summary " +
+                "INNER JOIN " + TENANT_TABLE + " AS tenant " +
+                "ON summary.FK_TENANT_ID = tenant.TENANT_PID " +
+                "WHERE tenant.TENANT_ID = \'" + tenantId + "\'");
     }
 }
