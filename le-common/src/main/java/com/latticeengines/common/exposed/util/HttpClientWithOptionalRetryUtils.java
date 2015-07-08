@@ -3,24 +3,48 @@ package com.latticeengines.common.exposed.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 
 public class HttpClientWithOptionalRetryUtils {
     private static final long INITIAL_WAIT_INTERVAL = 100L;
     private static final long MAX_WAIT_INTERVAL = 60000L;
     private static final int MAX_RETRIES = 12;
+    private static HttpClient httpClientIgnoreSsl;
+
+    private HttpClientWithOptionalRetryUtils() {}
+
+    static {
+        httpClientIgnoreSsl = makeHttpClientIgnoreSsl();
+    }
 
     private static String parseHttpResponse(HttpResponse response) throws IllegalStateException, IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
@@ -35,6 +59,26 @@ public class HttpClientWithOptionalRetryUtils {
     }
 
     public static String sendGetRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,
+                                        BasicNameValuePair... params) throws IOException {
+        return sendGetRequest(httpClientIgnoreSsl, requestUrl, retry, headers, params);
+    }
+
+    public static String sendPostRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,
+                                         String payload) throws IOException {
+        return sendPostRequest(httpClientIgnoreSsl, requestUrl, retry, headers, payload);
+    }
+
+    public static String sendPutRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,
+                                        String payload) throws IOException {
+        return sendPutRequest(httpClientIgnoreSsl, requestUrl, retry, headers, payload);
+    }
+
+    public static String sendDeleteRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers)
+            throws IOException {
+        return sendDeleteRequest(httpClientIgnoreSsl, requestUrl, retry, headers);
+    }
+
+    private static String sendGetRequest(HttpClient httpClient, String requestUrl, boolean retry, List<BasicNameValuePair> headers,
             BasicNameValuePair... params) throws IOException {
 
         StringBuilder parameterizedRequestUrl = new StringBuilder(requestUrl);
@@ -48,12 +92,12 @@ public class HttpClientWithOptionalRetryUtils {
             httpGet.setHeader(basicNameValuePair.getName(), basicNameValuePair.getValue());
         }
 
-        HttpResponse response = executeHttpClient(retry ? MAX_RETRIES : 0, httpGet);
+        HttpResponse response = executeHttpClient(httpClient, retry ? MAX_RETRIES : 0, httpGet);
 
         return parseHttpResponse(response);
     }
 
-    public static String sendPostRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,
+    private static String sendPostRequest(HttpClient httpClient, String requestUrl, boolean retry, List<BasicNameValuePair> headers,
             String payload) throws IOException {
         HttpPost httpPost = new HttpPost(requestUrl);
         for (BasicNameValuePair basicNameValuePair : headers) {
@@ -62,12 +106,12 @@ public class HttpClientWithOptionalRetryUtils {
 
         httpPost.setEntity(new StringEntity(payload));
 
-        HttpResponse response = executeHttpClient(retry ? MAX_RETRIES : 0, httpPost);
+        HttpResponse response = executeHttpClient(httpClient, retry ? MAX_RETRIES : 0, httpPost);
 
         return parseHttpResponse(response);
     }
 
-    public static String sendPutRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,
+    private static String sendPutRequest(HttpClient httpClient, String requestUrl, boolean retry, List<BasicNameValuePair> headers,
                                          String payload) throws IOException {
         HttpPut httpPut = new HttpPut(requestUrl);
         for (BasicNameValuePair basicNameValuePair : headers) {
@@ -76,27 +120,25 @@ public class HttpClientWithOptionalRetryUtils {
 
         httpPut.setEntity(new StringEntity(payload));
 
-        HttpResponse response = executeHttpClient(retry ? MAX_RETRIES : 0, httpPut);
+        HttpResponse response = executeHttpClient(httpClient, retry ? MAX_RETRIES : 0, httpPut);
 
         return parseHttpResponse(response);
     }
 
-    public static String sendDeleteRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers)
+    private static String sendDeleteRequest(HttpClient httpClient, String requestUrl, boolean retry, List<BasicNameValuePair> headers)
             throws IOException {
         HttpDelete httpDelete = new HttpDelete(requestUrl);
         for (BasicNameValuePair basicNameValuePair : headers) {
             httpDelete.setHeader(basicNameValuePair.getName(), basicNameValuePair.getValue());
         }
 
-        HttpResponse response = executeHttpClient(retry ? MAX_RETRIES : 0, httpDelete);
+        HttpResponse response = executeHttpClient(httpClient, retry ? MAX_RETRIES : 0, httpDelete);
 
         return parseHttpResponse(response);
     }
 
-    private static HttpResponse executeHttpClient(int maxRetries, HttpUriRequest request) throws IOException
+    private static HttpResponse executeHttpClient(HttpClient httpClient, int maxRetries, HttpUriRequest request) throws IOException
              {
-        DefaultHttpClient httpclient = new DefaultHttpClient();
-
         boolean retry = true;
         int retries = 0;
         HttpResponse response = null;
@@ -111,7 +153,7 @@ public class HttpClientWithOptionalRetryUtils {
             }
 
             try {
-                response = httpclient.execute(request);
+                response = httpClient.execute(request);
                 retry = false;
             } catch (IOException e) {
                 exception = e;
@@ -123,6 +165,38 @@ public class HttpClientWithOptionalRetryUtils {
         }
 
         return response;
+    }
+
+    private static HttpClient makeHttpClientIgnoreSsl() {
+        SSLContext sslContext;
+
+        try {
+            sslContext = SSLContext.getInstance("SSL");
+
+            // set up a TrustManager that trusts everything
+            sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                public void checkClientTrusted(X509Certificate[] certs,
+                                               String authType) { }
+
+                public void checkServerTrusted(X509Certificate[] certs,
+                                               String authType) { }
+            }}, new SecureRandom());
+        } catch (NoSuchAlgorithmException|KeyManagementException e) {
+            throw new RuntimeException("Failed to create a trust-all ssl context.", e);
+        }
+
+        SSLSocketFactory sf = new SSLSocketFactory(sslContext);
+        SchemeRegistry schemeRegistry = new SchemeRegistry();
+        schemeRegistry.register(new Scheme("http", new PlainSocketFactory(), 80));
+        schemeRegistry.register(new Scheme("https", sf, 443));
+
+        HttpParams params = new BasicHttpParams();
+        ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
+        return new DefaultHttpClient(cm, params);
     }
 
     private static long getExponentialWaitTime(int retryCount) {
