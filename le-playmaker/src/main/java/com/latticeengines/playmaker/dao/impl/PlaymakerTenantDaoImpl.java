@@ -50,17 +50,17 @@ public class PlaymakerTenantDaoImpl extends BaseDaoImpl<PlaymakerTenant> impleme
 
     @Override
     public void updateByTenantName(PlaymakerTenant tenant) {
-        PlaymakerTenant origTenat = findByTenantName(tenant.getTenantName());
-        if (origTenat == null) {
+        PlaymakerTenant origTenant = findByTenantName(tenant.getTenantName());
+        if (origTenant == null) {
             return;
         }
-        origTenat.setExternalId(tenant.getExternalId());
-        origTenat.setJdbcDriver(tenant.getJdbcDriver());
-        origTenat.setJdbcPassword(tenant.getJdbcPassword());
-        origTenat.setJdbcUrl(tenant.getJdbcUrl());
-        origTenat.setJdbcUserName(tenant.getJdbcUserName());
+        origTenant.setExternalId(tenant.getExternalId());
+        origTenant.setJdbcDriver(tenant.getJdbcDriver());
+        origTenant.setJdbcPassword(tenant.getJdbcPassword());
+        origTenant.setJdbcUrl(tenant.getJdbcUrl());
+        origTenant.setJdbcUserName(tenant.getJdbcUserName());
 
-        update(origTenat);
+        update(origTenant);
 
     }
 }

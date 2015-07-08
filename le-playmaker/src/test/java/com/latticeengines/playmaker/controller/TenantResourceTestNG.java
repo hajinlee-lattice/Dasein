@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.controller;
 
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -11,6 +12,7 @@ import com.latticeengines.playmaker.functionalframework.BasePlaymakerFunctionalT
 public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
 
     private RestTemplate restTemplate = null;
+    protected OAuth2RestTemplate adminRestTemplate = null;
 
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
@@ -29,6 +31,8 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
         } catch (Exception ex) {
             Assert.assertEquals(ex.getMessage(), "401 Unauthorized");
         }
+
+        adminRestTemplate = getOauthTemplate(newTenant.getTenantName(), newTenant.getTenantPassword());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
@@ -37,11 +41,9 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
         PlaymakerTenant newTenant = adminRestTemplate.postForObject(url, tenant, PlaymakerTenant.class);
         Assert.assertNotNull(newTenant);
         Assert.assertNotNull(newTenant.getTenantPassword());
-        Assert.assertTrue(newTenant.getTenantPassword().length() > 4);
         System.out.println("Tenant name=" + newTenant.getTenantName() + " password=" + newTenant.getTenantPassword());
-        url = apiHostPort + "/tenants/" + tenant.getTenantName();
-        tenant = adminRestTemplate.getForObject(url, PlaymakerTenant.class);
-        Assert.assertNotNull(tenant);
+
+        adminRestTemplate = getOauthTemplate(newTenant.getTenantName(), newTenant.getTenantPassword());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
