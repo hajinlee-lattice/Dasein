@@ -6,9 +6,9 @@
     <artifactId>le-parent</artifactId>
     <packaging>pom</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop_2.0.0_maint/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop_2.0.0_maint/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop_2.0.0_maint/develop</url>
 	</scm>
 
     <version>2.0.1-SNAPSHOT</version>
