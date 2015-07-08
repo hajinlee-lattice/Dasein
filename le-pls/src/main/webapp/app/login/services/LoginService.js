@@ -190,6 +190,6 @@ angular.module('mainApp.login.services.LoginService', [
         } else {
             return protocal + "://" + host + ":" + port;
         }
-    }
+    };
 
 });
