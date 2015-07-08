@@ -74,13 +74,13 @@ CREATE TABLE iris_metadata (
   `TargetEventTableName` nvarchar(11)
 );
 
-LOAD DATA INFILE '/home/hliu/workspace/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_train.dat'
+LOAD DATA INFILE '/Users/bnguyen/dev/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_train.dat'
 INTO TABLE iris 
 FIELDS TERMINATED BY ',' 
 LINES TERMINATED BY '\n' 
 (SEPAL_LENGTH, SEPAL_WIDTH, PETAL_LENGTH, PETAL_WIDTH, CATEGORY);
 
-LOAD DATA INFILE '/home/hliu/workspace/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_test.dat'
+LOAD DATA INFILE '/Users/bnguyen/dev/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_test.dat'
 INTO TABLE iris 
 FIELDS TERMINATED BY ',' 
 LINES TERMINATED BY '\n' 
