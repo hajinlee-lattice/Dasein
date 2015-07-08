@@ -5,7 +5,7 @@
             <button type="button" class="btn btn-link" data-ng-click="modelNameEditClick($event)" data-title="Enter Model Name"><i class="fa fa-pencil"></i></button>
         </h2>
     </div>
-    <button type="button" data-ng-if="mayDeleteModels" class="btn btn-link delete-model"><i class="fa fa-trash-o"></i></button>
+    <button type="button" data-ng-if="mayDeleteModels && !isActive" class="btn btn-link delete-model"><i class="fa fa-trash-o"></i></button>
     <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
         <div novalidate class="form-inline editable-container editableform" name="form">
             <div class="control-group">
