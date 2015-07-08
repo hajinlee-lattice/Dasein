@@ -51,5 +51,9 @@ describe('smoketest main flow of app', function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
         expect(element(by.id('adminInfoContainer')).getWebElement().isDisplayed()).toBe(true);
+
+        // default to summary tab in hidden admin page, check existence of it
+        expect(element(by.id('adminInfoTable')).getWebElement().isDisplayed()).toBe(true);
+
     }
 });

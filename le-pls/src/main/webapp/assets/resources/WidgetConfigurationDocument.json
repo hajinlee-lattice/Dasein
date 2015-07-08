@@ -138,8 +138,7 @@
 				}, {
                     "ID" : "modelListCreationHistoryWidget",
                     "Type" : "ModelListCreationHistoryWidget",
-                    "Widgets" : [
-                                ]
+                    "Widgets" : []
                 }, {
                     "ID" : "userManagementScreenWidget",
                     "Type" : "ScreenWidget",
@@ -152,11 +151,28 @@
                     "ID" : "adminInfoScreenWidget",
                     "Type" : "ScreenWidget",
                     "Widgets" : [{
-                        "ID" : "adminInfoWidget",
-                        "Type" : "AdminInfoWidget",
-                        "Widgets" : []
-                    }]
-                  }
+                            "ID" : "adminInfoTabWidget",
+                            "Type" : "SimpleTabWidget",
+                            "DefaultTab" : 0,
+                            "Tabs" : [{
+                                    "ID" : "adminInfoSummaryTab",
+                                    "TitleString" : "ADMIN_INFO_SUMMARY_TAB_TITLE",
+                                    "Widgets" : [{
+                                            "ID" : "adminInfoWidget",
+                                            "Type" : "AdminInfoWidget"
+                                    }]
+                                },{
+                                    "ID" : "adminInfoAlertsTab",
+                                    "TitleString" : "ADMIN_INFO_ALERTS_TAB_TITLE",
+                                    "Widgets" : [{
+                                            "ID" : "adminInfoAlertsWidget",
+                                            "Type" : "AdminInfoAlertsWidget"
+                                    }]
+                                }
+                            ]
+                        }
+                    ]
+                }
 			]
 		}
 	]

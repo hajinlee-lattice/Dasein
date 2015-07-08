@@ -277,11 +277,13 @@ Model list title
 Model-detail
 */
 
+#adminInfoContainer .nav {
+  width: 200px;
+}
 
 .model-admin-back-button {
   font-size: 12pt;
 }
-
 
 .model-admin-link {
   padding-left: 5px;
@@ -296,6 +298,7 @@ Model-detail
   width: 60%;
   margin-left: auto;
   margin-right: auto;
+  padding: 2px;
 }
 
 .model-admin-info table th {
@@ -331,7 +334,7 @@ Model-detail
 }
 
 .panel-body.model-admin-info {
-  margin-top: 8em;
+  margin-top: 0;
   padding-top: 4em;
   padding-bottom: 3em;
 }
