@@ -83,6 +83,10 @@ public class UpgradeRunner {
         return Arrays.asList(CMD_CP_MODELS, CMD_REGISTER_ZK, CMD_REGISTER_PLS, CMD_UPGRADE, CMD_UPDATE_ACTIVE);
     }
 
+    private List<String> cmdsAllowAll() {
+        return Arrays.asList(CMD_LIST, CMD_UPGRADE);
+    }
+
     private void validateArguments(Namespace ns) {
         if (ns == null) {
             throw new IllegalArgumentException("Failed to parse input arguments.");
@@ -90,8 +94,8 @@ public class UpgradeRunner {
 
         String command = ns.getString("command");
 
-        if (cmdsNeedCustomer().contains(command) &&
-                !ns.getBoolean("all") && ns.getString("customer") == null ) {
+        if (cmdsNeedCustomer().contains(command) && ns.getString("customer") == null &&
+                !(cmdsAllowAll().contains(command) && ns.getBoolean("all"))) {
             throw new IllegalArgumentException("Missing customer (tenantId).");
         }
     }

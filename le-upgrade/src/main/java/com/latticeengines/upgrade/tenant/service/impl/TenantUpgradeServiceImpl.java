@@ -79,6 +79,11 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
         }
     }
 
+    private void upgrade(String customer) {
+        registerCustomerInPLS(customer);
+        registerCustomerInZK(customer);
+    }
+
     private SpaceConfiguration fetchSpaceConfigurationFromDL(String customer) {
         System.out.print("Fetching info from DataLoader (this is slow) ... ");
         SpaceConfiguration spaceConfiguration = dataLoaderManager.constructSpaceConfiguration(customer);
@@ -98,8 +103,7 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
                 registerCustomerInPLS(customer);
                 return true;
             case (UpgradeRunner.CMD_UPGRADE):
-                registerCustomerInPLS(customer);
-                registerCustomerInZK(customer);
+                upgrade(customer);
                 return true;
             case (UpgradeRunner.CMD_UPDATE_ACTIVE):
                 updateModelsActivity(customer);

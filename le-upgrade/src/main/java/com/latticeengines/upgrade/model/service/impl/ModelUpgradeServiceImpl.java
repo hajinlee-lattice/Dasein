@@ -309,6 +309,11 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
     }
 
+    private void upgrade(String customer) {
+        copyCustomerModelsToTupleId(customer);
+        upgradeModelSummaryForCustomerModels(customer);
+    }
+
     private class ModelStatistics {
         public int activeModels = 0;
         public int modelJsons = 0;
@@ -336,8 +341,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             copyCustomerModelsToTupleId(customer);
             return true;
         case UpgradeRunner.CMD_UPGRADE:
-            copyCustomerModelsToTupleId(customer);
-            upgradeModelSummaryForCustomerModels(customer);
+            upgrade(customer);
             return true;
         default:
             return false;
