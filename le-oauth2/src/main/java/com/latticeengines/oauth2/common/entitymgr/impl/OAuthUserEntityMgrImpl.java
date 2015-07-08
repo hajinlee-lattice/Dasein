@@ -19,13 +19,13 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     private PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2")
     public OAuthUser get(String userId) {
         return users.get(userId);
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2")
     public void create(OAuthUser user) {
         if (user != null) {
             user = new OAuthUser(user);
@@ -35,13 +35,13 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2")
     public void delete(String userId) {
         users.delete(userId);
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2")
     public void update(OAuthUser user) {
         if (user != null) {
             user = new OAuthUser(user);
@@ -51,7 +51,7 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2")
     public OAuthUser getByAccessToken(String token) {
         OAuthUser user = users.getByAccessToken(token);
         return user;
