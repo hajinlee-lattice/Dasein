@@ -42,7 +42,7 @@ public class OAuthUserDaoImpl extends BaseDaoImpl<OAuthUser> implements OAuthUse
     public OAuthUser getByAccessToken(String token) {
         NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(getDataSource());
 
-        String sql = "SELECT client_id FROM oauth_access_token WHERE token_id = :tokenId";
+        String sql = "SELECT user_name FROM oauth_access_token WHERE token_id = :tokenId";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("tokenId", token);
 
