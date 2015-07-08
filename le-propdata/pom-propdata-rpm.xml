@@ -30,9 +30,6 @@
             </activation>
             <properties>
                 <propdata.properties.path>conf/env/devcluster</propdata.properties.path>
-                <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/devcluster
-                </dataplatform.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -47,9 +44,6 @@
             </activation>
             <properties>
                 <propdata.properties.path>conf/env/intcluster</propdata.properties.path>
-                <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/intcluster
-                </dataplatform.properties.path>
                 <bin.env.path>bin/env/intcluster</bin.env.path>
             </properties>
         </profile>
@@ -63,9 +57,6 @@
             </activation>
             <properties>
                 <propdata.properties.path>conf/env/qacluster</propdata.properties.path>
-                <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/qacluster
-                </dataplatform.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -79,9 +70,6 @@
             </activation>
             <properties>
                 <propdata.properties.path>conf/env/deployment</propdata.properties.path>
-                <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/prodcluster
-                </dataplatform.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -103,7 +91,7 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/opt/jetty/webapps</directory>
+                            <directory>/opt/jetty2/webapps</directory>
                             <filemode>755</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
@@ -114,7 +102,7 @@
                             </sources>
                         </mapping>
                         <mapping>
-                            <directory>/etc/ledp</directory>
+                            <directory>/etc/propdata</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -122,30 +110,16 @@
                                 <source>
                                     <location>${propdata.properties.path}/propdata.properties</location>
                                 </source>
-                                <source>
-                                    <location>${dataplatform.properties.path}/dataplatform.properties</location>
-                                </source>
                             </sources>
                         </mapping>
                         <mapping>
-                            <directory>/opt/jetty/bin</directory>
+                            <directory>/opt/jetty2/bin</directory>
                             <filemode>755</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>${bin.env.path}/jetty.sh</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>/home/yarn</directory>
-                            <filemode>700</filemode>
-                            <username>yarn</username>
-                            <groupname>hadoop</groupname>
-                            <sources>
-                                <source>
-                                    <location>${bin.env.path}/.bashrc</location>
                                 </source>
                             </sources>
                         </mapping>
