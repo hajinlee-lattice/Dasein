@@ -5,27 +5,27 @@
     <artifactId>le-scoring</artifactId>
     <packaging>jar</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.34/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
 	</scm>
 
-    <version>1.0.34</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>${component-name}</name>
 
     <properties>
         <component-name>le-scoring</component-name>
-        <le.common.version>1.0.34</le.common.version>
-        <le.dataplatform.version>1.0.34</le.dataplatform.version>
-        <le.db.version>1.0.34</le.db.version>
-        <le.domain.version>1.0.34</le.domain.version>
-        <le.monitor.version>1.0.34</le.monitor.version>
+        <le.common.version>2.0.0-SNAPSHOT</le.common.version>
+        <le.dataplatform.version>2.0.0-SNAPSHOT</le.dataplatform.version>
+        <le.db.version>2.0.0-SNAPSHOT</le.db.version>
+        <le.domain.version>2.0.0-SNAPSHOT</le.domain.version>
+        <le.monitor.version>2.0.0-SNAPSHOT</le.monitor.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.34</version>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
