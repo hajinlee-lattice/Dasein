@@ -29,7 +29,6 @@ public class TenentConfigResourceTestNG extends PlsFunctionalTestNGBase {
             // ignore
         }
         CustomerSpaceProperties properties = new CustomerSpaceProperties();
-        properties.topology = "SFDC";
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
 
         SpaceLifecycleManager.create("contractId", "tenantId", "spaceId", spaceInfo);
