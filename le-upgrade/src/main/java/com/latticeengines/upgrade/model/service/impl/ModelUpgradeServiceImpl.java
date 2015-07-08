@@ -184,11 +184,12 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
 
         if (toBeGenerated) {
+            String name = plsMultiTenantJdbcManager.findNameByUuid(uuid);
+
             System.out.print("Deleting modelsummaries with the same uuid in PLS_MultiTenant DB ...");
             plsMultiTenantJdbcManager.deleteModelSummariesByUuid(uuid);
             System.out.println("OK");
 
-            String name = plsMultiTenantJdbcManager.findNameByUuid(uuid);
             JsonNode jsonNode;
             if (StringUtils.isEmpty(name)) {
                 System.out.print("Generating incomplete modelsummary based on model.json ...");
