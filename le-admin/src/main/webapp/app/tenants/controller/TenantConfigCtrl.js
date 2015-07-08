@@ -53,6 +53,48 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.isValid = {valid: true};
 
     if ($scope.new) {
+        constructNewPage();
+    } else {
+        constructViewPage($scope.tenantId, $scope.contractId);
+    }
+
+    if ($scope.listenState) {
+        var statusUpdater = $interval(function(){
+            if ($state.current.name !== "TENANT.CONFIG") {
+                $interval.cancel(statusUpdater);
+            }
+            if (!$scope.loading) {
+                updateServiceStatus();
+            }
+        }, 3000);
+    }
+
+    //==================================================
+    // other definitions
+    //==================================================
+    $scope.onSaveClick = function(){
+        var infos = {
+            CustomerSpaceInfo: $scope.spaceInfo,
+            TenantInfo: $scope.tenantInfo
+        };
+
+        $scope.tenantRegisration =
+            TenantUtility.constructTenantRegistration($scope.components,
+                $scope.tenantId, $scope.contractId, infos, $scope.spaceConfig, $scope.featureFlags);
+
+        popInstallConfirmationModal();
+    };
+
+
+    $scope.onDeleteClick = function(){ popDeleteConfirmationModal(); };
+
+    $scope.$on("CALC_DERIVED", function(evt, data) {
+        var derivation = data.derivation;
+        var derivedValue = TenantUtility.calcDerivation($scope.components, derivation, $scope);
+        data.callback(derivedValue);
+    });
+
+    function constructNewPage() {
         $scope.spaceInfo = {
             properties: {
                 displayName: "LPA_" + $scope.tenantId,
@@ -105,9 +147,10 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 $state.go("TENANT.LIST");
             }
         });
+    }
 
-    } else {
-        TenantService.GetTenantInfo($scope.tenantId, $scope.contractId).then(function(result1){
+    function constructViewPage(tenantId, contractId) {
+        TenantService.GetTenantInfo(tenantId, contractId).then(function(result1){
             if (result1.success) {
                 $scope.spaceInfo = result1.resultObj.CustomerSpaceInfo;
                 $scope.contractInfo = result1.resultObj.ContractInfo;
@@ -159,27 +202,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         });
     }
 
-    if ($scope.listenState) {
-        var statusUpdater = $interval(function(){
-            if ($state.current.name !== "TENANT.CONFIG") {
-                $interval.cancel(statusUpdater);
-            }
-            if (!$scope.loading) {
-                updateServiceStatus();
-            }
-        }, 3000);
-    }
-
-    $scope.onSaveClick = function(){
-        var infos = {
-            CustomerSpaceInfo: $scope.spaceInfo,
-            TenantInfo: $scope.tenantInfo
-        };
-
-        $scope.tenantRegisration =
-            TenantUtility.constructTenantRegistration($scope.components,
-                $scope.tenantId, $scope.contractId, infos, $scope.spaceConfig, $scope.featureFlags);
-
+    function popInstallConfirmationModal() {
         $modal.open({
             template: '<div class="modal-header">' +
             '<h3 class="modal-title">About to bootstrap a new tenant.</h3></div>' +
@@ -222,10 +245,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 contractId: function () { return $scope.contractId; }
             }
         });
-    };
+    }
 
-
-    $scope.onDeleteClick = function(){
+    function popDeleteConfirmationModal() {
         $modal.open({
             template: '<div class="modal-header">' +
             '<h3 class="modal-title">Delete tenant</h3></div>' +
@@ -258,13 +280,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 contractId: function () { return $scope.contractId; }
             }
         });
-    };
-
-    $scope.$on("CALC_DERIVED", function(evt, data) {
-        var derivation = data.derivation;
-        var derivedValue = TenantUtility.calcDerivation($scope.components, derivation, $scope);
-        data.callback(derivedValue);
-    });
+    }
 
     function updateServiceStatus() {
         var componentsToScan = $scope.components.length;
