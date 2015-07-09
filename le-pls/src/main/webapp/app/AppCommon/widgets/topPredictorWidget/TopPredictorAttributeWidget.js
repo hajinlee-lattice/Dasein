@@ -103,7 +103,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     var xTicks = TopPredictorService.createTicks(maxTick, 5);
     var x = d3.scale.linear()
         .domain([0, xTicks[xTicks.length - 1]])
-        .range([0, width - 5]);
+        .range([0, width]);
 
     chart = d3.select("#attributeChart")
         .append('svg')
@@ -278,7 +278,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("y", function(d, i) {
             return (i * (barHeight + 2 * gap)) + 42;
         })
-        .attr("dx", -5)
         .attr("dy", commonDy)
         .attr("font-weight", "semi-bold")
         .attr("font-size", fontSize)
@@ -289,7 +288,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
 
     // This is the lift label to the right of the chart
     chart.append("text")
-        .attr("x", width + 110)
+        .attr("x", width + 115)
         .attr("y", 5)
         .attr("dy", "0.36em")
         .attr("font-size", labelSize)
