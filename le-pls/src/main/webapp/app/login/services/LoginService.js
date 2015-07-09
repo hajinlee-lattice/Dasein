@@ -114,7 +114,7 @@ angular.module('mainApp.login.services.LoginService', [
         $http({
             method: 'GET', 
             data: '',
-            url: "/pls/users/logout",
+            url: "/pls/logout",
             headers: {
                "Content-Type": "application/json"
             }

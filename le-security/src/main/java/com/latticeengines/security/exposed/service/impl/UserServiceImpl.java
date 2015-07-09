@@ -5,19 +5,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.RegistrationResult;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
+import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
+import com.latticeengines.security.exposed.exception.LoginException;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
-import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Component("userService")
@@ -28,7 +37,7 @@ public class UserServiceImpl implements UserService {
     private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
-    private SessionService sessionService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Override
     public boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant) {
@@ -89,7 +98,11 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
+        userRegistration.toLowerCase();
+        User user = userRegistration.getUser();
+        Credentials creds = userRegistration.getCredentials();
+
+        User userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
 
         if (userByEmail != null) {
             LOGGER.warn(String.format(
@@ -97,10 +110,12 @@ public class UserServiceImpl implements UserService {
                     userByEmail));
         } else {
             try {
-                globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
-                userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
+                globalUserManagementService.registerUser(user, creds);
+                userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
             } catch (Exception e) {
                 LOGGER.warn("Error creating admin user.", e);
+                globalUserManagementService.deleteUser(user.getUsername());
+                globalUserManagementService.deleteUser(user.getEmail());
             }
         }
 
@@ -145,17 +160,152 @@ public class UserServiceImpl implements UserService {
     @Override
     public AccessLevel getAccessLevel(String tenantId, String username) {
         List<String> rights = globalUserManagementService.getRights(username, tenantId);
-        AccessLevel toReturn = AccessLevel.findAccessLevel(rights);
-        if (toReturn == null && hasPLSRights(rights)) {
-            User user = globalUserManagementService.getUserByUsername(username);
-            toReturn = sessionService.upgradeFromDeprecatedBARD(
-                    tenantId, username, user.getEmail(), rights);
-        }
-        return  toReturn;
+        return AccessLevel.findAccessLevel(rights);
     }
 
     @Override
-    public boolean softDelete(String tenantId, String username) {
+    public boolean deleteUser(String tenantId, String username) {
+        if (softDelete(tenantId, username) && globalUserManagementService.isRedundant(username)) {
+            return globalUserManagementService.deleteUser(username);
+        }
+        return false;
+    }
+
+    @Override
+    public User findByEmail(String email) { return globalUserManagementService.getUserByEmail(email); }
+
+    @Override
+    public User findByUsername(String username) {
+        return globalUserManagementService.getUserByUsername(username);
+    }
+
+    @Override
+    public List<User> getUsers(String tenantId, UserFilter filter) {
+        List<User> users = new ArrayList<>();
+        try {
+            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
+                    = globalUserManagementService.getAllUsersOfTenant(tenantId);
+            for (Map.Entry<User, List<String>> userRights : userRightsList) {
+                User user = userRights.getKey();
+                AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
+                if (accessLevel != null) {
+                    user.setAccessLevel(accessLevel.name());
+                }
+                if (filter.visible(user)) users.add(user);
+            }
+        } catch (LedpException e) {
+            LOGGER.warn(String.format("Trying to get all users from a non-existing tenant %s", tenantId), e);
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+
+        return users;
+    }
+
+    @Override
+    public List<User> getUsers(String tenantId) {
+        return getUsers(tenantId, UserFilter.TRIVIAL_FILTER);
+    }
+
+    @Override
+    public boolean isSuperior(AccessLevel loginLevel, AccessLevel targetLevel) {
+        return loginLevel != null && targetLevel != null && targetLevel.compareTo(loginLevel) <= 0;
+    }
+
+    @Override
+    public boolean inTenant(String tenantId, String username) {
+        return !globalUserManagementService.getRights(username, tenantId).isEmpty();
+    }
+
+    @Override
+    public String getURLSafeUsername(String username) {
+        if (username.endsWith("\"") && username.startsWith("\""))
+            return username.substring(1, username.length() - 1);
+        return username;
+    }
+
+    @Override
+    public RegistrationResult registerUserToTenant(UserRegistrationWithTenant userRegistrationWithTenant) {
+        UserRegistration userRegistration = userRegistrationWithTenant.getUserRegistration();
+        userRegistration.toLowerCase();
+        User user = userRegistration.getUser();
+        String tenantId = userRegistrationWithTenant.getTenant();
+
+        RegistrationResult result = validateNewUser(user, tenantId);
+        if (!result.isValid()) return result;
+
+        result.setValid(createUser(userRegistration));
+        if (!result.isValid()) return result;
+
+        if (StringUtils.isNotEmpty(user.getAccessLevel())) {
+            assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername());
+        }
+
+        String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
+        result.setPassword(tempPass);
+
+        return result;
+    }
+
+    @Override
+    public boolean updateCredentials(User user, UserUpdateData data) {
+        // change password
+        String oldPassword = data.getOldPassword();
+        String newPassword = data.getNewPassword();
+        if (oldPassword != null && newPassword != null) {
+            Credentials oldCreds = new Credentials();
+            oldCreds.setUsername(user.getUsername());
+            oldCreds.setPassword(oldPassword);
+
+            Credentials newCreds = new Credentials();
+            newCreds.setUsername(user.getUsername());
+            newCreds.setPassword(newPassword);
+
+            Ticket ticket;
+            try {
+                ticket = globalAuthenticationService.authenticateUser(user.getUsername(), oldPassword);
+            } catch (LedpException e) {
+                throw new LoginException(e);
+            }
+
+            if (globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds)) {
+                LOGGER.info(String.format("%s changed his/her password", user.getUsername()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private RegistrationResult validateNewUser(User newUser, String tenantId) {
+        String email = newUser.getEmail();
+        User oldUser = findByEmail(email);
+        RegistrationResult result = new RegistrationResult();
+        result.setValid(true);
+
+        if (oldUser != null) {
+            result.setValid(false);
+            if (!inTenant(tenantId, oldUser.getUsername())) {
+                result.setConflictingUser(oldUser);
+            }
+            return result;
+        }
+
+        String username = newUser.getUsername();
+        oldUser = findByUsername(username);
+        if (oldUser != null) {
+            result.setValid(false);
+            if (!inTenant(tenantId, oldUser.getUsername())) {
+                result.setConflictingUser(oldUser);
+            }
+            return result;
+        }
+
+        return result;
+    }
+
+    private boolean softDelete(String tenantId, String username) {
         if (resignAccessLevel(tenantId, username)) {
             boolean success = true;
             List<String> rights = globalUserManagementService.getRights(username, tenantId);
@@ -176,80 +326,5 @@ public class UserServiceImpl implements UserService {
         } else {
             return false;
         }
-    }
-
-    @Override
-    public boolean deleteUser(String tenantId, String username) {
-        if (softDelete(tenantId, username) && globalUserManagementService.isRedundant(username)) {
-            return globalUserManagementService.deleteUser(username);
-        }
-        return false;
-    }
-
-    @Override
-    public User findByEmail(String email) { return globalUserManagementService.getUserByEmail(email); }
-
-    @Override
-    public User findByUsername(String username) {
-        return globalUserManagementService.getUserByUsername(username);
-    }
-
-    @Override
-    public List<User> getUsers(String tenantId) {
-        List<User> users = new ArrayList<>();
-        try {
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
-                    = globalUserManagementService.getAllUsersOfTenant(tenantId);
-            for (Map.Entry<User, List<String>> userRights : userRightsList) {
-                User user = userRights.getKey();
-                AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
-                if (accessLevel == null) {
-                    accessLevel = getAccessLevel(tenantId, user.getUsername());
-                }
-                if (accessLevel != null) {
-                    user.setAccessLevel(accessLevel.name());
-                }
-                users.add(user);
-            }
-        } catch (LedpException e) {
-            LOGGER.warn(String.format("Trying to get all users from a non-existing tenant %s", tenantId), e);
-        }
-
-        return users;
-    }
-
-    @Override
-    public boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel) {
-        return (loginLevel != null && targetLevel != null)
-                && (loginLevel.compareTo(AccessLevel.INTERNAL_USER) >= 0
-                || targetLevel.compareTo(AccessLevel.INTERNAL_USER) < 0);
-    }
-
-    @Override
-    public boolean isSuperior(AccessLevel loginLevel, AccessLevel targetLevel) {
-        return loginLevel != null && targetLevel != null && targetLevel.compareTo(loginLevel) <= 0;
-    }
-
-    @Override
-    public boolean inTenant(String tenantId, String username) {
-        try {
-            return !globalUserManagementService.getRights(username, tenantId).isEmpty();
-        } catch (LedpException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public String getURLSafeUsername(String username) {
-        if (username.endsWith("\"") && username.startsWith("\""))
-            return username.substring(1, username.length() - 1);
-        return username;
-    }
-
-    private boolean hasPLSRights(List<String> rights) {
-        for (String right : rights) {
-            if (right.contains("_PLS_")) { return true; }
-        }
-        return false;
     }
 }

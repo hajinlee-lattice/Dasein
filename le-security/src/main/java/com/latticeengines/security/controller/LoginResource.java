@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
+import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -139,6 +141,18 @@ public class LoginResource {
 
         return true;
     }
+
+    @RequestMapping(value = "/logout", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Logout the user")
+    public SimpleBooleanResponse logout(HttpServletRequest request) {
+        String token = request.getHeader(request.getHeader(Constants.AUTHORIZATION));
+        if (StringUtils.isNotEmpty(token)) {
+            globalAuthenticationService.discard(new Ticket(token));
+        }
+        return SimpleBooleanResponse.getSuccessResponse();
+    }
+
 
     class TenantNameSorter implements Comparator<Tenant> {
 

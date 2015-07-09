@@ -6,7 +6,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,15 +30,13 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.UserResourceTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
-import junit.framework.Assert;
-
 
 public class UserResourceTestNG extends UserResourceTestNGBase {
+
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
 
@@ -185,124 +182,11 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
 
         String url = getRestAPIHostPort() + "/pls/users/\"" + shortEmail + "\"";
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, ResponseDocument.class);
+        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
+                ResponseDocument.class);
         assertTrue(response.getBody().isSuccess());
 
         makeSureUserDoesNotExist(shortEmail);
-    }
-
-    @Test(groups = { "functional", "deployment" })
-    public void upgradeFromBARD() {
-        UserRegistration userReg = createUserRegistrationWithInternalEmail();
-        registerAsBARDUser(userReg);
-        testUpgradBARDAccountUponLogin(userReg, AccessLevel.INTERNAL_USER);
-        registerAsBARDAdmin(userReg);
-        testUpgradBARDAccountUponLogin(userReg, AccessLevel.INTERNAL_ADMIN);
-        registerAsBARDUser(userReg);
-        testUpgradBARDAccountUponGetUsers(userReg, AccessLevel.INTERNAL_USER);
-        registerAsBARDAdmin(userReg);
-        testUpgradBARDAccountUponGetUsers(userReg, AccessLevel.INTERNAL_ADMIN);
-
-        userReg = createUserRegistrationWithExternalEmail();
-        registerAsBARDUser(userReg);
-        testUpgradBARDAccountUponLogin(userReg, AccessLevel.EXTERNAL_USER);
-        registerAsBARDAdmin(userReg);
-        testUpgradBARDAccountUponLogin(userReg, AccessLevel.EXTERNAL_ADMIN);
-        registerAsBARDUser(userReg);
-        testUpgradBARDAccountUponGetUsers(userReg, AccessLevel.EXTERNAL_USER);
-        registerAsBARDAdmin(userReg);
-        testUpgradBARDAccountUponGetUsers(userReg, AccessLevel.EXTERNAL_ADMIN);
-    }
-
-    private UserRegistration createUserRegistrationWithInternalEmail() {
-        UserRegistration userReg = new UserRegistration();
-
-        User user = new User();
-        user.setEmail("test" + UUID.randomUUID().toString() + "@lattice-engines.com");
-        user.setFirstName("Test");
-        user.setLastName("Tester");
-        user.setPhoneNumber("650-555-5555");
-        user.setTitle("Silly Tester");
-
-        Credentials creds = new Credentials();
-        creds.setUsername(user.getEmail());
-        creds.setPassword(generalPasswordHash);
-
-        user.setUsername(creds.getUsername());
-
-        userReg.setUser(user);
-        userReg.setCredentials(creds);
-
-        return userReg;
-    }
-
-    private UserRegistration createUserRegistrationWithExternalEmail() {
-        UserRegistration userReg = new UserRegistration();
-
-        User user = new User();
-        user.setEmail("test" + UUID.randomUUID().toString() + "@lattice-engines.ext");
-        user.setFirstName("Test");
-        user.setLastName("Tester");
-        user.setPhoneNumber("650-555-5555");
-        user.setTitle("Silly Tester");
-
-        Credentials creds = new Credentials();
-        creds.setUsername(user.getEmail());
-        creds.setPassword(generalPasswordHash);
-
-        user.setUsername(creds.getUsername());
-
-        userReg.setUser(user);
-        userReg.setCredentials(creds);
-
-        return userReg;
-    }
-
-    private void registerAsBARDUser(UserRegistration userReg) {
-        globalUserManagementService.registerUser(userReg.getUser(), userReg.getCredentials());
-        globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_MODELS.getAuthority(),
-                testTenant.getId(), userReg.getCredentials().getUsername());
-        globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(),
-                testTenant.getId(), userReg.getCredentials().getUsername());
-    }
-
-    private void registerAsBARDAdmin(UserRegistration userReg) {
-        globalUserManagementService.registerUser(userReg.getUser(), userReg.getCredentials());
-        globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_MODELS.getAuthority(),
-                testTenant.getId(), userReg.getCredentials().getUsername());
-        globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(),
-                testTenant.getId(), userReg.getCredentials().getUsername());
-        globalUserManagementService.grantRight(GrantedRight.EDIT_PLS_MODELS.getAuthority(),
-                testTenant.getId(), userReg.getCredentials().getUsername());
-    }
-
-    private void assertAccessLevelIsNotPopulated(String usernamem) {
-        List<String> rights = globalUserManagementService.getRights(usernamem, testTenant.getId());
-        for (AccessLevel level: AccessLevel.values()) {
-            Assert.assertFalse(level.name() + " should not be populated.",
-                    rights.contains(level.name()));
-        }
-    }
-
-    private void verifyAccessLevelIsPopulated(String usernamem, AccessLevel accessLevel) {
-        List<String> rights = globalUserManagementService.getRights(usernamem, testTenant.getId());
-        Assert.assertTrue(accessLevel.name() + " should be populated in the GlobalUserTenantRight table",
-                rights.contains(accessLevel.name()));
-    }
-
-    private void testUpgradBARDAccountUponLogin(UserRegistration userReg, AccessLevel accessLevel) {
-        assertAccessLevelIsNotPopulated(userReg.getUser().getUsername());
-        UserDocument userDocument = loginAndAttach(userReg.getCredentials().getUsername(), generalPassword, testTenant);
-        Assert.assertEquals(accessLevel.name(), userDocument.getResult().getUser().getAccessLevel());
-        verifyAccessLevelIsPopulated(userReg.getCredentials().getUsername(), accessLevel);
-        makeSureUserDoesNotExist(userReg.getUser().getUsername());
-    }
-
-    private void testUpgradBARDAccountUponGetUsers(UserRegistration userReg, AccessLevel accessLevel) {
-        assertAccessLevelIsNotPopulated(userReg.getUser().getUsername());
-        userService.getUsers(testTenant.getId());
-        verifyAccessLevelIsPopulated(userReg.getCredentials().getUsername(), accessLevel);
-        makeSureUserDoesNotExist(userReg.getUser().getUsername());
     }
 
     private UserRegistration createUserRegistration() {
@@ -314,6 +198,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         user.setLastName("Tester");
         user.setPhoneNumber("650-555-5555");
         user.setTitle("Silly Tester");
+        user.setAccessLevel(AccessLevel.EXTERNAL_USER.name());
 
         Credentials creds = new Credentials();
         creds.setUsername(user.getEmail());
@@ -338,7 +223,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult().getPassword());
 
-        User newUser = globalUserManagementService.getUserByEmail(userReg.getUser().getEmail());
+        User newUser = userService.findByEmail(userReg.getUser().getEmail());
         assertNotNull(newUser);
         assertEquals(newUser.getFirstName(), userReg.getUser().getFirstName());
         assertEquals(newUser.getLastName(), userReg.getUser().getLastName());
@@ -380,7 +265,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
 
         String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername();
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, ResponseDocument.class);
+        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
+                ResponseDocument.class);
         assertTrue(response.getBody().isSuccess());
 
         makeSureUserDoesNotExist(user.getUsername());
@@ -405,7 +291,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
         String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername();
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
+                ResponseDocument.class);
         assertTrue(response.getBody().isSuccess());
 
         AccessLevel resultLevel = userService.getAccessLevel(testTenant.getId(), user.getUsername());
@@ -443,8 +330,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
         assertNotNull(response);
         assertFalse(response.getResult().isValid());
-        // when conflict with another use in the same tenant, do not show the conflicting user
-        assertNull(response.getResult().getConflictingUser());
+        assertNull(response.getResult().getConflictingUser(),
+                "When conflict with another use in the same tenant, should not show the conflicting user");
 
         makeSureUserDoesNotExist(existingUser.getUsername());
     }
@@ -505,7 +392,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
-        String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername() + "/creds";
+        String url = getRestAPIHostPort() + "/pls/users/creds";
 
         boolean exception = false;
         try {

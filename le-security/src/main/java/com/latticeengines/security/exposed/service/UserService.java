@@ -2,6 +2,8 @@ package com.latticeengines.security.exposed.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.pls.RegistrationResult;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
@@ -13,6 +15,8 @@ public interface UserService {
 
     boolean createUser(UserRegistration userRegistration);
 
+    RegistrationResult registerUserToTenant(UserRegistrationWithTenant userRegistrationWithTenant);
+
     User findByEmail(String email);
 
     User findByUsername(String username);
@@ -23,17 +27,17 @@ public interface UserService {
 
     AccessLevel getAccessLevel(String tenantId, String username);
 
-    boolean softDelete(String tenantId, String username);
-
     boolean deleteUser(String tenantId, String username);
 
     List<User> getUsers(String tenantId);
 
-    boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel);
+    List<User> getUsers(String tenantId, UserFilter filter);
 
     boolean isSuperior(AccessLevel loginLevel, AccessLevel targetLevel);
 
     boolean inTenant(String tenantId, String username);
+
+    boolean updateCredentials(User user, UserUpdateData data);
 
     String getURLSafeUsername(String username);
 }
