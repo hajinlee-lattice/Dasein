@@ -52,12 +52,20 @@ public class LatticeAuthenticationManager implements AuthenticationManager {
             throw new BadCredentialsException("Invalid password/one-time key provided");
         }
 
-        user.setPasswordExpired(true);
-        users.update(user);
+//        user.setPasswordExpired(true);
+//        users.update(user);
+        if (user.getPasswordExpiration() != null) {
+            user.setPasswordExpiration(null);
+            users.update(user);
+        }
 
         List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("ROLE_PLAYMAKER_ADMIN"));
 
+        if (user.getPasswordExpiration() != null) {
+            user.setPasswordExpiration(null);
+            users.update(user);
+        }
         return new UsernamePasswordAuthenticationToken(authentication.getName(), password, authorities);
     }
 }
