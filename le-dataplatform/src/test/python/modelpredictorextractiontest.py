@@ -13,6 +13,7 @@ class ModelPredictorExtractiontTest(TestBase):
         naInput = ["", "NA", "N/A", "-1", "NuLL", "NOT AvAILABLE"]
         otherInput = ["dump1", "name"]
         allInput = yesInput + noInput + naInput
+        predictor["FundamentalType"] = None
         for value in allInput:
             result = globals()["mapBinaryValue"](predictor, value)
             self.assertEqual(result, value)
