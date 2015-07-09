@@ -17,7 +17,6 @@ import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
-import com.latticeengines.security.exposed.service.UserService;
 
 @Component("sessionService")
 public class SessionServiceImpl implements SessionService {
@@ -28,9 +27,6 @@ public class SessionServiceImpl implements SessionService {
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
-
-    @Autowired
-    private UserService userService;
 
     @Override
     public Session attach(Ticket ticket){

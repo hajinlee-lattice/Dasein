@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
         if (userByEmail != null) {
             LOGGER.warn(String.format(
-                    "A user with the same email address %s already exists. Update instead of create user.",
+                    "A user with the same email address %s already exists. Please update instead of create user.",
                     userByEmail));
         } else {
             try {
@@ -194,11 +194,6 @@ public class UserServiceImpl implements UserService {
         return globalUserManagementService.getUserByUsername(username);
     }
 
-    /**
-     *
-     * @param tenantId
-     * @return all users in the tenant
-     */
     @Override
     public List<User> getUsers(String tenantId) {
         List<User> users = new ArrayList<>();
