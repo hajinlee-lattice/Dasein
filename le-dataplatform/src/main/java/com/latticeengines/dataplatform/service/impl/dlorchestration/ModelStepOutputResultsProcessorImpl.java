@@ -50,6 +50,9 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
     @Value("${dataplatform.fs.web.defaultFS}")
     private String httpFsPrefix;
 
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -158,6 +161,9 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 hdfsConsumerDirectory.append(hdfsCustomersDirectory).append(tokens[4]).append("/").append(consumer)
                         .append("/").append(modelId);
                 String hdfsConsumerFile = hdfsConsumerDirectory + "/" + getModelVersion() + ".json";
+
+                String customer = modelCommand.getDeploymentExternalId();
+                HdfsUtils.copyFiles(yarnConfiguration, hdfsConsumerFile, hdfsConsumerFile.replaceFirst(CustomerSpace.parse(customer).toString(), customer));
 
                 if (HdfsUtils.fileExists(yarnConfiguration, hdfsConsumerFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, hdfsConsumerFile);

@@ -61,8 +61,8 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private String scoreDerivationContents = "Deciles!";
     private String dataCompositionContents = "Transforms!";
 
-    private String resultDirectory = "/user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
-    private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";
+    private String resultDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
+    private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";   
     private String hdfsArtifactsDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
     private String zkArtifactsPath = "/Models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
 

@@ -14,6 +14,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
@@ -205,14 +206,21 @@ public class HdfsUtils {
         for (FileStatus status : statuses) {
             Path filePath = status.getPath();
             filePaths.add(Path.getPathWithoutSchemeAndAuthority(filePath).toString());
-            
+
         }
         return filePaths;
 
     }
 
-    public static boolean moveFile(Configuration configuration, String src, String dst) throws IOException{
+    public static boolean moveFile(Configuration configuration, String src, String dst) throws IOException {
         FileSystem fs = FileSystem.get(configuration);
         return fs.rename(new Path(src), new Path(dst));
     }
+
+    public static boolean copyFiles(Configuration configuration, String src, String dst)
+            throws IllegalArgumentException, IOException {
+        return FileUtil.copy(FileSystem.get(configuration), new Path(src), FileSystem.get(configuration),
+                new Path(dst), false, false, configuration);
+    }
+
 }
