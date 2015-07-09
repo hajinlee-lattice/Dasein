@@ -39,6 +39,13 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
         $scope.confirmPasswordInputError === "error") {
             return false;
         }
+        
+        if ($scope.newPassword == $scope.oldPassword) {
+            $scope.validateErrorMessage = ResourceUtility.getString("LOGIN_PASSWORD_UPDATE_ERROR");
+            $scope.newPasswordInputError = "error";
+            $scope.confirmPasswordInputError = "error";
+            return false;
+        }
 
         if ($scope.newPassword !== $scope.confirmPassword) {
             $scope.validateErrorMessage = ResourceUtility.getString("LOGIN_PASSWORD_MATCH_ERROR");
