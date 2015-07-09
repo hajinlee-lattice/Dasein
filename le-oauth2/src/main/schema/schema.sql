@@ -187,7 +187,8 @@ GO
 CREATE TABLE [OAuthUser](
 	[PID] [bigint] IDENTITY(1,1) NOT NULL,
 	[UserId] [nvarchar](256) NOT NULL,
-	[Password] [nvarchar](256) NOT NULL,
+	[EncryptedPassword] [nvarchar](256) NOT NULL,
+	[PasswordExpired] [bit] NOT NULL,
 	[PasswordExpiration] [datetime] NULL
 ) 
 GO

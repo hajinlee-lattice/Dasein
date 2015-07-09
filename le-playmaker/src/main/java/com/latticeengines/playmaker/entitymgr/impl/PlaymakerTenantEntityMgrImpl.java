@@ -66,6 +66,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
             // Generate new password
             user.setPassword(generatePassword());
             user.setPasswordExpiration(getPasswordExpiration(tenant.getTenantName()));
+            user.setPasswordExpired(false);
             users.update(user);
         }
         tenant.setTenantPassword(user.getPassword());
