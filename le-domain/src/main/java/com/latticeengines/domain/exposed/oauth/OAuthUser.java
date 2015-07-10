@@ -9,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,9 +24,7 @@ public class OAuthUser implements HasPid {
     private Long pid;
     private String userId;
     private String password;
-    private String encryptedPassword;
     private Date passwordExpiration;
-    private boolean passwordExpired;
 
     public OAuthUser() {
         super();
@@ -36,9 +33,7 @@ public class OAuthUser implements HasPid {
     public OAuthUser(OAuthUser user) {
         this.userId = user.userId;
         this.password = user.password;
-        this.encryptedPassword = user.encryptedPassword;
         this.passwordExpiration = user.passwordExpiration;
-        this.passwordExpired = user.passwordExpired;
     }
 
     @Id
@@ -68,26 +63,15 @@ public class OAuthUser implements HasPid {
         this.userId = userId;
     }
 
-    @JsonIgnore
-    @Transient
+    @JsonProperty("Password")
+    @Column(name = "Password", nullable = false)
     public String getPassword() {
         return password;
     }
 
-    @JsonIgnore
+    @JsonProperty("Password")
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    @JsonProperty("EncryptedPassword")
-    @Column(name = "EncryptedPassword", nullable = false)
-    public String getEncryptedPassword() {
-        return encryptedPassword;
-    }
-
-    @JsonProperty("EncryptedPassword")
-    public void setEncryptedPassword(String password) {
-        this.encryptedPassword = password;
     }
 
     @JsonProperty("PasswordExpiration")
@@ -99,17 +83,6 @@ public class OAuthUser implements HasPid {
     @JsonProperty("PasswordExpiration")
     public void setPasswordExpiration(Date passwordExpiration) {
         this.passwordExpiration = passwordExpiration;
-    }
-
-    @JsonProperty("PasswordExpired")
-    @Column(name = "PasswordExpired", nullable = false)
-    public boolean getPasswordExpired() {
-        return passwordExpired;
-    }
-
-    @JsonProperty("PasswordExpired")
-    public void setPasswordExpired(boolean expired) {
-        this.passwordExpired = expired;
     }
 
 }

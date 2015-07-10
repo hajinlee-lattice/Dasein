@@ -43,29 +43,15 @@ public class LatticeAuthenticationManager implements AuthenticationManager {
         }
 
         DateTime now = DateTime.now(DateTimeZone.UTC);
-        boolean expired = user.getPasswordExpired()
-                || (user.getPasswordExpiration() != null && now.isAfter(new DateTime(user.getPasswordExpiration())));
-        if (expired) {
-            throw new BadCredentialsException(
-                    "The provided password/one-time key has expired. Please request a new one.");
-        } else if (!encoder.matches(password, user.getEncryptedPassword())) {
-            throw new BadCredentialsException("Invalid password/one-time key provided");
-        }
-
-//        user.setPasswordExpired(true);
-//        users.update(user);
-        if (user.getPasswordExpiration() != null) {
-            user.setPasswordExpiration(null);
-            users.update(user);
+        if (user.getPasswordExpiration() != null && now.isAfter(new DateTime(user.getPasswordExpiration()))) {
+            throw new BadCredentialsException("The password has expired");
+        } else if (!encoder.matches(password, user.getPassword())) {
+            throw new BadCredentialsException("Invalid password provided");
         }
 
         List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("ROLE_PLAYMAKER_ADMIN"));
 
-        if (user.getPasswordExpiration() != null) {
-            user.setPasswordExpiration(null);
-            users.update(user);
-        }
         return new UsernamePasswordAuthenticationToken(authentication.getName(), password, authorities);
     }
 }
