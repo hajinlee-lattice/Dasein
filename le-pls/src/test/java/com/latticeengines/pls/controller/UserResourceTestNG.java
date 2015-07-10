@@ -34,7 +34,6 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
-
 public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Autowired
@@ -48,145 +47,144 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        createTestTenant();
-        createTestUsers();
+        this.createTestTenant();
+        this.createTestUsers();
     }
 
     @AfterClass(groups = { "functional", "deployment" })
     public void tearDown() {
-        destroyTestUsers();
-        destroyTestTenant();
+        this.destroyTestUsers();
+        this.destroyTestTenant();
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })
     public void beforeMethod() {
-        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+        this.switchToAccessLevel(AccessLevel.SUPER_ADMIN);
     }
 
     @Test(groups = { "functional", "deployment" })
     public void registerUser() {
-        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
-        testRegisterUserSuccess(AccessLevel.SUPER_ADMIN);
+        this.switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+        this.testRegisterUserSuccess(AccessLevel.SUPER_ADMIN);
 
-        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
+        this.switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+        this.testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
+        this.testRegisterUserFail(AccessLevel.SUPER_ADMIN);
 
-        switchToAccessLevel(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail(AccessLevel.EXTERNAL_USER);
-        testRegisterUserFail(AccessLevel.INTERNAL_USER);
+        this.switchToAccessLevel(AccessLevel.INTERNAL_USER);
+        this.testRegisterUserFail(AccessLevel.EXTERNAL_USER);
+        this.testRegisterUserFail(AccessLevel.INTERNAL_USER);
 
-        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.INTERNAL_USER);
+        this.switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        this.testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
+        this.testRegisterUserFail(AccessLevel.INTERNAL_USER);
 
-        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
-        testRegisterUserFail(AccessLevel.EXTERNAL_USER);
+        this.switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+        this.testRegisterUserFail(AccessLevel.EXTERNAL_USER);
     }
 
     @Test(groups = { "functional", "deployment" })
     public void validateNewUser() {
         // Conflict with a user in the same tenant
-        testConflictingUserInTenant();
-        testConflictingUserOutsideTenant();
+        this.testConflictingUserInTenant();
+        this.testConflictingUserOutsideTenant();
     }
 
     @Test(groups = { "functional", "deployment" })
     public void getAllUsers() {
-        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
-        testGetAllUsersFail();
+        this.switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+        this.testGetAllUsersFail();
 
-        switchToAccessLevel(AccessLevel.INTERNAL_USER);
-        testGetAllUsersFail();
+        this.switchToAccessLevel(AccessLevel.INTERNAL_USER);
+        this.testGetAllUsersFail();
 
-        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testGetAllUsersSuccess(2);
+        this.switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        this.testGetAllUsersSuccess(2);
 
-        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testGetAllUsersSuccess(5);
+        this.switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+        this.testGetAllUsersSuccess(5);
 
-        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
-        testGetAllUsersSuccess(5);
+        this.switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+        this.testGetAllUsersSuccess(5);
     }
 
     @Test(groups = { "functional", "deployment" })
     public void changePassword() {
-        testChangePassword(AccessLevel.EXTERNAL_USER);
-        testChangePassword(AccessLevel.EXTERNAL_ADMIN);
-        testChangePassword(AccessLevel.INTERNAL_USER);
-        testChangePassword(AccessLevel.INTERNAL_ADMIN);
-        testChangePassword(AccessLevel.SUPER_ADMIN);
+        this.testChangePassword(AccessLevel.EXTERNAL_USER);
+        this.testChangePassword(AccessLevel.EXTERNAL_ADMIN);
+        this.testChangePassword(AccessLevel.INTERNAL_USER);
+        this.testChangePassword(AccessLevel.INTERNAL_ADMIN);
+        this.testChangePassword(AccessLevel.SUPER_ADMIN);
     }
 
     @Test(groups = { "functional", "deployment" })
     public void updateAccessLevel() {
-        User user = createTestUser(AccessLevel.EXTERNAL_USER);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, true);
+        User user = this.createTestUser(AccessLevel.EXTERNAL_USER);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
+        this.testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, true);
 
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
-        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+        this.userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, this.testTenant.getId(), user.getUsername());
+        this.switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
+        this.testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
 
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
-        switchToAccessLevel(AccessLevel.INTERNAL_USER);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+        this.userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, this.testTenant.getId(), user.getUsername());
+        this.switchToAccessLevel(AccessLevel.INTERNAL_USER);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+        this.testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
 
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
-        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+        this.userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, this.testTenant.getId(), user.getUsername());
+        this.switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+        this.testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
 
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
-        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+        this.userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, this.testTenant.getId(), user.getUsername());
+        this.switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
+        this.testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+        this.testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+        this.testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
 
-        makeSureUserDoesNotExist(user.getUsername());
+        this.makeSureUserDoesNotExist(user.getUsername());
     }
 
     @Test(groups = { "functional", "deployment" })
     public void deleteUser() {
-        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
-        testDeleteUserSuccess(AccessLevel.EXTERNAL_USER);
+        this.switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+        this.testDeleteUserSuccess(AccessLevel.EXTERNAL_USER);
     }
 
-
     @SuppressWarnings("rawtypes")
-	@Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional", "deployment" })
     public void deleteUserWithShortEmail() {
         String shortEmail = "a@b.c";
-        makeSureUserDoesNotExist(shortEmail);
-        createUser(shortEmail, shortEmail, "Short", "Email");
-        userService.assignAccessLevel(AccessLevel.INTERNAL_USER, testTenant.getId(), shortEmail);
+        this.makeSureUserDoesNotExist(shortEmail);
+        this.createUser(shortEmail, shortEmail, "Short", "Email");
+        this.userService.assignAccessLevel(AccessLevel.INTERNAL_USER, this.testTenant.getId(), shortEmail);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
 
-        String url = getRestAPIHostPort() + "/pls/users/\"" + shortEmail + "\"";
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
+        String url = this.getRestAPIHostPort() + "/pls/users/\"" + shortEmail + "\"";
+        ResponseEntity<ResponseDocument> response = this.restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
                 ResponseDocument.class);
         assertTrue(response.getBody().isSuccess());
 
-        makeSureUserDoesNotExist(shortEmail);
+        this.makeSureUserDoesNotExist(shortEmail);
     }
 
     private UserRegistration createUserRegistration() {
@@ -213,17 +211,18 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     }
 
     private void testRegisterUserSuccess(AccessLevel accessLevel) {
-        UserRegistration userReg = createUserRegistration();
+        UserRegistration userReg = this.createUserRegistration();
         userReg.getUser().setAccessLevel(accessLevel.name());
-        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
+        this.makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
 
-        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
-        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+        String json = this.restTemplate.postForObject(this.getRestAPIHostPort() + "/pls/users", userReg, String.class);
+        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
+                RegistrationResult.class);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult().getPassword());
 
-        User newUser = userService.findByEmail(userReg.getUser().getEmail());
+        User newUser = this.userService.findByEmail(userReg.getUser().getEmail());
         assertNotNull(newUser);
         assertEquals(newUser.getFirstName(), userReg.getUser().getFirstName());
         assertEquals(newUser.getLastName(), userReg.getUser().getLastName());
@@ -231,53 +230,54 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertEquals(newUser.getTitle(), userReg.getUser().getTitle());
 
         String password = response.getResult().getPassword();
-        Ticket ticket = globalAuthenticationService.authenticateUser(userReg.getUser().getUsername(), DigestUtils.sha256Hex(password));
+        Ticket ticket = this.globalAuthenticationService.authenticateUser(userReg.getUser().getUsername(),
+                DigestUtils.sha256Hex(password));
         assertEquals(ticket.getTenants().size(), 1);
-        globalAuthenticationService.discard(ticket);
+        this.globalAuthenticationService.discard(ticket);
 
-        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
+        this.makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
     }
 
     private void testRegisterUserFail(AccessLevel accessLevel) {
-        UserRegistration userReg = createUserRegistration();
+        UserRegistration userReg = this.createUserRegistration();
         userReg.getUser().setAccessLevel(accessLevel.name());
-        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
+        this.makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
 
         boolean exception = false;
         try {
-            restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
+            this.restTemplate.postForObject(this.getRestAPIHostPort() + "/pls/users", userReg, String.class);
         } catch (RuntimeException e) {
             exception = true;
             assertEquals(e.getMessage(), "403");
         }
         assertTrue(exception);
-        assertNull(globalUserManagementService.getUserByEmail(userReg.getUser().getEmail()));
+        assertNull(this.globalUserManagementService.getUserByEmail(userReg.getUser().getEmail()));
 
-        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
+        this.makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
     }
 
     @SuppressWarnings("rawtypes")
-	private void testDeleteUserSuccess(AccessLevel accessLevel) {
-        User user = createTestUser(accessLevel);
+    private void testDeleteUserSuccess(AccessLevel accessLevel) {
+        User user = this.createTestUser(accessLevel);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
 
-        String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername();
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
+        String url = this.getRestAPIHostPort() + "/pls/users/" + user.getUsername();
+        ResponseEntity<ResponseDocument> response = this.restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
                 ResponseDocument.class);
         assertTrue(response.getBody().isSuccess());
 
-        makeSureUserDoesNotExist(user.getUsername());
+        this.makeSureUserDoesNotExist(user.getUsername());
     }
 
-
     private void testUpdateAccessLevel(User user, AccessLevel targetLevel, boolean expectSuccess) {
-        if (expectSuccess)
-            updateAccessLevelWithSufficientPrivilege(user, targetLevel);
-        else
-            updateAccessLevelWithoutSufficientPrivilege(user, targetLevel);
+        if (expectSuccess) {
+            this.updateAccessLevelWithSufficientPrivilege(user, targetLevel);
+        } else {
+            this.updateAccessLevelWithoutSufficientPrivilege(user, targetLevel);
+        }
     }
 
     @SuppressWarnings("rawtypes")
@@ -290,13 +290,31 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
-        String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername();
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
+        String url = this.getRestAPIHostPort() + "/pls/users/" + user.getUsername();
+        ResponseEntity<ResponseDocument> response = this.restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
                 ResponseDocument.class);
         assertTrue(response.getBody().isSuccess());
 
-        AccessLevel resultLevel = userService.getAccessLevel(testTenant.getId(), user.getUsername());
+        AccessLevel resultLevel = this.userService.getAccessLevel(this.testTenant.getId(), user.getUsername());
         assertEquals(accessLevel, resultLevel);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = { "functional", "deployment" })
+    public void stringifiedUserName_updateAccessLevel_acessLevelSuccessfullyUpdated() {
+        User user = this.createTestUser(AccessLevel.EXTERNAL_USER);
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(user.getAccessLevel());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+
+        String url = this.getRestAPIHostPort() + "/pls/users/\"" + user.getUsername() + "\"";
+        ResponseEntity<ResponseDocument> response = this.restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
+                ResponseDocument.class);
+        assertTrue(response.getBody().isSuccess());
     }
 
     private void updateAccessLevelWithoutSufficientPrivilege(User user, AccessLevel accessLevel) {
@@ -308,11 +326,11 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
-        String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername();
+        String url = this.getRestAPIHostPort() + "/pls/users/" + user.getUsername();
 
         boolean exception = false;
         try {
-            restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+            this.restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
         } catch (RuntimeException e) {
             exception = true;
             assertEquals(e.getMessage(), "403");
@@ -321,47 +339,50 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     }
 
     private void testConflictingUserInTenant() {
-        User existingUser = createTestUser(AccessLevel.EXTERNAL_USER);
+        User existingUser = this.createTestUser(AccessLevel.EXTERNAL_USER);
 
-        UserRegistration uReg = createUserRegistration();
+        UserRegistration uReg = this.createUserRegistration();
         uReg.getUser().setEmail(existingUser.getEmail());
 
-        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
-        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+        String json = this.restTemplate.postForObject(this.getRestAPIHostPort() + "/pls/users", uReg, String.class);
+        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
+                RegistrationResult.class);
         assertNotNull(response);
         assertFalse(response.getResult().isValid());
         assertNull(response.getResult().getConflictingUser(),
                 "When conflict with another use in the same tenant, should not show the conflicting user");
 
-        makeSureUserDoesNotExist(existingUser.getUsername());
+        this.makeSureUserDoesNotExist(existingUser.getUsername());
     }
 
     private void testConflictingUserOutsideTenant() {
-        User existingUser = createTestUser(AccessLevel.EXTERNAL_USER);
-        userService.resignAccessLevel(testTenant.getId(), existingUser.getUsername());
+        User existingUser = this.createTestUser(AccessLevel.EXTERNAL_USER);
+        this.userService.resignAccessLevel(this.testTenant.getId(), existingUser.getUsername());
 
-        UserRegistration uReg = createUserRegistration();
+        UserRegistration uReg = this.createUserRegistration();
         uReg.getUser().setEmail(existingUser.getEmail());
 
-        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
-        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+        String json = this.restTemplate.postForObject(this.getRestAPIHostPort() + "/pls/users", uReg, String.class);
+        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
+                RegistrationResult.class);
         assertNotNull(response);
         assertFalse(response.getResult().isValid());
         // when conflict with another use outside the same tenant,
-        // show the conflicting user if its access level is lower than the current logged in user
-        User user =  response.getResult().getConflictingUser();
+        // show the conflicting user if its access level is lower than the
+        // current logged in user
+        User user = response.getResult().getConflictingUser();
         assertEquals(user.getFirstName(), existingUser.getFirstName());
         assertEquals(user.getLastName(), existingUser.getLastName());
         assertEquals(user.getEmail(), existingUser.getEmail());
         assertEquals(user.getUsername(), existingUser.getUsername());
 
-        makeSureUserDoesNotExist(existingUser.getUsername());
+        this.makeSureUserDoesNotExist(existingUser.getUsername());
     }
 
     private void testGetAllUsersFail() {
         boolean exception = false;
         try {
-            restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
+            this.restTemplate.getForObject(this.getRestAPIHostPort() + "/pls/users", String.class);
         } catch (RuntimeException e) {
             exception = true;
             assertEquals(e.getMessage(), "403");
@@ -370,8 +391,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     }
 
     private void testGetAllUsersSuccess(int expectedNumOfVisibleUsers) {
-        String json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-        ResponseDocument<ArrayNode> response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
+        String json = this.restTemplate.getForObject(this.getRestAPIHostPort() + "/pls/users", String.class);
+        ResponseDocument<ArrayNode> response = ResponseDocument.generateFromJSON(json, ArrayNode.class);
         assertNotNull(response);
         ArrayNode users = response.getResult();
         assertEquals(users.size(), expectedNumOfVisibleUsers);
@@ -379,9 +400,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @SuppressWarnings("rawtypes")
     private void testChangePassword(AccessLevel accessLevel) {
-        User user = createTestUser(accessLevel);
-        UserDocument doc = loginAndAttach(user.getUsername());
-        useSessionDoc(doc);
+        User user = this.createTestUser(accessLevel);
+        UserDocument doc = this.loginAndAttach(user.getUsername());
+        this.useSessionDoc(doc);
 
         UserUpdateData data = new UserUpdateData();
         data.setOldPassword(DigestUtils.sha256Hex("wrong"));
@@ -392,11 +413,11 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
-        String url = getRestAPIHostPort() + "/pls/users/creds";
+        String url = this.getRestAPIHostPort() + "/pls/users/creds";
 
         boolean exception = false;
         try {
-            restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+            this.restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
         } catch (RuntimeException e) {
             exception = true;
             assertEquals(e.getMessage(), "401");
@@ -405,15 +426,16 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
         data.setOldPassword(DigestUtils.sha256Hex(generalPassword));
         requestEntity = new HttpEntity<>(data.toString(), headers);
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        ResponseEntity<ResponseDocument> response = this.restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
+                ResponseDocument.class);
         assertEquals(response.getStatusCode().value(), 200);
         assertTrue(response.getBody().isSuccess());
 
-        logoutUserDoc(doc);
+        this.logoutUserDoc(doc);
 
-        Ticket ticket = loginCreds(user.getUsername(), "newpass");
-        logoutTicket(ticket);
+        Ticket ticket = this.loginCreds(user.getUsername(), "newpass");
+        this.logoutTicket(ticket);
 
-        makeSureUserDoesNotExist(user.getUsername());
+        this.makeSureUserDoesNotExist(user.getUsername());
     }
 }

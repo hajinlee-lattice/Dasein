@@ -191,6 +191,7 @@ public class UserResource {
                                         @RequestBody UserUpdateData data,
                                         HttpServletRequest request,
                                         HttpServletResponse response) {
+        username = userService.getURLSafeUsername(username).toLowerCase();
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
 
