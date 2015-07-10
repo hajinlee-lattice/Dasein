@@ -27,7 +27,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        yarnManager.deleteTupleIdCustomerRoot(CUSTOMER);
+        tearDown();
         String modelHdfsPath = YarnPathUtils.constructSingularIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE
                 + "/" + UUID + "/" + CONTAINER_ID + "/";
         HdfsUtils.rmdir(yarnConfiguration, modelHdfsPath);
@@ -50,12 +50,12 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
-        yarnManager.deleteTupleIdCustomerRoot(CUSTOMER);
+        deleteTupleIdCustomerRoot(CUSTOMER);
     }
 
     @Test(groups = "functional")
     public void testCopyModel() throws Exception {
-        yarnManager.copyModelsFromSingularToTupleId(CUSTOMER);
+        yarnManager.upsertModelsFromSingularToTupleId(CUSTOMER);
         String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
                 + UUID + "/" + CONTAINER_ID;
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath),
@@ -119,10 +119,12 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertFalse(yarnManager.modelSummaryExistsInTupleId(CUSTOMER, UUID), "modelsummary should be deleted.");
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testDeleteModelSummary" })
-    public void testDeleteTupleIdPath() throws Exception {
-        String customerRoot = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, CUSTOMER);
-        yarnManager.deleteTupleIdCustomerRoot(CUSTOMER);
-        Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, customerRoot));
+    private void deleteTupleIdCustomerRoot(String customer) {
+        String customerPath = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, customer);
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, customerPath);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 }
