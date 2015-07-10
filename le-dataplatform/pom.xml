@@ -5,9 +5,9 @@
     <artifactId>le-dataplatform</artifactId>
     <packaging>jar</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.1/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.1/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.1/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
 	</scm>
 
     <name>le-${component-name}</name>
@@ -16,24 +16,24 @@
         <component-name>dataplatform</component-name>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
-        <le.dataflow.version>2.0.1</le.dataflow.version>
+        <le.dataflow.version>2.0.2-SNAPSHOT</le.dataflow.version>
         <avro.version>1.7.7</avro.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
-        <le.db.version>2.0.1</le.db.version>
-        <le.perf.version>2.0.1</le.perf.version>
-        <le.common.version>2.0.1</le.common.version>
-        <le.domain.version>2.0.1</le.domain.version>
-        <le.scheduler.version>2.0.1</le.scheduler.version>
+        <le.db.version>2.0.2-SNAPSHOT</le.db.version>
+        <le.perf.version>2.0.2-SNAPSHOT</le.perf.version>
+        <le.common.version>2.0.2-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.2-SNAPSHOT</le.domain.version>
+        <le.scheduler.version>2.0.2-SNAPSHOT</le.scheduler.version>
         <le.eai.version>2.0.1-SNAPSHOT</le.eai.version>
-        <le.camille.version>2.0.1</le.camille.version>
-        <le.monitor.version>2.0.1</le.monitor.version>
-        <le.remote.version>2.0.1</le.remote.version>
+        <le.camille.version>2.0.2-SNAPSHOT</le.camille.version>
+        <le.monitor.version>2.0.2-SNAPSHOT</le.monitor.version>
+        <le.remote.version>2.0.2-SNAPSHOT</le.remote.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.2-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
