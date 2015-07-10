@@ -5,23 +5,23 @@
     <artifactId>le-pls</artifactId>
     <packaging>war</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.1/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.1/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.1/develop</url>
 	</scm>
 
     <name>le-${component-name}</name>
 
     <properties>
         <component-name>pls</component-name>
-        <le.common.version>2.0.1-SNAPSHOT</le.common.version>
-        <le.db.version>2.0.1-SNAPSHOT</le.db.version>
-        <le.domain.version>2.0.1-SNAPSHOT</le.domain.version>
-        <le.remote.version>2.0.1-SNAPSHOT</le.remote.version>
-        <le.camille.version>2.0.1-SNAPSHOT</le.camille.version>
-        <le.security.version>2.0.1-SNAPSHOT</le.security.version>
-        <le.baton.version>2.0.1-SNAPSHOT</le.baton.version>
-        <le.monitor.version>2.0.1-SNAPSHOT</le.monitor.version>
+        <le.common.version>2.0.1</le.common.version>
+        <le.db.version>2.0.1</le.db.version>
+        <le.domain.version>2.0.1</le.domain.version>
+        <le.remote.version>2.0.1</le.remote.version>
+        <le.camille.version>2.0.1</le.camille.version>
+        <le.security.version>2.0.1</le.security.version>
+        <le.baton.version>2.0.1</le.baton.version>
+        <le.monitor.version>2.0.1</le.monitor.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
@@ -32,7 +32,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.1-SNAPSHOT</version>
+        <version>2.0.1</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
