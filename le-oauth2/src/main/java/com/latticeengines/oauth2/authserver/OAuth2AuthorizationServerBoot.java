@@ -21,8 +21,6 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
-import com.latticeengines.oauth2.common.service.impl.LatticeAuthenticationManager;
-
 @Configuration
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
