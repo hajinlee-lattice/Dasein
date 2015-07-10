@@ -55,7 +55,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testCopyModel() throws Exception {
+    public void testUpsertModels() throws Exception {
         yarnManager.upsertModelsFromSingularToTupleId(CUSTOMER);
         String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
                 + UUID + "/" + CONTAINER_ID;
@@ -63,7 +63,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
                 String.format("model %s for customer %s cannot be found at %s.", MODEL_GUID, CUSTOMER, modelPath));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCopyModel" })
+    @Test(groups = "functional", dependsOnMethods = { "testUpsertModels" })
     public void testFixModelName() throws Exception {
         yarnManager.fixModelNameInTupleId(CUSTOMER, UUID);
 
@@ -80,7 +80,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
                         MODEL_GUID, CUSTOMER, modelPath));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCopyModel" })
+    @Test(groups = "functional", dependsOnMethods = { "testUpsertModels" })
     public void testCheckModelSummary() {
         Assert.assertFalse(yarnManager.modelSummaryExistsInSingularId(CUSTOMER, UUID), "modelsummary should not exists");
     }

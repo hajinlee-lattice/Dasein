@@ -39,7 +39,7 @@ public class PlsMultiTenantJdbcManager {
 
     public String findNameByUuid(String uuid) {
         List<String> names =  plsJdbcTemlate.queryForList("SELECT NAME FROM " + MODEL_SUMMARY_TABLE
-                        + " WHERE ID LIKE \'%" + uuid + "%\' ORDER BY LENGTH(ID)", String.class);
+                        + " WHERE ID LIKE \'%" + uuid + "%\' ORDER BY ID", String.class);
         for (String name: names) {
             if (isCustomizedName(name)) return name;
         }
@@ -48,7 +48,7 @@ public class PlsMultiTenantJdbcManager {
 
     public String findModelGuidByUuid(String uuid) {
         List<String> ids =  plsJdbcTemlate.queryForList("SELECT ID FROM " + MODEL_SUMMARY_TABLE
-                + " WHERE ID LIKE \'%" + uuid + "%\' ORDER BY LENGTH(ID)", String.class);
+                + " WHERE ID LIKE \'%" + uuid + "%\' ORDER BY ID", String.class);
         if (ids.isEmpty()) return null;
         return ids.get(0);
     }
