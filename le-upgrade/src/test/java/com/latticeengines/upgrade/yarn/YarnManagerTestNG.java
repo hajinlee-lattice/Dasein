@@ -65,7 +65,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCopyModel" })
     public void testFixModelName() throws Exception {
-        yarnManager.fixModelName(CUSTOMER, UUID);
+        yarnManager.fixModelNameInTupleId(CUSTOMER, UUID);
 
         String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
                 + UUID + "/" + CONTAINER_ID;

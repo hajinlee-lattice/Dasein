@@ -68,7 +68,7 @@ public class YarnManager {
         return findAllModelPathsInTuplerId(customer).size();
     }
 
-    public void fixModelName(String customer, String uuid) {
+    public void fixModelNameInTupleId(String customer, String uuid) {
         String srcModelJsonFullPath = findModelPathInTuple(customer, uuid);
         if (!srcModelJsonFullPath.endsWith("model.json")) {
             String newModelJsonFullPath = srcModelJsonFullPath.replace(".json", "_model.json");

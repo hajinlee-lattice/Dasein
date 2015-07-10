@@ -148,10 +148,10 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println(String.format("OK. %02d models have been moved.", nModels));
 
         System.out.println("Fix model.json filenames ... ");
-        List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
+        List<String> uuids = yarnManager.findAllUuidsInTupleId(customer);
         for (String uuid: uuids) {
             System.out.print("    " + uuid + " ... ");
-            yarnManager.fixModelName(customer, uuid);
+            yarnManager.fixModelNameInTupleId(customer, uuid);
             System.out.println("OK");
         }
     }
