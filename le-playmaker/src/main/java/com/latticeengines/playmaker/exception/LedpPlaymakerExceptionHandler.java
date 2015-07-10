@@ -27,21 +27,21 @@ public class LedpPlaymakerExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ModelAndView handleException(LedpException e) {
+    public ModelAndView handleException(LedpException ex) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
-                .getStackTrace(e);
-        log.error(e.getCode() + "\n" + stackTrace);
-        String errorMsg = e.getMessage();
-        Throwable t = e;
-        while (t != null) {
-            if (t.getCause() != null) {
-                errorMsg = t.getCause().getMessage();
+        String stackTrace = ex.getCause() != null ? ExceptionUtils.getFullStackTrace(ex.getCause()) : ExceptionUtils
+                .getStackTrace(ex);
+        log.error(ex.getCode() + "\n" + stackTrace);
+        String errorMsg = ex.getMessage();
+        Throwable cause = ex;
+        while (cause != null) {
+            if (cause.getCause() != null) {
+                errorMsg = cause.getCause().getMessage();
             }
-            t = t.getCause();
+            cause = cause.getCause();
         }
-        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //
-                "errorMsg", e.getCode().getMessage(), "cause", errorMsg));
+        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", ex.getCode().name(), //
+                "errorMsg", ex.getCode().getMessage(), "cause", errorMsg));
 
     }
 
@@ -54,11 +54,6 @@ public class LedpPlaymakerExceptionHandler {
         List<String> messages = new ArrayList<String>();
         Throwable cause = ex;
         while (cause != null) {
-            String message = cause.getMessage();
-            if (message == null) {
-                message = cause.getClass().getSimpleName();
-            }
-
             messages.add(cause.getMessage());
             cause = cause.getCause();
         }
