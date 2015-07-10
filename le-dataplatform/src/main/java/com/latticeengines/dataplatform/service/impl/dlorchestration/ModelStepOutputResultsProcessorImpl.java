@@ -162,15 +162,15 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                         .append("/").append(modelId);
                 String hdfsConsumerFile = hdfsConsumerDirectory + "/" + getModelVersion() + ".json";
 
-                String customer = modelCommand.getDeploymentExternalId();
-                HdfsUtils.copyFiles(yarnConfiguration, hdfsConsumerFile, hdfsConsumerFile.replaceFirst(CustomerSpace.parse(customer).toString(), customer));
-
                 if (HdfsUtils.fileExists(yarnConfiguration, hdfsConsumerFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, hdfsConsumerFile);
                 }
 
                 String modelContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFilePath);
                 HdfsUtils.writeToFile(yarnConfiguration, hdfsConsumerFile, modelContent);
+
+                String customer = modelCommand.getDeploymentExternalId();
+                HdfsUtils.copyFiles(yarnConfiguration, hdfsConsumerFile, hdfsConsumerFile.replaceFirst(CustomerSpace.parse(customer).toString(), customer));
 
                 // Publish the PMML model and associated artifacts.
                 String deploymentExternalId = modelCommand.getDeploymentExternalId();
