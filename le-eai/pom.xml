@@ -5,9 +5,9 @@
     <artifactId>le-eai</artifactId>
     <packaging>jar</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.2/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.2/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.2/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
 	</scm>
 
     <name>${component-name}</name>
@@ -16,10 +16,10 @@
         <component-name>le-eai</component-name>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <camel.version>2.14.0</camel.version>
-        <le.common.version>2.0.2</le.common.version>
-        <le.domain.version>2.0.2</le.domain.version>
-        <le.dataplatform.version>2.0.2</le.dataplatform.version>
-        <le.scheduler.version>2.0.2</le.scheduler.version>
+        <le.common.version>2.0.3-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.3-SNAPSHOT</le.domain.version>
+        <le.dataplatform.version>2.0.3-SNAPSHOT</le.dataplatform.version>
+        <le.scheduler.version>2.0.3-SNAPSHOT</le.scheduler.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <parquet.avro.version>1.4.3</parquet.avro.version>
         <avro.version>1.7.7</avro.version>
@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.2</version>
+        <version>2.0.3-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
