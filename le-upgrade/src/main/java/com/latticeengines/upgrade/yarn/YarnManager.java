@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -73,8 +72,11 @@ public class YarnManager {
         String srcModelJsonFullPath = findModelPathInTuple(customer, uuid);
         if (!srcModelJsonFullPath.endsWith("model.json")) {
             String newModelJsonFullPath = srcModelJsonFullPath.replace(".json", "_model.json");
+            String srcModelCsvFullPath = srcModelJsonFullPath.replace(".json", ".csv");
+            String newModelCsvFullPath = srcModelJsonFullPath.replace(".json", "_model.csv");
             try {
                 HdfsUtils.moveFile(yarnConfiguration, srcModelJsonFullPath, newModelJsonFullPath);
+                HdfsUtils.moveFile(yarnConfiguration, srcModelCsvFullPath, newModelCsvFullPath);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_24000, "Failed to move file from one src to dest path.", e);
             }
@@ -252,7 +254,13 @@ public class YarnManager {
     }
 
     private String findModelPathInTuple(String customer, String uuid) {
-        return findModelPathInSingular(CustomerSpace.parse(customer).toString(), uuid);
+        List<String> paths = findAllModelPathsInTuplerId(customer);
+        for (String path : paths) {
+            if (path.contains(uuid))
+                return path;
+        }
+        RuntimeException e = new RuntimeException("No model json with specific uuid can be found.");
+        throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
     }
 
     private String findModelPathInSingular(String customer, String uuid) {

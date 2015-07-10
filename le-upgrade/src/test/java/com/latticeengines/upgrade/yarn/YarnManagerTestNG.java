@@ -33,6 +33,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, modelHdfsPath);
         modelFileName = "PLSModel_2015-03-05_18-30";
         HdfsUtils.writeToFile(yarnConfiguration, modelHdfsPath + modelFileName + ".json", constructModelContent());
+        HdfsUtils.writeToFile(yarnConfiguration, modelHdfsPath + modelFileName + ".csv", constructModelContent());
     }
 
     private String constructModelContent(){
@@ -65,10 +66,18 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testCopyModel" })
     public void testFixModelName() throws Exception {
         yarnManager.fixModelName(CUSTOMER, UUID);
+
         String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
                 + UUID + "/" + CONTAINER_ID;
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath + "/" + modelFileName + "_model.json"),
-                String.format("model name %s for customer %s cannot be fixed at %s.", MODEL_GUID, CUSTOMER, modelPath));
+        String newModelJson = modelPath + "/" + modelFileName + "_model.json";
+        String newModelCsv = modelPath + "/" + modelFileName + "_model.csv";
+
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, newModelJson),
+                String.format("renamed model.json for model %s of customer %s cannot be fixed at %s",
+                        MODEL_GUID, CUSTOMER, modelPath));
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, newModelCsv),
+                String.format("renamed model.csv for model %s of customer %s cannot be fixed at %s",
+                        MODEL_GUID, CUSTOMER, modelPath));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCopyModel" })
