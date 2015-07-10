@@ -56,12 +56,16 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         
         // Adjust height of tail pseudo-element to anchor to path element
         // FIXME - Find a better way to adjust pseudo-element when supported
-        document.styleSheets[0].addRule(
+        var styleSheet = document.styleSheets[0],
+            addMethod = 'insertRule'; // doesn't work on IE8 and lower
+
+        styleSheet[addMethod](
             '.attribute-hover-left-arrow>div:after,' +
             '.attribute-hover-left-arrow>div:before,' +
             '.attribute-hover-right-arrow>div:after,' +
-            '.attribute-hover-right-arrow>div:before',
-            'top: ' + top * 100 + '% !important;' // !important to override previous
+            '.attribute-hover-right-arrow>div:before {' +
+            'top: ' + (top * 100) + '% !important; '+ // !important to override previous
+            '}', styleSheet.cssRules.length // append to end of styleSheet
         );
 
         hoverElem.css("top", donutRect.top + (donutRect.height >> 1));
