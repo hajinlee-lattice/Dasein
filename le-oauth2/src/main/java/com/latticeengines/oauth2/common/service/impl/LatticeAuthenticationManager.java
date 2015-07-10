@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.authserver;
+package com.latticeengines.oauth2.common.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
