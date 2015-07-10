@@ -72,6 +72,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         JobStatus jobStatus = new JobStatus();
         jobStatus.setResultDirectory(resultDirectory);
 
+        HdfsUtils.rmdir(yarnConfiguration, consumerDirectory);
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.json", linkContents.get(0));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.csv", linkContents.get(1));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "diagnostics.json", linkContents.get(2));
