@@ -40,15 +40,6 @@ public class YarnManager {
     @Value("${dataplatform.customer.basedir}")
     protected String customerBase;
 
-    public void deleteTupleIdCustomerRoot(String customer) {
-        String customerPath = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, customer);
-        try {
-            HdfsUtils.rmdir(yarnConfiguration, customerPath);
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
     public void createTupleIdCustomerRootIfNotExist(String customer) {
         String customerPath = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, customer);
         if (!customerTupleIdPathExists(customer)) {
@@ -61,12 +52,7 @@ public class YarnManager {
         }
     }
 
-    private boolean customerTupleIdPathExists(String customer) {
-        String customerPath = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, customer);
-        return hdfsPathExists(customerPath);
-    }
-
-    public void copyModelsFromSingularToTupleId(String customer) {
+    public void upsertModelsFromSingularToTupleId(String customer) {
         String srcRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
         String destRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer);
 
@@ -78,7 +64,7 @@ public class YarnManager {
             throw new IllegalStateException(String.format("The destination path %s already exists.", destRoot));
         }
 
-        copyHdfsToHdfs(srcRoot, destRoot);
+        mergeHdfsFolders(destRoot, srcRoot, destRoot);
     }
 
     public void fixModelName(String customer, String uuid) {
@@ -135,6 +121,15 @@ public class YarnManager {
         return uuids;
     }
 
+    public List<String> findAllUuidsInTupleId(String customer) {
+        List<String> paths = findAllModelPathsInTuplerId(customer);
+        List<String> uuids = new ArrayList<>();
+        for (String path: paths) {
+            uuids.add(YarnPathUtils.parseUuid(path));
+        }
+        return uuids;
+    }
+
     public void uploadModelsummary(String customer, String uuid, JsonNode summary) {
         String modelFolder = findModelFolderPathInTuple(customer, uuid);
         String path = modelFolder + MS_PATH;
@@ -175,6 +170,11 @@ public class YarnManager {
         return new DateTime(constructionTime);
     }
 
+    private boolean customerTupleIdPathExists(String customer) {
+        String customerPath = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, customer);
+        return hdfsPathExists(customerPath);
+    }
+
     private boolean hdfsPathExists(String path) {
         try {
             return HdfsUtils.fileExists(yarnConfiguration, path);
@@ -184,13 +184,24 @@ public class YarnManager {
         }
     }
 
-    private void copyHdfsToHdfs(String src, String dest) {
-        String tmpLocalDir = TEMPFOLDER + "/" + UUID.randomUUID();
+    private void mergeHdfsFolders(String dest, String ... srcs) {
         try {
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpLocalDir);
-            HdfsUtils.copyLocalToHdfs(yarnConfiguration, tmpLocalDir, dest);
+            List<String> srcTmpDirs = new ArrayList<>();
+            for(String src: srcs) {
+                String tmpDir = TEMPFOLDER + "/" + UUID.randomUUID();
+                srcTmpDirs.add(tmpDir);
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpDir);
+            }
+
+            String destTmpDir = TEMPFOLDER + "/" + UUID.randomUUID();
+            for (String srcTempDir: srcTmpDirs) {
+                FileUtils.copyDirectory(new File(srcTempDir), new File(destTmpDir));
+            }
+
+            HdfsUtils.rmdir(yarnConfiguration, dest);
+            HdfsUtils.copyLocalToHdfs(yarnConfiguration, destTmpDir, dest);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000, "Failed to copy file from one src to dest path.", e);
+            throw new LedpException(LedpCode.LEDP_24000, "Failed to merge hdfs folders.", e);
         } finally {
             FileUtils.deleteQuietly(new File(TEMPFOLDER));
         }
@@ -247,13 +258,29 @@ public class YarnManager {
 
     private List<String> findAllModelPathsInSingularId(String customer) {
         String modelsRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
+        try {
+            return findAllModelPaths(modelsRoot);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24000, "Cannot find all model jsons for customer " + customer, e);
+        }
+    }
+
+    private List<String> findAllModelPathsInTuplerId(String customer) {
+        String modelsRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer);
+        try {
+            return findAllModelPaths(modelsRoot);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24000, "Cannot find all model jsons for customer " + customer, e);
+        }
+    }
+
+    private List<String> findAllModelPaths(String modelsRoot) throws Exception {
         if (!hdfsPathExists(modelsRoot)) {
             return new ArrayList<>();
         }
 
-        try {
-            return HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + "/" + customer
-                    + "/models", new HdfsUtils.HdfsFileFilter() {
+        return HdfsUtils.getFilesForDirRecursive(yarnConfiguration, modelsRoot,
+            new HdfsUtils.HdfsFileFilter() {
                 @Override
                 public boolean accept(FileStatus fileStatus) {
                     if (fileStatus == null) {
@@ -271,8 +298,7 @@ public class YarnManager {
                             "modelsummary",
                             "diagnostics",
                             "DataComposition",
-                            "ScoreDerivation",
-                            "/1/"
+                            "ScoreDerivation"
                     );
                     for (String token: blacklist) {
                         if (path.contains(token)) return true;
@@ -280,9 +306,6 @@ public class YarnManager {
                     return false;
                 }
             });
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000, "Cannot find all model jsons for customer " + customer, e);
-        }
     }
 
     private Long convertModelingTimestampToLong(ModelingMetadata.DateTime dateTime) {

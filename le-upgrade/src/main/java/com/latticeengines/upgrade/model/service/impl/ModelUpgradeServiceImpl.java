@@ -137,8 +137,8 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
 
-        System.out.print("Copying model files to the destination folder ... ");
-        yarnManager.copyModelsFromSingularToTupleId(customer);
+        System.out.print("Upserting model files to the destination folder ... ");
+        yarnManager.upsertModelsFromSingularToTupleId(customer);
         System.out.println("OK");
 
         System.out.println("Fix model.json filenames ... ");
@@ -248,9 +248,13 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             System.out.println(String.format("\nCustomer %s does not have any active model", customer));
         }
 
-        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, %2d modelsummary.json, " +
-                        "%2d modelsummaries in PLS 1.4 DB.", customer, modelGuids.size(), aggregator.activeModels,
-                aggregator.modelJsons, aggregator.modelSummeries, aggregator.summariesIn1_4);
+        int modlesInTupleId = yarnManager.findAllUuidsInTupleId(customer).size();
+
+        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, " +
+                        "%2d modelsummary.json, %2d modelsummaries in PLS 1.4 DB, " +
+                        "%2d models already in TupleID folder.",
+                customer, modelGuids.size(), aggregator.activeModels, aggregator.modelJsons, aggregator.modelSummeries,
+                aggregator.summariesIn1_4, modlesInTupleId);
     }
 
     private String printModelsInHdfs(String customer) {
@@ -261,13 +265,17 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             printPreUpgradeStatusOfCustomerModel(customer, uuid, aggregator);
         }
 
-        if (uuids.isEmpty()) {
+        int modlesInTupleId = yarnManager.findAllUuidsInTupleId(customer).size();
+
+        if (uuids.size() + modlesInTupleId == 0) {
             System.out.println(String.format("\nCustomer %s does not have any model in hdfs.", customer));
         }
 
-        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, %2d modelsummary.json, " +
-                        "%2d modelsummaries in PLS 1.4 DB.", customer, uuids.size(), aggregator.activeModels,
-                aggregator.modelJsons, aggregator.modelSummeries, aggregator.summariesIn1_4);
+        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, " +
+                        "%2d modelsummary.json, %2d modelsummaries in PLS 1.4 DB, " +
+                        "%2d models already in TupleID folder.",
+                customer, uuids.size(), aggregator.activeModels, aggregator.modelJsons,
+                aggregator.modelSummeries, aggregator.summariesIn1_4, modlesInTupleId);
 
     }
 
