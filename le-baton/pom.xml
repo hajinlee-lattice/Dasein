@@ -8,7 +8,7 @@
 
     <properties>
         <component-name>baton</component-name>
-        <le.domain.version>2.0.1-SNAPSHOT</le.domain.version>
+        <le.domain.version>2.0.2-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
