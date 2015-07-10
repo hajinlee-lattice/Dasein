@@ -27,18 +27,20 @@ public class RecommendationRetryAspect {
         try {
             Object retVal = null;
             int retries = 2;
+            Exception exception = null;
             while (retries > 0) {
                 try {
                     retVal = joinPoint.proceed();
                     return retVal;
                 } catch (Exception ex) {
                     log.warn("There's exception happening!, retries=" + retries, ex);
+                    exception = ex;
                     templateFactory.removeTemplate(tenantName);
                     retries--;
                 }
             }
 
-            throw new LedpException(LedpCode.LEDP_22007);
+            throw new LedpException(LedpCode.LEDP_22007, exception);
 
         } finally {
             long endTime = System.currentTimeMillis();
