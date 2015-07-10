@@ -91,6 +91,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Getting rights of user %s in tenant %s.", username, tenantId));
             return service.getRights(tenantId, username).getString();
         } catch (Exception e) {
+            if (e.getMessage().contains("Sequence contains no elements")) {
+                return new ArrayList<>();
+            }
             throw new LedpException(LedpCode.LEDP_18000,
                 "Getting rights of user " + username + " in tenant " + tenantId + ".", e);
         }
