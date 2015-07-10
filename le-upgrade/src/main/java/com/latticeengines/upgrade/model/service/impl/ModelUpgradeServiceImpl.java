@@ -282,7 +282,8 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     private void printPreUpgradeStatusOfCustomerModel(String customer, String uuid, ModelStatistics statistics) {
         System.out.println(String.format("\n(%s, %s): ", customer, uuid));
         System.out.print("    Model is active? .................... ");
-        if (tenantModelJdbcManager.modelIsActive(customer, uuid)) {
+        boolean active = tenantModelJdbcManager.modelIsActive(customer, uuid);
+        if (active) {
             statistics.activeModels++;
             System.out.println("YES");
         } else {
@@ -298,20 +299,23 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             return;
         }
 
+        System.out.print("    Modelsummary in on PLS 1.4 DB? ...... ");
+        boolean in1_4 = plsMultiTenantJdbcManager.hasUuid(uuid);
+        if (in1_4) {
+            statistics.summariesIn1_4++;
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+        }
+
+        if (!active && !in1_4) return;
+
         System.out.print("    Model was created at ................ ");
         System.out.println(FMT.print(yarnManager.getModelCreationDate(customer, uuid)));
 
         System.out.print("    Modelsummary already exists? ........ ");
         if (yarnManager.modelSummaryExistsInSingularId(customer, uuid)) {
             statistics.modelSummeries++;
-            System.out.println("YES");
-        } else {
-            System.out.println("NO");
-        }
-
-        System.out.print("    Modelsummary in on PLS 1.4 DB? ........ ");
-        if (plsMultiTenantJdbcManager.hasUuid(uuid)) {
-            statistics.summariesIn1_4++;
             System.out.println("YES");
         } else {
             System.out.println("NO");
