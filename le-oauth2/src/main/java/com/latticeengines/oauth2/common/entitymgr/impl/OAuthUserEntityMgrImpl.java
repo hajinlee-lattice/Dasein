@@ -27,7 +27,10 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     @Override
     @Transactional(value = "oauth2")
     public void create(OAuthUser user) {
-        user.setEncryptedPassword(encoder.encode(user.getPassword()));
+        if (user != null) {
+            user = new OAuthUser(user);
+            user.setPassword(encoder.encode(user.getPassword()));
+        }
         users.create(user);
     }
 
@@ -40,10 +43,10 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     @Override
     @Transactional(value = "oauth2")
     public void update(OAuthUser user) {
-        if (user.getPassword() != null) {
-            user.setEncryptedPassword(encoder.encode(user.getPassword()));
-        }
-        users.update(user);
+        OAuthUser newUser = new OAuthUser(user);
+        newUser.setPid(user.getPid());
+        newUser.setPassword(encoder.encode(user.getPassword()));
+        users.update(newUser);
     }
 
     @Override
