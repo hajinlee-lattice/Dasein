@@ -63,10 +63,11 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         int version = 0;
         String possibleName = modelSummary.getName();
         String possibleId = modelSummary.getId();
+        String rootId = possibleId;
         String rootname = modelSummaryParser.parseOriginalName(modelSummary.getName());
         while (existingNames.contains(possibleName) || existingIds.contains(possibleId)) {
             possibleName = modelSummary.getName().replace(rootname, rootname + "-" + String.format("%03d", ++version));
-            possibleId = modelSummary.getId().replace(rootname, rootname + "-" + String.format("%03d", version));
+            possibleId = rootId + "-" + String.format("%03d", version);
         }
 
         if (version > 0) {
