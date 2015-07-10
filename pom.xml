@@ -6,9 +6,9 @@
     <version>2.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop_2.0.2_maint</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop_2.0.2_maint</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop_2.0.2_maint</url>
 	</scm>
 
     <name>Lattice Data Platform Top Level Module</name>
