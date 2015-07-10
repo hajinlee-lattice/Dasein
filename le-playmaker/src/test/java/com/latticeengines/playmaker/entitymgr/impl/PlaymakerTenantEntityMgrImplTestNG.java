@@ -22,7 +22,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
     @Autowired
     private OAuthUserEntityMgr users;
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testCRUD() throws Exception {
 
         PlaymakerTenant tenant = getTenant();
@@ -56,6 +56,35 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
 
         tenant = getTenant();
         result = playMakerEntityMgr.create(tenant);
+    }
+
+    @Test(groups = "functional")
+    public void testPasswordExpiration() {
+        PlaymakerTenant tenant = getTenant();
+        try {
+            playMakerEntityMgr.deleteByTenantName(tenant.getTenantName());
+        } catch (Exception ex) {
+
+        }
+        PlaymakerTenant result = playMakerEntityMgr.create(tenant);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getTenantPassword());
+
+        OAuthUser user = users.get(tenant.getTenantName());
+        Assert.assertNotNull(user);
+        Assert.assertFalse(user.getPasswordExpired());
+
+        user.setPasswordExpired(true);
+        users.update(user);
+
+        user = users.get(user.getUserId());
+        Assert.assertTrue(user.getPasswordExpired());
+
+        tenant = getTenant();
+        result = playMakerEntityMgr.create(tenant);
+        user = users.get(user.getUserId());
+        Assert.assertFalse(user.getPasswordExpired());
     }
 
     public static PlaymakerTenant getTenant() {
