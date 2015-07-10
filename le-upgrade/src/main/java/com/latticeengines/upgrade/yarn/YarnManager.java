@@ -52,7 +52,7 @@ public class YarnManager {
         }
     }
 
-    public void upsertModelsFromSingularToTupleId(String customer) {
+    public int upsertModelsFromSingularToTupleId(String customer) {
         String srcRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
         String destRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer);
 
@@ -64,7 +64,9 @@ public class YarnManager {
             throw new IllegalStateException(String.format("The destination path %s already exists.", destRoot));
         }
 
-        mergeHdfsFolders(destRoot, srcRoot, destRoot);
+        copyHdfsToHdfs(srcRoot, destRoot);
+
+        return findAllModelPathsInTuplerId(customer).size();
     }
 
     public void fixModelName(String customer, String uuid) {
@@ -141,10 +143,6 @@ public class YarnManager {
     }
 
     public JsonNode generateModelSummary(String customer, String uuid) {
-        return generateModelSummary(customer, uuid, MODEL_NAME);
-    }
-
-    public JsonNode generateModelSummary(String customer, String uuid, String name) {
         JsonNode json = readModelAsJson(customer, uuid);
         Long constructionTime = getTimestampFromModelJson(json);
         String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
@@ -152,7 +150,7 @@ public class YarnManager {
         String lookupId = String.format("%s|%s|%s", customer, eventTable, YarnPathUtils.extractUuid(uuid));
 
         ObjectNode detail = objectMapper.createObjectNode();
-        detail.put("Name", name);
+        detail.put("Name", MODEL_NAME);
         detail.put("ModelID", YarnPathUtils.constructModelGuidFromUuid(uuid));
         detail.put("ConstructionTime", constructionTime/1000L);
         detail.put("LookupId", lookupId);
@@ -170,6 +168,28 @@ public class YarnManager {
         return new DateTime(constructionTime);
     }
 
+    public int moveModelsFromTupleToSingularId(String customer) {
+        List<String> modelJsonPaths = findAllModelPathsInTuplerId(customer);
+
+        for (String jsonPath: modelJsonPaths) {
+            String uuid = YarnPathUtils.extractUuid(jsonPath);
+            String modelPathInTuple = findModelPathInTuple(customer, uuid);
+            String modelPathInSingular = YarnPathUtils.substituteBySingularId(modelPathInTuple);
+            copyHdfsToHdfs(modelPathInTuple, modelPathInSingular);
+        }
+
+        String destRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer);
+        if (hdfsPathExists(destRoot)) {
+            try {
+                HdfsUtils.rmdir(yarnConfiguration, destRoot);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to cleanup models folder in TupleID path.", e);
+            }
+        }
+
+        return modelJsonPaths.size();
+    }
+
     private boolean customerTupleIdPathExists(String customer) {
         String customerPath = YarnPathUtils.constructTupleIdCustomerRoot(customerBase, customer);
         return hdfsPathExists(customerPath);
@@ -184,24 +204,13 @@ public class YarnManager {
         }
     }
 
-    private void mergeHdfsFolders(String dest, String ... srcs) {
+    private void copyHdfsToHdfs(String src, String dest) {
+        String tmpLocalDir = TEMPFOLDER + "/" + UUID.randomUUID();
         try {
-            List<String> srcTmpDirs = new ArrayList<>();
-            for(String src: srcs) {
-                String tmpDir = TEMPFOLDER + "/" + UUID.randomUUID();
-                srcTmpDirs.add(tmpDir);
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpDir);
-            }
-
-            String destTmpDir = TEMPFOLDER + "/" + UUID.randomUUID();
-            for (String srcTempDir: srcTmpDirs) {
-                FileUtils.copyDirectory(new File(srcTempDir), new File(destTmpDir));
-            }
-
-            HdfsUtils.rmdir(yarnConfiguration, dest);
-            HdfsUtils.copyLocalToHdfs(yarnConfiguration, destTmpDir, dest);
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, src, tmpLocalDir);
+            HdfsUtils.copyLocalToHdfs(yarnConfiguration, tmpLocalDir, dest);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_24000, "Failed to merge hdfs folders.", e);
+            throw new LedpException(LedpCode.LEDP_24000, "Failed to copy file from one src to dest path.", e);
         } finally {
             FileUtils.deleteQuietly(new File(TEMPFOLDER));
         }

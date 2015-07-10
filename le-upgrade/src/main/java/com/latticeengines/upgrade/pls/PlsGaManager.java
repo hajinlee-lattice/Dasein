@@ -51,7 +51,6 @@ public class PlsGaManager {
     private static ImmutableList<String> superAdminEmails;
     private static ImmutableList<String> latticeAdminEmails;
 
-
     static {
         List<BasicNameValuePair> list = new ArrayList<>();
         list.add(new BasicNameValuePair("MagicAuthentication", "Security through obscurity!"));
@@ -112,6 +111,18 @@ public class PlsGaManager {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24003,
                     String.format("Failed to set model %s to ACTIVE", modelId), e);
+        }
+    }
+
+    public void updateModelName(String modelId, String name) {
+        try {
+            String url = plsApiHost + "/pls/internal/modelsummaries/" + modelId;
+            AttributeMap map = new AttributeMap();
+            map.put("Name", name);
+            HttpClientWithOptionalRetryUtils.sendPutRequest(url, false, headers, JsonUtils.serialize(map));
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24003,
+                    String.format("Failed to change name for model %s.", modelId), e);
         }
     }
 

@@ -22,11 +22,12 @@ public class PlsMultiTenantJdbcManager {
 
     private static final String TENANT_TABLE = "TENANT";
     private static final String MODEL_SUMMARY_TABLE = "MODEL_SUMMARY";
-    private static Set<String> uuids = new HashSet<>();
+    private static Set<String> uuids;
 
     @PostConstruct
-    private void getModelGuids() {
+    public void getModelGuids() {
         List<String> ids = plsJdbcTemlate.queryForList("SELECT ID FROM " + MODEL_SUMMARY_TABLE, String.class);
+        uuids = new HashSet<>();
         for (String id: ids) {
             uuids.add(YarnPathUtils.extractUuid(id));
         }
@@ -37,9 +38,19 @@ public class PlsMultiTenantJdbcManager {
     }
 
     public String findNameByUuid(String uuid) {
-        String modelId = YarnPathUtils.constructModelGuidFromUuid(uuid);
-        return plsJdbcTemlate.queryForObject(
-                "SELECT NAME FROM " + MODEL_SUMMARY_TABLE + " WHERE ID = \'" + modelId + "\'", String.class);
+        List<String> names =  plsJdbcTemlate.queryForList("SELECT NAME FROM " + MODEL_SUMMARY_TABLE
+                        + " WHERE ID LIKE \'%" + uuid + "%\' ORDER BY LENGTH(ID)", String.class);
+        for (String name: names) {
+            if (isCustomizedName(name)) return name;
+        }
+        return null;
+    }
+
+    public String findModelGuidByUuid(String uuid) {
+        List<String> ids =  plsJdbcTemlate.queryForList("SELECT ID FROM " + MODEL_SUMMARY_TABLE
+                + " WHERE ID LIKE \'%" + uuid + "%\' ORDER BY LENGTH(ID)", String.class);
+        if (ids.isEmpty()) return null;
+        return ids.get(0);
     }
 
     public void deleteModelSummariesByUuid(String modelId) {
@@ -53,5 +64,9 @@ public class PlsMultiTenantJdbcManager {
                 "INNER JOIN " + TENANT_TABLE + " AS tenant " +
                 "ON summary.FK_TENANT_ID = tenant.TENANT_PID " +
                 "WHERE tenant.TENANT_ID = \'" + tenantId + "\'");
+    }
+
+    private boolean isCustomizedName(String name) {
+        return !(name.startsWith("PLSModel-") || name.endsWith(" GMT"));
     }
 }

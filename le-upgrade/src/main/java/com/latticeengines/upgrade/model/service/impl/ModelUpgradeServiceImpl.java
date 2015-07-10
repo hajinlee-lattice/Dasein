@@ -1,6 +1,7 @@
 package com.latticeengines.upgrade.model.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +65,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
     private static final DateTimeFormatter FMT = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private static final Map<String, String> modelNames = new HashMap<>();
 
     public void setInfos(List<BardInfo> infos) throws Exception {
         dlTenantName = "Unknown";
@@ -137,9 +139,13 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
 
-        System.out.print("Upserting model files to the destination folder ... ");
-        yarnManager.upsertModelsFromSingularToTupleId(customer);
-        System.out.println("OK");
+        System.out.print("Moving models from tuple to singular ID ... ");
+        int nModels = yarnManager.moveModelsFromTupleToSingularId(customer);
+        System.out.println(String.format("OK. %02d models have been moved.", nModels));
+
+        System.out.print("Moving models from singular to tuple ID ... ");
+        nModels = yarnManager.upsertModelsFromSingularToTupleId(customer);
+        System.out.println(String.format("OK. %02d models have been moved.", nModels));
 
         System.out.println("Fix model.json filenames ... ");
         List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
@@ -184,20 +190,21 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
 
         if (toBeGenerated) {
+            System.out.print("Checking if the model has a customized name in PLS 1.4 ...");
             String name = plsMultiTenantJdbcManager.findNameByUuid(uuid);
+            if (StringUtils.isNotEmpty(name)) {
+                modelNames.put(uuid, name);
+                System.out.println("YES. The name is: " + name);
+            } else {
+                System.out.println("NO");
+            }
 
             System.out.print("Deleting modelsummaries with the same uuid in PLS_MultiTenant DB ...");
             plsMultiTenantJdbcManager.deleteModelSummariesByUuid(uuid);
             System.out.println("OK");
 
-            JsonNode jsonNode;
-            if (StringUtils.isEmpty(name)) {
-                System.out.print("Generating incomplete modelsummary based on model.json ...");
-                jsonNode = yarnManager.generateModelSummary(customer, uuid);
-            } else {
-                System.out.print("Generating incomplete modelsummary based on model.json using name " + name + "...");
-                jsonNode = yarnManager.generateModelSummary(customer, uuid, name);
-            }
+            System.out.print("Generating incomplete modelsummary based on model.json ...");
+            JsonNode jsonNode = yarnManager.generateModelSummary(customer, uuid);
             System.out.println("OK");
 
             System.out.print("Uploading modelsummary to tupleId path ...");
