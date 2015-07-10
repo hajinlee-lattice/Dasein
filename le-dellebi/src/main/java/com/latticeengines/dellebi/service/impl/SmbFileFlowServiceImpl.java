@@ -65,6 +65,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     public boolean deleteFile(String fileName) {
 
         try {
+            log.info("Deleting smbFile, name=" + fileName);
             NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
             SmbFile smbFile = new SmbFile(smbInboxPath + "/" + fileName, auth);
             if (smbFile.canWrite()) {

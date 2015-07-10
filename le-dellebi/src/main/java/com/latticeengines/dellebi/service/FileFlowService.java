@@ -6,6 +6,8 @@ public interface FileFlowService {
     String getFile();
 
     String getOutputDir();
+    
+    String getErrorOutputDir();
 
     String getTxtDir();
 

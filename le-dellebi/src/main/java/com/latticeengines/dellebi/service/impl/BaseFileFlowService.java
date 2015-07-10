@@ -34,6 +34,9 @@ public abstract class BaseFileFlowService implements FileFlowService {
     
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
+    
+    @Value("${dellebi.datahadooperrorworkingpath}")
+    private String dataHadoopErrorWorkingPath;
 
     public BaseFileFlowService() {
         super();
@@ -171,6 +174,11 @@ public abstract class BaseFileFlowService implements FileFlowService {
     @Override
     public String getOutputDir() {
         return dataHadoopWorkingPath + "/output";
+    }
+    
+    @Override
+    public String getErrorOutputDir() {
+        return dataHadoopErrorWorkingPath;
     }
 
 }

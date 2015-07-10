@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import cascading.operation.AssertionLevel;
+import cascading.operation.assertion.AssertSizeEquals;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
@@ -163,6 +165,8 @@ public class PipeFactory {
                 .append(new Fields("fileName"));
 
         docPipe = new Pipe("copy");
+        AssertSizeEquals equals = new AssertSizeEquals(111);
+        docPipe = new Each(docPipe, AssertionLevel.VALID, equals);
         docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments), Fields.RESULTS);
         return docPipe;
     }

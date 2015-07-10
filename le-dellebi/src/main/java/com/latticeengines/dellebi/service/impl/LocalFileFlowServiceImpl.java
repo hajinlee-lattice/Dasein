@@ -65,6 +65,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
 
     @Override
     public boolean deleteFile(String fileName) {
+        log.info("Deleting local File, name=" + fileName);
         return new File(localInboxPath + "/" + fileName).delete();
     }
 

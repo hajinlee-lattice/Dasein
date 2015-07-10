@@ -66,6 +66,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
         dellEbiFlowService.deleteFile(context);
         context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, "tgt_quote_trans_global_4_2015.zip");
         dellEbiFlowService.deleteFile(context);
+        context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, "tgt_quote_trans_global_5_2015.zip");
+        dellEbiFlowService.deleteFile(context);
 
         FileUtils.deleteDirectory(new File(localInboxPath));
         FileUtils.forceMkdir(new File(localInboxPath));
@@ -74,8 +76,10 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "functional", dataProvider = "fileDataProvider")
     public void testExecute(String fileName, String sourceType) throws Exception {
         if (sourceType.equals("SMB")) {
+            System.out.println("Copying file: " + fileName);
             smbPut(smbInboxPath, fileName);
         } else {
+            System.out.println("Copying file: " + fileName);
             FileUtils.copyFileToDirectory(new File(fileName), new File(localInboxPath));
         }
 
@@ -95,8 +99,10 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     public static Object[][] getValidateNameData() {
         return new Object[][] { { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "SMB" },
                 { "./src/test/resources/tgt_quote_trans_global_4_2015.zip", "SMB" },
+                { "./src/test/resources/tgt_quote_trans_global_5_2015.zip", "SMB" },
                 { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL" },
-                { "./src/test/resources/tgt_quote_trans_global_4_2015.zip", "LOCAL" } };
+                { "./src/test/resources/tgt_quote_trans_global_4_2015.zip", "LOCAL" },
+                { "./src/test/resources/tgt_quote_trans_global_5_2015.zip", "LOCAL" }};
     }
 
     private void smbPut(String remoteUrl, String localFilePath) throws Exception {

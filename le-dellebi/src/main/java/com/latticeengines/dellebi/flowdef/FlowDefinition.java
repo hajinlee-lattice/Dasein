@@ -154,9 +154,11 @@ public class FlowDefinition {
 
         Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
         Tap outTapFile = new Hfs(new TextDelimited(false, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
+        Tap failedRowsTapFile = new Hfs(new TextDelimited(false, ","), dellEbiFlowService.getErrorOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
+        
         try {
             filePipe = PipeFactory.getPipe("quote_trans_Pipe", quoteFields);
         } catch (Exception e) {
@@ -165,6 +167,7 @@ public class FlowDefinition {
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
                 .addTailSink(filePipe, outTapFile);
+        flowDef_fileType.addTrap(filePipe, failedRowsTapFile);
         flowDef_fileType.setName(FileType.QUOTE.getType());
         return flowDef_fileType;
     }

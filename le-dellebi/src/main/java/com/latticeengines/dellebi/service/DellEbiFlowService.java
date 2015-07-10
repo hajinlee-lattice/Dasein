@@ -17,6 +17,8 @@ public interface DellEbiFlowService {
     DataFlowContext getFile();
 
     String getOutputDir(DataFlowContext context);
+    
+    String getErrorOutputDir(DataFlowContext context);
 
     void registerFailedFile(DataFlowContext context);
 

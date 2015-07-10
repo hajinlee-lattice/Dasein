@@ -129,4 +129,12 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         }
         return false;
     }
+    
+    @Override
+    public String getErrorOutputDir(DataFlowContext context) {
+        if (isSmb(context)) {
+            return smbFileFlowService.getErrorOutputDir();
+        }
+        return localFileFlowService.getErrorOutputDir();
+    }
 }
