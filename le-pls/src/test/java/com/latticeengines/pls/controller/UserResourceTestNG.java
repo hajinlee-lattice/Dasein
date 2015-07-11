@@ -85,7 +85,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Test(groups = { "functional", "deployment" })
     public void validateNewUser() {
-        // Conflict with a user in the same tenant
         this.testConflictingUserInTenant();
         this.testConflictingUserOutsideTenant();
     }
@@ -185,6 +184,24 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertTrue(response.getBody().isSuccess());
 
         this.makeSureUserDoesNotExist(shortEmail);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = { "functional", "deployment" })
+    public void stringifiedUserName_updateAccessLevel_acessLevelSuccessfullyUpdated() {
+        User user = this.createTestUser(AccessLevel.EXTERNAL_USER);
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(user.getAccessLevel());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+
+        String url = this.getRestAPIHostPort() + "/pls/users/\"" + user.getUsername() + "\"";
+        ResponseEntity<ResponseDocument> response = this.restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
+                ResponseDocument.class);
+        assertTrue(response.getBody().isSuccess());
     }
 
     private UserRegistration createUserRegistration() {
@@ -297,24 +314,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
         AccessLevel resultLevel = this.userService.getAccessLevel(this.testTenant.getId(), user.getUsername());
         assertEquals(accessLevel, resultLevel);
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Test(groups = { "functional", "deployment" })
-    public void stringifiedUserName_updateAccessLevel_acessLevelSuccessfullyUpdated() {
-        User user = this.createTestUser(AccessLevel.EXTERNAL_USER);
-        UserUpdateData data = new UserUpdateData();
-        data.setAccessLevel(user.getAccessLevel());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
-
-        String url = this.getRestAPIHostPort() + "/pls/users/\"" + user.getUsername() + "\"";
-        ResponseEntity<ResponseDocument> response = this.restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
-                ResponseDocument.class);
-        assertTrue(response.getBody().isSuccess());
     }
 
     private void updateAccessLevelWithoutSufficientPrivilege(User user, AccessLevel accessLevel) {
