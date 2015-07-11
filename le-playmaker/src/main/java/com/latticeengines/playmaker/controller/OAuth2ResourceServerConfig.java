@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.resourceserver;
+package com.latticeengines.playmaker.controller;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;

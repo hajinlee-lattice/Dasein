@@ -9,7 +9,7 @@
 
     <import resource="classpath:playmaker-properties-context.xml" />
     <import resource="classpath:playmaker-persistence-context.xml" />
-    <import resource="classpath:oauth2-persistence-context.xml" />
+    <import resource="classpath:oauth2-db-persistence-context.xml" />
 
     <!-- <import resource="classpath:security-context.xml"/> -->
     <context:component-scan

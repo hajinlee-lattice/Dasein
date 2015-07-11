@@ -13,10 +13,8 @@
         <component-name>oauth2</component-name>
         <le.common.version>2.0.4-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.4-SNAPSHOT</le.domain.version>
-        <le.db.version>2.0.4-SNAPSHOT</le.db.version>
+        <le.oauth2.db.version>2.0.4-SNAPSHOT</le.oauth2.db.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
-        <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
-        <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
         <start-class>com.latticeengines.oauth2.authserver.OAuth2AuthorizationServerBoot</start-class>
         <java.version>1.7</java.version>
     </properties>
@@ -133,50 +131,10 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>le-oauth2-db</artifactId>
+            <version>${le.oauth2.db.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
-            <version>${spring.oauth2.version}</version>
-        </dependency>
+        
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>

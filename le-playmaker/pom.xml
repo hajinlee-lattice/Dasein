@@ -14,7 +14,7 @@
         <le.common.version>2.0.4-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.4-SNAPSHOT</le.domain.version>
         <le.db.version>2.0.4-SNAPSHOT</le.db.version>
-        <le.oauth2.version>2.0.4-SNAPSHOT</le.oauth2.version>
+        <le.oauth2.db.version>2.0.4-SNAPSHOT</le.oauth2.db.version>
         <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
         <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
         <spring.version>4.1.6.RELEASE</spring.version>
@@ -138,8 +138,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-oauth2</artifactId>
-            <version>${le.oauth2.version}</version>
+            <artifactId>le-oauth2-db</artifactId>
+            <version>${le.oauth2.db.version}</version>
         </dependency>
         <dependency>
             <groupId>com.mangofactory</groupId>

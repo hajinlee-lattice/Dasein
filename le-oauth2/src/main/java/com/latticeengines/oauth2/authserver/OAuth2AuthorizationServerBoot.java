@@ -21,12 +21,10 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
-import com.latticeengines.oauth2.common.service.impl.LatticeAuthenticationManager;
-
 @Configuration
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2-properties-context.xml" })
+@ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2-db-properties-context.xml" })
 public class OAuth2AuthorizationServerBoot extends SpringBootServletInitializer {
 
     @Override
