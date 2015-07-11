@@ -29,7 +29,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     private PalymakerTenantDao tenantDao;
 
     @Autowired
-    private OAuthUserEntityMgr users;
+    private OAuthUserEntityMgr userEngityMgr;
 
     @Value("${oauth2.password_expiration_days}")
     private int passwordExpirationDays;
@@ -54,19 +54,20 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
         OAuthUser user = null;
         try {
-            user = users.get(tenant.getTenantName());
+            user = userEngityMgr.get(tenant.getTenantName());
         } catch (Exception ex) {
             log.info("OAuth user does not exist! userId=" + tenant.getTenantName());
         }
         if (user == null) {
             user = getNewOAuthUser(tenant);
-            users.create(user);
+            userEngityMgr.create(user);
         } else {
             log.info("Generating new password for tenant " + tenant.getTenantName());
             // Generate new password
             user.setPassword(generatePassword());
             user.setPasswordExpiration(getPasswordExpiration(tenant.getTenantName()));
-            users.update(user);
+            user.setPasswordExpired(false);
+            userEngityMgr.update(user);
         }
         tenant.setTenantPassword(user.getPassword());
 
@@ -110,7 +111,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
         if (tenant != null) {
             OAuthUser user = null;
             try {
-                user = users.get(tenantName);
+                user = userEngityMgr.get(tenantName);
             } catch (Exception ex) {
             }
             if (user != null) {
@@ -127,7 +128,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     @Transactional(value = "playmaker")
     public void deleteByTenantName(String tenantName) {
         tenantDao.deleteByTenantName(tenantName);
-        users.delete(tenantName);
+        userEngityMgr.delete(tenantName);
         log.info("Deleted the following tenantName=" + tenantName);
     }
 
@@ -140,7 +141,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
     @Override
     public String findTenantByTokenId(String tokenId) {
-        OAuthUser user = users.getByAccessToken(tokenId);
+        OAuthUser user = userEngityMgr.getByAccessToken(tokenId);
         if (user != null) {
             return user.getUserId();
         }
