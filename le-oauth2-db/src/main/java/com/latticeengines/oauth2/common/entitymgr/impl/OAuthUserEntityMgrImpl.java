@@ -14,45 +14,42 @@ import com.latticeengines.oauth2.common.entitymgr.OAuthUserEntityMgr;
 public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
 
     @Autowired
-    private OAuthUserDao users;
+    private OAuthUserDao userDao;
 
     private PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Override
     @Transactional(value = "oauth2")
     public OAuthUser get(String userId) {
-        return users.get(userId);
+        return userDao.get(userId);
     }
 
     @Override
     @Transactional(value = "oauth2")
     public void create(OAuthUser user) {
-        if (user != null) {
-            user = new OAuthUser(user);
-            user.setPassword(encoder.encode(user.getPassword()));
-        }
-        users.create(user);
+        user.setEncryptedPassword(encoder.encode(user.getPassword()));
+        userDao.create(user);
     }
 
     @Override
     @Transactional(value = "oauth2")
     public void delete(String userId) {
-        users.delete(userId);
+        userDao.delete(userId);
     }
 
     @Override
     @Transactional(value = "oauth2")
     public void update(OAuthUser user) {
-        OAuthUser newUser = new OAuthUser(user);
-        newUser.setPid(user.getPid());
-        newUser.setPassword(encoder.encode(user.getPassword()));
-        users.update(newUser);
+        if (user.getPassword() != null) {
+            user.setEncryptedPassword(encoder.encode(user.getPassword()));
+        }
+        userDao.update(user);
     }
 
     @Override
     @Transactional(value = "oauth2")
     public OAuthUser getByAccessToken(String token) {
-        OAuthUser user = users.getByAccessToken(token);
+        OAuthUser user = userDao.getByAccessToken(token);
         return user;
     }
 
