@@ -4,13 +4,13 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
-    <artifactId>le-oauth2-db</artifactId>
+    <artifactId>le-oauth2db</artifactId>
     <packaging>jar</packaging>
     <version>2.0.5-SNAPSHOT</version>
     <name>le-${component-name}</name>
 
     <properties>
-        <component-name>oauth2</component-name>
+        <component-name>oauth2db</component-name>
         <le.common.version>2.0.5-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.5-SNAPSHOT</le.domain.version>
         <le.db.version>2.0.5-SNAPSHOT</le.db.version>

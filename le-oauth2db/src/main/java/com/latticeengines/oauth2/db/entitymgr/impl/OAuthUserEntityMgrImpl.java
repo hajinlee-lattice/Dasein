@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.common.entitymgr.impl;
+package com.latticeengines.oauth2.db.entitymgr.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
-import com.latticeengines.oauth2.common.dao.OAuthUserDao;
-import com.latticeengines.oauth2.common.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2.db.dao.OAuthUserDao;
+import com.latticeengines.oauth2.db.entitymgr.OAuthUserEntityMgr;
 
 @Component("oAuthUserEntityMgr")
 public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {

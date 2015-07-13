@@ -44,12 +44,12 @@
             </props>
         </property>
     </bean>
-    
+
     <bean id="oAuthUserDao"
-        class="com.latticeengines.oauth2.common.dao.impl.OAuthUserDaoImpl">
+        class="com.latticeengines.oauth2.db.dao.impl.OAuthUserDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryOauth2" />
     </bean>
-    
+
     <bean id="transactionManager"
         class="org.springframework.orm.hibernate4.HibernateTransactionManager"
         p:sessionFactory-ref="sessionFactoryOauth2">

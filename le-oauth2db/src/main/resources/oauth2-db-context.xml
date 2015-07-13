@@ -8,7 +8,7 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
 
     <import resource="classpath:oauth2-db-persistence-context.xml" />
-    <context:component-scan base-package="com.latticeengines.oauth2.common">
+    <context:component-scan base-package="com.latticeengines.oauth2.db">
     </context:component-scan>
 
     <mvc:annotation-driven />
