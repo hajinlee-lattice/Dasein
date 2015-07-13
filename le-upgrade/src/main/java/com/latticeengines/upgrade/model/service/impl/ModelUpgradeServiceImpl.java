@@ -2,15 +2,17 @@ package com.latticeengines.upgrade.model.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.joda.time.format.DateTimeFormat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,6 +68,17 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
     private static final DateTimeFormatter FMT = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Map<String, String> modelNames = new HashMap<>();
+    private static final Set<String> originalUuids = new HashSet<>();
+
+    @Override
+    public Map<String, String> getUuidModelNameMap() {
+        return modelNames;
+    }
+
+    @Override
+    public Set<String> getLpUuidsBeforeUpgrade() {
+        return originalUuids;
+    }
 
     public void setInfos(List<BardInfo> infos) throws Exception {
         dlTenantName = "Unknown";
@@ -104,6 +117,10 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             }
             System.out.println("_______________________________________");
         }
+
+        System.out.print("Removing duplicated TenantModel information ... ");
+        tenantModelJdbcManager.removeDuplicatedTenantModelInfo();
+        System.out.println("OK");
     }
 
     private List<String> getActiveModelKeyList(String deploymentId) {
@@ -176,6 +193,10 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.print("Check if the modelsummary was generated in 1.4 ...");
         boolean in1_4 = plsMultiTenantJdbcManager.hasUuid(uuid);
         System.out.println(in1_4 ? "YES" : "NO");
+
+        if (in1_4) {
+            originalUuids.add(uuid);
+        }
 
         boolean toBeDeleted = exists && !in1_4;
         boolean toBeGenerated = active && !in1_4;

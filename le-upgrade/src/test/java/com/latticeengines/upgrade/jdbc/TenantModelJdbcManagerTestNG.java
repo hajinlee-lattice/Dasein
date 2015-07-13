@@ -37,6 +37,24 @@ public class TenantModelJdbcManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertTrue(tenantModelJdbcManager.modelIsActive(CUSTOMER, UUID));
         Assert.assertFalse(tenantModelJdbcManager.modelIsActive(CUSTOMER, java.util.UUID.randomUUID().toString()));
     }
+
+    @Test(groups = "functional")
+    public void testUpgradeSummary() {
+        tenantModelJdbcManager.removeUpgradeSummary(CUSTOMER);
+
+        Assert.assertFalse(tenantModelJdbcManager.hasBeenUpgraded(CUSTOMER),
+                "CUSTOMER should not have been upgrade initially.");
+
+        UpgradeSummary summary = new UpgradeSummary();
+        summary.tenantName = CUSTOMER;
+        summary.activeModelGuid = MODEL_GUID;
+
+        tenantModelJdbcManager.populateUpgradeSummary(summary);
+
+        Assert.assertTrue(tenantModelJdbcManager.hasBeenUpgraded(CUSTOMER), "CUSTOMER should be upgraded now.");
+
+        tenantModelJdbcManager.removeUpgradeSummary(CUSTOMER);
+    }
 }
 
 

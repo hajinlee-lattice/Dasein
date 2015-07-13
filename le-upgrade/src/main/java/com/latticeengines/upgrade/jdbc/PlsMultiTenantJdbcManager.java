@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
 @Component
@@ -33,6 +34,16 @@ public class PlsMultiTenantJdbcManager {
         }
     }
 
+    public Set<String> getModelGuidsForCustomer(String tenantName) {
+        List<String> ids = plsJdbcTemlate.queryForList("SELECT ID FROM " + MODEL_SUMMARY_TABLE
+                + " WHERE TenantName = \'" + tenantName + "\'", String.class);
+        Set<String> toReturn = new HashSet<>();
+        for (String id: ids) {
+            toReturn.add(YarnPathUtils.extractUuid(id));
+        }
+        return toReturn;
+    }
+
     public boolean hasUuid(String modelGuidOrUuid) {
         return uuids.contains(YarnPathUtils.extractUuid(modelGuidOrUuid));
     }
@@ -51,6 +62,12 @@ public class PlsMultiTenantJdbcManager {
                 + " WHERE ID LIKE \'%" + uuid + "%\' ORDER BY ID", String.class);
         if (ids.isEmpty()) return null;
         return ids.get(0);
+    }
+
+    public boolean isActive(String modelGuid) {
+        Integer status =  plsJdbcTemlate.queryForObject("SELECT Status FROM " + MODEL_SUMMARY_TABLE
+                + " WHERE ID = \'" + modelGuid + "\'", Integer.class);
+        return ModelSummaryStatus.ACTIVE.getStatusId() == status;
     }
 
     public void deleteModelSummariesByUuid(String modelId) {
