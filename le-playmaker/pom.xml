@@ -138,7 +138,7 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-oauth2-db</artifactId>
+            <artifactId>le-oauth2db</artifactId>
             <version>${le.oauth2.db.version}</version>
         </dependency>
         <dependency>

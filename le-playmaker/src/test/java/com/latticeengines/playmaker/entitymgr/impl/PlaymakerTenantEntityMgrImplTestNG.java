@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.oauth2.common.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2.db.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
