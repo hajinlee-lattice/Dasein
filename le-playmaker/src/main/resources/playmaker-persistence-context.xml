@@ -55,13 +55,4 @@
         class="com.latticeengines.playmaker.dao.impl.PlaymakerTenantDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPlaymaker" />
     </bean>
-
-    <bean id="oAuthUserDao"
-        class="com.latticeengines.oauth2db.dao.impl.OAuthUserDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPlaymaker" />
-    </bean>
-    
-    <bean id="oAuthUserEntityMgr"
-        class="com.latticeengines.oauth2db.entitymgr.impl.OAuthUserEntityMgrImpl">
-    </bean>
 </beans>
