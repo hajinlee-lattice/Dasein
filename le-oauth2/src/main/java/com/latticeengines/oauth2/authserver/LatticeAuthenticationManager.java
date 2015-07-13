@@ -3,8 +3,6 @@ package com.latticeengines.oauth2.authserver;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,9 +14,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.oauth.OAuthUser;
-import com.latticeengines.oauth2.common.entitymgr.OAuthUserEntityMgr;
-
+/**
+ * The AuthenticationManager used for the oauth password flow. This provides
+ * One-Time Key behavior.
+ */
 @Component
 public class LatticeAuthenticationManager implements AuthenticationManager {
 
