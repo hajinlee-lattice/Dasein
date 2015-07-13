@@ -8,13 +8,13 @@
     <description>Lattice Engines Data Platform REST API</description>
     
     <servlet>
-        <servlet-name>PropData</servlet-name>
+        <servlet-name>propdata</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>PropData</servlet-name>
+        <servlet-name>propdata</servlet-name>
         <url-pattern>/PropData/*</url-pattern>
     </servlet-mapping>
 
