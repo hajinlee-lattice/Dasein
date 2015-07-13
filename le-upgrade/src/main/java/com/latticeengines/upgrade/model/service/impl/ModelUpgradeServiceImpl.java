@@ -140,12 +140,8 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
         System.out.println("OK");
 
-        System.out.print("Moving models from tuple to singular ID ... ");
-        int nModels = yarnManager.moveModelsFromTupleToSingularId(customer);
-        System.out.println(String.format("OK. %02d models have been moved.", nModels));
-
         System.out.print("Moving models from singular to tuple ID ... ");
-        nModels = yarnManager.upsertModelsFromSingularToTupleId(customer);
+        int nModels = yarnManager.moveModelsFromSingularToTupleId(customer);
         System.out.println(String.format("OK. %02d models have been moved.", nModels));
 
         System.out.println("Fix model.json filenames ... ");

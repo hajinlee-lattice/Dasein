@@ -51,21 +51,17 @@ public class YarnManager {
         }
     }
 
-    public int upsertModelsFromSingularToTupleId(String customer) {
-        String srcRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
-        String destRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer);
+    public int moveModelsFromSingularToTupleId(String customer) {
+        List<String> modelJsonPaths = findAllModelPathsInSingularId(customer);
 
-        if (!hdfsPathExists(srcRoot)) {
-            throw new IllegalStateException(String.format("The source path %s does not exist.", srcRoot));
+        for (String jsonPath: modelJsonPaths) {
+            String uuid = YarnPathUtils.extractUuid(jsonPath);
+            String modelPathInSingular = findModelPathInSingular(customer, uuid);
+            String modelPathInTuple = YarnPathUtils.substituteByTupleId(modelPathInSingular);
+            copyHdfsToHdfs(modelPathInSingular, modelPathInTuple);
         }
 
-        if (hdfsPathExists(destRoot)) {
-            throw new IllegalStateException(String.format("The destination path %s already exists.", destRoot));
-        }
-
-        copyHdfsToHdfs(srcRoot, destRoot);
-
-        return findAllModelPathsInTuplerId(customer).size();
+        return modelJsonPaths.size();
     }
 
     public void fixModelNameInTupleId(String customer, String uuid) {
@@ -168,28 +164,6 @@ public class YarnManager {
         JsonNode json = readModelAsJson(customer, uuid);
         Long constructionTime = getTimestampFromModelJson(json);
         return new DateTime(constructionTime);
-    }
-
-    public int moveModelsFromTupleToSingularId(String customer) {
-        List<String> modelJsonPaths = findAllModelPathsInTuplerId(customer);
-
-        for (String jsonPath: modelJsonPaths) {
-            String uuid = YarnPathUtils.extractUuid(jsonPath);
-            String modelPathInTuple = findModelPathInTuple(customer, uuid);
-            String modelPathInSingular = YarnPathUtils.substituteBySingularId(modelPathInTuple);
-            copyHdfsToHdfs(modelPathInTuple, modelPathInSingular);
-        }
-
-        String destRoot = YarnPathUtils.constructTupleIdModelsRoot(customerBase, customer);
-        if (hdfsPathExists(destRoot)) {
-            try {
-                HdfsUtils.rmdir(yarnConfiguration, destRoot);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to cleanup models folder in TupleID path.", e);
-            }
-        }
-
-        return modelJsonPaths.size();
     }
 
     private boolean customerTupleIdPathExists(String customer) {

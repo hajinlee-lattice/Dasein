@@ -56,7 +56,7 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testUpsertModels() throws Exception {
-        yarnManager.upsertModelsFromSingularToTupleId(CUSTOMER);
+        yarnManager.moveModelsFromSingularToTupleId(CUSTOMER);
         String modelPath = YarnPathUtils.constructTupleIdModelsRoot(customerBase, CUSTOMER) + "/" + EVENT_TABLE + "/"
                 + UUID + "/" + CONTAINER_ID;
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelPath),
