@@ -7,7 +7,7 @@ var InternalUser = function() {
 
     this.testUserManagement = function() {
         describe('An internal user', function(){
-            it('should not see the hidden link', function () {
+            it('should be able to see the hidden link', function () {
                 loginPage.loginAsInternalUser();
                 userManagement.assertAdminLinkIsVisible(true);
                 loginPage.logout();

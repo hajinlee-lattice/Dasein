@@ -13,7 +13,8 @@ var SuperAdmin = function() {
                 loginPage.logout();
             });
 
-            it('should be able to add a new user, modify the user and then delete the user', function () {
+            var originalNumUsers;
+            it('should be able to add a new user', function () {
                 //==================================================
                 // Login
                 //==================================================
@@ -24,53 +25,57 @@ var SuperAdmin = function() {
                 //==================================================
                 userDropdown.toggleDropdown();
                 userDropdown.ManageUsersLink.click();
-                var expectedNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
-                browser.driver.sleep(500);
+                element.all(by.repeater('user in users')).count().then(function(userCount){
+                    browser.driver.sleep(500);
+                    originalNumUsers = userCount;
+                    //==================================================
+                    // Open add new user modal and add the user
+                    //==================================================
+                    userManagement.AddNewUserLink.click();
+                    userManagement.waitAndSleep();
+                    expect(element(by.css('#add-user-modal')).isPresent()).toBe(true);
+                    // verify number of roles in dropdown
+                    element(by.css('select')).click();
+                    expect(element.all(by.css('option')).count()).toBe(3);
+                    var testName = "0000" + userManagement.randomName(8);
+                    userManagement.createNewUser(testName);
+                    var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
+                    expect(originalNumUsers+1).toEqual(actualNumOfCurrentUsers);
+                    browser.driver.sleep(5000);
+                })
+            });
 
-                //==================================================
-                // Open add new user modal and add the user
-                //==================================================
-                userManagement.AddNewUserLink.click();
-                browser.waitForAngular();
-                browser.driver.sleep(500);
-                expect(element(by.css('#add-user-modal')).isPresent()).toBe(true);
-                // verify number of roles in dropdown
-                element(by.css('select')).click();
-                expect(element.all(by.css('option')).count()).toBe(3);
-                var testName = "0000" + userManagement.randomName(8);
-                userManagement.createNewUser(testName);
-                browser.driver.sleep(500);
-
+            it("should be able to modify the new user and then delete it", function () {
                 //==================================================
                 // Open edit user modal and edit the user
                 //==================================================
                 element.all(by.css('.js-edit-user-link')).first().click();
-                browser.driver.sleep(500);
-                expect(element(by.css('#edit-user-modal')).isPresent()).toBe(true);
+                userManagement.waitAndSleep();
+                var userModal = element(by.css('#edit-user-modal'));
+                expect(userModal.isPresent()).toBe(true);
                 // verify number of roles in dropdown
                 element(by.css('select')).click();
                 expect(element.all(by.css('option')).count()).toBeLessThan(4);
                 element(by.css('#edit-user-btn-save')).click();
-                browser.driver.sleep(500);
+                userManagement.waitAndSleep();
                 element(by.css('#edit-user-btn-ok')).click();
-                browser.driver.sleep(500);
-                expect(element(by.css('#edit-user-modal')).isPresent()).toBe(false);
+                userManagement.waitAndSleep();
+                expect(userModal.isPresent()).toBe(false);
 
                 //==================================================
                 // Find the created user and delete him
                 //==================================================
                 element.all(by.css('.js-delete-user-link')).first().click();
-                browser.driver.sleep(500);
+                userManagement.waitAndSleep();
                 element(by.css('#delete-user-modal button.btn-primary')).click();
-                browser.driver.sleep(500);
+                userManagement.waitAndSleep();
                 var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
-                expect(expectedNumOfCurrentUsers).toEqual(actualNumOfCurrentUsers);
+                expect(originalNumUsers).toEqual(actualNumOfCurrentUsers);
 
                 //==================================================
                 // Logout
                 //==================================================
                 loginPage.logout();
-                browser.driver.sleep(1000);
             });
 
             it('should be able to cancel adding a new user', function () {
@@ -84,25 +89,24 @@ var SuperAdmin = function() {
                 //==================================================
                 userDropdown.toggleDropdown();
                 userDropdown.ManageUsersLink.click();
-                var expectedNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
                 browser.driver.sleep(500);
 
                 //==================================================
                 // Open add new user modal and then click cancel
                 //==================================================
                 userManagement.AddNewUserLink.click();
+                userManagement.waitAndSleep();
                 expect(element(by.css('#add-user-modal')).isPresent()).toBe(true);
                 element(by.css('#add-user-btn-cancel')).click();
-                browser.driver.sleep(500);
+                userManagement.waitAndSleep();
                 var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
-                expect(expectedNumOfCurrentUsers).toEqual(actualNumOfCurrentUsers);
+                expect(originalNumUsers).toEqual(actualNumOfCurrentUsers);
 
 
                 //==================================================
                 // Logout
                 //==================================================
                 loginPage.logout();
-                browser.driver.sleep(1000);
             });
 
             it('should be able to cancel editing a user', function () {
@@ -122,10 +126,10 @@ var SuperAdmin = function() {
                 // Open edit user modal and cancel editing the user
                 //==================================================
                 element.all(by.css('.js-edit-user-link')).first().click();
-                browser.driver.sleep(500);
+                userManagement.waitAndSleep();
                 expect(element(by.css('#edit-user-modal')).isDisplayed()).toBe(true);
                 element(by.css('#edit-user-btn-cancel')).click();
-                browser.driver.sleep(500);
+                userManagement.waitAndSleep();
                 expect(element(by.css('#edit-user-modal')).isPresent()).toBe(false);
 
 
@@ -133,7 +137,6 @@ var SuperAdmin = function() {
                 // Logout
                 //==================================================
                 loginPage.logout();
-                browser.driver.sleep(1000);
             });
 
             it('should be able to cancel deleting a user', function () {
@@ -147,18 +150,17 @@ var SuperAdmin = function() {
                 //==================================================
                 userDropdown.toggleDropdown();
                 userDropdown.ManageUsersLink.click();
-                var expectedNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
                 browser.driver.sleep(500);
 
                 //==================================================
                 // Find the first user, click the delete icon and then click No
                 //==================================================
                 element.all(by.css('.js-delete-user-link')).first().click();
-                browser.driver.sleep(500);
+                userManagement.waitAndSleep();
                 element(by.css('#delete-user-modal button.btn-secondary')).click();
-                browser.driver.sleep(500);
+                userManagement.waitAndSleep();
                 var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
-                expect(expectedNumOfCurrentUsers).toEqual(actualNumOfCurrentUsers);
+                expect(originalNumUsers).toEqual(actualNumOfCurrentUsers);
                 expect(element(by.css('#delete-user-modal')).isPresent()).toBe(false);
 
 
@@ -166,9 +168,7 @@ var SuperAdmin = function() {
                 // Logout
                 //==================================================
                 loginPage.logout();
-                browser.driver.sleep(1000);
             });
-
         });
     };
 

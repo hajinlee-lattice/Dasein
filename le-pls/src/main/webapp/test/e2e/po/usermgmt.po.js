@@ -32,7 +32,7 @@ var UserManagement = function() {
         expect(element(by.css("#add-user-btn-ok")).isPresent()).toBe(true);
         element(by.css('#add-user-btn-ok')).click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        browser.driver.sleep(1500);
     };
 
     this.assertAdminLinkIsVisible = function(expected) {
@@ -46,7 +46,12 @@ var UserManagement = function() {
         } else {
             expect(element(by.linkText('Admin')).isPresent()).toBe(expected);
         }
-    }
+    };
+    
+    this.waitAndSleep = function() {
+        browser.waitForAngular();
+        browser.driver.sleep(5000);
+    };
 };
 
 module.exports = new UserManagement();
