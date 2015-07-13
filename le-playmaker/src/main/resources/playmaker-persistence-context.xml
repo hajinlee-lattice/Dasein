@@ -57,11 +57,11 @@
     </bean>
 
     <bean id="oAuthUserDao"
-        class="com.latticeengines.oauth2.db.dao.impl.OAuthUserDaoImpl">
+        class="com.latticeengines.oauth2db.dao.impl.OAuthUserDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPlaymaker" />
     </bean>
     
     <bean id="oAuthUserEntityMgr"
-        class="com.latticeengines.oauth2.db.entitymgr.impl.OAuthUserEntityMgrImpl">
+        class="com.latticeengines.oauth2db.entitymgr.impl.OAuthUserEntityMgrImpl">
     </bean>
 </beans>

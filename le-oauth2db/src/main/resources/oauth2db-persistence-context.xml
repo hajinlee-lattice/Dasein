@@ -46,7 +46,7 @@
     </bean>
 
     <bean id="oAuthUserDao"
-        class="com.latticeengines.oauth2.db.dao.impl.OAuthUserDaoImpl">
+        class="com.latticeengines.oauth2db.dao.impl.OAuthUserDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryOauth2" />
     </bean>
 

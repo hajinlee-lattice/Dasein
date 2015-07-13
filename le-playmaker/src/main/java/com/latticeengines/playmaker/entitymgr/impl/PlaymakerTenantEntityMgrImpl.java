@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.oauth2.db.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.playmaker.dao.PlaymakerTenantDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 

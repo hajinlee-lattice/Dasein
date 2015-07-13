@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.db.entitymgr;
+package com.latticeengines.oauth2db.entitymgr;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 

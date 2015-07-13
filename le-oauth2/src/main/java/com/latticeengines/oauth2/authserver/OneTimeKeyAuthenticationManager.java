@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
-import com.latticeengines.oauth2.db.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.entitymgr.OAuthUserEntityMgr;
 
 /**
  * The AuthenticationManager used for the oauth password flow. This provides

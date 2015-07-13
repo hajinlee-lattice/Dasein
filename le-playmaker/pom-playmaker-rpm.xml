@@ -29,7 +29,7 @@
             <properties>
                 <playmaker.properties.path>conf/env/qacluster</playmaker.properties.path>
                 <oauth2.properties.path>
-                    ../le-oauth2-db/conf/env/qacluster
+                    ../le-oauth2db/conf/env/qacluster
                 </oauth2.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
@@ -45,7 +45,7 @@
             <properties>
                 <playmaker.properties.path>conf/env/prodcluster</playmaker.properties.path>
                 <oauth2.properties.path>
-                    ../le-oauth2-db/conf/env/prodcluster
+                    ../le-oauth2db/conf/env/prodcluster
                 </oauth2.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>

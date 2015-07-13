@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.db.dao.impl;
+package com.latticeengines.oauth2db.dao.impl;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
-import com.latticeengines.oauth2.db.dao.OAuthUserDao;
+import com.latticeengines.oauth2db.dao.OAuthUserDao;
 
 public class OAuthUserDaoImpl extends BaseDaoImpl<OAuthUser> implements OAuthUserDao {
 

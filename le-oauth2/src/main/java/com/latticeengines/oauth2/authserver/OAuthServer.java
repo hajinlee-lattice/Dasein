@@ -24,7 +24,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 @Configuration
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2-db-properties-context.xml" })
+@ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2db-properties-context.xml" })
 public class OAuthServer extends SpringBootServletInitializer {
 
     @Override

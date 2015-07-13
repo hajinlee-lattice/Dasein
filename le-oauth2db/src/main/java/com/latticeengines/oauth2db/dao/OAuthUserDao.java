@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.db.dao;
+package com.latticeengines.oauth2db.dao;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 
