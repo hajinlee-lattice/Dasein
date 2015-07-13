@@ -15,7 +15,7 @@
         <le.domain.version>2.0.4-SNAPSHOT</le.domain.version>
         <le.oauth2.db.version>2.0.4-SNAPSHOT</le.oauth2.db.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
-        <start-class>com.latticeengines.oauth2.authserver.OAuth2AuthorizationServerBoot</start-class>
+        <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
         <java.version>1.7</java.version>
     </properties>
 

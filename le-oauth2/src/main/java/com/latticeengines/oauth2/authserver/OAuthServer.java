@@ -25,20 +25,20 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2-db-properties-context.xml" })
-public class OAuth2AuthorizationServerBoot extends SpringBootServletInitializer {
+public class OAuthServer extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(OAuth2AuthorizationServerBoot.class);
+        return application.sources(OAuthServer.class);
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(OAuth2AuthorizationServerBoot.class, args);
+        SpringApplication.run(OAuthServer.class, args);
     }
 
     @Configuration
     @EnableAuthorizationServer
-    protected static class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+    protected static class ServerConfig extends AuthorizationServerConfigurerAdapter {
 
         @Resource(name = "dataSourceOauth2")
         private DataSource dataSource;

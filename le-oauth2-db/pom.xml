@@ -17,7 +17,6 @@
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
         <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
-        <start-class>com.latticeengines.oauth2.authserver.OAuth2AuthorizationServerBoot</start-class>
         <java.version>1.7</java.version>
     </properties>
 

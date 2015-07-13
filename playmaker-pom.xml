@@ -29,8 +29,8 @@
         <module>le-common</module>
         <module>le-domain</module>
         <module>le-db</module>
-        <module>le-oauth2</module>
         <module>le-oauth2-db</module>
+        <module>le-oauth2</module>
         <module>le-playmaker</module>
     </modules>
 
