@@ -49,7 +49,7 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
             Date today = responseContextForTransformaton.getProperty(PropDataMadisonService.TODAY_KEY, Date.class);
             PropDataContext requestContextForUpload = new PropDataContext();
             requestContextForUpload.setProperty(PropDataMadisonService.TODAY_KEY, today);
-            PropDataContext responseContextForUpload = propDataMadisonService.exportToDB(requestContextForUpload);
+            propDataMadisonService.exportToDB(requestContextForUpload);
 
             long endTime = System.currentTimeMillis();
             log.info("Finished! Eclipsed time="
