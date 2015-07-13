@@ -44,7 +44,7 @@ public class OAuth2AuthorizationServerBoot extends SpringBootServletInitializer 
         private DataSource dataSource;
 
         @Autowired
-        private LatticeAuthenticationManager authenticationManager;
+        private OneTimeKeyAuthenticationManager authenticationManager;
 
         @Bean
         public JdbcTokenStore tokenStore() {

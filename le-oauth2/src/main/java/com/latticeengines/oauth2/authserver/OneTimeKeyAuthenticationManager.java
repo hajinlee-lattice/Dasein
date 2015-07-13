@@ -19,14 +19,14 @@ import org.springframework.stereotype.Component;
  * One-Time Key behavior.
  */
 @Component
-public class LatticeAuthenticationManager implements AuthenticationManager {
+public class OneTimeKeyAuthenticationManager implements AuthenticationManager {
 
     @Autowired
     private OAuthUserEntityMgr users;
 
     private PasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public LatticeAuthenticationManager() {
+    public OneTimeKeyAuthenticationManager() {
     }
 
     @Override
