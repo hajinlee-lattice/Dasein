@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2.common.entitymgr.OAuthUserEntityMgr;
-import com.latticeengines.playmaker.dao.PalymakerTenantDao;
+import com.latticeengines.playmaker.dao.PlaymakerTenantDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 @Component("playmakerTenantEntityMgr")
@@ -26,7 +26,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     private final Log log = LogFactory.getLog(this.getClass());
 
     @Autowired
-    private PalymakerTenantDao tenantDao;
+    private PlaymakerTenantDao tenantDao;
 
     @Autowired
     private OAuthUserEntityMgr userEngityMgr;

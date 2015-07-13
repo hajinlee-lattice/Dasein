@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.playmaker.entitymgr.impl.JdbcTempalteFactoryImpl;
+import com.latticeengines.playmaker.entitymgr.impl.JdbcTemplateFactoryImpl;
 
 @Aspect
 public class RecommendationRetryAspect {
@@ -18,7 +18,7 @@ public class RecommendationRetryAspect {
     public static Log log = LogFactory.getLog(RecommendationRetryAspect.class);
 
     @Autowired
-    private JdbcTempalteFactoryImpl templateFactory;
+    private JdbcTemplateFactoryImpl templateFactory;
 
     @Around("execution(public * com.latticeengines.playmaker.entitymgr.impl.PlaymakerRecommendationEntityMgrImpl.*(..)) && args(tenantName, ..)")
     public Object playMakerRecommendationApiRetry(ProceedingJoinPoint joinPoint, String tenantName) throws Throwable {

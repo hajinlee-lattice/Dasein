@@ -8,9 +8,9 @@ import org.hibernate.Session;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.playmaker.dao.PalymakerTenantDao;
+import com.latticeengines.playmaker.dao.PlaymakerTenantDao;
 
-public class PlaymakerTenantDaoImpl extends BaseDaoImpl<PlaymakerTenant> implements PalymakerTenantDao {
+public class PlaymakerTenantDaoImpl extends BaseDaoImpl<PlaymakerTenant> implements PlaymakerTenantDao {
 
     @Override
     protected Class<PlaymakerTenant> getEntityClass() {

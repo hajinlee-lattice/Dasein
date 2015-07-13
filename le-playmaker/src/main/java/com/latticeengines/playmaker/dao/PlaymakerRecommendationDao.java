@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.db.exposed.dao.GenericDao;
 
-public interface PalymakerRecommendationDao extends GenericDao {
+public interface PlaymakerRecommendationDao extends GenericDao {
 
     List<Map<String, Object>> getRecommendations(long start, int offset, int maximum);
 

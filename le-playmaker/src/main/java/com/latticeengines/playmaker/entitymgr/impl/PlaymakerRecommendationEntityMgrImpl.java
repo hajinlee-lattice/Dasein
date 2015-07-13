@@ -8,19 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.playmaker.dao.impl.PalymakerRecommendationDaoImpl;
+import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImpl;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 
 @Component("playmakerRecommendationEntityMgr")
 public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommendationEntityMgr {
 
     @Autowired
-    private JdbcTempalteFactoryImpl templateFactory;
+    private JdbcTemplateFactoryImpl templateFactory;
 
     @Override
     public Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         List<Map<String, Object>> recommendations = dao.getRecommendations(start, offset, maximum);
         Map<String, Object> result = wrapResult(recommendations);
@@ -30,7 +30,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public Map<String, Object> getRecommendationCount(String tenantName, long start) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
         Map<String, Object> result = new HashMap<>();
         result.put(COUNT_KEY, dao.getRecommendationCount(start));
         return result;
@@ -39,7 +39,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         List<Map<String, Object>> plays = dao.getPlays(start, offset, maximum);
         Map<String, Object> result = wrapResult(plays);
@@ -49,7 +49,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public Map<String, Object> getPlayCount(String tenantName, long start) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         Map<String, Object> result = new HashMap<>();
         result.put(COUNT_KEY, dao.getPlayCount(start));
@@ -59,7 +59,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public Map<String, Object> getAccountextensions(String tenantName, long start, int offset, int maximum) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         List<Map<String, Object>> extensions = dao.getAccountExtensions(start, offset, maximum);
         Map<String, Object> result = wrapResult(extensions);
@@ -69,7 +69,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public Map<String, Object> getAccountextensionCount(String tenantName, long start) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         Map<String, Object> result = new HashMap<>();
         result.put(COUNT_KEY, dao.getAccountExtensionCount(start));
@@ -79,7 +79,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public List<Map<String, Object>> getAccountExtensionSchema(String tenantName) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         List<Map<String, Object>> schemas = dao.getAccountExtensionSchema();
         return schemas;
@@ -88,7 +88,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         List<Map<String, Object>> values = dao.getPlayValues(start, offset, maximum);
         Map<String, Object> result = wrapResult(values);
@@ -98,7 +98,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public Map<String, Object> getPlayValueCount(String tenantName, long start) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
-        PalymakerRecommendationDaoImpl dao = new PalymakerRecommendationDaoImpl(namedJdbcTemplate);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
         Map<String, Object> result = new HashMap<>();
         result.put(COUNT_KEY, dao.getPlayValueCount(start));

@@ -16,7 +16,7 @@ import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Component("JdbcTempalteFactory")
-public class JdbcTempalteFactoryImpl implements JdbcTempalteFactory {
+public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
 
     private Map<String, NamedParameterJdbcTemplate> jdbcTempates = new HashMap<>();
 

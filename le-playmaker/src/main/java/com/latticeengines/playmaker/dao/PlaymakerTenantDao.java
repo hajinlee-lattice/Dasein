@@ -3,7 +3,7 @@ package com.latticeengines.playmaker.dao;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 
-public interface PalymakerTenantDao extends BaseDao<PlaymakerTenant> {
+public interface PlaymakerTenantDao extends BaseDao<PlaymakerTenant> {
 
     PlaymakerTenant findByTenantName(String tenantName);
 

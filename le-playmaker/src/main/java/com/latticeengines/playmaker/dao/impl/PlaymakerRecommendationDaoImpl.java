@@ -12,11 +12,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
-import com.latticeengines.playmaker.dao.PalymakerRecommendationDao;
+import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 
-public class PalymakerRecommendationDaoImpl extends BaseGenericDaoImpl implements PalymakerRecommendationDao {
+public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
 
-    public PalymakerRecommendationDaoImpl(NamedParameterJdbcTemplate namedJdbcTemplate) {
+    public PlaymakerRecommendationDaoImpl(NamedParameterJdbcTemplate namedJdbcTemplate) {
         super(namedJdbcTemplate);
     }
 
