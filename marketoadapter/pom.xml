@@ -5,6 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>marketoadapter</artifactId>
     <packaging>war</packaging>
+	<scm>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+	</scm>
+
     <name>${component-name}</name>
 
     <properties>
