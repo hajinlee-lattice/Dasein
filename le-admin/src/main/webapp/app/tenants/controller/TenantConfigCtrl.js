@@ -98,9 +98,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         $scope.spaceInfo = {
             properties: {
                 displayName: "LPA_" + $scope.tenantId,
-                description: "A LPA solution for " + $scope.tenantId + " in " + $scope.contractId,
-                product: $scope.availableProducts[0],
-                topology: $scope.availableTopologies[0]
+                description: "A LPA solution for " + $scope.tenantId + " in " + $scope.contractId
             },
             featureFlags: ""
         };
