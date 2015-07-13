@@ -70,12 +70,12 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     public void setInfos(List<BardInfo> infos) throws Exception {
         dlTenantName = "Unknown";
         for (BardInfo bardInfo : infos) {
-            if (bardInfo.getDisplayName().equals(BARD_DB)) {
+            if (bardInfo.getDisplayName().endsWith(BARD_DB)) {
                 bardDB = bardInfo.getName();
                 System.out.println("BardDB: " + bardDB);
                 instance = bardInfo.getInstance();
                 System.out.println("instance: " + instance);
-            } else if (bardInfo.getDisplayName().equals(VISIDB_DL)) {
+            } else if (bardInfo.getDisplayName().endsWith(VISIDB_DL)) {
                 String settings = bardInfo.getSettings();
                 JsonNode parentNode = new ObjectMapper().readTree(settings);
                 for (JsonNode node : parentNode) {
@@ -99,7 +99,8 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
                 List<String> activeModelKeyList = getActiveModelKeyList(deploymentId);
                 populateTenantModelInfo(activeModelKeyList);
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                System.out.println("Error: ");
+                e.printStackTrace();
             }
             System.out.println("_______________________________________");
         }

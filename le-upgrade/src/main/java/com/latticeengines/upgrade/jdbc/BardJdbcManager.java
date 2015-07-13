@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -33,8 +34,8 @@ public class BardJdbcManager {
     private String useTestAddress;
 
     private String getHostAddress(String instance) {
-        if(Boolean.valueOf(useTestAddress.toLowerCase()))
-            return "10.41.1.250:1433";
+        if(StringUtils.isNotEmpty(useTestAddress))
+            return useTestAddress.toLowerCase();
         String hostAddr = SQLServer200;
         if (instance.equals("SQL100")) {
             hostAddr = SQLServer100;
@@ -58,12 +59,6 @@ public class BardJdbcManager {
             activeModelKeys.add(subNode.asText());
         }
         return activeModelKeys;
-    }
-
-    public String getModelContent(String activeModelKey) throws Exception {
-        String encryptedModelContent = bardJdbcTemplate.queryForObject(
-                "select value from KeyValueStore where [Key] = '" + activeModelKey + "'", String.class);
-        return ModelDecryptor.decrypt(encryptedModelContent);
     }
 
 }
