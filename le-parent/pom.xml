@@ -5,12 +5,6 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-parent</artifactId>
     <packaging>pom</packaging>
-	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
-	</scm>
-
     <version>2.0.5-SNAPSHOT</version>
     <name>le-parent</name>
     <description>Parent of all lattice engine maven projects.</description>
