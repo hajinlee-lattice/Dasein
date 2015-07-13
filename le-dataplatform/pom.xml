@@ -18,7 +18,7 @@
         <le.common.version>2.0.5-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.5-SNAPSHOT</le.domain.version>
         <le.scheduler.version>2.0.5-SNAPSHOT</le.scheduler.version>
-        <le.eai.version>2.0.4-SNAPSHOT</le.eai.version>
+        <le.eai.version>2.0.5-SNAPSHOT</le.eai.version>
         <le.camille.version>2.0.5-SNAPSHOT</le.camille.version>
         <le.monitor.version>2.0.5-SNAPSHOT</le.monitor.version>
         <le.remote.version>2.0.5-SNAPSHOT</le.remote.version>
