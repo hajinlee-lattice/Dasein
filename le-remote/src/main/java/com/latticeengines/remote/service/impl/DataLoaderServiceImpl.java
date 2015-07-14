@@ -437,9 +437,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     private String callDLRestService(String dlUrl, String endpoint, Object payload) throws IOException {
-        if (!dlUrl.endsWith(DL_REST_SERVICE)) {
-            dlUrl += DL_REST_SERVICE;
-        }
+        if (dlUrl.endsWith("/")) dlUrl = dlUrl.substring(0, dlUrl.length() - 1);
+        if (!dlUrl.endsWith(DL_REST_SERVICE)) dlUrl += DL_REST_SERVICE;
 
         if (payload instanceof String) {
             return HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
