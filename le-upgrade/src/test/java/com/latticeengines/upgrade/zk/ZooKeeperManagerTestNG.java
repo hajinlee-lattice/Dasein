@@ -7,18 +7,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.upgrade.functionalframework.UpgradeFunctionalTestNGBase;
 
 public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
@@ -78,6 +84,14 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertEquals(newSpaceConfig.getProduct(), LatticeProduct.LPA);
     }
 
+    @Test(groups = "functional", dependsOnMethods = "registerTenant",  dataProvider = "crmCredentialProvider")
+    public void uploadCredentials(CRMTopology topology, String crmType, Boolean isProduction) throws Exception {
+        zooKeeperManager.uploadCrmCredentials(CUSTOMER, topology);
+        checkCrmCredential(crmType, getCredential(crmType, CUSTOMER, isProduction));
+        checkCrmCredential(crmType, getCredential(crmType, TUPLE_ID, isProduction));
+        removeCredentials(crmType, CUSTOMER, isProduction);
+    }
+
     @Test(groups = "functional", dependsOnMethods = "registerTenant")
     public void setBootstrapState() throws Exception {
         zooKeeperManager.setBootstrapStateToMigrate(CUSTOMER);
@@ -89,5 +103,62 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
             BootstrapState state = batonService.getTenantServiceBootstrapState(CUSTOMER, CUSTOMER, SPACE, component);
             Assert.assertEquals(state.state, BootstrapState.State.MIGRATED);
         }
+    }
+
+    private CrmCredential getCredential(String crmType, String tenantId, Boolean isProduction) throws Exception {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+
+        Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId());
+        docPath = addExtraPath(crmType, docPath, isProduction);
+
+        Camille camille = CamilleEnvironment.getCamille();
+        Document doc = camille.get(docPath);
+        CrmCredential crmCredential = JsonUtils.deserialize(doc.getData(), CrmCredential.class);
+        crmCredential.setPassword(CipherUtils.decrypt(crmCredential.getPassword()));
+
+        return crmCredential;
+    }
+
+    private void removeCredentials(String crmType, String tenantId, Boolean isProduction) throws Exception {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+
+        Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId());
+        docPath = addExtraPath(crmType, docPath, isProduction);
+
+        Camille camille = CamilleEnvironment.getCamille();
+        if (camille.exists(docPath)) camille.delete(docPath);
+    }
+
+    private Path addExtraPath(String crmType, Path docPath, Boolean isProduction) {
+        docPath = docPath.append(crmType);
+        if (crmType.equalsIgnoreCase("sfdc")) {
+            docPath = docPath.append(isProduction ? "Production" : "Sandbox");
+        }
+        return docPath;
+    }
+
+    private void checkCrmCredential(String crmType, CrmCredential crmCredential) {
+        Assert.assertNotNull(crmCredential, "Should be able to find credential in ZK.");
+        if (crmType.equalsIgnoreCase("marketo")) {
+            Assert.assertNotNull(crmCredential.getUrl(), "Marketo credential should have url.");
+        }
+        if (crmType.equalsIgnoreCase("eloqua")) {
+            Assert.assertNotNull(crmCredential.getCompany(), "Eloqua credential should have company.");
+        }
+        if (crmType.equalsIgnoreCase("sfdc")) {
+            Assert.assertNotNull(crmCredential.getSecurityToken(), "SFDC credential should have security token.");
+        }
+    }
+
+    @DataProvider(name = "crmCredentialProvider")
+    public static Object[][] getCrmCredentialProvider() {
+        return new Object[][] { //
+                { CRMTopology.MARKETO, "marketo", true },
+                { CRMTopology.ELOQUA, "eloqua", true },
+//                { CRMTopology.SFDC, "sfdc", true },
+//                { CRMTopology.SFDC, "sfdc", false },
+        };
     }
 }

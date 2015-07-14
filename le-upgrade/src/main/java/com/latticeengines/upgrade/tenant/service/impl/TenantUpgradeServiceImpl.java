@@ -45,6 +45,10 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
         zooKeeperManager.uploadSpaceConfiguration(customer, spaceConfiguration);
         System.out.println("OK");
 
+        System.out.print("Upload CRM credentials to ZK ... ");
+        zooKeeperManager.uploadCrmCredentials(customer, spaceConfiguration.getTopology());
+        System.out.println("OK");
+
         System.out.print("Set Bootstrap stat to MIGRATED ... ");
         zooKeeperManager.setBootstrapStateToMigrate(customer);
         System.out.println("OK");

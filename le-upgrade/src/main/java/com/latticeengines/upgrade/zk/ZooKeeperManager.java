@@ -16,14 +16,19 @@ import com.latticeengines.camille.exposed.CamilleTransaction;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.CrmCredential;
 
 @Component
 public class ZooKeeperManager {
@@ -37,6 +42,10 @@ public class ZooKeeperManager {
 
     private static String podId;
     private static Camille camille;
+    private static CrmCredential marketoCredential;
+    private static CrmCredential eloquaCredential;
+    private static CrmCredential sfdcCredential;
+    private static CrmCredential sfdcsandboxCredential;
 
     @Autowired
     private BatonService batonService;
@@ -45,6 +54,36 @@ public class ZooKeeperManager {
     private void readCamilleEnvironment() {
         podId = CamilleEnvironment.getPodId();
         camille = CamilleEnvironment.getCamille();
+    }
+
+    @PostConstruct
+    private void setCrmCredentials() {
+        String password = "";
+        try {
+            password = CipherUtils.encrypt("password");
+        } catch (Exception e) {
+            //ignore
+        }
+
+        marketoCredential = new CrmCredential();
+        marketoCredential.setUserName(" ");
+        marketoCredential.setPassword(password);
+        marketoCredential.setUrl(" ");
+
+        eloquaCredential = new CrmCredential();
+        eloquaCredential.setUserName(" ");
+        eloquaCredential.setPassword(password);
+        eloquaCredential.setCompany(" ");
+
+        sfdcCredential = new CrmCredential();
+        sfdcCredential.setUserName(" ");
+        sfdcCredential.setPassword(password);
+        sfdcCredential.setSecurityToken("security-token");
+
+        sfdcsandboxCredential = new CrmCredential();
+        sfdcsandboxCredential.setUserName(" ");
+        sfdcsandboxCredential.setPassword(password);
+        sfdcsandboxCredential.setSecurityToken("security-token");
     }
 
     public void registerTenantIfNotExist(String tenantId) {
@@ -68,6 +107,16 @@ public class ZooKeeperManager {
         batonService.loadDirectory(spaceConfig.toDocumentDirectory(), spaceConfigPath);
     }
 
+    public void uploadCrmCredentials(String tenantId, CRMTopology topology) {
+        if (topology.equals(CRMTopology.MARKETO)) {
+            writeAsCredential("marketo", tenantId, true, marketoCredential);
+        }
+
+        if (topology.equals(CRMTopology.ELOQUA)) {
+            writeAsCredential("eloqua", tenantId, true, eloquaCredential);
+        }
+    }
+
     public void setBootstrapStateToMigrate(String tenantId) {
         CustomerSpace space = CustomerSpace.parse(tenantId);
         Path servicesPath = PathBuilder.buildCustomerSpaceServicesPath(podId, space);
@@ -87,4 +136,27 @@ public class ZooKeeperManager {
         }
     }
 
+    private void writeAsCredential(String crmType, String tenantId, Boolean isProduction, CrmCredential crmCredential) {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        Camille camille = CamilleEnvironment.getCamille();
+        Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
+                customerSpace.getTenantId(), customerSpace.getSpaceId());
+        docPath = addExtraPath(crmType, docPath, isProduction);
+        Document doc = new Document(JsonUtils.serialize(crmCredential));
+        try {
+            camille.upsert(docPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "Error inserting credential znodes for topology %s, customer %s",
+                    crmType, customerSpace.getTenantId()));
+        }
+    }
+
+    private Path addExtraPath(String crmType, Path docPath, Boolean isProduction) {
+        docPath = docPath.append(crmType);
+        if (crmType.equalsIgnoreCase("sfdc")) {
+            docPath = docPath.append(isProduction ? "Production" : "Sandbox");
+        }
+        return docPath;
+    }
 }
