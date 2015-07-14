@@ -111,11 +111,14 @@ public class ScoringProcessorCallable implements Callable<Long> {
         ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
                 .findLastStateByScoringCommand(scoringCommand);
         if (scoringCommandState == null) {
-            executeYarnStep(ScoringCommandStep.LOAD_DATA);
             scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
+            if (scoringCommand.getTotal() < 1) {
+                throw new LedpException(LedpCode.LEDP_200016);
+            }
+            executeYarnStep(ScoringCommandStep.LOAD_DATA);
         } else { // scoringCommand IN_PROGRESS
             String yarnApplicationId;
-            if((yarnApplicationId = scoringCommandState.getYarnApplicationId()) == null)
+            if ((yarnApplicationId = scoringCommandState.getYarnApplicationId()) == null)
                 return;
             JobStatus jobStatus = jobService.getJobStatus(yarnApplicationId);
             saveScoringCommandStateFromJobStatus(scoringCommandState, jobStatus);
@@ -133,10 +136,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
     private void executeStep(ScoringStepProcessor scoringCommandProcessor, ScoringCommandStep scoringCommandStep) {
         long start = System.currentTimeMillis();
-        scoringCommandLogService.logBeginStep(scoringCommand, scoringCommandStep);
-        ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, scoringCommandStep);
-        scoringCommandState.setStatus(FinalApplicationStatus.UNDEFINED);
-        scoringCommandStateEntityMgr.create(scoringCommandState);
+        ScoringCommandState scoringCommandState = initExecutionStep(scoringCommandStep);
 
         scoringCommandProcessor.executeStep(scoringCommand);
 
@@ -147,16 +147,23 @@ public class ScoringProcessorCallable implements Callable<Long> {
     }
 
     private void executeYarnStep(ScoringCommandStep scoringCommandStep) {
-        scoringCommandLogService.logBeginStep(scoringCommand, scoringCommandStep);
-        ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, scoringCommandStep);
-        scoringCommandState.setStatus(FinalApplicationStatus.UNDEFINED);
-        scoringCommandStateEntityMgr.create(scoringCommandState);
+        ScoringCommandState scoringCommandState = initExecutionStep(scoringCommandStep);
+
         ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, scoringCommandStep);
+
         String appIdString = appId.toString();
         scoringCommandLogService.logYarnAppId(scoringCommand, appIdString, scoringCommandStep);
         JobStatus jobStatus = jobService.getJobStatus(appIdString);
         saveScoringCommandStateFromJobStatus(scoringCommandStateEntityMgr.findByKey(scoringCommandState), jobStatus);
 
+    }
+
+    private ScoringCommandState initExecutionStep(ScoringCommandStep scoringCommandStep) {
+        scoringCommandLogService.logBeginStep(scoringCommand, scoringCommandStep);
+        ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, scoringCommandStep);
+        scoringCommandState.setStatus(FinalApplicationStatus.UNDEFINED);
+        scoringCommandStateEntityMgr.create(scoringCommandState);
+        return scoringCommandState;
     }
 
     private void saveScoringCommandStateFromJobStatus(ScoringCommandState scoringCommandState, JobStatus jobStatus) {
@@ -170,7 +177,8 @@ public class ScoringProcessorCallable implements Callable<Long> {
     }
 
     private void handleAllJobsSucceeded() {
-        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr.findLastStateByScoringCommand(scoringCommand);
+        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
+                .findLastStateByScoringCommand(scoringCommand);
         scoringCommandLogService.logCompleteStep(scoringCommand, scoringCommandState.getScoringCommandStep(),
                 ScoringCommandStatus.SUCCESS);
         ScoringCommandStep nextScoringCommandStep = scoringCommandState.getScoringCommandStep().getNextStep();
@@ -190,33 +198,42 @@ public class ScoringProcessorCallable implements Callable<Long> {
     String handleJobFailed(String failedYarnApplicationId) {
         ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
                 .findLastStateByScoringCommand(scoringCommand);
-        scoringCommandLogService.logCompleteStep(scoringCommand, scoringCommandState.getScoringCommandStep(),
-                ScoringCommandStatus.FAIL);
-        scoringCommandState.setStatus(FinalApplicationStatus.FAILED);
-        scoringCommandStateEntityMgr.update(scoringCommandState);
+        setJobFailed(scoringCommandState);
+        if (scoringCommandState != null) {
+            StringBuilder clientUrl = new StringBuilder(appTimeLineWebAppAddress);
+            if (failedYarnApplicationId != null) {
+                clientUrl.append("/app/").append(failedYarnApplicationId);
+                scoringCommandLogService.log(scoringCommand, "Failed job link: " + clientUrl.toString());
+            }
+
+            List<BasicNameValuePair> details = new ArrayList<>();
+            details.add(new BasicNameValuePair("scoringCommandId", scoringCommand.getPid().toString()));
+            details.add(new BasicNameValuePair("yarnAppId", failedYarnApplicationId == null ? "None" : ""));
+            details.add(new BasicNameValuePair("deploymentExternalId", scoringCommand.getId()));
+            details.add(new BasicNameValuePair("failedStep", scoringCommandState.getScoringCommandStep()
+                    .getDescription()));
+            List<ScoringCommandLog> logs = scoringCommandLogService.findByScoringCommand(scoringCommand);
+            if (!logs.isEmpty()) {
+                for (ScoringCommandLog scoringCommandLog : logs) {
+                    details.add(new BasicNameValuePair("scoringCommandLogId" + scoringCommandLog.getPid(), scoringCommandLog
+                            .getMessage()));
+                }
+            }
+
+            return alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(), details);
+        } else
+            return "";
+    }
+
+    private void setJobFailed(ScoringCommandState scoringCommandState) {
+        if (scoringCommandState != null) {
+            scoringCommandLogService.logCompleteStep(scoringCommand, scoringCommandState.getScoringCommandStep(),
+                    ScoringCommandStatus.FAIL);
+            scoringCommandState.setStatus(FinalApplicationStatus.FAILED);
+            scoringCommandStateEntityMgr.update(scoringCommandState);
+        }
 
         scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
         scoringCommandEntityMgr.update(scoringCommand);
-
-        StringBuilder clientUrl = new StringBuilder(appTimeLineWebAppAddress);
-        if (failedYarnApplicationId != null) {
-            clientUrl.append("/app/").append(failedYarnApplicationId);
-            scoringCommandLogService.log(scoringCommand, "Failed job link: " + clientUrl.toString());
-        }
-
-        List<BasicNameValuePair> details = new ArrayList<>();
-        details.add(new BasicNameValuePair("commandId", scoringCommand.getPid().toString()));
-        details.add(new BasicNameValuePair("yarnAppId", failedYarnApplicationId == null ? "None" : ""));
-        details.add(new BasicNameValuePair("deploymentExternalId", scoringCommand.getId()));
-        details.add(new BasicNameValuePair("failedStep", scoringCommandState.getScoringCommandStep().getDescription()));
-        List<ScoringCommandLog> logs = scoringCommandLogService.findByScoringCommand(scoringCommand);
-        if (!logs.isEmpty()) {
-            for (ScoringCommandLog scoringCommandLog : logs) {
-                details.add(new BasicNameValuePair("commandLogId" + scoringCommandLog.getPid(), scoringCommandLog
-                        .getMessage()));
-            }
-        }
-
-        return alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(), details);
     }
 }
