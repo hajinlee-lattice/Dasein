@@ -78,7 +78,6 @@
     <!-- =========================================================== -->
     <New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
         <Set name="secureScheme">https</Set>
-        <Set name="port"><SystemProperty name="jetty.port" default="8081"/></Set>
         <Set name="securePort"><Property name="jetty.secure.port" default="8443" /></Set>
         <Set name="outputBufferSize"><Property name="jetty.output.buffer.size" default="32768" /></Set>
         <Set name="requestHeaderSize"><Property name="jetty.request.header.size" default="8192" /></Set>
