@@ -46,16 +46,13 @@
                             </sources>
                         </mapping>
                         <mapping>
-                            <directory>/opt/jetty2/start.d</directory>
+                            <directory>/opt/jetty2-tmp</directory>
                             <filemode>775</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
-                                    <location>src/main/resources/jetty2/http.ini</location>
-                                </source>
-                                <source>
-                                    <location>src/main/resources/jetty2/https.ini</location>
+                                    <location>src/main/resources/jetty2</location>
                                 </source>
                             </sources>
                         </mapping>
