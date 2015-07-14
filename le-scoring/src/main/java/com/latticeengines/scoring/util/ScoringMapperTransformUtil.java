@@ -135,7 +135,6 @@ public class ScoringMapperTransformUtil {
         leadJsonObject = (JSONObject) jsonParser.parse(record);
 
         String modelGuid = identifyModelGuid(leadJsonObject, modelIdMap);
-        log.info("The modelGuid is " + modelGuid);
 
         String formattedRecord = transformToJsonString(leadJsonObject, models, modelGuid);
         if (leadInputRecordMap.containsKey(modelGuid)) {
