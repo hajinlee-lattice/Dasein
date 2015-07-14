@@ -18,21 +18,22 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     private JdbcTemplateFactoryImpl templateFactory;
 
     @Override
-    public Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum) {
+    public Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum,
+            int syncDestination) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
         PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
 
-        List<Map<String, Object>> recommendations = dao.getRecommendations(start, offset, maximum);
+        List<Map<String, Object>> recommendations = dao.getRecommendations(start, offset, maximum, syncDestination);
         Map<String, Object> result = wrapResult(recommendations);
         return result;
     }
 
     @Override
-    public Map<String, Object> getRecommendationCount(String tenantName, long start) {
+    public Map<String, Object> getRecommendationCount(String tenantName, long start, int syncDestination) {
         NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
         PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getRecommendationCount(start));
+        result.put(COUNT_KEY, dao.getRecommendationCount(start, syncDestination));
         return result;
     }
 
@@ -103,6 +104,13 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         Map<String, Object> result = new HashMap<>();
         result.put(COUNT_KEY, dao.getPlayValueCount(start));
         return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> getWorkflowTypes(String tenantName) {
+        NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
+        PlaymakerRecommendationDaoImpl dao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
+        return dao.getWorkflowTypes();
     }
 
     private Map<String, Object> wrapResult(List<Map<String, Object>> records) {

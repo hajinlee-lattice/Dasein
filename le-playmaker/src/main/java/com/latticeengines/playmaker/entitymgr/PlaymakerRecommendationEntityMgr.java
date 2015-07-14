@@ -14,7 +14,7 @@ public interface PlaymakerRecommendationEntityMgr {
 
     List<Map<String, Object>> getAccountExtensionSchema(String tenantName);
 
-    Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum);
+    Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum, int syncDestination);
 
     Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum);
 
@@ -22,7 +22,9 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum);
 
-    Map<String, Object> getRecommendationCount(String tenantName, long start);
+    List<Map<String, Object>> getWorkflowTypes(String tenantName);
+
+    Map<String, Object> getRecommendationCount(String tenantName, long start, int syncDestination);
 
     Map<String, Object> getPlayCount(String tenantName, long start);
 

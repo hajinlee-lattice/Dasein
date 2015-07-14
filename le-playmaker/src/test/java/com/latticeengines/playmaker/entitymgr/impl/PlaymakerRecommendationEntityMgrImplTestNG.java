@@ -40,7 +40,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     public void getRecommendations() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendations(tenant.getTenantName(), 1000,
-                0, 100);
+                0, 100, 0);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> recomendations = (List<Map<String, Object>>) result
@@ -53,7 +53,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     public void getRecommendationCount() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendationCount(tenant.getTenantName(),
-                1000);
+                1000, 0);
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
@@ -124,15 +124,16 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
+    @Test(groups = "functional", enabled = true)
+    public void getWorkflowTypes() throws Exception {
+
+        List<Map<String, Object>> result = playMakerRecommendationEntityMgr.getWorkflowTypes(tenant.getTenantName());
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.size() > 0);
+    }
+
     public static PlaymakerTenant getTennat() {
-        PlaymakerTenant tenant = new PlaymakerTenant();
-        tenant.setExternalId("externalId");
-        tenant.setJdbcDriver("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        tenant.setJdbcPassword("playmaker");
-        tenant.setJdbcUrl("jdbc:sqlserver://10.41.1.82;instanceName=SQL2012STD;databaseName=ADEDTBDd70064747nA26263627n1");
-        tenant.setJdbcUserName("playmaker");
-        tenant.setTenantName("playmaker");
-        return tenant;
+        return PlaymakerTenantEntityMgrImplTestNG.getTenant();
     }
 
 }

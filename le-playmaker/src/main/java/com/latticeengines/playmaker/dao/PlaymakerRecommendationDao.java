@@ -7,7 +7,7 @@ import com.latticeengines.db.exposed.dao.GenericDao;
 
 public interface PlaymakerRecommendationDao extends GenericDao {
 
-    List<Map<String, Object>> getRecommendations(long start, int offset, int maximum);
+    List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination);
 
     List<Map<String, Object>> getPlays(long start, int offset, int maximum);
 
@@ -17,7 +17,9 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     List<Map<String, Object>> getPlayValues(long start, int offset, int maximum);
 
-    int getRecommendationCount(long start);
+    List<Map<String, Object>> getWorkflowTypes();
+
+    int getRecommendationCount(long start, int syncDestination);
 
     int getPlayCount(long start);
 

@@ -61,10 +61,12 @@ public class RecommendationResource extends SpringBootServletInitializer {
             HttpServletRequest request,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) int start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
-            @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum) {
+            @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
+            @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = true) @RequestParam(value = "destination", required = true) String destination) {
 
         String tenantName = getTenantName(request);
-        return playmakerRecommendationMgr.getRecommendations(tenantName, start, offset, maximum);
+        return playmakerRecommendationMgr.getRecommendations(tenantName, start, offset, maximum,
+                SynchronizationDestinationEnum.mapToIntType(destination));
     }
 
     @RequestMapping(value = "/recommendationcount", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -72,10 +74,12 @@ public class RecommendationResource extends SpringBootServletInitializer {
     @ApiOperation(value = "Get recommendation count")
     public Map<String, Object> getRecommendationCount(
             HttpServletRequest request,
-            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) int start) {
+            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) int start,
+            @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = true) @RequestParam(value = "destination", required = true) String destination) {
 
         String tenantName = getTenantName(request);
-        return playmakerRecommendationMgr.getRecommendationCount(tenantName, start);
+        return playmakerRecommendationMgr.getRecommendationCount(tenantName, start,
+                SynchronizationDestinationEnum.mapToIntType(destination));
     }
 
     @RequestMapping(value = "/plays", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -156,6 +160,15 @@ public class RecommendationResource extends SpringBootServletInitializer {
 
         String tenantName = getTenantName(request);
         return playmakerRecommendationMgr.getPlayValueCount(tenantName, start);
+    }
+
+    @RequestMapping(value = "/workflowtypes", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get workflow types' IDs and Names")
+    public List<Map<String, Object>> getWorkflowTypes(HttpServletRequest request) {
+
+        String tenantName = getTenantName(request);
+        return playmakerRecommendationMgr.getWorkflowTypes(tenantName);
     }
 
     private String getTenantName(HttpServletRequest request) {

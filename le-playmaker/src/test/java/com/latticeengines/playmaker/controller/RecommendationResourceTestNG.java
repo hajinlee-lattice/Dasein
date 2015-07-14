@@ -31,7 +31,7 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
 
     @Test(groups = "deployment")
     public void getRecommendations() {
-        String url = apiHostPort + "/playmaker/recommendations?start=1&offset=1&maximum=100";
+        String url = apiHostPort + "/playmaker/recommendations?start=1&offset=1&maximum=100&destination=SFDC";
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
@@ -39,7 +39,7 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
 
     @Test(groups = "deployment")
     public void getRecommendationCount() {
-        String url = apiHostPort + "/playmaker/recommendationcount?start=1";
+        String url = apiHostPort + "/playmaker/recommendationcount?start=1&destination=SFDC";
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);

@@ -21,7 +21,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum) {
+    public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination) {
         String sql = "SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
                 + "L.[Display_Name] AS DisplayName, L.[Description] AS Description, A.Alt_ID AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, L.[Likelihood] AS Likelihood, "
@@ -38,6 +38,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         source.addValue("start", start);
         source.addValue("offset", offset);
         source.addValue("maximum", maximum);
+        source.addValue("syncDestination", syncDestination);
 
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
         convertContacts(results);
@@ -72,11 +73,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getRecommendationCount(long start) {
+    public int getRecommendationCount(long start, int syncDestination) {
         String sql = "SELECT COUNT(*) " + getRecommendationFromWhereClause();
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
+        source.addValue("syncDestination", syncDestination);
         return queryForObject(sql, source, Integer.class);
     }
 
@@ -85,8 +87,10 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "ON L.[LaunchRun_ID] = R.[LaunchRun_ID] JOIN LEAccount A "
                 + "ON L.Account_ID = A.LEAccount_ID JOIN Priority P "
                 + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C "
-                + "ON P.Display_Text_Key = C.Key_Name JOIN Currency M "
-                + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID WHERE DATEDIFF(s,'19700101 00:00:00:000',L.[Last_Modification_Date]) >= :start ";
+                + "ON P.Display_Text_Key = C.Key_Name AND C.External_ID LIKE 'en-%' JOIN Currency M "
+                + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID "
+                + "WHERE L.Status = 2800 AND L.Synchronization_Destination = :syncDestination "
+                + "AND DATEDIFF(s,'19700101 00:00:00:000',L.[Last_Modification_Date]) >= :start ";
     }
 
     @Override
@@ -98,7 +102,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "ON M.PlayGroup_ID = G.PlayGroup_ID WHERE M.Play_ID = Play.Play_ID FOR XML PATH ('')) AS PlayGroups, "
                 + "(SELECT DISTINCT P.Display_Name + '|' + P.[External_Name] + '|' as [text()] "
                 + "FROM [ProductGroupMap] M JOIN Product P ON M.Product_ID = P.Product_ID "
-                + "WHERE M.[ProductGroup_ID] = Play.[Target_ProductGroup_ID] FOR XML PATH ('')) AS TargetProducts "
+                + "WHERE M.[ProductGroup_ID] = Play.[Target_ProductGroup_ID] FOR XML PATH ('')) AS TargetProducts, "
+                + "(SELECT W.[External_ID] FROM [PlayWorkflowType] W WHERE Play.[PlayWorkflowType_ID] = W.[PlayWorkflowType_ID]) AS Workflow "
                 + getPlayFromWhereClause()
                 + "ORDER BY Last_Modification_Date OFFSET :offset ROWS FETCH NEXT :maximum ROWS ONLY";
         MapSqlParameterSource source = new MapSqlParameterSource();
@@ -144,7 +149,6 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 record.put(key, Arrays.asList(valueArray));
             }
         }
-
     }
 
     @Override
@@ -207,6 +211,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         String sql = "SELECT [Play_ID] AS ID, "
                 + "(SELECT DISTINCT G.Display_Name + '|' as [text()] FROM PlayGroupMap M JOIN PlayGroup G "
                 + "ON M.PlayGroup_ID = G.PlayGroup_ID WHERE M.Play_ID = Play.Play_ID FOR XML PATH ('')) AS PlayGroups, "
+                + "(SELECT DISTINCT W.Display_Name + '|' as [text()] FROM PlayWorkflowType W "
+                + "WHERE W.PlayWorkflowType_ID = Play.PlayWorkflowType_ID FOR XML PATH ('')) AS Workflows, "
                 + "(SELECT DISTINCT S.value + '|' as [text()] FROM [PlayPriorityRuleMap] M "
                 + "JOIN [Priority] P ON M.Priority_ID = P.Priority_ID JOIN ConfigResource S ON P.[Display_Text_Key] = S.Key_Name "
                 + "WHERE M.Play_ID = Play.Play_ID FOR XML PATH (''))  AS Priorities " + getPlayFromWhereClause()
@@ -219,6 +225,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
         convertToList("PlayGroups", results);
+        convertToList("Workflows", results);
         convertToList("Priorities", results);
         return results;
     }
@@ -230,5 +237,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         return queryForObject(sql, source, Integer.class);
+    }
+
+    @Override
+    public List<Map<String, Object>> getWorkflowTypes() {
+        String sql = "SELECT External_ID as ID, Display_Name AS DisplayName FROM PlayWorkflowType";
+
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        return queryForListOfMap(sql, source);
+
     }
 }
