@@ -92,7 +92,7 @@ SQOOP_HOME=/usr/hdp/current/sqoop-server
 JAVA_HOME=/usr/java/default
 
 JAVA_OPTIONS=(-XX:MaxPermSize=2048m -Dcom.latticeengines.registerBootstrappers=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty -DPLS_PROPDIR=/etc/propdata -Djavax.net.ssl.trustStore=/etc/propdata/laca-ldap.dev.lattice.local.jks)
-JAVA_OPTIONS+=(-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099)
+JAVA_OPTIONS+=(-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1098)
 
 usage()
 {
