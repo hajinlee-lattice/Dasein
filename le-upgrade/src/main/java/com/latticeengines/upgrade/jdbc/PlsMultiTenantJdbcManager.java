@@ -8,9 +8,11 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
@@ -81,6 +83,24 @@ public class PlsMultiTenantJdbcManager {
                 "INNER JOIN " + TENANT_TABLE + " AS tenant " +
                 "ON summary.FK_TENANT_ID = tenant.TENANT_PID " +
                 "WHERE tenant.TENANT_ID = \'" + tenantId + "\'");
+    }
+
+    public void substituteSingularIdByTupleId(String customer) {
+        String singularId = CustomerSpace.parse(customer).getTenantId();
+        String tupleId = CustomerSpace.parse(customer).toString();
+        plsJdbcTemlate.execute("UPDATE " + TENANT_TABLE
+                + " SET TENANT_ID = \'" + tupleId + "\'"
+                + " WHERE TENANT_ID = \'" + singularId + "\'");
+    }
+
+    public boolean hasTenantId(String tenantId) {
+        try {
+            plsJdbcTemlate.queryForObject("SELECT TENANT_ID FROM " + TENANT_TABLE
+                    + " WHERE TENANT_ID = \'" + tenantId + "\'", String.class);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     private boolean isCustomizedName(String name) {

@@ -59,4 +59,16 @@
           p:dataSource-ref="plsDataSource">
     </bean>
 
+    <bean id="gaDataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${upgrade.dao.ga.driver}" />
+        <property name="url" value="${upgrade.dao.ga.jdbc}" />
+        <property name="username" value="${upgrade.dao.ga.user}" />
+        <property name="password" value="${upgrade.dao.ga.password.encrypted}" />
+    </bean>
+
+    <bean id="gaJdbcTemlate" class="org.springframework.jdbc.core.JdbcTemplate"
+          p:dataSource-ref="gaDataSource">
+    </bean>
+
 </beans>

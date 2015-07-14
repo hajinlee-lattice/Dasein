@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.upgrade.UpgradeRunner;
 import com.latticeengines.upgrade.dl.DataLoaderManager;
+import com.latticeengines.upgrade.jdbc.GaJdbcManager;
+import com.latticeengines.upgrade.jdbc.PlsMultiTenantJdbcManager;
 import com.latticeengines.upgrade.pls.PlsGaManager;
 import com.latticeengines.upgrade.tenant.service.TenantUpgradeService;
 import com.latticeengines.upgrade.zk.ZooKeeperManager;
@@ -23,6 +25,12 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
 
     @Autowired
     private PlsGaManager plsGaManager;
+
+    @Autowired
+    private PlsMultiTenantJdbcManager plsMultiTenantJdbcManager;
+
+    @Autowired
+    private GaJdbcManager gaJdbcManager;
 
     private void registerCustomerInZK(String customer) {
         System.out.println(String.format("\nThe customer being registered in ZK ... ... ... ... %s", customer));
@@ -45,10 +53,24 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
     private void registerCustomerInPLS(String customer) {
         System.out.println(String.format("\nThe customer being registered in PLS ... ... ... ... %s", customer));
 
-        System.out.print("Creating tenant in PLS ... ");
-        plsGaManager.registerTenant(customer);
-        System.out.println("OK");
+        System.out.print("Check if tenant already in PLS and GA ... ");
+        boolean inpls = plsMultiTenantJdbcManager.hasTenantId(customer);
+        boolean inqa = gaJdbcManager.hasDeploymentId(customer);
+        if (inpls != inqa) {
+            throw new RuntimeException("The records in PLS_MultiTenant and Global_Authentication are not in sync.");
+        }
+        System.out.println(inpls ? "YES": "NO");
 
+        if (inpls) {
+            System.out.print("Change tenantId in PLS and GA ... ");
+            plsMultiTenantJdbcManager.substituteSingularIdByTupleId(customer);
+            gaJdbcManager.substituteSingularIdByTupleId(customer);
+            System.out.println("OK");
+        } else {
+            System.out.print("Creating tenant in PLS ... ");
+            plsGaManager.registerTenant(customer);
+            System.out.println("OK");
+        }
 
         System.out.print("Setting up admin users in PLS ... ");
         plsGaManager.setupAdminUsers(customer);
