@@ -55,6 +55,22 @@
                                     <location>src/main/resources/jetty2/jetty.xml</location>
                                     <targetArchitecture>x86_64</targetArchitecture>
                                 </source>
+                                <source>
+                                    <location>src/main/resources/jetty2/jetty-http.xml</location>
+                                    <targetArchitecture>x86_64</targetArchitecture>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/opt/jetty2</directory>
+                            <filemode>775</filemode>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
+                            <sources>
+                                <source>
+                                    <location>src/main/resources/jetty2/start.ini</location>
+                                    <targetArchitecture>x86_64</targetArchitecture>
+                                </source>
                             </sources>
                         </mapping>
                     </mappings>
