@@ -46,7 +46,7 @@
                             </sources>
                         </mapping>
                         <mapping>
-                            <directory>/opt/jetty2.xml</directory>
+                            <directory>/opt/jetty2/etc</directory>
                             <filemode>775</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
