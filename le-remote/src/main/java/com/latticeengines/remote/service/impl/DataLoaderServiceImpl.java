@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.remote.exposed.service.Headers;
 import com.latticeengines.remote.util.CrmUtils;
+import com.latticeengines.remote.util.DlConfigUtils;
 
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
@@ -56,6 +58,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String DELETE_TENANT = "/DeleteDLTenant";
     private static final String VALIDATE_CREDS = "/ValidateExternalAPICredentials";
     private static final String UPDATE_DATA_PROVIDER = "/UpdateDataProvider";
+    private static final String DOWNLOAD_CONFIG = "/DownloadConfigFile";
 
     private static final String SEGMENT_PREFIX = "DefnSegment_";
     private static final String MODELID_PREFIX = "LatticeFunctionExpressionConstant(\"";
@@ -71,6 +74,10 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String MODELIDLENGTH_TOKEN = "{MODELID_LENGTH}";
     private static final String SEGMENTNAME_TOKEN = "{SEGMENT_NAME}";
     private static final String UNINITIALIZED_MODELID = "";
+
+    private static final int STATUS_SUCCESS = 3;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public List<String> getSegmentNames(String tenantName, String dlUrl) {
@@ -424,6 +431,51 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             crmConfig.setDataProviderName("SFDC_DataProvider");
             Map<String, Object> parameters = CrmUtils.dataProviderParameters(crmType, plsTenantId, crmConfig);
             executeUpdateDataProviderRequest(dlUrl, parameters);
+        }
+    }
+
+    @Override
+    public String getSfdcUser(String tenantName, String dlUrl) {
+        String config = getDLConfig(tenantName, dlUrl);
+        return DlConfigUtils.parseSfdcUser(config);
+    }
+
+    @Override
+    public String getMarketoUserId(String tenantName, String dlUrl) {
+        String config = getDLConfig(tenantName, dlUrl);
+        return DlConfigUtils.parseMarketoUserId(config);
+    }
+
+    @Override
+    public String getEloquaUsername(String tenantName, String dlUrl) {
+        String config = getDLConfig(tenantName, dlUrl);
+        return DlConfigUtils.parseEloquaUsername(config);
+    }
+
+    @Override
+    public String getEloquaCompany(String tenantName, String dlUrl) {
+        String config = getDLConfig(tenantName, dlUrl);
+        return DlConfigUtils.parseEloquaCompany(config);
+    }
+
+    private String getDLConfig(String tenantName, String dlUrl) {
+        Map<String, String> paramerters = new HashMap<>();
+        paramerters.put("tenantName", tenantName);
+        String response;
+        try {
+            response = callDLRestService(dlUrl, DOWNLOAD_CONFIG, paramerters);
+            JsonNode json = objectMapper.readTree(response);
+            if (json.get("Status").asInt() != STATUS_SUCCESS) {
+                throw new IllegalStateException("Returned status from DL is not SUCCESS.");
+            }
+            for(JsonNode kvpair: json.get("Value")) {
+                if("Config".equalsIgnoreCase(kvpair.get("Key").asText())) {
+                    return kvpair.get("Value").asText();
+                }
+            }
+            throw new IOException("Cannot find Config file in the response.");
+        } catch (IOException|IllegalStateException ex) {
+            throw new LedpException(LedpCode.LEDP_21002, ex);
         }
     }
 

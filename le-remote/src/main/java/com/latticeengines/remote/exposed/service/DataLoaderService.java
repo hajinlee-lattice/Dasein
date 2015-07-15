@@ -25,6 +25,14 @@ public interface DataLoaderService {
 
     String getTemplateVersion(String tenantName, String dlUrl);
 
+    String getSfdcUser(String tenantName, String dlUrl);
+
+    String getMarketoUserId(String tenantName, String dlUrl);
+
+    String getEloquaUsername(String tenantName, String dlUrl);
+
+    String getEloquaCompany(String tenantName, String dlUrl);
+
     InstallResult getDLTenantSettings(GetVisiDBDLRequest getRequest, String dlUrl);
 
     InstallResult createDLTenant(CreateVisiDBDLRequest postRequest, String dlUrl);
