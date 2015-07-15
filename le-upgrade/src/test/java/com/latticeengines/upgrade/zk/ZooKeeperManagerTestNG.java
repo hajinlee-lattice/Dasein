@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -84,33 +83,37 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
         Assert.assertEquals(newSpaceConfig.getProduct(), LatticeProduct.LPA);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "registerTenant",  dataProvider = "crmCredentialProvider")
-    public void uploadCredentials(CRMTopology topology, String crmType, Boolean isProduction) throws Exception {
-        zooKeeperManager.uploadCrmCredentials(CUSTOMER, topology);
-        checkCrmCredential(crmType, getCredential(crmType, CUSTOMER, isProduction));
-        checkCrmCredential(crmType, getCredential(crmType, TUPLE_ID, isProduction));
-        removeCredentials(crmType, CUSTOMER, isProduction);
+    @Test(groups = "functional", dependsOnMethods = "registerTenant")
+    public void uploadCredentials() throws Exception {
+        zooKeeperManager.uploadCrmCredentials(CUSTOMER, DL_URL, CRMTopology.MARKETO);
+        
+        checkCrmCredential("marketo", getCredential("marketo", CUSTOMER));
+        checkCrmCredential("marketo", getCredential("marketo", TUPLE_ID));
+
+        checkCrmCredential("sfdc", getCredential("sfdc", CUSTOMER));
+        checkCrmCredential("sfdc", getCredential("sfdc", TUPLE_ID));
+
+        removeCredentials("marketo", CUSTOMER);
+        removeCredentials("sfdc", CUSTOMER);
     }
 
     @Test(groups = "functional", dependsOnMethods = "registerTenant")
     public void setBootstrapState() throws Exception {
         zooKeeperManager.setBootstrapStateToMigrate(CUSTOMER);
 
-        List<String> components = Arrays.asList(
-                "PLS", "VisiDBDL", "VisiDBTemplate", "DLTemplate", "BardJams"
-        );
+        List<String> components = Arrays.asList("PLS", "VisiDBDL", "VisiDBTemplate", "DLTemplate", "BardJams");
         for (String component: components) {
             BootstrapState state = batonService.getTenantServiceBootstrapState(CUSTOMER, CUSTOMER, SPACE, component);
             Assert.assertEquals(state.state, BootstrapState.State.MIGRATED);
         }
     }
 
-    private CrmCredential getCredential(String crmType, String tenantId, Boolean isProduction) throws Exception {
+    private CrmCredential getCredential(String crmType, String tenantId) throws Exception {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
 
         Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
                 customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId());
-        docPath = addExtraPath(crmType, docPath, isProduction);
+        docPath = addExtraPath(crmType, docPath, true);
 
         Camille camille = CamilleEnvironment.getCamille();
         Document doc = camille.get(docPath);
@@ -120,12 +123,12 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
         return crmCredential;
     }
 
-    private void removeCredentials(String crmType, String tenantId, Boolean isProduction) throws Exception {
+    private void removeCredentials(String crmType, String tenantId) throws Exception {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
 
         Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
                 customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId());
-        docPath = addExtraPath(crmType, docPath, isProduction);
+        docPath = addExtraPath(crmType, docPath, true);
 
         Camille camille = CamilleEnvironment.getCamille();
         if (camille.exists(docPath)) camille.delete(docPath);
@@ -150,15 +153,5 @@ public class ZooKeeperManagerTestNG extends UpgradeFunctionalTestNGBase {
         if (crmType.equalsIgnoreCase("sfdc")) {
             Assert.assertNotNull(crmCredential.getSecurityToken(), "SFDC credential should have security token.");
         }
-    }
-
-    @DataProvider(name = "crmCredentialProvider")
-    public static Object[][] getCrmCredentialProvider() {
-        return new Object[][] { //
-                { CRMTopology.MARKETO, "marketo", true },
-                { CRMTopology.ELOQUA, "eloqua", true },
-//                { CRMTopology.SFDC, "sfdc", true },
-//                { CRMTopology.SFDC, "sfdc", false },
-        };
     }
 }

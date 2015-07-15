@@ -16,7 +16,6 @@ import com.latticeengines.camille.exposed.CamilleTransaction;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -29,6 +28,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.upgrade.dl.DataLoaderManager;
 
 @Component
 public class ZooKeeperManager {
@@ -42,48 +42,19 @@ public class ZooKeeperManager {
 
     private static String podId;
     private static Camille camille;
-    private static CrmCredential marketoCredential;
-    private static CrmCredential eloquaCredential;
-    private static CrmCredential sfdcCredential;
-    private static CrmCredential sfdcsandboxCredential;
+    private static String crmPassword = "";
+    private static String crmSecurityToken = "security-token";
 
     @Autowired
     private BatonService batonService;
+
+    @Autowired
+    private DataLoaderManager dataLoaderManager;
 
     @PostConstruct
     private void readCamilleEnvironment() {
         podId = CamilleEnvironment.getPodId();
         camille = CamilleEnvironment.getCamille();
-    }
-
-    @PostConstruct
-    private void setCrmCredentials() {
-        String password = "";
-        try {
-            password = CipherUtils.encrypt("password");
-        } catch (Exception e) {
-            //ignore
-        }
-
-        marketoCredential = new CrmCredential();
-        marketoCredential.setUserName(" ");
-        marketoCredential.setPassword(password);
-        marketoCredential.setUrl(" ");
-
-        eloquaCredential = new CrmCredential();
-        eloquaCredential.setUserName(" ");
-        eloquaCredential.setPassword(password);
-        eloquaCredential.setCompany(" ");
-
-        sfdcCredential = new CrmCredential();
-        sfdcCredential.setUserName(" ");
-        sfdcCredential.setPassword(password);
-        sfdcCredential.setSecurityToken("security-token");
-
-        sfdcsandboxCredential = new CrmCredential();
-        sfdcsandboxCredential.setUserName(" ");
-        sfdcsandboxCredential.setPassword(password);
-        sfdcsandboxCredential.setSecurityToken("security-token");
     }
 
     public void registerTenantIfNotExist(String tenantId) {
@@ -107,13 +78,17 @@ public class ZooKeeperManager {
         batonService.loadDirectory(spaceConfig.toDocumentDirectory(), spaceConfigPath);
     }
 
-    public void uploadCrmCredentials(String tenantId, CRMTopology topology) {
-        if (topology.equals(CRMTopology.MARKETO)) {
-            writeAsCredential("marketo", tenantId, true, marketoCredential);
+    public void uploadCrmCredentials(String tenantId, String dlUrl, CRMTopology topology) {
+        String tenantName = CustomerSpace.parse(tenantId).getContractId();
+        CrmCredential crmCredential = dataLoaderManager.constructCrmCredential(tenantName, dlUrl, topology);
+        if (crmCredential != null) {
+            writeAsCredential(topology.getName().toLowerCase(), tenantId, true, crmCredential);
+        } else {
+            System.out.println("WARNING: Cannot find expected " + topology + " information for " +
+                    tenantName + " in DL.");
         }
-
-        if (topology.equals(CRMTopology.ELOQUA)) {
-            writeAsCredential("eloqua", tenantId, true, eloquaCredential);
+        if (!topology.equals(CRMTopology.SFDC)) {
+            uploadCrmCredentials(tenantId, dlUrl, CRMTopology.SFDC);
         }
     }
 
