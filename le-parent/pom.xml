@@ -41,7 +41,7 @@
         <load.groups>load</load.groups>
         <jacoco.destfile>jacoco.exec</jacoco.destfile>
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
-        <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize>
+        <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize> <!-- for java 8 compatibility, where this variable is empty -->
     </properties>
 
     <!-- set up to use LE local Nexus Repository for dependencies -->
