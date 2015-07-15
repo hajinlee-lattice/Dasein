@@ -97,6 +97,16 @@
                             </sources>
                         </mapping>
                     </mappings>
+                    <preremoveScriptlet>
+                        <scriptFile>scripts/preremove</scriptFile>
+                    </preremoveScriptlet>
+                    <preinstallScriptlet>
+                        <scriptFile>scripts/preinstall</scriptFile>
+                    </preinstallScriptlet>
+                    <postinstallScriptlet>
+                        <scriptFile>scripts/postinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
+                    </postinstallScriptlet>
                 </configuration>
             </plugin>
         </plugins>

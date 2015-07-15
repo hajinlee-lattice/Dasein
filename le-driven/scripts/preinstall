@@ -1,3 +1,4 @@
 #!/bin/bash
 echo "preinstalling now"
 chown -R yarn:yarn /etc/hadoop/conf
+rm -f /etc/hadoop/conf/cascading-service.properties
