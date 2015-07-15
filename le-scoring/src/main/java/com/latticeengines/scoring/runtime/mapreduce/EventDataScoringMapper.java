@@ -110,7 +110,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         log.info("The number of transformed lead record is: " + totalRecordSize);
 
         if (numberOfRecords != totalRecordSize) {
-            throw new LedpException(LedpCode.LEDP_200010, new String[] { String.valueOf(numberOfRecords), String.valueOf(totalRecordSize) });
+            throw new LedpException(LedpCode.LEDP_20010, new String[] { String.valueOf(numberOfRecords), String.valueOf(totalRecordSize) });
         }
 
         Long leadFileThreshold = context.getConfiguration().getLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(),
@@ -144,7 +144,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             }
             if (leadList.size() == 0) {
                 log.error("The mapper gets zero leads.");
-                throw new LedpException(LedpCode.LEDP_200015);
+                throw new LedpException(LedpCode.LEDP_20015);
             }else{
                 scoring(context, leadList);
             }
@@ -154,7 +154,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             log.error(errorMessage);
             File logFile = new File(logDir + "/" + UUID.randomUUID() + ".err");
             FileUtils.writeStringToFile(logFile, errorMessage);
-            throw new LedpException(LedpCode.LEDP_200014, new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e) });
+            throw new LedpException(LedpCode.LEDP_20014, new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e) });
         }
     }
 }

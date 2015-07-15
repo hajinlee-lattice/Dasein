@@ -260,7 +260,7 @@ public class ScoringMapperPredictUtilTestNG {
         try {
             returnedStr = ScoringMapperPredictUtil.evaluate(models);
         } catch (LedpException e) {
-            assertTrue(e.getCode() == LedpCode.LEDP_200011);
+            assertTrue(e.getCode() == LedpCode.LEDP_20011);
         }
         System.out.println("returnedStr is " + returnedStr) ;
 

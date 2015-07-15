@@ -122,9 +122,9 @@ public class ScoringProcessorCallable implements Callable<Long> {
             scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
             long total = metadataService.getRowCount(scoringJdbcTemplate, scoringCommand.getTableName());
             if (total != scoringCommand.getTotal()) {
-                throw new LedpException(LedpCode.LEDP_200016);
+                throw new LedpException(LedpCode.LEDP_20016);
             }if(total < 1)
-                throw new LedpException(LedpCode.LEDP_200017);
+                throw new LedpException(LedpCode.LEDP_20017);
             executeYarnStep(ScoringCommandStep.LOAD_DATA);
         } else { // scoringCommand IN_PROGRESS
             String yarnApplicationId;

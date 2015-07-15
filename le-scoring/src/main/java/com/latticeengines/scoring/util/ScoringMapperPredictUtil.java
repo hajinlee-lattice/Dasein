@@ -85,7 +85,7 @@ public class ScoringMapperPredictUtil {
         p.waitFor();
 
         if (errors.length() != 0) {
-            throw new LedpException(LedpCode.LEDP_200011, new String[] { errors.toString() });
+            throw new LedpException(LedpCode.LEDP_20011, new String[] { errors.toString() });
         }
 
         return strs.toString();
@@ -141,14 +141,14 @@ public class ScoringMapperPredictUtil {
         String fileName = modelGuid + SCORING_OUTPUT_PREFIX + index + ".txt";
         File f = new File(fileName);
         if (!f.exists()) {
-            throw new LedpException(LedpCode.LEDP_200012, new String[] { fileName });
+            throw new LedpException(LedpCode.LEDP_20012, new String[] { fileName });
         }
 
         List<String> lines = FileUtils.readLines(f);
         for (String line : lines) {
             String[] splitLine = line.split(",");
             if (splitLine.length != 2) {
-                throw new LedpException(LedpCode.LEDP_200013);
+                throw new LedpException(LedpCode.LEDP_20013);
             }
             scores.put(splitLine[0], Double.parseDouble(splitLine[1]));
         }
