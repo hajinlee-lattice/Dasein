@@ -12,21 +12,13 @@
 
     <properties>
         <component-name>driven</component-name>
-        <driven.plugin.version>1.2-eap-11</driven.plugin.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>conjars</id>
-            <url>http://conjars.org/repo</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
             <groupId>driven</groupId>
             <artifactId>driven-plugin</artifactId>
-            <version>${driven.plugin.version}</version>
+            <version>${cascading.driven.version}</version>
         </dependency>
     </dependencies>
 

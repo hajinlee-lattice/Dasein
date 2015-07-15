@@ -15,12 +15,19 @@
         <nexusrepourl />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <maven.jar.version>2.3.2</maven.jar.version>
         <maven.surefire.version>2.12.3</maven.surefire.version>
         <maven.failsafe.version>2.12.4</maven.failsafe.version>
         <maven.eclipse.version>2.9</maven.eclipse.version>
         <maven.antrun.version>1.7</maven.antrun.version>
         <jacoco.version>0.7.0.201403182114</jacoco.version>
+        <jetty.version>9.1.1.v20140108</jetty.version>
+        <spring.version>4.0.0.RELEASE</spring.version>
+        <hibernate.version>4.1.9.Final</hibernate.version>
+        <cascading.version>2.5.0</cascading.version>
+        <cascading.driven.version>1.2</cascading.driven.version>
+
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>
         <functional.classes.include>**/*TestNG.java</functional.classes.include>
@@ -34,9 +41,6 @@
         <load.groups>load</load.groups>
         <jacoco.destfile>jacoco.exec</jacoco.destfile>
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
-        <jetty.version>9.1.1.v20140108</jetty.version>
-        <spring.version>4.0.0.RELEASE</spring.version>
-        <hibernate.version>4.1.9.Final</hibernate.version>
         <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize>
     </properties>
 

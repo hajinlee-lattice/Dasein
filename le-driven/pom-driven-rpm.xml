@@ -88,8 +88,8 @@
                         <mapping>
                             <directory>/etc/hadoop/conf</directory>
                             <filemode>733</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>${driven.properties.path}/cascading-service.properties</location>

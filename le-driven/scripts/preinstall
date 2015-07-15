@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "preinstalling now"
+chown -R yarn:yarn /etc/hadoop/conf
