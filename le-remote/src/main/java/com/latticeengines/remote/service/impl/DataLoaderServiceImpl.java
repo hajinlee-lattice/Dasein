@@ -447,6 +447,12 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    public String getMarketoUrl(String tenantName, String dlUrl) {
+        String config = getDLConfig(tenantName, dlUrl);
+        return DlConfigUtils.parseMarketoUrl(config);
+    }
+
+    @Override
     public String getEloquaUsername(String tenantName, String dlUrl) {
         String config = getDLConfig(tenantName, dlUrl);
         return DlConfigUtils.parseEloquaUsername(config);

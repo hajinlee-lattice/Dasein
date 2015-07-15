@@ -22,6 +22,10 @@ public class DlConfigUtils {
         return parseSubfieldOfDataProvider(config, "Marketo_DataProvider", "UserID");
     }
 
+    public static String parseMarketoUrl(String config) {
+        return parseSubfieldOfDataProvider(config, "Marketo_DataProvider", "URL");
+    }
+
 
     private static String parseSubfieldOfDataProvider(String config, String provider, String field) {
         Pattern pattern = Pattern.compile("<dataProvider name=\"" + provider + "\"[^>]*");

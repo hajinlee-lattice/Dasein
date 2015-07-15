@@ -36,8 +36,9 @@ public class DlConfigUtilsUnitTestNG {
     }
 
     @Test(groups = {"unit", "functional"}, dataProvider = "marketoConfigProvider")
-    public void parseMarketoUserId(String config, String userId) {
+    public void parseMarketoUserIdURL(String config, String userId, String url) {
         Assert.assertEquals(DlConfigUtils.parseMarketoUserId(config), userId);
+        Assert.assertEquals(DlConfigUtils.parseMarketoUrl(config), url);
     }
 
     @DataProvider(name = "sfdcConfigProvider")
@@ -70,9 +71,11 @@ public class DlConfigUtilsUnitTestNG {
     public static Object[][] getMarketoConfigProvider() {
         return new Object[][] {
                 { wrapTag("<dataProvider name=\"Marketo_DataProvider\" autoMatch=\"False\" connectionString=\"URL=https://na-sj02.marketo.com/soap/mktows/2_0;UserID=latticeenginessandbox1_9026948050BD016F376AE6;EncryptionKey=;Timeout=10000;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;BatchSize=500;MaxSizeOfErrorBatch=25;\" dbType=\"1004\" usedFor=\"31\" e=\"False\" />"),
-                        "latticeenginessandbox1_9026948050BD016F376AE6" },
+                        "latticeenginessandbox1_9026948050BD016F376AE6", "https://na-sj02.marketo.com/soap/mktows/2_0" },
                 { wrapTag("<dataProvider name=\"Marketo_DataProvider\" autoMatch=\"False\" connectionString=\"URL=https://na-sj02.marketo.com/soap/mktows/2_0;UserID=;EncryptionKey=;Timeout=10000;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;BatchSize=500;MaxSizeOfErrorBatch=25;\" dbType=\"1004\" usedFor=\"31\" e=\"False\" />"),
-                        "" },
+                        "", "https://na-sj02.marketo.com/soap/mktows/2_0" },
+                { wrapTag("<dataProvider name=\"Marketo_DataProvider\" autoMatch=\"False\" connectionString=\"URL=;UserID=latticeenginessandbox1_9026948050BD016F376AE6;EncryptionKey=;Timeout=10000;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;BatchSize=500;MaxSizeOfErrorBatch=25;\" dbType=\"1004\" usedFor=\"31\" e=\"False\" />"),
+                        "latticeenginessandbox1_9026948050BD016F376AE6", "" },
                 { wrapTag(""), "" },
                 { marketoConfig, "latticeenginessandbox1_9026948050BD016F376AE6" },
         };

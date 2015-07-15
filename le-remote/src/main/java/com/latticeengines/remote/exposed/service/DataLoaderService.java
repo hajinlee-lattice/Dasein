@@ -29,6 +29,8 @@ public interface DataLoaderService {
 
     String getMarketoUserId(String tenantName, String dlUrl);
 
+    String getMarketoUrl(String tenantName, String dlUrl);
+
     String getEloquaUsername(String tenantName, String dlUrl);
 
     String getEloquaCompany(String tenantName, String dlUrl);
