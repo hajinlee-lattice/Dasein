@@ -145,7 +145,9 @@ public enum LedpCode {
     LEDP_200013("Scoring output file in incorrect format.}"),
     LEDP_200014("The scoring mapper failed. The message is: {0}, and the stack trace is: {1}}"),
     LEDP_200015("The scoring mapper should not get 0 lead"),
-    LEDP_200016("Cannot process scoring request with 0 lead"),
+    LEDP_200016("The total number scoring leads is incorrect"),
+    LEDP_200017("Cannot process scoring request with 0 lead"),
+
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),

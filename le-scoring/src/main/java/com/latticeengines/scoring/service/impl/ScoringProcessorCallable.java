@@ -15,11 +15,13 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -71,6 +73,12 @@ public class ScoringProcessorCallable implements Callable<Long> {
     @Value("${dataplatform.yarn.timeline-service.webapp.address}")
     private String appTimeLineWebAppAddress;
 
+    @Autowired
+    private MetadataService metadataService;
+
+    @Autowired
+    private JdbcTemplate scoringJdbcTemplate;
+
     private static final Log log = LogFactory.getLog(ScoringProcessorCallable.class);
 
     public ScoringProcessorCallable() {
@@ -112,9 +120,11 @@ public class ScoringProcessorCallable implements Callable<Long> {
                 .findLastStateByScoringCommand(scoringCommand);
         if (scoringCommandState == null) {
             scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
-            if (scoringCommand.getTotal() < 1) {
+            long total = metadataService.getRowCount(scoringJdbcTemplate, scoringCommand.getTableName());
+            if (total != scoringCommand.getTotal()) {
                 throw new LedpException(LedpCode.LEDP_200016);
-            }
+            }if(total < 1)
+                throw new LedpException(LedpCode.LEDP_200017);
             executeYarnStep(ScoringCommandStep.LOAD_DATA);
         } else { // scoringCommand IN_PROGRESS
             String yarnApplicationId;

@@ -119,7 +119,7 @@ public class ScoringCommandProcessorTestNG extends ScoringFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testWorkflow() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
-                0, 4352, new Timestamp(System.currentTimeMillis()));
+                0, 3891, new Timestamp(System.currentTimeMillis()));
 
         scoringCommandEntityMgr.create(scoringCommand);
 
