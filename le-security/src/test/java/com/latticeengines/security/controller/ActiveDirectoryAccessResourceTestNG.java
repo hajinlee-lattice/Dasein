@@ -23,7 +23,7 @@ public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestN
     public void getSomethingWithAccess() {
         addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
-        Map<String, String> retVal = restTemplate.getForObject(getRestAPIHostPort() + "/security/adhasaccess", Map.class, new HashMap<>());
+        Map<String, String> retVal = restTemplate.getForObject(getRestAPIHostPort() + "/adhasaccess", Map.class, new HashMap<>());
         assertTrue(retVal.containsKey("SomeReturnValue"));
     }
 
@@ -34,7 +34,7 @@ public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestN
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         boolean exception = false;
         try {
-            restTemplate.getForObject(getRestAPIHostPort() + "/security/adnoaccess", Map.class, new HashMap<>());
+            restTemplate.getForObject(getRestAPIHostPort() + "/adnoaccess", Map.class, new HashMap<>());
         } catch (Exception e) {
             exception = true;
             String code = e.getMessage();
@@ -50,7 +50,7 @@ public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestN
         creds.setUsername("testuser1");
         creds.setPassword("Lattice1");
         
-        Map<String, String> map = restTemplate.postForObject(getRestAPIHostPort() + "/security/adlogin", creds, Map.class);
+        Map<String, String> map = restTemplate.postForObject(getRestAPIHostPort() + "/adlogin", creds, Map.class);
         token = map.get("Token");
         assertNotNull(token);
     }

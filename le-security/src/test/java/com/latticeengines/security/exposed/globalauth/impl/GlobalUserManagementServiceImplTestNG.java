@@ -43,7 +43,7 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        Session session = loginAndAttach(adminUsername, adminPassword);
+        Session session = login(adminUsername, adminPassword);
         ticket = session.getTicket();
         testTenantId = session.getTenant().getId();
     }
@@ -68,13 +68,13 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
 
     @Test(groups = "functional")
     public void deleteUser() {
-        Session session = loginAndAttach(testUsername);
+        Session session = login(testUsername);
         assertNotNull(session);
         globalUserManagementService.deleteUser(testUsername);
 
         boolean exception = false;
         try {
-            loginAndAttach(testUsername);
+            login(testUsername);
         } catch (Exception e) {
             exception = true;
         }

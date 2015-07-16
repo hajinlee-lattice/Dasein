@@ -4,6 +4,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
@@ -24,13 +25,15 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.LoginDocument;
+import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
 
@@ -42,8 +45,6 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected static final String adminUsername = "bnguyen@lattice-engines.com";
     protected static final String adminPassword = "tahoe";
-    protected static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
-    protected static final String generalUsername = "lming@lattice-engines.com";
     protected static final String generalPassword = "admin";
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
     protected RestTemplate restTemplate = new RestTemplate();
@@ -56,9 +57,6 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
-
-    @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
 
     @Autowired
     private SessionService sessionService;
@@ -117,11 +115,11 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         assertNull(globalUserManagementService.getUserByUsername(username));
     }
     
-    protected Session loginAndAttach(String username) {
-        return loginAndAttach(username, generalPassword);
+    protected Session login(String username) {
+        return login(username, generalPassword);
     }
     
-    protected Session loginAndAttach(String username, String password) {
+    protected Session login(String username, String password) {
         password = DigestUtils.sha256Hex(password);
         Ticket ticket = globalAuthenticationService.authenticateUser(username, password);
         return sessionService.attach(ticket);
@@ -151,12 +149,50 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         }
     }
 
-    protected void revokeRight (String right, String tenantId, String username) {
-        try {
-            globalUserManagementService.revokeRight(right, tenantId, username);
-        } catch (LedpException e) {
-            //ignore
-        }
+    protected UserDocument loginAndAttach(String username) {
+        return loginAndAttach(username, generalPassword);
     }
+
+    protected UserDocument loginAndAttach(String username, String password) {
+        Credentials creds = new Credentials();
+        creds.setUsername(username);
+        creds.setPassword(DigestUtils.sha256Hex(password));
+
+        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds, LoginDocument.class);
+
+        addAuthHeader.setAuthValue(doc.getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+
+        return restTemplate.postForObject(getRestAPIHostPort() + "/attach", doc.getResult().getTenants().get(0),
+                UserDocument.class);
+    }
+
+    protected UserDocument loginAndAttach(String username, Tenant tenant) {
+        return loginAndAttach(username, generalPassword, tenant);
+    }
+
+    protected UserDocument loginAndAttach(String username, String password, Tenant tenant) {
+        Credentials creds = new Credentials();
+        creds.setUsername(username);
+        creds.setPassword(DigestUtils.sha256Hex(password));
+
+        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds,
+                LoginDocument.class);
+
+        addAuthHeader.setAuthValue(doc.getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+
+        return restTemplate.postForObject(getRestAPIHostPort() + "/attach", tenant, UserDocument.class);
+    }
+
+    protected void useSessionDoc(UserDocument doc) {
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+    }
+
+    protected void logoutUserDoc(UserDocument doc) { logoutTicket(doc.getTicket()); }
+
+    protected void logoutTicket(Ticket ticket) { globalAuthenticationService.discard(ticket); }
 
 }

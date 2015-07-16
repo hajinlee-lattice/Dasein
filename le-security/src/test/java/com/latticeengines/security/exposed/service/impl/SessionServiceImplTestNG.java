@@ -40,7 +40,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
         String passwd = DigestUtils.sha256Hex(adminPassword);
         ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
         assertNotNull(ticket);
-        Session session = loginAndAttach(adminUsername, adminPassword);
+        Session session = login(adminUsername, adminPassword);
         tenant = session.getTenant();
     }
     
@@ -117,7 +117,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
             grantRight(right.getAuthority(), tenant.getId(), testUsername);
         }
 
-        Session session = loginAndAttach(testUsername);
+        Session session = login(testUsername);
 
         if (levelOut == null) {
             assertNull(session.getAccessLevel());
