@@ -7,8 +7,8 @@ from optparse import OptionParser, OptionGroup
 
 def construct_option_parser():
     parser = OptionParser()
-    parser.add_option("-o", "--hostport", dest="hostport", default="http://bodcprodjty221.prod.lattice.local",
-                      help='default = http://bodcprodjty221.prod.lattice.local')
+    parser.add_option("-o", "--hostport", dest="hostport", default="http://admin.lattice.local",
+                      help='default = http://admin.lattice.local')
     parser.add_option("-c", "--command", dest="command", help='list, add, remove, setdefault')
     parser.add_option("-s", "--server", dest="server", help='the server to be added/removed, or set to be default')
     return parser
