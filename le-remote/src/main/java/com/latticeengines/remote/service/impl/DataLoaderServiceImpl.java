@@ -507,8 +507,12 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
         log.info("Send POST to " + dlUrl + endpoint + " with payload = " + stringifiedPayload);
 
-        return HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
+        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
                 Headers.getHeaders(), stringifiedPayload);
+
+        log.info("Get response from " + dlUrl + endpoint + ": " + response);
+
+        return response;
 
     }
 }
