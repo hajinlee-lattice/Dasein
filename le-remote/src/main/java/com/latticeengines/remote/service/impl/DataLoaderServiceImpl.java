@@ -498,15 +498,17 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         if (dlUrl.endsWith("/")) dlUrl = dlUrl.substring(0, dlUrl.length() - 1);
         if (!dlUrl.endsWith(DL_REST_SERVICE)) dlUrl += DL_REST_SERVICE;
 
-        log.info("Send POST to " + dlUrl + endpoint);
-
+        String stringifiedPayload;
         if (payload instanceof String) {
-            return HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
-                    Headers.getHeaders(), ( String ) payload);
+            stringifiedPayload = ( String ) payload;
         } else {
-            return HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
-                    Headers.getHeaders(), JsonUtils.serialize(payload));
+            stringifiedPayload =  JsonUtils.serialize(payload);
         }
+
+        log.info("Send POST to " + dlUrl + endpoint + " with payload = " + stringifiedPayload);
+
+        return HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
+                Headers.getHeaders(), stringifiedPayload);
 
     }
 }
