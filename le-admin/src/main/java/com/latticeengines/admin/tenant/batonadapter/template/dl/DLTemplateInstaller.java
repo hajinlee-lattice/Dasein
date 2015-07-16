@@ -72,7 +72,10 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
 
         String version = vdbdlConfig.getNodeAtPath("/TemplateVersion").getData();
         File dataloaderTemplate = new File(templateProvider.getTemplate(version, topology) + ".config");
-
+        if (!dataloaderTemplate.exists()) {
+            throw new LedpException(LedpCode.LEDP_18038,
+                    new IOException("Cannot find DL template at " + dataloaderTemplate));
+        }
         try {
             String str = BOMUtils.toString(new FileInputStream(dataloaderTemplate));
             InstallTemplateRequest request = new InstallTemplateRequest(tenant, str);

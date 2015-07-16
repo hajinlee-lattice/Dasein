@@ -72,6 +72,10 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
         String version = vdbdlConfig.getNodeAtPath("/TemplateVersion").getData();
         File visiDBTemplate = new File(templateProvider.getTemplate(version, topology) + ".specs");
+        if (!visiDBTemplate.exists()) {
+            throw new LedpException(LedpCode.LEDP_18038,
+                    new IOException("Cannot find VDB template at " + visiDBTemplate));
+        }
 
         try {
             String str = BOMUtils.toString(new FileInputStream(visiDBTemplate));
