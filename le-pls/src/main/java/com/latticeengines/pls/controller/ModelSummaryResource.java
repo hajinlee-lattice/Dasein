@@ -1,9 +1,11 @@
 package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -70,6 +73,30 @@ public class ModelSummaryResource {
             summary.setDetails(null);
         }
         return summaries;
+    }
+
+    @RequestMapping(value = "/alerts/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get diagnostic alerts for a model.")
+    public ModelAlerts getModelAlerts(@PathVariable String modelId, HttpServletRequest request,
+                                      HttpServletResponse response) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        if (!modelSummaryService.modelIdinTenant(modelId, tenant.getId())) {
+            response.setStatus(403);
+            return null;
+        }
+
+        //TODO: to be replaced by true model alerts
+        ModelAlerts mockAlerts = new ModelAlerts();
+        ModelAlerts.ModelQualityWarnings modelQualityWarnings = new ModelAlerts.ModelQualityWarnings();
+        modelQualityWarnings.setSuccess(false);
+        List<ModelAlerts.AttributeValuePair> badAttributes = Arrays.asList(
+                new ModelAlerts.AttributeValuePair("attribuite1", "0.5"),
+                new ModelAlerts.AttributeValuePair("attribuite2", "0.3")
+        );
+        modelQualityWarnings.setLowConversionRateAttributes(badAttributes);
+
+        return mockAlerts;
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

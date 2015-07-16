@@ -50,6 +50,13 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         return modelSummary;
     }
 
+    public boolean modelIdinTenant(String modelId, String tenantId) {
+        ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false, false);
+        if (modelSummary == null) return false;
+        Tenant tenant = modelSummary.getTenant();
+        return (tenant != null) && tenantId.equals(tenant.getId());
+    }
+
     private void resolveNameIdConflict(ModelSummary modelSummary, String tenantId) {
         List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getAll();
         List<String> existingNames = new ArrayList<>();

@@ -108,9 +108,7 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
                 deferred.resolve(result);
             } else {
                 result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
-                if (_.some(data.Errors, function (err) {
-                        return err.indexOf("email conflicts") > -1;
-                    })) {
+                if (data.Result.hasOwnProperty("ConflictingUser")) {
                     result.ResultObj.ConflictingUser = data.Result.ConflictingUser;
                     result.ResultErrors = ResourceUtility.getString('ADD_USER_CONFLICT_EMAIL');
                 }

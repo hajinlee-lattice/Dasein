@@ -8,4 +8,6 @@ public interface ModelSummaryService {
 
     ModelSummary createModelSummary(ModelSummary modelSummary, String tenantId);
 
+    boolean modelIdinTenant(String modelId, String tenantId);
+
 }
