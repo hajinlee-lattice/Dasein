@@ -83,7 +83,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         tenantEntityMgr.create(tenant);
         
         String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
+                + "/TENANT1.TENANT1.Production/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
         URL modelSummaryUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
@@ -105,7 +105,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
     @Test(groups = "functional")
     public void executeInternalWithTenantRegistrationLaterThanHdfsModelCreation() throws Exception {
         String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0002/enhancements";
+                + "/TENANT1.TENANT1.Production/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0002/enhancements";
         URL modelSummaryUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         HdfsUtils.mkdir(yarnConfiguration, dir);
@@ -131,7 +131,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         tenantEntityMgr.create(tenant);
 
         String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
+                + "/TENANT1.TENANT1.Production/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
         URL modelSummaryUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/pls/service/impl/modelsummary-detailsonly.json");
 

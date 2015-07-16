@@ -13,6 +13,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -37,7 +38,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + tenant.getId();
+        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId());
         final Long tenantRegistrationTime = tenant.getRegisteredTime();
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
 
