@@ -63,7 +63,7 @@ public class BardJamsTenant implements HasPid {
     private String weekendScheduleName;
     @Column(name = "Data_LaunchPath", nullable = true)
     private String dataLaunchPath;
-    @Column(name = "Data_AlternativeManifestPath", nullable = true)
+    @Column(name = "Data_AlternateManifestPath", nullable = true)
     private String dataAlternativeManifestPath;
     @Column(name = "Data_ArchivePath", nullable = true)
     private String dataArchivePath;
