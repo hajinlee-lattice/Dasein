@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-driven-rpm</artifactId>
     <packaging>rpm</packaging>
-    <description>LE DRIVEN RPM</description>
+    <description>LE DRIVEN RPM - install driven properties on jenkins slaves</description>
 
     <properties>
         <le.rpm.version>2.0.5-SNAPSHOT</le.rpm.version>
@@ -28,20 +28,19 @@
                 </property>
             </activation>
             <properties>
-                <driven.properties.path>conf/env/devcluster</driven.properties.path>
+                <driven.properties.path>conf/driven/env/devcluster</driven.properties.path>
             </properties>
         </profile>
         <profile>
             <id>integration</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
                 <property>
                     <name>environment.type</name>
                     <value>intcluster</value>
                 </property>
             </activation>
             <properties>
-                <driven.properties.path>conf/env/intcluster</driven.properties.path>
+                <driven.properties.path>conf/driven/env/intcluster</driven.properties.path>
             </properties>
         </profile>
         <profile>
@@ -53,7 +52,7 @@
                 </property>
             </activation>
             <properties>
-                <driven.properties.path>conf/env/qacluster</driven.properties.path>
+                <driven.properties.path>conf/driven/env/qacluster</driven.properties.path>
             </properties>
         </profile>
         <profile>
@@ -65,7 +64,7 @@
                 </property>
             </activation>
             <properties>
-                <driven.properties.path>conf/env/prodcluster</driven.properties.path>
+                <driven.properties.path>conf/driven/env/prodcluster</driven.properties.path>
             </properties>
         </profile>
     </profiles>
@@ -83,7 +82,7 @@
                     <!--distribution>Trash 2005</distribution -->
                     <group>Application/Collectors</group>
                     <!-- prefix>/usr/local</prefix -->
-                    <changelogFile>src/main/resources/changelog</changelogFile>
+                    <changelogFile>src/main/resources/driven/changelog</changelogFile>
                     <mappings>
                         <mapping>
                             <directory>/etc/hadoop/conf</directory>
