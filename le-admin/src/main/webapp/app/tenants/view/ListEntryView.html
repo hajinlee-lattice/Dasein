@@ -6,7 +6,7 @@
         </label>
 
         <div class="input-group" ng-repeat="item in list">
-            <input type="text" class="form-control" ng-model="item.value"ng-model-options="{ debounce: 200 }"
+            <input type="text" class="form-control" ng-model="item.value" ng-model-options="{ debounce: 50 }"
                    ng-change="syncData()" />
             <div class="input-group-addon"><a href="" ng-click="deleteItem($index)"><i class="fa fa-trash-o text-danger"></i></a></div>
         </div>
