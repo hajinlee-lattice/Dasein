@@ -3,10 +3,11 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.login.services.LoginService'
+    'mainApp.login.services.LoginService',
+    'mainApp.config.services.ConfigService'
 ])
 
-.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, NavUtility, LoginService) {
+.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, NavUtility, LoginService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
 
@@ -20,7 +21,15 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $scope.showSystemSetup =  RightsUtility.maySeeSystemSetup();
     $scope.showModelCreationHistoryDropdown = RightsUtility.maySeeModelCreationHistory();
     $scope.showMultipleModelSetup = RightsUtility.mayEditMultipleModelSetup();
-    
+
+    // hide MultipleModelSetup and SystemSetup links, if there is no topology in ZK, i.e. not registered in tenant console.
+    ConfigService.GetCurrentTopology().then(function(result){
+        if (!result.success) {
+            $scope.showSystemSetup = false;
+            $scope.showMultipleModelSetup = false;
+        }
+    });
+
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
             $event.preventDefault();
