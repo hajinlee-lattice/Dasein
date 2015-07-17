@@ -39,6 +39,12 @@ public class DefaultConfigOverwritter {
     @Value("${admin.overwrite.vdb.permstore.options:DEFAULT}")
     private String vdbPermstoreOptions;
 
+    @Value("${admin.overwrite.vdb.servername:DEFAULT}")
+    private String vdbServername;
+
+    @Value("${admin.overwrite.vdb.servername.options:DEFAULT}")
+    private String vdbServernameOptions;
+
     @Value("${admin.overwrite.pls.superadmin:DEFAULT}")
     private String plsSuperAdmins;
 
@@ -103,6 +109,10 @@ public class DefaultConfigOverwritter {
         if (isToBeOverwritten(vdbPermstore) && isToBeOverwritten(vdbPermstoreOptions)) {
             overwritePermstoreConfig();
         }
+
+        if (isToBeOverwritten(vdbServername) && isToBeOverwritten(vdbServernameOptions)) {
+            overwriteVdbServernameConfig();
+        }
     }
 
 
@@ -111,6 +121,14 @@ public class DefaultConfigOverwritter {
         patch.setNode("/VisiDB/PermanentStore");
         patch.setDefaultOption(vdbPermstore);
         patch.setOptions(Arrays.asList(vdbPermstoreOptions.split(listDelimiter)));
+        serviceService.patchDefaultConfigWithOptions(VisiDBDLComponent.componentName, patch);
+    }
+
+    private void overwriteVdbServernameConfig() {
+        SelectableConfigurationField patch = new SelectableConfigurationField();
+        patch.setNode("/VisiDB/ServerName");
+        patch.setDefaultOption(vdbServername);
+        patch.setOptions(Arrays.asList(vdbServernameOptions.split(listDelimiter)));
         serviceService.patchDefaultConfigWithOptions(VisiDBDLComponent.componentName, patch);
     }
 
