@@ -97,13 +97,13 @@
                         </mapping>
                     </mappings>
                     <preremoveScriptlet>
-                        <scriptFile>scripts/preremove</scriptFile>
+                        <scriptFile>src/main/scripts/driven/preremove</scriptFile>
                     </preremoveScriptlet>
                     <preinstallScriptlet>
-                        <scriptFile>scripts/preinstall</scriptFile>
+                        <scriptFile>src/main/scripts/driven/preinstall</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>scripts/postinstall</scriptFile>
+                        <scriptFile>src/main/scripts/driven/postinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>
