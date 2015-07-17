@@ -50,7 +50,7 @@ public class TenantUpgradeServiceImpl implements TenantUpgradeService {
                 spaceConfiguration.getTopology());
         System.out.println("OK");
 
-        System.out.print("Set Bootstrap stat to MIGRATED ... ");
+        System.out.print("Set Bootstrap state to MIGRATED ... ");
         zooKeeperManager.setBootstrapStateToMigrate(customer);
         System.out.println("OK");
     }

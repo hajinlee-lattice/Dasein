@@ -8,7 +8,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.upgrade.UpgradeRunner;
 import com.latticeengines.upgrade.jdbc.PlsMultiTenantJdbcManager;
 import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
@@ -49,49 +48,26 @@ public class TenantCleanupServiceImpl implements TenantUpgradeService {
                 uuidsInLp.add(uuid);
             }
         }
+
+        for(String uuid: tenantModelJdbcManager.getActiveUuids(customer)) {
+            if (uuidsInHdfs.contains(uuid)) {
+                uuidsInLp.add(uuid);
+            }
+        }
+
         System.out.println(String.format("Number of models to be downloaded for customer %s ... ... ... ... %d",
                 customer, uuidsInLp.size()));
     }
 
-    private void deleteSingularIdPLSTenant(String customer) {
-        System.out.println(String.format("\nThe old customer being deleted from PLS ... ... ... ... %s", customer));
-
-        System.out.print("Deleting singular ID tenant in PLS/GA ... ");
-        plsGaManager.deleteTenantWithSingularId(customer);
-        System.out.println("OK");
-    }
-
-    private void deleteModelSummariesForNewTenant(String customer) {
-        System.out.println(String.format("\nRemoving modelsummaries in the new tenant for ... ... ... ... %s", customer));
-
-        System.out.print("Removing modelsummaries in PLS_MultiTenant DB ... ");
-        String tupleId = CustomerSpace.parse(customer).toString();
-        plsMultiTenantJdbcManager.deleteModelSummariesByTenantId(tupleId);
-        System.out.println("OK");
-    }
-
     private void waitForModelDownloadedAndRename(String customer) {
         System.out.println("  Waiting for all models for customer " + customer + " are downloaded ... ");
-        Set<String> uuidsDownloaded = new HashSet<>();
         for (String uuid: uuidsToBeDownloaded(customer)) {
             if (uuidsInHdfs.contains(uuid)) {
                 System.out.println("    " + uuid + " ... ");
                 String modelGuid = modelIsDownloaded(uuid);
                 System.out.println(modelGuid == null ? "NO" : "YES. ModelGuid = " + modelGuid);
-                if (modelGuid != null) {
-                    uuidsDownloaded.add(modelGuid);
-                }
             }
         }
-
-        System.out.println("  Updating model names for customer " + customer + ", if necessary ... ");
-        Map<String, String> modelNames = modelUpgrader.getUuidModelNameMap();
-        for (Map.Entry<String, String> entry: modelNames.entrySet()) {
-            if (uuidsDownloaded.contains(entry.getKey())) {
-                updateModelName(entry.getKey(), entry.getValue());
-            }
-        }
-
     }
 
     private void populateUpgradeSummary(String customer) {
@@ -120,13 +96,6 @@ public class TenantCleanupServiceImpl implements TenantUpgradeService {
         }
         tenantModelJdbcManager.populateUpgradeSummary(summary);
 
-        System.out.println("OK");
-    }
-
-    private void updateModelName(String uuid, String name) {
-        System.out.print("  Updating the name of model " + uuid + " to " + name + " ... ");
-        String modelGuid = modelIsDownloaded(uuid);
-        plsGaManager.updateModelName(modelGuid, name);
         System.out.println("OK");
     }
 
@@ -168,8 +137,6 @@ public class TenantCleanupServiceImpl implements TenantUpgradeService {
 
     private void upgrade(String customer) {
         getUuids(customer);
-        deleteSingularIdPLSTenant(customer);
-        deleteModelSummariesForNewTenant(customer);
         waitForModelDownloadedAndRename(customer);
         updateModelsActivity(customer);
         populateUpgradeSummary(customer);
