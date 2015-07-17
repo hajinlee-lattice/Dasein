@@ -19,6 +19,19 @@
 
     <profiles>
         <profile>
+            <id>buildmachine</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>buildmachine</value>
+                </property>
+            </activation>
+            <properties>
+                <driven.properties.path>conf/driven/env/buildmachine</driven.properties.path>
+            </properties>
+        </profile>
+        <profile>
             <id>development</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
