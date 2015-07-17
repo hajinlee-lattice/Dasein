@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class BardJamsInstaller extends LatticeComponentInstaller {
 
-    private int timeout = 60000;
+    private long timeout = 60000L;
     private long wait_interval_mills = 3000L;
 
     private final Log log = LogFactory.getLog(this.getClass());
@@ -92,7 +92,13 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
             }
             currTime = System.currentTimeMillis();
         }
-
+        BardJamsTenant newTenant = bardJamsEntityMgr.findByKey(tenant);
+        String status = newTenant.getStatus().trim();
+        if (BardJamsTenantStatus.NEW.getStatus().equals(status)) {
+            Exception e = new IllegalStateException("The status of tenant " + tenant.getTenant()
+                    + " remains NEW after " + String.valueOf(timeout/1000.) + " seconds.");
+            throw new LedpException(LedpCode.LEDP_18027, e);
+        }
         return isSuccessful;
     }
 
