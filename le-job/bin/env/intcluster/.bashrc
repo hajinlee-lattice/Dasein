@@ -24,4 +24,4 @@ export SCORING_MGR_QUARTZ_ENABLED=enabled
 export DELLEBI_QUARTZ_ENABLED=enabled
 export MODEL_DL_QUARTZ_ENABLED=enabled
 export DRIVEN_API_KEY=1DC6ABF74C494DA395F940F64034CFA6
-export DRIVEN_SERVER_HOSTS=http://bodcdevhdpweb54.lattice.local:8080
+export DRIVEN_SERVER_HOSTS=http://bodcdevhdpweb54.lattice.local
