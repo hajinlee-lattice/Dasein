@@ -90,6 +90,16 @@
                         </configuration>
                         <dependencies>
                             <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm-commons</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
                                 <groupId>javax.mail</groupId>
                                 <artifactId>mail</artifactId>
                                 <version>1.4.7</version>
@@ -430,16 +440,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>5.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-commons</artifactId>
-            <version>5.0.2</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
