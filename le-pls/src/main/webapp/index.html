@@ -1,151 +1,211 @@
-﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en" id="ng-app" data-ng-app="mainApp">
 <head runat="server">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon"> 
+    <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
     <title>Lattice Engines</title>
-    <!-- build:css assets/styles/production_@@versionString.css -->
+
+    <!-- build:template:dist
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/styles/production_<%= versionString %>.min.css"/>
+    /build -->
+    <!-- build:remove:dist -->
+    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="lib/css/jquery.qtip.css"/>
+    <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.css"/>
+
     <link href="assets/styles/production.css" rel="stylesheet" type="text/css" />
-    <!-- endbuild -->
-    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700" rel="stylesheet" type="text/css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.1/jquery.qtip.min.css" rel="stylesheet" type="text/css">
+    <!-- /build -->
+
 </head>
 <body data-ng-controller="MainController" class="blue-background">
-    <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
-    <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-    <div class="content-wrap">
-        <div id="mainView">
-            <div id="mainHeaderView"></div>
-            <div data-ng-view class="container"></div>
-        </div>
+<!-- Used for all modals. Be sure to clear HTML before and after using it. -->
+<div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
+<div class="content-wrap">
+    <div id="mainView">
+        <div id="mainHeaderView"></div>
+        <div data-ng-view class="container"></div>
     </div>
-    <div class="footer" data-ng-show="showFooter">
-        © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
-    </div>
-    
-    <!-- 
-    This div will be added to the DOM if the browser is IE 
-    Use DOMUtil.isIE() to detect internet explorer.
-    -->
-    <!--[if IE]> <div id="isIE"></div> <![endif]-->
+</div>
+<div class="footer" data-ng-show="showFooter">
+    © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
+</div>
 
-    <!-- build:js app/production_@@versionString.js -->
-    <!-- vendor -->
-    <script src="app/AppCommon/vendor/jquery-2.1.1.js"></script>
-    <script src="app/AppCommon/vendor/angular/angular.js"></script>
-    <script src="app/AppCommon/vendor/angular/angular-resource.js"></script>
-    <script src="app/AppCommon/vendor/angular/angular-route.js"></script>
-    <script src="app/AppCommon/vendor/angular/angular-sanitize.js"></script>
-    <script src="app/AppCommon/vendor/underscore.js"></script>
-    <script src="app/AppCommon/vendor/jstorage.js"></script>
-    <script src="app/AppCommon/vendor/d3.v3.js"></script>
-    <script src="app/AppCommon/vendor/CryptoJS.js"></script>
-    <script src="app/AppCommon/vendor/bootstrap.js"></script>
-    <script src="app/AppCommon/vendor/jquery.qtip.js"></script>
-    <script src="app/AppCommon/vendor/alasql.js"></script>
-    <script src="app/AppCommon/vendor/date.format.js"></script>
-    <script src="app/AppCommon/vendor/ui-bootstrap-jpls-0.13.0.js"></script>
-    
-    <!-- common -->
-    <script src="app/AppCommon/directives/ngEnterDirective.js"></script>
-    <script src="app/AppCommon/directives/ngQtipDirective.js"></script>
-    <script src="app/AppCommon/directives/helperMarkDirective.js"></script>
-    <script src="app/AppCommon/utilities/ExceptionOverrideUtility.js"></script>
-    <script src="app/AppCommon/utilities/URLUtility.js"></script>
-    <script src="app/AppCommon/utilities/ResourceUtility.js"></script>
-    <script src="app/AppCommon/utilities/FaultUtility.js"></script>
-    <script src="app/AppCommon/utilities/ConfigConstantUtility.js"></script>
-    <script src="app/AppCommon/utilities/EvergageUtility.js"></script>
-    <script src="app/AppCommon/utilities/AuthenticationUtility.js"></script>
-    <script src="app/AppCommon/utilities/SortUtility.js"></script>
-    <script src="app/AppCommon/utilities/WidgetConfigUtility.js"></script>
-    <script src="app/AppCommon/utilities/MetadataUtility.js"></script>
-    <script src="app/AppCommon/utilities/AnimationUtility.js"></script>
-    <script src="app/AppCommon/utilities/DateTimeFormatUtility.js"></script>
-    <script src="app/AppCommon/utilities/NumberUtility.js"></script>
-    <script src="app/AppCommon/utilities/AnalyticAttributeUtility.js"></script>
-    <script src="app/AppCommon/utilities/TrackingConstantsUtility.js"></script>
-    <script src="app/AppCommon/utilities/StringUtility.js"></script>
-    <script src="app/AppCommon/utilities/UnderscoreUtility.js"></script>
-    <script src="app/AppCommon/utilities/TimestampIntervalUtility.js"></script>
-    <script src="app/AppCommon/modals/SimpleModal.js"></script>
-    <script src="app/AppCommon/services/WidgetFrameworkService.js"></script>
-    <script src="app/AppCommon/services/PlayTileService.js"></script>
-    <script src="app/AppCommon/services/TopPredictorService.js"></script>
-    <script src="app/AppCommon/services/ThresholdExplorerService.js"></script>
-    <script src="app/AppCommon/services/ModelSummaryValidationService.js"></script>
-    <script src="app/AppCommon/widgets/WidgetEventConstantUtility.js"></script>
-    <script src="app/AppCommon/widgets/screenWidget/ScreenWidget.js"></script>
-    <script src="app/AppCommon/widgets/screenHeaderWidget/ScreenHeaderWidget.js"></script>
-    <script src="app/AppCommon/widgets/repeaterWidget/RepeaterWidget.js"></script>
-    <script src="app/AppCommon/widgets/leadDetailsTileWidget/LeadDetailsTileWidget.js"></script>
-    <script src="app/AppCommon/widgets/arcChartWidget/ArcChartWidget.js"></script>
-    <script src="app/AppCommon/widgets/collapsiblePanelWidget/CollapsiblePanelWidget.js"></script>
-    <script src="app/AppCommon/widgets/analyticAttributeTileWidget/AnalyticAttributeTileWidget.js"></script>
-    <script src="app/AppCommon/widgets/analyticAttributeListWidget/AnalyticAttributeListWidget.js"></script>
-    <script src="app/AppCommon/widgets/playListTileWidget/PlayListTileWidget.js"></script>
-    <script src="app/AppCommon/widgets/playDetailsTileWidget/PlayDetailsTileWidget.js"></script>
-    <script src="app/AppCommon/widgets/tabWidget/TabWidget.js"></script>
-    <script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js"></script>
-    <script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointWidget.js"></script>
-    <script src="app/AppCommon/directives/charts/ArcChartDirective.js"></script>
-    <script src="app/AppCommon/widgets/modelListTileWidget/ModelListTileWidget.js"></script>
-    <script src="app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidget.js"></script>
-    <script src="app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidget.js"></script>
-    <script src="app/AppCommon/widgets/thresholdExplorerWidget/ThresholdExplorerWidget.js"></script>
-    <script src="app/AppCommon/widgets/simpleTabWidget/SimpleTabWidget.js"></script>
-    <script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorWidget.js"></script>
-    <script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidget.js"></script>
-    <script src="app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js"></script>
-    <script src="app/AppCommon/widgets/userManagementWidget/UserManagementWidget.js"></script>
-    <script src="app/AppCommon/widgets/adminInfoWidget/AdminInfoWidget.js"></script>
-    <script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
-    
-    <!-- app specific -->
-    <script src="app/app.js"></script>
-    <script src="app/core/utilities/BrowserStorageUtility.js"></script>
-    <script src="app/core/utilities/RightsUtility.js"></script>
-    <script src="app/core/utilities/PasswordUtility.js"></script>
-    <script src="app/core/utilities/ServiceErrorUtility.js"></script>
-    <script src="app/core/utilities/NavUtility.js"></script>
-    
-    <script src="app/core/services/HelpService.js"></script>
-    <script src="app/core/services/ResourceStringsService.js"></script>
-    <script src="app/core/services/SessionService.js"></script>
-    <script src="app/core/services/WidgetService.js"></script>
-    <script src="app/login/services/LoginService.js"></script>
-    <script src="app/config/services/ConfigService.js"></script>
-    <script src="app/models/services/ModelService.js"></script>
-    <script src="app/userManagement/services/UserManagementService.js"></script>
-    
-    <script src="app/login/controllers/LoginController.js"></script>
-    <script src="app/login/controllers/UpdatePasswordController.js"></script>
-    <script src="app/core/controllers/MainViewController.js"></script>
-    <script src="app/core/controllers/MainHeaderController.js"></script>
-    <script src="app/config/controllers/ManageCredentialsController.js"></script>
-    <script src="app/config/modals/EnterCredentialsModal.js"></script>
-    <script src="app/userManagement/controllers/UserManagementController.js"></script>
-    <script src="app/models/controllers/ModelListController.js"></script>
-    <script src="app/models/controllers/ModelDetailController.js"></script>
-    <script src="app/models/controllers/AdminInfoController.js"></script>
-    <script src="app/models/controllers/ModelCreationHistoryController.js"></script>
-    <script src="app/models/controllers/MultipleModelSetupController.js"></script>
-    <script src="app/models/modals/DeleteModelModal.js"></script>
-    <script src="app/models/modals/StaleModelModal.js"></script>
-    <script src="app/models/modals/ImportModelModal.js"></script>
-    <script src="app/models/modals/AddSegmentModal.js"></script>
-    
-    <script src="app/login/modals/TenantSelectionModal.js"></script>
-    <script src="app/userManagement/modals/AddUserModal.js"></script>
-    <script src="app/userManagement/modals/DeleteUserModal.js"></script>
-    <script src="app/userManagement/modals/EditUserModal.js"></script>
-    <!-- endbuild -->
-    
-    <script>
-        // Create global variable for Evergage to use
-        var _aaq = _aaq || [];
-    </script>
+<!--
+This div will be added to the DOM if the browser is IE
+Use DOMUtil.isIE() to detect internet explorer.
+-->
+<!--[if IE]> <div id="isIE"></div> <![endif]-->
+
+
+<!-- build:remove:dist -->
+<script type="text/javascript">
+    WebFontConfig = {
+        google: { families: [ 'Open Sans' ]
+        }
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = 'lib/js/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
+</script>
+
+<script src="lib/js/jquery.js"></script>
+
+<script src="lib/js/angular/angular.js"></script>
+<script src="lib/js/angular/angular-sanitize.js"></script>
+<script src="lib/js/angular/angular-resource.js"></script>
+<script src="lib/js/angular/angular-route.js"></script>
+
+<script src="lib/js/crypto/core.js"></script>
+<script src="lib/js/crypto/sha256.js"></script>
+
+<script src="lib/js/ui-bootstrap.js"></script>
+<script src="lib/js/ui-bootstrap-tpls.js"></script>
+<script src="lib/js/jquery.qtip.js"></script>
+<script src="lib/js/underscore.js"></script>
+<script src="lib/js/bootstrap.js"></script>
+<script src="lib/js/d3.js"></script>
+<script src="lib/js/jstorage.js"></script>
+<script src="lib/js/alasql.min.js"></script>
+
+<script src="app/AppCommon/vendor/date.format.js"></script>
+
+<!-- common -->
+<script src="app/AppCommon/directives/charts/ArcChartDirective.js"></script>
+<script src="app/AppCommon/directives/ngEnterDirective.js"></script>
+<script src="app/AppCommon/directives/ngQtipDirective.js"></script>
+<script src="app/AppCommon/directives/helperMarkDirective.js"></script>
+<script src="app/AppCommon/utilities/ExceptionOverrideUtility.js"></script>
+<script src="app/AppCommon/utilities/URLUtility.js"></script>
+<script src="app/AppCommon/utilities/ResourceUtility.js"></script>
+<script src="app/AppCommon/utilities/FaultUtility.js"></script>
+<script src="app/AppCommon/utilities/ConfigConstantUtility.js"></script>
+<script src="app/AppCommon/utilities/EvergageUtility.js"></script>
+<script src="app/AppCommon/utilities/AuthenticationUtility.js"></script>
+<script src="app/AppCommon/utilities/SortUtility.js"></script>
+<script src="app/AppCommon/utilities/WidgetConfigUtility.js"></script>
+<script src="app/AppCommon/utilities/MetadataUtility.js"></script>
+<script src="app/AppCommon/utilities/AnimationUtility.js"></script>
+<script src="app/AppCommon/utilities/DateTimeFormatUtility.js"></script>
+<script src="app/AppCommon/utilities/NumberUtility.js"></script>
+<script src="app/AppCommon/utilities/AnalyticAttributeUtility.js"></script>
+<script src="app/AppCommon/utilities/TrackingConstantsUtility.js"></script>
+<script src="app/AppCommon/utilities/StringUtility.js"></script>
+<script src="app/AppCommon/utilities/UnderscoreUtility.js"></script>
+<script src="app/AppCommon/utilities/TimestampIntervalUtility.js"></script>
+<script src="app/AppCommon/modals/SimpleModal.js"></script>
+<script src="app/AppCommon/services/WidgetFrameworkService.js"></script>
+<script src="app/AppCommon/services/PlayTileService.js"></script>
+<script src="app/AppCommon/services/TopPredictorService.js"></script>
+<script src="app/AppCommon/services/ThresholdExplorerService.js"></script>
+<script src="app/AppCommon/services/ModelSummaryValidationService.js"></script>
+<script src="app/AppCommon/widgets/WidgetEventConstantUtility.js"></script>
+<script src="app/AppCommon/widgets/screenWidget/ScreenWidget.js"></script>
+<script src="app/AppCommon/widgets/screenHeaderWidget/ScreenHeaderWidget.js"></script>
+<script src="app/AppCommon/widgets/repeaterWidget/RepeaterWidget.js"></script>
+<script src="app/AppCommon/widgets/leadDetailsTileWidget/LeadDetailsTileWidget.js"></script>
+<script src="app/AppCommon/widgets/arcChartWidget/ArcChartWidget.js"></script>
+<script src="app/AppCommon/widgets/collapsiblePanelWidget/CollapsiblePanelWidget.js"></script>
+<script src="app/AppCommon/widgets/analyticAttributeTileWidget/AnalyticAttributeTileWidget.js"></script>
+<script src="app/AppCommon/widgets/analyticAttributeListWidget/AnalyticAttributeListWidget.js"></script>
+<script src="app/AppCommon/widgets/playListTileWidget/PlayListTileWidget.js"></script>
+<script src="app/AppCommon/widgets/playDetailsTileWidget/PlayDetailsTileWidget.js"></script>
+<script src="app/AppCommon/widgets/tabWidget/TabWidget.js"></script>
+<script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js"></script>
+<script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointWidget.js"></script>
+<script src="app/AppCommon/widgets/modelListTileWidget/ModelListTileWidget.js"></script>
+<script src="app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidget.js"></script>
+<script src="app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidget.js"></script>
+<script src="app/AppCommon/widgets/thresholdExplorerWidget/ThresholdExplorerWidget.js"></script>
+<script src="app/AppCommon/widgets/simpleTabWidget/SimpleTabWidget.js"></script>
+<script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorWidget.js"></script>
+<script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidget.js"></script>
+<script src="app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js"></script>
+<script src="app/AppCommon/widgets/userManagementWidget/UserManagementWidget.js"></script>
+<script src="app/AppCommon/widgets/adminInfoWidget/AdminInfoWidget.js"></script>
+<script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
+
+<!-- app specific -->
+<script src="app/app.js"></script>
+<script src="app/core/utilities/BrowserStorageUtility.js"></script>
+<script src="app/core/utilities/RightsUtility.js"></script>
+<script src="app/core/utilities/PasswordUtility.js"></script>
+<script src="app/core/utilities/ServiceErrorUtility.js"></script>
+<script src="app/core/utilities/NavUtility.js"></script>
+
+<script src="app/core/services/HelpService.js"></script>
+<script src="app/core/services/ResourceStringsService.js"></script>
+<script src="app/core/services/SessionService.js"></script>
+<script src="app/core/services/WidgetService.js"></script>
+<script src="app/login/services/LoginService.js"></script>
+<script src="app/config/services/ConfigService.js"></script>
+<script src="app/models/services/ModelService.js"></script>
+<script src="app/userManagement/services/UserManagementService.js"></script>
+
+<script src="app/login/controllers/LoginController.js"></script>
+<script src="app/login/controllers/UpdatePasswordController.js"></script>
+<script src="app/core/controllers/MainViewController.js"></script>
+<script src="app/core/controllers/MainHeaderController.js"></script>
+<script src="app/config/controllers/ManageCredentialsController.js"></script>
+<script src="app/config/modals/EnterCredentialsModal.js"></script>
+<script src="app/userManagement/controllers/UserManagementController.js"></script>
+<script src="app/models/controllers/ModelListController.js"></script>
+<script src="app/models/controllers/ModelDetailController.js"></script>
+<script src="app/models/controllers/AdminInfoController.js"></script>
+<script src="app/models/controllers/ModelCreationHistoryController.js"></script>
+<script src="app/models/controllers/MultipleModelSetupController.js"></script>
+<script src="app/models/modals/DeleteModelModal.js"></script>
+<script src="app/models/modals/StaleModelModal.js"></script>
+<script src="app/models/modals/ImportModelModal.js"></script>
+<script src="app/models/modals/AddSegmentModal.js"></script>
+
+<script src="app/login/modals/TenantSelectionModal.js"></script>
+<script src="app/userManagement/modals/AddUserModal.js"></script>
+<script src="app/userManagement/modals/DeleteUserModal.js"></script>
+<script src="app/userManagement/modals/EditUserModal.js"></script>
+<!-- /build -->
+<!-- build:template:dist
+<script type="text/javascript">
+    WebFontConfig = {
+        google: { families: [ 'Open Sans' ]
+        }
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = '//cdnjs.cloudflare.com/ajax/libs/webfont/<%= version.webfont %>/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
+</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/<%= version.jquery %>/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular-sanitize.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular-resource.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular-route.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/<%= version.underscore %>/underscore-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/<%= version.d3 %>/d3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jStorage/<%= version.jStorage %>/jstorage.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js"></script>
+<script src="app/production_<%= versionString %>.min.js"></script>
+/build -->
+
+<script>
+    // Create global variable for Evergage to use
+    var _aaq = _aaq || [];
+</script>
 </body>
 </html>

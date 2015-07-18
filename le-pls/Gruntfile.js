@@ -7,6 +7,23 @@ module.exports = function (grunt) {
     var appConfig = {
         app:  sourceDir,
         dist: 'dist',
+        version: {
+            "le-common": '0.0.1',
+
+            jquery: '2.1.3',
+            angular: '1.3.15',
+            "angular-ui-bootstrap": '0.12.1',
+            underscore: '1.8.2',
+            qtip2: '2.2.1',
+            webfont: '1.5.16',
+            alasql: '0.2.0',
+            d3: '3.5.6',
+            crypto: '3.1.2',
+            jStorage: '0.4.12',
+
+            bootstrap: '3.3.4',
+            "font-awesome": '4.3.0'
+        },
         env:  {
             dev:         {
                 url:            'http://localhost:8080',
@@ -46,7 +63,7 @@ module.exports = function (grunt) {
 
     // version of our software. This should really be in the package.json
     // but it gets passed in through 
-    var versionStringConfig = grunt.option('versionString') || '';
+    var versionStringConfig = grunt.option('versionString') || new Date().getTime();
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -56,15 +73,101 @@ module.exports = function (grunt) {
         testenv:       chosenEnv,
         versionString: versionStringConfig,
 
+        // download external libraries
+        wget: {
+            // download un-minimized version of vendor javascript libraries from CDN
+            js: {
+                options: {
+                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
+                },
+                src: [
+                    'jquery/<%= pls.version.jquery %>/jquery.js',
+                    'angular-ui-bootstrap/<%= pls.version["angular-ui-bootstrap"] %>/ui-bootstrap.js',
+                    'angular-ui-bootstrap/<%= pls.version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.js',
+                    'qtip2/<%= pls.version.qtip2 %>/jquery.qtip.js',
+                    'underscore.js/<%= pls.version.underscore %>/underscore.js',
+                    'webfont/<%= pls.version.webfont %>/webfontloader.js',
+                    'twitter-bootstrap/<%= pls.version.bootstrap %>/js/bootstrap.js',
+                    'd3/<%= pls.version.d3 %>/d3.js',
+                    'jStorage/<%= pls.version.jStorage %>/jstorage.js',
+                    'alasql/<%= pls.version.alasql %>/alasql.min.js'
+                ],
+                dest: '<%= pls.app %>/lib/js'
+            },
+
+            angular: {
+                options: {
+                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/angular.js/<%= pls.version.angular %>/'
+                },
+                src: [
+                    'angular.js',
+                    'angular-resource.js',
+                    'angular-route.js',
+                    'angular-sanitize.js',
+                    'angular-mocks.js'
+                ],
+                dest: '<%= pls.app %>/lib/js/angular'
+            },
+
+            crypto: {
+                options: {
+                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/crypto-js/<%= pls.version.crypto %>/components/'
+                },
+                src: [
+                    'core.js',
+                    'sha256.js'
+                ],
+                dest: '<%= pls.app %>/lib/js/crypto'
+            },
+
+            css: {
+                options: {
+                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
+                },
+                src: [
+                    'bootswatch/<%= pls.version.bootstrap %>/simplex/bootstrap.css',
+                    'qtip2/<%= pls.version.qtip2 %>/jquery.qtip.css',
+                    'font-awesome/<%= pls.version["font-awesome"] %>/css/font-awesome.css',
+                    'font-awesome/<%= pls.version["font-awesome"] %>/css/font-awesome.css.map'
+                ],
+                dest: '<%= pls.app %>/lib/css'
+            },
+
+            fonts: {
+                options: {
+                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
+                },
+                src: [
+                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/FontAwesome.otf',
+                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.eot',
+                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.svg',
+                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.ttf',
+                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.woff',
+                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.woff2'
+                ],
+                dest: '<%= pls.app %>/lib/fonts'
+            }
+        },
+
         // Removes unessasary folders and files that are created during the build process
         // Force = true to allow for deleting contents outside of the grunt directory structure
         clean: {
+            lib: {
+                files:   [{
+                    dot: true,
+                    src: ['<%= pls.app %>/lib']
+                }],
+                options: {
+                    force: true
+                }
+            },
             dist: {
                 files:   [{
                     dot: true,
                     src: [
                         '.tmp',
-                        '<%= pls.dist %>/{,*/}*'
+                        '<%= pls.app %>/app/production_*.js',
+                        '<%= pls.app %>/assets/styles/production_*.css'
                     ]
                 }],
                 options: {
@@ -74,12 +177,7 @@ module.exports = function (grunt) {
             post: {
                 files:   [{
                     dot: true,
-                    src: [
-                        '.tmp',
-                        '<%= pls.app %>/app/*production*.js',
-                        '<%= pls.app %>/assets/styles/production*.css',
-                        '.sass-cache'
-                    ]
+                    src: [ '.tmp' ]
                 }],
                 options: {
                     force: true
@@ -93,50 +191,70 @@ module.exports = function (grunt) {
             }
         },
 
-        concurrent: {
-            mac:     ['e2eChrome', 'e2eFirefox', 'e2eSafari'],
-            windows: ['e2eChrome']
+        // concat and compress js files
+        uglify: {
+            dist: {
+                options: {
+                    mangle: false
+                },
+                files: {
+                    '<%= pls.app %>/app/production_<%= versionString %>.min.js': [
+                        '<%= pls.app %>/app/AppCommon/vendor/date.format.js',
+                        '<%= pls.app %>/app/AppCommon/!(vendor|test)/**/*.js',
+                        '<%= pls.app %>/app/!(AppCommon)/**/*.js',
+                        '<%= pls.app %>/app/app.js'
+                    ]
+                }
+            }
         },
 
-        // Copies files around the directory structure. Main copies the pls website over to the
-        // new distribution directory (dist). While tmpIndex copies the original index.html page
-        // so we can modify the version strings without screwing up SVN. the .tmp folder gets
-        // delted later on.
-        copy: {
-            main:     {
-                files: [
-                    {
-                        expand: true,
-                        cwd:    '<%= pls.app %>',
-                        src:    [
-                            '**/*',
-                            '!assets/styles/**/*.scss',
-                            '!assets/styles/**/*.map',
-                            '!test/**',
-                            '!assets/CommonAssets/styles/**/*.scss',
-                            'assets/CommonAssets/styles/**/*.css',
-                            '!**/*.js'
-                        ],
-                        dest:   '<%= pls.dist %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd:    '<%= pls.app %>',
-                        src:    'assets/styles/production_<%= versionString %>.css',
-                        dest:   '<%= pls.dist %>/'
-                    },
-                    {expand: true, cwd: '.tmp', src: 'index.html', dest: '<%= pls.dist %>/'}
-                ]
+        // Compiles Sass to CSS
+        sass: {
+            options: {
+                sourcemap: 'none',
+                style:     'compressed'
             },
-            tmpIndex: {
-                src:  '<%= pls.app %>/index.html',
-                dest: '.tmp/index.html'
+            dist:    {
+                files: {
+                    '<%= pls.app %>/assets/styles/production_<%= versionString %>.min.css': '<%= pls.app %>/assets/styles/main.scss'
+                }
+            },
+            dev:     {
+                files: {
+                    '<%= pls.app %>/assets/styles/production.css': '<%= pls.app %>/assets/styles/main.scss'
+                }
+            }
+        },
+
+        // replace long list of local js files to compressed js and CDN links
+        processhtml: {
+            // redirect vendor javascript/css to minimized version on CDN
+            options: {
+                data: {
+                    version: appConfig.version,
+                    versionString: versionStringConfig
+                }
+            },
+
+            dist: {
+                files: {
+                    '<%= pls.app %>/index.html': ['.tmp/index.html']
+                }
+            }
+        },
+
+        // predist and dist are used to copy index.html to a temporary folder for the processing
+        // instrumented is to replace js by instrumented version, so that we can cc protractor test
+        copy: {
+            dist: {
+                src:  '.tmp/index.html',
+                dest: '<%= pls.app %>/index.html'
             },
 
             instrumented: {
                 files: [{
-                	expand: true,
-                	cwd: 'target/protractor_coverage/instrumented/src/main/webapp/',
+                    expand: true,
+                    cwd: 'target/protractor_coverage/instrumented/src/main/webapp/',
                     src: ['**/*'],
                     dest: 'src/main/webapp/'
                 }]
@@ -170,7 +288,6 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/test/testData/**/*.js',
                     '<%= pls.app %>/app/AppCommon/test/unit/**/*.js',
                     '<%= pls.app %>/app/**/*.js'
-
                 ],
                 frameworks: ['jasmine']
 
@@ -220,139 +337,6 @@ module.exports = function (grunt) {
                     singleRun:  false,
                     background: false,
                     autoWatch:  true
-                }
-            }
-        },
-
-        concat: {
-            generated: {
-                files: [{
-                    dest: '<%= pls.dist %>/app/production_<%= versionString %>.js',
-                    src:  [
-                        '<%= pls.app %>/app/AppCommon/vendor/jquery-2.1.1.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/angular/angular.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/angular/angular-resource.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/angular/angular-route.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/angular/angular-sanitize.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/ui-bootstrap-jpls-0.13.0.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/underscore.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/jstorage.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/d3.v3.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/CryptoJS.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/bootstrap.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/jquery.qtip.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/alasql.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/date.format.js',
-                        '<%= pls.app %>/app/AppCommon/directives/ngEnterDirective.js',
-                        '<%= pls.app %>/app/AppCommon/directives/ngQtipDirective.js',
-                        '<%= pls.app %>/app/AppCommon/directives/helperMarkDirective.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/ExceptionOverrideUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/URLUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/ResourceUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/FaultUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/ConfigConstantUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/EvergageUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/AuthenticationUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/SortUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/WidgetConfigUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/MetadataUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/AnimationUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/DateTimeFormatUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/NumberUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/AnalyticAttributeUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/TrackingConstantsUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/StringUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/UnderscoreUtility.js',
-                        '<%= pls.app %>/app/AppCommon/utilities/TimestampIntervalUtility.js',
-                        '<%= pls.app %>/app/AppCommon/modals/SimpleModal.js',
-                        '<%= pls.app %>/app/AppCommon/services/WidgetFrameworkService.js',
-                        '<%= pls.app %>/app/AppCommon/services/PlayTileService.js',
-                        '<%= pls.app %>/app/AppCommon/services/TopPredictorService.js',
-                        '<%= pls.app %>/app/AppCommon/services/ThresholdExplorerService.js',
-                        '<%= pls.app %>/app/AppCommon/services/ModelSummaryValidationService.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/WidgetEventConstantUtility.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/screenWidget/ScreenWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/screenHeaderWidget/ScreenHeaderWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/repeaterWidget/RepeaterWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/leadDetailsTileWidget/LeadDetailsTileWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/arcChartWidget/ArcChartWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/collapsiblePanelWidget/CollapsiblePanelWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/analyticAttributeTileWidget/AnalyticAttributeTileWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/analyticAttributeListWidget/AnalyticAttributeListWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/playListTileWidget/PlayListTileWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/playDetailsTileWidget/PlayDetailsTileWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/tabWidget/TabWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/talkingPointWidget/TalkingPointWidget.js',
-                        '<%= pls.app %>/app/AppCommon/directives/charts/ArcChartDirective.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/modelListTileWidget/ModelListTileWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/thresholdExplorerWidget/ThresholdExplorerWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/simpleTabWidget/SimpleTabWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/topPredictorWidget/TopPredictorWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/adminInfoWidget/AdminInfoWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/userManagementWidget/UserManagementWidget.js',
-                        '<%= pls.app %>/app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js',
-                        '<%= pls.app %>/app/app.js',
-                        '<%= pls.app %>/app/core/utilities/BrowserStorageUtility.js',
-                        '<%= pls.app %>/app/core/utilities/ServiceErrorUtility.js',
-                        '<%= pls.app %>/app/core/utilities/NavUtility.js',
-                        '<%= pls.app %>/app/core/utilities/RightsUtility.js',
-                        '<%= pls.app %>/app/core/utilities/PasswordUtility.js',
-                        '<%= pls.app %>/app/core/services/HelpService.js',
-                        '<%= pls.app %>/app/core/services/ResourceStringsService.js',
-                        '<%= pls.app %>/app/core/services/SessionService.js',
-                        '<%= pls.app %>/app/core/services/WidgetService.js',
-                        '<%= pls.app %>/app/login/services/LoginService.js',
-                        '<%= pls.app %>/app/config/services/ConfigService.js',
-                        '<%= pls.app %>/app/models/services/ModelService.js',
-                        '<%= pls.app %>/app/userManagement/services/UserManagementService.js',
-                        '<%= pls.app %>/app/login/controllers/LoginController.js',
-                        '<%= pls.app %>/app/login/controllers/UpdatePasswordController.js',
-                        '<%= pls.app %>/app/core/controllers/MainViewController.js',
-                        '<%= pls.app %>/app/core/controllers/MainHeaderController.js',
-                        '<%= pls.app %>/app/config/controllers/ManageCredentialsController.js',
-                        '<%= pls.app %>/app/config/modals/EnterCredentialsModal.js',
-                        '<%= pls.app %>/app/userManagement/controllers/UserManagementController.js',
-                        '<%= pls.app %>/app/models/controllers/ModelCreationHistoryController.js',
-                        '<%= pls.app %>/app/models/controllers/MultipleModelSetupController.js',
-                        '<%= pls.app %>/app/models/controllers/ModelListController.js',
-                        '<%= pls.app %>/app/models/controllers/ModelDetailController.js',
-                        '<%= pls.app %>/app/models/controllers/AdminInfoController.js',
-                        '<%= pls.app %>/app/models/modals/DeleteModelModal.js',
-                        '<%= pls.app %>/app/models/modals/StaleModelModal.js',
-                        '<%= pls.app %>/app/models/modals/ImportModelModal.js',
-                        '<%= pls.app %>/app/models/modals/AddSegmentModal.js',
-                        '<%= pls.app %>/app/login/modals/TenantSelectionModal.js',
-                        '<%= pls.app %>/app/userManagement/modals/EditUserModal.js',
-                        '<%= pls.app %>/app/userManagement/modals/AddUserModal.js',
-                        '<%= pls.app %>/app/userManagement/modals/DeleteUserModal.js'
-
-                    ]
-                }]
-            }
-        },
-
-        // Adds Angular JS dependency injection annotations. Needed for when we minify
-        // JavaScript code. For more information see: https://github.com/olov/ng-annotate
-        ngAnnotate: {
-            options: {
-                singleQuotes: true
-            },
-            app:     {
-                files: {
-                    '<%= pls.dist %>/app/production_<%= versionString %>.js': ['<%= pls.dist %>/app/production_<%= versionString %>.js']
-                }
-            }
-        },
-
-        uglify: {
-            app: {
-                files: {
-                    '<%= pls.dist %>/app/production_<%= versionString %>.js': ['<%= pls.dist %>/app/production_<%= versionString %>.js']
                 }
             }
         },
@@ -412,6 +396,11 @@ module.exports = function (grunt) {
         },
 
         rename: {
+            moveIndexToTmp: {
+                src:  '<%= pls.app %>/index.html',
+                dest: '.tmp/index.html'
+            },
+
             moveAppToBak: {
                 src:  '<%= pls.app %>',
                 dest: '<%= pls.app %>-bak'
@@ -437,24 +426,6 @@ module.exports = function (grunt) {
                 },
                 files:   {
                     '.tmp/index.html': '.tmp/index.html'
-                }
-            }
-        },
-
-        // Compiles Sass to CSS
-        sass: {
-            options: {
-                sourcemap: 'none',
-                style:     'compressed'
-            },
-            dist:    {
-                files: {
-                    '<%= pls.app %>/assets/styles/production_<%= versionString %>.css': '<%= pls.app %>/assets/styles/main.scss'
-                }
-            },
-            dev:     {
-                files: {
-                    '<%= pls.app %>/assets/styles/production.css': '<%= pls.app %>/assets/styles/main.scss'
                 }
             }
         },
@@ -506,8 +477,6 @@ module.exports = function (grunt) {
             }
         },
         
-        
-        
         // E2E UI Automation with code coverage
         protractor_coverage: {
             options: {
@@ -542,9 +511,18 @@ module.exports = function (grunt) {
                 dir: 'target/protractor_coverage/reports',
                 print: 'detail'
             }
+        },
+
+        concurrent: {
+            wget:    ['wget:angular', 'wget:crypto', 'wget:js', 'wget:css', 'wget:fonts'],
+            test:    ['jshint:dist', 'karma:unit'],
+            mac:     ['e2eChrome', 'e2eFirefox', 'e2eSafari'],
+            windows: ['e2eChrome']
         }
 
     });
+
+    grunt.loadNpmTasks('grunt-wget');
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
@@ -553,6 +531,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-ng-annotate');
     grunt.loadNpmTasks('grunt-protractor-runner');
@@ -563,21 +542,28 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-protractor-coverage');
     grunt.loadNpmTasks('grunt-istanbul');
 
+
+    grunt.registerTask('init', [
+        'clean:lib',
+        'concurrent:wget'
+    ]);
+
+    grunt.registerTask('dist', [
+        'clean:dist',
+        'concurrent:test',
+        'uglify:dist',
+        'sass:dist',
+        'index'
+    ]);
+
+    grunt.registerTask('index', [
+        'rename:moveIndexToTmp',
+        'processhtml:dist'
+    ]);
+
     var defaultText = 'The default grunt build task. Runs a full build for everything including: file linting and minification (including css), running unit tests, and versioning for production. This website ready for distribution will be placed in the <SVN Directory>\<Product>\Projects\dist directory. This can be called just with the grunt command. The production files will then be named production_.js and production_.css.';
     grunt.registerTask('default', defaultText, [
-        'clean:dist',
-        'copy:tmpIndex',
-        'replace',
-        'jshint:dist',
-        'karma:unit',
-        //'protractor:run',
-        'concat:generated',
-        'ngAnnotate:app',
-        'uglify:app',
-        'sass:dev',
-        'sass:dist',
-        'copy:main',
-        'usemin',
+        'dist',
         'clean:post'
     ]);
 
