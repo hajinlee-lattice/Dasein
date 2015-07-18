@@ -200,6 +200,7 @@ module.exports = function (grunt) {
                 files: {
                     '<%= pls.app %>/app/production_<%= versionString %>.min.js': [
                         '<%= pls.app %>/app/AppCommon/vendor/date.format.js',
+                        '<%= pls.app %>/app/AppCommon/vendor/ui-bootstrap-jpls-0.13.0.js',
                         '<%= pls.app %>/app/AppCommon/!(vendor|test)/**/*.js',
                         '<%= pls.app %>/app/!(AppCommon)/**/*.js',
                         '<%= pls.app %>/app/app.js'
