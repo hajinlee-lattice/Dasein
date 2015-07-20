@@ -283,6 +283,17 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                     
             }, 1000);
             
+            svg.append("circle")
+               .attr("cx", 0)
+               .attr("cy", 0)
+               .attr("r", 50)
+               .attr("fill", "#fff")
+               .on("mouseover", function() {
+                   svg.selectAll('circle').style('cursor', 'pointer');
+               })
+               .on("click", function() {
+                   $("#back-to-summary-link").click();
+               });
                 
             var arc2 = d3.svg.arc()
                 .startAngle(function(d) { return d.x; })
@@ -327,7 +338,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                         });
 
                     path.style("opacity", hoverOpacity);
-                    
+
                     if (d.depth == 1) {
                         showAttributeHover(d.name, d.color, d3.mouse(this)[0], d3.mouse(this)[1], path);
                     }
@@ -341,7 +352,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                     hideAttributeHover();
                 })
                 .each(stash);
-            
+
             // Interpolate the arcs in data space.
             function arcTween (a) {
                 var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
