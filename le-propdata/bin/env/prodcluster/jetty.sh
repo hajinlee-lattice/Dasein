@@ -83,7 +83,7 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 JETTY_HOME=/opt/jetty2
 JETTY_USER=yarn
 JETTY_HOST=0.0.0.0
-JETTY_LOGS=logs
+JETTY_LOGS=propdata-logs
 JETTY_ARGS=jetty.host=0.0.0.0
 HADOOP_HOME=/usr/hdp/current/hadoop-client
 HADOOP_MAPRED_HOME=/usr/current/hadoop-mapreduce-client

@@ -1,15 +1,34 @@
 #!/bin/bash
-rm -rf /opt/jetty2/webapps/le-propdata-*.war
-rm -rf /etc/propdata/pls.properties
-rm -rf /opt/jetty2/bin/jetty.sh
+
 adduser yarn
 groupadd yarn
-mkdir -p /etc/propdata
+
+rm -rf /opt/jetty2/webapps/le-propdata-*.war
+rm -rf /opt/jetty2/bin/jetty.sh
+
+mkdir -p /opt/jetty2/propdata-logs
+chmod -R 755 /opt/jetty2/propdata-logs
+chown -R yarn:yarn /opt/jetty2/propdata-logs
+
+pushd /home/yarn/propdata-logs
+for i in *.log.* ; do
+    gzip -9 $i ;
+done
+popd
+mkdir -p /home/yarn/propdata-logs
+chmod -R 755 /home/yarn/propdata-logs
+chown -R yarn:yarn /home/yarn/propdata-logs
+
+pushd /var/log/propdata
+for i in *.log.* ; do
+    gzip -9 $i ;
+done
+popd
 mkdir -p /var/log/propdata
-mkdir -p /home/yarn/logs
-chmod -R 755 /etc/propdata
 chmod -R 755 /var/log/propdata
-chmod -R 755 /home/yarn/logs
 chown -R yarn:yarn /var/log/propdata
-chown -R yarn:yarn /home/yarn/logs
-chown -R yarn:yarn /opt/jetty2/logs
+
+rm -rf /etc/propdata/pls.properties
+mkdir -p /etc/propdata
+chmod -R 755 /etc/propdata
+chown -R yarn:yarn /etc/propdata
