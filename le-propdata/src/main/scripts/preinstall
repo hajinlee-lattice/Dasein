@@ -10,23 +10,23 @@ mkdir -p /opt/jetty2/logs/propdata
 chmod -R 755 /opt/jetty2/logs/propdata
 chown -R yarn:yarn /opt/jetty2/logs/propdata
 
+mkdir -p /home/yarn/logs/propdata
+chmod -R 755 /home/yarn/logs/propdata
+chown -R yarn:yarn /home/yarn/logs/propdata
 pushd /home/yarn/logs/propdata
 for i in *.log.* ; do
     gzip -9 $i ;
 done
 popd
-mkdir -p /home/yarn/logs/propdata
-chmod -R 755 /home/yarn/logs/propdata
-chown -R yarn:yarn /home/yarn/logs/propdata
 
+mkdir -p /var/log/propdata
+chmod -R 755 /var/log/propdata
+chown -R yarn:yarn /var/log/propdata
 pushd /var/log/propdata
 for i in *.log.* ; do
     gzip -9 $i ;
 done
 popd
-mkdir -p /var/log/propdata
-chmod -R 755 /var/log/propdata
-chown -R yarn:yarn /var/log/propdata
 
 rm -rf /etc/propdata/pls.properties
 mkdir -p /etc/propdata
