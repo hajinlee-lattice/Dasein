@@ -6,18 +6,18 @@ groupadd yarn
 rm -rf /opt/jetty2/webapps/le-propdata-*.war
 rm -rf /opt/jetty2/bin/jetty.sh
 
-mkdir -p /opt/jetty2/propdata-logs
-chmod -R 755 /opt/jetty2/propdata-logs
-chown -R yarn:yarn /opt/jetty2/propdata-logs
+mkdir -p /opt/jetty2/logs/propdata
+chmod -R 755 /opt/jetty2/logs/propdata
+chown -R yarn:yarn /opt/jetty2/logs/propdata
 
-pushd /home/yarn/propdata-logs
+pushd /home/yarn/logs/propdata
 for i in *.log.* ; do
     gzip -9 $i ;
 done
 popd
-mkdir -p /home/yarn/propdata-logs
-chmod -R 755 /home/yarn/propdata-logs
-chown -R yarn:yarn /home/yarn/propdata-logs
+mkdir -p /home/yarn/logs/propdata
+chmod -R 755 /home/yarn/logs/propdata
+chown -R yarn:yarn /home/yarn/logs/propdata
 
 pushd /var/log/propdata
 for i in *.log.* ; do
