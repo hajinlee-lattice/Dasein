@@ -4,8 +4,10 @@ rm -rf /etc/propdata/pls.properties
 rm -rf /opt/jetty2/bin/jetty.sh
 adduser yarn
 groupadd yarn
+mkdir -p /etc/propdata
 mkdir -p /var/log/propdata
 mkdir -p /home/yarn/logs
+chmod -R 755 /etc/propdata
 chmod -R 755 /var/log/propdata
 chmod -R 755 /home/yarn/logs
 chown -R yarn:yarn /var/log/propdata
