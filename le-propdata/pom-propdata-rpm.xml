@@ -34,20 +34,6 @@
             </properties>
         </profile>
         <profile>
-            <id>integration</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>intcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <propdata.properties.path>conf/env/intcluster</propdata.properties.path>
-                <bin.env.path>bin/env/intcluster</bin.env.path>
-            </properties>
-        </profile>
-        <profile>
             <id>qa</id>
             <activation>
                 <property>
