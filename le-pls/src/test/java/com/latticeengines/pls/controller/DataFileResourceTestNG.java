@@ -74,6 +74,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/diagnostics.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/metadata.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
@@ -126,6 +127,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     public static Object[][] getDataFileProvider() {
         return new Object[][] { { "modeljson", "application/json" }, //
                 { "diagnosticsjson", "application/json" }, //
+                { "metadatajson", "application/json" }, //
                 { "predictorcsv", "application/csv" }, //
                 { "readoutcsv", "application/csv" }, //
                 { "scorecsv", "text/plain" }, //

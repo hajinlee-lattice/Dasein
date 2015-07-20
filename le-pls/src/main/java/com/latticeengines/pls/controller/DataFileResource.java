@@ -34,7 +34,7 @@ public class DataFileResource {
 
         dataFileProviderService.downloadFile(request, response, modelId, "application/json", "modelsummary.json");
     }
-
+    
     @RequestMapping(value = "/diagnosticsjson/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get diagnostics json file for specific model summary")
@@ -42,6 +42,15 @@ public class DataFileResource {
             throws IOException {
 
         dataFileProviderService.downloadFile(request, response, modelId, "application/json", "diagnostics.json");
+    }
+
+    @RequestMapping(value = "/metadatajson/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get metadata json file for specific model summary")
+    public void getMetadataJsonFile(@PathVariable String modelId, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        dataFileProviderService.downloadFile(request, response, modelId, "application/json", "metadata.json");
     }
 
     @RequestMapping(value = "/predictorcsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
