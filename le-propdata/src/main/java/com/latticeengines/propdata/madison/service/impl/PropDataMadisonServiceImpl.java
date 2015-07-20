@@ -175,6 +175,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
                 if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(getOutputDir(targetDir)))) {
                     log.info("Data is already transformed for today=" + today.toString());
+                    response.setProperty(TODAY_KEY, today);
+                    response.setProperty(STATUS_KEY, STATUS_OK);
                     return response;
                 } else {
                     log.warn("Cleanup dir=" + targetDir);
@@ -315,19 +317,16 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 log.warn("There's no aggregated data for today.");
                 return response;
             }
-            log.info("Uploading today's aggregation data=" + sourceDir);
-            String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-            truncateNewTable(assignedQueue);
+            if (HdfsUtils.fileExists(yarnConfiguration, getExportSuccessFile(getOutputDir(sourceDir)))) {
+                log.warn("Data has already be exported for today.");
+                return response;
+            }
 
-            DbCreds.Builder builder = new DbCreds.Builder();
-            builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
-                    .password(targetJdbcPassword).dbType(targetJdbcType);
-            DbCreds creds = new DbCreds(builder);
-            propDataJobService.exportDataSync(getTableNew(), getOutputDir(sourceDir), creds, assignedQueue,
-                    getJobName() + "-uploadAggregationData", numMappers, null);
-
-            swapTargetTables(assignedQueue);
             uploadTodayRawData(today);
+
+            uploadAggregateData(sourceDir);
+
+            HdfsUtils.writeToFile(yarnConfiguration, getExportSuccessFile(getOutputDir(sourceDir)), "EXPORT_SUCCESS");
 
             response.setProperty(TODAY_KEY, today);
             response.setProperty(STATUS_KEY, STATUS_OK);
@@ -337,6 +336,21 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             throw new LedpException(LedpCode.LEDP_00002, ex);
         }
         return response;
+    }
+
+    private void uploadAggregateData(String sourceDir) {
+        log.info("Uploading today's aggregation data=" + sourceDir);
+        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        truncateNewTable(assignedQueue);
+
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
+                .password(targetJdbcPassword).dbType(targetJdbcType);
+        DbCreds creds = new DbCreds(builder);
+        propDataJobService.exportDataSync(getTableNew(), getOutputDir(sourceDir), creds, assignedQueue, getJobName()
+                + "-uploadAggregationData", numMappers, null);
+
+        swapTargetTables(assignedQueue);
     }
 
     private void truncateNewTable(String assignedQueue) {
@@ -354,6 +368,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     }
 
     private void uploadTodayRawData(Date today) throws Exception {
+
         String todayIncrementalPath = getHdfsDataflowIncrementalRawPathWithDate(today);
         if (!HdfsUtils.fileExists(yarnConfiguration, getTableNameFromFile(todayIncrementalPath))) {
             log.error("There's no incremental data for today.");
@@ -369,13 +384,14 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         String connectionString = getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword);
+
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
                 .password(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
-        // propDataJobService.eval("DROP TABLE" + tableName, assignedQueue,
-        // getJobName() + "-uploadRawData0", 1,
-        // connectionString);
+        propDataJobService.eval("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + tableName
+                + "') AND type in (N'U')) DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
+                connectionString);
         propDataJobService.eval("SELECT TOP 0 ID AS ID1, * INTO " + tableName + " FROM " + targetRawTable
                 + ";ALTER TABLE " + tableName + " DROP COLUMN ID1", assignedQueue, getJobName()
                 + "-uploadRawDataCreateTable", connectionString);
@@ -424,6 +440,10 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     String getSuccessFile(String targetDir) {
         return targetDir + "/_SUCCESS";
+    }
+
+    String getExportSuccessFile(String targetDir) {
+        return targetDir + "/_SUCCESS_EXPORT";
     }
 
     private void setFailed(MadisonLogicDailyProgress dailyProgress, Exception ex) {
