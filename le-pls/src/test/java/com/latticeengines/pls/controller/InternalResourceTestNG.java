@@ -244,6 +244,6 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
         CRMTopology topology = tenantConfigService.getTopology(tenantId);
         Assert.assertNotNull(topology);
-        Assert.assertEquals(topology, CRMTopology.MARKETO);
+        Assert.assertEquals(topology, CRMTopology.ELOQUA);
     }
 }

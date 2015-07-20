@@ -229,13 +229,13 @@ public class InternalResource extends InternalResourceBase {
         try {
             tenantConfigService.getTopology(tenant1Id);
         } catch (LedpException e) {
-            provisionThroughTenantConsole(tenant1Id, "Eloqua");
+            provisionThroughTenantConsole(tenant1Id, "Marketo");
         }
 
         try {
             tenantConfigService.getTopology(tenant2Id);
         } catch (LedpException e) {
-            provisionThroughTenantConsole(tenant2Id, "Marketo");
+            provisionThroughTenantConsole(tenant2Id, "Eloqua");
         }
 
         return SimpleBooleanResponse.getSuccessResponse();
