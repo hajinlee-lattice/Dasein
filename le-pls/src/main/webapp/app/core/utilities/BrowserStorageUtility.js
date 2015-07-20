@@ -23,6 +23,9 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     
     this._widgetConfigDocumentStorageKey = "GriotWidgetConfigDocument";
     this._widgetConfigDocument = null; // actual client session object
+
+    this._featureFlagsDocumentStorageKey = "GriotFeatureFlagsDocument";
+    this._featureFlagsDocument = null; // actual client session object
     
     this._sessionLastActiveTimestampStorageKey = "GriotSessionLastActiveTimestamp";
     
@@ -50,7 +53,16 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     this.getLoginDocument = function () {
         return this._getProperty("_loginDocument", "_loginDocumentStorageKey");
     };
-    
+
+    this.setFeatureFlagsDocument = function (data, successHandler) {
+        this._setProperty(data, successHandler, "_featureFlagsDocument", "_featureFlagsDocumentStorageKey");
+    };
+
+    this.getFeatureFlagsDocument = function () {
+        var featureFlags = this._getProperty("_featureFlagsDocument", "_featureFlagsDocumentStorageKey");
+        return featureFlags || {};
+    };
+
     this.setSessionDocument = function (data, successHandler) {
         this._setProperty(data, successHandler, "_sessionDocument", "_sessionDocumentStorageKey");
     };

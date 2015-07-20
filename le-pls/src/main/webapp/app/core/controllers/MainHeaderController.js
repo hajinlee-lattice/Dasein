@@ -21,6 +21,10 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $scope.showModelCreationHistoryDropdown = RightsUtility.maySeeModelCreationHistory();
     $scope.showMultipleModelSetup = RightsUtility.mayEditMultipleModelSetup();
 
+    var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
+    $scope.showMultipleModelSetup = $scope.showMultipleModelSetup && (featureFlags['MultiModelSetup'] || false);
+    $scope.showSystemSetup = $scope.showSystemSetup && (featureFlags['SystemSetup'] || false);
+
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
             $event.preventDefault();

@@ -123,10 +123,25 @@ angular.module('mainApp.login.controllers.LoginController', [
         ConfigService.GetWidgetConfigDocument().then(function(result) {
             $("body").removeClass("login-body");
             $rootScope.$broadcast("ShowFooterEvent", true);
-            $http.get('./app/core/views/MainView.html').success(function (html) {
-                var scope = $rootScope.$new();
-                scope.directToPassword = $scope.directToPassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo($scope.passwordLastModifiedTimestamp);
-                $compile($("#mainView").html(html))(scope);
+
+            ConfigService.GetCurrentTopology().then(function(result){
+                if (result.success) {
+                    var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
+                    if (featureFlags == null) featureFlags = {};
+                    featureFlags['MultiModelSetup'] = true;
+                    featureFlags['SystemSetup'] = true;
+                    BrowserStorageUtility.setFeatureFlagsDocument(featureFlags, featureFlagsCallback);
+                } else {
+                    featureFlagsCallback();
+                }
+
+                function featureFlagsCallback() {
+                    $http.get('./app/core/views/MainView.html').success(function (html) {
+                        var scope = $rootScope.$new();
+                        scope.directToPassword = $scope.directToPassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo($scope.passwordLastModifiedTimestamp);
+                        $compile($("#mainView").html(html))(scope);
+                    });
+                }
             });
         });
     };

@@ -59,15 +59,16 @@ angular.module('mainApp.login.services.LoginService', [
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.setSessionDocument(data.Result);
                 data.Result.User.Tenant = tenant;
-                BrowserStorageUtility.setClientSession(data.Result.User);
                 result = data;
+                BrowserStorageUtility.setClientSession(data.Result.User, function(){
+                    deferred.resolve(result);
+                });
             }
             if (result.Result.User.AccessLevel === null) {
                 status = 401;
                 SessionService.HandleResponseErrors(data, status);
+                deferred.resolve(result);
             }
-
-            deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
             SessionService.HandleResponseErrors(data, status);
