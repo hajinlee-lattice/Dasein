@@ -10,10 +10,9 @@ mkdir -p /opt/jetty2/logs/propdata
 chmod -R 766 /opt/jetty2/logs/propdata
 chown -R yarn:yarn /opt/jetty2/logs/propdata
 
-mkdir -p /home/yarn/logs
+mkdir -p /home/yarn/logs/propdata
 chmod -R 766 /home/yarn/logs
 chown -R yarn:yarn /home/yarn/logs
-mkdir -p /home/yarn/logs/propdata
 
 mkdir -p /var/log/propdata
 chmod -R 766 /var/log/propdata
