@@ -10,6 +10,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -30,14 +31,14 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     private String defaultDataLoaderUrl;
 
     @Override
-    public String getTopology(String tenantId) {
+    public CRMTopology getTopology(String tenantId) {
         try {
             Camille camille = CamilleEnvironment.getCamille();
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
             Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
                     customerSpace.getContractId(), customerSpace.getTenantId(),
                     customerSpace.getSpaceId()).append(new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
-            return camille.get(path).getData();
+            return CRMTopology.fromName(camille.get(path).getData());
         } catch (Exception ex) {
             log.error("Can not get tenant's topology", ex);
             throw new LedpException(LedpCode.LEDP_18033, ex);

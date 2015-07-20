@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -24,7 +25,7 @@ public class TenantConfigResource {
     @RequestMapping(value = "/topology", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenant's topology")
-    public String getTopology(@RequestParam(value = "tenantId") String tenantId) {
+    public CRMTopology getTopology(@RequestParam(value = "tenantId") String tenantId) {
 
         return configService.getTopology(tenantId);
 

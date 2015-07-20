@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.Status;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
@@ -41,6 +44,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
@@ -59,6 +63,8 @@ public class InternalResource extends InternalResourceBase {
     private static final String passwordTesterPwd = "Lattice123";
     private static final String adminTester = "pls-super-admin-tester@test.lattice-engines.com";
     private static final String adminTesterPwd = "admin";
+    private static final String adUsername = "testuser1";
+    private static final String adPassword = "Lattice1";
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -75,11 +81,17 @@ public class InternalResource extends InternalResourceBase {
     @Autowired
     private CrmCredentialService crmCredentialService;
 
+    @Autowired
+    private TenantConfigService tenantConfigService;
+
     @Value("${pls.test.contract}")
     protected String contractId;
 
     @Value("${pls.api.hostport}")
     private String hostPort;
+
+    @Value("${pls.internal.admin.api}")
+    private String adminApi;
 
     @RequestMapping(value = "/modelsummaries/{modelId}",
         method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -127,8 +139,9 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         LOGGER.info("Cleaning up test tenants through internal API");
 
-        final String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
-        final String tenant2Id = contractId + "PLSTenant2." + contractId + "PLSTenant2.Production";
+        List<String> Ids = getTestTenants();
+        final String tenant1Id = Ids.get(0);
+        final String tenant2Id = Ids.get(1);
 
         //==================================================
         // Upload modelsummary if necessary
@@ -210,6 +223,21 @@ public class InternalResource extends InternalResourceBase {
         crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant2Id, true);
         crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant2Id, true);
 
+        //==================================================
+        // Provision through tenant console if needed
+        //==================================================
+        try {
+            tenantConfigService.getTopology(tenant1Id);
+        } catch (LedpException e) {
+            provisionThroughTenantConsole(tenant1Id, "Eloqua");
+        }
+
+        try {
+            tenantConfigService.getTopology(tenant2Id);
+        } catch (LedpException e) {
+            provisionThroughTenantConsole(tenant2Id, "Marketo");
+        }
+
         return SimpleBooleanResponse.getSuccessResponse();
     }
 
@@ -228,6 +256,12 @@ public class InternalResource extends InternalResourceBase {
         return doCalc(result);
     }
 
+    public List<String> getTestTenants() {
+        String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
+        String tenant2Id = contractId + "PLSTenant2." + contractId + "PLSTenant2.Production";
+        return Arrays.asList(tenant1Id, tenant2Id);
+    }
+
     private Status doCalc(Status c) {
         String op = c.getOperation();
         int left = c.getLeft();
@@ -242,6 +276,39 @@ public class InternalResource extends InternalResourceBase {
             c.setResult(left + right);
         }
         return c;
+    }
+
+    private void provisionThroughTenantConsole(String tupleId, String topology) throws IOException {
+        List<BasicNameValuePair> adHeaders = loginAd();
+
+        String tenantToken = "${TENANT}";
+        String topologyToken = "${TOPOLOGY}";
+        String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
+        InputStream ins = getClass().getClassLoader()
+                .getResourceAsStream("com/latticeengines/pls/controller/internal/tenant-registration.json");
+        String payload = IOUtils.toString(ins);
+        payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
+        HttpClientWithOptionalRetryUtils.sendPostRequest(
+                adminApi + "/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders, payload);
+    }
+
+    private List<BasicNameValuePair> loginAd() throws IOException {
+        List<BasicNameValuePair> headers = new ArrayList<>();
+        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
+        headers.add(new BasicNameValuePair("Accept", "application/json"));
+
+        Credentials credentials = new Credentials();
+        credentials.setUsername(adUsername);
+        credentials.setPassword(adPassword);
+        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/adlogin", false,
+                headers, JsonUtils.serialize(credentials));
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode json = mapper.readTree(response);
+        String token = json.get("Token").asText();
+
+        headers.add(new BasicNameValuePair("Authorization", token));
+        return headers;
     }
 
     private void resetPasswordTester() {

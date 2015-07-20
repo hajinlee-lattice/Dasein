@@ -12,6 +12,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -65,8 +66,8 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void getCredential() {
-        String topology = configService.getTopology(PLSTenantId);
-        Assert.assertEquals(topology, "SFDC");
+        CRMTopology topology = configService.getTopology(PLSTenantId);
+        Assert.assertEquals(topology, CRMTopology.SFDC);
     }
 
 }
