@@ -2,9 +2,11 @@ import logging
 import os
 import pwd
 import sys
+import shutil
 from urlparse import urlparse
 from pandas.core.frame import DataFrame
 from pandas import Series
+
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
@@ -71,6 +73,7 @@ class Launcher(object):
             progressReporter = ProgressReporter(None, 0)
         progressReporter.setTotalState(2)
         
+        metadataFile = self.stripPath(schema["config_metadata"])
         self.training = parser.createList(self.stripPath(schema["training_data"]), postProcessClf)
         progressReporter.nextStateForPreStateMachine(0, 0.1, 1)
         self.test = parser.createList(self.stripPath(schema["test_data"]), postProcessClf)
@@ -147,8 +150,10 @@ class Launcher(object):
 
             # Copy the model data files from local to hdfs
             hdfs.mkdir(modelHdfsDir)
-            if not os.path.exists(modelLocalDir + "diagnostics.json"): 
+            if not os.path.exists(modelLocalDir + "diagnostics.json"):
                 hdfs.copyToLocal(params["schema"]["diagnostics_path"] + "diagnostics.json", modelLocalDir + "diagnostics.json")
+                if os.path.exists(metadataFile):
+                    shutil.copy2(metadataFile, modelLocalDir + "metadata.json")
             (_, _, filenames) = os.walk(modelLocalDir).next()
             for filename in filter(lambda e: executor.accept(e), filenames):
                 hdfs.copyFromLocal(modelLocalDir + filename, "%s%s" % (modelHdfsDir, filename))
