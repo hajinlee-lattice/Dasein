@@ -26,7 +26,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     $scope.generateAttributeName = function() { 
         return $sce.trustAsHtml('<h4 style="border-left: ' + $scope.attributeColor + 
     		' solid 6px;" title="' + $scope.attributeName + '">' + $scope.attributeName + '</h4>' + '<p title="' +  
-    		$scope.attributeDescription + '">' + decodeURIComponent(escape($scope.attributeDescription)) + '</p>');
+    		$scope.attributeDescription + '">' + decodeURIComponent(encodeURIComponent($scope.attributeDescription)) + '</p>');
     };
 
     var chart,

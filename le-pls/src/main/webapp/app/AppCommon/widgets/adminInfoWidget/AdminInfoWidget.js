@@ -88,9 +88,9 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
 
                 $http.get($attrs.url).then(function (response) {
                     if ($attrs.filetype === "application/json") {
-                        $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(JSON.stringify(response.data)))));
+                        $scope.$emit('downloaded', btoa(decodeURIComponent(encodeURIComponent(JSON.stringify(response.data)))));
                     } else {
-                        $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(response.data))));
+                        $scope.$emit('downloaded', btoa(decodeURIComponent(encodeURIComponent(response.data))));
                     }
                     $scope.fetching = false;
                     setTimeout($event.target.click(), 500);
