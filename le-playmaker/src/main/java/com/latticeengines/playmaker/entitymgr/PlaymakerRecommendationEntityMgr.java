@@ -7,8 +7,8 @@ public interface PlaymakerRecommendationEntityMgr {
 
     public static final String ID_KEY = "ID";
     public static final String RECORDS_KEY = "records";
-    public static final String END_KEY = "end";
-    public static final String START_KEY = "start";
+    public static final String END_KEY = "endDatetime";
+    public static final String START_KEY = "startDatetime";
     public static final String LAST_MODIFIATION_DATE_KEY = "LastModificationDate";
     public static final String COUNT_KEY = "count";
 
