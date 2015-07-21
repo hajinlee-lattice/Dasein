@@ -87,7 +87,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "ON L.[LaunchRun_ID] = R.[LaunchRun_ID] JOIN LEAccount A "
                 + "ON L.Account_ID = A.LEAccount_ID JOIN Priority P "
                 + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C "
-                + "ON P.Display_Text_Key = C.Key_Name AND C.External_ID LIKE 'en-%' JOIN Currency M "
+                + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M "
                 + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID "
                 + "WHERE L.Status = 2800 AND L.Synchronization_Destination = :syncDestination "
                 + "AND DATEDIFF(s,'19700101 00:00:00:000',L.[Last_Modification_Date]) >= :start ";
