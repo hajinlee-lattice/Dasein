@@ -20,6 +20,8 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
+
     <bean id="camilleEnvironment" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="targetClass" value="com.latticeengines.camille.exposed.CamilleEnvironment" />
         <property name="targetMethod" value="start" />

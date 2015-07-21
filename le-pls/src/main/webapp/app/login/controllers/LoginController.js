@@ -126,13 +126,13 @@ angular.module('mainApp.login.controllers.LoginController', [
 
             ConfigService.GetCurrentTopology().then(function(result){
                 if (result.success) {
+                    featureFlagsCallback();
+                } else {
                     var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
                     if (featureFlags == null) featureFlags = {};
-                    featureFlags['MultiModelSetup'] = true;
-                    featureFlags['SystemSetup'] = true;
+                    featureFlags['MultiModelSetup'] = false;
+                    featureFlags['SystemSetup'] = false;
                     BrowserStorageUtility.setFeatureFlagsDocument(featureFlags, featureFlagsCallback);
-                } else {
-                    featureFlagsCallback();
                 }
 
                 function featureFlagsCallback() {

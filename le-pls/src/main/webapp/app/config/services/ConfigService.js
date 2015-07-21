@@ -75,7 +75,7 @@ angular.module('mainApp.config.services.ConfigService', [
             if (status === 200) {
                 result = {
                     success: true,
-                    resultObj: data,
+                    resultObj: data.Topology,
                     resultErrors: null
                 };
             } else {

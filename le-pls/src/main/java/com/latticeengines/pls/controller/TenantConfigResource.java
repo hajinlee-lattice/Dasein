@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import java.util.AbstractMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.wordnik.swagger.annotations.Api;
@@ -25,9 +29,15 @@ public class TenantConfigResource {
     @RequestMapping(value = "/topology", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenant's topology")
-    public CRMTopology getTopology(@RequestParam(value = "tenantId") String tenantId) {
+    public TopologyJson getTopology(@RequestParam(value = "tenantId") String tenantId) {
+        CRMTopology topology = configService.getTopology(tenantId);
+        return new TopologyJson(topology);
+    }
 
-        return configService.getTopology(tenantId);
-
+    // this class can bubble up the schema to swagger UI
+    private class TopologyJson {
+        @JsonProperty("Topology")
+        public CRMTopology topology;
+        public TopologyJson(CRMTopology topology) { this.topology = topology; }
     }
 }

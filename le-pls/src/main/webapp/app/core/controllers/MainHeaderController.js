@@ -22,8 +22,14 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $scope.showMultipleModelSetup = RightsUtility.mayEditMultipleModelSetup();
 
     var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
-    $scope.showMultipleModelSetup = $scope.showMultipleModelSetup && (featureFlags['MultiModelSetup'] || false);
-    $scope.showSystemSetup = $scope.showSystemSetup && (featureFlags['SystemSetup'] || false);
+    if (featureFlags) {
+        if (featureFlags.hasOwnProperty("MultiModelSetup")) {
+            $scope.showMultipleModelSetup = $scope.showMultipleModelSetup && featureFlags['MultiModelSetup'];
+        }
+        if (featureFlags.hasOwnProperty("SystemSetup")) {
+            $scope.showSystemSetup = $scope.showSystemSetup && featureFlags['SystemSetup'];
+        }
+    }
 
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {

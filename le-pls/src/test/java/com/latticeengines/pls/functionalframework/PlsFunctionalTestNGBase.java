@@ -589,8 +589,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             List<String> subTenantIds = Arrays.asList(contractId + "PLSTenant1", contractId + "PLSTenant2");
             testingTenants = new ArrayList<>();
             for (String subTenantId: subTenantIds) {
-                String tenantId = String.format("%s.%s.%s", subTenantId, subTenantId,
-                        CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+                String tenantId = CustomerSpace.parse(subTenantId).toString();
                 if (!tenantService.hasTenantId(tenantId)) {
                     Tenant tenant = new Tenant();
                     tenant.setId(tenantId);
