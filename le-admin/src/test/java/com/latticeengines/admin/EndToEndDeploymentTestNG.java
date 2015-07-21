@@ -18,6 +18,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
@@ -380,9 +382,15 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         String PLSTenantId =
                 String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         RestTemplate plsRestTemplate = plsComponentTestNG.plsRestTemplate;
-        CRMTopology topology = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
-                CRMTopology.class);
-        Assert.assertEquals(topology, CRMTopology.ELOQUA);
+        String response = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
+                String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode json = mapper.readTree(response);
+            Assert.assertEquals(CRMTopology.fromName(json.get("Topology").asText()), CRMTopology.ELOQUA);
+        } catch (IOException e) {
+            Assert.fail("Failed to parse topology from PLS.", e);
+        }
     }
     /**
      * ==================================================
