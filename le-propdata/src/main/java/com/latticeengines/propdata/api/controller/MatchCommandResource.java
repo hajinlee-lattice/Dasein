@@ -27,12 +27,12 @@ public class MatchCommandResource {
     @ResponseBody
     @ApiOperation(value = "Get status of match command")
     public ResponseCommandStatus getMatchStatus(@PathVariable String commandID
-    									,@RequestParam(value="matchClient", required=false) String matchClient) {
+                                        ,@RequestParam(value="matchClient", required=false) String matchClient) {
         
-    	String status = 
-    			matchCommandService.getMatchCommandStatus(commandID,matchClient);
-    	
-    	return new ResponseCommandStatus(true,null,status);
+        String status = 
+                matchCommandService.getMatchCommandStatus(commandID,matchClient);
+        
+        return new ResponseCommandStatus(true,null,status);
     }
 
     @RequestMapping(value = "", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -40,16 +40,16 @@ public class MatchCommandResource {
     @ApiOperation(value = "Create a new command")
     /*@PreAuthorize("hasRole('Create_PLS_Models')")*/
     public ResponseID createMatchCommand(@RequestParam(value = "sourceTable", required = true) String sourceTable
-    								,@RequestParam(value = "destTables", required = true) String destTables
-    								,@RequestParam(value = "contractExternalID", required = true) String contractExternalID
-    								,@RequestParam(value = "matchClient", required = false) String matchClient) {
+                                    ,@RequestParam(value = "destTables", required = true) String destTables
+                                    ,@RequestParam(value = "contractExternalID", required = true) String contractExternalID
+                                    ,@RequestParam(value = "matchClient", required = false) String matchClient) {
         /*Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         if (tenant == null) {
             return null;
         }*/
 
         Long commandID = matchCommandService
-        		.createMatchCommand(sourceTable,destTables,contractExternalID,matchClient);
+                .createMatchCommand(sourceTable,destTables,contractExternalID,matchClient);
         
         return new ResponseID(true,null,commandID);
     }

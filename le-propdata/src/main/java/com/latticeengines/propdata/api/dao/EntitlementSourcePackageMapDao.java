@@ -7,8 +7,8 @@ import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackageMap;
 
 public interface EntitlementSourcePackageMapDao extends BaseDao<EntitlementSourcePackageMap> {
 
-	List<EntitlementSourcePackageMap> findByPackageID(Long packageID);
+    List<EntitlementSourcePackageMap> findByPackageID(Long packageID);
 
-	EntitlementSourcePackageMap findByContent(Long packageID, String lookupID);
+    EntitlementSourcePackageMap findByContent(Long packageID, String lookupID);
 
 }

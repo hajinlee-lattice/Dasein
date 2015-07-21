@@ -7,8 +7,8 @@ import com.latticeengines.domain.exposed.propdata.EntitlementColumnMap;
 
 public interface EntitlementColumnMapDao extends BaseDao<EntitlementColumnMap> {
 
-	List<EntitlementColumnMap> findByPackageID(Long packageID);
+    List<EntitlementColumnMap> findByPackageID(Long packageID);
 
-	EntitlementColumnMap findByContent(Long packageID, Long columnCalc);
+    EntitlementColumnMap findByContent(Long packageID, Long columnCalc);
 
 }

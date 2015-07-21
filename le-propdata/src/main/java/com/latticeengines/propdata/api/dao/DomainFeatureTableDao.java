@@ -5,6 +5,6 @@ import com.latticeengines.domain.exposed.propdata.DomainFeatureTable;
 
 public interface DomainFeatureTableDao extends BaseDao<DomainFeatureTable> {
 
-	DomainFeatureTable findByLookupID(String lookupID);
-	
+    DomainFeatureTable findByLookupID(String lookupID);
+    
 }

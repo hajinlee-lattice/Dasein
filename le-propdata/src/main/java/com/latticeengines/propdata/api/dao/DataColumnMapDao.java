@@ -5,6 +5,6 @@ import com.latticeengines.domain.exposed.propdata.DataColumnMap;
 
 public interface DataColumnMapDao extends BaseDao<DataColumnMap> {
 
-	DataColumnMap findByContent(String extensionName, String sourceTableName);
+    DataColumnMap findByContent(String extensionName, String sourceTableName);
 
 }

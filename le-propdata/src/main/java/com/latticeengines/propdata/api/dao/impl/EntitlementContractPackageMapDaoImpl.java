@@ -10,18 +10,18 @@ import com.latticeengines.domain.exposed.propdata.EntitlementContractPackageMap;
 import com.latticeengines.propdata.api.dao.EntitlementContractPackageMapDao;
 
 public class EntitlementContractPackageMapDaoImpl extends BaseDaoImpl<EntitlementContractPackageMap> implements
-		EntitlementContractPackageMapDao {
+        EntitlementContractPackageMapDao {
 
-	public EntitlementContractPackageMapDaoImpl(){
-		super();
-	}
-	
-	@Override
-	protected Class<EntitlementContractPackageMap> getEntityClass() {
-		return EntitlementContractPackageMap.class;
-	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+    public EntitlementContractPackageMapDaoImpl(){
+        super();
+    }
+    
+    @Override
+    protected Class<EntitlementContractPackageMap> getEntityClass() {
+        return EntitlementContractPackageMap.class;
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public List<EntitlementContractPackageMap> findByContractID(String contractID) {
         Session session = getSessionFactory().getCurrentSession();
@@ -29,26 +29,26 @@ public class EntitlementContractPackageMapDaoImpl extends BaseDaoImpl<Entitlemen
         String queryStr = String.format("from %s where Contract_ID = :contractID", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("contractID", contractID);
-		List list = query.list();
+        List list = query.list();
         return list;
     }
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public EntitlementContractPackageMap findByContent(Long packageID,
-			String externalID) {
-		Session session = getSessionFactory().getCurrentSession();
+    @SuppressWarnings("rawtypes")
+    @Override
+    public EntitlementContractPackageMap findByContent(Long packageID,
+            String externalID) {
+        Session session = getSessionFactory().getCurrentSession();
         Class<EntitlementContractPackageMap> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Package_ID = :packageID "
-        		+ "AND Contract_ID = :externalID", entityClz.getSimpleName());
+                + "AND Contract_ID = :externalID", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("packageID", packageID);
         query.setString("externalID", externalID);
-		List list = query.list();
-		if (list.size() == 0) {
+        List list = query.list();
+        if (list.size() == 0) {
             return null;
         }
         return (EntitlementContractPackageMap)list.get(0);
-	}
+    }
 
 }

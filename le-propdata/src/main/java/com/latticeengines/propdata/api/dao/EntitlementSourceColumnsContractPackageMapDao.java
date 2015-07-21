@@ -6,11 +6,11 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsContractPackageMap;
 
 public interface EntitlementSourceColumnsContractPackageMapDao extends
-		BaseDao<EntitlementSourceColumnsContractPackageMap> {
+        BaseDao<EntitlementSourceColumnsContractPackageMap> {
 
-	List<EntitlementSourceColumnsContractPackageMap> findByContractID(
-			String contract_ID);
+    List<EntitlementSourceColumnsContractPackageMap> findByContractID(
+            String contract_ID);
 
-	EntitlementSourceColumnsContractPackageMap findByContent(Long packageID, String externalID);
+    EntitlementSourceColumnsContractPackageMap findByContent(Long packageID, String externalID);
 
 }

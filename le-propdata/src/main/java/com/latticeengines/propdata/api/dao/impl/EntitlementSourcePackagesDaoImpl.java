@@ -5,16 +5,16 @@ import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackages;
 import com.latticeengines.propdata.api.dao.EntitlementSourcePackagesDao;
 
 public class EntitlementSourcePackagesDaoImpl extends
-		BaseDaoImpl<EntitlementSourcePackages> implements
-		EntitlementSourcePackagesDao {
+        BaseDaoImpl<EntitlementSourcePackages> implements
+        EntitlementSourcePackagesDao {
 
-	public EntitlementSourcePackagesDaoImpl() {
-		super();
-	}
+    public EntitlementSourcePackagesDaoImpl() {
+        super();
+    }
 
-	@Override
-	protected Class<EntitlementSourcePackages> getEntityClass() {
-		return EntitlementSourcePackages.class;
-	}
+    @Override
+    protected Class<EntitlementSourcePackages> getEntityClass() {
+        return EntitlementSourcePackages.class;
+    }
 
 }

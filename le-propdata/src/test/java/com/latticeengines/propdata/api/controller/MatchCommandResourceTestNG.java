@@ -21,48 +21,48 @@ import com.latticeengines.domain.exposed.pls.ResponseDocument;
 @ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })
 public class MatchCommandResourceTestNG extends AbstractTestNGSpringContextTests{
 
-	@Value("${propdata.api.hostport}")
+    @Value("${propdata.api.hostport}")
     private String hostPort;
-	
-	protected String getRestAPIHostPort() {
+    
+    protected String getRestAPIHostPort() {
         return hostPort;
     }
 
-	private RestTemplate restTemplate = new RestTemplate();
-	
-	@SuppressWarnings("rawtypes")
-	@Test(groups =  "functional")
-	public void testMatchCommands() {
-		Object sourceTable = new String("PayPal_matching_elements_small");
-		Object destTables = new String("Alexa_Source|DerivedColumns");
-		Object contractExternalID = new String("PD_Test");
-		Object matchClient = new String("10.51.15.130");
-		HttpHeaders headers = new HttpHeaders();
-	    headers.add("Content-Type", "application/json");
-	    headers.add("Accept", "application/json");
-	    HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-	    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() + "/PropData/matchcommands/")
-	            .queryParam("sourceTable", sourceTable)
-	            .queryParam("destTables", destTables)
-	            .queryParam("contractExternalID", contractExternalID)
-	            .queryParam("matchClient", matchClient);
-	    
-	    ResponseEntity<ResponseDocument> responseID = 
-				restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.PUT
-				,requestEntity,ResponseDocument.class);
-	    assertNotNull(responseID);
-	    
-	    try {
-			Thread.sleep(30000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	    
-	    ResponseDocument commandStatus = 
-	    		restTemplate.getForObject(getRestAPIHostPort() 
-	    				+ "/PropData/matchcommands/" + responseID.getBody().getResult()
-	    				,ResponseDocument.class);
-	      assertNotNull(commandStatus);
-	}
-	
+    private RestTemplate restTemplate = new RestTemplate();
+    
+    @SuppressWarnings("rawtypes")
+    @Test(groups =  "functional")
+    public void testMatchCommands() {
+        Object sourceTable = new String("PayPal_matching_elements_small");
+        Object destTables = new String("Alexa_Source|DerivedColumns");
+        Object contractExternalID = new String("PD_Test");
+        Object matchClient = new String("10.51.15.130");
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestAPIHostPort() + "/PropData/matchcommands/")
+            .queryParam("sourceTable", sourceTable)
+            .queryParam("destTables", destTables)
+            .queryParam("contractExternalID", contractExternalID)
+            .queryParam("matchClient", matchClient);
+        
+        ResponseEntity<ResponseDocument> responseID = 
+            restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.PUT
+            ,requestEntity,ResponseDocument.class);
+        assertNotNull(responseID);
+        
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        ResponseDocument commandStatus = 
+            restTemplate.getForObject(getRestAPIHostPort() 
+                + "/PropData/matchcommands/" + responseID.getBody().getResult()
+                ,ResponseDocument.class);
+          assertNotNull(commandStatus);
+    }
+    
 }

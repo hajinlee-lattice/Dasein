@@ -7,10 +7,10 @@ import com.latticeengines.domain.exposed.propdata.EntitlementSourceContractPacka
 
 public interface EntitlementSourceContractPackageMapDao extends BaseDao<EntitlementSourceContractPackageMap> {
 
-	List<EntitlementSourceContractPackageMap> findByContractID(
-			String contract_ID);
+    List<EntitlementSourceContractPackageMap> findByContractID(
+            String contract_ID);
 
-	EntitlementSourceContractPackageMap findByContent(Long packageID,
-			String externalID);
+    EntitlementSourceContractPackageMap findByContent(Long packageID,
+            String externalID);
 
 }

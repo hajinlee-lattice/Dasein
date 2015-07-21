@@ -7,25 +7,25 @@ import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackag
 
 public interface EntitlementSourceColumnEntityMgr {
 
-	EntitlementSourceColumnsPackages getSourceColumnPackage(Long pid);
-	
-	List<EntitlementSourceColumnsPackages> getAllSourceColumnPackages();
-	
-	List<EntitlementSourceColumnsPackages> getEntitledSourcePackages(String Contract_ID);
-	
-	List<EntitlementSourceColumnsPackageMap> getPackageSourceColumns(Long packageID);
-	
-	EntitlementSourceColumnsPackageMap getSourceColumnFromPackage(Long packageID
-			,String lookupID, String columnName);
+    EntitlementSourceColumnsPackages getSourceColumnPackage(Long pid);
+    
+    List<EntitlementSourceColumnsPackages> getAllSourceColumnPackages();
+    
+    List<EntitlementSourceColumnsPackages> getEntitledSourcePackages(String Contract_ID);
+    
+    List<EntitlementSourceColumnsPackageMap> getPackageSourceColumns(Long packageID);
+    
+    EntitlementSourceColumnsPackageMap getSourceColumnFromPackage(Long packageID
+            ,String lookupID, String columnName);
 
-	Long createSourceColumnsPackage(EntitlementSourceColumnsPackages entitlementPackage);
-	
-	Long assignSourceColumnToPackage(Long packageID, String lookupID, String columnName);
-	
-	void removeSourceColumnFromPackage(EntitlementSourceColumnsPackageMap sourcePackageMap);
-	
-	Long assignCustomerToSourceColumnsPackage(Long packageID,String externalID);
-	
-	void removeCustomerFromSourceColumnsPackage(Long packageID,String externalID);
+    Long createSourceColumnsPackage(EntitlementSourceColumnsPackages entitlementPackage);
+    
+    Long assignSourceColumnToPackage(Long packageID, String lookupID, String columnName);
+    
+    void removeSourceColumnFromPackage(EntitlementSourceColumnsPackageMap sourcePackageMap);
+    
+    Long assignCustomerToSourceColumnsPackage(Long packageID,String externalID);
+    
+    void removeCustomerFromSourceColumnsPackage(Long packageID,String externalID);
 
 }
