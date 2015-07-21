@@ -1,8 +1,9 @@
 package com.latticeengines.scoring.service.impl;
 
-import java.sql.Timestamp;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
-import javax.annotation.Resource;
+import java.sql.Timestamp;
 
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,21 +14,19 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.monitor.alerts.service.impl.BaseAlertServiceImpl;
-import com.latticeengines.monitor.alerts.service.impl.PagerDutyTestUtils;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
+import com.latticeengines.monitor.alerts.service.impl.AlertServiceImpl;
+import com.latticeengines.monitor.alerts.service.impl.PagerDutyTestUtils;
+import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringCommandLogService;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
@@ -38,20 +37,20 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
     @Autowired
+    private AlertService alertService;
+
+    @Autowired
     private ScoringCommandLogService scoringCommandLogService;
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-
-    @Resource(name = "modelingAlertService")
-    private BaseAlertServiceImpl alertService;
 
     @Autowired
     private MetadataService metadataService;
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
-    
+
     @Autowired
     private ScoringProcessorCallable scoringProcessor;
 
@@ -71,90 +70,93 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        scoringManager = new ScoringManagerServiceImpl();
-        scoringManager.setCustomerBaseDir(customerBaseDir);
-        scoringManager.setEnableCleanHdfs(true);
-        scoringManager.setCleanUpInterval(cleanUpInterval);
-        scoringManager.init(applicationContext);
-        alertService.enableTestMode();
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputTable))){
-            metadataService.dropTable(scoringJdbcTemplate, inputTable);
+        this.scoringManager = new ScoringManagerServiceImpl();
+        this.scoringManager.setCustomerBaseDir(this.customerBaseDir);
+        this.scoringManager.setEnableCleanHdfs(true);
+        this.scoringManager.setCleanUpInterval(cleanUpInterval);
+        this.scoringManager.init(this.applicationContext);
+        ((AlertServiceImpl) this.alertService).enableTestMode();
+        this.scoringProcessor.setAlertService(this.alertService);
+        if (!CollectionUtils.isEmpty(this.metadataService.showTable(this.scoringJdbcTemplate, inputTable))) {
+            this.metadataService.dropTable(this.scoringJdbcTemplate, inputTable);
         }
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, outputTable))){
-            metadataService.dropTable(scoringJdbcTemplate, outputTable);
+        if (!CollectionUtils.isEmpty(this.metadataService.showTable(this.scoringJdbcTemplate, outputTable))) {
+            this.metadataService.dropTable(this.scoringJdbcTemplate, outputTable);
         }
     }
 
     @Test(groups = "functional")
     public void testCleanTables() throws ParseException, NumberFormatException, InterruptedException {
-        assertEquals(scoringCommandEntityMgr.findAll().size(), 0);
-        assertEquals(scoringCommandResultEntityMgr.findAll().size(), 0);
+        assertEquals(this.scoringCommandEntityMgr.findAll().size(), 0);
+        assertEquals(this.scoringCommandResultEntityMgr.findAll().size(), 0);
         ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, inputTable, 0, 100,
                 new Timestamp(System.currentTimeMillis()));
-        scoringCommandEntityMgr.create(scoringCommand);
-        scoringManager.cleanTables();
-        assertEquals(scoringCommandEntityMgr.findAll().size(), 1);
+        this.scoringCommandEntityMgr.create(scoringCommand);
+        this.scoringManager.cleanTables();
+        assertEquals(this.scoringCommandEntityMgr.findAll().size(), 1);
 
-        metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, inputTable, testInputTable);
+        this.metadataService.createNewEmptyTableFromExistingOne(this.scoringJdbcTemplate, inputTable,
+                this.testInputTable);
         scoringCommand.setStatus(ScoringCommandStatus.POPULATED);
-        scoringCommandEntityMgr.update(scoringCommand);
-        scoringCommand = scoringCommandEntityMgr.findAll().get(0);
+        this.scoringCommandEntityMgr.update(scoringCommand);
+        scoringCommand = this.scoringCommandEntityMgr.findAll().get(0);
         ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.LOAD_DATA);
-        scoringCommandStateEntityMgr.create(scoringCommandState);
-        scoringManager.cleanTables();
-        assertEquals(scoringCommandEntityMgr.findAll().size(), 1);
-        assertEquals(scoringCommandStateEntityMgr.findAll().size(), 1);
-        assertEquals(metadataService.showTable(scoringJdbcTemplate, inputTable).get(0), inputTable);
+        this.scoringCommandStateEntityMgr.create(scoringCommandState);
+        this.scoringManager.cleanTables();
+        assertEquals(this.scoringCommandEntityMgr.findAll().size(), 1);
+        assertEquals(this.scoringCommandStateEntityMgr.findAll().size(), 1);
+        assertEquals(this.metadataService.showTable(this.scoringJdbcTemplate, inputTable).get(0), inputTable);
 
-        scoringCommand = scoringCommandEntityMgr.findAll().get(0);
+        scoringCommand = this.scoringCommandEntityMgr.findAll().get(0);
         scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.SCORE_DATA);
-        scoringCommandStateEntityMgr.create(scoringCommandState);
+        this.scoringCommandStateEntityMgr.create(scoringCommandState);
         scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.EXPORT_DATA);
-        scoringCommandStateEntityMgr.create(scoringCommandState);
-        scoringCommandLogService.log(scoringCommand, "some logs");
+        this.scoringCommandStateEntityMgr.create(scoringCommandState);
+        this.scoringCommandLogService.log(scoringCommand, "some logs");
         ScoringCommandResult scoringCommandResult = new ScoringCommandResult("Nutanix", ScoringCommandStatus.NEW,
                 outputTable, 100, new Timestamp(System.currentTimeMillis()));
-        scoringCommandResultEntityMgr.create(scoringCommandResult);
-        scoringManager.cleanTables();
-        assertEquals(scoringCommandResultEntityMgr.findAll().size(), 1);
-        assertEquals(scoringCommandLogService.findByScoringCommand(scoringCommand).size(), 1);
-        assertEquals(scoringCommandStateEntityMgr.findAll().size(), 3);
+        this.scoringCommandResultEntityMgr.create(scoringCommandResult);
+        this.scoringManager.cleanTables();
+        assertEquals(this.scoringCommandResultEntityMgr.findAll().size(), 1);
+        assertEquals(this.scoringCommandLogService.findByScoringCommand(scoringCommand).size(), 1);
+        assertEquals(this.scoringCommandStateEntityMgr.findAll().size(), 3);
 
-        metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, outputTable, testOutputTable);
-        assertEquals(metadataService.showTable(scoringJdbcTemplate, outputTable).get(0), outputTable);
+        this.metadataService.createNewEmptyTableFromExistingOne(this.scoringJdbcTemplate, outputTable,
+                this.testOutputTable);
+        assertEquals(this.metadataService.showTable(this.scoringJdbcTemplate, outputTable).get(0), outputTable);
 
         scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
         scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));
         scoringCommandResult.setStatus(ScoringCommandStatus.CONSUMED);
         scoringCommandResult.setConsumed(new Timestamp(System.currentTimeMillis()));
-        scoringCommandEntityMgr.update(scoringCommand);
-        scoringCommandResultEntityMgr.update(scoringCommandResult);
+        this.scoringCommandEntityMgr.update(scoringCommand);
+        this.scoringCommandResultEntityMgr.update(scoringCommandResult);
         Thread.sleep(4000);
-        scoringManager.cleanTables();
+        this.scoringManager.cleanTables();
 
-        assertEquals(scoringCommandStateEntityMgr.findAll().size(), 0);
-        assertEquals(scoringCommandLogService.findByScoringCommand(scoringCommand).size(), 0);
-        assertNull(scoringCommandEntityMgr.findByKey(scoringCommand));
-        assertNull(scoringCommandResultEntityMgr.findByKey(scoringCommandResult));
-        assertEquals(metadataService.showTable(scoringJdbcTemplate, inputTable).size(), 0);
-        assertEquals(metadataService.showTable(scoringJdbcTemplate, outputTable).size(), 0);
+        assertEquals(this.scoringCommandStateEntityMgr.findAll().size(), 0);
+        assertEquals(this.scoringCommandLogService.findByScoringCommand(scoringCommand).size(), 0);
+        assertNull(this.scoringCommandEntityMgr.findByKey(scoringCommand));
+        assertNull(this.scoringCommandResultEntityMgr.findByKey(scoringCommandResult));
+        assertEquals(this.metadataService.showTable(this.scoringJdbcTemplate, inputTable).size(), 0);
+        assertEquals(this.metadataService.showTable(this.scoringJdbcTemplate, outputTable).size(), 0);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testHandleJobFailed() throws ParseException {
         ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, inputTable, 0,
                 100, new Timestamp(System.currentTimeMillis()));
-        scoringCommandEntityMgr.create(scoringCommand);
+        this.scoringCommandEntityMgr.create(scoringCommand);
 
-        scoringCommandLogService.log(scoringCommand, "message.  #%#$%%^$%^$%^$%^");
-        scoringCommandLogService.log(scoringCommand, "another message.  #%#$%%^$%^$%^$%^ 12344       .");
+        this.scoringCommandLogService.log(scoringCommand, "message.  #%#$%%^$%^$%^$%^");
+        this.scoringCommandLogService.log(scoringCommand, "another message.  #%#$%%^$%^$%^$%^ 12344       .");
 
-        scoringProcessor.setScoringCommand(scoringCommand);
+        this.scoringProcessor.setScoringCommand(scoringCommand);
         String failedAppId = "application_1415144508340_0729";
         ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.SCORE_DATA);
-        scoringCommandStateEntityMgr.create(scoringCommandState);
-        PagerDutyTestUtils.confirmPagerDutyIncident(scoringProcessor.handleJobFailed(failedAppId));
-        PagerDutyTestUtils.confirmPagerDutyIncident(scoringProcessor.handleJobFailed());
+        this.scoringCommandStateEntityMgr.create(scoringCommandState);
+        PagerDutyTestUtils.confirmPagerDutyIncident(this.scoringProcessor.handleJobFailed(failedAppId));
+        PagerDutyTestUtils.confirmPagerDutyIncident(this.scoringProcessor.handleJobFailed());
     }
 
 }

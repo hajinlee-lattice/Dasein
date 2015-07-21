@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -64,7 +62,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
     @Autowired
     private JobService jobService;
 
-    @Resource(name = "modelingAlertService")
+    @Autowired
     private AlertService alertService;
 
     @SuppressWarnings("unused")
@@ -88,91 +86,100 @@ public class ScoringProcessorCallable implements Callable<Long> {
         this.scoringCommand = scoringCommand;
     }
 
+    public void setAlertService(AlertService alertService) {
+        this.alertService = alertService;
+    }
+
     @Override
     public Long call() throws Exception {
         int result = SUCCESS;
         try {
             log.info("Begin scheduled work on " + ScoringCommandLogServiceImpl.SCORINGCOMMAND_ID_LOG_PREFIX + ":"
-                    + scoringCommand.getPid()); // Need this line to associate
-                                                // scoringCommandId with
-                                                // threadId
-                                                // in
-                                                // log4j output.
-            executeWorkflow();
+                    + this.scoringCommand.getPid()); // Need this line to
+                                                     // associate
+                                                     // scoringCommandId with
+                                                     // threadId in log4j
+                                                     // output.
+            this.executeWorkflow();
             log.info("End scheduled work on " + ScoringCommandLogServiceImpl.SCORINGCOMMAND_ID_LOG_PREFIX + ":"
-                    + scoringCommand.getPid());
+                    + this.scoringCommand.getPid());
         } catch (LedpException e) {
             result = FAIL;
-            scoringCommandLogService.logLedpException(scoringCommand, e);
+            this.scoringCommandLogService.logLedpException(this.scoringCommand, e);
         } catch (Exception e) {
             result = FAIL;
-            scoringCommandLogService.logException(scoringCommand, e);
+            this.scoringCommandLogService.logException(this.scoringCommand, e);
         } finally {
             if (result == FAIL) {
-                handleJobFailed();
+                this.handleJobFailed();
             }
         }
-        return scoringCommand.getPid();
+        return this.scoringCommand.getPid();
     }
 
     private void executeWorkflow() {
-        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
-                .findLastStateByScoringCommand(scoringCommand);
+        ScoringCommandState scoringCommandState = this.scoringCommandStateEntityMgr
+                .findLastStateByScoringCommand(this.scoringCommand);
         if (scoringCommandState == null) {
-            scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
-            long total = metadataService.getRowCount(scoringJdbcTemplate, scoringCommand.getTableName());
-            if (total != scoringCommand.getTotal()) {
+            this.scoringCommandLogService.log(this.scoringCommand, "Total: " + this.scoringCommand.getTotal());
+            long total = this.metadataService.getRowCount(this.scoringJdbcTemplate, this.scoringCommand.getTableName());
+            if (total != this.scoringCommand.getTotal()) {
                 throw new LedpException(LedpCode.LEDP_20016);
-            }if(total < 1)
+            }
+            if (total < 1) {
                 throw new LedpException(LedpCode.LEDP_20017);
-            executeYarnStep(ScoringCommandStep.LOAD_DATA);
+            }
+            this.executeYarnStep(ScoringCommandStep.LOAD_DATA);
         } else { // scoringCommand IN_PROGRESS
             String yarnApplicationId;
-            if ((yarnApplicationId = scoringCommandState.getYarnApplicationId()) == null)
+            if ((yarnApplicationId = scoringCommandState.getYarnApplicationId()) == null) {
                 return;
-            JobStatus jobStatus = jobService.getJobStatus(yarnApplicationId);
-            saveScoringCommandStateFromJobStatus(scoringCommandState, jobStatus);
+            }
+            JobStatus jobStatus = this.jobService.getJobStatus(yarnApplicationId);
+            this.saveScoringCommandStateFromJobStatus(scoringCommandState, jobStatus);
             if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
-                handleAllJobsSucceeded();
+                this.handleAllJobsSucceeded();
             } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                     || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                 // Job in progress.
             } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
                     || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
-                handleJobFailed(yarnApplicationId);
+                this.handleJobFailed(yarnApplicationId);
             }
         }
     }
 
     private void executeStep(ScoringStepProcessor scoringCommandProcessor, ScoringCommandStep scoringCommandStep) {
         long start = System.currentTimeMillis();
-        ScoringCommandState scoringCommandState = initExecutionStep(scoringCommandStep);
+        ScoringCommandState scoringCommandState = this.initExecutionStep(scoringCommandStep);
 
-        scoringCommandProcessor.executeStep(scoringCommand);
+        scoringCommandProcessor.executeStep(this.scoringCommand);
 
         scoringCommandState.setElapsedTimeInMillis(System.currentTimeMillis() - start);
         scoringCommandState.setStatus(FinalApplicationStatus.SUCCEEDED);
-        scoringCommandStateEntityMgr.update(scoringCommandState);
-        scoringCommandLogService.logCompleteStep(scoringCommand, scoringCommandStep, ScoringCommandStatus.SUCCESS);
+        this.scoringCommandStateEntityMgr.update(scoringCommandState);
+        this.scoringCommandLogService.logCompleteStep(this.scoringCommand, scoringCommandStep,
+                ScoringCommandStatus.SUCCESS);
     }
 
     private void executeYarnStep(ScoringCommandStep scoringCommandStep) {
-        ScoringCommandState scoringCommandState = initExecutionStep(scoringCommandStep);
+        ScoringCommandState scoringCommandState = this.initExecutionStep(scoringCommandStep);
 
-        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, scoringCommandStep);
+        ApplicationId appId = this.scoringStepYarnProcessor.executeYarnStep(this.scoringCommand, scoringCommandStep);
 
         String appIdString = appId.toString();
-        scoringCommandLogService.logYarnAppId(scoringCommand, appIdString, scoringCommandStep);
-        JobStatus jobStatus = jobService.getJobStatus(appIdString);
-        saveScoringCommandStateFromJobStatus(scoringCommandStateEntityMgr.findByKey(scoringCommandState), jobStatus);
+        this.scoringCommandLogService.logYarnAppId(this.scoringCommand, appIdString, scoringCommandStep);
+        JobStatus jobStatus = this.jobService.getJobStatus(appIdString);
+        this.saveScoringCommandStateFromJobStatus(this.scoringCommandStateEntityMgr.findByKey(scoringCommandState),
+                jobStatus);
 
     }
 
     private ScoringCommandState initExecutionStep(ScoringCommandStep scoringCommandStep) {
-        scoringCommandLogService.logBeginStep(scoringCommand, scoringCommandStep);
-        ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, scoringCommandStep);
+        this.scoringCommandLogService.logBeginStep(this.scoringCommand, scoringCommandStep);
+        ScoringCommandState scoringCommandState = new ScoringCommandState(this.scoringCommand, scoringCommandStep);
         scoringCommandState.setStatus(FinalApplicationStatus.UNDEFINED);
-        scoringCommandStateEntityMgr.create(scoringCommandState);
+        this.scoringCommandStateEntityMgr.create(scoringCommandState);
         return scoringCommandState;
     }
 
@@ -183,67 +190,69 @@ public class ScoringProcessorCallable implements Callable<Long> {
         scoringCommandState.setDiagnostics(jobStatus.getDiagnostics());
         scoringCommandState.setTrackingUrl(jobStatus.getTrackingUrl());
         scoringCommandState.setElapsedTimeInMillis(System.currentTimeMillis() - jobStatus.getStartTime());
-        scoringCommandStateEntityMgr.update(scoringCommandState);
+        this.scoringCommandStateEntityMgr.update(scoringCommandState);
     }
 
     private void handleAllJobsSucceeded() {
-        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
-                .findLastStateByScoringCommand(scoringCommand);
-        scoringCommandLogService.logCompleteStep(scoringCommand, scoringCommandState.getScoringCommandStep(),
+        ScoringCommandState scoringCommandState = this.scoringCommandStateEntityMgr
+                .findLastStateByScoringCommand(this.scoringCommand);
+        this.scoringCommandLogService.logCompleteStep(this.scoringCommand, scoringCommandState.getScoringCommandStep(),
                 ScoringCommandStatus.SUCCESS);
         ScoringCommandStep nextScoringCommandStep = scoringCommandState.getScoringCommandStep().getNextStep();
         if (nextScoringCommandStep.equals(ScoringCommandStep.FINISH)) {
-            executeStep(scoringStepFinishProcessor, ScoringCommandStep.FINISH);
+            this.executeStep(this.scoringStepFinishProcessor, ScoringCommandStep.FINISH);
         } else {
-            executeYarnStep(nextScoringCommandStep);
+            this.executeYarnStep(nextScoringCommandStep);
         }
     }
 
     @VisibleForTesting
     String handleJobFailed() {
-        return handleJobFailed(null);
+        return this.handleJobFailed(null);
     }
 
     @VisibleForTesting
     String handleJobFailed(String failedYarnApplicationId) {
-        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
-                .findLastStateByScoringCommand(scoringCommand);
-        setJobFailed(scoringCommandState);
+        ScoringCommandState scoringCommandState = this.scoringCommandStateEntityMgr
+                .findLastStateByScoringCommand(this.scoringCommand);
+        this.setJobFailed(scoringCommandState);
         if (scoringCommandState != null) {
-            StringBuilder clientUrl = new StringBuilder(appTimeLineWebAppAddress);
+            StringBuilder clientUrl = new StringBuilder(this.appTimeLineWebAppAddress);
             if (failedYarnApplicationId != null) {
                 clientUrl.append("/app/").append(failedYarnApplicationId);
-                scoringCommandLogService.log(scoringCommand, "Failed job link: " + clientUrl.toString());
+                this.scoringCommandLogService.log(this.scoringCommand, "Failed job link: " + clientUrl.toString());
             }
 
             List<BasicNameValuePair> details = new ArrayList<>();
-            details.add(new BasicNameValuePair("scoringCommandId", scoringCommand.getPid().toString()));
+            details.add(new BasicNameValuePair("scoringCommandId", this.scoringCommand.getPid().toString()));
             details.add(new BasicNameValuePair("yarnAppId", failedYarnApplicationId == null ? "None" : ""));
-            details.add(new BasicNameValuePair("deploymentExternalId", scoringCommand.getId()));
+            details.add(new BasicNameValuePair("deploymentExternalId", this.scoringCommand.getId()));
             details.add(new BasicNameValuePair("failedStep", scoringCommandState.getScoringCommandStep()
                     .getDescription()));
-            List<ScoringCommandLog> logs = scoringCommandLogService.findByScoringCommand(scoringCommand);
+            List<ScoringCommandLog> logs = this.scoringCommandLogService.findByScoringCommand(this.scoringCommand);
             if (!logs.isEmpty()) {
                 for (ScoringCommandLog scoringCommandLog : logs) {
-                    details.add(new BasicNameValuePair("scoringCommandLogId" + scoringCommandLog.getPid(), scoringCommandLog
-                            .getMessage()));
+                    details.add(new BasicNameValuePair("scoringCommandLogId" + scoringCommandLog.getPid(),
+                            scoringCommandLog.getMessage()));
                 }
             }
 
-            return alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(), details);
-        } else
+            return this.alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(),
+                    details);
+        } else {
             return "";
+        }
     }
 
     private void setJobFailed(ScoringCommandState scoringCommandState) {
         if (scoringCommandState != null) {
-            scoringCommandLogService.logCompleteStep(scoringCommand, scoringCommandState.getScoringCommandStep(),
-                    ScoringCommandStatus.FAIL);
+            this.scoringCommandLogService.logCompleteStep(this.scoringCommand,
+                    scoringCommandState.getScoringCommandStep(), ScoringCommandStatus.FAIL);
             scoringCommandState.setStatus(FinalApplicationStatus.FAILED);
-            scoringCommandStateEntityMgr.update(scoringCommandState);
+            this.scoringCommandStateEntityMgr.update(scoringCommandState);
         }
 
-        scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
-        scoringCommandEntityMgr.update(scoringCommand);
+        this.scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
+        this.scoringCommandEntityMgr.update(this.scoringCommand);
     }
 }
