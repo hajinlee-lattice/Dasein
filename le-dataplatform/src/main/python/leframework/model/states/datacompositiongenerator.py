@@ -29,7 +29,7 @@ class DataCompositionGenerator(State):
         config_metadata = schema["config_metadata"]["Metadata"]
         
         result = list()
-        for name, data_type in schema["fields"].iteritems():            
+        for name, data_type in schema["fields"].iteritems():
             metadata = [x for x in config_metadata if x["ColumnName"] == name]
             if len(metadata) == 0:
                 continue
