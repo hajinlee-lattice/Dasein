@@ -4,7 +4,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-api</artifactId>
     <packaging>war</packaging>
-    <version>2.0.5-SNAPSHOT</version>
     <name>${component-name}</name>
     <description>LE API </description>
 
