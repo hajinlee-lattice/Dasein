@@ -21,6 +21,7 @@ import com.latticeengines.scoring.service.ScoringStepProcessor;
 
 public class ScoringServiceValidationAspectTestNG extends ScoringFunctionalTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ScoringServiceValidationAspectTestNG.class);
 
     private static final String customer = "Nutanix";
