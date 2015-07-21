@@ -253,6 +253,10 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "readoutsample.csv");
         modelCommandLogService.log(modelCommand, "ReadOutSample file download link: " + httpFsPrefix
                 + readOutSampleFileHdfsPath + HTTPFS_SUFFIX);
+
+        String enhancedModelSummaryFileHdfsPath = jobStatus.getResultDirectory() + "/enhancements/modelsummary.json";
+        modelCommandLogService.log(modelCommand, "Enhanced model summary file download link: " + httpFsPrefix
+                + enhancedModelSummaryFileHdfsPath + HTTPFS_SUFFIX);
     }
 
     private void updateEventTable(ModelCommand modelCommand, String modelFilePath) {

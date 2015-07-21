@@ -55,11 +55,11 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    private List<String> linkContents = Arrays.<String> asList(new String[] { "a", "b", "c", "d", "e" });
     private String pmmlContents = "XML!";
     private String modelSummaryContents = "MSC";
     private String scoreDerivationContents = "Deciles!";
     private String dataCompositionContents = "Transforms!";
+    private List<String> linkContents = Arrays.<String> asList(new String[] { "a", "b", "c", "d", "e", modelSummaryContents });
 
     private String resultDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
     private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";   
@@ -126,7 +126,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
         List<String> outputLogs = dlOrchestrationJdbcTemplate.queryForList("select Message from LeadScoringCommandLog",
                 String.class);
-        assertEquals(outputLogs.size(), 5);
+        assertEquals(outputLogs.size(), 6);
         for (int i = 0; i < outputLogs.size(); i++) {
             String link = outputLogs.get(i).substring(outputLogs.get(i).indexOf("http://"));
             assertEquals(restTemplate.getForObject(link, String.class), linkContents.get(i));
