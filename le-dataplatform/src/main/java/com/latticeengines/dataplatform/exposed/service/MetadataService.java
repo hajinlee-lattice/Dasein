@@ -11,15 +11,15 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 public interface MetadataService {
 
     DataSchema createDataSchema(DbCreds creds, String tableName);
-    
+
     Schema getAvroSchema(DbCreds creds, String tableName);
 
     String getJdbcConnectionUrl(DbCreds creds);
-    
+
     Long getRowCount(JdbcTemplate jdbcTemplate, String tableName);
-    
+
     Long getDataSize(JdbcTemplate jdbcTemplate, String tableName);
-    
+
     Integer getColumnCount(JdbcTemplate jdbcTemplate, String tableName);
 
     Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName);
@@ -33,4 +33,8 @@ public interface MetadataService {
     void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid);
 
     void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
+
+    List<String> getColumnNames(JdbcTemplate jdbcTemplate, String table);
+
+    JdbcTemplate constructJdbcTemplate(DbCreds creds);
 }

@@ -58,7 +58,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
-    public List<String> showTable(JdbcTemplate jdbcTemplate, String table){
+    public List<String> showTable(JdbcTemplate jdbcTemplate, String table) {
         return jdbcTemplate.queryForList("SELECT [name] FROM SYS.TABLES WHERE [name] = '" + table + "'", String.class);
     }
 

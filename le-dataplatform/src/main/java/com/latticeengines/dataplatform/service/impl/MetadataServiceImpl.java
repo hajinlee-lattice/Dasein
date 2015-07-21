@@ -5,10 +5,13 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -129,5 +132,16 @@ public class MetadataServiceImpl implements MetadataService {
     public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid) {
         MetadataProvider provider = getProvider(jdbcTemplate);
         provider.addPrimaryKeyColumn(jdbcTemplate, table, pid);
+    }
+
+    @Override
+    public List<String> getColumnNames(JdbcTemplate jdbcTemplate, String table) {
+        return jdbcTemplate.queryForList("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + table + "'", String.class);
+    }
+
+    @Override
+    public JdbcTemplate constructJdbcTemplate(DbCreds creds){
+        DataSource dataSource = new DriverManagerDataSource(this.getJdbcConnectionUrl(creds), creds.getUser(), creds.getPassword());
+        return new JdbcTemplate(dataSource);
     }
 }

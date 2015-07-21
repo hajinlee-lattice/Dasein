@@ -40,6 +40,28 @@ public class ModelingServiceValidationAspectUnitTestNG {
 
     }
 
+    @Test(groups = "unit", dataProvider = "validateNameData")
+    public void validateColumnName(String columnName, boolean result, LedpCode ledpCode) {
+        ModelingServiceValidationAspect aop = new ModelingServiceValidationAspect();
+        assertColumnName(result, ledpCode, aop, columnName);
+    }
+
+    private void assertColumnName(boolean result, LedpCode ledpCode, ModelingServiceValidationAspect aop,
+            String columnName) {
+        LedpException ex = null;
+        try {
+            aop.validateColumnName(columnName);
+        } catch (LedpException ex2) {
+            ex = ex2;
+        }
+        if (result) {
+            Assert.assertTrue(ex == null);
+            return;
+        }
+        Assert.assertTrue(ex instanceof LedpException);
+        Assert.assertEquals(ex.getCode(), ledpCode);
+    }
+
     private void assertLoadValidation(boolean result, LedpCode ledpCode, ModelingServiceValidationAspect aop,
             LoadConfiguration config) {
         LedpException ex = null;
@@ -58,6 +80,17 @@ public class ModelingServiceValidationAspectUnitTestNG {
 
     @DataProvider(name = "validateNameData")
     public static Object[][] getValidateNameData() {
+        return new Object[][] { { "goodName", true, null }, //
+                { "good_Name", true, null }, //
+                { "bad Name", false, LedpCode.LEDP_10007 }, //
+                { "bad:Name", false, LedpCode.LEDP_10007 }, //
+                { "bad/Name", false, LedpCode.LEDP_10007 }, //
+                { "bad:Name", false, LedpCode.LEDP_10007 }, //
+        };
+    }
+
+    @DataProvider(name = "validateColumnNames")
+    public static Object[][] getValidateColumnNames() {
         return new Object[][] { { "goodName", true, null }, //
                 { "good_Name", true, null }, //
                 { "good.Name", true, null }, //
