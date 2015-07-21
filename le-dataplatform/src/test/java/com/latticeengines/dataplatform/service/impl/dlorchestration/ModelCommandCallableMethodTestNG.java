@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,8 +30,9 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
-import com.latticeengines.monitor.alerts.service.impl.BaseAlertServiceImpl;
+import com.latticeengines.monitor.alerts.service.impl.AlertServiceImpl;
 import com.latticeengines.monitor.alerts.service.impl.PagerDutyTestUtils;
+import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -70,8 +69,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     @Autowired
     private DebugProcessorImpl debugProcessorImpl;
 
-    @Resource(name="modelingAlertService")
-    private BaseAlertServiceImpl alertService;
+    @Autowired
+    private AlertService alertService;
 
     @Value("${dataplatform.yarn.resourcemanager.webapp.address}")
     private String resourceManagerWebAppAddress;
@@ -96,7 +95,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        alertService.enableTestMode();
+        ((AlertServiceImpl) this.alertService).enableTestMode();
     }
 
     @Test(groups = "functional")
@@ -104,36 +103,36 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
                 ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.PROFILE_DATA);
-        modelCommandEntityMgr.create(command);
+        this.modelCommandEntityMgr.create(command);
 
-        modelCommandLogService.log(command, "message.  #%#$%%^$%^$%^$%^");
-        modelCommandLogService.log(command, "another message.  #%#$%%^$%^$%^$%^ 12344       .");
+        this.modelCommandLogService.log(command, "message.  #%#$%%^$%^$%^$%^");
+        this.modelCommandLogService.log(command, "another message.  #%#$%%^$%^$%^$%^ 12344       .");
 
         ModelCommandResult result = new ModelCommandResult(command, new Date(), new Date(),
                 ModelCommandStatus.IN_PROGRESS);
-        modelCommandResultEntityMgr.create(result);
+        this.modelCommandResultEntityMgr.create(result);
 
         ModelCommandCallable.Builder builder = new ModelCommandCallable.Builder();
         builder.modelCommand(command) //
-        .yarnConfiguration(yarnConfiguration) //
-        .modelingJobService(modelingJobService) //
-        .modelCommandEntityMgr(modelCommandEntityMgr) //
-        .modelCommandStateEntityMgr(modelCommandStateEntityMgr) //
-        .modelStepYarnProcessor(modelStepYarnProcessor) //
-        .modelCommandLogService(modelCommandLogService) //
-        .modelCommandResultEntityMgr(modelCommandResultEntityMgr) //
-        .modelStepFinishProcessor(modelStepFinishProcessor) //
-        .modelStepOutputResultsProcessor(modelStepOutputResultsProcessor) //
-        .modelStepRetrieveMetadataProcessor(modelStepRetrieveMetadataProcessor) //
-        .debugProcessorImpl(debugProcessorImpl) //
-        .alertService(alertService) //
-        .resourceManagerWebAppAddress(resourceManagerWebAppAddress) //
-        .appTimeLineWebAppAddress(appTimeLineWebAppAddress) //
-        .rowFailThreshold(rowFailThreshold) //
-        .rowWarnThreshold(rowWarnThreshold) //
-        .positiveEventFailThreshold(positiveEventFailThreshold) //
-        .positiveEventWarnThreshold(positiveEventWarnThreshold) //
-        .metadataService(metadataService);
+                .yarnConfiguration(this.yarnConfiguration) //
+                .modelingJobService(this.modelingJobService) //
+                .modelCommandEntityMgr(this.modelCommandEntityMgr) //
+                .modelCommandStateEntityMgr(this.modelCommandStateEntityMgr) //
+                .modelStepYarnProcessor(this.modelStepYarnProcessor) //
+                .modelCommandLogService(this.modelCommandLogService) //
+                .modelCommandResultEntityMgr(this.modelCommandResultEntityMgr) //
+                .modelStepFinishProcessor(this.modelStepFinishProcessor) //
+                .modelStepOutputResultsProcessor(this.modelStepOutputResultsProcessor) //
+                .modelStepRetrieveMetadataProcessor(this.modelStepRetrieveMetadataProcessor) //
+                .debugProcessorImpl(this.debugProcessorImpl) //
+                .alertService(this.alertService) //
+                .resourceManagerWebAppAddress(this.resourceManagerWebAppAddress) //
+                .appTimeLineWebAppAddress(this.appTimeLineWebAppAddress) //
+                .rowFailThreshold(this.rowFailThreshold) //
+                .rowWarnThreshold(this.rowWarnThreshold) //
+                .positiveEventFailThreshold(this.positiveEventFailThreshold) //
+                .positiveEventWarnThreshold(this.positiveEventWarnThreshold) //
+                .metadataService(this.metadataService);
 
         ModelCommandCallable callable = new ModelCommandCallable(builder);
 
@@ -149,46 +148,46 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         ModelCommand command = new ModelCommand(2L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
                 ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.SUBMIT_MODELS);
-        modelCommandEntityMgr.create(command);
+        this.modelCommandEntityMgr.create(command);
 
         ModelCommandCallable.Builder builder = new ModelCommandCallable.Builder();
         builder.modelCommand(command) //
-        .yarnConfiguration(yarnConfiguration) //
-        .modelingJobService(modelingJobService) //
-        .modelCommandEntityMgr(modelCommandEntityMgr) //
-        .modelCommandStateEntityMgr(modelCommandStateEntityMgr) //
-        .modelStepYarnProcessor(modelStepYarnProcessor) //
-        .modelCommandLogService(modelCommandLogService) //
-        .modelCommandResultEntityMgr(modelCommandResultEntityMgr) //
-        .modelStepFinishProcessor(modelStepFinishProcessor) //
-        .modelStepOutputResultsProcessor(modelStepOutputResultsProcessor) //
-        .modelStepRetrieveMetadataProcessor(modelStepRetrieveMetadataProcessor) //
-        .debugProcessorImpl(debugProcessorImpl) //
-        .alertService(alertService) //
-        .resourceManagerWebAppAddress(resourceManagerWebAppAddress) //
-        .appTimeLineWebAppAddress(appTimeLineWebAppAddress) //
-        .rowFailThreshold(rowFailThreshold) //
-        .rowWarnThreshold(rowWarnThreshold) //
-        .positiveEventFailThreshold(positiveEventFailThreshold) //
-        .positiveEventWarnThreshold(positiveEventWarnThreshold) //
-        .metadataService(metadataService);
+                .yarnConfiguration(this.yarnConfiguration) //
+                .modelingJobService(this.modelingJobService) //
+                .modelCommandEntityMgr(this.modelCommandEntityMgr) //
+                .modelCommandStateEntityMgr(this.modelCommandStateEntityMgr) //
+                .modelStepYarnProcessor(this.modelStepYarnProcessor) //
+                .modelCommandLogService(this.modelCommandLogService) //
+                .modelCommandResultEntityMgr(this.modelCommandResultEntityMgr) //
+                .modelStepFinishProcessor(this.modelStepFinishProcessor) //
+                .modelStepOutputResultsProcessor(this.modelStepOutputResultsProcessor) //
+                .modelStepRetrieveMetadataProcessor(this.modelStepRetrieveMetadataProcessor) //
+                .debugProcessorImpl(this.debugProcessorImpl) //
+                .alertService(this.alertService) //
+                .resourceManagerWebAppAddress(this.resourceManagerWebAppAddress) //
+                .appTimeLineWebAppAddress(this.appTimeLineWebAppAddress) //
+                .rowFailThreshold(this.rowFailThreshold) //
+                .rowWarnThreshold(this.rowWarnThreshold) //
+                .positiveEventFailThreshold(this.positiveEventFailThreshold) //
+                .positiveEventWarnThreshold(this.positiveEventWarnThreshold) //
+                .metadataService(this.metadataService);
 
         ModelCommandCallable callable = new ModelCommandCallable(builder);
         ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
         JobStatus jobStatus = new JobStatus();
 
         String outputDir = "diagnostics_output";
-        HdfsUtils.rmdir(yarnConfiguration, outputDir);
-        HdfsUtils.mkdir(yarnConfiguration, outputDir);
-        String contents = getContent();
-        HdfsUtils.writeToFile(yarnConfiguration, outputDir + "/diagnostics.json", contents);
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "diagnostics_output");
+        HdfsUtils.rmdir(this.yarnConfiguration, outputDir);
+        HdfsUtils.mkdir(this.yarnConfiguration, outputDir);
+        String contents = this.getContent();
+        HdfsUtils.writeToFile(this.yarnConfiguration, outputDir + "/diagnostics.json", contents);
+        List<String> files = HdfsUtils.getFilesForDir(this.yarnConfiguration, "diagnostics_output");
         Assert.assertEquals(files.size(), 1);
 
         jobStatus.setDataDiagnosticsPath(files.get(0));
 
         callable.generateDataDiagnostics(commandState, jobStatus);
-        List<ModelCommandLog> logs = modelCommandLogService.findByModelCommand(command);
+        List<ModelCommandLog> logs = this.modelCommandLogService.findByModelCommand(command);
         Assert.assertEquals(logs.size(), 1);
         int warnIndex = logs.get(0).getMessage().contains("The number of skipped rows") ? 0 : 1;
         String warnLog = logs.get(warnIndex).getMessage();

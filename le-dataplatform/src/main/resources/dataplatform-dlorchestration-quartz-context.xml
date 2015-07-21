@@ -21,7 +21,7 @@
                 <entry key="modelStepRetrieveMetadataProcessor" value-ref="modelStepRetrieveMetadataProcessor" />
                 <entry key="debugProcessorImpl" value-ref="debugProcessorImpl" />
                 <entry key="yarnConfiguration" value-ref="yarnConfiguration" />
-                <entry key="alertService" value-ref="modelingAlertService" />
+                <entry key="alertService" value-ref="alertService" />
                 <entry key="waitTime" value="${dataplatform.dlorchestrationjob.wait.time}" />
                 <entry key="httpFsPrefix" value="${dataplatform.fs.web.defaultFS}" />
                 <entry key="resourceManagerWebAppAddress" value="${dataplatform.yarn.resourcemanager.webapp.address}" />
