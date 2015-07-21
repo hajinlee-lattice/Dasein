@@ -6,7 +6,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-remote-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-monitor-context.xml" })
 public class MonitorFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
 }
