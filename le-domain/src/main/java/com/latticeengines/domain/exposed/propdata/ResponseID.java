@@ -8,11 +8,11 @@ import com.latticeengines.domain.exposed.pls.ResponseDocument;
 @SuppressWarnings("rawtypes")
 public class ResponseID extends ResponseDocument{
 
-	@SuppressWarnings("unchecked")
-	public ResponseID(Boolean success,List<String> errors
-			,@JsonProperty("ID")  Long ID) {
-		this.setSuccess(success);
+    @SuppressWarnings("unchecked")
+    public ResponseID(Boolean success,List<String> errors
+            ,@JsonProperty("ID")  Long ID) {
+        this.setSuccess(success);
         this.setErrors(errors);
-		this.setResult(ID);
-	}		
+        this.setResult(ID);
+    }        
 }

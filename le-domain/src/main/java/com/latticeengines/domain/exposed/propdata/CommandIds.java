@@ -20,76 +20,76 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Table(name = "CommandIds")
 public class CommandIds implements HasPid {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Basic(optional = false)
-	@Column(name = "CommandId", unique = true, nullable = false)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "CommandId", unique = true, nullable = false)
+    private Long id;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "CreateTime", nullable = false)
-	private Date createTime;
-	
-	@Column(name = "CreatedBy", nullable = false)
-	private String createdBy;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "CreateTime", nullable = false)
+    private Date createTime;
+    
+    @Column(name = "CreatedBy", nullable = false)
+    private String createdBy;
 
-	@Override
-	public Long getPid() {
-		return this.id;
-	}
+    @Override
+    public Long getPid() {
+        return this.id;
+    }
 
-	@Override
-	public void setPid(Long id) {
-		this.id = id;
-	}
+    @Override
+    public void setPid(Long id) {
+        this.id = id;
+    }
 
-	public Date getCreateTime() {
-		return createTime;
-	}
+    public Date getCreateTime() {
+        return createTime;
+    }
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
 
-	public String getCreatedBy() {
-		return createdBy;
-	}
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
-	@Override
-	public int hashCode() {
-		int result;
-		result = getPid().hashCode();
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        int result;
+        result = getPid().hashCode();
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object other) {
+    @Override
+    public boolean equals(Object other) {
 
-		if (other == null) {
-			return false;
-		}
-		if (other == this) {
-			return true;
-		}
-		if (!other.getClass().equals(this.getClass())) {
-			return false;
-		}
+        if (other == null) {
+            return false;
+        }
+        if (other == this) {
+            return true;
+        }
+        if (!other.getClass().equals(this.getClass())) {
+            return false;
+        }
 
-		CommandIds theOther = (CommandIds) other;
+        CommandIds theOther = (CommandIds) other;
 
-		return new EqualsBuilder().append(id, theOther.getPid()).isEquals();
+        return new EqualsBuilder().append(id, theOther.getPid()).isEquals();
 
-	}
+    }
 
-	@Override
-	public String toString() {
-		return "CommandIds [id=" + id + ", createTime=" + createTime
-				+ ", createdBy=" + createdBy + "]";
-	}
-	
-	
+    @Override
+    public String toString() {
+        return "CommandIds [id=" + id + ", createTime=" + createTime
+                + ", createdBy=" + createdBy + "]";
+    }
+    
+    
 }
