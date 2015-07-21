@@ -3,12 +3,11 @@ package com.latticeengines.pls.exception;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,7 +26,7 @@ import com.latticeengines.security.exposed.exception.SecurityControllerException
 public class PlsControllerExceptionHandler extends SecurityControllerExceptionHandler {
     private static final Log log = LogFactory.getLog(PlsControllerExceptionHandler.class);
 
-    @Resource(name = "plsAlertService")
+    @Autowired
     private AlertService alertService;
 
     public PlsControllerExceptionHandler() {
@@ -53,7 +52,7 @@ public class PlsControllerExceptionHandler extends SecurityControllerExceptionHa
 
         List<BasicNameValuePair> details = new ArrayList<>();
         details.add(new BasicNameValuePair("stackTrace", stackTrace));
-        alertService.triggerCriticalEvent(e.getMessage(), null, details);
+        this.alertService.triggerCriticalEvent(e.getMessage(), null, details);
 
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_00002.name(), //
                 "errorMsg", stackTrace));
