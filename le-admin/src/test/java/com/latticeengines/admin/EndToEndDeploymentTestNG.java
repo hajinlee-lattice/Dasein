@@ -380,9 +380,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         String PLSTenantId =
                 String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         RestTemplate plsRestTemplate = plsComponentTestNG.plsRestTemplate;
-        String crmType = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
-                String.class);
-        Assert.assertEquals(crmType.toLowerCase(), CRMTopology.ELOQUA.name().toLowerCase());
+        CRMTopology topology = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
+                CRMTopology.class);
+        Assert.assertEquals(topology, CRMTopology.ELOQUA);
     }
     /**
      * ==================================================
