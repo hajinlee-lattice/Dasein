@@ -20,7 +20,7 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
         creds.setUsername(adminUsername);
         creds.setPassword(DigestUtils.sha256Hex(adminPassword));
 
-        LoginDocument loginDoc = restTemplate.postForObject(getRestAPIHostPort() + "/security/login", creds, LoginDocument.class);
+        LoginDocument loginDoc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds, LoginDocument.class);
         assertTrue(loginDoc.getResult().getTenants().size() >= 2);
         assertNotNull(loginDoc.getData());
     }
@@ -34,7 +34,7 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         try {
-            restTemplate.postForObject(getRestAPIHostPort() + "/security/login", creds, Session.class);
+            restTemplate.postForObject(getRestAPIHostPort() + "/login", creds, Session.class);
         } catch (Exception e) {
             String code = e.getMessage();
             assertEquals(code, "401");

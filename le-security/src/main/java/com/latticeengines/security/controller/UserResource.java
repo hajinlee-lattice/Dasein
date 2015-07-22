@@ -224,7 +224,8 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Delete a user. The user must be in the tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public SimpleBooleanResponse deleteUser(@PathVariable String username, HttpServletRequest request) {
+    public SimpleBooleanResponse deleteUser(@PathVariable String username, HttpServletRequest request,
+                                            HttpServletResponse response) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
 
@@ -237,6 +238,7 @@ public class UserResource {
         if (userService.inTenant(tenantId, username)) {
             AccessLevel targetLevel = userService.getAccessLevel(tenantId, username);
             if (!userService.isSuperior(loginLevel,  targetLevel)) {
+                response.setStatus(403);
                 return SimpleBooleanResponse.getFailResponse(
                         Collections.singletonList(
                                 String.format("Could not delete a %s user using a %s user.",

@@ -11,8 +11,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -24,6 +28,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -194,5 +199,23 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected void logoutUserDoc(UserDocument doc) { logoutTicket(doc.getTicket()); }
 
     protected void logoutTicket(Ticket ticket) { globalAuthenticationService.discard(ticket); }
+
+    protected static <T> T sendHttpDeleteForObject(RestTemplate restTemplate, String url, Class<T> responseType) {
+        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.DELETE, jsonRequestEntity(""), responseType);
+        return response.getBody();
+    }
+
+    protected static <T> T sendHttpPutForObject(RestTemplate restTemplate, String url, Object payload, Class<T> responseType) {
+        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.PUT,
+                jsonRequestEntity(payload), responseType);
+        return response.getBody();
+    }
+
+    protected static HttpEntity<String> jsonRequestEntity(Object payload) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        return new HttpEntity<>(JsonUtils.serialize(payload), headers);
+    }
 
 }
