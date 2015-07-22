@@ -1,8 +1,10 @@
 package com.latticeengines.pls.controller;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,7 +46,6 @@ public class ModelSummaryResource {
     @Autowired
     private ModelSummaryService modelSummaryService;
 
-
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
@@ -59,7 +60,8 @@ public class ModelSummaryResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of model summary ids available to the user")
-    public List<ModelSummary> getModelSummaries(@RequestParam(value="selection", required=false) String selection) {
+    public List<ModelSummary> getModelSummaries(
+            @RequestParam(value = "selection", required = false) String selection) {
 
         List<ModelSummary> summaries;
         if (selection != null && selection.equalsIgnoreCase("all")) {
@@ -79,22 +81,69 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Get diagnostic alerts for a model.")
     public ModelAlerts getModelAlerts(@PathVariable String modelId, HttpServletRequest request,
-                                      HttpServletResponse response) {
+            HttpServletResponse response) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         if (!modelSummaryService.modelIdinTenant(modelId, tenant.getId())) {
             response.setStatus(403);
             return null;
         }
 
-        //TODO: to be replaced by true model alerts
+        // TODO: to be replaced by true model alerts
         ModelAlerts mockAlerts = new ModelAlerts();
-        ModelAlerts.ModelQualityWarnings modelQualityWarnings = new ModelAlerts.ModelQualityWarnings();
-        modelQualityWarnings.setSuccess(false);
-        List<ModelAlerts.AttributeValuePair> badAttributes = Arrays.asList(
-                new ModelAlerts.AttributeValuePair("attribuite1", "0.5"),
-                new ModelAlerts.AttributeValuePair("attribuite2", "0.3")
-        );
-        modelQualityWarnings.setLowConversionRateAttributes(badAttributes);
+        ModelAlerts.ModelQualityWarnings modelQualityWarnings = mockAlerts.new ModelQualityWarnings();
+        modelQualityWarnings.setLowSuccessEvents(437L);
+        modelQualityWarnings.setMinSuccessEvents(500L);
+        modelQualityWarnings.setLowConversionPercentage(0.8);
+        modelQualityWarnings.setMinConversionPercentage(1.0);
+        modelQualityWarnings.setOutOfRangeRocScore(0.62);
+        modelQualityWarnings.setMinRocScore(0.7);
+        modelQualityWarnings.setMaxRocScore(0.85);
+        List<Map.Entry<String, String>> excessiveDiscreteValuesAttributes = new ArrayList<>();
+        excessiveDiscreteValuesAttributes.add(new AbstractMap.SimpleEntry<String, String>(
+                "attribuite1", "220"));
+        excessiveDiscreteValuesAttributes.add(new AbstractMap.SimpleEntry<String, String>(
+                "attribuite2", "389"));
+        modelQualityWarnings.setExcessiveDiscreteValuesAttributes(excessiveDiscreteValuesAttributes);
+        modelQualityWarnings.setMaxNumberOfDiscreteValues(200L);
+        List<Map.Entry<String, String>> excessivePredictiveAttributes = new ArrayList<Map.Entry<String, String>>();
+        excessivePredictiveAttributes.add(new AbstractMap.SimpleEntry<String, String>("attribuite1",
+                "0.12"));
+        excessivePredictiveAttributes.add(new AbstractMap.SimpleEntry<String, String>("attribuite2",
+                "0.25"));
+        modelQualityWarnings.setExcessivePredictiveAttributes(excessivePredictiveAttributes);
+        modelQualityWarnings.setMaxFeatureImportance(1.0);
+        List<Map.Entry<String, String>> excessivePredictiveNullValuesAttributes = new ArrayList<Map.Entry<String, String>>();
+        excessivePredictiveNullValuesAttributes.add(new AbstractMap.SimpleEntry<String, String>(
+                "attribuite1", "1.3"));
+        excessivePredictiveNullValuesAttributes.add(new AbstractMap.SimpleEntry<String, String>(
+                "attribuite2", "1.7"));
+        modelQualityWarnings
+                .setExcessivePredictiveNullValuesAttributes(excessivePredictiveNullValuesAttributes);
+        modelQualityWarnings.setMaxLiftForNull(1.0);
+
+        ModelAlerts.MissingMetaDataWarnings missingMetaDataWarnings = mockAlerts.new MissingMetaDataWarnings();
+        List<String> approvedUsageValuesMissingAttributes = Arrays.asList("attribuite1",
+                "attribuite2");
+        missingMetaDataWarnings
+                .setInvalidApprovedUsageMissingAttributes(approvedUsageValuesMissingAttributes);
+        List<String> tagsValuesMissingAttributes = Arrays.asList("attribuite1", "attribuite2");
+        missingMetaDataWarnings.setInvalidTagsAttributes(tagsValuesMissingAttributes);
+        List<String> categoryValuesMissingAttributes = Arrays.asList("attribuite1", "attribuite2");
+        missingMetaDataWarnings.setInvalidCategoryAttributes(categoryValuesMissingAttributes);
+        List<String> displayNameValuesMissingAttributes = Arrays.asList("attribuite1",
+                "attribuite2");
+        missingMetaDataWarnings
+                .setInvalidDisplayNameAttributes(displayNameValuesMissingAttributes);
+        List<String> statisticalTypeValuesMissingAttributes = Arrays.asList("attribuite1",
+                "attribuite2");
+        missingMetaDataWarnings
+                .setInvalidStatisticalTypeAttributes(statisticalTypeValuesMissingAttributes);
+        List<String> excessiveCategoriesInModelSummary = Arrays.asList("category1", "category2");
+        missingMetaDataWarnings.setExcessiveCategoriesInModelSummary(excessiveCategoriesInModelSummary);
+        missingMetaDataWarnings.setMaxCategoriesInModelSummary(8L);
+
+        mockAlerts.setModelQualityWarnings(modelQualityWarnings);
+        mockAlerts.setMissingMetaDataWarnings(missingMetaDataWarnings);
 
         return mockAlerts;
     }
@@ -104,14 +153,16 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Register a model summary")
     @PreAuthorize("hasRole('Create_PLS_Models')")
     public ModelSummary createModelSummary(@RequestBody ModelSummary modelSummary,
-            @RequestParam(value = "raw", required = false) boolean usingRaw, HttpServletRequest request) {
+            @RequestParam(value = "raw", required = false) boolean usingRaw,
+            HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         if (tenant == null) {
             return null;
         }
 
         if (usingRaw) {
-            return modelSummaryService.createModelSummary(modelSummary.getRawFile(), tenant.getId());
+            return modelSummaryService
+                    .createModelSummary(modelSummary.getRawFile(), tenant.getId());
         } else {
             return modelSummaryService.createModelSummary(modelSummary, tenant.getId());
         }
