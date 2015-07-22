@@ -8,7 +8,6 @@ import requests
 import time
 import threading
 import json
-from IPython.core.tests.test_hooks import Fail
 
 
 
@@ -83,10 +82,10 @@ class Test(unittest.TestCase):
         return len(json.loads(response)['records'])
 
     def getStartTimestamp(self, response):
-        return int(json.loads(response)['start'])
+        return int(json.loads(response)['startDatetime'])
 
     def getEndTimestamp(self, response):
-        return int(json.loads(response)['end'])
+        return int(json.loads(response)['endDatetime'])
 
 
     def testGetRecommendationOffset(self):
@@ -154,7 +153,7 @@ class Test(unittest.TestCase):
 
     def testGetRecommendationMultipleThreads(self):
         for i in range(0, 3):
-            t = threading.Thread(target=self.requestRecommendationSingleThread, args=({i+1}))
+            t = threading.Thread(target=self.requestRecommendationSingleThread, args=([i]))
             t.daemon = True
             t.start()
             
@@ -170,6 +169,7 @@ class Test(unittest.TestCase):
 
     # called by each thread
     def requestRecommendationSingleThread(self, i):
+        i += 1
         print 'starting within the thread {} at time {}'.format(i, time.ctime())
         startTime = 1436549860
         headers = {'Authorization':self.token}
