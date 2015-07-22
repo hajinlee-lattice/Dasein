@@ -494,12 +494,12 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         }
     }
 
-    private String callDLRestService(String dlUrl, String endpoint, Object payload) throws IOException {
+    private <T> String callDLRestService(String dlUrl, String endpoint, T payload) throws IOException {
         if (dlUrl.endsWith("/")) dlUrl = dlUrl.substring(0, dlUrl.length() - 1);
         if (!dlUrl.endsWith(DL_REST_SERVICE)) dlUrl += DL_REST_SERVICE;
 
         String stringifiedPayload;
-        if (payload instanceof String) {
+        if (payload.getClass().equals(String.class)) {
             stringifiedPayload = ( String ) payload;
         } else {
             stringifiedPayload =  JsonUtils.serialize(payload);
