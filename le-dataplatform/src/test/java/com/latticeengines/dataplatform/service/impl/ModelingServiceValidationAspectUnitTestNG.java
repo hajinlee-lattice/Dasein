@@ -40,7 +40,7 @@ public class ModelingServiceValidationAspectUnitTestNG {
 
     }
 
-    @Test(groups = "unit", dataProvider = "validateNameData")
+    @Test(groups = "unit", dataProvider = "validateColumnNames")
     public void validateColumnName(String columnName, boolean result, LedpCode ledpCode) {
         ModelingServiceValidationAspect aop = new ModelingServiceValidationAspect();
         assertColumnName(result, ledpCode, aop, columnName);
@@ -82,17 +82,6 @@ public class ModelingServiceValidationAspectUnitTestNG {
     public static Object[][] getValidateNameData() {
         return new Object[][] { { "goodName", true, null }, //
                 { "good_Name", true, null }, //
-                { "bad Name", false, LedpCode.LEDP_10007 }, //
-                { "bad:Name", false, LedpCode.LEDP_10007 }, //
-                { "bad/Name", false, LedpCode.LEDP_10007 }, //
-                { "bad:Name", false, LedpCode.LEDP_10007 }, //
-        };
-    }
-
-    @DataProvider(name = "validateColumnNames")
-    public static Object[][] getValidateColumnNames() {
-        return new Object[][] { { "goodName", true, null }, //
-                { "good_Name", true, null }, //
                 { "good.Name", true, null }, //
                 { "{badName}", false, LedpCode.LEDP_10007 }, //
                 { "[badName]", false, LedpCode.LEDP_10007 }, //
@@ -102,7 +91,17 @@ public class ModelingServiceValidationAspectUnitTestNG {
                 { ".", false, LedpCode.LEDP_10007 }, //
                 { "..", false, LedpCode.LEDP_10007 }, //
                 { "/", false, LedpCode.LEDP_10007 }, //
+        };
+    }
 
+    @DataProvider(name = "validateColumnNames")
+    public static Object[][] getValidateColumnNames() {
+        return new Object[][] { { "goodName", true, null }, //
+                { "good_Name", true, null }, //
+                { "bad Name", false, LedpCode.LEDP_10007 }, //
+                { "bad:Name", false, LedpCode.LEDP_10007 }, //
+                { "bad/Name", false, LedpCode.LEDP_10007 }, //
+                { "bad:Name", false, LedpCode.LEDP_10007 }, //
         };
     }
 
