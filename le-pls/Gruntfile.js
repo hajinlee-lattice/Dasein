@@ -11,7 +11,7 @@ module.exports = function (grunt) {
             "le-common": '0.0.1',
 
             jquery: '2.1.3',
-            angular: '1.3.15',
+            angular: '1.4.2',
             "angular-ui-bootstrap": '0.12.1',
             underscore: '1.8.2',
             qtip2: '2.2.1',
