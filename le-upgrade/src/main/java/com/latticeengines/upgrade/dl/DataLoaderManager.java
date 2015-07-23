@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
@@ -18,14 +19,17 @@ import com.latticeengines.remote.exposed.service.DataLoaderService;
 @Component("dataLoaderManager")
 public class DataLoaderManager {
 
-    private static final String DL_URL1 = "https://dataloader-prod.lattice-engines.com/Dataloader_PLS";
-    private static final String DL_URL2 = "https://data-pls.lattice-engines.com/Dataloader_PLS";
-
     @Autowired
     private DataLoaderService dataLoaderService;
 
     private static String crmPassword = "";
     private static String crmSecurityToken = "security-token";
+
+    @Value("${upgrade.dl.url1}")
+    private String dlUrl1;
+
+    @Value("${upgrade.dl.url2}")
+    private String dlUrl2;
 
     @PostConstruct
     private void setCrmCredentials() throws Exception {
@@ -33,14 +37,14 @@ public class DataLoaderManager {
     }
 
     public SpaceConfiguration constructSpaceConfiguration(String tenantName) {
-        String version = dataLoaderService.getTemplateVersion(tenantName, DL_URL1);
+        String version = dataLoaderService.getTemplateVersion(tenantName, dlUrl1);
         if (!StringUtils.isEmpty(version)) {
-            return constructSpaceConfiguration(DL_URL1, parseTopoloy(version));
+            return constructSpaceConfiguration(dlUrl1, parseTopoloy(version));
         }
 
-        version = dataLoaderService.getTemplateVersion(tenantName, DL_URL2);
+        version = dataLoaderService.getTemplateVersion(tenantName, dlUrl2);
         if (!StringUtils.isEmpty(version)) {
-            return constructSpaceConfiguration(DL_URL2, parseTopoloy(version));
+            return constructSpaceConfiguration(dlUrl2, parseTopoloy(version));
         }
 
         Exception e = new RuntimeException("Neither of the two prod dl urls can find the tenant requested, " +
