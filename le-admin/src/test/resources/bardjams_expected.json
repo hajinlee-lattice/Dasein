@@ -82,7 +82,7 @@
       "Data":"",
       "Metadata":{
         "Type":"string",
-        "Helper":"Leave it blank to use \"$tenantId_Dante_Queue\""
+        "Readonly": true
       }
     },
     {
@@ -162,7 +162,7 @@
       "Data":"",
       "Metadata":{
         "Type":"string",
-        "Helper":"Leave it blank to use \"$tenantId_Queue\""
+        "Readonly": true
       }
     },
     {

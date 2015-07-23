@@ -90,11 +90,11 @@
 	  },
 	  {
 		"Node": "Queue_Name",
-		"Data": {"Type": "string", "Helper": "Leave it blank to use \"$tenantId_Queue\""}
+		"Data": {"Type": "string", "Readonly": true}
 	  },
 	  {
 		"Node": "Dante_Queue_Name",
-		"Data": {"Type": "string", "Helper": "Leave it blank to use \"$tenantId_Dante_Queue\""}
+		"Data": {"Type": "string", "Readonly": true}
 	  },
 	  {
 		"Node": "Agent_Name",

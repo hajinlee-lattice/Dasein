@@ -104,6 +104,8 @@ public class BardJamsComponent extends LatticeComponent {
         tenant.setDanteToolPath(dir.getChild("DanteTool_Path").getDocument().getData());
         tenant.setWeekdayScheduleName(dir.getChild("WeekdaySchedule_Name").getDocument().getData());
         tenant.setWeekendScheduleName(dir.getChild("WeekendSchedule_Name").getDocument().getData());
+        tenant.setQueueName(dir.getChild("Queue_Name").getDocument().getData());
+        tenant.setDanteQueueName(dir.getChild("Dante_Queue_Name").getDocument().getData());
 
         String active = dir.getChild("Active").getDocument().getData();
         tenant.setActive(Integer.parseInt(active));
@@ -137,14 +139,6 @@ public class BardJamsComponent extends LatticeComponent {
         //==================================================
         // configurable
         //==================================================
-        tenant.setQueueName(getDataWithFailover(dir.getChild("Queue_Name").getDocument().getData(),
-                tenantId + "_Queue"));
-        dir.getChild("Queue_Name").getDocument().setData(tenant.getQueueName());
-
-        tenant.setDanteQueueName(getDataWithFailover(dir.getChild("Dante_Queue_Name").getDocument().getData(),
-                tenantId + "_Dante_Queue"));
-        dir.getChild("Queue_Name").getDocument().setData(tenant.getDanteQueueName());
-
         tenant.setAgentName(dir.getChild("Agent_Name").getDocument().getData());
 
         return tenant;
