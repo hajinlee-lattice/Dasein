@@ -14,10 +14,12 @@ app.directive('listEntry', function(){
 
             $scope.addItem = function() {
                 $scope.list.push({value: ""});
+                $scope.syncData();
             };
 
             $scope.deleteItem = function(idx) {
                 $scope.list.splice(idx, 1);
+                $scope.syncData();
             };
 
             $scope.syncData = function() {
