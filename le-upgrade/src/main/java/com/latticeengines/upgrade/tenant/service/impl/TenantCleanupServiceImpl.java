@@ -60,7 +60,7 @@ public class TenantCleanupServiceImpl implements TenantUpgradeService {
     }
 
     private void waitForModelDownloadedAndRename(String customer) {
-        System.out.println("  Waiting for all models for customer " + customer + " are downloaded ... ");
+        System.out.print("  Waiting for all models for customer " + customer + " are downloaded ... ");
         for (String uuid: uuidsToBeDownloaded(customer)) {
             if (uuidsInHdfs.contains(uuid)) {
                 System.out.println("    " + uuid + " ... ");

@@ -101,15 +101,29 @@ public class YarnManager {
     }
 
     public boolean modelSummaryExistsInSingularId(String customer, String uuid) {
-        String modelFolder = findModelFolderPathInSingular(customer, uuid);
-        String destPath = modelFolder + MS_PATH;
-        return hdfsPathExists(destPath);
+        try {
+            String modelFolder = findModelFolderPathInSingular(customer, uuid);
+            String destPath = modelFolder + MS_PATH;
+            return hdfsPathExists(destPath);
+        } catch (LedpException e) {
+            if (LedpCode.LEDP_24000.equals(e.getCode())) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     public boolean modelSummaryExistsInTupleId(String customer, String uuid) {
-        String modelFolder = findModelFolderPathInTuple(customer, uuid);
-        String destPath = modelFolder + MS_PATH;
-        return hdfsPathExists(destPath);
+        try {
+            String modelFolder = findModelFolderPathInTuple(customer, uuid);
+            String destPath = modelFolder + MS_PATH;
+            return hdfsPathExists(destPath);
+        } catch (LedpException e) {
+            if (LedpCode.LEDP_24000.equals(e.getCode())) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     public List<String> findAllUuidsInSingularId(String customer) {
@@ -154,7 +168,7 @@ public class YarnManager {
         detail.put("LookupId", lookupId);
 
         ObjectNode summary = objectMapper.createObjectNode();
-        summary.set("ModelDetail", detail);
+        summary.set("ModelDetails", detail);
 
         return summary;
     }
