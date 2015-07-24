@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         tenant = 'PCM'
-        key = cls.getOneTimeKey(tenant, "jdbc:sqlserver://10.41.1.82\\sql2012std;databaseName=PCM")
+        key = cls.getOneTimeKey(tenant, "jdbc:sqlserver://BODCDEVVSAS193\\SQL2008R2;databaseName=PCM")
         cls.token = 'bearer ' + cls.getToken(key, tenant)
         #print "Key is: " + key
         #print  "token is: " + cls.token
