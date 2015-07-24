@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
@@ -15,6 +16,7 @@ import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Component("madisonDataFlowGroupAndExpandBuilder")
+@Scope("prototype")
 public class MadisonDataFlowGroupAndExpandBuilder extends CascadingDataFlowBuilder {
 
     public MadisonDataFlowGroupAndExpandBuilder() {

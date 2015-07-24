@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema.Type;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Component("madisonDataFlowAggregationBuilder")
+@Scope("prototype")
 public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
 
     public MadisonDataFlowBuilder() {
