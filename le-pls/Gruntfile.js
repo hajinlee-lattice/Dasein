@@ -183,6 +183,21 @@ module.exports = function (grunt) {
                     force: true
                 }
             },
+            jsAndCss: {
+                files:   [{
+                    dot: true,
+                    src: [
+                        '<%= pls.app %>/**/*.js',
+                        '<%= pls.app %>/**/*.css',
+                        '<%= pls.app %>/**/*.scss',
+                        '!<%= pls.app %>/app/production_<%= versionString %>.min.js',
+                        '!<%= pls.app %>/assets/styles/production_<%= versionString %>.min.css'
+                    ]
+                }],
+                options: {
+                    force: true
+                }
+            },
             coverage: {
             	src: ['target/protractor_coverage'],
             	options: {
@@ -565,7 +580,8 @@ module.exports = function (grunt) {
     var defaultText = 'The default grunt build task. Runs a full build for everything including: file linting and minification (including css), running unit tests, and versioning for production. This website ready for distribution will be placed in the <SVN Directory>\<Product>\Projects\dist directory. This can be called just with the grunt command. The production files will then be named production_.js and production_.css.';
     grunt.registerTask('default', defaultText, [
         'dist',
-        'clean:post'
+        'clean:post',
+        'clean:jsAndCss'
     ]);
 
     var prepWarText = 'Move dist into webapp directory for maven webapp packager to pick up.  This should only be run on build machine because it messes with the source webapp.';

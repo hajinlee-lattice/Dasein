@@ -6,18 +6,31 @@ angular.module('mainApp.core.services.ResourceStringsService', [
     
     this.DefaultLocale= "en-US";
     
-    this.GetResourceStrings = function (locale) {
-        
-        var deferred = $q.defer();
+    this.GetExternalResourceStringsForLocale = function (locale) {
         if (locale == null) {
             locale = this.DefaultLocale;
         }
         
-        var webServer = URLUtility.GetWebServerAddress("/") + "/assets/resources/" + locale + "/" + "ResourceStrings.txt";
+        var webAddress = URLUtility.GetWebServerAddress("/") + "/assets/resources/" + locale + "/" + "ResourceStringsExternal.txt";
+        return getResourceStringsAtWebAddress(webAddress);
+    };
+
+    this.GetInternalResourceStringsForLocale = function (locale) {
+        if (locale == null) {
+            locale = this.DefaultLocale;
+        }
+        
+        var webAddress = URLUtility.GetWebServerAddress("/") + "/assets/resources/" + locale + "/" + "ResourceStrings.txt";
+        return getResourceStringsAtWebAddress(webAddress);
+    };
+
+    function getResourceStringsAtWebAddress (webAddress) {
+        
+        var deferred = $q.defer();
         
         $http({
             method: 'GET', 
-            url: webServer
+            url: webAddress
         })
         .success(function(data, status, headers, config) {
             if (data == null) return;
@@ -39,5 +52,5 @@ angular.module('mainApp.core.services.ResourceStringsService', [
         });
         
         return deferred.promise;
-    };
+    }
 });

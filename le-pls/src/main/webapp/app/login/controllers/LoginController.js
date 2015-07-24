@@ -114,7 +114,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     };
     
     $scope.getLocaleSpecificResourceStrings = function (locale) {
-        ResourceStringsService.GetResourceStrings(locale).then(function(result) {
+        ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
             $scope.getWidgetConfigDoc();
         });
     };

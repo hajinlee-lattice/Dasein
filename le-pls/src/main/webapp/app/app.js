@@ -47,7 +47,7 @@ var mainApp = angular.module('mainApp', [
         }
     });
     
-    ResourceStringsService.GetResourceStrings().then(function(result) {
+    ResourceStringsService.GetExternalResourceStringsForLocale().then(function(result) {
         var previousSession = BrowserStorageUtility.getClientSession();
         if (BrowserStorageUtility.getLoginDocument() && mustUserChangePassword(BrowserStorageUtility.getLoginDocument())) {
             $http.get('./app/core/views/MainView.html').success(function (html) {
@@ -110,7 +110,7 @@ var mainApp = angular.module('mainApp', [
     });
     
     $scope.getLocaleSpecificResourceStrings = function (locale) {
-        ResourceStringsService.GetResourceStrings(locale).then(function(result) {
+        ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
             $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
             $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
             $scope.getWidgetConfigDoc();
