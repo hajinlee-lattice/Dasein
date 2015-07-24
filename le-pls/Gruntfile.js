@@ -405,7 +405,8 @@ module.exports = function (grunt) {
                 options: {
                     url:     '<%= testenv.url %>/pls/internal/testtenants',
                     method:  'PUT',
-                    headers: { MagicAuthentication: "Security through obscurity!" }
+                    headers: { MagicAuthentication: "Security through obscurity!" },
+                    strictSSL: false
                 }
             }
 
