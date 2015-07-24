@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -31,6 +32,7 @@ public class GlobalSessionManagementServiceImpl
 
     private static final Log LOGGER = LogFactory.getLog(GlobalSessionManagementServiceImpl.class);
 
+    @RestApiCall
     private ISessionManagementService getService() {
         SessionManagementService service;
         try {
@@ -42,6 +44,7 @@ public class GlobalSessionManagementServiceImpl
     }
 
     @Override
+    @RestApiCall
     public Session retrieve(Ticket ticket) {
         if (ticket == null) {
             throw new NullPointerException("Ticket cannot be null.");
@@ -65,6 +68,7 @@ public class GlobalSessionManagementServiceImpl
     }
 
     @Override
+    @RestApiCall
     public Session attach(Ticket ticket) {
         if (ticket == null) {
             throw new NullPointerException("Ticket cannot be null.");

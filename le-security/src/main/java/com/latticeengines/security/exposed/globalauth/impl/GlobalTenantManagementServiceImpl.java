@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.globalauth.generated.tenantmgr.ITenantManagementService;
@@ -18,6 +19,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
 
     private static final Log log = LogFactory.getLog(GlobalTenantManagementServiceImpl.class);
 
+    @RestApiCall
     private ITenantManagementService getService() {
         TenantManagementService service;
         try {
@@ -29,6 +31,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
     }
     
     @Override
+    @RestApiCall
     public Boolean registerTenant(Tenant tenant) {
         ITenantManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -42,6 +45,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
     }
 
     @Override
+    @RestApiCall
     public Boolean discardTenant(Tenant tenant) {
         ITenantManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.EmailSettings;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -49,6 +50,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     @Value("${security.emailsettings.useSSL}")
     private boolean EMAIL_USESSL;
 
+    @RestApiCall
     private IUserManagementService getService() {
         UserManagementService service;
         try {
@@ -60,6 +62,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public Boolean registerUser(User user, Credentials creds) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -72,6 +75,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public Boolean grantRight(String right, String tenant, String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -84,6 +88,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public List<String> getRights(String username, String tenantId) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -100,6 +105,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public Boolean revokeRight(String right, String tenant, String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -112,6 +118,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public Boolean forgotLatticeCredentials(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -138,6 +145,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -154,6 +162,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public String resetLatticeCredentials(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -166,6 +175,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public User getUserByEmail(String email) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -180,6 +190,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public User getUserByUsername(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -194,6 +205,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public Boolean deleteUser(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -207,6 +219,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public Boolean isRedundant(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -219,6 +232,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);

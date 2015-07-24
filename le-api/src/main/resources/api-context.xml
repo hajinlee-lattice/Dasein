@@ -14,8 +14,7 @@
         <context:exclude-filter type="assignable" expression="com.latticeengines.api.swagger.SwaggerConfig" />
     </context:component-scan>
     <mvc:annotation-driven/>
-    
- 
+
     <import resource="classpath:dataplatform-context.xml"/>
     <import resource="classpath:monitor-aspects-context.xml"/>
 </beans>

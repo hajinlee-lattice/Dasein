@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.Segment;
@@ -494,7 +495,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         }
     }
 
-    private <T> String callDLRestService(String dlUrl, String endpoint, T payload) throws IOException {
+    @RestApiCall
+    public <T> String callDLRestService(String dlUrl, String endpoint, T payload) throws IOException {
         if (dlUrl.endsWith("/")) dlUrl = dlUrl.substring(0, dlUrl.length() - 1);
         if (!dlUrl.endsWith(DL_REST_SERVICE)) dlUrl += DL_REST_SERVICE;
 

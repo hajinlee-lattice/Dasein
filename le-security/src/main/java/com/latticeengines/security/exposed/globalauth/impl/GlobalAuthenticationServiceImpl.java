@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
@@ -25,6 +26,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     private static final Log log = LogFactory.getLog(GlobalAuthenticationServiceImpl.class);
 
     @Override
+    @RestApiCall
     public Ticket authenticateUser(String user, String password) {
         AuthenticationService service;
         try {
@@ -45,6 +47,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @RestApiCall
     public boolean discard(Ticket ticket) {
         AuthenticationService service;
         try {

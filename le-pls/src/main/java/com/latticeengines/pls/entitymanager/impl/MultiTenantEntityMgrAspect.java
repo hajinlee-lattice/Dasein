@@ -61,7 +61,6 @@ public class MultiTenantEntityMgrAspect {
         Tenant tenant = token.getSession().getTenant();
         Tenant tenantWithPid = tenantEntityMgr.findByTenantId(tenant.getId());
         
-        
         if (tenantWithPid == null) {
             throw new RuntimeException("No tenant found with id " + tenant.getId());
         }
