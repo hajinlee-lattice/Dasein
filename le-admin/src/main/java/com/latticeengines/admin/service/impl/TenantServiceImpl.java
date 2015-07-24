@@ -182,7 +182,7 @@ public class TenantServiceImpl implements TenantService {
         SerializableDocumentDirectory rawDir =
                 tenantEntityMgr.getTenantServiceConfig(contractId, tenantId, serviceName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
-        rawDir.applyMetadata(metaDir);
+        rawDir.applyMetadataIgnoreOptionsValidation(metaDir);
         return rawDir;
     }
 

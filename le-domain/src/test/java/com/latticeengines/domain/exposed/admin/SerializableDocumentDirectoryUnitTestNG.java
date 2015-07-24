@@ -365,6 +365,35 @@ public class SerializableDocumentDirectoryUnitTestNG {
         }
     }
 
+
+    @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class )
+    public void testValidateOptions() {
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));
+        configDir.add("/Config", "option1");
+
+        DocumentDirectory metaDir = new DocumentDirectory(new Path("/root"));
+        SerializableDocumentDirectory.Metadata metadata = new SerializableDocumentDirectory.Metadata();
+        metadata.setType("options");
+        metadata.setOptions(Arrays.asList("option1", "option2", "option3"));
+        metaDir.add("/Config", metadata.toString());
+
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
+        sDir.applyMetadata(metaDir);
+
+        metaDir = new DocumentDirectory(new Path("/root"));
+        metadata = new SerializableDocumentDirectory.Metadata();
+        metadata.setType("options");
+        metadata.setOptions(Arrays.asList("option2", "option3"));
+        metaDir.add("/Config", metadata.toString());
+
+        sDir = new SerializableDocumentDirectory(configDir);
+        sDir.applyMetadataTemplate(metaDir, true);
+
+        sDir = new SerializableDocumentDirectory(configDir);
+        sDir.applyMetadata(metaDir);
+    }
+
+
     @Test(groups = "unit")
     public void testIteratorOfEmptyDirectory() {
         DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));

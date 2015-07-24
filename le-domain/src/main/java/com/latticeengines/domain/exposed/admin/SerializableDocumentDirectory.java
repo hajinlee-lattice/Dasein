@@ -118,9 +118,18 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
     }
 
     public void applyMetadata (DocumentDirectory metadataDirectory) {
+        applyMetadataTemplate(metadataDirectory, false);
+    }
+
+    public void applyMetadataIgnoreOptionsValidation (DocumentDirectory metadataDirectory) {
+        applyMetadataTemplate(metadataDirectory, true);
+    }
+
+    public void applyMetadataTemplate (DocumentDirectory metadataDirectory, boolean ignoreOptions) {
         if (metadataDirectory != null && this.getNodes() != null) {
             // apply metadata to nodes
             for (Node node : this.getNodes()) {
+                node.ignoreOptionsValidateion = ignoreOptions;
                 DocumentDirectory.Node metaNode = metadataDirectory.get("/" + node.getNode());
                 node.applyMetadata(metaNode);
             }
@@ -314,6 +323,8 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         @JsonIgnore
         public Path path;
+        @JsonIgnore
+        public boolean ignoreOptionsValidateion;
 
         public Node() { }
 
@@ -383,6 +394,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             // apply metadata to children
             if (this.getChildren() != null) {
                 for (Node child : this.getChildren()) {
+                    child.ignoreOptionsValidateion = this.ignoreOptionsValidateion;
                     DocumentDirectory.Node childMetaNode = metaNode.getChild(child.getNode());
                     child.applyMetadata(childMetaNode);
                 }
@@ -393,7 +405,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             if (this.getData() == null) return;
 
             if (metadata != null && metadata.getType() != null && !metadata.getType().equals("")) {
-                if (metadata.validateData(this.getData())) {
+                if (metadata.validateDataTemplate(this.getData(), ignoreOptionsValidateion)) {
                     this.metadata = metadata;
                 } else {
                     throw new IllegalArgumentException(
@@ -447,7 +459,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             Metadata metadata = this.getMetadata();
             if (metadata != null && metadata.getType().equals("options") &&
                     (includeDynamicOptions || metadata.isDynamicOptions() == null || !metadata.isDynamicOptions())) {
-                if (this.getMetadata().validateData(this.getData())) {
+                if (this.getMetadata().validateDataIgnoreOptions(this.getData())) {
                     SelectableConfigurationField field = new SelectableConfigurationField();
                     field.setNode(parent + "/" + this.getNode());
                     field.setDefaultOption(this.getData());
@@ -525,6 +537,14 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         public void setDerived(DerivedField derived) { this.derived = derived; }
 
         private boolean validateData(String data) {
+            return validateDataTemplate(data, false);
+        }
+
+        private boolean validateDataIgnoreOptions(String data) {
+            return validateDataTemplate(data, true);
+        }
+
+        private boolean validateDataTemplate(String data, boolean ignoreOptions) {
             if (this.getType() == null) { return true; }
             switch (this.getType()) {
                 case "number":
@@ -536,6 +556,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                 case "array":
                     return true; // isArray(data);
                 case "options":
+                    if (ignoreOptions) return true;
                     if (this.dynamicOptions != null) {
                         return this.isDynamicOptions() || this.getOptions().contains(data);
                     } else {
