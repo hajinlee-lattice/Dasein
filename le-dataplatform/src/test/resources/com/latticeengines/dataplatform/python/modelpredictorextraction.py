@@ -11,6 +11,9 @@ import operator
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+columnNames = ["Original Column Name", "Attribute Name", "Category", "FundamentalType", "Predictive Power", "Attribute Value", "Conversion Rate", "Lift", "Total Leads", "Frequency(#)", "Frequency/Total Leads", "ApprovedUsage", "Tags", "StatisticalType", "Attribute Description", "DataSource"]
+approvedUsagesToDisplay = set([u'Model', u'ModelAndModelInsights', u'ModelAndAllInsights'])
+
 def main(argv):
     
     ModelJSONFilePath = sys.argv[1]
@@ -54,7 +57,10 @@ def main(argv):
         return 1
     
     with open (CSVFilePath, "w") as csvFile:
-        csvFile.write("Original Column Name,Attribute Name,Category,FundamentalType,Predictive Power,Attribute Value,Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads,ApprovedUsage,Tags,StatisticalType,Attribute Description,DataSource\n")
+        for columnName in columnNames:
+            csvFile.write(columnName)
+            csvFile.write(",")
+        csvFile.write("\n")
             
         #This section calculates the total #leads for each predictor. Ideally it should be the same for each predictor, but there seem to be some exceptions
         siddata = sorted(contentJSON["Summary"]["Predictors"], key=operator.itemgetter('Name'))
@@ -72,6 +78,8 @@ def main(argv):
         #dictArray is a list of dictionaries with attributeName = #Total Leads
 
         for predictor in contentJSON["Summary"]["Predictors"]:
+            if not predictor["ApprovedUsage"] or len(approvedUsagesToDisplay.intersection(predictor["ApprovedUsage"])) == 0:
+                continue
             otherPredictorElements = []
             for predictorElement in predictor["Elements"]:
                 if isMergeWithOther(predictor, predictorElement, dictArray):

@@ -9,7 +9,6 @@ import sys
 from leframework.executors.learningexecutor import LearningExecutor
 from trainingtestbase import TrainingTestBase
 
-
 class SuiteProfilingThenTrainTest(TrainingTestBase):
     def executeProfilingThenTrain(self):
         # Dynamically import launcher to make sure globals() is clean in launcher
@@ -190,8 +189,9 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         count = 0
         hasOther = False
         binarySet = set()
-        csvFile = csv.DictReader(open(glob.glob("./results/*PLSModel*_model.csv")[0]))
-        for row in csvFile:
+        csvFile = open(glob.glob("./results/*PLSModel*_model.csv")[0])
+        csvDictReader = csv.DictReader(csvFile)
+        for row in csvDictReader:
             if row['Attribute Name'] == 'ELQContact_Industry':
                 if row['Attribute Value'] == '["Other"]':
                     hasOther = True
@@ -200,6 +200,14 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
                 count += 1
             if row['Attribute Name'] == 'Open Source Adoption':
                 binarySet.add(row['Attribute Value'])
+
+        from modelpredictorextraction import columnNames
+        csvFile.seek(0);
+        predictorElementRow = csvDictReader.next()
+        for columnName in predictorElementRow:
+            if columnName in columnNames:
+                columnNames.remove(columnName)
+        self.assertTrue(len(columnNames) == 0)
 
         self.assertTrue(count == 9)
         self.assertTrue(hasOther)
