@@ -316,29 +316,6 @@ public class SerializableDocumentDirectoryUnitTestNG {
         }
 
         //==================================================
-        // invalid option
-        //==================================================
-        configDir = new DocumentDirectory(new Path("/root"));
-        configDir.add("/Config", "option1");
-
-        metaDir = new DocumentDirectory(new Path("/root"));
-        metadata = new SerializableDocumentDirectory.Metadata();
-        metadata.setType("options");
-        metadata.setOptions(Arrays.asList("option1", "option2", "option3"));
-        metaDir.add("/Config", metadata.toString());
-
-        sDir = new SerializableDocumentDirectory(configDir);
-        sDir.applyMetadata(metaDir);
-
-        Collection<SerializableDocumentDirectory.Node> nodes = sDir.getNodes();
-        for (SerializableDocumentDirectory.Node node: nodes) {
-            node.setData("option4");
-        }
-
-        optionalFields = sDir.findSelectableFields();
-        Assert.assertEquals(optionalFields.size(), 0);
-
-        //==================================================
         // child node
         //==================================================
         configDir = new DocumentDirectory(new Path("/root"));
