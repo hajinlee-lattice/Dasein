@@ -12,7 +12,8 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.TopPredictorWidget',
     'mainApp.appCommon.widgets.ThresholdExplorerWidget',
     'mainApp.appCommon.widgets.UserManagementWidget',
-    'mainApp.appCommon.widgets.AdminInfoWidget',
+    'mainApp.appCommon.widgets.AdminInfoSummaryWidget',
+    'mainApp.appCommon.widgets.AdminInfoAlertsWidget',
     'mainApp.appCommon.widgets.LeadsTabWidget',
     'mainApp.appCommon.widgets.ModelListCreationHistoryWidget'
 ])
@@ -98,8 +99,11 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
             case WidgetConfigUtility.TOP_PREDICTOR_WIDGET:
                 $compile(options.element.html('<div data-top-predictor-widget></div>'))(scope);
                 break;
-            case WidgetConfigUtility.ADMIN_INFO_WIDGET:
-                $compile(options.element.html('<div data-admin-info-widget></div>'))(scope);
+            case WidgetConfigUtility.ADMIN_INFO_SUMMARY_WIDGET:
+                $compile(options.element.html('<div data-admin-info-summary-widget></div>'))(scope);
+                break;
+            case WidgetConfigUtility.ADMIN_INFO_ALERTS_WIDGET:
+                $compile(options.element.html('<div data-admin-info-alerts-widget></div>'))(scope);
                 break;
             case WidgetConfigUtility.LEADS_TAB_WIDGET:
                 $compile(options.element.html('<div data-leads-tab-widget></div>'))(scope);

@@ -49,11 +49,19 @@ describe('smoketest main flow of app', function() {
         expect(element(by.id('adminInfoContainer')).isPresent()).toBe(false);
         element(by.id('adminLink')).click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        browser.driver.sleep(10000);
         expect(element(by.id('adminInfoContainer')).getWebElement().isDisplayed()).toBe(true);
 
         // default to summary tab in hidden admin page, check existence of it
-        expect(element(by.id('adminInfoTable')).getWebElement().isDisplayed()).toBe(true);
+        expect(element(by.id('adminInfoSummaryTable')).getWebElement().isDisplayed()).toBe(true);
+        browser.driver.sleep(1000);
+
+        // check existence of alerts tab
+        expect(element(by.id('adminInfoAlertsTable')).getWebElement().isDisplayed()).toBe(false);
+        modelTabs.getTabByIndex(1).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+        expect(element(by.id('adminInfoAlertsTable')).getWebElement().isDisplayed()).toBe(true);
 
     }
 });

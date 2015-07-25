@@ -1,10 +1,10 @@
-angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
+angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     'mainApp.appCommon.services.ThresholdExplorerService',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.services.SessionService'
 ])
-.controller('AdminInfoWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService) {
+.controller('AdminInfoSummaryWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.Error = { ShowError: false };
 
@@ -20,9 +20,9 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
         alasql("SELECT * INTO CSV('performance.csv') FROM ?", [csvRows]);
     };
 })
-.directive('adminInfoWidget', function () {
+.directive('adminInfoSummaryWidget', function () {
     return {
-        templateUrl: 'app/AppCommon/widgets/adminInfoWidget/AdminInfoWidgetTemplate.html'
+        templateUrl: 'app/AppCommon/widgets/adminInfoWidget/AdminInfoSummaryWidgetTemplate.html'
     };
 })
 .directive('healthScore', function() {

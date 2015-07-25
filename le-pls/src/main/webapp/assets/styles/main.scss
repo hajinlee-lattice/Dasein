@@ -296,11 +296,37 @@ Model-detail
   width: 60%;
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: 48px;
   padding: 2px;
+}
+
+.model-admin-info table thead th {
+  font-weight: normal;
 }
 
 .model-admin-info table th {
   min-width: 150px;
+}
+
+.model-admin-info table h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.model-admin-info table h4 {
+  font-size: 13px;
+  font-weight: bold;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.model-admin-info table h5 {
+  font-weight: bold;
+  display: inline;
+}
+
+.model-admin-info table .impacted-elems {
+  margin-top: 12px;
 }
 
 .model-admin-info .health-excellent {

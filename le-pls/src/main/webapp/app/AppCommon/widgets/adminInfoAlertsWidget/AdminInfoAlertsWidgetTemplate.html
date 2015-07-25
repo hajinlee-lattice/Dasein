@@ -1,0 +1,34 @@
+<div id="adminInfoAlertsTable" class="panel panel-default" data-ng-controller="AdminInfoAlertsWidgetController">
+    <div class="panel-body model-admin-info">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><h3>{{warnings.modelQualityWarningsTitle}}</h3>{{warnings.modelQualityWarningsLabel}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="warning in warnings.modelQualityWarnings">
+                    <td><h4>{{warning.title}}</h4>{{warning.description}}<div class="impacted-elems" data-ng-if="warning.impactedContent != null">{{warning.impactedLabel}}<h5>&nbsp;{{warning.impactedContent}}</h5></div></td>
+                </tr>
+                <tr data-ng-if="warnings.noModelQualityWarnings == true">
+                    <td><h4>{{warnings.noWarning}}</h4></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><h3>{{warnings.missingMetaDataWarningsTitle}}</h3>{{warnings.missingMetaDataWarningsLabel}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="warning in warnings.missingMetaDataWarnings">
+                    <td><h4>{{warning.title}}</h4>{{warning.description}}<div class="impacted-elems" data-ng-if="warning.impactedContent != null">{{warning.impactedLabel}}<h5>&nbsp;{{warning.impactedContent}}</h5></div></td>
+                </tr>
+                <tr data-ng-if="warnings.noMissingMetaDataWarnings == true">
+                    <td><h4>{{warnings.noWarning}}</h4></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

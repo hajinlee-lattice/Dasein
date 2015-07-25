@@ -158,8 +158,8 @@
                                     "ID" : "adminInfoSummaryTab",
                                     "TitleString" : "ADMIN_INFO_SUMMARY_TAB_TITLE",
                                     "Widgets" : [{
-                                            "ID" : "adminInfoWidget",
-                                            "Type" : "AdminInfoWidget"
+                                            "ID" : "adminInfoSummaryWidget",
+                                            "Type" : "AdminInfoSummaryWidget"
                                     }]
                                 },{
                                     "ID" : "adminInfoAlertsTab",
