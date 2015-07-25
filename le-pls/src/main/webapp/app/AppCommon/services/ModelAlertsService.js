@@ -23,7 +23,7 @@ angular.module('mainApp.appCommon.services.ModelAlertsService', [
             addExcessivePredictiveAttributesWarning(modelQualityWarnings, modelQualityWarningsObj);
             addExcessivePredictiveNullValuesAttributesWarning(modelQualityWarnings, modelQualityWarningsObj);
         }
-        warnings.noModelQualityWarnings = (modelQualityWarnings.length == 0);
+        warnings.noModelQualityWarnings = (modelQualityWarnings.length === 0);
         warnings.modelQualityWarnings = modelQualityWarnings;
 
         // Get missing meta-data warnings
@@ -37,11 +37,11 @@ angular.module('mainApp.appCommon.services.ModelAlertsService', [
             addInvalidStatisticalTypeAttributesWarning(missingMetaDataWarnings, missingMetaDataWarningsObj);
             addExcessiveCategoriesInModelSummaryWarning(missingMetaDataWarnings, missingMetaDataWarningsObj);
         }
-        warnings.noMissingMetaDataWarnings = (missingMetaDataWarnings.length == 0);
+        warnings.noMissingMetaDataWarnings = (missingMetaDataWarnings.length === 0);
         warnings.missingMetaDataWarnings = missingMetaDataWarnings;
 
         return warnings;
-    }
+    };
 
     function addSuccessEventsWarning(warnings, modelQualityWarnings) {
         var successEvents = modelQualityWarnings.LowSuccessEvents;

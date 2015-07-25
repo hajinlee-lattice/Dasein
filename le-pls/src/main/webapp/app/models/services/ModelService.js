@@ -688,6 +688,6 @@ angular.module('mainApp.models.services.ModelService', [
         });
 
         return deferred.promise;
-    }
+    };
 
 });
