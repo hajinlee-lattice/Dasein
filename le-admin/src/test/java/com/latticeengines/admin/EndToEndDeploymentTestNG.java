@@ -328,7 +328,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
                 msg.append(String.format(
                         "Could not successfully get the bootstrap state of %s \n", serviceName));
             }
-            boolean thisIsOK = state != null && state.state.equals(BootstrapState.State.OK);
+            boolean thisIsOK = (state != null && state.state.equals(BootstrapState.State.OK)) ||
+                    (BootstrapState.State.INITIAL.equals(state.state) &&
+                            DanteComponent.componentName.equals(serviceName));
             if (!thisIsOK && state != null) {
                 msg.append(String.format(
                         "The bootstrap state of %s is not OK, but rather %s : %s.\n",
