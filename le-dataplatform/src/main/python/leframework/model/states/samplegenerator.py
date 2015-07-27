@@ -102,9 +102,9 @@ class SampleGenerator(State):
             return lead
 
         def isValid(row):
-            company = row[samples["company"]] if "company" in samples else None
-            firstName = row[samples["firstname"]] if "firstname" in samples else None
-            lastName = row[samples["lastname"]] if "lastname" in samples else None
+            company = row[samples["company"]] if "company" in samples and pd.notnull(row[samples["company"]]) else None
+            firstName = row[samples["firstname"]] if "firstname" in samples and pd.notnull(row[samples["firstname"]]) else None
+            lastName = row[samples["lastname"]] if "lastname" in samples and pd.notnull(row[samples["lastname"]]) else None
             validCompany = company is not None and len(company.strip()) > 0
             validFirstName = firstName is not None and len(firstName.strip()) > 0
             validLastName = lastName is not None and len(lastName.strip()) > 0
