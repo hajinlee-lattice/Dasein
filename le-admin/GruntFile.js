@@ -28,7 +28,7 @@ module.exports = function(grunt) {
         },
         env:  {
             dev:         {
-                url:            'http://localhost:8081',
+                url:            'http://localhost:8085',
                 protractorConf: testDir + '/e2e/conf/protractor.conf.js',
                 protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
@@ -43,7 +43,7 @@ module.exports = function(grunt) {
                 protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
             prod:        {
-                url:            'https://app.lattice-engines.com',
+                url:            'http://admin.lattice.local',
                 protractorConf: testDir + '/e2e/conf/protractor.conf.js',
                 protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             }
