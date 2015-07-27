@@ -22,4 +22,5 @@
 
     <mvc:annotation-driven />
 
+    <import resource="classpath:monitor-aspects-context.xml"/>
 </beans>

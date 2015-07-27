@@ -11,6 +11,7 @@
         <le.baton.version>2.0.5-SNAPSHOT</le.baton.version>
         <le.common.version>2.0.5-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.5-SNAPSHOT</le.domain.version>
+        <le.monitor.version>2.0.5-SNAPSHOT</le.monitor.version>
         <le.remote.version>2.0.5-SNAPSHOT</le.remote.version>
         <le.camille.version>2.0.5-SNAPSHOT</le.camille.version>
 	    <le.db.version>2.0.5-SNAPSHOT</le.db.version>
@@ -179,6 +180,18 @@
             <version>${le.domain.version}</version>
             <classifier>intf</classifier><exclusions>
         </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
