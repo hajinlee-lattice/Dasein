@@ -97,7 +97,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     function constructNewPage() {
         $scope.spaceInfo = {
             properties: {
-                displayName: "LPA_" + $scope.tenantId,
+                displayName: $scope.tenantId,
                 description: "A LPA solution for " + $scope.tenantId + " in " + $scope.contractId
             },
             featureFlags: ""
@@ -107,7 +107,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         };
         $scope.tenantInfo = {
             properties: {
-                displayName: "LPA " + $scope.tenantId,
+                displayName: $scope.tenantId,
                 description: "A LPA tenant under the contract " + $scope.contractId
             }
         };
