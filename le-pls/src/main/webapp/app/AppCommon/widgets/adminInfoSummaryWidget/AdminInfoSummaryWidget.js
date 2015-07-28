@@ -22,7 +22,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
 })
 .directive('adminInfoSummaryWidget', function () {
     return {
-        templateUrl: 'app/AppCommon/widgets/adminInfoWidget/AdminInfoSummaryWidgetTemplate.html'
+        templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
     };
 })
 .directive('healthScore', function() {
@@ -79,7 +79,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
         controller:  ['$scope', '$attrs', '$http', 'ResourceUtility', 'SessionService', function ($scope, $attrs, $http, ResourceUtility, SessionService) {
             $scope.fetching = false;
             $scope.fetched = false;
-            $scope.ResourceUtility = ResourceUtility;            
+            $scope.ResourceUtility = ResourceUtility;
 
             $scope.downloadFile = function($event) {
                 $scope.fetching = true;
