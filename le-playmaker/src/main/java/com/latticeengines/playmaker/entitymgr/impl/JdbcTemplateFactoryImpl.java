@@ -1,8 +1,10 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -18,7 +20,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 @Component("JdbcTempalteFactory")
 public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
 
-    private Map<String, NamedParameterJdbcTemplate> jdbcTempates = new HashMap<>();
+    private Map<String, TemplateInfo> jdbcTempates = new ConcurrentHashMap<>();
 
     @Autowired
     private PlaymakerTenantEntityMgr tenantEntityMgr;
@@ -34,18 +36,34 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
 
     public NamedParameterJdbcTemplate getTemplate(String tenantName) {
 
-        NamedParameterJdbcTemplate template = jdbcTempates.get(tenantName);
-        if (template == null) {
+        PlaymakerTenant tenant = tenantEntityMgr.findByTenantName(tenantName);
+        if (tenant == null) {
+            throw new LedpException(LedpCode.LEDP_22001, new String[] { tenantName });
+        }
+
+        boolean hasCreatedNew = false;
+        TemplateInfo templateInfo = jdbcTempates.get(tenantName);
+        if (templateInfo == null) {
             synchronized (jdbcTempates) {
-                template = jdbcTempates.get(tenantName);
-                if (template == null) {
-                    ComboPooledDataSource cpds = getDataSource(tenantName);
-                    template = new NamedParameterJdbcTemplate(cpds);
-                    jdbcTempates.put(tenantName, template);
+                templateInfo = jdbcTempates.get(tenantName);
+                if (templateInfo == null) {
+                    templateInfo = getTemplateInfo(tenant);
+                    jdbcTempates.put(tenantName, templateInfo);
+                }
+            }
+        } else if (isHashChanged(tenant, templateInfo)) {
+            if (!hasCreatedNew) {
+                synchronized (jdbcTempates) {
+                    if (!hasCreatedNew) {
+                        templateInfo = getTemplateInfo(tenant);
+                        jdbcTempates.put(tenantName, templateInfo);
+                        hasCreatedNew = true;
+                    }
                 }
             }
         }
-        return template;
+
+        return templateInfo.template;
     }
 
     public void removeTemplate(String tenantName) {
@@ -55,12 +73,15 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
         }
     }
 
-    private ComboPooledDataSource getDataSource(String tenantName) {
-
-        PlaymakerTenant tenant = tenantEntityMgr.findByTenantName(tenantName);
-        if (tenant == null) {
-            throw new LedpException(LedpCode.LEDP_22001, new String[] { tenantName });
+    public boolean isHashChanged(PlaymakerTenant tenant, TemplateInfo templateInfo) {
+        if (templateInfo == null || templateInfo.hash == null) {
+            return false;
         }
+        return !Arrays.equals(templateInfo.hash, getHash(tenant));
+    }
+
+    private TemplateInfo getTemplateInfo(PlaymakerTenant tenant) {
+
         try {
             ComboPooledDataSource cpds = new ComboPooledDataSource();
             cpds.setDriverClass(tenant.getJdbcDriver());
@@ -73,11 +94,32 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
             cpds.setMaxIdleTime(maxPoolIdleTime);
             cpds.setCheckoutTimeout(maxPoolCheckoutTime);
 
-            return cpds;
+            NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(cpds);
+            byte[] hash = getHash(tenant);
+            TemplateInfo templateInfo = new TemplateInfo(template, hash);
+            return templateInfo;
 
         } catch (Exception ex) {
-            throw new LedpException(LedpCode.LEDP_22000, ex, new String[] { tenantName });
+            throw new LedpException(LedpCode.LEDP_22000, ex, new String[] { tenant.getTenantName() });
+        }
+    }
+
+    private byte[] getHash(PlaymakerTenant tenant) {
+        String hashStr = tenant.getJdbcDriver() + tenant.getJdbcUrl() + tenant.getJdbcUserName()
+                + tenant.getJdbcPassword();
+        return DigestUtils.md5(hashStr);
+    }
+
+    private static class TemplateInfo {
+
+        private NamedParameterJdbcTemplate template;
+        private byte[] hash;
+
+        public TemplateInfo(NamedParameterJdbcTemplate template, byte[] hash) {
+            this.template = template;
+            this.hash = hash;
         }
 
     }
+
 }
