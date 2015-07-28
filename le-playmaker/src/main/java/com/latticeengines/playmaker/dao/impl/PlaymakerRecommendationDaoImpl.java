@@ -22,7 +22,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination) {
-        String sql = "SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
+        String sql = "SELECT * FROM (SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
                 + "L.[Display_Name] AS DisplayName, L.[Description] AS Description, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, L.[Likelihood] AS Likelihood, "
@@ -31,14 +31,15 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "(SELECT TOP 1 T.[Display_Name] + '|' + T.[Phone_Number] + '|' + T.[Email_Address] + '|' + "
                 + " T.[Address_Street_1] + '|' + T.[City] + '|' + T.[State_Province] + '|' + T.[Country]+ '|' + T.[Zip] "
                 + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
-                + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate "
+                + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate, "
+                + "ROW_NUMBER() OVER ( ORDER BY L.[Last_Modification_Date] ) RowNum "
                 + getRecommendationFromWhereClause()
-                + "ORDER BY LastModificationDate OFFSET :offset ROWS FETCH NEXT :maximum ROWS ONLY";
+                + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
-        source.addValue("offset", offset);
-        source.addValue("maximum", maximum);
+        source.addValue("startRow", offset + 1);
+        source.addValue("endRow", offset + maximum);
         source.addValue("syncDestination", syncDestination);
 
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
@@ -96,7 +97,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum) {
-        String sql = "SELECT [Play_ID] AS ID, [Display_Name] AS DisplayName, "
+        String sql = "SELECT * FROM (SELECT [Play_ID] AS ID, [Display_Name] AS DisplayName, "
                 + "[Description] AS Description, [Average_Probability] AS AverageProbability,"
                 + "DATEDIFF(s,'19700101 00:00:00:000', [Last_Modification_Date]) AS LastModificationDate, "
                 + "(SELECT DISTINCT G.Display_Name + '|' as [text()] FROM PlayGroupMap M JOIN PlayGroup G "
@@ -104,13 +105,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "(SELECT DISTINCT P.Display_Name + '|' + P.[External_Name] + '|' as [text()] "
                 + "FROM [ProductGroupMap] M JOIN Product P ON M.Product_ID = P.Product_ID "
                 + "WHERE M.[ProductGroup_ID] = Play.[Target_ProductGroup_ID] FOR XML PATH ('')) AS TargetProducts, "
-                + "(SELECT W.[External_ID] FROM [PlayWorkflowType] W WHERE Play.[PlayWorkflowType_ID] = W.[PlayWorkflowType_ID]) AS Workflow "
+                + "(SELECT W.[External_ID] FROM [PlayWorkflowType] W WHERE Play.[PlayWorkflowType_ID] = W.[PlayWorkflowType_ID]) AS Workflow, "
+                + "ROW_NUMBER() OVER ( ORDER BY [Last_Modification_Date] ) RowNum "
                 + getPlayFromWhereClause()
-                + "ORDER BY Last_Modification_Date OFFSET :offset ROWS FETCH NEXT :maximum ROWS ONLY";
+                + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
-        source.addValue("offset", offset);
-        source.addValue("maximum", maximum);
+        source.addValue("startRow", offset + 1);
+        source.addValue("endRow", offset + maximum);
 
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
         convertToList("PlayGroups", results);
@@ -167,12 +169,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum) {
-        String sql = "SELECT [Item_ID] AS ID, E.* " + getAccountExtensionFromWhereClause()
-                + "ORDER BY Last_Modification_Date OFFSET :offset ROWS FETCH NEXT :maximum ROWS ONLY";
+        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, E.*, " 
+                + "ROW_NUMBER() OVER ( ORDER BY A.[Last_Modification_Date] ) RowNum "
+                + getAccountExtensionFromWhereClause()
+                + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
-        source.addValue("offset", offset);
-        source.addValue("maximum", maximum);
+        source.addValue("startRow", offset + 1);
+        source.addValue("endRow", offset + maximum);
 
         List<Map<String, Object>> result = queryForListOfMap(sql, source);
         if (result != null) {
@@ -209,20 +213,22 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getPlayValues(long start, int offset, int maximum) {
-        String sql = "SELECT [Play_ID] AS ID, "
+        String sql = "SELECT * FROM (SELECT [Play_ID] AS ID, "
                 + "(SELECT DISTINCT G.Display_Name + '|' as [text()] FROM PlayGroupMap M JOIN PlayGroup G "
                 + "ON M.PlayGroup_ID = G.PlayGroup_ID WHERE M.Play_ID = Play.Play_ID FOR XML PATH ('')) AS PlayGroups, "
                 + "(SELECT DISTINCT W.Display_Name + '|' as [text()] FROM PlayWorkflowType W "
                 + "WHERE W.PlayWorkflowType_ID = Play.PlayWorkflowType_ID FOR XML PATH ('')) AS Workflows, "
                 + "(SELECT DISTINCT S.value + '|' as [text()] FROM [PlayPriorityRuleMap] M "
                 + "JOIN [Priority] P ON M.Priority_ID = P.Priority_ID JOIN ConfigResource S ON P.[Display_Text_Key] = S.Key_Name "
-                + "WHERE M.Play_ID = Play.Play_ID FOR XML PATH (''))  AS Priorities " + getPlayFromWhereClause()
-                + "ORDER BY Last_Modification_Date OFFSET :offset ROWS FETCH NEXT :maximum ROWS ONLY";
+                + "WHERE M.Play_ID = Play.Play_ID FOR XML PATH (''))  AS Priorities, " 
+                + "ROW_NUMBER() OVER ( ORDER BY [Last_Modification_Date] ) RowNum "
+                + getPlayFromWhereClause()
+                + " ) AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
-        source.addValue("offset", offset);
-        source.addValue("maximum", maximum);
+        source.addValue("startRow", offset + 1);
+        source.addValue("endRow", offset + maximum);
 
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
         convertToList("PlayGroups", results);
