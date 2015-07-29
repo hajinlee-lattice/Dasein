@@ -130,7 +130,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             } else {
                 ConfigService.GetCurrentTopology().then(function(result){
                     if (result.success) {
-                        featureFlagsCallback();
+                        constructMainView();
                     } else {
                         var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
                         if (featureFlags == null) featureFlags = {};
