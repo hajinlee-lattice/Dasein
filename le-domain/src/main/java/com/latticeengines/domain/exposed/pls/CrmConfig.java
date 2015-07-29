@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class CrmConfig {
 
@@ -50,4 +51,8 @@ public class CrmConfig {
         this.version = version;
     }
 
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }

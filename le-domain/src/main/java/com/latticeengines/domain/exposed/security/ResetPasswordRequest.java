@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.security;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -42,4 +43,10 @@ public class ResetPasswordRequest {
     public void setProduct(LatticeProduct product) {
         this.product = product;
     }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
 }

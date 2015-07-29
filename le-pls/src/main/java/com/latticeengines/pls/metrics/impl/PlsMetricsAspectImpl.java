@@ -12,14 +12,20 @@ public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements Metri
 
     @Override
     public String getLogRestApiSpecificMetrics(ProceedingJoinPoint joinPoint) {
+        StringBuffer args = new StringBuffer();
+        for (Object arg : joinPoint.getArgs()) {
+            args.append((arg == null ? " " : arg.toString()) + ";");
+        }
+        String metrics = String.format(" Arguments=%s", args.deleteCharAt(args.length() - 1));
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof TicketAuthenticationToken) {
             TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
             if (token.getSession() != null && token.getSession().getEmailAddress() != null) {
-                return String.format(" User=%s", token.getSession().getEmailAddress());
+                return metrics + String.format(" User=%s", token.getSession().getEmailAddress());
             }
         }
-        return "";
+        return metrics;
     }
 
     @Override

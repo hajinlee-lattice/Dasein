@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class CrmCredential {
 
@@ -82,6 +83,11 @@ public class CrmCredential {
     @JsonProperty("OrgId")
     public void setOrgId(String orgId) {
         this.orgId = orgId;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }
