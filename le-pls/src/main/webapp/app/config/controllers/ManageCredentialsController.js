@@ -88,6 +88,8 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
                     }
                     getSFDCCredentials();
                 });
+            } else {
+                getSFDCCredentials();
             }
         } else {
             $scope.showError = true;
