@@ -46,15 +46,14 @@ var mainApp = angular.module('mainApp', [
             refreshSessionLastActiveTimeStamp();
         }
     });
-    
+
     ResourceStringsService.GetExternalResourceStringsForLocale().then(function(result) {
         var previousSession = BrowserStorageUtility.getClientSession();
-        if (BrowserStorageUtility.getLoginDocument() && mustUserChangePassword(BrowserStorageUtility.getLoginDocument())) {
-            $http.get('./app/core/views/MainView.html').success(function (html) {
-                var scope = $rootScope.$new();
-                scope.directToPassword = true;
-                $compile($("#mainView").html(html))(scope);
-            });
+        var loginDocument = BrowserStorageUtility.getLoginDocument();
+        if (loginDocument && mustUserChangePassword(loginDocument)) {
+            $scope.isLoggedInWithTempPassword = loginDocument.MustChangePassword;
+            $scope.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
+            createMandatoryChangePasswordViewForLocale(previousSession.Locale);
         } else if (previousSession != null && ! hasSessionTimedOut()) {
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
@@ -200,10 +199,21 @@ var mainApp = angular.module('mainApp', [
     function hideTenantSelectionModal() {
         $("#modalContainer").modal('hide');
     }
-    
+
     function closeWarningModalAndSetInstanceToNull() {
         warningModalInstance.close();
         warningModalInstance = null;
+    }
+
+    function createMandatoryChangePasswordViewForLocale(locale) {
+        ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
+            $http.get('./app/core/views/MainView.html').success(function (html) {
+                var scope = $rootScope.$new();
+                scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
+                scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
+                $compile($("#mainView").html(html))(scope);
+            });
+        });
     }
 });
 

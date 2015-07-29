@@ -64,9 +64,10 @@ angular.module('mainApp.login.controllers.LoginController', [
             $scope.loginInProgess = false;
             $scope.loginMessage = null;
             if (result != null && result.Success === true) {
-                $scope.directToPassword = result.Result.MustChangePassword;
-                $scope.passwordLastModifiedTimestamp = result.Result.PasswordLastModified;
                 $rootScope.$broadcast("LoggedIn");
+
+                $scope.isLoggedInWithTempPassword = result.Result.MustChangePassword;
+                $scope.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(result.Result.PasswordLastModified);
                 $scope.handleTenantSelection(result.Result.Tenants);
             } else {
                 // Need to fail gracefully if we get no service response at all
@@ -78,7 +79,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             }
         });
     };
-    
+
     $scope.handleTenantSelection = function (tenantList) {
         if (tenantList == null || tenantList.length === 0) {
             $scope.showLoginHeaderMessage(ResourceUtility.getString("NO_TENANT_MESSAGE"));
@@ -124,28 +125,24 @@ angular.module('mainApp.login.controllers.LoginController', [
             $("body").removeClass("login-body");
             $rootScope.$broadcast("ShowFooterEvent", true);
 
-            ConfigService.GetCurrentTopology().then(function(result){
-                if (result.success) {
-                    featureFlagsCallback();
-                } else {
-                    var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
-                    if (featureFlags == null) featureFlags = {};
-                    featureFlags['MultiModelSetup'] = false;
-                    featureFlags['SystemSetup'] = false;
-                    BrowserStorageUtility.setFeatureFlagsDocument(featureFlags, featureFlagsCallback);
-                }
-
-                function featureFlagsCallback() {
-                    $http.get('./app/core/views/MainView.html').success(function (html) {
-                        var scope = $rootScope.$new();
-                        scope.directToPassword = $scope.directToPassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo($scope.passwordLastModifiedTimestamp);
-                        $compile($("#mainView").html(html))(scope);
-                    });
-                }
-            });
+            if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
+                constructMainView();
+            } else {
+                ConfigService.GetCurrentTopology().then(function(result){
+                    if (result.success) {
+                        featureFlagsCallback();
+                    } else {
+                        var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
+                        if (featureFlags == null) featureFlags = {};
+                        featureFlags['MultiModelSetup'] = false;
+                        featureFlags['SystemSetup'] = false;
+                        BrowserStorageUtility.setFeatureFlagsDocument(featureFlags, constructMainView);
+                    }
+                });
+            }
         });
     };
-    
+
     $scope.showLoginHeaderMessage = function (message) {
         if (message == null) {
             return;
@@ -210,4 +207,13 @@ angular.module('mainApp.login.controllers.LoginController', [
         }
         HelpService.OpenPrivacyPolicy();
     };
+
+    function constructMainView() {
+        $http.get('./app/core/views/MainView.html').success(function (html) {
+            var scope = $rootScope.$new();
+            scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
+            scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
+            $compile($("#mainView").html(html))(scope);
+        });
+    }
 });

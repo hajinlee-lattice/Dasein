@@ -11,15 +11,13 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $scope.showUserManagement = false;
 
     var clientSession = BrowserStorageUtility.getClientSession();
-    if (clientSession == null) {
-        return;
+    if (clientSession != null) {
+        $scope.userDisplayName = clientSession.DisplayName;
+        $scope.showUserManagement = RightsUtility.maySeeUserManagement();
+        $scope.showSystemSetup =  RightsUtility.maySeeSystemSetup();
+        $scope.showModelCreationHistoryDropdown = RightsUtility.maySeeModelCreationHistory();
+        $scope.showMultipleModelSetup = RightsUtility.mayEditMultipleModelSetup();
     }
-
-    $scope.userDisplayName = clientSession.DisplayName;
-    $scope.showUserManagement = RightsUtility.maySeeUserManagement();
-    $scope.showSystemSetup =  RightsUtility.maySeeSystemSetup();
-    $scope.showModelCreationHistoryDropdown = RightsUtility.maySeeModelCreationHistory();
-    $scope.showMultipleModelSetup = RightsUtility.mayEditMultipleModelSetup();
 
     var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
     if (featureFlags) {

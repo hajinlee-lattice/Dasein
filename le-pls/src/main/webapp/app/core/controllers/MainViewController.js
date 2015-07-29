@@ -18,7 +18,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
-    if ($scope.directToPassword) {
+    if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
         createUpdatePasswordView();
     } else {
         createModelListView();
@@ -27,10 +27,10 @@ angular.module('mainApp.core.controllers.MainViewController', [
     // Handle Initial View
     $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
         var scope = $rootScope.$new();
-        scope.mandatePasswordChange = $scope.directToPassword;
+        scope.mandatePasswordChange = $scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays;
         $compile($("#mainHeaderView").html(html))(scope);
     });
-    
+
     // Handle when the Manage Credentials link is clicked
     $scope.$on(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT, function (event, data) {
         createManageCredentialsView();
@@ -59,11 +59,12 @@ angular.module('mainApp.core.controllers.MainViewController', [
     function createUpdatePasswordView() {
         // Set the hash
         window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
-        
+
         // Fetch the view and make it Angular aware
         $http.get('./app/login/views/UpdatePasswordView.html').success(function (html) {
             var scope = $rootScope.$new();
-            scope.mandatePasswordChange = true;
+            scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
+            scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
             $compile($("#mainContentView").html(html))(scope);
         });
     }

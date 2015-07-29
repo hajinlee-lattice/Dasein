@@ -12,17 +12,25 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     $scope.oldPassword = null;
     $scope.newPassword = null;
     $scope.confirmPassword = null;
-    
+
     $scope.oldPasswordInputError = "";
     $scope.newPasswordInputError = "";
     $scope.confirmPasswordInputError = "";
     $scope.showPasswordError = false;
     $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
-    
+
     $scope.saveInProgess = false;
-    
+
     $("#validateAlertError, #changePasswordSuccessAlert").hide();
-    
+
+    if ($scope.isPasswordOlderThanNinetyDays) {
+        $scope.showPasswordError = true;
+        $scope.validateErrorMessage = ResourceUtility.getString("NINTY_DAY_OLD_PASSWORD");
+    } else if ($scope.isLoggedInWithTempPassword) {
+        $scope.showPasswordError = true;
+        $scope.validateErrorMessage = ResourceUtility.getString("MUST_CHANGE_TEMP_PASSWORD");
+    }
+
     function validatePassword () {
         $("#validateAlertError, #changePasswordSuccessAlert").fadeOut();
         $scope.oldPasswordInputError = StringUtility.IsEmptyString($scope.oldPassword) ? "error" : "";
@@ -67,8 +75,8 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
         if ($event != null) {
             $event.preventDefault();
         }
-        
-        if ($scope.mandatePasswordChange) {
+
+        if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
             clearChangePasswordField();
         } else {
             $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
