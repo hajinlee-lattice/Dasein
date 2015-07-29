@@ -124,7 +124,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
     public void destroy() {
         for (Tenant tenant : tenantList) {
             for (User user : users.get(tenant)) {
-                makeSureUserDoesNotExist(user.getUsername());
+                deleteUserWithUsername(user.getUsername());
             }
             try {
                 String tenantId = tenant.getId();
@@ -216,7 +216,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
         for (int i = 0; i < numOfRuns; i++) {
             List<Future<List<Long>>> futures = new ArrayList<>();
             for (final Tenant tenant : tenantList) {
-                for (int j = 0; j < this.numOfUsers; j++) {
+                for (int j = 0; j < numOfUsers; j++) {
                     final int userNum = j;
                     Future<List<Long>> future = executor.submit(new Callable<List<Long>>() {
 
@@ -325,7 +325,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 modelSummaryTime += timeConsumptions.get(3);
                 logOutTime += timeConsumptions.get(4);
             }
-            int userSize = this.numOfTenants * this.numOfUsers;
+            int userSize = numOfTenants * numOfUsers;
             System.out
                     .println(String.format("Log in to main page: %f seconds", Math.ceil(loginMainPageTime / userSize)));
             System.out.println(String.format("Log and Attach: %f seconds", Math.ceil(loginAndAttachTime / userSize)));

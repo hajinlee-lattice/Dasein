@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -45,10 +46,12 @@ import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -65,6 +68,7 @@ public class InternalResource extends InternalResourceBase {
     private static final String adminTesterPwd = "admin";
     private static final String adUsername = "testuser1";
     private static final String adPassword = "Lattice1";
+    protected static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -84,6 +88,9 @@ public class InternalResource extends InternalResourceBase {
     @Autowired
     private TenantConfigService tenantConfigService;
 
+    @Autowired
+    private InternalTestUserService internalTestUserService;
+
     @Value("${pls.test.contract}")
     protected String contractId;
 
@@ -93,29 +100,25 @@ public class InternalResource extends InternalResourceBase {
     @Value("${pls.internal.admin.api}")
     private String adminApi;
 
-    @RequestMapping(value = "/modelsummaries/{modelId}",
-        method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")
-    public ResponseDocument<ModelActivationResult> update(
-        @PathVariable String modelId,
-        @RequestBody AttributeMap attrMap, HttpServletRequest request
-    ) {
+    public ResponseDocument<ModelActivationResult> update(@PathVariable String modelId,
+            @RequestBody AttributeMap attrMap, HttpServletRequest request) {
         checkHeader(request);
         ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
 
         if (summary == null) {
             ModelActivationResult result = new ModelActivationResult();
             result.setExists(false);
-            ResponseDocument<ModelActivationResult> response
-                = new ResponseDocument<>();
+            ResponseDocument<ModelActivationResult> response = new ResponseDocument<>();
             response.setSuccess(false);
             response.setResult(result);
             return response;
         }
 
-        ((ModelSummaryEntityMgrImpl) modelSummaryEntityMgr)
-            .manufactureSecurityContextForInternalAccess(summary.getTenant());
+        ((ModelSummaryEntityMgrImpl) modelSummaryEntityMgr).manufactureSecurityContextForInternalAccess(summary
+                .getTenant());
 
         // Reuse the logic in the ModelSummaryResource to do the updates
         ModelSummaryResource msr = new ModelSummaryResource();
@@ -139,93 +142,13 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         LOGGER.info("Cleaning up test tenants through internal API");
 
-        List<String> Ids = getTestTenants();
+        List<String> Ids = getTestTenantIds();
         final String tenant1Id = Ids.get(0);
         final String tenant2Id = Ids.get(1);
 
-        //==================================================
-        // Upload modelsummary if necessary
-        //==================================================
-        Credentials creds = new Credentials();
-        creds.setUsername(adminTester);
-        creds.setPassword(DigestUtils.sha256Hex(adminTesterPwd));
-
-        List<BasicNameValuePair> headers = new ArrayList<>();
-        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
-        headers.add(new BasicNameValuePair("Accept", "application/json"));
-
-        String payload = JsonUtils.serialize(creds);
-        String loginDocAsString =
-                HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/login", true, headers, payload);
-        LoginDocument loginDoc = JsonUtils.deserialize(loginDocAsString, LoginDocument.class);
-
-        headers.add(new BasicNameValuePair(Constants.AUTHORIZATION, loginDoc.getData()));
-
-        for (Tenant tenant: loginDoc.getResult().getTenants()) {
-            if (tenant.getId().equals(tenant2Id)) {
-                payload = JsonUtils.serialize(tenant);
-                HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/attach", true, headers, payload);
-                String response =
-                        HttpClientWithOptionalRetryUtils.sendGetRequest(hostPort + "pls/modelsummaries", true, headers);
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode jNode = mapper.readTree(response);
-                while (jNode.size() < 2) {
-                    InputStream ins = getClass().getClassLoader()
-                            .getResourceAsStream("com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
-                    ModelSummary data = new ModelSummary();
-                    Tenant fakeTenant = new Tenant();
-                    fakeTenant.setId("FAKE_TENANT");
-                    fakeTenant.setName("Fake Tenant");
-                    fakeTenant.setPid(-1L);
-                    data.setTenant(fakeTenant);
-                    data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                    HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/modelsummaries?raw=true", true,
-                            headers, JsonUtils.serialize(data));
-                    response = HttpClientWithOptionalRetryUtils.sendGetRequest(hostPort + "pls/modelsummaries",
-                            true, headers);
-                    jNode = mapper.readTree(response);
-                }
-            }
-        }
-
-        //==================================================
-        // Delete test users
-        //==================================================
-        for (User user: userService.getUsers(tenant1Id)) {
-            if (user.getUsername().startsWith("0000")) {
-                userService.deleteUser(tenant1Id, user.getUsername());
-            }
-        }
-        for (User user: userService.getUsers(tenant2Id)) {
-            if (user.getUsername().startsWith("0000")) {
-                userService.deleteUser(tenant2Id, user.getUsername());
-            }
-        }
-
-        //==================================================
-        // Reset password of password tester
-        //==================================================
-        try {
-            globalAuthenticationService.authenticateUser(passwordTester, DigestUtils.sha256Hex(passwordTesterPwd));
-        } catch (Exception e) {
-            resetPasswordTester();
-        }
-
-        //==================================================
-        // Cleanup stored credentials
-        //==================================================
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, false);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant1Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant1Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant2Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant2Id, false);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant2Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant2Id, true);
-
-        //==================================================
+        // ==================================================
         // Provision through tenant console if needed
-        //==================================================
+        // ==================================================
         try {
             tenantConfigService.getTopology(tenant1Id);
         } catch (LedpException e) {
@@ -248,6 +171,87 @@ public class InternalResource extends InternalResourceBase {
             }
         }
 
+        // ==================================================
+        // Upload modelsummary if necessary
+        // ==================================================
+        Credentials creds = new Credentials();
+        creds.setUsername(adminTester);
+        creds.setPassword(DigestUtils.sha256Hex(adminTesterPwd));
+
+        List<BasicNameValuePair> headers = new ArrayList<>();
+        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
+        headers.add(new BasicNameValuePair("Accept", "application/json"));
+
+        String payload = JsonUtils.serialize(creds);
+        String loginDocAsString = HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/login", true,
+                headers, payload);
+        LoginDocument loginDoc = JsonUtils.deserialize(loginDocAsString, LoginDocument.class);
+
+        headers.add(new BasicNameValuePair(Constants.AUTHORIZATION, loginDoc.getData()));
+
+        for (Tenant tenant : loginDoc.getResult().getTenants()) {
+            if (tenant.getId().equals(tenant2Id)) {
+                payload = JsonUtils.serialize(tenant);
+                HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/attach", true, headers, payload);
+                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(hostPort + "pls/modelsummaries",
+                        true, headers);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jNode = mapper.readTree(response);
+                while (jNode.size() < 2) {
+                    InputStream ins = getClass().getClassLoader().getResourceAsStream(
+                            "com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
+                    ModelSummary data = new ModelSummary();
+                    Tenant fakeTenant = new Tenant();
+                    fakeTenant.setId("FAKE_TENANT");
+                    fakeTenant.setName("Fake Tenant");
+                    fakeTenant.setPid(-1L);
+                    data.setTenant(fakeTenant);
+                    data.setRawFile(new String(IOUtils.toByteArray(ins)));
+                    HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/modelsummaries?raw=true", true,
+                            headers, JsonUtils.serialize(data));
+                    response = HttpClientWithOptionalRetryUtils.sendGetRequest(hostPort + "pls/modelsummaries", true,
+                            headers);
+                    jNode = mapper.readTree(response);
+                }
+            }
+        }
+
+        // ==================================================
+        // Delete test users
+        // ==================================================
+        for (User user : userService.getUsers(tenant1Id)) {
+            if (user.getUsername().startsWith("0000")) {
+                userService.deleteUser(tenant1Id, user.getUsername());
+            }
+        }
+        for (User user : userService.getUsers(tenant2Id)) {
+            if (user.getUsername().startsWith("0000")) {
+                userService.deleteUser(tenant2Id, user.getUsername());
+            }
+        }
+
+        Map<AccessLevel, User> accessLevelToUsers = internalTestUserService
+                .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel();
+
+        // ==================================================
+        // Reset password of password tester
+        // ==================================================
+        resetPasswordTester();
+
+        // ==================================================
+        // Cleanup stored credentials
+        // ==================================================
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, false);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant1Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant1Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant2Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant2Id, false);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant2Id, true);
+        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant2Id, true);
+
+        assignTestingUsersToTenants(accessLevelToUsers);
+
         return SimpleBooleanResponse.getSuccessResponse();
     }
 
@@ -255,7 +259,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Status check for this endpoint")
     public Status calculate(@PathVariable("op") String op, @PathVariable("left") int left,
-                            @PathVariable("right") int right) {
+            @PathVariable("right") int right) {
         Assert.notNull(op);
         Assert.notNull(left);
         Assert.notNull(right);
@@ -266,7 +270,7 @@ public class InternalResource extends InternalResourceBase {
         return doCalc(result);
     }
 
-    public List<String> getTestTenants() {
+    public List<String> getTestTenantIds() {
         String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
         String tenant2Id = contractId + "PLSTenant2." + contractId + "PLSTenant2.Production";
         return Arrays.asList(tenant1Id, tenant2Id);
@@ -294,12 +298,12 @@ public class InternalResource extends InternalResourceBase {
         String tenantToken = "${TENANT}";
         String topologyToken = "${TOPOLOGY}";
         String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
-        InputStream ins = getClass().getClassLoader()
-                .getResourceAsStream("com/latticeengines/pls/controller/internal/tenant-registration.json");
+        InputStream ins = getClass().getClassLoader().getResourceAsStream(
+                "com/latticeengines/pls/controller/internal/tenant-registration.json");
         String payload = IOUtils.toString(ins);
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
-        HttpClientWithOptionalRetryUtils.sendPostRequest(
-                adminApi + "/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders, payload);
+        HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/tenants/" + dlTenantName + "?contractId="
+                + dlTenantName, false, adHeaders, payload);
     }
 
     private List<BasicNameValuePair> loginAd() throws IOException {
@@ -310,8 +314,8 @@ public class InternalResource extends InternalResourceBase {
         Credentials credentials = new Credentials();
         credentials.setUsername(adUsername);
         credentials.setPassword(adPassword);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/adlogin", false,
-                headers, JsonUtils.serialize(credentials));
+        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/adlogin", false, headers,
+                JsonUtils.serialize(credentials));
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode json = mapper.readTree(response);
@@ -319,6 +323,18 @@ public class InternalResource extends InternalResourceBase {
 
         headers.add(new BasicNameValuePair("Authorization", token));
         return headers;
+    }
+
+    private void assignTestingUsersToTenants(Map<AccessLevel, User> accessLevelToUsers) {
+        for (String testTenantId : getTestTenantIds()) {
+            for (Map.Entry<AccessLevel, User> accessLevelToUser : accessLevelToUsers.entrySet()) {
+                userService.assignAccessLevel(accessLevelToUser.getKey(), testTenantId, accessLevelToUser.getValue()
+                        .getUsername());
+            }
+            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenantId, passwordTester);
+        }
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, getTestTenantIds().get(0), EXTERNAL_USER_USERNAME_1);
+        userService.deleteUser(getTestTenantIds().get(1), EXTERNAL_USER_USERNAME_1);
     }
 
     private void resetPasswordTester() {

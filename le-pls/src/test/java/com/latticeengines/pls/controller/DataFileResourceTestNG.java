@@ -61,13 +61,14 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         tenant1.setName(TENANT_ID);
         tenantService.discardTenant(tenant1);
         tenantService.registerTenant(tenant1);
-        userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, TENANT_ID, SUPER_ADMIN_USERNAME);
+        userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, TENANT_ID,
+                getTheTestingUserAtLevel(AccessLevel.SUPER_ADMIN).getUsername());
 
         setupDbWithEloquaSMB(TENANT_ID, TENANT_ID);
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestingTenant.getId());
-        String dir = modelingServiceHdfsBaseDir
-                + "/" + TENANT_ID + "/models/Q_PLS_Modeling_TENANT1/" + UUID + "/1423547416066_0001/";
+        String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/Q_PLS_Modeling_TENANT1/" + UUID
+                + "/1423547416066_0001/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
@@ -75,7 +76,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/diagnostics.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/metadata.avsc");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
+        HdfsUtils
+                .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
@@ -85,7 +87,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @AfterClass(groups = { "functional", "deployment" })
     public void teardown() throws Exception {
-        userService.resignAccessLevel(TENANT_ID, SUPER_ADMIN_USERNAME);
+        userService.resignAccessLevel(TENANT_ID, getTheTestingUserAtLevel(AccessLevel.SUPER_ADMIN).getUsername());
         Tenant tenant1 = tenantService.findByTenantId(TENANT_ID);
         tenantService.discardTenant(tenant1);
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);

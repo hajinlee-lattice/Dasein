@@ -42,7 +42,7 @@ import com.latticeengines.security.exposed.service.UserService;
 public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant;
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
@@ -54,10 +54,10 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
-    
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        makeSureUserDoesNotExist("ron@lattice-engines.com");
+        deleteUserWithUsername("ron@lattice-engines.com");
         setupDbWithMarketoSMB("T1", "T1");
         tenant = tenantService.findByTenantId("T1");
     }
@@ -71,9 +71,10 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     public void addTenantWithProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
+        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
+                new HashMap<>());
         assertTrue(result);
-        
+
         Tenant t = tenantEntityMgr.findByTenantId("T1");
         assertNotNull(t);
     }
@@ -86,7 +87,8 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
         boolean exception = false;
         try {
-            restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
+            restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
+                    new HashMap<>());
         } catch (Exception e) {
             exception = true;
             String code = e.getMessage();
@@ -98,12 +100,14 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "functional", "deployment" })
     public void addExistingTenant() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
-        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
+                new HashMap<>());
         assertTrue(result);
 
         tenant.setName("new name");
-        result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
+        result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
+                new HashMap<>());
         assertTrue(result);
         Tenant t = tenantEntityMgr.findByTenantId("T1");
         assertNotNull(t);
@@ -135,7 +139,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         }
         assertTrue(exception);
     }
-    
+
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "addAdminUserBadArgs" })
     public void addAdminUser() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
@@ -146,10 +150,11 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         userRegistrationWithTenant.setUserRegistration(userRegistration);
         userRegistration.setUser(getUser());
         userRegistration.setCredentials(getCreds());
-        
-        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users", userRegistrationWithTenant, Boolean.class);
+
+        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users",
+                userRegistrationWithTenant, Boolean.class);
         assertTrue(result);
-        
+
         assertNotNull(globalUserManagementService.getUserByEmail("ron@lattice-engines.com"));
     }
 
@@ -157,8 +162,9 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     public void addAdminUserBadArgs(UserRegistrationWithTenant userRegistrationWithTenant) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        
-        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users", userRegistrationWithTenant, Boolean.class);
+
+        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users",
+                userRegistrationWithTenant, Boolean.class);
         assertFalse(result);
         assertNull(globalUserManagementService.getUserByEmail("ron@lattice-engines.com"));
     }
@@ -167,10 +173,10 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "functional", "deployment" })
     public void updateUserAccessLevels() throws URIException {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
         String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
-        makeSureUserDoesNotExist(username);
+        deleteUserWithUsername(username);
         createUser(username, username, "Test", "Tester");
         userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
 
@@ -182,28 +188,25 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
-        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
-                getRestAPIHostPort() + "/pls/admin/users?tenant=" + tenant.getId() + "&username=" + username,
-                HttpMethod.PUT,
-                requestEntity,
-                ResponseDocument.class
-        );
+        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(getRestAPIHostPort()
+                + "/pls/admin/users?tenant=" + tenant.getId() + "&username=" + username, HttpMethod.PUT, requestEntity,
+                ResponseDocument.class);
         ResponseDocument response = responseEntity.getBody();
         Assert.assertTrue(response.isSuccess());
 
         AccessLevel accessLevel = userService.getAccessLevel(tenant.getId(), username);
         Assert.assertEquals(accessLevel, AccessLevel.INTERNAL_ADMIN);
-        makeSureUserDoesNotExist(username);
+        deleteUserWithUsername(username);
     }
 
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void updateUserAccessLevelsWrongArgs() throws URIException {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
         String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
-        makeSureUserDoesNotExist(username);
+        deleteUserWithUsername(username);
         createUser(username, username, "Test", "Tester");
         userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
 
@@ -215,25 +218,18 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
-        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
-                getRestAPIHostPort() + "/pls/admin/users?tenant=" + tenant.getId() + "&username=nope",
-                HttpMethod.PUT,
-                requestEntity,
-                ResponseDocument.class
-        );
+        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(getRestAPIHostPort()
+                + "/pls/admin/users?tenant=" + tenant.getId() + "&username=nope", HttpMethod.PUT, requestEntity,
+                ResponseDocument.class);
         ResponseDocument response = responseEntity.getBody();
         Assert.assertFalse(response.isSuccess(), "Update user with wrong username should fail.");
 
-        responseEntity = restTemplate.exchange(
-                getRestAPIHostPort() + "/pls/admin/users?tenant=nope&username=" + username,
-                HttpMethod.PUT,
-                requestEntity,
-                ResponseDocument.class
-        );
+        responseEntity = restTemplate.exchange(getRestAPIHostPort() + "/pls/admin/users?tenant=nope&username="
+                + username, HttpMethod.PUT, requestEntity, ResponseDocument.class);
         response = responseEntity.getBody();
         Assert.assertFalse(response.isSuccess(), "Update user with wrong tenant should fail.");
 
-        makeSureUserDoesNotExist(username);
+        deleteUserWithUsername(username);
     }
 
     @DataProvider(name = "userRegistrationDataProviderBadArgs")
@@ -244,34 +240,33 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         // No user registration
         UserRegistrationWithTenant urwt1 = new UserRegistrationWithTenant();
         urwt1.setTenant("T1");
-        
+
         // No tenant
         UserRegistrationWithTenant urwt2 = new UserRegistrationWithTenant();
         UserRegistration ur2 = new UserRegistration();
         urwt2.setUserRegistration(ur2);
         ur2.setUser(user);
         ur2.setCredentials(creds);
-        
+
         // With tenant and user registration, but user registration has no user
         UserRegistrationWithTenant urwt3 = new UserRegistrationWithTenant();
         UserRegistration ur3 = new UserRegistration();
         urwt3.setUserRegistration(ur3);
         ur3.setCredentials(creds);
-        
-        // With tenant and user registration, but user registration has no credentials
+
+        // With tenant and user registration, but user registration has no
+        // credentials
         UserRegistrationWithTenant urwt4 = new UserRegistrationWithTenant();
         UserRegistration ur4 = new UserRegistration();
         urwt4.setUserRegistration(ur4);
         ur4.setUser(user);
-        
-        return new Object[][] {
-                { urwt1 }, //
+
+        return new Object[][] { { urwt1 }, //
                 { urwt2 }, //
                 { urwt3 }, //
-                { urwt4 }
-        };
+                { urwt4 } };
     }
-    
+
     private static User getUser() {
         User user = new User();
         user.setActive(true);
@@ -281,13 +276,13 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         user.setUsername("ron@lattice-engines.com");
         return user;
     }
-    
+
     private static Credentials getCreds() {
         Credentials creds = new Credentials();
         creds.setUsername("ron@lattice-engines.com");
         creds.setPassword(adminPasswordHash);
         return creds;
-        
+
     }
 
 }

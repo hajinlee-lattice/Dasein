@@ -15,7 +15,8 @@ var Config = function() {
                 specBasePath + '/usermgmt_spec.js',
                 specBasePath + '/multiplemodel_spec.js',
                 specBasePath + '/systemsetup_spec.js',
-                specBasePath + '/passwordchange_spec.js'
+                specBasePath + '/passwordchange_spec.js',
+                specBasePath + '/multitenant_spec.js'
             ],
 
             params: {

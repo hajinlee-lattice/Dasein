@@ -1,19 +1,17 @@
 package com.latticeengines.pls.functionalframework;
 
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import junit.framework.Assert;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,19 +52,15 @@ import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.UserService;
-
-import junit.framework.Assert;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    private static final Log log = LogFactory.getLog(PlsFunctionalTestNGBase.class);
-
     protected static boolean usersInitialized = false;
+
     protected static final String adminUsername = "bnguyen@lattice-engines.com";
     protected static final String adminPassword = "tahoe";
     protected static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
@@ -75,31 +69,21 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
     protected static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
     protected static final String passwordTesterPwd = "Lattice123";
-    protected static final String passwordTesterPwdHash = "3OCRIbECCiTtJ8FyaNgvTjNES/eyjQUK59Z5rMCnrAk=";
-
-    protected static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@test.lattice-engines.com";
-    protected static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@test.lattice-engines.com";
-    protected static final String INTERNAL_USER_USERNAME = "pls-internal-user-tester@test.lattice-engines.com";
-    protected static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@test.lattice-engines.ext";
-    protected static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@test.lattice-engines.ext";
 
     protected static final String BISAP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000WjNY";
     protected static final String BISLP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000Kk28";
 
-    private static HashMap<AccessLevel, User> testingUsers;
+    private static Map<AccessLevel, User> testingUsers;
     private static HashMap<AccessLevel, UserDocument> testingUserSessions;
     protected static List<Tenant> testingTenants;
     protected static Tenant mainTestingTenant;
 
     @Autowired
-    protected GlobalAuthenticationService globalAuthenticationService;
-
-    @Autowired
-    private GlobalUserManagementService globalUserManagementService;
+    private InternalTestUserService internalTestUserService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
-    
+
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
 
@@ -129,23 +113,11 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             "");
 
     protected void createUser(String username, String email, String firstName, String lastName) {
-        createUser(username, email, firstName, lastName, generalPasswordHash);
+        internalTestUserService.createUser(username, email, firstName, lastName);
     }
 
-    protected void createUser(String username, String email, String firstName, String lastName, String password) {
-        try {
-            User user1 = new User();
-            user1.setFirstName(firstName);
-            user1.setLastName(lastName);
-            user1.setEmail(email);
-
-            Credentials user1Creds = new Credentials();
-            user1Creds.setUsername(username);
-            user1Creds.setPassword(password);
-            assertTrue(globalUserManagementService.registerUser(user1, user1Creds));
-        } catch (Exception e) {
-            log.info("User " + username + " already created.");
-        }
+    protected void deleteUserWithUsername(String username) {
+        internalTestUserService.deleteUserWithUsername(username);
     }
 
     protected boolean createTenantByRestCall(String tenantName) {
@@ -154,11 +126,12 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         tenant.setName(tenantName);
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
+        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
+                new HashMap<>());
     }
 
-    protected boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName, String lastName,
-            String password) {
+    protected boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName,
+            String lastName, String password) {
         UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
         userRegistrationWithTenant.setTenant(tenant);
         UserRegistration userRegistration = new UserRegistration();
@@ -178,9 +151,8 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
-
-        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users",
-                userRegistrationWithTenant, Boolean.class);
+        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users", userRegistrationWithTenant,
+                Boolean.class);
     }
 
     protected String getRestAPIHostPort() {
@@ -264,7 +236,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
                 UserDocument.class);
@@ -279,31 +251,46 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         creds.setUsername(username);
         creds.setPassword(DigestUtils.sha256Hex(password));
 
-        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds,
-            LoginDocument.class);
+        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant, UserDocument.class);
     }
 
-    protected Ticket loginCreds(String username, String password){
-        return globalAuthenticationService.authenticateUser(username, DigestUtils.sha256Hex(password));
+    protected Ticket loginCreds(String username, String password) {
+        return internalTestUserService.loginCreds(username, password);
     }
 
-    protected void logoutUserDoc(UserDocument doc) { logoutTicket(doc.getTicket()); }
+    protected void logoutTicket(Ticket ticket) {
+        internalTestUserService.logoutTicket(ticket);
+    }
 
-    protected void logoutTicket(Ticket ticket) { globalAuthenticationService.discard(ticket); }
+    protected void switchToSuperAdmin() {
+        switchToTheSessionWithAccessLevel(AccessLevel.SUPER_ADMIN);
+    }
 
-    protected void switchToSuperAdmin() { switchToTheSessionWithAccessLevel(AccessLevel.SUPER_ADMIN); }
-    protected void switchToInternalAdmin() { switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_ADMIN); }
-    protected void switchToInternalUser() { switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_USER); }
-    protected void switchToExternalAdmin() { switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_ADMIN); }
-    protected void switchToExternalUser() { switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_USER); }
+    protected void switchToInternalAdmin() {
+        switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_ADMIN);
+    }
+
+    protected void switchToInternalUser() {
+        switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_USER);
+    }
+
+    protected void switchToExternalAdmin() {
+        switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+    }
+
+    protected void switchToExternalUser() {
+        switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_USER);
+    }
 
     protected void switchToTheSessionWithAccessLevel(AccessLevel level) {
-        if (testingUserSessions == null || testingUserSessions.isEmpty()) { loginTestingUsersToMainTenant(); }
+        if (testingUserSessions == null || testingUserSessions.isEmpty()) {
+            loginTestingUsersToMainTenant();
+        }
         UserDocument uDoc = testingUserSessions.get(level);
         if (uDoc == null) {
             throw new NullPointerException("Could not find the session with access level " + level.name());
@@ -313,7 +300,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected void useSessionDoc(UserDocument doc) {
         addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
     }
 
@@ -327,7 +314,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         return summary;
     }
 
-    protected void setUpMarketoEloquaTestEnvironment() throws Exception{
+    protected void setUpMarketoEloquaTestEnvironment() throws Exception {
         setupUsers();
         setupDbUsingDefaultTenantIds();
     }
@@ -340,9 +327,10 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         setupDbUsingDefaultTenantIds(useTenant1, useTenant2, true, true);
     }
 
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries, boolean createSegments) throws Exception {
+    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries,
+            boolean createSegments) throws Exception {
         String tenant1Id = useTenant1 ? testingTenants.get(0).getId() : null;
-        String tenant1Name = useTenant1 ?  testingTenants.get(0).getName() : null;
+        String tenant1Name = useTenant1 ? testingTenants.get(0).getName() : null;
         String tenant2Id = useTenant2 ? testingTenants.get(1).getId() : null;
         String tenant2Name = useTenant2 ? testingTenants.get(1).getName() : null;
         setupDbWithMarketoSMB(tenant1Id, tenant1Name, createSummaries, createSegments);
@@ -353,8 +341,8 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         setupDbWithMarketoSMB(tenantId, tenantName, true, true);
     }
 
-    protected void setupDbWithMarketoSMB(String tenantId, String tenantName,
-                                         boolean createSummaries, boolean createSegments) throws Exception {
+    protected void setupDbWithMarketoSMB(String tenantId, String tenantName, boolean createSummaries,
+            boolean createSegments) throws Exception {
         Tenant tenant = new Tenant();
         tenant.setId(tenantId);
         tenant.setName(tenantName);
@@ -403,8 +391,8 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         setupDbWithEloquaSMB(tenantId, tenantName, true, true);
     }
 
-    protected void setupDbWithEloquaSMB(String tenantId, String tenantName,
-                                         boolean createSummaries, boolean createSegments) throws Exception {
+    protected void setupDbWithEloquaSMB(String tenantId, String tenantName, boolean createSummaries,
+            boolean createSegments) throws Exception {
         Tenant tenant = new Tenant();
         tenant.setId(tenantId);
         tenant.setName(tenantName);
@@ -474,17 +462,14 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
 
-    protected void makeSureUserDoesNotExist(String username) {
-        assertTrue(globalUserManagementService.deleteUser(username));
-        assertNull(globalUserManagementService.getUserByUsername(username));
-    }
-
     protected void setupUsers() {
-        if (usersInitialized) return;
+        if (usersInitialized) {
+            return;
+        }
 
         setTestingTenants();
 
-        for (Tenant tenant: testingTenants) {
+        for (Tenant tenant : testingTenants) {
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
             userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), generalUsername);
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), passwordTester);
@@ -493,7 +478,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 User user = getTheTestingUserAtLevel(level);
                 if (user != null) {
                     userService.assignAccessLevel(level, tenant.getId(), user.getUsername());
-
                 }
             }
         }
@@ -505,90 +489,17 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected User getTheTestingUserAtLevel(AccessLevel level) {
         if (testingUsers == null || testingUsers.isEmpty()) {
-            createTestUsers();
+            testingUsers = internalTestUserService
+                    .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel();
         }
         return testingUsers.get(level);
     }
 
-    private void createTestUsers() {
-        testingUsers = new HashMap<>();
-        for (AccessLevel level : AccessLevel.values()) {
-            User user = createATestUser(level);
-            testingUsers.put(level, user);
-        }
-
-        // testing admin user
-        User user = globalUserManagementService.getUserByEmail(adminUsername);
-        if (user == null || !user.getUsername().equals(adminUsername)) {
-            globalUserManagementService.deleteUser("bnguyen");
-            globalUserManagementService.deleteUser(adminUsername);
-            createUser(adminUsername, adminUsername, "Super", "User", adminPasswordHash);
-        }
-
-        // testing general user
-        user = globalUserManagementService.getUserByEmail(generalUsername);
-        if (user == null || !user.getUsername().equals(generalUsername)) {
-            globalUserManagementService.deleteUser("lming");
-            globalUserManagementService.deleteUser(generalUsername);
-            createUser(generalUsername, generalUsername, "General", "User", generalPasswordHash);
-        }
-
-        // passwordTester
-        user = globalUserManagementService.getUserByEmail(passwordTester);
-        if (user == null || !user.getUsername().equals(passwordTester)) {
-            globalUserManagementService.deleteUser(passwordTester);
-            createUser(passwordTester, passwordTester, "Lattice", "Tester", passwordTesterPwdHash);
-        }
-    }
-
-    private User createATestUser(AccessLevel accessLevel) {
-        String username;
-        switch (accessLevel) {
-            case SUPER_ADMIN:
-                username = SUPER_ADMIN_USERNAME;
-                break;
-            case INTERNAL_ADMIN:
-                username = INTERNAL_ADMIN_USERNAME;
-                break;
-            case INTERNAL_USER:
-                username = INTERNAL_USER_USERNAME;
-                break;
-            case EXTERNAL_ADMIN:
-                username = EXTERNAL_ADMIN_USERNAME;
-                break;
-            case EXTERNAL_USER:
-                username = EXTERNAL_USER_USERNAME;
-                break;
-            default:
-                return null;
-        }
-
-        if (userService.findByEmail(username) == null) {
-
-            User user = new User();
-            user.setEmail(username);
-            user.setFirstName("Lattice");
-            user.setLastName("Tester");
-
-            Credentials credentials = new Credentials();
-            credentials.setUsername(user.getEmail());
-            credentials.setPassword("WillBeModifiedImmediately");
-
-            user.setUsername(credentials.getUsername());
-
-            makeSureUserDoesNotExist(credentials.getUsername());
-
-            createUser(credentials.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName());
-        }
-
-        return globalUserManagementService.getUserByEmail(username);
-    }
-
-    private void setTestingTenants(){
+    private void setTestingTenants() {
         if (testingTenants == null || testingTenants.isEmpty()) {
             List<String> subTenantIds = Arrays.asList(contractId + "PLSTenant1", contractId + "PLSTenant2");
             testingTenants = new ArrayList<>();
-            for (String subTenantId: subTenantIds) {
+            for (String subTenantId : subTenantIds) {
                 String tenantId = CustomerSpace.parse(subTenantId).toString();
                 if (!tenantService.hasTenantId(tenantId)) {
                     Tenant tenant = new Tenant();
@@ -606,7 +517,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected void loginTestingUsersToMainTenant() {
-        if (mainTestingTenant == null) { setTestingTenants(); }
+        if (mainTestingTenant == null) {
+            setTestingTenants();
+        }
         if (testingUserSessions == null || testingUserSessions.isEmpty()) {
             testingUserSessions = new HashMap<>();
             for (AccessLevel level : AccessLevel.values()) {
@@ -616,7 +529,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
 
-    protected void setupSecurityContext(ModelSummary summary) { setupSecurityContext(summary.getTenant()); }
+    protected void setupSecurityContext(ModelSummary summary) {
+        setupSecurityContext(summary.getTenant());
+    }
 
     protected void setupSecurityContext(Segment segment) {
         setupSecurityContext(segment.getTenant());

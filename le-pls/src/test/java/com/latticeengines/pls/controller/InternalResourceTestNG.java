@@ -49,9 +49,6 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
-    private GlobalUserManagementService globalUserManagementService;
-
-    @Autowired
     private TenantService tenantService;
 
     @Autowired
@@ -68,7 +65,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     @Value("${pls.api.hostport}")
     private String hostPort;
 
-    @BeforeClass(groups = {"functional", "deployment"})
+    @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         setUpMarketoEloquaTestEnvironment();
 
@@ -79,16 +76,16 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         tenantService.registerTenant(tenant);
     }
 
-    @AfterClass(groups = {"functional", "deployment"})
+    @AfterClass(groups = { "functional", "deployment" })
     public void teardown() throws Exception {
         tenantService.discardTenant(tenant);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "functional")
     public void updateModelSummary() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
         List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getAll();
         AttributeMap attrMap = new AttributeMap();
@@ -99,7 +96,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
             String url = String.format("%s/pls/internal/modelsummaries/%s", restAPIHostPort, modelSummary.getId());
             HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
             ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
-                ResponseDocument.class);
+                    ResponseDocument.class);
             ResponseDocument responseDoc = response.getBody();
             Assert.assertTrue(responseDoc.isSuccess());
             Map<String, Object> result = (Map) response.getBody().getResult();
@@ -114,11 +111,11 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "functional")
     public void updateupdateModelSummaryNotExists() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsActive");
@@ -145,59 +142,32 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void cleanupTestTenant() throws Exception {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
-        //==================================================
+        // ==================================================
         // save CRM credentials
-        //==================================================
+        // ==================================================
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         String tenantId = mainTestingTenant.getId();
         try {
-            CrmCredential newCrmCredential = crmCredentialService.verifyCredential(
-                    CrmConstants.CRM_SFDC, tenantId, true, crmCredential);
+            CrmCredential newCrmCredential = crmCredentialService.verifyCredential(CrmConstants.CRM_SFDC, tenantId,
+                    true, crmCredential);
             Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
             Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
         } catch (Exception e) {
             // ignore
         }
 
-        //==================================================
-        // change the password of password tester
-        //==================================================
-        globalUserManagementService.resetLatticeCredentials(passwordTester);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-        ResponseEntity<ResponseDocument> responseEntity = magicRestTemplate.exchange(
-                getRestAPIHostPort() + "/pls/internal/testtenants",
-                HttpMethod.PUT,
-                requestEntity,
-                ResponseDocument.class
-        );
-        ResponseDocument response = responseEntity.getBody();
-        Assert.assertTrue(response.isSuccess());
-
-        //==================================================
-        // verify password tester
-        //==================================================
-        Credentials creds = new Credentials();
-        creds.setUsername(passwordTester);
-        creds.setPassword(DigestUtils.sha256Hex(passwordTesterPwd));
-        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
-        Assert.assertNotNull(doc, "Logging in password tester got null LoginDocument.");
-
-        //==================================================
+        // ==================================================
         // verify empty CRM credentials
-        //==================================================
+        // ==================================================
         Camille camille = CamilleEnvironment.getCamille();
         CustomerSpace space = CustomerSpace.parse(tenantId);
-        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                space.getContractId(), space.getTenantId(), space.getSpaceId());
+        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), space.getContractId(),
+                space.getTenantId(), space.getSpaceId());
 
         Path newPath = path.append(CrmConstants.CRM_SFDC).append("Production");
         Assert.assertFalse(camille.exists(newPath));
@@ -205,17 +175,17 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment")
-    public void provisionThroughTenantConsole() throws Exception{
-        String tenantId = internalResource.getTestTenants().get(1);
+    public void provisionThroughTenantConsole() throws Exception {
+        String tenantId = internalResource.getTestTenantIds().get(1);
 
         final String SPACE_CONFIGURATION_ZNODE = "/SpaceConfiguration";
         final String TOPOLOGY_ZNODE = "/Topology";
 
         Camille camille = CamilleEnvironment.getCamille();
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                customerSpace.getContractId(), customerSpace.getTenantId(),
-                customerSpace.getSpaceId()).append(new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
+        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
+                customerSpace.getTenantId(), customerSpace.getSpaceId()).append(
+                new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
         try {
             camille.delete(path);
         } catch (Exception e) {
@@ -234,12 +204,8 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         headers.add("Accept", "application/json");
         headers.add("MagicAuthentication", "Security through obscurity!");
         HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-        ResponseEntity<ResponseDocument> responseEntity = magicRestTemplate.exchange(
-                getRestAPIHostPort() + "/pls/internal/testtenants",
-                HttpMethod.PUT,
-                requestEntity,
-                ResponseDocument.class
-        );
+        ResponseEntity<ResponseDocument> responseEntity = magicRestTemplate.exchange(getRestAPIHostPort()
+                + "/pls/internal/testtenants", HttpMethod.PUT, requestEntity, ResponseDocument.class);
         ResponseDocument response = responseEntity.getBody();
         Assert.assertTrue(response.isSuccess());
 

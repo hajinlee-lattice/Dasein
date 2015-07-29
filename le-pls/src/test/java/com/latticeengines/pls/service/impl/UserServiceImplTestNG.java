@@ -19,7 +19,6 @@ import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
 
-
 public class UserServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
@@ -40,19 +39,15 @@ public class UserServiceImplTestNG extends PlsFunctionalTestNGBase {
         tenantService.discardTenant(tenant);
         tenantService.registerTenant(tenant);
 
-        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
+        deleteUserWithUsername(uReg.getCredentials().getUsername());
 
-        createUser(
-            uReg.getCredentials().getUsername(),
-            uReg.getUser().getEmail(),
-            uReg.getUser().getFirstName(),
-            uReg.getUser().getLastName()
-        );
+        createUser(uReg.getCredentials().getUsername(), uReg.getUser().getEmail(), uReg.getUser().getFirstName(), uReg
+                .getUser().getLastName());
     }
 
-    @AfterClass(groups = {"functional"})
+    @AfterClass(groups = { "functional" })
     public void tearDown() {
-        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
+        deleteUserWithUsername(uReg.getCredentials().getUsername());
         tenantService.discardTenant(tenant);
     }
 

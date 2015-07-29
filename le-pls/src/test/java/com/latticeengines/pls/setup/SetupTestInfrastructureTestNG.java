@@ -25,47 +25,55 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.security.exposed.AccessLevel;
 
 public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
     private static final Log log = LogFactory.getLog(SetupTestInfrastructureTestNG.class);
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "infrastructure", enabled = true)
     public void setup() throws Exception {
-        
+
         List<Tenant> tenants = getTenants(5);
 
         for (Tenant tenant : tenants) {
             tenantEntityMgr.delete(tenant);
         }
-        
+
         boolean registeredUser = false;
+        String externalUserName = getTheTestingUserAtLevel(AccessLevel.EXTERNAL_USER).getUsername();
         for (Tenant tenant : tenants) {
             try {
                 createTenantByRestCall(tenant.getId());
-                createAdminUserByRestCall(tenant.getId(), "admin", "build@lattice-engines.com", "Real", "Admin", generalPasswordHash);
-                createAdminUserByRestCall(tenant.getId(), adminUsername, adminUsername, "Super", "User", adminPasswordHash);
-                
+                createAdminUserByRestCall(tenant.getId(), "admin", "build@lattice-engines.com", "Real", "Admin",
+                        generalPasswordHash);
+                createAdminUserByRestCall(tenant.getId(), adminUsername, adminUsername, "Super", "User",
+                        adminPasswordHash);
+
                 UserDocument userDoc = loginAndAttach(adminUsername, adminPassword, tenant);
                 addAuthHeader.setAuthValue(userDoc.getTicket().getData());
                 restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
-                
+
                 if (!registeredUser) {
                     // Create user and add general rights.
-                    UserRegistration commonUserReg = getUserRegistration(EXTERNAL_USER_USERNAME, EXTERNAL_USER_USERNAME, "General", "User", generalPasswordHash);
-                    String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", commonUserReg, String.class);
-                    ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+                    UserRegistration commonUserReg = getUserRegistration(externalUserName, externalUserName, "General",
+                            "User", generalPasswordHash);
+                    String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", commonUserReg,
+                            String.class);
+                    ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
+                            RegistrationResult.class);
                     Assert.assertNotNull(response);
-                    String pwd = response.getResult().getPassword(); 
+                    String pwd = response.getResult().getPassword();
                     if (pwd != null) {
                         System.out.println("New password = " + pwd);
                     }
-                    
+
                     registeredUser = true;
                 } else {
-                    // Modify user and add general rights for the rest of the tenants
+                    // Modify user and add general rights for the rest of the
+                    // tenants
                     UserUpdateData data = new UserUpdateData();
                     Map<String, EntityAccessRightsData> rightsDataMap = new HashMap<>();
                     EntityAccessRightsData rightsData = new EntityAccessRightsData();
@@ -75,7 +83,7 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
                     rightsDataMap.put("PLS_Reporting", rightsData);
                     data.setRights(rightsDataMap);
 
-                    String url = getRestAPIHostPort() + "/pls/users/" + EXTERNAL_USER_USERNAME;
+                    String url = getRestAPIHostPort() + "/pls/users/" + externalUserName;
                     restTemplate.put(url, data, new HashMap<String, Object>());
                 }
             } catch (Exception e) {
