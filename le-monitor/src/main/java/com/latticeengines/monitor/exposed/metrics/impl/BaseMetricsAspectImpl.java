@@ -27,7 +27,7 @@ public class BaseMetricsAspectImpl implements MetricsAspect {
             tracker.set(trackId);
         }
         try {
-            return logMetrics(joinPoint, trackId);
+            return logRestApiMetrics(joinPoint, trackId);
 
         } finally {
             tracker.remove();
@@ -36,37 +36,55 @@ public class BaseMetricsAspectImpl implements MetricsAspect {
 
     @Around("@annotation(com.latticeengines.domain.exposed.monitor.annotation.RestApiCall)")
     public Object logRestApiCall(ProceedingJoinPoint joinPoint) throws Throwable {
+
         String trackId = tracker.get();
         if (trackId == null) {
             trackId = UUID.randomUUID().toString();
             tracker.set(trackId);
         }
         try {
-            return logMetrics(joinPoint, trackId);
+            return logRestApiCallMetrics(joinPoint, trackId);
 
         } finally {
             tracker.remove();
         }
     }
 
-    public Object logMetrics(ProceedingJoinPoint joinPoint, String trackId) throws Throwable {
-
+    public Object logRestApiMetrics(ProceedingJoinPoint joinPoint, String trackId) throws Throwable {
         long startTime = System.currentTimeMillis();
 
         Object retVal = joinPoint.proceed();
-        
+
         long endTime = System.currentTimeMillis();
 
         long elapsedTime = endTime - startTime;
 
         String metricsToLog = getDefaultMetrics(joinPoint.getSignature(), elapsedTime, trackId)
-                + getLogRestApiCallSpecificMetrics();
+                + getLogRestApiSpecificMetrics(joinPoint);
         log.info(metricsToLog);
 
         return retVal;
     }
 
-    public String getLogRestApiSpecificMetrics() {
+    public Object logRestApiCallMetrics(ProceedingJoinPoint joinPoint, String trackId) throws Throwable {
+
+        long startTime = System.currentTimeMillis();
+
+        Object retVal = joinPoint.proceed();
+
+        long endTime = System.currentTimeMillis();
+
+        long elapsedTime = endTime - startTime;
+
+        String metricsToLog = getDefaultMetrics(joinPoint.getSignature(), elapsedTime, trackId)
+                + getLogRestApiCallSpecificMetrics(joinPoint);
+        log.info(metricsToLog);
+
+        return retVal;
+    }
+
+    @Override
+    public String getLogRestApiSpecificMetrics(ProceedingJoinPoint joinPoint) {
         return "";
     }
 
@@ -76,7 +94,7 @@ public class BaseMetricsAspectImpl implements MetricsAspect {
     }
 
     @Override
-    public String getLogRestApiCallSpecificMetrics() {
+    public String getLogRestApiCallSpecificMetrics(ProceedingJoinPoint joinPoint) {
         return "";
     }
 

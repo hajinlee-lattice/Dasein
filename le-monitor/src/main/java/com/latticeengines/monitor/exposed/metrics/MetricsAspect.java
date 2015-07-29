@@ -8,7 +8,7 @@ public interface MetricsAspect {
 
     Object logRestApiCall(ProceedingJoinPoint joinPoint) throws Throwable;
 
-    String getLogRestApiSpecificMetrics();
+    String getLogRestApiSpecificMetrics(ProceedingJoinPoint joinPoint);
 
-    String getLogRestApiCallSpecificMetrics();
+    String getLogRestApiCallSpecificMetrics(ProceedingJoinPoint joinPoint);
 }

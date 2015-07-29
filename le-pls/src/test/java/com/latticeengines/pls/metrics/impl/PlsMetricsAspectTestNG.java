@@ -17,16 +17,20 @@ import org.apache.commons.logging.Log;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.controller.ModelSummaryResource;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.metrics.impl.PlsMetricsAspectImpl;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
 public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
@@ -68,6 +72,11 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
             }
         }).when(newLog).info(any());
 
+        TicketAuthenticationToken auth = new TicketAuthenticationToken("", "Uniqueness.Randomness");
+        Session session = new Session();
+        session.setEmailAddress("bnguyen@lattice-engines.com");
+        auth.setSession(session);
+        SecurityContextHolder.getContext().setAuthentication(auth);
         ModelSummaryEntityMgr summaryEntityMgr = mock(ModelSummaryEntityMgr.class);
         modelSummaryResource.setModelSummaryEntityMgr(summaryEntityMgr);
 
@@ -75,6 +84,7 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
         verify(newLog, times(1)).info(anyString());
         Assert.assertTrue(logs.get(0).contains("Metrics for API=ModelSummaryResource.delete(..) ElapsedTime="));
         Assert.assertTrue(logs.get(0).contains("Track Id="));
+        Assert.assertTrue(logs.get(0).contains("User=bnguyen@lattice-engines.com"));
 
         modelSummaryResource.getModelSummaries(null);
         verify(newLog, times(2)).info(anyString());

@@ -1,5 +1,6 @@
 package com.latticeengines.pls.metrics.impl;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -10,7 +11,19 @@ import com.latticeengines.security.exposed.TicketAuthenticationToken;
 public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements MetricsAspect {
 
     @Override
-    public String getLogRestApiCallSpecificMetrics() {
+    public String getLogRestApiSpecificMetrics(ProceedingJoinPoint joinPoint) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof TicketAuthenticationToken) {
+            TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
+            if (token.getSession() != null && token.getSession().getEmailAddress() != null) {
+                return String.format(" User=%s", token.getSession().getEmailAddress());
+            }
+        }
+        return "";
+    }
+
+    @Override
+    public String getLogRestApiCallSpecificMetrics(ProceedingJoinPoint joinPoint) {
         String ticketId = "";
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof TicketAuthenticationToken) {
