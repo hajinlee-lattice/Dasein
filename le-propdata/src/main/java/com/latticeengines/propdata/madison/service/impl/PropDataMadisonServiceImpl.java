@@ -395,7 +395,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         propDataJobService.eval("SELECT TOP 0 ID AS ID1, * INTO " + tableName + " FROM " + targetRawTable
                 + ";ALTER TABLE " + tableName + " DROP COLUMN ID1", assignedQueue, getJobName()
                 + "-uploadRawDataCreateTable", connectionString);
-        log.info("Uploading today's data, targetTable=" + tableName + " connectionUrl=" + connectionString);
+        log.info("Uploading today's data, targetTable=" + tableName);
 
         propDataJobService.exportDataSync(tableName, todayIncrementalPath, creds, assignedQueue, getJobName()
                 + "-uploadRawDataExportData", numMappers, null);
