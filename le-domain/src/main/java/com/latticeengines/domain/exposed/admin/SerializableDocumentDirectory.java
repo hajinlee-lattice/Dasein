@@ -536,10 +536,6 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         @JsonProperty("Derived")
         public void setDerived(DerivedField derived) { this.derived = derived; }
 
-        private boolean validateData(String data) {
-            return validateDataTemplate(data, false);
-        }
-
         private boolean validateDataIgnoreOptions(String data) {
             return validateDataTemplate(data, true);
         }
