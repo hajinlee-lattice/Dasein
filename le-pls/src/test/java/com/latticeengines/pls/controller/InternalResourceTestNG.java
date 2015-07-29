@@ -203,6 +203,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         Assert.assertFalse(camille.exists(newPath));
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment")
     public void provisionThroughTenantConsole() throws Exception{
         String tenantId = internalResource.getTestTenants().get(1);
