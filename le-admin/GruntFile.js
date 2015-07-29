@@ -447,6 +447,9 @@ module.exports = function(grunt) {
         },
 
         concurrent: {
+            options: {
+                limit: 8
+            },
             wget: ['wget:js', 'wget:css', 'wget:fonts', 'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages'],
             test: ['jshint', 'karma:unit']
         }
