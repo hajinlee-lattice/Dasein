@@ -57,6 +57,7 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             log.error("Failed to send new internal user email to " + user.getEmail() + " " + e.getMessage());
         }
+        log.info("Sending new internal user email to " + user.getEmail() + " succeeded.");
     }
 
     @Override
@@ -79,6 +80,7 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             log.error("Failed to send new external user email to " + user.getEmail() + " " + e.getMessage());
         }
+        log.info("Sending new external user email to " + user.getEmail() + " succeeded.");
     }
 
     @Override
@@ -95,8 +97,9 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp, Collections.singleton(user.getEmail()));
         } catch (Exception e) {
-            log.error("Failed to send existing external user email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send existing internal user email to " + user.getEmail() + " " + e.getMessage());
         }
+        log.info("Sending existing internal user email to " + user.getEmail() + " succeeded.");
     }
 
     @Override
@@ -115,6 +118,7 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             log.error("Failed to send existing external user email to " + user.getEmail() + " " + e.getMessage());
         }
+        log.info("Sending existing external user email to " + user.getEmail() + " succeeded.");
     }
 
     @Override
@@ -134,6 +138,7 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             log.error("Failed to send forget password email to " + user.getEmail() + " " + e.getMessage());
         }
+        log.info("Sending forget password email " + user.getEmail() + " succeeded.");
     }
 
 }
