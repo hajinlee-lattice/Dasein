@@ -4,6 +4,11 @@ var UserManagement = function() {
     var userDropdown = require('./userdropdown.po');
     
     this.AddNewUserLink = element(by.css('#usermgmt-btn-add-user'));
+    this.tempUserFirstName = 'Temp';
+    this.tempUserLastName = 'User';
+
+    // the '0' and 'ext' necessary to have the user show up as first in the user managemnt list
+    this.tempUserEmail = '0000tempuser@lattice-engines.ext'; 
 
     this.randomName = function(n) {
         var text = "";
@@ -23,21 +28,9 @@ var UserManagement = function() {
         }
 
     };
-    
-    this.createNewUser = function (name) {
-        element(by.model('user.FirstName')).sendKeys(name);
-        element(by.model('user.LastName')).sendKeys(name);
-        element(by.model('user.Email')).sendKeys(name + "@gmail.com");
-        element(by.css('#add-user-btn-save')).click();
-        expect(element(by.css("#add-user-btn-ok")).isPresent()).toBe(true);
-        element(by.css('#add-user-btn-ok')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1500);
-    };
 
-    this.createNewUser = function(firstName, lastName, email) {
-        this.AddNewUserLink.click();
-        browser.driver.sleep(1000);
+    this.enterUserInfoAndClickOkay = function(firstName, lastName, email) {
+        expect(element(by.css('#add-user-modal')).isPresent()).toBe(true);
         element(by.model('user.FirstName')).sendKeys(firstName);
         element(by.model('user.LastName')).sendKeys(lastName);
         element(by.model('user.Email')).sendKeys(email);

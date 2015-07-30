@@ -13,7 +13,9 @@ describe('when an admin tries to add a user that exists in another tenant', func
         userDropdown.ManageUsersLink.click();
         userManagement.waitAndSleep();
 
-        userManagement.createNewUser("Lattice", "Tester", externalUserUsername1);
+        userManagement.AddNewUserLink.click();
+        userManagement.waitAndSleep();
+        userManagement.enterUserInfoAndClickOkay("Lattice", "Tester", externalUserUsername1);
         element(by.css('.modal-body')).getText().then(function(text) {
             expect(text).toContain('existing user');
         });

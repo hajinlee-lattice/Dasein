@@ -220,12 +220,12 @@ public class InternalResource extends InternalResourceBase {
         // Delete test users
         // ==================================================
         for (User user : userService.getUsers(tenant1Id)) {
-            if (user.getUsername().startsWith("0000")) {
+            if (user.getUsername().indexOf("0tempuser") > 0) {
                 userService.deleteUser(tenant1Id, user.getUsername());
             }
         }
         for (User user : userService.getUsers(tenant2Id)) {
-            if (user.getUsername().startsWith("0000")) {
+            if (user.getUsername().indexOf("0tempuser") > 0) {
                 userService.deleteUser(tenant2Id, user.getUsername());
             }
         }

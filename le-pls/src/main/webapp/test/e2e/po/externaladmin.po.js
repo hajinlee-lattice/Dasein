@@ -38,8 +38,12 @@ var ExternalAdmin = function() {
                     // verify number of roles in dropdown
                     element(by.css('select')).click();
                     expect(element.all(by.css('option')).count()).toBe(1);
-                    var testName = "0000" + userManagement.randomName(8);
-                    userManagement.createNewUser(testName);
+                    userManagement.enterUserInfoAndClickOkay(userManagement.tempUserFirstName, userManagement.tempUserLastName,
+                            userManagement.tempUserEmail);
+                    expect(element(by.css(".alert-success")).isPresent()).toBe(true);
+                    element(by.css('#add-user-btn-ok')).click();
+                    userManagement.waitAndSleep();
+
                     var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
                     expect(originalNumUsers+1).toEqual(actualNumOfCurrentUsers);
                     browser.driver.sleep(5000);
