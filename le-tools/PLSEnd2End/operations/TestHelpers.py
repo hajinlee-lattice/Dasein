@@ -24,7 +24,7 @@ from selenium import webdriver
 
 from TestConfigs import ConfigCSV, ConfigDLC, EtlConfig
 from TestRunner import SessionRunner
-from Properties import PLSEnvironments
+from PLSEnd2End.Properties import PLSEnvironments
 
 
 def runLoadGroups(dlc, params, load_groups, max_run_time_in_sec=7200, sleep_time=120):
@@ -61,7 +61,7 @@ def getLoadGroupStatus(dlc, params, load_group, start_datetime):
     params["-g"] = load_group
     print load_group
     print dlc.runDLCcommand(command, params)
-    text = dlc.request_text[-1].replace("<br/>", "\n")
+    text = dlc.stdout.replace("<br/>", "\n")
     print text
     status = "Still working on it"
     for line in text.split("\n"):
@@ -87,9 +87,9 @@ def getLoadGroupStatus(dlc, params, load_group, start_datetime):
                 except ValueError:
                     print "Incorrectly formated string, should be YYYY-MM-DD HH:MM:SS"
                     return "Weird..."
-                return status      
-        
-        
+                return status
+
+
 class DLCRunner(SessionRunner):
 
     def __init__(self, dlc_path=PLSEnvironments.dl_dlc_path, host=PLSEnvironments.pls_test_server, logfile=None, exception=False):
@@ -101,6 +101,7 @@ class DLCRunner(SessionRunner):
             self.dlc_path = dlc_path
         self.command = ""
         self.params = {}
+        self.runLocal = True
 
     def setDlcPath(self, dlc_path):
         self.dlc_path = dlc_path
@@ -174,14 +175,14 @@ class DLCRunner(SessionRunner):
         else:
             return None
         
-    def runDLCcommand(self, command, params, local=False):
+    def runDLCcommand(self, command, params):
         cmd = self.constructCommand(command, params)
         if cmd is None:
             logging.error("There is something wrong with your command, please see logs for details")
             if self.exception:
                 raise "There is something wrong with your command, please see logs for details"
             return False
-        return self.runCommand(cmd, local)
+        return self.runCommand(cmd, self.runLocal)
 
     def testRun(self):
         print "Starting tests. All should be True"
@@ -701,21 +702,21 @@ class DLConfigRunner(SessionRunner):
 
     # Step 2.75
     def loadCfgTables(self,tenant,marketting_app, svn_location=PLSEnvironments.svn_location_local, dp_folder=PLSEnvironments.template_location , dlc_host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
-                          local=False, cp=True,
+                          local=True, cp=True,
                           dl_server=PLSEnvironments.dl_server,
                           user=PLSEnvironments.dl_server_user,
                           password=PLSEnvironments.dl_server_pwd):
-    
+
         dlc = DLCRunner(host=dlc_host, dlc_path=dlc_path)
         params = {"-s": dl_server,
                   "-u": user,
                   "-p": password,
                   "-t": tenant
                  }
-    
+
         runLoadGroups(dlc, params, ["ImportMetaData"], sleep_time=30)
         dlc.getStatus()
-    
+
         utils = UtilsRunner(host=dlc_host)
         if marketting_app == PLSEnvironments.pls_marketing_app_ELQ:
             marketting = "Eloqua";
@@ -725,7 +726,7 @@ class DLConfigRunner(SessionRunner):
             marketting = "Salesforce";
         
         # Pre-process templates
-        location = os.path.join(svn_location, "%s csv files for QA to load standard Cfg tables" % marketting)        
+        location = os.path.join(svn_location, "%s csv files for QA to load standard Cfg tables" % marketting)
         files = utils.getFiles(location, [".csv"])
         schema_map = utils.createSchemaDir(location, files, marketting)
         reloc_dir = utils.relocateCsvFile(dp_folder, schema_map, marketting, local, cp)

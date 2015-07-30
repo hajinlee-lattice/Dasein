@@ -11,7 +11,7 @@ import traceback
 
 import pypyodbc as pyodbc
 import requests
-from Properties import PLSEnvironments
+from  PLSEnd2End.Properties import PLSEnvironments
 
 
 # Base test framework
@@ -289,8 +289,11 @@ class SessionRunner(object):
         return status
 
     def runCommand(self, cmd, local=False):
+        from_dir=None
+        if type(cmd) == dict and cmd.values()!=None :
+            from_dir=cmd.values()[0]
         if local:
-            return self.runCommandLocally(cmd)
+            return self.runCommandLocally(cmd, from_dir)
         else:
             return self.runCommandOnServer(cmd)
 

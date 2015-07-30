@@ -178,7 +178,7 @@ def index():
     out = runCmd("pip list")
     html+= "<tr><td><b>%s</b></td></tr>" % out[0]
     html += "</table><hr>"
-    
+
     html += "<table border='1'><tr><th><h2>Pre-Installation Python files</h2></th></tr>"
     for f in getPreInstallationFiles():
         html+= "<tr><td><b>%s</b></td></tr>" % f
@@ -338,8 +338,8 @@ def runCommand(cmd):
             out, err = runCmd(cmd)
             output = "%s\nSTDOUT:%s\nSTDERR:%s\n" % (cmd, out, err)
             html = output.replace("\n","<br/>")
-            updateExecutionDiary(cmd, output)
-            return html
+            updateExecutionDiary(cmd, html)
+            return output
         else:
             raise "CMD should be a string"     
     except Exception:
