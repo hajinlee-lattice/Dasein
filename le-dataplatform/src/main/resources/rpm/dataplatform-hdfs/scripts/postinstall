@@ -15,7 +15,7 @@ rm /tmp/datascientist/*.pyo
 su -l yarn -c 'hadoop dfs -mkdir /app'
 su -l yarn -c 'hadoop dfs -mkdir /datascientist'
 su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
-su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/playmaker /app/playmaker'
+su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/playmaker /app'
 su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/datascientist /'
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/datascientist
