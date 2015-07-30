@@ -18,6 +18,7 @@ su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/dataplatform /app/dataplatform
 su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/playmaker /app'
 su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/datascientist /'
 rm -rf /tmp/app/dataplatform
+rm -rf /tmp/app/playmaker
 rm -rf /tmp/datascientist
 
 

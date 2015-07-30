@@ -1,5 +1,7 @@
 #!/bin/bash
 rm -rf /tmp/app/dataplatform
+rm -rf /tmp/app/playmaker
 rm -rf /tmp/datascientist
 hadoop fs -rm -f -r /app/dataplatform
+hadoop fs -rm -f -r /app/playmaker
 hadoop fs -rm -f -r /datascientist
