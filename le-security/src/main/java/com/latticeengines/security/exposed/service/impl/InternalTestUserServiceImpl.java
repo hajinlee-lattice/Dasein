@@ -7,6 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
@@ -156,12 +157,30 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
             return true;
         }
 
-        Ticket ticket = loginCreds(username, password);
-        if (ticket.isMustChangePassword()
-                || System.currentTimeMillis() - ticket.getPasswordLastModified() >= NINETY_DAYS_IN_MILLISECONDS) {
-            return true;
+        try {
+            Ticket ticket = loginCreds(username, password);
+            if (ticket.isMustChangePassword()
+                    || System.currentTimeMillis() - ticket.getPasswordLastModified() >= NINETY_DAYS_IN_MILLISECONDS) {
+                return true;
+            }
+        } catch (LedpException e) {
+            resetUserToPassword(username, password);
         }
         return false;
+    }
+
+    private void resetUserToPassword(String username, String password) {
+        String tempPassword = globalUserManagementService.resetLatticeCredentials(username);
+        Ticket ticket = globalAuthenticationService.authenticateUser(username, DigestUtils.sha256Hex(tempPassword));
+
+        Credentials oldCredentials = new Credentials();
+        oldCredentials.setUsername(username);
+        oldCredentials.setPassword(DigestUtils.sha256Hex(tempPassword));
+        Credentials newCredentials = new Credentials();
+        newCredentials.setUsername(username);
+        newCredentials.setPassword(DigestUtils.sha256Hex(password));
+
+        globalUserManagementService.modifyLatticeCredentials(ticket, oldCredentials, newCredentials);
     }
 
     @Override
