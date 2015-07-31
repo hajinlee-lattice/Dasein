@@ -32,20 +32,12 @@ var mainApp = angular.module('mainApp', [
     $scope.showFooter = true;
     $scope.sessionExpired = false;
     
-    var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30000;
+    var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30 * 1000;
     var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 14.5 * 60 * 1000;  // 14.5 minutes
-    var TIME_INTERVAL_WARNING_BEFORE_LOGOUT = 30000;
+    var TIME_INTERVAL_WARNING_BEFORE_LOGOUT = 30 * 1000;
     
-    var inactivityCheckingPromise = null;
+    var inactivityCheckingId = null;
     var warningModalInstance = null;
-    
-    var config = { attributes: true, childList: true, characterData: true, subtree: true };
-    var observer = new MutationObserver(function(mutations) {
-        /** This check is because we do not want the opening of the warning modal to cause session to refresh */
-        if (!warningModalInstance) {
-            refreshSessionLastActiveTimeStamp();
-        }
-    });
 
     ResourceStringsService.GetExternalResourceStringsForLocale().then(function(result) {
         var previousSession = BrowserStorageUtility.getClientSession();
@@ -67,7 +59,7 @@ var mainApp = angular.module('mainApp', [
     });
 
     $scope.$on("LoggedIn", function() {
-        startObservingDocumentBody();
+        startObservingUserActivtyThroughMouseAndKeyboard();
         startCheckingIfSessionIsInactive();
     });
     
@@ -87,7 +79,7 @@ var mainApp = angular.module('mainApp', [
                     
                     $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
                     
-                    startObservingDocumentBody();
+                    startObservingUserActivtyThroughMouseAndKeyboard();
                     startCheckingIfSessionIsInactive();
                 }
             },
@@ -131,6 +123,34 @@ var mainApp = angular.module('mainApp', [
             });
         });
     };
+
+    function startObservingUserActivtyThroughMouseAndKeyboard() {
+        $(this).mousemove(function (e) {
+            if (!warningModalInstance) {
+                refreshSessionLastActiveTimeStamp();
+            }
+        });
+        $(this).keypress(function (e) {
+            if (!warningModalInstance) {
+                refreshSessionLastActiveTimeStamp();
+            }
+        });
+    }
+
+    function startCheckingIfSessionIsInactive() {
+        refreshSessionLastActiveTimeStamp();
+        inactivityCheckingId = setInterval(checkIfSessionIsInactiveEveryInterval, TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS); // 1 minute
+    }
+
+    function checkIfSessionIsInactiveEveryInterval() {
+        if (Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >= TIME_INTERVAL_INACTIVITY_BEFORE_WARNING) {
+            if (!warningModalInstance) {
+                cancelCheckingIfSessionIsInactiveAndSetIdToNull();
+                openWarningModal();
+            }
+            $timeout(callWhenWarningModalExpires, TIME_INTERVAL_WARNING_BEFORE_LOGOUT);
+        }
+    }
     
     function mustUserChangePassword(loginDocument) {
         return loginDocument.MustChangePassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
@@ -138,10 +158,6 @@ var mainApp = angular.module('mainApp', [
     
     function refreshSessionLastActiveTimeStamp() {
         BrowserStorageUtility.setSessionLastActiveTimestamp(Date.now());
-    }
-    
-    function startObservingDocumentBody() {
-        observer.observe(document.body, config);
     }
     
     function hasSessionTimedOut() {
@@ -159,40 +175,34 @@ var mainApp = angular.module('mainApp', [
 
         $scope.refreshSession = function() {
             closeWarningModalAndSetInstanceToNull();
-            refreshSessionLastActiveTimeStamp();
             startCheckingIfSessionIsInactive();
         };
     }
     
-    function checkIfSessionIsInactiveEveryInterval() {
-        if (Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >= TIME_INTERVAL_INACTIVITY_BEFORE_WARNING) {
-            if (!warningModalInstance) {
-                cancelCheckingIfSessionIsInactive();
-                openWarningModal();
-            }
-            $timeout(callWhenWarningModalExpires, TIME_INTERVAL_WARNING_BEFORE_LOGOUT);
-        }
+    function cancelCheckingIfSessionIsInactiveAndSetIdToNull() {
+        clearInterval(inactivityCheckingId);
+        inactivityCheckingId = null;
     }
 
-    function startCheckingIfSessionIsInactive() {
-        inactivityCheckingPromise = $interval(checkIfSessionIsInactiveEveryInterval, TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS);
+    function stopObservingUserInteractionBasedOnMouseAndKeyboard() {
+        $(this).off("mousemove");
+        $(this).off("keypress");
     }
     
-    function cancelCheckingIfSessionIsInactive() {
-        $interval.cancel(inactivityCheckingPromise);
-    }
-
     function callWhenWarningModalExpires() {
         if (hasSessionTimedOut()) {
             $scope.sessionExpired = true;
             /** This line is actually necessary. Otherwise, user doesn't get properly logged out when tenant selection modal is up */
             hideTenantSelectionModal();
+            stopObservingUserInteractionBasedOnMouseAndKeyboard();
             LoginService.Logout();
         } else {
             if (warningModalInstance) {
                 closeWarningModalAndSetInstanceToNull();
             }
-            startCheckingIfSessionIsInactive();
+            if (!inactivityCheckingId) {
+                startCheckingIfSessionIsInactive();
+            }
         }
     }
 
