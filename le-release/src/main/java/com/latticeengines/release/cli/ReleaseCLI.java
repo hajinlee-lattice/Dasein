@@ -1,15 +1,12 @@
 package com.latticeengines.release.cli;
 
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.release.exposed.domain.JenkinsParameters;
 import com.latticeengines.release.exposed.domain.JiraParameters;
@@ -26,13 +23,13 @@ import com.latticeengines.release.jmx.service.impl.JMXCheckServiceImpl;
 
 public class ReleaseCLI {
 
-    public static void main(String[] args) throws JsonProcessingException, IOException {
+    public static void main(String[] args) {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("release-context.xml");
 
-        //invokeJMX(applicationContext);
-        //invokeHipChat(applicationContext);
+        // invokeJMX(applicationContext);
+        // invokeHipChat(applicationContext);
         invokeJenkins(applicationContext);
-        //invokeJira(applicationContext);
+        // invokeJira(applicationContext);
     }
 
     public static void invokeJMX(ApplicationContext applicationContext) {
@@ -45,7 +42,7 @@ public class ReleaseCLI {
         hc.sendNotification("red", "release failed");
     }
 
-    public static void invokeJenkins(ApplicationContext applicationContext) throws JsonProcessingException, IOException {
+    public static void invokeJenkins(ApplicationContext applicationContext) {
         JenkinsService js = (JenkinsServiceImpl) applicationContext.getBean("jenkinsService");
 
         JenkinsParameters par = new JenkinsParameters();
