@@ -31,7 +31,6 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
     $scope.TemplateVersion = data.ModelDetails.TemplateVersion;
     $scope.modelUploaded = data.ModelDetails.Uploaded;
     $scope.displayName = data.ModelDetails.DisplayName;
-    $scope.loading= true;
 
     $scope.onBackClicked = function() {
         var model = {
@@ -43,20 +42,49 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
         $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, model);
     };
 
-    ModelService.GetModelAlertsByModelId(data.ModelId).then(function(result) {
-        $scope.loading= false;
-        if (result != null && result.success === true) {
-            data.ModelAlerts = result.resultObj;
+    var showAlertsTab = false;
+    if (showAlertsTab) {
+        $scope.loading= true;
+        ModelService.GetModelAlertsByModelId(data.ModelId).then(function(result) {
+            $scope.loading= false;
+            if (result != null && result.success === true) {
+                data.ModelAlerts = result.resultObj;
 
-            var contentContainer = $('#adminInfoContainer');
-            WidgetFrameworkService.CreateWidget({
-                element: contentContainer,
-                widgetConfig: screenWidgetConfig,
-                metadata: null,
-                data: data,
-                parentData: null
-            });
+                var contentContainer = $('#adminInfoContainer');
+                WidgetFrameworkService.CreateWidget({
+                    element: contentContainer,
+                    widgetConfig: screenWidgetConfig,
+                    metadata: null,
+                    data: data,
+                    parentData: null
+                });
+            }
+        });
+    } else {
+        var screenWidgetConfigNoAlertsTab = angular.copy(screenWidgetConfig);
+        for (var i = 0; i < screenWidgetConfigNoAlertsTab.Widgets.length; i++) {
+            var widget = screenWidgetConfigNoAlertsTab.Widgets[i];
+            if (widget.Tabs != null) {
+                var tabs = [];
+                for (var j = 0; j < widget.Tabs.length; j++) {
+                    var tab = widget.Tabs[j];
+                    if (tab.ID !== "adminInfoAlertsTab") {
+                        var tabCopy = angular.copy(tab);
+                        tabs.push(tabCopy);
+                    }
+                }
+                widget.Tabs = tabs;
+            }
         }
-    });
+
+        var contentContainer = $('#adminInfoContainer');
+        WidgetFrameworkService.CreateWidget({
+            element: contentContainer,
+            widgetConfig: screenWidgetConfigNoAlertsTab,
+            metadata: null,
+            data: data,
+            parentData: null
+        });
+    }
 
 });
