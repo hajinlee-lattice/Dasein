@@ -39,12 +39,15 @@ public class SessionServiceImpl implements SessionService {
 
     private void interpretGARights(Session session) {
         List<String> GARights = session.getRights();
+        AccessLevel level;
         try {
-            AccessLevel level = AccessLevel.findAccessLevel(GARights);
-            session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
-            session.setAccessLevel(level.name());
+            level = AccessLevel.findAccessLevel(GARights);
         } catch (Exception e) {
-            LOGGER.error("Failed to interpret GA rights: " + GARights.toString(), e);
+            level = AccessLevel.maxAccessLevel(GrantedRight.getGrantedRights(GARights));
+            LOGGER.warn("Failed to interpret GA rights: " + GARights.toString()
+                    + ". Assign to " + level.name() + " instead.", e);
         }
+        session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+        session.setAccessLevel(level.name());
     }
 }
