@@ -21,7 +21,7 @@ public class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequ
             throws IOException {
         HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
         requestWrapper.getHeaders().add("Authorization", "Basic " + headerValue);
-        requestWrapper.getHeaders().add("Content-Type", "application/json");
+        //requestWrapper.getHeaders().add("Content-Type", "multipart/form-data");
         return execution.execute(requestWrapper, body);
     }
 }

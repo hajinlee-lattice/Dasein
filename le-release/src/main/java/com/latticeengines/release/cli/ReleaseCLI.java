@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.release.exposed.domain.JenkinsParameters;
 import com.latticeengines.release.exposed.domain.JiraParameters;
@@ -20,6 +22,8 @@ import com.latticeengines.release.jira.service.ChangeManagementJiraService;
 import com.latticeengines.release.jira.service.impl.ChangeManagementJiraServiceImpl;
 import com.latticeengines.release.jmx.service.JMXCheckService;
 import com.latticeengines.release.jmx.service.impl.JMXCheckServiceImpl;
+import com.latticeengines.release.nexus.service.NexusService;
+import com.latticeengines.release.nexus.service.impl.NexusServiceImpl;
 
 public class ReleaseCLI {
 
@@ -27,9 +31,10 @@ public class ReleaseCLI {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("release-context.xml");
 
         // invokeJMX(applicationContext);
-        // invokeHipChat(applicationContext);
+         //invokeHipChat(applicationContext);
         invokeJenkins(applicationContext);
         // invokeJira(applicationContext);
+        //invokeNeux(applicationContext);
     }
 
     public static void invokeJMX(ApplicationContext applicationContext) {
@@ -45,23 +50,24 @@ public class ReleaseCLI {
     public static void invokeJenkins(ApplicationContext applicationContext) {
         JenkinsService js = (JenkinsServiceImpl) applicationContext.getBean("jenkinsService");
 
-        JenkinsParameters par = new JenkinsParameters();
-        NameValuePair p1 = new NameValuePair();
-        p1.setName("SVN_DIR");
-        p1.setValue("tags");
-        NameValuePair p2 = new NameValuePair();
-        p2.setName("SVN_BRANCH_NAME");
-        p2.setValue("release_2.0.4");
-        List<NameValuePair> kvList = new ArrayList<>();
-        kvList.add(p1);
-        kvList.add(p2);
-        par.setNameValuePairs(kvList);
-
-        System.out.println(js.triggerJenkinsJobWithParameters("", par));
-        JsonNode jn = js.getLastBuildStatus("");
-        System.out.println(jn.get("building"));
-        System.out.println(jn.get("result"));
-        System.out.println(jn.get("number"));
+//        JenkinsParameters par = new JenkinsParameters();
+//        NameValuePair p1 = new NameValuePair();
+//        p1.setName("SVN_DIR");
+//        p1.setValue("tags");
+//        NameValuePair p2 = new NameValuePair();
+//        p2.setName("SVN_BRANCH_NAME");
+//        p2.setValue("release_2.0.4");
+//        List<NameValuePair> kvList = new ArrayList<>();
+//        kvList.add(p1);
+//        kvList.add(p2);
+//        par.setNameValuePairs(kvList);
+//
+//        System.out.println(js.triggerJenkinsJobWithParameters("", par));
+//        JsonNode jn = js.getLastBuildStatus("");
+//        System.out.println(jn.get("building"));
+//        System.out.println(jn.get("result"));
+//        System.out.println(jn.get("number"));
+        System.out.println(js.updateSVNBranchName("","release_2.0.5"));
     }
 
     public static void invokeJira(ApplicationContext applicationContext) {
@@ -79,5 +85,10 @@ public class ReleaseCLI {
         ChangeManagementJiraService jira = (ChangeManagementJiraServiceImpl) applicationContext
                 .getBean("changeManagmentJiraService");
         System.out.println(jira.createChangeManagementTicket(jp));
+    }
+    
+    public static void invokeNeux(ApplicationContext applicationContext){
+        NexusService ns = (NexusServiceImpl) applicationContext.getBean("nexusService");
+        System.out.println(ns.uploadArtifactToNexus("", "le-pls", "2.0.7"));
     }
 }
