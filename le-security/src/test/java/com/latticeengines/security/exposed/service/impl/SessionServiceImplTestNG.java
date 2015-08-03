@@ -83,8 +83,8 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
                 GrantedRight.VIEW_PLS_MODELS,
                 GrantedRight.EDIT_PLS_MODELS
         );
-        rightsOut = AccessLevel.INTERNAL_ADMIN.getGrantedRights();
-        levelOut = AccessLevel.INTERNAL_ADMIN;
+        rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
+        levelOut = AccessLevel.INTERNAL_USER;
         testInterpretGARights(rightsIn, null, rightsOut, levelOut);
 
         // level in level out

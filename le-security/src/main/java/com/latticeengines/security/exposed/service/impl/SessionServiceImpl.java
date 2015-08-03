@@ -39,15 +39,24 @@ public class SessionServiceImpl implements SessionService {
 
     private void interpretGARights(Session session) {
         List<String> GARights = session.getRights();
-        AccessLevel level;
         try {
-            level = AccessLevel.findAccessLevel(GARights);
-        } catch (Exception e) {
-            level = AccessLevel.maxAccessLevel(GrantedRight.getGrantedRights(GARights));
-            LOGGER.warn("Failed to interpret GA rights: " + GARights.toString()
-                    + ". Assign to " + level.name() + " instead.", e);
+            AccessLevel level = AccessLevel.findAccessLevel(GARights);
+            session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+            session.setAccessLevel(level.name());
+        } catch (NullPointerException e) {
+            if (!GARights.isEmpty()) {
+                AccessLevel level = isInternalEmail(session.getEmailAddress()) ?
+                        AccessLevel.INTERNAL_USER : AccessLevel.EXTERNAL_USER;
+                session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+                session.setAccessLevel(level.name());
+            }
+            LOGGER.warn(String.format("Failed to interpret GA rights: %s for user %s in tenant %s. Use %s instead",
+                    GARights.toString(), session.getEmailAddress(), session.getTenant().getId(),
+                    session.getAccessLevel()), e);
         }
-        session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
-        session.setAccessLevel(level.name());
+    }
+
+    private boolean isInternalEmail(String email) {
+        return email.toLowerCase().endsWith("lattice-engines.com");
     }
 }
