@@ -254,7 +254,7 @@ module.exports = function (grunt) {
 
             dist: {
                 files: {
-                    '<%= pls.app %>/index.html': ['.tmp/index.html']
+                    '<%= pls.app %>/index.html': ['<%= pls.app %>/index.html']
                 }
             }
         },
@@ -303,7 +303,8 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/vendor/*underscore.js',
                     '<%= pls.app %>/app/AppCommon/test/testData/**/*.js',
                     '<%= pls.app %>/app/AppCommon/test/unit/**/*.js',
-                    '<%= pls.app %>/app/**/*.js'
+                    '<%= pls.app %>/app/**/*.js',
+                    '<%= pls.app %>/test/unit/**/*.js'
                 ],
                 frameworks: ['jasmine']
 
@@ -413,11 +414,6 @@ module.exports = function (grunt) {
         },
 
         rename: {
-            moveIndexToTmp: {
-                src:  '<%= pls.app %>/index.html',
-                dest: '.tmp/index.html'
-            },
-
             moveAppToBak: {
                 src:  '<%= pls.app %>',
                 dest: '<%= pls.app %>-bak'
@@ -570,11 +566,6 @@ module.exports = function (grunt) {
         'concurrent:test',
         'uglify:dist',
         'sass:dist',
-        'index'
-    ]);
-
-    grunt.registerTask('index', [
-        'rename:moveIndexToTmp',
         'processhtml:dist'
     ]);
 

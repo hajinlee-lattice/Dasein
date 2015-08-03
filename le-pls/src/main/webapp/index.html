@@ -41,13 +41,15 @@ Use DOMUtil.isIE() to detect internet explorer.
 -->
 <!--[if IE]> <div id="isIE"></div> <![endif]-->
 
-
-<!-- build:remove:dist -->
 <script type="text/javascript">
     WebFontConfig = {
         google: { families: [ 'Open Sans' ]
         }
     };
+</script>
+
+<!-- build:remove:dist -->
+<script type="text/javascript">
     (function() {
         var wf = document.createElement('script');
         wf.src = 'lib/js/webfontloader.js';
@@ -178,37 +180,43 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/userManagement/modals/DeleteUserModal.js"></script>
 <script src="app/userManagement/modals/EditUserModal.js"></script>
 <!-- /build -->
+
+<!-- build:js inline -->
+<script src="app/loadjs.js"></script>
+<!-- /build -->
+
 <!-- build:template:dist
 <script type="text/javascript">
-    WebFontConfig = {
-        google: { families: [ 'Open Sans' ]
-        }
-    };
-    (function() {
-        var wf = document.createElement('script');
-        wf.src = '//cdnjs.cloudflare.com/ajax/libs/webfont/<%= version.webfont %>/webfontloader.js';
-        wf.type = 'text/javascript';
-        wf.async = 'true';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(wf, s);
-    })();
+    var cdnroot = "//cdnjs.cloudflare.com/ajax/libs/";
+    var jslist = [
+        {path:cdnroot + "jquery/<%= version.jquery %>/jquery.min.js", fallback:"lib/js/jquery.js"},
+
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular.min.js", fallback:"lib/js/angular/angular.js"},
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular-sanitize.min.js", fallback:"lib/js/angular/angular-sanitize.js"},
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular-resource.min.js", fallback:"lib/js/angular/angular-resource.js"},
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular-route.min.js", fallback:"lib/js/angular/angular-route.js"},
+
+        {path:cdnroot + "crypto-js/<%= version.crypto %>/components/core-min.js", fallback:"lib/js/crypto/core.js"},
+        {path:cdnroot + "crypto-js/<%= version.crypto %>/components/sha256-min.js", fallback:"lib/js/crypto/sha256.js"},
+
+        {path:cdnroot + "angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap.min.js", fallback:"lib/js/ui-bootstrap.js"},
+        {path:cdnroot + "angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.min.js", fallback:"lib/js/ui-bootstrap-tpls.js"},
+        {path:cdnroot + "qtip2/<%= version.qtip2 %>/jquery.qtip.min.js", fallback:"lib/js/jquery.qtip.js"},
+        {path:cdnroot + "underscore.js/<%= version.underscore %>/underscore-min.js", fallback:"lib/js/underscore.js"},
+        {path:cdnroot + "twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js", fallback:"lib/js/bootstrap.js"},
+        {path:cdnroot + "d3/<%= version.d3 %>/d3.min.js", fallback:"lib/js/d3.js"},
+        {path:cdnroot + "jStorage/<%= version.jStorage %>/jstorage.min.js", fallback:"lib/js/jstorage.js"},
+        {path:cdnroot + "alasql/<%= version.alasql %>/alasql.min.js", fallback:"lib/js/alasql.min.js"},
+
+        {path:cdnroot + "webfont/<%= version.webfont %>/webfontloader.js", fallback:"lib/js/webfontloader.js"},
+
+        {path:"app/production_<%= versionString %>.min.js", fallback:"app/production_<%= versionString %>.min.js"}
+    ];
+
+    var jsLoader = new JsLoader();
+    var head = jsLoader.toLinkedList(jslist);
+    jsLoader.loadScriptByObj(head);
 </script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/<%= version.jquery %>/jquery.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/<%= version.crypto %>/components/core-min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/<%= version.crypto %>/components/sha256-min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular-sanitize.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular-resource.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular-route.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/<%= version.underscore %>/underscore-min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/d3/<%= version.d3 %>/d3.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jStorage/<%= version.jStorage %>/jstorage.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/alasql/<%= version.alasql %>/alasql.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js"></script>
-<script src="app/production_<%= versionString %>.min.js"></script>
 /build -->
 
 <script>
