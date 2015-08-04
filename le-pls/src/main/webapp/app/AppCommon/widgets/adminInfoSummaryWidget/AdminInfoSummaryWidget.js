@@ -67,8 +67,9 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
             scope.$on('downloaded', function (event, data) {
                 scope.downloadFile = function ($event) { };
                 $(anchor).attr({
-                    href: 'data:' + attr.filetype + ';' + data,
-                    download: attr.filename
+                    href: 'data:' + attr.filetype + ';utf-8;' + data,
+                    download: attr.filename,
+                    target: '_blank'
                 }).removeAttr('disabled');
             });
 
@@ -88,9 +89,9 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
 
                 $http.get($attrs.url).then(function (response) {
                     if ($attrs.filetype === "application/json") {
-                        $scope.$emit('downloaded', JSON.stringify(response.data));
+                        $scope.$emit('downloaded', encodeURI(JSON.stringify(response.data)));
                     } else {
-                        $scope.$emit('downloaded', response.data);
+                        $scope.$emit('downloaded', encodeURI(response.data));
                     }
                     $scope.fetching = false;
                     setTimeout($event.target.click(), 500);
