@@ -76,8 +76,8 @@ public class DlConfigUtilsUnitTestNG {
                         "", "https://na-sj02.marketo.com/soap/mktows/2_0" },
                 { wrapTag("<dataProvider name=\"Marketo_DataProvider\" autoMatch=\"False\" connectionString=\"URL=;UserID=latticeenginessandbox1_9026948050BD016F376AE6;EncryptionKey=;Timeout=10000;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;BatchSize=500;MaxSizeOfErrorBatch=25;\" dbType=\"1004\" usedFor=\"31\" e=\"False\" />"),
                         "latticeenginessandbox1_9026948050BD016F376AE6", "" },
-                { wrapTag(""), "" },
-                { marketoConfig, "latticeenginessandbox1_9026948050BD016F376AE6" },
+                { wrapTag(""), "", "" },
+                { marketoConfig, "latticeenginessandbox1_9026948050BD016F376AE6", "https://na-sj02.marketo.com/soap/mktows/2_0" },
         };
     }
 
