@@ -11,7 +11,7 @@ import traceback
 
 import pypyodbc as pyodbc
 import requests
-from  PLSEnd2End.Properties import PLSEnvironments
+from Properties import PLSEnvironments
 
 
 # Base test framework

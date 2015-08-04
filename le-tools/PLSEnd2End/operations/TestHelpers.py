@@ -24,7 +24,7 @@ from selenium import webdriver
 
 from TestConfigs import ConfigCSV, ConfigDLC, EtlConfig
 from TestRunner import SessionRunner
-from PLSEnd2End.Properties import PLSEnvironments
+from Properties import PLSEnvironments
 
 
 def runLoadGroups(dlc, params, load_groups, max_run_time_in_sec=7200, sleep_time=120):
