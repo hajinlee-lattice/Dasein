@@ -5,22 +5,22 @@
     <artifactId>le-job</artifactId>
     <packaging>war</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.5/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.5/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.5/develop</url>
 	</scm>
 
     <name>le-${component-name}</name>
 
     <properties>
         <component-name>job</component-name>
-        <le.dataplatform.version>2.0.5-SNAPSHOT</le.dataplatform.version>
+        <le.dataplatform.version>2.0.5</le.dataplatform.version>
         <le.db.version>2.0.5-SNAPSHOT</le.db.version>
-        <le.camille.version>2.0.5-SNAPSHOT</le.camille.version>
-        <le.propdata.version>2.0.5-SNAPSHOT</le.propdata.version>
-        <le.pls.version>2.0.5-SNAPSHOT</le.pls.version>
-        <le.scoring.version>2.0.5-SNAPSHOT</le.scoring.version>
-        <le.dellebi.version>2.0.5-SNAPSHOT</le.dellebi.version>
+        <le.camille.version>2.0.5</le.camille.version>
+        <le.propdata.version>2.0.5</le.propdata.version>
+        <le.pls.version>2.0.5</le.pls.version>
+        <le.scoring.version>2.0.5</le.scoring.version>
+        <le.dellebi.version>2.0.5</le.dellebi.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.5-SNAPSHOT</version>
+        <version>2.0.5</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

@@ -5,9 +5,9 @@
     <artifactId>le-dellebi</artifactId>
     <packaging>jar</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.5/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.5/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_2.0.5/develop</url>
 	</scm>
 
     <name>le-${component-name}</name>
@@ -17,9 +17,9 @@
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <camel.version>2.14.0</camel.version>
         <cameljcifs.version>2.13.2</cameljcifs.version>
-        <le.common.version>2.0.5-SNAPSHOT</le.common.version>
-        <le.scheduler.version>2.0.5-SNAPSHOT</le.scheduler.version>
-        <le.dataplatform.version>2.0.5-SNAPSHOT</le.dataplatform.version>
+        <le.common.version>2.0.5</le.common.version>
+        <le.scheduler.version>2.0.5</le.scheduler.version>
+        <le.dataplatform.version>2.0.5</le.dataplatform.version>
         <jetty.version>6.1.26</jetty.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <mysql.driver.version>5.1.35</mysql.driver.version>
@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.5-SNAPSHOT</version>
+        <version>2.0.5</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
