@@ -4,18 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-job</artifactId>
     <packaging>war</packaging>
-	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
-	</scm>
-
     <name>le-${component-name}</name>
 
     <properties>
         <component-name>job</component-name>
         <le.dataplatform.version>2.0.6-SNAPSHOT</le.dataplatform.version>
-        <le.db.version>2.0.5-SNAPSHOT</le.db.version>
+        <le.db.version>2.0.6-SNAPSHOT</le.db.version>
         <le.camille.version>2.0.6-SNAPSHOT</le.camille.version>
         <le.propdata.version>2.0.6-SNAPSHOT</le.propdata.version>
         <le.pls.version>2.0.6-SNAPSHOT</le.pls.version>

@@ -5,12 +5,6 @@
 	<groupId>ledp_throttle</groupId>
 	<artifactId>ledp_throttle</artifactId>
 	<packaging>jar</packaging>
-	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
-	</scm>
-
 	<name>Ambari ledp_throttle view</name>
 	<version>2.0.6-SNAPSHOT</version>
 	<url>http://maven.apache.org</url>
