@@ -256,6 +256,9 @@
                                     <additionalClasspathElements>
                                         <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
                                     </additionalClasspathElements>
+                                    <runOrder>
+                                        alphabetical
+                                    </runOrder>  <!-- To get ZEndToEndTest to run last -->
                                 </configuration>
                             </execution>
                         </executions>
