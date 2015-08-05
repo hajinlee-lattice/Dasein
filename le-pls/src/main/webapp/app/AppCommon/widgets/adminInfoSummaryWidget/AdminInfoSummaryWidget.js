@@ -82,6 +82,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
             $scope.fetched = false;
             $scope.ResourceUtility = ResourceUtility;
 
+            
             $scope.downloadFile = function($event) {
                 $scope.fetching = true;
                 $scope.$parent.Error.ShowError = false;
