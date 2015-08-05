@@ -1,8 +1,12 @@
 'use strict';
 
 var ModelList = function() {
-    this.getAnyModel = function() {    	   
-     	return element.all(by.binding('createdDate')).get(0);      
+    this.getAnyModel = function() {
+        return element.all(by.binding('createdDate')).get(0);
+    };
+
+    this.getFirstModelTile = function() {
+        return element.all(by.xpath(this.xpath.ModelTileWidget)).first();
     };
 
     this.xpath = {

@@ -26,7 +26,8 @@ var Config = function() {
                 internalUserUsername:   'pls-internal-user-tester@test.lattice-engines.com',
                 externalAdminUsername:  'pls-external-admin-tester@test.lattice-engines.ext',
                 externalUserUsername:   'pls-external-user-tester@test.lattice-engines.ext',
-                testingUserPassword:    'admin'
+                testingUserPassword:    'admin',
+                downloadRoot:           'C:/Users/jenkins/Downloads/'
             },
 
             allScriptsTimeout: 110000,

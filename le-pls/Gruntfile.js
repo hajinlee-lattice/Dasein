@@ -368,8 +368,8 @@ module.exports = function (grunt) {
             chrome:           {
                 options: {
                     args: {
-                        browser:       'chrome',
-                        baseUrl:       '<%= testenv.url %>',
+                        browser: 'chrome',
+                        baseUrl: '<%= testenv.url %>',
                         directConnect: true
                     }
                 }
@@ -377,8 +377,8 @@ module.exports = function (grunt) {
             firefox:          {
                 options: {
                     args: {
-                        browser:       'firefox',
-                        baseUrl:       '<%= testenv.url %>',
+                        browser: 'firefox',
+                        baseUrl: '<%= testenv.url %>',
                         directConnect: true
                     }
                 }
@@ -591,9 +591,10 @@ module.exports = function (grunt) {
 
     var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
     grunt.registerTask('e2eChrome', e2eChromeText, [
-        'http:resetTenants',
-        'protractor:chrome',
-        'http:resetTenants'
+        //'http:resetTenants',
+        //'protractor:chrome',
+        //'http:resetTenants'
+        'protractor:chrome'
     ]);
 
     var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';

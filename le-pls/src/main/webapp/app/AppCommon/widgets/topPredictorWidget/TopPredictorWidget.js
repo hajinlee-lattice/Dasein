@@ -200,10 +200,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.drawSummaryChart();
 
         $scope.exportClicked = function () {
-            var fileName = "Attributes.csv";
-            if (data != null && data.ModelDetails != null) {
-                fileName = data.ModelDetails.DisplayName + "-" + fileName;
-            }
+            var fileName = "attributes.csv";
         	var csvRows = TopPredictorService.GetTopPredictorExport(data);
             alasql("SELECT * INTO CSV('" + fileName + "') FROM ?", [csvRows]);
         };
