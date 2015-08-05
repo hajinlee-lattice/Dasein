@@ -9,11 +9,11 @@
 
     <properties>
         <component-name>skald</component-name>
-        <le.common.version>2.0.7-SNAPSHOT</le.common.version>
-        <le.domain.version>2.0.7-SNAPSHOT</le.domain.version>
+        <le.common.version>2.0.6-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.6-SNAPSHOT</le.domain.version>
         <guava.version>18.0</guava.version>
         <jpmml.version>2.0.0</jpmml.version>
-        <le.camille.version>2.0.7-SNAPSHOT</le.camille.version>
+        <le.camille.version>2.0.6-SNAPSHOT</le.camille.version>
         <jackson.version>2.4.1</jackson.version>
         <postgresql.version>9.4-1201-jdbc41</postgresql.version>
         <beanstalker.version>1.4.0</beanstalker.version>
@@ -22,7 +22,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.7-SNAPSHOT</version>
+        <version>2.0.6-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
     

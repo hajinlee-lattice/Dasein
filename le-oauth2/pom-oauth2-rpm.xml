@@ -8,13 +8,13 @@
     <description>LE Oauth2 RPM</description>
 
     <properties>
-        <le.rpm.version>2.0.7-SNAPSHOT</le.rpm.version>
+        <le.rpm.version>2.0.6-SNAPSHOT</le.rpm.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.7-SNAPSHOT</version>
+        <version>2.0.6-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
