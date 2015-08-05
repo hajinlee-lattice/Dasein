@@ -12,6 +12,7 @@ var Config = function() {
                 specBasePath + '/predictors_spec.js',
                 specBasePath + '/thresholdexplorer_spec.js',
                 specBasePath + '/leadsample_spec.js',
+                specBasePath + '/admininfo_spec.js',
                 specBasePath + '/usermgmt_spec.js',
                 specBasePath + '/multiplemodel_spec.js',
                 specBasePath + '/systemsetup_spec.js',
