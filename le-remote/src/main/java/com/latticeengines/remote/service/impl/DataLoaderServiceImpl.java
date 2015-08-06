@@ -80,10 +80,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     private static final int MAX_RETRIES = 3;
     private static final String[] RETRY_TRIGGERS =
-            new String[] {
-                    "Collection was modified; enumeration operation may not execute.",
-                    "Invalid use of SingleClientConnManager: connection still allocated."
-            };
+            new String[] {"Collection was modified", "Invalid use of SingleClientConnManager"};
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
