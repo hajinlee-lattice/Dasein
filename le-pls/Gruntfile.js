@@ -593,10 +593,9 @@ module.exports = function (grunt) {
 
     var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
     grunt.registerTask('e2eChrome', e2eChromeText, [
-        //'http:resetTenants',
-        //'protractor:chrome',
-        //'http:resetTenants'
-        'protractor:chrome'
+        'http:resetTenants',
+        'protractor:chrome',
+        'http:resetTenants'
     ]);
 
     var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
