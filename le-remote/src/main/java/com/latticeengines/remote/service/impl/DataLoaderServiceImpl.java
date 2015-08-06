@@ -522,8 +522,17 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         while (retry < MAX_RETRIES && shouldRetry(response)) {
             log.info("Retry #" + String.valueOf(++retry) + ": Send POST to " + dlUrl + endpoint
                     + " with payload = " + stringifiedPayload.substring(0, Math.min(stringifiedPayload.length(), 200)));
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
-                    Headers.getHeaders(), stringifiedPayload);
+
+            try {
+                response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
+                        Headers.getHeaders(), stringifiedPayload);
+            } catch (Exception e) {
+                if (shouldRetry(e.getMessage()) && retry < MAX_RETRIES) {
+                    response = e.getMessage();
+                    continue;
+                }
+                throw e;
+            }
             log.info("Get response from " + dlUrl + endpoint + ": "
                     + response.substring(0, Math.min(response.length(), 200)));
         }
