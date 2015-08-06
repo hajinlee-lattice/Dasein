@@ -78,6 +78,13 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     private static final int STATUS_SUCCESS = 3;
 
+    private static final int MAX_RETRIES = 3;
+    private static final String[] RETRY_TRIGGERS =
+            new String[] {
+                    "Collection was modified; enumeration operation may not execute.",
+                    "Invalid use of SingleClientConnManager: connection still allocated."
+            };
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -507,14 +514,26 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             stringifiedPayload =  JsonUtils.serialize(payload);
         }
 
-        log.info("Send POST to " + dlUrl + endpoint + " with payload = " + stringifiedPayload);
-
+        int retry = 0;
+        log.info("Send POST to " + dlUrl + endpoint + " with payload = "
+                + stringifiedPayload.substring(0, Math.min(stringifiedPayload.length(), 200)));
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
                 Headers.getHeaders(), stringifiedPayload);
-
-        log.info("Get response from " + dlUrl + endpoint + ": " + response);
+        while (retry < MAX_RETRIES && shouldRetry(response)) {
+            log.info("Retry #" + String.valueOf(++retry) + ": Send POST to " + dlUrl + endpoint
+                    + " with payload = " + stringifiedPayload.substring(0, Math.min(stringifiedPayload.length(), 200)));
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
+                    Headers.getHeaders(), stringifiedPayload);
+            log.info("Get response from " + dlUrl + endpoint + ": "
+                    + response.substring(0, Math.min(response.length(), 200)));
+        }
 
         return response;
 
+    }
+
+    private static boolean shouldRetry(String response) {
+        for (String trigger : RETRY_TRIGGERS) { if (response.contains(trigger)) return true; }
+        return false;
     }
 }
