@@ -20,6 +20,7 @@ module.exports = function (grunt) {
             d3: '3.5.6',
             crypto: '3.1.2',
             jStorage: '0.4.12',
+            FileSaver: '2014-11-29',
 
             bootstrap: '3.3.4',
             "font-awesome": '4.3.0'
@@ -90,7 +91,8 @@ module.exports = function (grunt) {
                     'twitter-bootstrap/<%= pls.version.bootstrap %>/js/bootstrap.js',
                     'd3/<%= pls.version.d3 %>/d3.js',
                     'jStorage/<%= pls.version.jStorage %>/jstorage.js',
-                    'alasql/<%= pls.version.alasql %>/alasql.min.js'
+                    'alasql/<%= pls.version.alasql %>/alasql.min.js',
+                    'FileSaver.js/<%= pls.version.FileSaver %>/FileSaver.js'
                 ],
                 dest: '<%= pls.app %>/lib/js'
             },

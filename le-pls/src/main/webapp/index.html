@@ -79,6 +79,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="lib/js/d3.js"></script>
 <script src="lib/js/jstorage.js"></script>
 <script src="lib/js/alasql.min.js"></script>
+<script src="lib/js/FileSaver.js"></script>
 
 <!-- self-host vendors -->
 <script src="app/AppCommon/vendor/date.format.js"></script>
@@ -207,6 +208,7 @@ Use DOMUtil.isIE() to detect internet explorer.
         {path:cdnroot + "d3/<%= version.d3 %>/d3.min.js", fallback:"lib/js/d3.js"},
         {path:cdnroot + "jStorage/<%= version.jStorage %>/jstorage.min.js", fallback:"lib/js/jstorage.js"},
         {path:cdnroot + "alasql/<%= version.alasql %>/alasql.min.js", fallback:"lib/js/alasql.min.js"},
+        {path:cdnroot + "FileSaver/<%= version.FileSaver %>/FileSaver.min.js", fallback:"lib/js/FileSaver.js"},
 
         {path:cdnroot + "webfont/<%= version.webfont %>/webfontloader.js", fallback:"lib/js/webfontloader.js"},
 

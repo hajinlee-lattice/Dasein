@@ -65,7 +65,10 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
 
             // When the download finishes, attach the data to the link. Enable the link and change its appearance.
             scope.$on('downloaded', function (event, data) {
-                scope.downloadFile = function ($event) { };
+                scope.downloadFile = function ($event) {
+
+                };
+
                 $(anchor).attr({
                     href: 'data:' + attr.filetype + ';utf-8;' + data,
                     download: attr.filename,
@@ -73,7 +76,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
                 }).removeAttr('disabled');
             });
 
-            scope.$on('download-failed', function () {
+            scope.$on('download-finished', function () {
                 $(anchor).removeAttr('disabled');
             });
         },
@@ -81,27 +84,33 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
             $scope.fetching = false;
             $scope.fetched = false;
             $scope.ResourceUtility = ResourceUtility;
+            $scope.blob = null;
 
-            
             $scope.downloadFile = function($event) {
                 $scope.fetching = true;
                 $scope.$parent.Error.ShowError = false;
-                $scope.$emit('download-start');
 
+                if ($scope.blob != null) {
+                    $scope.fetching = false;
+                    saveAs($scope.blob, $attrs.filename);
+                    return;
+                }
+
+                $scope.$emit('download-start');
                 $http.get($attrs.url).then(function (response) {
                     if ($attrs.filetype === "application/json") {
-                        $scope.$emit('downloaded', encodeURI(JSON.stringify(response.data)));
+                        $scope.blob = new Blob([JSON.stringify(response.data)], {type : $attrs.filetype});
                     } else {
-                        $scope.$emit('downloaded', encodeURI(response.data));
+                        $scope.blob = new Blob([response.data], {type : $attrs.filetype});
                     }
-                    $scope.fetching = false;
-                    setTimeout($event.target.click(), 500);
+                    $scope.downloadFile();
+                    $scope.$emit('download-finished');
                 }, function (response) {
                     SessionService.HandleResponseErrors(response.data, response.status);
                     $scope.$parent.Error.ShowError = true;
                     $scope.$parent.Error.ErrorMsg = ResourceUtility.getString("MODEL_ADMIN_FETCH_ERROR", [$attrs.filename]);
                     $scope.fetching = false;
-                    $scope.$emit('download-failed');
+                    $scope.$emit('download-finished');
                 });
             };
         }]
