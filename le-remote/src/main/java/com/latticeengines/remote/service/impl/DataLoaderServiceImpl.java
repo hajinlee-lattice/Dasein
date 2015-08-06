@@ -529,6 +529,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             } catch (Exception e) {
                 if (shouldRetry(e.getMessage()) && retry < MAX_RETRIES) {
                     response = e.getMessage();
+                    log.info("Get response from " + dlUrl + endpoint + ": "
+                            + response.substring(0, Math.min(response.length(), 200)));
                     continue;
                 }
                 throw e;
