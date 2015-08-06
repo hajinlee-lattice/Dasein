@@ -83,4 +83,12 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
         return "jdbc:mysql://$$HOST$$:$$PORT$$/$$DB$$?user=$$USER$$&password=$$PASSWD$$";
     }
 
+    @Override
+    public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
+        Integer positiveEventCount = jdbcTemplate.queryForObject( //
+                String.format("SELECT COUNT(*) FROM %s WHERE %s = 1", tableName, eventColName), //
+                Integer.class);
+        return Long.valueOf(positiveEventCount);
+    }
+
 }

@@ -24,13 +24,13 @@ public abstract class MetadataProvider {
     private AvroSchemaGenerator avroSchemaGenerator;
 
     public abstract String getName();
-    
+
     public abstract String getDriverName();
 
     public abstract ConnManager getConnectionManager(SqoopOptions options);
-    
+
     public abstract Long getRowCount(JdbcTemplate jdbcTemplate, String tableName);
-    
+
     public abstract Long getDataSize(JdbcTemplate jdbcTemplate, String tableName);
 
     public abstract void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
@@ -42,17 +42,17 @@ public abstract class MetadataProvider {
     public abstract void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid);
 
     public abstract String getDriverClass();
-    
+
     public abstract String getJdbcUrlTemplate();
 
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();
         options.setConnectString(getConnectionString(dbCreds));
-        
+
         if (!StringUtils.isEmpty(dbCreds.getDriverClass())) {
             options.setDriverClassName(dbCreds.getDriverClass());
         }
-        
+
         ConnManager connManager = getConnectionManager(options);
         avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
         try {
@@ -69,7 +69,7 @@ public abstract class MetadataProvider {
         } catch (ClassNotFoundException e) {
             throw new LedpException(LedpCode.LEDP_11000, e, new String[] { driverClass });
         }
-        
+
         try {
             url = creds.getHost() != null ? url.replaceFirst("\\$\\$HOST\\$\\$", creds.getHost()) : url;
             url = url.replaceFirst("\\$\\$PORT\\$\\$", Integer.toString(creds.getPort()));
@@ -91,7 +91,7 @@ public abstract class MetadataProvider {
     public String getConnectionString(DbCreds creds) {
         String url = creds.getJdbcUrl();
         String driverClass = creds.getDriverClass();
-        
+
         if (StringUtils.isEmpty(url)) {
             url = getJdbcUrlTemplate();
         }
@@ -102,5 +102,7 @@ public abstract class MetadataProvider {
     }
 
     public abstract void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
+
+    public abstract Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName);
 
 }

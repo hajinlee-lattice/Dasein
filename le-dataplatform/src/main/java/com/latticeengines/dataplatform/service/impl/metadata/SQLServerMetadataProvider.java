@@ -77,4 +77,11 @@ public class SQLServerMetadataProvider extends MetadataProvider {
         jdbcTemplate.execute("ALTER TABLE [" + table + "] ADD " + pid + " INT IDENTITY");
     }
 
+    @Override
+    public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
+        Integer positiveEventCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM [" + tableName + "] WHERE ["
+                + eventColName + "] = 1", Integer.class);
+        return Long.valueOf(positiveEventCount);
+    }
+
 }
