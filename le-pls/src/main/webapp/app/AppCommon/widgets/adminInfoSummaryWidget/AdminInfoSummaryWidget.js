@@ -58,22 +58,8 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
         link:        function (scope, element, attr) {
             var anchor = element.children()[0];
 
-            // When the download starts, disable the link
             scope.$on('download-start', function () {
                 $(anchor).attr('disabled', 'disabled');
-            });
-
-            // When the download finishes, attach the data to the link. Enable the link and change its appearance.
-            scope.$on('downloaded', function (event, data) {
-                scope.downloadFile = function ($event) {
-
-                };
-
-                $(anchor).attr({
-                    href: 'data:' + attr.filetype + ';utf-8;' + data,
-                    download: attr.filename,
-                    target: '_blank'
-                }).removeAttr('disabled');
             });
 
             scope.$on('download-finished', function () {
@@ -86,7 +72,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
             $scope.ResourceUtility = ResourceUtility;
             $scope.blob = null;
 
-            $scope.downloadFile = function($event) {
+            $scope.downloadFile = function() {
                 $scope.fetching = true;
                 $scope.$parent.Error.ShowError = false;
 
