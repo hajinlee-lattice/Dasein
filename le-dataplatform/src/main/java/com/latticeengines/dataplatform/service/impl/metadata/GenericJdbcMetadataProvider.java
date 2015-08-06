@@ -71,4 +71,9 @@ public class GenericJdbcMetadataProvider extends MetadataProvider {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
+        throw new UnsupportedOperationException();
+    }
+
 }
