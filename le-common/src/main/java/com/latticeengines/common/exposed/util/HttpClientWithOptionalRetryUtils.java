@@ -30,6 +30,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
@@ -195,7 +196,8 @@ public class HttpClientWithOptionalRetryUtils {
         schemeRegistry.register(new Scheme("https", sf, 443));
 
         HttpParams params = new BasicHttpParams();
-        ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
+        ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
+
         return new DefaultHttpClient(cm, params);
     }
 

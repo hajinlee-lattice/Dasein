@@ -79,8 +79,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final int STATUS_SUCCESS = 3;
 
     private static final int MAX_RETRIES = 3;
-    private static final String[] RETRY_TRIGGERS =
-            new String[] {"Collection was modified", "Invalid use of SingleClientConnManager"};
+    private static final String[] RETRY_TRIGGERS = new String[] {"Collection was modified"};
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -520,18 +519,9 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             log.info("Retry #" + String.valueOf(++retry) + ": Send POST to " + dlUrl + endpoint
                     + " with payload = " + stringifiedPayload.substring(0, Math.min(stringifiedPayload.length(), 200)));
 
-            try {
-                response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
-                        Headers.getHeaders(), stringifiedPayload);
-            } catch (Exception e) {
-                if (shouldRetry(e.getMessage()) && retry < MAX_RETRIES) {
-                    response = e.getMessage();
-                    log.info("Get response from " + dlUrl + endpoint + ": "
-                            + response.substring(0, Math.min(response.length(), 200)));
-                    continue;
-                }
-                throw e;
-            }
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
+                    Headers.getHeaders(), stringifiedPayload);
+
             log.info("Get response from " + dlUrl + endpoint + ": "
                     + response.substring(0, Math.min(response.length(), 200)));
         }
