@@ -202,8 +202,7 @@ public class HttpClientWithOptionalRetryUtils {
     }
 
     private static long getExponentialWaitTime(int retryCount) {
-        long waitTime = retryCount == 0 ? 0 : ((long) Math.pow(2, retryCount) * INITIAL_WAIT_INTERVAL);
-        return waitTime;
+        return retryCount == 0 ? 0 : ((long) Math.pow(2, retryCount) * INITIAL_WAIT_INTERVAL);
     }
 
 }
