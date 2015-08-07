@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -28,11 +27,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
-import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -41,7 +38,6 @@ import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -138,7 +134,6 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(status);
     }
 
-    @SuppressWarnings("rawtypes")
     @Test(groups = "functional")
     public void cleanupTestTenant() throws Exception {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
