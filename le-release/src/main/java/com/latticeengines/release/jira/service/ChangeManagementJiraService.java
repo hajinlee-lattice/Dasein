@@ -6,5 +6,5 @@ import com.latticeengines.release.exposed.domain.JiraParameters;
 
 public interface ChangeManagementJiraService{
 
-    ResponseEntity<String> createChangeManagementTicket(JiraParameters jiraParameters);
+    ResponseEntity<String> createChangeManagementTicket(String url, JiraParameters jiraParameters);
 }

@@ -4,8 +4,6 @@ import java.util.HashMap;
 
 import javax.management.*;
 import javax.management.remote.*;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.release.jmx.service.JMXCheckService;
@@ -13,16 +11,7 @@ import com.latticeengines.release.jmx.service.JMXCheckService;
 @Service("jmxService")
 public class JMXCheckServiceImpl implements JMXCheckService {
 
-    @Value("${release.jmx.rmi}")
-    private String jmxRMI;
-
-    @Value("${release.jmx.object}")
-    private String objectName;
-
-    @Value("${release.jmx.operation}")
-    private String operation;
-
-    public String checkJMX() {
+    public String checkJMX(String jmxRMI, String objectName, String operation) {
         try {
             JMXServiceURL url = new JMXServiceURL(jmxRMI);
             JMXConnector jmxc = JMXConnectorFactory.connect(url, new HashMap<String, String>());

@@ -1,7 +1,9 @@
 package com.latticeengines.release.hipchat.service;
 
+import org.springframework.http.ResponseEntity;
+
 public interface HipChatService {
 
-    void sendNotification(String color, String message);
+    ResponseEntity<String> sendNotification(String url, String color, String message);
 
 }

@@ -15,20 +15,17 @@ import com.latticeengines.release.jira.service.ChangeManagementJiraService;
 import com.latticeengines.release.resttemplate.util.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.release.resttemplate.util.RestTemplateUtil;
 
-@Service("changeManagmentJiraService")
+@Service("changeManagementJiraService")
 public class ChangeManagementJiraServiceImpl implements ChangeManagementJiraService{
 
     @Autowired
     private RestTemplate restTemplate;
-    
-    @Value("${release.jira.url}")
-    private String url;
 
     @Value("${release.jira.user.credential}")
     private String creds;
 
     @Override
-    public ResponseEntity<String> createChangeManagementTicket(JiraParameters jiraParameters) {
+    public ResponseEntity<String> createChangeManagementTicket(String url, JiraParameters jiraParameters) {
         AuthorizationHeaderHttpRequestInterceptor interceptor = new AuthorizationHeaderHttpRequestInterceptor(RestTemplateUtil.encodeToken(creds));
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{interceptor}));
         return restTemplate.postForEntity(url, jiraParameters, String.class, new HashMap<>());

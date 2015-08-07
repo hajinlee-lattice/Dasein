@@ -23,6 +23,11 @@ public class JenkinsParameters {
 
         private String value;
 
+        public NameValuePair(String name, String value) {
+            this.name = name;
+            this.value = value;
+        }
+
         @JsonProperty("name")
         public String getName() {
             return this.name;

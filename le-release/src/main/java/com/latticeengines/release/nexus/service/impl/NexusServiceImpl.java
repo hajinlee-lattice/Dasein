@@ -25,9 +25,6 @@ public class NexusServiceImpl implements NexusService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${release.nexus.url}")
-    private String nexusUrl;
-    
     @Value("${release.nexus.user.credential}")
     private String creds;
 
@@ -36,27 +33,29 @@ public class NexusServiceImpl implements NexusService {
         AuthorizationHeaderHttpRequestInterceptor authInterceptor = new AuthorizationHeaderHttpRequestInterceptor(
                 RestTemplateUtil.encodeToken(creds));
         LoggingHttpRequestInterceptor loggingInterceptor = new LoggingHttpRequestInterceptor();
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { authInterceptor, loggingInterceptor }));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { authInterceptor,
+                loggingInterceptor }));
 
         FormHttpMessageConverter formConverter = new FormHttpMessageConverter();
         formConverter.setCharset(Charset.forName("UTF8"));
         restTemplate.getMessageConverters().add(formConverter);
 
         MultiValueMap<String, Object> parts = createMultipartFormData(project, version);
- 
-        return restTemplate.postForEntity(nexusUrl, parts, String.class);
+
+        return restTemplate.postForEntity(url, parts, String.class);
     }
 
-    private MultiValueMap<String, Object> createMultipartFormData(String project, String version){
+    private MultiValueMap<String, Object> createMultipartFormData(String project, String version) {
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
         parts.add("hasPom", "false");
         parts.add("r", "releases");
         parts.add("g", "com.latticeengines");
-        parts.add("a", project); //project
-        parts.add("v", version); //version
+        parts.add("a", project);
+        parts.add("v", version);
         parts.add("p", "jar");
 
-        FileSystemResource file = new FileSystemResource("/home/hliu/workspace6/ledp/le-pls/target/le-pls-2.0.5-SNAPSHOT.jar");
+        FileSystemResource file = new FileSystemResource(String.format("../%1$s/target/%1$s-%2$s-SNAPSHOT.jar", project, version));
+
         System.out.println(file.exists());
         parts.add("file", file);
         return parts;
