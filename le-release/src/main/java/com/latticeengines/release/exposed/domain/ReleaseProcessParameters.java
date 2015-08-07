@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class JenkinsParameters {
+public class ReleaseProcessParameters {
     List<NameValuePair> nameValuePairs = new ArrayList<>();
 
     @JsonProperty("parameter")

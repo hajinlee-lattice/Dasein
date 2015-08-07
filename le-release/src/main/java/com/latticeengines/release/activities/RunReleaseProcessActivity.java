@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.release.error.handler.ErrorHandler;
 import com.latticeengines.release.exposed.domain.JenkinsBuildStatus;
-import com.latticeengines.release.exposed.domain.JenkinsParameters;
-import com.latticeengines.release.exposed.domain.JenkinsParameters.NameValuePair;
+import com.latticeengines.release.exposed.domain.ReleaseProcessParameters;
+import com.latticeengines.release.exposed.domain.ReleaseProcessParameters.NameValuePair;
 import com.latticeengines.release.exposed.domain.ProcessContext;
 
 @Component("runReleaseProcessActivity")
@@ -23,7 +23,7 @@ public class RunReleaseProcessActivity extends RunJenkinsJobActivity {
 
     @Override
     public ProcessContext runActivity(ProcessContext context) {
-        JenkinsParameters jenkinsParameters = constructJenkinsParameters(context);
+        ReleaseProcessParameters jenkinsParameters = constructReleaseProcessParameters(context);
         jenkinsService.triggerJenkinsJobWithParameters(context.getUrl(), jenkinsParameters);
         waitUtilNoJobIsRunning(context.getUrl());
         JenkinsBuildStatus status = jenkinsService.getLastBuildStatus(context.getUrl());
@@ -34,8 +34,8 @@ public class RunReleaseProcessActivity extends RunJenkinsJobActivity {
         return context;
     }
 
-    private JenkinsParameters constructJenkinsParameters(ProcessContext context) {
-        JenkinsParameters jenkinsParameters = new JenkinsParameters();
+    private ReleaseProcessParameters constructReleaseProcessParameters(ProcessContext context) {
+        ReleaseProcessParameters jenkinsParameters = new ReleaseProcessParameters();
         NameValuePair branchName = new NameValuePair("Branch_Name", "develop");
         NameValuePair copyBranchName = new NameValuePair("Copy_Branch_Name", "develop_copy");
         NameValuePair releaseVersion = new NameValuePair("Release_Version", context.getReleaseVersion());
