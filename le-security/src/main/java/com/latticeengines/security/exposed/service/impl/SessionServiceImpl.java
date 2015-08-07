@@ -17,7 +17,6 @@ import com.latticeengines.security.exposed.service.SessionService;
 @Component("sessionService")
 public class SessionServiceImpl implements SessionService {
 
-    @SuppressWarnings("unused")
     private static final Log LOGGER = LogFactory.getLog(SessionServiceImpl.class);
 
     @Autowired
