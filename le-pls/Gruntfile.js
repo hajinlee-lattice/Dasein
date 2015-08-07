@@ -192,6 +192,7 @@ module.exports = function (grunt) {
                         '<%= pls.app %>/**/*.js',
                         '<%= pls.app %>/**/*.css',
                         '<%= pls.app %>/**/*.scss',
+                        '!<%= pls.app %>/lib/js/*.js',
                         '!<%= pls.app %>/app/production_<%= versionString %>.min.js',
                         '!<%= pls.app %>/assets/styles/production_<%= versionString %>.min.css'
                     ]
