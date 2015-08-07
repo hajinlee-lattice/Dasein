@@ -84,6 +84,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
+    @RestApiCall
     public List<String> getSegmentNames(String tenantName, String dlUrl) {
         List<String> result = Collections.emptyList();
         String jsonStr = JsonUtils.serialize(new GetSpecRequest(tenantName, SEGMENTS_SPEC));
@@ -150,6 +151,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return finalResults;
     }
 
+    @RestApiCall
     private LinkedHashMap<String, Segment> getNameToSegmentMap(String tenantName, String dlUrl) {
         LinkedHashMap<String, Segment> nameToSegments = new LinkedHashMap<>();
 
@@ -312,6 +314,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    @RestApiCall
     public InstallResult installVisiDBStructureFile(InstallTemplateRequest request, String dlUrl) {
         try {
             String response = callDLRestService(dlUrl, INSTALL_VISIDB_STRUC_SYNC, request);
@@ -322,6 +325,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    @RestApiCall
     public InstallResult installDataLoaderConfigFile(InstallTemplateRequest request, String dlUrl) {
         try {
             String response = callDLRestService(dlUrl, INSTALL_CONFIG_SYNC, request);
@@ -333,6 +337,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    @RestApiCall
     public InstallResult getDLTenantSettings(GetVisiDBDLRequest getRequest, String dlUrl) {
         try {
             String response = callDLRestService(dlUrl, GET_TENANT_SETTINGS, getRequest);
@@ -343,6 +348,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    @RestApiCall
     public InstallResult deleteDLTenant(DeleteVisiDBDLRequest request, String dlUrl, boolean retry) {
         try{
             String response = callDLRestService(dlUrl, DELETE_TENANT, request);
@@ -353,6 +359,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    @RestApiCall
     public InstallResult createDLTenant(CreateVisiDBDLRequest postRequest, String dlUrl) {
         try {
             String response = callDLRestService(dlUrl, CREATE_TENANT, postRequest);
@@ -374,6 +381,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    @RestApiCall
     public String getTemplateVersion(String tenantName, String dlUrl) {
         try {
             String response = callDLRestService(dlUrl, GET_SPEC_DETAILS, new GetSpecRequest(tenantName, VERSION_SPEC));
@@ -392,6 +400,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    @RestApiCall
     public void verifyCredentials(String crmType, CrmCredential crmCredential, boolean isProduction, String dlUrl) {
         try {
             Map<String, String> paramerters = CrmUtils.verificationParameters(crmType, crmCredential, isProduction);
@@ -451,23 +460,27 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     }
 
     @Override
+    @RestApiCall
     public String getMarketoUrl(String tenantName, String dlUrl) {
         String config = getDLConfig(tenantName, dlUrl);
         return DlConfigUtils.parseMarketoUrl(config);
     }
 
     @Override
+    @RestApiCall
     public String getEloquaUsername(String tenantName, String dlUrl) {
         String config = getDLConfig(tenantName, dlUrl);
         return DlConfigUtils.parseEloquaUsername(config);
     }
 
     @Override
+    @RestApiCall
     public String getEloquaCompany(String tenantName, String dlUrl) {
         String config = getDLConfig(tenantName, dlUrl);
         return DlConfigUtils.parseEloquaCompany(config);
     }
 
+    @RestApiCall
     private String getDLConfig(String tenantName, String dlUrl) {
         Map<String, String> paramerters = new HashMap<>();
         paramerters.put("tenantName", tenantName);
@@ -489,6 +502,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         }
     }
 
+    @RestApiCall
     private void executeUpdateDataProviderRequest(String dlUrl, Map<String, Object> parameters) {
         try {
             String response = callDLRestService(dlUrl, UPDATE_DATA_PROVIDER, parameters);
