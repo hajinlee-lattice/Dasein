@@ -101,7 +101,7 @@ class DLCRunner(SessionRunner):
             self.dlc_path = dlc_path
         self.command = ""
         self.params = {}
-        self.runLocal = True
+        self.runLocal = False
 
     def setDlcPath(self, dlc_path):
         self.dlc_path = dlc_path
@@ -590,7 +590,7 @@ class DLConfigRunner(SessionRunner):
         self.editDataProviders(tenant, "SQL_LeadScoring", PLSEnvironments.SQL_LeadScoring);
         self.editDataProviders(tenant, "SQL_DanteDB_DataProvider", PLSEnvironments.SQL_DanteDB_DataProvider);
         self.editDataProviders(tenant, "SQL_LSSBard", PLSEnvironments.SQL_LSSBard);
-        self.editDataProviders(tenant, "SFDC_DataProvider", PLSEnvironments.SFDC_DataProvider);
+#         self.editDataProviders(tenant, "SFDC_DataProvider", PLSEnvironments.SFDC_DataProvider);
         
         if PLSEnvironments.pls_marketing_app_ELQ == marketting_app:
             self.editDataProviders(tenant, "SQL_ReportsDB_DataProvider", PLSEnvironments.SQL_ReportsDB_DataProvider_ELQ);
