@@ -48,9 +48,9 @@ class Test(unittest.TestCase):
     
     def TestHourlyScoringSFDC(self): 
         sfdc = SFDCRequest();
-        leads_US = mkto.addLeadsToSFDC(2,"United States");
-        leads_UK = mkto.addLeadsToSFDC(2,"UK");
-        leads_CN = mkto.addLeadsToSFDC(2,"China");
+        leads_US = sfdc.addLeadsToSFDC(2,"United States");
+        leads_UK = sfdc.addLeadsToSFDC(2,"UK");
+        leads_CN = sfdc.addLeadsToSFDC(2,"China");
         contacts_list = sfdc.addContactsToSFDC(2)
         
         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_3,PLSEnvironments.pls_marketing_app_SFDC);
