@@ -541,7 +541,7 @@ class SFDCRequest():
         
         for i in range(contact_num):
             emailAddress =  getRandomMail(domains[i][0]);
-            contact_id = self.addContactToSFDC(email=emailAddress,country=country);
+            contact_id = self.addContactToSFDC(email=emailAddress,mailingCountry=country);
             if contact_id != None:
                 contact_lists[contact_id] = emailAddress;
                 recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC, "Contact", contact_id, contact_lists[contact_id]); 
