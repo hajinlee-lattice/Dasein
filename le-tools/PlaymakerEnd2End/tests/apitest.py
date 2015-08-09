@@ -8,43 +8,24 @@ import requests
 import time
 import threading
 import json
+from tools import apitool
 
 
 
 class Test(unittest.TestCase):
 
     token = None
-    apiUrl = 'http://testapi.lattice-engines.com:8080/playmaker'
-    tenantUrl = "http://testapi.lattice-engines.com:8080/tenants"
-    oauthUrl = "http://testoauth.lattice-engines.com:8080/oauth/token"
-
-
-    @classmethod
-    def getOneTimeKey(cls, tenant, jdbcUrl):
-        request = requests.post(cls.tenantUrl,
-                          json={"TenantName":tenant,"TenantPassword":"null","ExternalId":tenant,"JdbcDriver":"com.microsoft.sqlserver.jdbc.SQLServerDriver",
-                                "JdbcUrl":jdbcUrl,"JdbcUserName":"playmaker","JdbcPassword":"playmaker"})
-        assert request.status_code == 200
-        response = json.loads(request.text)
-        assert response['TenantPassword'] != None
-        return response['TenantPassword']
-
-    @classmethod
-    def getToken(cls, key, tenant):
-        params = {'grant_type':'password', 'username':tenant, 'password':key}
-        headers = {'Authorization':'Basic cGxheW1ha2VyOg=='}
-        request = requests.post(cls.oauthUrl, params=params, headers=headers)
-        assert request.status_code == 200
-        assert json.loads(request.text)['access_token'] != None
-        return json.loads(request.text)['access_token']
+    apiUrl = apitool.apiUrl
+    tenantUrl = apitool.tenantUrl
+    oauthUrl = apitool.oauthUrl
 
 
     @classmethod
     def setUpClass(cls):
         #Paypal_Obfusc_DB
         tenant = 'PCMTest'
-        key = cls.getOneTimeKey(tenant, "jdbc:sqlserver://10.41.1.193\\SQL2008R2;databaseName=PCM")
-        cls.token = 'bearer ' + cls.getToken(key, tenant)
+        key = apitool.getOneTimeKey(tenant, "jdbc:sqlserver://10.41.1.193\\SQL2008R2;databaseName=PCM")
+        cls.token = 'bearer ' + apitool.getToken(key, tenant)
         #print "Key is: " + key
         #print  "token is: " + cls.token
 
@@ -116,7 +97,7 @@ class Test(unittest.TestCase):
 
 
 
-    '''
+    
     def testGetPlayCount(self):
         url = self.apiUrl + "/playcount"
         headers = {'Authorization':self.token}
@@ -125,27 +106,31 @@ class Test(unittest.TestCase):
         params = {'start':'0'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(json.loads(request.text)['count'], 3348888) 
+        print 'Play count: ' + request.text
+        #self.assertEqual(json.loads(request.text)['count'], 3348888) 
         
         #second request, start time = 1436549860
-        params = {'start':'1436549860', 'destination':'SFDC'}
+        params = {'start':'1436549860'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(json.loads(request.text)['count'], 208)
+        print 'Play count: ' + request.text
+        #self.assertEqual(json.loads(request.text)['count'], 208)
         
 
     def testGetPlay(self):
         url = self.apiUrl + "/plays"
-        startTime = 1436549860
+        startTime = 0
         
         headers = {'Authorization':self.token}
-        params = {'start':startTime, 'offset':'0', 'maximum':'1000','destination':'SFDC'}
+        params = {'start':startTime, 'offset':'0', 'maximum':'1000'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
+        print 'Plays: ' + request.text
+        '''
         self.assertEqual(self.getRecordCount(request.text), 208)
         self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
         self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
-    '''
+        '''
 
 
 
@@ -187,8 +172,8 @@ class Test(unittest.TestCase):
     def testGetRecommendationMultipleTenants(self):
         # get token for another tenant
         tenant = 'p83_1'
-        key = self.getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.83\sql2012std;databaseName=ADEDTBDd72072nK28083n154')
-        secondToken = 'bearer ' + self.getToken(key, tenant)
+        key = apitool.getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.83\sql2012std;databaseName=ADEDTBDd72072nK28083n154')
+        secondToken = 'bearer ' + apitool.getToken(key, tenant)
         
         url = self.apiUrl + "/recommendationcount"
         params = {'start':'0', 'destination':'SFDC'}
@@ -204,8 +189,7 @@ class Test(unittest.TestCase):
         request2 = requests.get(url, headers=headers, params=params)
         assert request2.status_code == 200
         self.assertEqual(json.loads(request2.text)['count'],468)
+
         
-
-
 if __name__ == "__main__":
     unittest.main()
