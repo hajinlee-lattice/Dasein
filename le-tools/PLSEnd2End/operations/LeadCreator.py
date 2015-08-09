@@ -123,11 +123,19 @@ class EloquaRequest():
         request = requests.delete(request_url, headers=self.headers)
         return request
 
-    def createNewContact(self, email, first_name, last_name):
-        new_contact = {"emailAddress": email,
-                       "firstName": first_name,
-                       "lastName": last_name,
-                       }
+    def createNewContact(self, email, first_name, last_name,country=None):
+        
+        if country == None:
+            new_contact = {"emailAddress": email,
+                           "firstName": first_name,
+                           "lastName": last_name,
+                           }
+        else:
+            new_contact = {"emailAddress": email,
+                           "firstName": first_name,
+                           "lastName": last_name,
+                           "country": country,
+                           }
         response = self.post("/data/contact", new_contact)
         return response;
 
@@ -154,7 +162,7 @@ class EloquaRequest():
         else:
             return response;
 
-    def addEloquaContact(self,leads_number=3):
+    def addEloquaContact(self,leads_number=3,country=None):
         domains = getDomains(PLSEnvironments.pls_marketing_app_ELQ, leads_number);
         contact_lists={};
         failed = 0;
@@ -164,7 +172,8 @@ class EloquaRequest():
             email = getRandomMail(domain[0]);
             response = self.createNewContact(email, 
                                                 random_str(), 
-                                                random_str())
+                                                random_str(),
+                                                country)
             if response:
                 if response.status_code == 201:
                     created_id=json.loads(response.text)["id"];
@@ -177,37 +186,8 @@ class EloquaRequest():
                 failed += 1;
                 if failed>3:
                     break;
-        return contact_lists
+        return contact_lists    
     
-    def addEloquaContactWithCountry(self,country):
-        domains = getDomains(PLSEnvironments.pls_marketing_app_ELQ, 1);
-        contact_lists={};
-        failed = 0;
-        sequence = getSequence();
-        
-        for domain in domains:
-            email = getRandomMail(domain[0]);
-            
-            new_contact = {"emailAddress": email,
-                       "firstName": random_str(),
-                       "lastName": random_str(),
-                       "country": country,
-                       }
-            response = self.post("/data/contact", new_contact)            
-
-            if response:
-                if response.status_code == 201:
-                    created_id=json.loads(response.text)["id"];
-                    print "==>    " + created_id + "    " + email;
-                    contact_lists[created_id] = email;
-                    recordNewAdded(sequence, PLSEnvironments.pls_marketing_app_ELQ,"Contact", created_id, email);
-                if response.status_code == 409:
-                    print "Contact already exists - pick another one:    " + email;  
-            else:
-                failed += 1;
-                if failed>3:
-                    break;
-        return contact_lists
     def addEloquaContactForDante(self,leads_number=3):
         domains = getDomains(PLSEnvironments.pls_marketing_app_ELQ, leads_number);
         
@@ -289,7 +269,7 @@ class MarketoRequest():
         self.clinet_id=client_id;
         self.client_secret=client_secret;
     
-    def createOrUpdate(self,email,firstName):
+    def createOrUpdate(self,email,firstName,country=None):
         # leads_list must be a List of Dict
         """
         Like this:
@@ -298,6 +278,8 @@ class MarketoRequest():
              "email":"kjashaedd-1@klooblept.com",
              "firstName":"Kataldar-1",
              "postalCode":"04828"
+             "City": "new york"
+             "Country":"usa"
           },
           {  
              "email":"kjashaedd-2@klooblept.com",
@@ -311,9 +293,16 @@ class MarketoRequest():
           }
         ]
         """
-        leads_list=[{"email":email,
+        if country==None:
+            leads_list=[{"email":email,
+                 "firstName":firstName,
+                 "postalCode":"04828"},]
+        else:
+            leads_list=[{"email":email,
              "firstName":firstName,
-             "postalCode":"04828"},]
+             "postalCode":"04828",
+             "Country":country},]
+#         print leads_list
         marketo_dict = {"action":"createOrUpdate",
                         "input": leads_list}
         
@@ -347,8 +336,8 @@ class MarketoRequest():
             return True;
         else:
             return response;
-          
-    def addLeadToMarketo(self,leads_number=3):        
+              
+    def addLeadToMarketo(self,leads_number=3,country=None):        
         domains = getDomains(PLSEnvironments.pls_marketing_app_MKTO, leads_number);
         lead_lists={};
         failed = 0;
@@ -356,7 +345,7 @@ class MarketoRequest():
         
         for domain in domains:
             email = getRandomMail(domain[0]);
-            response = self.createOrUpdate(email, random_str());
+            response = self.createOrUpdate(email, random_str(),country);
             if response:
                 if response.status_code == 200:
                     created = json.loads(response.text);
@@ -544,7 +533,7 @@ class SFDCRequest():
         sobjects = "Account";
         return self.deleteRecord(sobjects, record_id);
 
-    def addContactsToSFDC(self,account_id=None, contact_num=3):
+    def addContactsToSFDC(self,account_id=None, contact_num=3,country=None):
         domains = getDomains(marketting_app=PLSEnvironments.pls_marketing_app_MKTO, leads_number=contact_num);                
         contact_lists={};
         failed = 0;
@@ -552,7 +541,7 @@ class SFDCRequest():
         
         for i in range(contact_num):
             emailAddress =  getRandomMail(domains[i][0]);
-            contact_id = self.addContactToSFDC(email=emailAddress);
+            contact_id = self.addContactToSFDC(email=emailAddress,country=country);
             if contact_id != None:
                 contact_lists[contact_id] = emailAddress;
                 recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC, "Contact", contact_id, contact_lists[contact_id]); 
@@ -561,7 +550,7 @@ class SFDCRequest():
                 if failed>3:
                     break;
         return contact_lists;
-    def addContactToSFDC(self,account_id=None,email=None):
+    def addContactToSFDC(self,account_id=None,email=None,mailingCountry=None):
         addresses = getAddresses(1);
         titles = getTitles(leads_number=1);  
         
@@ -573,7 +562,10 @@ class SFDCRequest():
 #             contact["Name"] = "%s %s" % (contact["FirstName"],contact["LastName"])
         contact["MailingCity"] = addresses[0]["c_city"];
         contact["MailingState"] = addresses[0]["c_state_Prov"];
-        contact["MailingCountry"] = addresses[0]["c_country"];
+        if mailingCountry == None:
+            contact["MailingCountry"] = addresses[0]["c_country"];
+        else:
+            contact["MailingCountry"]=mailingCountry
 #             contact["Phone"] = ;
         contact["Email"]=email;
         contact["Title"]=titles[0][0];
@@ -582,8 +574,8 @@ class SFDCRequest():
     
     def getContactsFromSFDC(self,contact_ids={}):
         return  self.getRecords("Contact",contact_ids);
-
-    def addLeadsToSFDC(self, lead_num=3): 
+    
+    def addLeadsToSFDC(self, lead_num=3, country=None): 
         domains = getDomains(marketting_app=PLSEnvironments.pls_marketing_app_MKTO, leads_number=lead_num); 
         
         lead_lists={};
@@ -592,7 +584,7 @@ class SFDCRequest():
         
         for i in range(lead_num):
             emailAddress =  getRandomMail(domains[i][0]);
-            lead_id = self.addLeadToSFDC(email=emailAddress);
+            lead_id = self.addLeadToSFDC(emailAddress,country);
             if lead_id != None:
                 lead_lists[lead_id] = emailAddress;
                 recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC, "Lead", lead_id, lead_lists[lead_id]); 
@@ -601,7 +593,7 @@ class SFDCRequest():
                 if failed>3:
                     break;
         return lead_lists;
-    def addLeadToSFDC(self, email=None):
+    def addLeadToSFDC(self, email=None,country=None):
         addresses = getAddresses(1);
         titles = getTitles(leads_number=1);  
         
@@ -610,7 +602,10 @@ class SFDCRequest():
         lead["FirstName"] = random_str(6);
         lead["City"] = addresses[0]["c_city"];
         lead["State"] = addresses[0]["c_state_Prov"];
-        lead["Country"] = addresses[0]["c_country"];
+        if country == None:
+            lead["Country"] = addresses[0]["c_country"];
+        else:
+            lead["Country"]=country;
 #             lead["Phone"] = ;
         lead["Email"]=email;
         lead["Title"]=titles[0][0];
@@ -618,7 +613,7 @@ class SFDCRequest():
         lead["NumberOfEmployees"]=random.randint(1,3000);
         mail=email[string.find(email,'@')+1:];
         lead["Company"]=mail[0:string.find(mail,'.')];
-        
+#         print lead
         return self.createRecord("Lead",lead);
         
     def getLeadsFromSFDC(self,lead_ids={}):
