@@ -314,7 +314,6 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     private void upgrade(String customer) {
-        listTenantModelInHdfsForCustomer(customer);
         copyCustomerModelsToTupleId(customer);
         upgradeModelSummaryForCustomerModels(customer);
     }
