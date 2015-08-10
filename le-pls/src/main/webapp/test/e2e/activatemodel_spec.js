@@ -1,23 +1,23 @@
 'use strict';
 
-describe('multiple model setup tests', function () {
+describe('activate model tests', function () {
 
     var loginPage = require('./po/login.po');
     var userDropdown = require('./po/userdropdown.po');
-    var multipleModelSetup = require('./po/multiplemodelsetup.po');
+    var activateModel = require('./po/activatemodel.po');
 
-    it('should validate that you can go to the Multiple Models page', function () {
+    it('should validate that you can go to the Activate Models page', function () {
         //==================================================
         // Login
         //==================================================
         loginPage.loginAsSuperAdmin();
 
         //==================================================
-        // Select Multiple Models Tab
+        // Select Activate Model
         //==================================================
         userDropdown.toggleDropdown();
         expect(userDropdown.ManageUsersLink.isDisplayed()).toBe(true);
-        userDropdown.MultipleModelsLink.click();
+        userDropdown.ActivateModelLink.click();
         browser.waitForAngular();
 
         loginPage.logout();
@@ -30,35 +30,35 @@ describe('multiple model setup tests', function () {
         loginPage.loginAsSuperAdmin();
 
         //==================================================
-        // Select Multiple Models Tab
+        // Select Activate Model
         //==================================================
         userDropdown.toggleDropdown();
-        userDropdown.MultipleModelsLink.click();
+        userDropdown.ActivateModelLink.click();
         browser.waitForAngular();
         
         //==================================================
         // Add a New Segment
         //==================================================
-        multipleModelSetup.clickAddSegment();
+        activateModel.clickAddSegment();
         var newName = new Date().toString();
-        multipleModelSetup.addNewSegment(newName);
+        activateModel.addNewSegment(newName);
         expect(element(by.css('.global-error > span')).getText()).toBe("");
         
         
         loginPage.logout();
-    });*/
+    });
     
-    /*it('should validate that you can delete a segment', function () {
+    it('should validate that you can delete a segment', function () {
         //==================================================
         // Login
         //==================================================
         loginPage.loginAsSuperAdmin();
 
         //==================================================
-        // Select Multiple Models Tab
+        // Select Activate Model
         //==================================================
         userDropdown.toggleDropdown();
-        userDropdown.MultipleModelsLink.click();
+        userDropdown.ActivateModelLink.click();
         browser.waitForAngular();
         
         //==================================================

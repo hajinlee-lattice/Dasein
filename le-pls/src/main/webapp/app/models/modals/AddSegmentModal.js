@@ -130,14 +130,14 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
                     } else {
                        $scope.saveInProgress = false;
                        $scope.showAddSegmentError = true;
-                       $scope.addSegmentErrorMessage = ResourceUtility.getString("MULTIPLE_MODEL_UPDATE_SEGMENT_ERROR", [secondSegment.Name]);
+                       $scope.addSegmentErrorMessage = ResourceUtility.getString("ACTIVATE_MODEL_UPDATE_SEGMENT_ERROR", [secondSegment.Name]);
                     }
                 });
             } else {
                 addSegment();
             }
         } else {
-            $scope.addSegmentErrorMessage = ResourceUtility.getString('MULTIPLE_MODEL_ADD_SEGMENT_NAME_ERROR');
+            $scope.addSegmentErrorMessage = ResourceUtility.getString('ACTIVATE_MODEL_ADD_SEGMENT_NAME_ERROR');
             $scope.showAddSegmentError = true;
         }
     };

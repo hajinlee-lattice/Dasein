@@ -16,13 +16,13 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $scope.showUserManagement = RightsUtility.maySeeUserManagement();
         $scope.showSystemSetup =  RightsUtility.maySeeSystemSetup();
         $scope.showModelCreationHistoryDropdown = RightsUtility.maySeeModelCreationHistory();
-        $scope.showMultipleModelSetup = RightsUtility.mayEditMultipleModelSetup();
+        $scope.showActivateModel = RightsUtility.mayEditActivateModel();
     }
 
     var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
     if (featureFlags) {
-        if (featureFlags.hasOwnProperty("MultiModelSetup")) {
-            $scope.showMultipleModelSetup = $scope.showMultipleModelSetup && featureFlags['MultiModelSetup'];
+        if (featureFlags.hasOwnProperty("ActivateModel")) {
+            $scope.showActivateModel = $scope.showActivateModel && featureFlags['ActivateModel'];
         }
         if (featureFlags.hasOwnProperty("SystemSetup")) {
             $scope.showSystemSetup = $scope.showSystemSetup && featureFlags['SystemSetup'];
@@ -82,12 +82,12 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $rootScope.$broadcast(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT);
     };
     
-    $scope.multipleModelSetupClicked = function ($event) {
+    $scope.activateModelClicked = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(NavUtility.MULTIPLE_MODEL_SETUP);
+        $rootScope.$broadcast(NavUtility.ACTIVATE_MODEL);
     };
     
     $scope.logoutClicked = function ($event) {

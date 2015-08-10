@@ -1,11 +1,11 @@
-angular.module('mainApp.models.controllers.MultipleModelSetupController', [
+angular.module('mainApp.models.controllers.ActivateModelController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.models.services.ModelService',
     'mainApp.models.modals.AddSegmentModal'
 ])
 
-.controller('MultipleModelSetupController', function ($scope, BrowserStorageUtility, ResourceUtility, ModelService, AddSegmentModal) {
+.controller('ActivateModelController', function ($scope, BrowserStorageUtility, ResourceUtility, ModelService, AddSegmentModal) {
     $scope.ResourceUtility = ResourceUtility;
     if (BrowserStorageUtility.getClientSession() == null) { 
         return; 
@@ -64,7 +64,7 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
                 $scope.segments = result.resultObj.sort(sortByPriority);
             } else {
                 $scope.showError = true;
-                $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_GET_SEGMENTS_ERROR");
+                $scope.errorMessage = ResourceUtility.getString("ACTIVATE_MODEL_GET_SEGMENTS_ERROR");
             }
         });        
     }
@@ -82,7 +82,7 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
                 $scope.errorMessage = result.resultErrors;
             } else {
                 $scope.showError = true;
-                $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_UPDATE_SEGMENTS_ERROR");              
+                $scope.errorMessage = ResourceUtility.getString("ACTIVATE_MODEL_UPDATE_SEGMENTS_ERROR");              
             }
             loadSegments();         
         });
@@ -114,7 +114,7 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
                 }
             } else {
                 $scope.showError = true;
-                $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_DELETE_SEGMENT_ERROR", [segment.Name]);
+                $scope.errorMessage = ResourceUtility.getString("ACTIVATE_MODEL_DELETE_SEGMENT_ERROR", [segment.Name]);
             }
         });
         

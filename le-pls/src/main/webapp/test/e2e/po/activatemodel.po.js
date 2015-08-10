@@ -1,6 +1,6 @@
 'use strict';
 
-var MultipleModelSetup = function() {
+var ActivateModel = function() {
     this.clickAddSegment = function() {          
         element(by.css('.btn-primary')).click();
         browser.waitForAngular();
@@ -18,4 +18,4 @@ var MultipleModelSetup = function() {
 
 };
 
-module.exports = new MultipleModelSetup();
+module.exports = new ActivateModel();

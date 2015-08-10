@@ -1,8 +1,8 @@
-<div data-ng-controller="MultipleModelSetupController">
+<div data-ng-controller="ActivateModelController">
     <header class="header">
         <div class="page-title">
             <div class="wrapper text-center">
-                <h1>{{ResourceUtility.getString('MULTIPLE_MODEL_SETUP_TITLE')}}</h1>
+                <h1>{{ResourceUtility.getString('ACTIVATE_MODEL_TITLE')}}</h1>
             </div>
         </div>
     </header>
@@ -22,11 +22,11 @@
                 <div class="panel-body">
                     <table>
                         <thead>
-                            <th>{{ResourceUtility.getString('MULTIPLE_MODEL_SEGMENT_NAME')}}</th>
-                            <th>{{ResourceUtility.getString('MULTIPLE_MODEL_MODEL_NAME')}}</th>
-                            <th>{{ResourceUtility.getString('MULTIPLE_MODEL_MODEL_ID')}}</th>
-                            <th data-ng-hide="segments.length === 1">{{ResourceUtility.getString('MULTIPLE_MODEL_PRIORITY')}}</th>
-                            <th data-ng-show="allowAddAndDelete">{{ResourceUtility.getString('MULTIPLE_MODEL_DELETE')}}</th>
+                            <th>{{ResourceUtility.getString('ACTIVATE_MODEL_SEGMENT_NAME')}}</th>
+                            <th>{{ResourceUtility.getString('ACTIVATE_MODEL_MODEL_NAME')}}</th>
+                            <th>{{ResourceUtility.getString('ACTIVATE_MODEL_MODEL_ID')}}</th>
+                            <th data-ng-hide="segments.length === 1">{{ResourceUtility.getString('ACTIVATE_MODEL_PRIORITY')}}</th>
+                            <th data-ng-show="allowAddAndDelete">{{ResourceUtility.getString('ACTIVATE_MODEL_DELETE')}}</th>
                         </thead>
                         <tbody>
                             <tr data-ng-repeat="segment in segments" data-ng-class="{shaded: $index % 2}">
@@ -70,7 +70,7 @@
                     </table>
                     <div class="text-left">
                         <button class="btn btn-primary" data-ng-click="addNewSegmentClicked()" data-ng-show="allowAddAndDelete">
-                            {{ResourceUtility.getString('MULTIPLE_MODEL_ADD_NEW')}}
+                            {{ResourceUtility.getString('ACTIVATE_MODEL_ADD_NEW')}}
                         </button>
                     </div>
                     <div class="text-left" data-ng-show="!saving">

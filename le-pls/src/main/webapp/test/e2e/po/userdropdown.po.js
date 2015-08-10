@@ -3,7 +3,7 @@
 var UserDropdown = function() {
     this.signout = element(by.linkText('Sign Out'));
     this.ManageUsersLink = element(by.linkText('Manage Users'));
-    this.MultipleModelsLink = element(by.linkText('Multiple Model Setup'));
+    this.ActivateModelLink = element(by.linkText('Activate Model'));
     this.SystemSetupLink = element(by.linkText('System Setup'));
     this.updatePassword = element(by.linkText('Update Password'));
 

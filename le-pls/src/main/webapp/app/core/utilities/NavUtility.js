@@ -8,7 +8,7 @@ angular.module('mainApp.core.utilities.NavUtility', [])
     this.MODEL_LIST_HASH = "/ModelList";
     this.MODEL_DETAIL_HASH = "/ModelDetail";
     this.MODEL_CREATION_HISTORY_HASH = "/ModelCreationHistory";
-    this.MULTIPLE_MODEL_SETUP = "/MultipleModelSetup";
+    this.ACTIVATE_MODEL = "/ActivateModel";
     
     // Navigation Event Constants
     this.MANAGE_CREDENTIALS_NAV_EVENT = "ManageCredentialsNavEvent";

@@ -134,7 +134,7 @@ angular.module('mainApp.login.controllers.LoginController', [
                     } else {
                         var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
                         if (featureFlags == null) featureFlags = {};
-                        featureFlags['MultiModelSetup'] = false;
+                        featureFlags['ActivateModel'] = false;
                         featureFlags['SystemSetup'] = false;
                         BrowserStorageUtility.setFeatureFlagsDocument(featureFlags, constructMainView);
                     }

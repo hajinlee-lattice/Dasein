@@ -12,7 +12,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.models.controllers.ModelListController',
     'mainApp.models.controllers.ModelDetailController',
     'mainApp.models.controllers.ModelCreationHistoryController',
-    'mainApp.models.controllers.MultipleModelSetupController'
+    'mainApp.models.controllers.ActivateModelController'
 ])
 
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, ConfigService) {
@@ -158,16 +158,16 @@ angular.module('mainApp.core.controllers.MainViewController', [
     }
     
     // Handle when the Update Password link is clicked
-    $scope.$on(NavUtility.MULTIPLE_MODEL_SETUP, function (event, data) {
-        createMultipleModelSetupView();
+    $scope.$on(NavUtility.ACTIVATE_MODEL, function (event, data) {
+        createActivateModelView();
     });
     
-    function createMultipleModelSetupView() {
+    function createActivateModelView() {
         // Set the hash
-        window.location.hash = NavUtility.MULTIPLE_MODEL_SETUP;
+        window.location.hash = NavUtility.ACTIVATE_MODEL;
         
         // Fetch the view and make it Angular aware
-        $http.get('./app/models/views/MultipleModelSetupView.html').success(function (html) {
+        $http.get('./app/models/views/ActivateModelView.html').success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
