@@ -227,20 +227,6 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
     }
 
-    private void listTenantModel() {
-        System.out.print("Retrieving list of tenants to be upgraded ... ");
-        List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
-        System.out.println("OK");
-
-        List<String> summaries = new ArrayList<>();
-        for (String tenant : tenants) {
-            summaries.add(printModelsInTable(tenant));
-        }
-        for (String summary: summaries) {
-            System.out.println(summary);
-        }
-    }
-
     private void listTenantModelInHdfs() {
         System.out.print("Retrieving list of tenants to be upgraded ... ");
         List<String> tenants = tenantModelJdbcManager.getTenantsToUpgrade();
@@ -256,26 +242,10 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
     }
 
-    private String printModelsInTable(String customer) {
-        List<String> modelGuids = tenantModelJdbcManager.getActiveModels(customer);
-
-        ModelStatistics aggregator = new ModelStatistics();
-        for (String modelGuid : modelGuids) {
-            String uuid = YarnPathUtils.extractUuid(modelGuid);
-            printPreUpgradeStatusOfCustomerModel(customer, uuid, aggregator);
-        }
-
-        if (modelGuids.isEmpty()) {
-            System.out.println(String.format("\nCustomer %s does not have any active model", customer));
-        }
-
-        int modlesInTupleId = yarnManager.findAllUuidsInTupleId(customer).size();
-
-        return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, " +
-                        "%2d modelsummary.json, %2d modelsummaries in PLS 1.4 DB, " +
-                        "%2d models already in TupleID folder.",
-                customer, modelGuids.size(), aggregator.activeModels, aggregator.modelJsons, aggregator.modelSummeries,
-                aggregator.summariesIn1_4, modlesInTupleId);
+    private void listTenantModelInHdfsForCustomer(String customer) {
+        String summary = printModelsInHdfs(customer);
+        System.out.println("");
+        System.out.println(summary);
     }
 
     private String printModelsInHdfs(String customer) {
@@ -293,7 +263,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
 
         return String.format("%-30s has %2d models in total, %2d active models, %2d model.json, " +
-                        "%2d modelsummary.json, %2d modelsummaries in PLS 1.4 DB, " +
+                        "%2d modelsummary.json, %2d of them already in PLS 1.4 DB, " +
                         "%2d models already in TupleID folder.",
                 customer, uuids.size(), aggregator.activeModels, aggregator.modelJsons,
                 aggregator.modelSummeries, aggregator.summariesIn1_4, modlesInTupleId);
@@ -344,6 +314,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     private void upgrade(String customer) {
+        listTenantModelInHdfsForCustomer(customer);
         copyCustomerModelsToTupleId(customer);
         upgradeModelSummaryForCustomerModels(customer);
     }
@@ -365,7 +336,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             if (all) {
                 listTenantModelInHdfs();
             } else {
-                listTenantModel();
+                listTenantModelInHdfsForCustomer(customer);
             }
             return true;
         case UpgradeRunner.CMD_MODEL_INFO:

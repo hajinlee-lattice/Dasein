@@ -38,7 +38,8 @@ public class PlsMultiTenantJdbcManager {
 
     public Set<String> getModelGuidsForCustomer(String tenantName) {
         List<String> ids = plsJdbcTemlate.queryForList("SELECT ID FROM " + MODEL_SUMMARY_TABLE
-                + " WHERE TenantName = \'" + tenantName + "\'", String.class);
+                + " lhs INNER JOIN " + TENANT_TABLE + " rhs ON lhs.[FK_TENANT_ID] = rhs.[TENANT_PID] "
+                + " AND rhs.[TenantName] = \'" + tenantName + "\'", String.class);
         Set<String> toReturn = new HashSet<>();
         for (String id: ids) {
             toReturn.add(YarnPathUtils.extractUuid(id));

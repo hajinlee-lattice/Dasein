@@ -12,6 +12,7 @@
         <le.remote.version>2.0.7-SNAPSHOT</le.remote.version>
         <le.camille.version>2.0.7-SNAPSHOT</le.camille.version>
         <le.baton.version>2.0.7-SNAPSHOT</le.baton.version>
+        <le.security.version>2.0.7-SNAPSHOT</le.security.version>
         <le.dataplatform.version>2.0.7-SNAPSHOT</le.dataplatform.version>
     </properties>
 
@@ -100,6 +101,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
             <version>${le.dataplatform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
