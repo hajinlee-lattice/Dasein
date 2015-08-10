@@ -11,8 +11,8 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     var data = $scope.data;
     $scope.ModelId = data.ModelId;
     $scope.TenantId = data.TenantId;
-    $scope.TenantName = $scope.data.TenantName
-    $scope.DataLoaderTenantName = $scope.data.DataLoaderTenantName
+    $scope.TenantName = $scope.data.TenantName;
+    $scope.DataLoaderTenantName = $scope.data.DataLoaderTenantName;
     $scope.ModelHealthScore = data.ModelDetails.RocScore;
     $scope.TemplateVersion = data.ModelDetails.TemplateVersion;
     $scope.modelUploaded = data.ModelDetails.Uploaded;
