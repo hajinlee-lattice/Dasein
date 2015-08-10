@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -140,14 +141,11 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     protected void cleanUpHdfs(String customer) {
         String deletePath = customerBaseDir + "/" + customer + "/data";
-        try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
-            if (fs.exists(new Path(deletePath))) {
-                boolean result = fs.delete(new Path(deletePath), true);
-                if (!result) {
-                    throw new LedpException(LedpCode.LEDP_16001, new String[] { deletePath });
-                }
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, deletePath)) {
+                HdfsUtils.rmdir(yarnConfiguration, deletePath);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_16001, e, new String[] { deletePath });
         }
     }
