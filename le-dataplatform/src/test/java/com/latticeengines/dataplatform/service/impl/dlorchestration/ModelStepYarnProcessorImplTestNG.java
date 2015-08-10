@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -37,6 +38,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
     @Test(groups = "functional.scheduler")
     public void testExecuteYarnSteps() throws Exception {
         cleanUpHdfs("Nutanix");
+        cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
         setupDBConfig();
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
