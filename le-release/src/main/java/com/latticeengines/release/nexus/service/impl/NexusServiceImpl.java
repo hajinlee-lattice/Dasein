@@ -55,8 +55,6 @@ public class NexusServiceImpl implements NexusService {
         parts.add("p", "jar");
 
         FileSystemResource file = new FileSystemResource(String.format("../%1$s/target/%1$s-%2$s-SNAPSHOT.jar", project, version));
-
-        System.out.println(file.exists());
         parts.add("file", file);
         return parts;
     }

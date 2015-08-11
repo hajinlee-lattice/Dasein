@@ -1,33 +1,30 @@
-package com.latticeengines.release.activities;
+package com.latticeengines.release.jenkins.activities;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import com.latticeengines.release.error.handler.ErrorHandler;
 import com.latticeengines.release.exposed.domain.JenkinsBuildStatus;
 import com.latticeengines.release.exposed.domain.ProcessContext;
 
-@Component("runJenkinsDeploymentTestActivity")
 public class RunJenkinsDeploymentTestActivity extends RunJenkinsJobActivity {
 
-    @Autowired
-    public RunJenkinsDeploymentTestActivity(@Qualifier("defaultErrorHandler") ErrorHandler errorHandler) {
-        super(errorHandler);
+    public RunJenkinsDeploymentTestActivity(String url, ErrorHandler errorHandler) {
+        super(url, errorHandler);
     }
 
     @Override
     public ProcessContext runActivity(ProcessContext context) {
-        String url = context.getUrl();
         JenkinsBuildStatus status = jenkinsService.getLastBuildStatus(url);
-        if(status.getIsBuilding() == true){
+        if (status.getIsBuilding()) {
             log.warn(String.format("There is already a deployment test %d running", status.getNumber()));
-            waitUtilNoJobIsRunning(url);
+            waitUtilNoJobIsRunning(0L, url);
         }
-        log.info("Launching a new job now.");
+        log.info("Updating deployment test jenkins configuration.");
+        jenkinsService.updateSVNBranchName(url, String.format("release_%s", context.getReleaseVersion()));
+        log.info("Launching a new job with latest configuration now.");
         jenkinsService.triggerJenkinsJobWithOutParameters(url);
-        waitUtilNoJobIsRunning(url);
+        waitUtilNoJobIsRunning(status.getNumber(), url);
         status = jenkinsService.getLastBuildStatus(url);
-        String message = String.format("The deployment test %d has completed with result %s", status.getNumber(), status.getResult());
+        String message = String.format("The deployment test %d has completed with result %s", status.getNumber(),
+                status.getResult());
         log.info(message);
         context.setResponseMessage(message);
         return context;

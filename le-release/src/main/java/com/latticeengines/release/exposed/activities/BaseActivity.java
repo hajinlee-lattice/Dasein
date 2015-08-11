@@ -8,13 +8,15 @@ import com.latticeengines.release.exposed.domain.ProcessContext;
 
 public abstract class BaseActivity implements Activity {
 
-    private ErrorHandler errorHandler;
+    protected ErrorHandler errorHandler;
+
+    private String beanName;
 
     protected static final Log log = LogFactory.getLog(BaseActivity.class);
 
     public abstract ProcessContext runActivity(ProcessContext context);
-    
-    public BaseActivity(ErrorHandler errorHandler){
+
+    public BaseActivity(ErrorHandler errorHandler) {
         this.errorHandler = errorHandler;
     }
 
@@ -30,6 +32,14 @@ public abstract class BaseActivity implements Activity {
             }
         }
         return null;
+    }
+
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
+    }
+
+    public String getBeanName() {
+        return beanName;
     }
 
 }

@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.release.exposed.domain.JenkinsBuildStatus;
-import com.latticeengines.release.exposed.domain.ReleaseProcessParameters;
+import com.latticeengines.release.exposed.domain.JenkinsJobParameters;
 import com.latticeengines.release.jenkins.service.JenkinsService;
 import com.latticeengines.release.jenkins.xml.helper.JenkinsXMLHelper;
 import com.latticeengines.release.resttemplate.util.AuthorizationHeaderHttpRequestInterceptor;
@@ -42,7 +42,7 @@ public class JenkinsServiceImpl implements JenkinsService {
     }
 
     @Override
-    public ResponseEntity<String> triggerJenkinsJobWithParameters(String url, ReleaseProcessParameters jenkinsParameters) {
+    public ResponseEntity<String> triggerJenkinsJobWithParameters(String url, JenkinsJobParameters jenkinsParameters) {
         AuthorizationHeaderHttpRequestInterceptor interceptor = new AuthorizationHeaderHttpRequestInterceptor(
                 RestTemplateUtil.encodeToken(creds));
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { interceptor }));

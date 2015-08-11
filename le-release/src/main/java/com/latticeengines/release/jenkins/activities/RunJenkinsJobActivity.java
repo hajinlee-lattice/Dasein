@@ -1,4 +1,4 @@
-package com.latticeengines.release.activities;
+package com.latticeengines.release.jenkins.activities;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -9,23 +9,30 @@ import com.latticeengines.release.jenkins.service.JenkinsService;
 
 public abstract class RunJenkinsJobActivity extends BaseActivity {
 
+    @Autowired
+    protected JenkinsService jenkinsService;
+
+    protected String url;
+
     public RunJenkinsJobActivity(ErrorHandler errorHandler) {
         super(errorHandler);
     }
 
-    @Autowired
-    protected JenkinsService jenkinsService;
+    public RunJenkinsJobActivity(String url, ErrorHandler errorHandler) {
+        this(errorHandler);
+        this.url = url;
+    }
 
-    protected void waitUtilNoJobIsRunning(String url) {
-        while(true){
-            try{
+    protected void waitUtilNoJobIsRunning(long lastBuildNumber, String url) {
+        while (true) {
+            try {
                 Thread.sleep(45000L);
                 JenkinsBuildStatus status = jenkinsService.getLastBuildStatus(url);
-                if(status.getIsBuilding() == false){
+                if (status.getIsBuilding() == false && status.getNumber() > lastBuildNumber ) {
                     return;
                 }
                 log.warn(String.format("Waiting for deployment test %d to complete", status.getNumber()));
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }

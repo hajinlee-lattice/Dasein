@@ -14,9 +14,7 @@ public class ProcessContext {
 
     private List<String> projectsShouldUploadToNexus;
 
-    private String url;
-
-    private String responseMessage;
+    private String responseMessage = "";
 
     private int statusCode = -1;
 
@@ -60,14 +58,6 @@ public class ProcessContext {
         this.projectsShouldUploadToNexus = projectsShouldUploadToNexus;
     }
 
-    public String getUrl() {
-        return this.url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public String getResponseMessage() {
         return this.responseMessage;
     }
@@ -82,5 +72,13 @@ public class ProcessContext {
 
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public boolean stopProcess() {
+        if (statusCode >= 400 && statusCode < 600)
+            return true;
+        if (responseMessage.toLowerCase().contains("fail") || responseMessage.toLowerCase().contains("error"))
+            return true;
+        return false;
     }
 }

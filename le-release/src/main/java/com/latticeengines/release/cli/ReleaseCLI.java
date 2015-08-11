@@ -7,6 +7,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.release.exposed.activities.Activity;
 import com.latticeengines.release.exposed.domain.ProcessContext;
+import com.latticeengines.release.processes.ReleaseProcess;
 
 public class ReleaseCLI {
 
@@ -15,9 +16,21 @@ public class ReleaseCLI {
 
         // invokeJMX(applicationContext);
         // invokeHipChat(applicationContext);
-        invokeJenkins(applicationContext);
+       //invokeJenkins(applicationContext);
         // invokeJira(applicationContext);
-        // invokeNeux(applicationContext);
+         //invokeNeux(applicationContext);
+        invokeProcess(applicationContext);
+    }
+
+    private static void invokeProcess(ApplicationContext applicationContext) {
+        ReleaseProcess rp = (ReleaseProcess) applicationContext.getBean("releaseDPProcess");
+        ProcessContext context = new ProcessContext();
+        context.setProduct("dataplatform");
+        context.setProjectsShouldUploadToNexus(Arrays.asList(new String[] {"le-pls", "le-propdata"}));
+        context.setReleaseVersion("2.0.7");
+        context.setNextReleaseVersion("2.0.8");
+        context.setRevision("revision");
+        rp.execute(context);
     }
 
     public static void invokeJMX(ApplicationContext applicationContext) {
@@ -28,7 +41,6 @@ public class ReleaseCLI {
     }
 
     public static void invokeHipChat(ApplicationContext applicationContext) {
-
         Activity ac = (Activity) applicationContext.getBean("finishReleaseNotificationActivity");
         ProcessContext c = ac.execute(new ProcessContext());
         System.out.println(c.getStatusCode());
@@ -36,13 +48,14 @@ public class ReleaseCLI {
 
     public static void invokeJenkins(ApplicationContext applicationContext) {
 
-        ProcessContext context = new ProcessContext();
-        context.setUrl("http://bodcdevvldp117.lattice.local:8080/view/DeploymentTests/job/ledp_release_deploymenttests_prodcluster_api");
-        context.setReleaseVersion("2.0.7");
-        context.setNextReleaseVersion("2.0.8");
-        Activity ac = (Activity) applicationContext.getBean("runJenkinsDeploymentTestActivity");
-        ProcessContext c = ac.execute(context);
-        System.out.print(c.getResponseMessage());
+         ProcessContext context = new ProcessContext();
+         context.setReleaseVersion("2.0.6");
+         context.setNextReleaseVersion("2.0.7");
+         Activity ac = (Activity)
+         applicationContext.getBean("dpDeploymentTestActivity");
+         ProcessContext c = ac.execute(context);
+         System.out.print(c.getResponseMessage());
+
     }
 
     public static void invokeJira(ApplicationContext applicationContext) {
@@ -57,7 +70,7 @@ public class ReleaseCLI {
 
     public static void invokeNeux(ApplicationContext applicationContext) {
         ProcessContext context = new ProcessContext();
-        context.setProjectsShouldUploadToNexus(Arrays.asList(new String[] { "le-pls" }));
+        context.setProjectsShouldUploadToNexus(Arrays.asList(new String[] { "le-propdata" }));
         context.setReleaseVersion("2.0.7");
         Activity ac = (Activity) applicationContext.getBean("uploadProjectsToNexusActivity");
         ProcessContext c = ac.execute(context);
