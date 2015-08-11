@@ -1,35 +1,28 @@
 package com.latticeengines.upgrade.pls;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.*;
+import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.LoginDocument;
-import com.latticeengines.domain.exposed.pls.ModelActivationResult;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.pls.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.UserUpdateData;
-import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.Tenant;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class PlsGaManager {

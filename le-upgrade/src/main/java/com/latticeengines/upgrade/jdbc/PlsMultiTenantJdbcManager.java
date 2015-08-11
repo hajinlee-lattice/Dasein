@@ -1,20 +1,18 @@
 package com.latticeengines.upgrade.jdbc;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.upgrade.yarn.YarnPathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.upgrade.yarn.YarnPathUtils;
+import javax.annotation.PostConstruct;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class PlsMultiTenantJdbcManager {
@@ -32,7 +30,11 @@ public class PlsMultiTenantJdbcManager {
         List<String> ids = plsJdbcTemlate.queryForList("SELECT ID FROM " + MODEL_SUMMARY_TABLE, String.class);
         uuids = new HashSet<>();
         for (String id: ids) {
-            uuids.add(YarnPathUtils.extractUuid(id));
+            try {
+                uuids.add(YarnPathUtils.extractUuid(id));
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
         }
     }
 
