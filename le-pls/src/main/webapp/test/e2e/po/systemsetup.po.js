@@ -1,6 +1,8 @@
 'use strict';
 
 var SystemSetup = function() {
+    var helper = require('./helper.po');
+
     this.enterValidSfdcProductionCredentials = function() {
         //element(by.css('.js-crm-production-edit-button')).click();
         element(by.model('crmProductionCredentials.UserName')).clear();
@@ -13,7 +15,15 @@ var SystemSetup = function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
     };
-    
+
+    this.verifySfdcProductionCredentialsSaved = function() {
+        expect(element(by.model('crmProductionCredentials.UserName')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('crmProductionCredentials.Password')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('crmProductionCredentials.SecurityToken')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('crmProductionCredentials.UserName')).getAttribute("value")).toBe("apeters-widgettech@lattice-engines.com");
+        helper.elementExists(element(by.css('.js-crm-production-edit-button')), true);
+    };
+
     this.enterBadSfdcProductionCredentials = function() {
         //element(by.css('.js-crm-production-edit-button')).click();
         element(by.model('crmProductionCredentials.UserName')).clear();
@@ -44,7 +54,15 @@ var SystemSetup = function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
     };
-    
+
+    this.verifySfdcSandboxCredentialsSaved = function() {
+        expect(element(by.model('crmSandboxCredentials.UserName')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('crmSandboxCredentials.Password')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('crmSandboxCredentials.SecurityToken')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('crmSandboxCredentials.UserName')).getAttribute("value")).toBe("tsanghavi@lattice-engines.com.sandbox2");
+        helper.elementExists(element(by.css('.js-crm-sandbox-edit-button')), true);
+    };
+
     this.enterBadSfdcSandboxCredentials = function() {
         //element(by.css('.js-crm-sandbox-edit-button')).click();
         element(by.model('crmSandboxCredentials.UserName')).clear();
@@ -74,6 +92,15 @@ var SystemSetup = function() {
         element(by.css('.js-eloqua-save-button')).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
+    };
+
+    this.verifyEloquaCredentialsSaved = function() {
+        expect(element(by.css('.js-eloqua-form input.js-user-name')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.css('.js-eloqua-form input.js-password')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.css('.js-eloqua-form input.js-company')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.css('.js-eloqua-form input.js-user-name')).getAttribute("value")).toBe("Matt.Sable");
+        expect(element(by.css('.js-eloqua-form input.js-company')).getAttribute("value")).toBe("TechnologyPartnerLatticeEngines");
+        helper.elementExists(element(by.css('.js-eloqua-edit-button')), true);
     };
     
     this.enterBadEloquaCredentials = function() {
@@ -105,6 +132,15 @@ var SystemSetup = function() {
         element(by.css('.js-marketo-save-button')).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
+    };
+
+    this.verifyMarketoCredentialsSaved = function() {
+        expect(element(by.model('mapCredentials.UserName')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('mapCredentials.Password')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('mapCredentials.Url')).getAttribute("readonly")).toBeTruthy();
+        expect(element(by.model('mapCredentials.UserName')).getAttribute("value")).toBe("latticeenginessandbox1_9026948050BD016F376AE6");
+        expect(element(by.model('mapCredentials.Url')).getAttribute("value")).toBe("https://na-sj02.marketo.com/soap/mktows/2_0");
+        helper.elementExists(element(by.css('.js-marketo-edit-button')), true);
     };
 
     this.enterBadMarketoCredentials = function() {

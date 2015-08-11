@@ -2,31 +2,32 @@
 
 describe('system setup tests', function () {
 
+    var helper = require('./po/helper.po');
     var loginPage = require('./po/login.po');
     var userDropdown = require('./po/userdropdown.po');
     var systemSetup = require('./po/systemsetup.po');
 
-    it('should validate that you can go to the System Setup page', function () {
-        //==================================================
-        // Login
-        //==================================================
-        loginPage.loginAsSuperAdmin();
-
-        //==================================================
-        // Select System Setup Tab
-        //==================================================
-        userDropdown.toggleDropdown();
-        browser.waitForAngular();
-        expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
-        userDropdown.SystemSetupLink.click();
-        browser.waitForAngular();
-        systemSetup.waitForSfdcCredentials();
-
-        //==================================================
-        // Logout
-        //==================================================
-        loginPage.logout();
-    });
+    //it('should validate that you can go to the System Setup page', function () {
+    //    //==================================================
+    //    // Login
+    //    //==================================================
+    //    loginPage.loginAsSuperAdmin();
+    //
+    //    //==================================================
+    //    // Select System Setup Tab
+    //    //==================================================
+    //    userDropdown.toggleDropdown();
+    //    browser.waitForAngular();
+    //    expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
+    //    userDropdown.SystemSetupLink.click();
+    //    browser.waitForAngular();
+    //    systemSetup.waitForSfdcCredentials();
+    //
+    //    //==================================================
+    //    // Logout
+    //    //==================================================
+    //    loginPage.logout();
+    //});
 
     it('should validate that you can enter Eloqua credentials', function () {
         //==================================================
@@ -51,11 +52,11 @@ describe('system setup tests', function () {
 
         browser.driver.sleep(2000);
 
-        ////==================================================
-        //// Enter Valid Eloqua Credentials
-        ////==================================================
-        //systemSetup.enterValidEloquaCredentials();
-        //expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("");
+        //==================================================
+        // Enter Valid Eloqua Credentials
+        //==================================================
+        systemSetup.enterValidEloquaCredentials();
+        expect(element(by.css('.js-eloqua-form .alert-danger')).getText()).toBe("");
 
         //==================================================
         // Logout
@@ -169,5 +170,67 @@ describe('system setup tests', function () {
         //==================================================
         loginPage.logout();
     });
+
+    it('should verify that Eloqua and SFDC credentials are saved', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        browser.waitForAngular();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForEloquaCredentials();
+
+        //==================================================
+        // Verify Eloqua Credentials
+        //==================================================
+        browser.driver.sleep(2000);
+        systemSetup.verifyEloquaCredentialsSaved();
+        systemSetup.verifySfdcProductionCredentialsSaved();
+
+        element(by.css('a[href="#formSandbox"]')).click();
+        systemSetup.waitForSfdcSandboxCredentials();
+        systemSetup.verifySfdcSandboxCredentialsSaved();
+
+        //==================================================
+        // Logout
+        //==================================================
+        loginPage.logout();
+    });
+
+    it('should verify that Marketo credentials are saved', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin(browser.params.alternativeTenantId);
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        navigateToSystemSetup();
+        systemSetup.waitForMarketoCredentials();
+
+        //==================================================
+        // Verify Eloqua Credentials
+        //==================================================
+        systemSetup.verifyMarketoCredentialsSaved();
+
+        //==================================================
+        // Logout
+        //==================================================
+        loginPage.logout();
+    });
+
+    function navigateToSystemSetup() {
+        userDropdown.toggleDropdown();
+        browser.waitForAngular();
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+    }
 
 });
