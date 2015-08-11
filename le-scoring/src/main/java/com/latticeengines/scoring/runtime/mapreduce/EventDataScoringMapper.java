@@ -34,7 +34,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
     private static final long LEAD_FILE_THRESHOLD = 10000L;
 
-    private void processLocalizedFiles(Path[] paths, HashSet<String> modelIDs, HashMap<String, String> modelIdMap, HashMap<String, JSONObject> models) throws IOException, ParseException {
+    private void processLocalizedFiles(Path[] paths, HashSet<String> modelIDs, HashMap<String, String> modelIdMap,
+            HashMap<String, JSONObject> models) throws IOException, ParseException {
 
         JSONObject datatype = null;
         boolean scoringScriptProvided = false;
@@ -50,7 +51,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 scoringScriptProvided = true;
             } else {
                 String modelGuid = p.getName();
-                // if the model is selected by this request, parse that particular model
+                // if the model is selected by this request, parse that
+                // particular model
                 for (Iterator<String> i = modelIDs.iterator(); i.hasNext();) {
                     String modelId = i.next();
                     if (modelId.contains(modelGuid)) {
@@ -88,8 +90,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
         // Preprocess the leads
         HashSet<String> modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
+        log.info("The modelIDs are:");
         for (String str : modelIDs) {
-            log.info("the current str is:");
             log.info(str);
         }
 
@@ -110,7 +112,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         log.info("The number of transformed lead record is: " + totalRecordSize);
 
         if (numberOfRecords != totalRecordSize) {
-            throw new LedpException(LedpCode.LEDP_20010, new String[] { String.valueOf(numberOfRecords), String.valueOf(totalRecordSize) });
+            throw new LedpException(LedpCode.LEDP_20010, new String[] { String.valueOf(numberOfRecords),
+                    String.valueOf(totalRecordSize) });
         }
 
         Long leadFileThreshold = context.getConfiguration().getLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(),
@@ -122,7 +125,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 leadFileThreshold);
         log.info("The size of resultList is: " + resultList.size());
         if (numberOfRecords != resultList.size()) {
-            throw new LedpException(LedpCode.LEDP_20009, new String[] { String.valueOf(totalRecordSize), String.valueOf(resultList.size()) });
+            throw new LedpException(LedpCode.LEDP_20009, new String[] { String.valueOf(totalRecordSize),
+                    String.valueOf(resultList.size()) });
         }
 
         String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
@@ -145,16 +149,18 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             if (leadList.size() == 0) {
                 log.error("The mapper gets zero leads.");
                 throw new LedpException(LedpCode.LEDP_20015);
-            }else{
+            } else {
                 scoring(context, leadList);
             }
         } catch (Exception e) {
-            String errorMessage = String.format("TenantId=%s leadnputQueueId+%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
+            String errorMessage = String
+                    .format("TenantId=%s leadnputQueueId+%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
                             tenantId, leadnputQueueId, e.getMessage(), ExceptionUtils.getStackTrace(e));
             log.error(errorMessage);
             File logFile = new File(logDir + "/" + UUID.randomUUID() + ".err");
             FileUtils.writeStringToFile(logFile, errorMessage);
-            throw new LedpException(LedpCode.LEDP_20014, new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e) });
+            throw new LedpException(LedpCode.LEDP_20014,
+                    new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e) });
         }
     }
 }

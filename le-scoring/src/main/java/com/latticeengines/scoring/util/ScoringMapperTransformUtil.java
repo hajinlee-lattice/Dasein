@@ -51,32 +51,32 @@ public class ScoringMapperTransformUtil {
 
         for (String lead : leadList) {
             leadJsonObject = (JSONObject) jsonParser.parse(lead);
-            String leadId = String.valueOf(leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN));
-            String modelId = String.valueOf(leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN));
-            if (leadId == null) {
+            if (leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN) == null) {
                 throw new LedpException(LedpCode.LEDP_20003);
             }
-            if (modelId == null) {
+            if (leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN) == null) {
                 throw new LedpException(LedpCode.LEDP_20004);
             }
+            String leadId = String.valueOf(leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN));
+            String modelId = String.valueOf(leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN));
             String key = leadId + modelId;
             if (leadAndModelHash.contains(key)) {
                 throw new LedpException(LedpCode.LEDP_20005, new String[] { leadId, modelId });
-            } else {
-                leadAndModelHash.add(leadId + modelId);
             }
+            leadAndModelHash.add(key);
             toReturn.add(modelId);
         }
         return toReturn;
     }
 
-    public static void parseModelFiles(HashMap<String, JSONObject> models, Path path) throws IOException, ParseException {
+    public static void parseModelFiles(HashMap<String, JSONObject> models, Path path) throws IOException,
+            ParseException {
 
         FileReader reader;
         reader = new FileReader(path.toString());
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-        // use the GUID to identify a model. It is a contact that when 
+        // use the GUID to identify a model. It is a contact that when
         // mapper localizes the model, it changes its name to be the modelGUID
         String modelGuid = path.getName();
         models.put(modelGuid, jsonObject);
@@ -106,7 +106,7 @@ public class ScoringMapperTransformUtil {
     }
 
     private static void decodeSupportedFiles(String modelGuid, JSONObject modelObject) throws IOException {
-        
+
         JSONArray compressedSupportedFiles = (JSONArray) modelObject.get(MODEL_COMPRESSED_SUPPORT_Files);
         for (int i = 0; i < compressedSupportedFiles.size(); i++) {
             JSONObject compressedFile = (JSONObject) compressedSupportedFiles.get(i);
@@ -128,7 +128,8 @@ public class ScoringMapperTransformUtil {
     }
 
     public static void manipulateLeadFile(HashMap<String, ArrayList<String>> leadInputRecordMap,
-            HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, String record) throws ParseException {
+            HashMap<String, JSONObject> models, HashMap<String, String> modelIdMap, String record)
+            throws ParseException {
 
         JSONParser jsonParser = new JSONParser();
         JSONObject leadJsonObject = null;
@@ -157,7 +158,7 @@ public class ScoringMapperTransformUtil {
                 break;
             }
         }
-        
+
         return guid;
     }
 
@@ -217,8 +218,9 @@ public class ScoringMapperTransformUtil {
         }
         return toReturn;
     }
-    
-    public static void writeToLeadInputFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, long threshold) throws IOException {
+
+    public static void writeToLeadInputFiles(HashMap<String, ArrayList<String>> leadInputRecordMap, long threshold)
+            throws IOException {
         log.info("threshold is " + threshold);
         if (leadInputRecordMap == null) {
             new Exception("leadInputRecordMap is null");
@@ -229,7 +231,8 @@ public class ScoringMapperTransformUtil {
         }
     }
 
-    private static void writeToLeadInputFile(ArrayList<String> leadInputRecords, String modelGuid, long threshold) throws IOException {
+    private static void writeToLeadInputFile(ArrayList<String> leadInputRecords, String modelGuid, long threshold)
+            throws IOException {
         log.info("for model " + modelGuid + ", there are " + leadInputRecords.size() + " leads");
 
         int indexOfFile = 0;
@@ -260,22 +263,21 @@ public class ScoringMapperTransformUtil {
     }
 
     public static void main(String[] args) throws Exception {
-//        String type = "Float";
-//        String value = "'123.00'wx";
-//
-//        String typeAndValue = type + "|\'" + value + "\'";
-//        String trpeAndValue2 = String.format("%s|\'%s\'", type, value);
-//        System.out.println(value);
-//        if (typeAndValue.equals(trpeAndValue2)) {
-//            System.out.println("jaja");
-//        }
-        
-        
+        // String type = "Float";
+        // String value = "'123.00'wx";
+        //
+        // String typeAndValue = type + "|\'" + value + "\'";
+        // String trpeAndValue2 = String.format("%s|\'%s\'", type, value);
+        // System.out.println(value);
+        // if (typeAndValue.equals(trpeAndValue2)) {
+        // System.out.println("jaja");
+        // }
+
         /*
-         *  Decompose the model.json
-         *
+         * Decompose the model.json
          */
-        //HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
+        // HashMap<String, JSONObject> models = new HashMap<String,
+        // JSONObject>();
         File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
         String modelStr = FileUtils.readFileToString(modelFile);
         JSONObject modelObject;
@@ -284,6 +286,5 @@ public class ScoringMapperTransformUtil {
         decodeSupportedFiles("e2e", (JSONObject) modelObject.get(MODEL));
         writeScoringScript("e2e", (JSONObject) modelObject.get(MODEL));
     }
-
 
 }
