@@ -22,6 +22,20 @@ var ExternalAdmin = function() {
                 loginPage.logout();
             });
 
+            it('should see edit/delete links for all users', function () {
+                loginPage.loginAsExternalAdmin();
+                userDropdown.toggleDropdown();
+                userDropdown.ManageUsersLink.click();
+
+                userManagement.canEditAndDeleteUser("pls-super-admin-tester", false);
+                userManagement.canEditAndDeleteUser("pls-internal-admin-tester", false);
+                userManagement.canEditAndDeleteUser("pls-internal-user-tester", false);
+                userManagement.canEditAndDeleteUser("pls-external-admin-tester", true);
+                userManagement.canEditAndDeleteUser("pls-external-user-tester", true);
+
+                loginPage.logout();
+            });
+
             var originalNumUsers;
             it('should be able to add a new user', function () {
                 //==================================================

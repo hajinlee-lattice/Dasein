@@ -7,17 +7,31 @@ var SuperAdmin = function() {
 
     this.testUserManagement = function() {
         describe('A super admin', function(){
-            it('should see links accordingly', function () {
+            //it('should see links accordingly', function () {
+            //    loginPage.loginAsSuperAdmin();
+            //
+            //    userDropdown.toggleDropdown();
+            //    userManagement.canSeeManageUsersLink(true);
+            //    userManagement.canSeeSystemSetupLink(true);
+            //    userManagement.canSeeActivateModelLink(true);
+            //    userManagement.canSeeModelCreationHistoryLink(true);
+            //    userDropdown.toggleDropdown();
+            //
+            //    userManagement.canSeeHiddenAdminLink(true);
+            //
+            //    loginPage.logout();
+            //});
+
+            it('should see edit/delete links for all users', function () {
                 loginPage.loginAsSuperAdmin();
-
                 userDropdown.toggleDropdown();
-                userManagement.canSeeManageUsersLink(true);
-                userManagement.canSeeSystemSetupLink(true);
-                userManagement.canSeeActivateModelLink(true);
-                userManagement.canSeeModelCreationHistoryLink(true);
-                userDropdown.toggleDropdown();
+                userDropdown.ManageUsersLink.click();
 
-                userManagement.canSeeHiddenAdminLink(true);
+                userManagement.canEditAndDeleteUser("pls-super-admin-tester", true);
+                userManagement.canEditAndDeleteUser("pls-internal-admin-tester", true);
+                userManagement.canEditAndDeleteUser("pls-internal-user-tester", true);
+                userManagement.canEditAndDeleteUser("pls-external-admin-tester", true);
+                userManagement.canEditAndDeleteUser("pls-external-user-tester", true);
 
                 loginPage.logout();
             });

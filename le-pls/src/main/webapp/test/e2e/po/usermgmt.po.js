@@ -59,6 +59,18 @@ var UserManagement = function() {
         browser.driver.sleep(5000);
     };
 
+    this.canEditAndDeleteUser = function(username, expected) {
+        var message = "be able to delete user " + username;
+        element.all(by.repeater('user in users')).each(function(tr){
+            tr.getInnerHtml().then(function(html){
+                if (html.indexOf(username) > -1) {
+                    expect(helper.elementExists(tr.element(by.css("i.fa-trash-o")), expected,
+                        expected ? "should " + message : "should not " + message));
+                }
+            });
+        });
+    };
+
     this.waitAndSleep = function() {
         browser.waitForAngular();
         browser.driver.sleep(5000);
