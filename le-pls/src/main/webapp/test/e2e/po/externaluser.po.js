@@ -3,22 +3,21 @@
 var ExternalUser = function() {
     var loginPage = require('./login.po');
     var userManagement = require('./usermgmt.po');
-    var userdropdown = require('./userdropdown.po');
+    var userDropdown = require('./userdropdown.po');
 
     this.testUserManagement = function() {
         describe('An external user', function(){
-            it('should not be able to see the hidden link', function () {
-                loginPage.loginAsExternalUser();
-                userManagement.assertAdminLinkIsVisible(false);
-                loginPage.logout();
-            });
-
-            it('should not be able to see the manage user page', function () {
+            it('should see links accordingly', function () {
                 loginPage.loginAsExternalUser();
 
-                // cannot see manage users link
-                userdropdown.toggleDropdown();
-                userManagement.assertManageUsersIsVisible(false);
+                userDropdown.toggleDropdown();
+                userManagement.canSeeManageUsersLink(false);
+                userManagement.canSeeSystemSetupLink(false);
+                userManagement.canSeeActivateModelLink(false);
+                userManagement.canSeeModelCreationHistoryLink(false);
+                userDropdown.toggleDropdown();
+
+                userManagement.canSeeHiddenAdminLink(false);
 
                 loginPage.logout();
             });

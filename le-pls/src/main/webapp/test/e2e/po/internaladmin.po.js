@@ -7,9 +7,18 @@ var InternalAdmin = function() {
 
     this.testUserManagement = function() {
         describe('An internal admin', function(){
-            it('should sees the hidden link', function () {
+            it('should see links accordingly', function () {
                 loginPage.loginAsInternalAdmin();
-                userManagement.assertAdminLinkIsVisible(true);
+
+                userDropdown.toggleDropdown();
+                userManagement.canSeeManageUsersLink(true);
+                userManagement.canSeeSystemSetupLink(true);
+                userManagement.canSeeActivateModelLink(true);
+                userManagement.canSeeModelCreationHistoryLink(true);
+                userDropdown.toggleDropdown();
+
+                userManagement.canSeeHiddenAdminLink(true);
+
                 loginPage.logout();
             });
 

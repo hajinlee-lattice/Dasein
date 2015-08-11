@@ -7,9 +7,18 @@ var ExternalAdmin = function() {
 
     this.testUserManagement = function() {
         describe('An external admin', function(){
-            it('should not see the hidden link', function () {
+            it('should see links accordingly', function () {
                 loginPage.loginAsExternalAdmin();
-                userManagement.assertAdminLinkIsVisible(false);
+
+                userDropdown.toggleDropdown();
+                userManagement.canSeeManageUsersLink(true);
+                userManagement.canSeeSystemSetupLink(false);
+                userManagement.canSeeActivateModelLink(false);
+                userManagement.canSeeModelCreationHistoryLink(false);
+                userDropdown.toggleDropdown();
+
+                userManagement.canSeeHiddenAdminLink(false);
+
                 loginPage.logout();
             });
 

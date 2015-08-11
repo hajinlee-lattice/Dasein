@@ -3,22 +3,21 @@
 var InternalUser = function() {
     var loginPage = require('./login.po');
     var userManagement = require('./usermgmt.po');
-    var userdropdown = require('./userdropdown.po');
+    var userDropdown = require('./userdropdown.po');
 
     this.testUserManagement = function() {
         describe('An internal user', function(){
-            it('should be able to see the hidden link', function () {
-                loginPage.loginAsInternalUser();
-                userManagement.assertAdminLinkIsVisible(true);
-                loginPage.logout();
-            });
-
-            it('should not be able to see the manage user page', function () {
+            it('should see links accordingly', function () {
                 loginPage.loginAsInternalUser();
 
-                // can see manage users link
-                userdropdown.toggleDropdown();
-                userManagement.assertManageUsersIsVisible(false);
+                userDropdown.toggleDropdown();
+                userManagement.canSeeManageUsersLink(false);
+                userManagement.canSeeSystemSetupLink(false);
+                userManagement.canSeeActivateModelLink(false);
+                userManagement.canSeeModelCreationHistoryLink(true);
+                userDropdown.toggleDropdown();
+
+                userManagement.canSeeHiddenAdminLink(true);
 
                 loginPage.logout();
             });

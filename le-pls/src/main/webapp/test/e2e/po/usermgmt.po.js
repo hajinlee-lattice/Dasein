@@ -2,6 +2,7 @@
 
 var UserManagement = function() {
     var userDropdown = require('./userdropdown.po');
+    var helper = require('./helper.po');
     
     this.AddNewUserLink = element(by.css('#usermgmt-btn-add-user'));
     this.tempUserFirstName = 'Temp';
@@ -20,13 +21,33 @@ var UserManagement = function() {
         return text;
     };
 
-    this.assertManageUsersIsVisible = function (expected) {
-        if (expected) {
-            expect(userDropdown.ManageUsersLink.getWebElement().isDisplayed()).toBe(expected);
-        } else {
-            expect(userDropdown.ManageUsersLink.isPresent()).toBe(expected);
-        }
+    this.canSeeManageUsersLink = function (expected) {
+        helper.elementExists(userDropdown.ManageUsersLink, expected,
+            expected ? "should see Manage Users" : "should not see Manage Users");
+    };
 
+    this.canSeeSystemSetupLink = function (expected) {
+        helper.elementExists(userDropdown.SystemSetupLink, expected,
+            expected ? "should see System Setup" : "should not see System Setup");
+    };
+
+    this.canSeeActivateModelLink = function (expected) {
+        helper.elementExists(userDropdown.ActivateModelLink, expected,
+            expected ? "should see Activate Model" : "should not see Activate Model");
+    };
+
+    this.canSeeModelCreationHistoryLink = function (expected) {
+        helper.elementExists(userDropdown.ModelCreationHistoryLink, expected,
+            expected ? "should see Model Creation History" : "should not see Model Creation History");
+    };
+
+    this.canSeeHiddenAdminLink = function(expected) {
+        element.all(by.css('a.model')).first().click();
+        browser.driver.wait(element(by.css('a.back-button')).isPresent(),
+            10000, 'tabs list should appear with in 10 sec.');
+        element(by.linkText('SAMPLE LEADS')).click();
+        helper.elementExists(element(by.linkText('Admin')), expected,
+            expected ? "should see Admin link" : "should not see Admin link");
     };
 
     this.enterUserInfoAndClickOkay = function(firstName, lastName, email) {
@@ -36,19 +57,6 @@ var UserManagement = function() {
         element(by.model('user.Email')).sendKeys(email);
         element(by.css('#add-user-btn-save')).click();
         browser.driver.sleep(5000);
-    };
-
-    this.assertAdminLinkIsVisible = function(expected) {
-        element.all(by.css('a.model')).first().click();
-        browser.driver.wait(element(by.css('a.back-button')).isPresent(),
-            10000, 'tabs list should appear with in 10 sec.');
-
-        element(by.linkText('SAMPLE LEADS')).click();
-        if (expected) {
-            expect(element(by.linkText('Admin')).getWebElement().isDisplayed()).toBe(expected);
-        } else {
-            expect(element(by.linkText('Admin')).isPresent()).toBe(expected);
-        }
     };
 
     this.waitAndSleep = function() {
