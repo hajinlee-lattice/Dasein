@@ -66,7 +66,7 @@ public enum LedpCode {
     LEDP_16006("Retrieved empty DL metadata columns for model command:{0} from url:{1}."), //
     LEDP_16007("LeadScoringCommand failed."), //
     LEDP_16008("Error message received in DL metadata columns response: {0}"), //
-    LEDP_16009("Problem writing metadata to HDFS path: {0}, metadata content: (1)"), //
+    LEDP_16009("Problem writing data to HDFS path: {0}, data content: {1}"), //
     LEDP_16010("Problem publishing model for model command:{0}, yarnAppId:{1}."), //
     LEDP_16011("Problem publishing model-artifacts for model command:{0}, yarnAppId:{1}."), //
 
@@ -122,57 +122,52 @@ public enum LedpCode {
     LEDP_19000("Failed to send an email."),
 
     // le-admin 19101-19999
-    LEDP_19101("Service service error."),
-    LEDP_19102("Service component {0} is not registered."),
-    LEDP_19103("Getting files in a server-side directory failed."),
-    LEDP_19104("The default choice [{0}] is not valid among the options {1}."),
-    LEDP_19105("The requested option list {0} does not contain the existing default choice [{1}]"),
+    LEDP_19101("Service service error."), //
+    LEDP_19102("Service component {0} is not registered."), //
+    LEDP_19103("Getting files in a server-side directory failed."), //
+    LEDP_19104("The default choice [{0}] is not valid among the options {1}."), //
+    LEDP_19105("The requested option list {0} does not contain the existing default choice [{1}]"), //
 
     // le-scoring 20000-20100
-    LEDP_20000("ScoringCommand Failed"),
-    LEDP_20001("Validation of the datatype failed: {0}"),
-    LEDP_20002("Python script for scoring is not provided."),
-    LEDP_20003("Lead does not have 'LeadID' column."),
-    LEDP_20004("Lead does not have 'Model_GUID' column."),
-    LEDP_20005("There are duplicate leads for 'LeadID': {0} and 'Model_GUID': {1} in one request."),
-    LEDP_20006("Datatype file for scoring is not provided."),
-    LEDP_20007("The following model(s) is(are) not provided: {0}"),
-    LEDP_20008("Cannot find any model for tenant: {0}"),
-    LEDP_20009("Not all the leads are not scored. {0} leads are transformed, but only {1} got scored."),
-    LEDP_20010("Not all the leads are transformed and stored. {0} leads are passed in, but only {1} got transformed."),
-    LEDP_20011("The scoring python script (scoring.py) failed, with the error message: {0}.}"),
-    LEDP_20012("Output file {0} does not exist.}"),
-    LEDP_20013("Scoring output file in incorrect format.}"),
-    LEDP_20014("The scoring mapper failed. The message is: {0}, and the stack trace is: {1}}"),
-    LEDP_20015("The scoring mapper should not get 0 lead"),
-    LEDP_20016("The total number scoring leads is incorrect"),
-    LEDP_20017("Cannot process scoring request with 0 lead"),
-
+    LEDP_20000("ScoringCommand Failed"), LEDP_20001("Validation of the datatype failed: {0}"), //
+    LEDP_20002("Python script for scoring is not provided."), //
+    LEDP_20003("Lead does not have 'LeadID' column."), //
+    LEDP_20004("Lead does not have 'Model_GUID' column."), //
+    LEDP_20005("There are duplicate leads for 'LeadID': {0} and 'Model_GUID': {1} in one request."), //
+    LEDP_20006("Datatype file for scoring is not provided."), //
+    LEDP_20007("The following model(s) is(are) not provided: {0}"), //
+    LEDP_20008("Cannot find any model for tenant: {0}"), //
+    LEDP_20009("Not all the leads are not scored. {0} leads are transformed, but only {1} got scored."), //
+    LEDP_20010("Not all the leads are transformed and stored. {0} leads are passed in, but only {1} got transformed."), //
+    LEDP_20011("The scoring python script (scoring.py) failed, with the error message: {0}.}"), //
+    LEDP_20012("Output file {0} does not exist.}"), LEDP_20013("Scoring output file in incorrect format.}"), //
+    LEDP_20014("The scoring mapper failed. The message is: {0}, and the stack trace is: {1}}"), //
+    LEDP_20015("The scoring mapper should not get 0 lead"), //
+    LEDP_20016("The total number scoring leads is incorrect"), //
+    LEDP_20017("Cannot process scoring request with 0 lead"), //
 
     // le-remote 21000-21999
-    LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"),
-    LEDP_21001("Problem installing segment spec; DataLoader result code: {0}, error message {1}"),
-    LEDP_21002("Problem installing VisiDB structure file via DataLoader REST: {0}"),
-    LEDP_21003("Problem updating segments. Updated segment names {0} does not match existing segment names {1}"),
-    LEDP_21004("Problem installing DataLoader config file via DataLoader REST: {0}"),
-    LEDP_21005("Problem getting DataLoader tenant settings via DataLoader REST: {0}"),
-    LEDP_21006("Problem creating DataLoader tenant via DataLoader REST: {0}"),
-    LEDP_21007("Problem deleting DataLoader tenant via DataLoader REST: {0}"),
+    LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"), //
+    LEDP_21001("Problem installing segment spec; DataLoader result code: {0}, error message {1}"), //
+    LEDP_21002("Problem installing VisiDB structure file via DataLoader REST: {0}"), //
+    LEDP_21003("Problem updating segments. Updated segment names {0} does not match existing segment names {1}"), //
+    LEDP_21004("Problem installing DataLoader config file via DataLoader REST: {0}"), //
+    LEDP_21005("Problem getting DataLoader tenant settings via DataLoader REST: {0}"), //
+    LEDP_21006("Problem creating DataLoader tenant via DataLoader REST: {0}"), //
+    LEDP_21007("Problem deleting DataLoader tenant via DataLoader REST: {0}"), //
     // le-playmaker
-    LEDP_22000("Can not create data source for tenant {0}"),
-    LEDP_22001("Can not find DB connection info for tenant {0}"),
-    LEDP_22002("Tenant exists, but there's no such oauth user, tenant name={0}"),
-    LEDP_22003("Access token does not exist!"),
-    LEDP_22004("Access token does not have token key!"),
-    LEDP_22005("Failed to get tenant!"),
-    LEDP_22006("Failed to get tenant from DB!"),
-    LEDP_22007("Failed to get recommendations after retry."),
+    LEDP_22000("Can not create data source for tenant {0}"), //
+    LEDP_22001("Can not find DB connection info for tenant {0}"), //
+    LEDP_22002("Tenant exists, but there's no such oauth user, tenant name={0}"), //
+    LEDP_22003("Access token does not exist!"), LEDP_22004("Access token does not have token key!"), //
+    LEDP_22005("Failed to get tenant!"), LEDP_22006("Failed to get tenant from DB!"), //
+    LEDP_22007("Failed to get recommendations after retry."), //
 
     // le-upgrade
-    LEDP_24000("Yarn operation exception: {0}"),
-    LEDP_24001("Jdbc operation exception: {0}"),
-    LEDP_24002("DL operation exception: {0}"),
-    LEDP_24003("PLS operation exception: {0}"),
+    LEDP_24000("Yarn operation exception: {0}"), //
+    LEDP_24001("Jdbc operation exception: {0}"), //
+    LEDP_24002("DL operation exception: {0}"), //
+    LEDP_24003("PLS operation exception: {0}"), //
     LEDP_24004("ZK operation exception: {0}");
 
     private String message;
@@ -185,4 +180,4 @@ public enum LedpCode {
         return message;
     }
 }
-//@formatter:on
+// @formatter:on

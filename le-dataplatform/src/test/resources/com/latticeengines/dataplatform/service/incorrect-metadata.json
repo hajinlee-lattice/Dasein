@@ -1,0 +1,174 @@
+{
+  "ErrorMessage": null,
+  "Metadata": [
+    {
+      "ApprovedUsage": [
+        "ModelAndModelInsights"
+      ],
+      "ColumnName": "Activity_Count_Click_Email",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Email Clicks (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "Email Clicks (Marketwo)",
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": "Marketing Activity"
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": "ratio",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "ApprovedUsage": [
+        "Model"
+      ],
+      "ColumnName": "Activity_Count_Click_Link",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Web-Link Clicks (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "Web-Link Clicks (Marketo)",
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": "Marketing Activity"
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": "ratio",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "ApprovedUsage": [
+        "ModelAndAllInsights"
+      ],
+      "ColumnName": "Activity_Count_Email_Bounced_Soft",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Soft Email Bounces (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "Email Bounces, Soft (Marketo)",
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": "Marketing Activity"
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": "ratio",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "ApprovedUsage": null,
+      "ColumnName": "Activity_Count_Fill_Out_Form",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Form Fills (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": null,
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": null
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "Activity_Count_Interesting_Moment_Any",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Interesting Moments (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "",
+      "Extensions": [
+        {
+          "Key": "Fake Category",
+          "Value": ""
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": "Fakeratio",
+      "Tags": [
+        "FakeInternal"
+      ]
+    },
+    {
+      "ApprovedUsage": [
+        "FakeNone"
+      ],
+      "ColumnName": "Activity_Count_Interesting_Moment_Any_2",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Interesting Moments (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "Interesting Moments (Marketo)",
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": "Marketing Activity"
+        },
+        {
+          "Key": "Fake Category",
+          "Value": "Fake Marketing Activity"
+        }
+      ],
+      "FundamentalType": null,
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": "interval",
+      "Tags": [
+        ""
+      ]
+    }
+  ],
+  "Status": 3
+}

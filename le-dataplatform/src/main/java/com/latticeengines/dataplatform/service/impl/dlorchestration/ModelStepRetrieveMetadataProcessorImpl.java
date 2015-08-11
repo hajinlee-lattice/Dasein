@@ -24,6 +24,8 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.remote.exposed.exception.MetadataValidationException;
+import com.latticeengines.remote.exposed.service.MetadataValidationService;
 
 @Component("modelStepRetrieveMetadataProcessor")
 public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcessor {
@@ -36,6 +38,9 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     @Autowired
     private ModelCommandLogService modelCommandLogService;
+
+    @Autowired
+    private MetadataValidationService metadataValidationService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -54,7 +59,8 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     @Override
     public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
-        executeStepWithResult(modelCommand, modelCommandParameters);
+        String metadata = executeStepWithResult(modelCommand, modelCommandParameters);
+        validateMetadata(metadata, modelCommand, modelCommandParameters);
     }
 
     @VisibleForTesting
@@ -98,18 +104,44 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
         }
         log.info(metadata);
 
-        String hdfsPath = getHdfsPathForMetadataFile(modelCommand, modelCommandParameters);
-        try {
-            HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, metadata);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_16009, e, new String[] { hdfsPath, metadata });
-        }
+        String metadataHdfsPath = getHdfsPathForMetadataFile(modelCommand, modelCommandParameters);
+        writeStringToHdfs(metadata, metadataHdfsPath);
 
         return metadata;
     }
 
+    @VisibleForTesting
+    void validateMetadata(String metadata, ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
+        try {
+            metadataValidationService.validate(metadata);
+        } catch (MetadataValidationException e) {
+            String metadataValidationString = e.getMessage();
+            String metadataDiagnosticsHdfsPath = getHdfsPathForMetadataDiagnosticsFile(modelCommand,
+                    modelCommandParameters);
+            writeStringToHdfs(metadataValidationString, metadataDiagnosticsHdfsPath);
+        }
+        return;
+    }
+
+    @VisibleForTesting
+    void writeStringToHdfs(String contents, String hdfsPath) {
+        try {
+            HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, contents);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_16009, e, new String[] { hdfsPath, contents });
+        }
+    }
+
     String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         String customer = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
-        return String.format("%s/%s/data/%s/metadata.avsc", customerBaseDir, customer, modelCommandParameters.getMetadataTable());
+        return String.format("%s/%s/data/%s/metadata.avsc", customerBaseDir, customer,
+                modelCommandParameters.getMetadataTable());
+    }
+
+    String getHdfsPathForMetadataDiagnosticsFile(ModelCommand modelCommand,
+            ModelCommandParameters modelCommandParameters) {
+        String customer = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
+        return String.format("%s/%s/data/%s/metadata-diagnostics.json", customerBaseDir, customer,
+                modelCommandParameters.getMetadataTable());
     }
 }

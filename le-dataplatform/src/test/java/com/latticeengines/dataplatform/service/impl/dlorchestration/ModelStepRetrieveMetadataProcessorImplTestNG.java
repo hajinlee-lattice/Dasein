@@ -1,13 +1,19 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
+import java.net.URL;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +72,33 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
     }
 
     @Test(groups = "functional")
+    public void testWriteStringToHdfs() throws Exception {
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        modelCommandEntityMgr.createOrUpdate(command);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+        String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataFile(command, commandParameters);
+
+        try {
+            modelStepRetrieveMetadataProcessor.writeStringToHdfs("Contents", hdfsPath);
+        } catch (Exception e) {
+            assertTrue(true, "Writing to Hdfs should have passed.");
+        }
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, hdfsPath));
+        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
+        assertTrue(content.equals("Contents"));
+
+        try {
+            URL metadataUrl = ClassLoader
+                    .getSystemResource("com/latticeengines/dataplatform/service/incorrect-metadata.json");
+            String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+            modelStepRetrieveMetadataProcessor.writeStringToHdfs(hdfsPath, metadata);
+        } catch (Exception e) {
+            assertTrue(e instanceof LedpException);
+            assertTrue(((LedpException) e).getCode() == LedpCode.LEDP_16009);
+        }
+    }
+
+    @Test(groups = "functional")
     public void testSuccessfulExecuteStep() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
         modelCommandEntityMgr.createOrUpdate(command);
@@ -91,9 +124,64 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         // Assert metadata is in json format
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(metadata);
-        long status = (long)jsonObject.get("Status");
+        long status = (long) jsonObject.get("Status");
 
         assertEquals(status, 3);
+    }
+
+    @Test(groups = "functional")
+    public void testMetadataDiagnosticJsonFormatAndExistsInHdfs() throws Exception {
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        modelCommandEntityMgr.createOrUpdate(command);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+
+        commandParameters.setDlUrl("http://visidb.lattice-engines.com/DLRestService");
+        commandParameters.setDlQuery("View_Table_Cfg_PLS_Event");
+
+        URL metadataUrl = ClassLoader
+                .getSystemResource("com/latticeengines/dataplatform/service/incorrect-metadata.json");
+        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+
+        modelStepRetrieveMetadataProcessor.validateMetadata(metadata, command, commandParameters);
+
+        String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataDiagnosticsFile(command,
+                commandParameters);
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, hdfsPath));
+
+        // Assert metadataValidationResult is in json format
+        String metadataDiagnosticsContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(metadataDiagnosticsContent);
+        JSONArray approvedUsageError = (JSONArray) jsonObject.get("ApprovedUsageAnnotationErrors");
+        assertEquals(approvedUsageError.size(), 2);
+        JSONArray tagsError = (JSONArray) jsonObject.get("TagsAnnotationErrors");
+        assertEquals(tagsError.size(), 3);
+        JSONArray categoryError = (JSONArray) jsonObject.get("CategoryAnnotationErrors");
+        assertEquals(categoryError.size(), 2);
+        JSONArray displayNameError = (JSONArray) jsonObject.get("DisplayNameAnnotationErrors");
+        assertEquals(displayNameError.size(), 2);
+        JSONArray statTypeError = (JSONArray) jsonObject.get("StatisticalTypeAnnotationErrors");
+        assertEquals(statTypeError.size(), 2);
+    }
+
+    @Test(groups = "functional")
+    public void testDoNotUploadMetadataDiagnosticJsonWhenValidationPasses() throws Exception {
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        modelCommandEntityMgr.createOrUpdate(command);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+
+        commandParameters.setDlUrl("http://visidb.lattice-engines.com/DLRestService");
+        commandParameters.setDlQuery("View_Table_Cfg_PLS_Event");
+
+        URL metadataUrl = ClassLoader
+                .getSystemResource("com/latticeengines/dataplatform/service/correct-metadata.json");
+        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+
+        modelStepRetrieveMetadataProcessor.validateMetadata(metadata, command, commandParameters);
+
+        String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataDiagnosticsFile(command,
+                commandParameters);
+        assertFalse(HdfsUtils.fileExists(yarnConfiguration, hdfsPath));
     }
 
     @Test(groups = "functional", enabled = true)

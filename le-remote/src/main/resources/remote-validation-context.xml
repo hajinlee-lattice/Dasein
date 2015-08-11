@@ -9,8 +9,7 @@
   http://www.springframework.org/schema/task
       http://www.springframework.org/schema/task/spring-task-3.2.xsd">
 
-    <import resource="classpath:remote-validation-context.xml"/>
-    <context:annotation-config />
-    <context:component-scan base-package="com.latticeengines.remote" />
+   <bean id="beanValidationService" class="com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl">
+   </bean>
 
 </beans>

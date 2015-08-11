@@ -2,7 +2,9 @@ package com.latticeengines.common.exposed.validator.impl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -10,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
-import com.latticeengines.common.exposed.expection.BeanValidationException;
+import com.latticeengines.common.exposed.expection.AnnotationValidationError;
 import com.latticeengines.common.exposed.validator.AnnotationValidator;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 
@@ -19,12 +21,13 @@ public class BeanValidationServiceImpl implements BeanValidationService {
 
     private static final String ANNOTATION_VALIDATOR = "AnnotationValidator";
     private static final String ANNOTATION_VALIDATOR_CLASS_PATH = "com.latticeengines.common.exposed.validator.impl.%s";
-    private static final String VALIDATION_EXCEPTION_MESSAGE = "Field with name: %s does not match its annotation";
 
     private static final Map<String, AnnotationValidator> nameToAnnotationValidators = new ConcurrentHashMap<>();
 
     @Override
-    public void validate(final Object bean) throws BeanValidationException {
+    public Set<AnnotationValidationError> validate(final Object bean) {
+        final Set<AnnotationValidationError> errorSet = new HashSet<AnnotationValidationError>();
+
         ReflectionUtils.doWithFields(bean.getClass(), new FieldCallback() {
             @Override
             public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
@@ -41,8 +44,9 @@ public class BeanValidationServiceImpl implements BeanValidationService {
                         AnnotationValidator annotationValidator = nameToAnnotationValidators
                                 .get(annotationValidatorName);
                         if (!annotationValidator.validate(fieldValue, annotation)) {
-                            throw new BeanValidationException(String.format(VALIDATION_EXCEPTION_MESSAGE,
-                                    field.getName()));
+                            AnnotationValidationError error = new AnnotationValidationError(field.getName(),
+                                    annotationValidatorName);
+                            errorSet.add(error);
                         }
                     } catch (ClassNotFoundException e) {
                         log.info(String.format("%s does not have one of the declared annotations", annotation
@@ -51,6 +55,8 @@ public class BeanValidationServiceImpl implements BeanValidationService {
                 }
             }
         });
+
+        return errorSet;
     }
 
     private AnnotationValidator getAnnotationValidatorFromValidatorName(String validatorName)

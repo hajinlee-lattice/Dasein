@@ -2,14 +2,31 @@ package com.latticeengines.domain.exposed.modeling;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.validator.annotation.AllowedValues;
+import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.common.exposed.validator.annotation.RequiredKeysInMap;
 
 public class ModelingMetadata {
 
+    private static final String NONE_APPROVED_USAGE = "None";
+    private static final String MODEL_APPROVED_USAGE = "Model";
+    private static final String MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE = "ModelAndModelInsights";
+    private static final String MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE = "ModelAndAllInsights";
+    private static final String INTERNAL_TAG = "Internal";
+    private static final String EXTERNAL_TAG = "External";
+    private static final String NOMINAL_STAT_TYPE = "nominal";
+    private static final String ORDINAL_STAT_TYPE = "ordinal";
+    private static final String INTERVAL_STAT_TYPE = "interval";
+    private static final String RATIO_STAT_TYPE = "ratio";
+    private static final String CATEGORY_EXTENTION = "Category";
+
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 
-    public static class KV {
+    public static class KV implements Map.Entry<String, String> {
         private String key;
         private String value;
 
@@ -29,11 +46,11 @@ public class ModelingMetadata {
         }
 
         @JsonProperty("Value")
-        public void setValue(String value) {
+        public String setValue(String value) {
+            String oldValue = this.value;
             this.value = value;
+            return oldValue;
         }
-        
-        
     }
 
     public static class DateTime {
@@ -60,25 +77,34 @@ public class ModelingMetadata {
             this.offsetMinutes = offsetMinutes;
         }
 
-        public String toString(){
-            return "{\"DateTime\":\"" + dateTime + "\",\"OffsetMinutes\":" + offsetMinutes+"}";
+        public String toString() {
+            return "{\"DateTime\":\"" + dateTime + "\",\"OffsetMinutes\":" + offsetMinutes + "}";
         }
     }
 
-
     public static class AttributeMetadata {
+        @AllowedValues(values = { MODEL_APPROVED_USAGE, MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE,
+                MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE, NONE_APPROVED_USAGE })
+        @NotNull
         private List<String> approvedUsage;
         private String columnName;
         private List<String> dataSource;
         private String dataType;
         private String description;
         private String displayDiscretizationStrategy;
+        @NotEmptyString
+        @NotNull
         private String displayName;
+        @RequiredKeysInMap(keys = { CATEGORY_EXTENTION })
         private List<KV> extensions;
         private String fundamentalType;
         private List<DateTime> lastTimeSourceUpdated;
         private DateTime mostRecentUpdateDate;
+        @AllowedValues(values = { NOMINAL_STAT_TYPE, ORDINAL_STAT_TYPE, INTERVAL_STAT_TYPE, RATIO_STAT_TYPE })
+        @NotNull
         private String statisticalType;
+        @AllowedValues(values = { INTERNAL_TAG, EXTERNAL_TAG })
+        @NotNull
         private List<String> tags;
         private String dataQuality;
 
@@ -221,7 +247,7 @@ public class ModelingMetadata {
         public void setDataQuality(String dataQuality) {
             this.dataQuality = dataQuality;
         }
-        
+
     }
 
     @JsonProperty("Attributes")
@@ -234,5 +260,4 @@ public class ModelingMetadata {
         this.attributeMetadata = attributeMetadata;
     }
 
-    
 }

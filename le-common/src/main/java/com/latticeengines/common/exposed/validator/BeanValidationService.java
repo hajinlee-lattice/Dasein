@@ -1,7 +1,9 @@
 package com.latticeengines.common.exposed.validator;
 
+import java.util.Set;
+
+import com.latticeengines.common.exposed.expection.AnnotationValidationError;
+
 public interface BeanValidationService {
-
-    void validate(Object bean) throws Exception;
-
+    Set<AnnotationValidationError> validate(Object bean) throws Exception;
 }
