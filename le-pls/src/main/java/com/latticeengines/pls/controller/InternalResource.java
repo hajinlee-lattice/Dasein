@@ -35,8 +35,8 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -252,7 +252,7 @@ public class InternalResource extends InternalResourceBase {
 
         assignTestingUsersToTenants(accessLevelToUsers);
 
-        return SimpleBooleanResponse.getSuccessResponse();
+        return SimpleBooleanResponse.successResponse();
     }
 
     @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)

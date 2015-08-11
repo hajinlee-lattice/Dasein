@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
-import com.latticeengines.domain.exposed.pls.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -162,9 +162,9 @@ public class UserResource {
     public SimpleBooleanResponse updateCredentials(@RequestBody UserUpdateData data, HttpServletRequest request) {
         User user = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         if (userService.updateCredentials(user, data)) {
-            return SimpleBooleanResponse.getSuccessResponse();
+            return SimpleBooleanResponse.successResponse();
         } else {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList("Could not change password."));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList("Could not change password."));
         }
     }
 
@@ -190,7 +190,7 @@ public class UserResource {
             AccessLevel targetLevel = AccessLevel.valueOf(data.getAccessLevel());
             if (!userService.isSuperior(loginLevel, targetLevel)) {
                 response.setStatus(403);
-                return SimpleBooleanResponse.getFailResponse(
+                return SimpleBooleanResponse.failedResponse(
                         Collections.singletonList("Cannot update to a level higher than that of the login user.")
                 );
             }
@@ -212,12 +212,12 @@ public class UserResource {
 
         // update other information
         if (!userService.inTenant(tenantId, username)) {
-            return SimpleBooleanResponse.getFailResponse(
+            return SimpleBooleanResponse.failedResponse(
                     Collections.singletonList("Cannot update users in another tenant.")
             );
         }
 
-        return SimpleBooleanResponse.getSuccessResponse();
+        return SimpleBooleanResponse.successResponse();
     }
 
     @RequestMapping(value = "/{username:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -239,16 +239,16 @@ public class UserResource {
             AccessLevel targetLevel = userService.getAccessLevel(tenantId, username);
             if (!userService.isSuperior(loginLevel,  targetLevel)) {
                 response.setStatus(403);
-                return SimpleBooleanResponse.getFailResponse(
+                return SimpleBooleanResponse.failedResponse(
                         Collections.singletonList(
                                 String.format("Could not delete a %s user using a %s user.",
                                         targetLevel.name(), loginLevel.name())));
             }
             userService.deleteUser(tenantId, username);
             LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, username, tenantId));
-            return SimpleBooleanResponse.getSuccessResponse();
+            return SimpleBooleanResponse.successResponse();
         } else {
-            return SimpleBooleanResponse.getFailResponse(
+            return SimpleBooleanResponse.failedResponse(
                     Collections.singletonList("Could not delete a user that is not in the current tenant"));
         }
     }

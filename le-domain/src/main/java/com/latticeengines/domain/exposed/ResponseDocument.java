@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,6 +51,13 @@ public class ResponseDocument<ResultType> {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public static ResponseDocument emptyFailedResponse(List<String> errors) {
+        ResponseDocument response = new ResponseDocument<>();
+        response.setSuccess(false);
+        response.setErrors(errors);
+        return response;
     }
 
     public static <T> ResponseDocument<T> generateFromJSON(String json, Class<T> resultType) {

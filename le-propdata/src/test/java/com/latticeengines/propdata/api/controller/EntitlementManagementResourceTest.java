@@ -17,13 +17,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.pls.ResponseDocument;
-import com.latticeengines.domain.exposed.propdata.DataColumnMap;
-import com.latticeengines.domain.exposed.propdata.EntitlementPackages;
-import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackageMap;
-import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackages;
-import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackageMap;
-import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackages;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.propdata.*;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })

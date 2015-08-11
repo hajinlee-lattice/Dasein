@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.pls.ResponseDocument;
+import com.latticeengines.domain.exposed.ResponseDocument;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })

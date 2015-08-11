@@ -24,9 +24,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.pls.ResponseDocument;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.Segment;
-import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
@@ -92,11 +92,11 @@ public class SegmentResource {
     public ResponseDocument<?> createSegment(@RequestBody Segment segment, HttpServletRequest request) {
         try {
             segmentService.createSegment(segment, request);
-            return SimpleBooleanResponse.getSuccessResponse();
+            return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(e.getMessage()));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(ExceptionUtils
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
                     .getFullStackTrace(e)));
         }
     }
@@ -109,11 +109,11 @@ public class SegmentResource {
         Segment segment = segmentEntityMgr.findByName(segmentName);
         try {
             segmentEntityMgr.delete(segment);
-            return SimpleBooleanResponse.getSuccessResponse();
+            return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(e.getMessage()));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(ExceptionUtils
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
                     .getFullStackTrace(e)));
         }
     }
@@ -125,11 +125,11 @@ public class SegmentResource {
     public ResponseDocument<?> update(@PathVariable String segmentName, @RequestBody Segment newSegment) {
         try {
             segmentService.update(segmentName, newSegment);
-            return SimpleBooleanResponse.getSuccessResponse();
+            return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(e.getMessage()));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(ExceptionUtils
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
                     .getFullStackTrace(e)));
         }
     }
@@ -158,11 +158,11 @@ public class SegmentResource {
                 modelSummaryEntityMgr.updateStatusByModelId(model.getId(), modelStatus);
             }
 
-            return SimpleBooleanResponse.getSuccessResponse();
+            return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(e.getMessage()));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(ExceptionUtils
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
                     .getFullStackTrace(e)));
         }
     }

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed;
 
 import java.util.List;
 
@@ -11,12 +11,12 @@ public class SimpleBooleanResponse extends ResponseDocument {
         this.setErrors(errors);
     }
 
-    public static SimpleBooleanResponse getSuccessResponse() {
+    public static SimpleBooleanResponse successResponse() {
         return new SimpleBooleanResponse(true, null);
     }
 
-    public static SimpleBooleanResponse getFailResponse(List<String> errors) {
-        return new SimpleBooleanResponse(false, errors);
+    public static SimpleBooleanResponse failedResponse(List<String> errors) {
+        return (SimpleBooleanResponse) emptyFailedResponse(errors);
     }
 
 }

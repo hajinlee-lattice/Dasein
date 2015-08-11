@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.propdata;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.pls.ResponseDocument;
+import com.latticeengines.domain.exposed.ResponseDocument;
 
 @SuppressWarnings("rawtypes")
 public class ResponseID extends ResponseDocument{

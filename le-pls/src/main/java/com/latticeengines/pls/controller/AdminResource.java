@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -110,12 +110,12 @@ public class AdminResource extends InternalResourceBase {
         tenantId = URIUtil.decode(tenantId);
 
         if(userService.findByUsername(username) == null) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(
                     String.format("User %s does not exist.", username)));
         }
 
         if(tenantService.findByTenantId(tenantId) == null) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList(
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(
                     String.format("Tenant %s does not exist.", tenantId)));
         }
 
@@ -159,7 +159,7 @@ public class AdminResource extends InternalResourceBase {
             globalAuthenticationService.discard(ticket);
         }
 
-        return SimpleBooleanResponse.getSuccessResponse();
+        return SimpleBooleanResponse.successResponse();
     }
 
 }

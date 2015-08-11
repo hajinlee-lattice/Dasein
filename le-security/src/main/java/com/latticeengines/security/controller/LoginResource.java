@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
-import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -150,7 +150,7 @@ public class LoginResource {
         if (StringUtils.isNotEmpty(token)) {
             globalAuthenticationService.discard(new Ticket(token));
         }
-        return SimpleBooleanResponse.getSuccessResponse();
+        return SimpleBooleanResponse.successResponse();
     }
 
 
