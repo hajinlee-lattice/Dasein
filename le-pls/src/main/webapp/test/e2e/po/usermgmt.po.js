@@ -71,6 +71,13 @@ var UserManagement = function() {
         });
     };
 
+    this.canSeeUser = function(username, expected) {
+        var message = "be able to see user " + username;
+        element(by.css('.user-list')).element(by.css('table')).getInnerHtml().then(function(html){
+            expect(html.indexOf(username) > -1).toBe(expected, expected ? "should " + message : "should not " + message)
+        });
+    };
+
     this.waitAndSleep = function() {
         browser.waitForAngular();
         browser.driver.sleep(5000);

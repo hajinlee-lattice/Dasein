@@ -27,6 +27,12 @@ var InternalAdmin = function() {
                 userDropdown.toggleDropdown();
                 userDropdown.ManageUsersLink.click();
 
+                userManagement.canSeeUser("pls-super-admin-tester", true);
+                userManagement.canSeeUser("pls-internal-admin-tester", true);
+                userManagement.canSeeUser("pls-internal-user-tester", true);
+                userManagement.canSeeUser("pls-external-admin-tester", true);
+                userManagement.canSeeUser("pls-external-user-tester", true);
+
                 userManagement.canEditAndDeleteUser("pls-super-admin-tester", false);
                 userManagement.canEditAndDeleteUser("pls-internal-admin-tester", true);
                 userManagement.canEditAndDeleteUser("pls-internal-user-tester", true);
