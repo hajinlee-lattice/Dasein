@@ -24,19 +24,26 @@ def getOneTimeKey(tenant, jdbcUrl):
     return response['TenantPassword']
 
 
-def getToken(key, tenant):
+def getAccessToken(key, tenant):
+    response = getTokenJsonFromKey(key, tenant)
+    assert json.loads(response)['access_token'] != None
+    return json.loads(response)['access_token']
+
+def getTokenJsonFromKey(key, tenant):
     params = {'grant_type':'password', 'username':tenant, 'password':key}
     headers = {'Authorization':'Basic cGxheW1ha2VyOg=='}
     request = requests.post(oauthUrl, params=params, headers=headers)
     assert request.status_code == 200
-    assert json.loads(request.text)['access_token'] != None
-    return json.loads(request.text)['access_token']
-
-
+    return request.text
 
 def getKey(tenant, jdbcUrl):
     key = getOneTimeKey(tenant, jdbcUrl)
     print 'key is: ' + key
+
+def getTokenJson(tenant, jdbcUrl):
+    key = getOneTimeKey(tenant, jdbcUrl)
+    print 'Access token is: ' + getTokenJsonFromKey(key, tenant)
+
 
 ### 'jdbc:sqlserver://10.41.1.82\\SQL2012std;databaseName=ADEDTBDd720154nN280153n154'
 
@@ -47,7 +54,7 @@ def getRecCount():
     
     tenant = 'TestGetRecCount'
     key = getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.83\\SQL2012std;databaseName=ADEDTBDd720154nW280139n154')
-    testToken = 'bearer ' + getToken(key, tenant)
+    testToken = 'bearer ' + getAccessToken(key, tenant)
     
     headers = {'Authorization':testToken}
     params = {'start':startTime, 'destination':'SFDC'}
@@ -60,7 +67,7 @@ def getRecommendations():
     
     tenant = 'TestGetRec'
     key = getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.83\\SQL2012std;databaseName=ADEDTBDd720154nW280139n154')
-    testToken = 'bearer ' + getToken(key, tenant)
+    testToken = 'bearer ' + getAccessToken(key, tenant)
     
     headers = {'Authorization':testToken}
     params = {'start':startTime, 'offset':'0', 'maximum':'1000','destination':'MAP'}
@@ -76,6 +83,8 @@ def main():
     
     if args.function_name == 'getKey':
         getKey(args.tenant, args.database)
+    elif args.function_name == 'getTokenJson':
+        getTokenJson(args.tenant, args.database)
     else:
         logging.error('No such function: ' + args.function_name)
 

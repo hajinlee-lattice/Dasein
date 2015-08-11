@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
         #Paypal_Obfusc_DB
         tenant = 'PCMTest'
         key = apitool.getOneTimeKey(tenant, "jdbc:sqlserver://10.41.1.193\\SQL2008R2;databaseName=PCM")
-        cls.token = 'bearer ' + apitool.getToken(key, tenant)
+        cls.token = 'bearer ' + apitool.getAccessToken(key, tenant)
         #print "Key is: " + key
         #print  "token is: " + cls.token
 
@@ -173,7 +173,7 @@ class Test(unittest.TestCase):
         # get token for another tenant
         tenant = 'p83_1'
         key = apitool.getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.83\sql2012std;databaseName=ADEDTBDd72072nK28083n154')
-        secondToken = 'bearer ' + apitool.getToken(key, tenant)
+        secondToken = 'bearer ' + apitool.getAccessToken(key, tenant)
         
         url = self.apiUrl + "/recommendationcount"
         params = {'start':'0', 'destination':'SFDC'}
