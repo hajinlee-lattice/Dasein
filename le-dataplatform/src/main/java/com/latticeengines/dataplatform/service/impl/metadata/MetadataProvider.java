@@ -33,13 +33,13 @@ public abstract class MetadataProvider {
 
     public abstract Long getDataSize(JdbcTemplate jdbcTemplate, String tableName);
 
-    public abstract void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
+    public abstract void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName);
 
-    public abstract void dropTable(JdbcTemplate jdbcTemplate, String table);
+    public abstract void dropTable(JdbcTemplate jdbcTemplate, String tableName);
 
-    public abstract List<String> showTable(JdbcTemplate jdbcTemplate, String table);
+    public abstract List<String> showTable(JdbcTemplate jdbcTemplate, String tableName);
 
-    public abstract void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid);
+    public abstract void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid);
 
     public abstract String getDriverClass();
 
@@ -101,7 +101,11 @@ public abstract class MetadataProvider {
         return replaceUrlWithParamsAndTestConnection(url, driverClass, creds);
     }
 
-    public abstract void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
+    public abstract void createNewTable(JdbcTemplate jdbcTemplate, String tableName, String columnInfo);
+
+    public abstract int insertRow(JdbcTemplate jdbcTemplate, String tableName, String columnStatement, Object... args);
+
+    public abstract void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName);
 
     public abstract Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName);
 

@@ -76,4 +76,14 @@ public class GenericJdbcMetadataProvider extends MetadataProvider {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void createNewTable(JdbcTemplate jdbcTemplate, String table, String columnInfo) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int insertRow(JdbcTemplate jdbcTemplate, String table, String columnStatement, Object... args) {
+        throw new UnsupportedOperationException();
+    }
+
 }

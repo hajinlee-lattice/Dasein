@@ -32,13 +32,14 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public Long getRowCount(JdbcTemplate jdbcTemplate, String tableName) {
-        Map<String, Object> resMap = jdbcTemplate.queryForMap("select count(*) from " + tableName);
+        Map<String, Object> resMap = jdbcTemplate.queryForMap(String.format("select count(*) from `%s`", tableName));
         return (Long) resMap.get("count(*)");
     }
 
     @Override
     public Long getDataSize(JdbcTemplate jdbcTemplate, String tableName) {
-        Map<String, Object> resMap = jdbcTemplate.queryForMap("show table status where name = '" + tableName + "'");
+        Map<String, Object> resMap = jdbcTemplate.queryForMap(String.format("show table status where name = '%s'",
+                tableName));
         BigInteger dataSize = (BigInteger) resMap.get("Data_length");
         return dataSize.longValue();
     }
@@ -49,28 +50,28 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
-    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
-        jdbcTemplate.execute("create table " + newTable + " select * from " + oldTable);
+    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName) {
+        jdbcTemplate.execute(String.format("create table `%s` select * from `%s`", newTableName, oldTableName));
     }
 
     @Override
-    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
-        jdbcTemplate.execute("create table " + newTable + " select * from " + oldTable + " where 1 = 0");
+    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName) {
+        jdbcTemplate.execute(String.format("create table `%s` select * from `%s` where 1 = 0", newTableName, oldTableName));
     }
 
     @Override
-    public void dropTable(JdbcTemplate jdbcTemplate, String table) {
-        jdbcTemplate.execute("drop table if exists " + table);
+    public void dropTable(JdbcTemplate jdbcTemplate, String tableName) {
+        jdbcTemplate.execute(String.format("drop table if exists `%s`", tableName));
     }
 
     @Override
-    public List<String> showTable(JdbcTemplate jdbcTemplate, String table) {
-        return jdbcTemplate.queryForList("show tables like '" + table + "'", String.class);
+    public List<String> showTable(JdbcTemplate jdbcTemplate, String tableName) {
+        return jdbcTemplate.queryForList(String.format("show tables like '%s'", tableName), String.class);
     }
 
     @Override
-    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid) {
-        jdbcTemplate.execute("alter table " + table + " add " + pid + " INT PRIMARY KEY auto_increment");
+    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid) {
+        jdbcTemplate.execute(String.format("alter table `%s` add %s INT PRIMARY KEY auto_increment", tableName, pid));
     }
 
     @Override
@@ -86,9 +87,19 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     @Override
     public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
         Integer positiveEventCount = jdbcTemplate.queryForObject( //
-                String.format("SELECT COUNT(*) FROM %s WHERE %s = 1", tableName, eventColName), //
+                String.format("SELECT COUNT(*) FROM `%s` WHERE %s = 1", tableName, eventColName), //
                 Integer.class);
         return Long.valueOf(positiveEventCount);
+    }
+
+    @Override
+    public void createNewTable(JdbcTemplate jdbcTemplate, String tableName, String columnInfo) {
+        jdbcTemplate.execute(String.format("create table `%s` " + columnInfo, tableName));
+    }
+
+    @Override
+    public int insertRow(JdbcTemplate jdbcTemplate, String tableName, String columnStatement, Object... args) {
+        return jdbcTemplate.update(String.format("insert into `%s` " + columnStatement, tableName), args);
     }
 
 }

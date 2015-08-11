@@ -102,43 +102,57 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
+    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName) {
         MetadataProvider provider = getProvider(jdbcTemplate);
-        provider.createNewTableFromExistingOne(jdbcTemplate, newTable, oldTable);
+        provider.createNewTableFromExistingOne(jdbcTemplate, newTableName, oldTableName);
     }
 
     @Override
-    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
+    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName) {
         MetadataProvider provider = getProvider(jdbcTemplate);
-        provider.createNewEmptyTableFromExistingOne(jdbcTemplate, newTable, oldTable);
+        provider.createNewEmptyTableFromExistingOne(jdbcTemplate, newTableName, oldTableName);
     }
 
     @Override
-    public void dropTable(JdbcTemplate jdbcTemplate, String table) {
+    public void dropTable(JdbcTemplate jdbcTemplate, String tableName) {
         MetadataProvider provider = getProvider(jdbcTemplate);
-        provider.dropTable(jdbcTemplate, table);
+        provider.dropTable(jdbcTemplate, tableName);
     }
 
     @Override
-    public List<String> showTable(JdbcTemplate jdbcTemplate, String table) {
+    public List<String> showTable(JdbcTemplate jdbcTemplate, String tableName) {
         MetadataProvider provider = getProvider(jdbcTemplate);
-        return provider.showTable(jdbcTemplate, table);
+        return provider.showTable(jdbcTemplate, tableName);
     }
 
     @Override
-    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid) {
+    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid) {
         MetadataProvider provider = getProvider(jdbcTemplate);
-        provider.addPrimaryKeyColumn(jdbcTemplate, table, pid);
+        provider.addPrimaryKeyColumn(jdbcTemplate, tableName, pid);
     }
 
     @Override
-    public List<String> getColumnNames(JdbcTemplate jdbcTemplate, String table) {
-        return jdbcTemplate.queryForList("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + table + "'", String.class);
+    public List<String> getColumnNames(JdbcTemplate jdbcTemplate, String tableName) {
+        return jdbcTemplate.queryForList("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '"
+                + tableName + "'", String.class);
     }
 
     @Override
-    public JdbcTemplate constructJdbcTemplate(DbCreds creds){
-        DataSource dataSource = new DriverManagerDataSource(this.getJdbcConnectionUrl(creds), creds.getUser(), creds.getPassword());
+    public JdbcTemplate constructJdbcTemplate(DbCreds creds) {
+        DataSource dataSource = new DriverManagerDataSource(this.getJdbcConnectionUrl(creds), creds.getUser(),
+                creds.getPassword());
         return new JdbcTemplate(dataSource);
+    }
+
+    @Override
+    public void createNewTable(JdbcTemplate jdbcTemplate, String tableName, String columnInfo) {
+        MetadataProvider provider = getProvider(jdbcTemplate);
+        provider.createNewTable(jdbcTemplate, tableName, columnInfo);
+    }
+
+    @Override
+    public int insertRow(JdbcTemplate jdbcTemplate, String tableName, String columnStatement, Object... args) {
+        MetadataProvider provider = getProvider(jdbcTemplate);
+        return provider.insertRow(jdbcTemplate, tableName, columnStatement, args);
     }
 }

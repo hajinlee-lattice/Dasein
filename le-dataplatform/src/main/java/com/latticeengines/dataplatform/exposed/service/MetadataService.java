@@ -24,17 +24,21 @@ public interface MetadataService {
 
     Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName);
 
-    void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
+    void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName);
 
-    void dropTable(JdbcTemplate jdbcTemplate, String table);
+    void dropTable(JdbcTemplate jdbcTemplate, String tableName);
 
-    List<String> showTable(JdbcTemplate jdbcTemplate, String table);
+    List<String> showTable(JdbcTemplate jdbcTemplate, String tableName);
 
-    void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid);
+    void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid);
 
-    void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
+    void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName);
 
-    List<String> getColumnNames(JdbcTemplate jdbcTemplate, String table);
+    List<String> getColumnNames(JdbcTemplate jdbcTemplate, String tableName);
 
     JdbcTemplate constructJdbcTemplate(DbCreds creds);
+
+    void createNewTable(JdbcTemplate jdbcTemplate, String tableName, String columnInfo);
+
+    int insertRow(JdbcTemplate jdbcTemplate, String tableName, String columnStatement, Object... args);
 }

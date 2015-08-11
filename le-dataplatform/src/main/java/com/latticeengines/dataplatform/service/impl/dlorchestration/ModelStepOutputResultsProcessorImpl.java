@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
@@ -67,6 +68,9 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
     @Autowired
     private ModelCommandLogService modelCommandLogService;
+
+    @Autowired
+    private MetadataService metadataService;
 
     @Override
     public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
@@ -170,7 +174,8 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 HdfsUtils.writeToFile(yarnConfiguration, hdfsConsumerFile, modelContent);
 
                 String customer = modelCommand.getDeploymentExternalId();
-                HdfsUtils.copyFiles(yarnConfiguration, hdfsConsumerFile, hdfsConsumerFile.replaceFirst(CustomerSpace.parse(customer).toString(), customer));
+                HdfsUtils.copyFiles(yarnConfiguration, hdfsConsumerFile,
+                        hdfsConsumerFile.replaceFirst(CustomerSpace.parse(customer).toString(), customer));
 
                 // Publish the PMML model and associated artifacts.
                 String deploymentExternalId = modelCommand.getDeploymentExternalId();
@@ -263,11 +268,10 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
         ModelCommandOutput output = new ModelCommandOutput(1, modelCommand.getPid().intValue(), SAMPLE_SIZE,
                 RANDOM_FOREST, modelFilePath, new Date());
-        dlOrchestrationJdbcTemplate.execute("drop table " + modelCommand.getEventTable());
-        dlOrchestrationJdbcTemplate.execute("create table " + modelCommand.getEventTable() + " "
-                + CREATE_OUTPUT_TABLE_SQL);
-        dlOrchestrationJdbcTemplate.update("insert into " + modelCommand.getEventTable() + " "
-                + INSERT_OUTPUT_TABLE_SQL, output.getId(), output.getCommandId(), output.getSampleSize(),
-                output.getAlgorithm(), output.getJsonPath(), output.getTimestamp());
+        metadataService.dropTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
+        metadataService.createNewTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(), CREATE_OUTPUT_TABLE_SQL);
+        metadataService.insertRow(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(), INSERT_OUTPUT_TABLE_SQL,
+                output.getId(), output.getCommandId(), output.getSampleSize(), output.getAlgorithm(),
+                output.getJsonPath(), output.getTimestamp());
     }
 }

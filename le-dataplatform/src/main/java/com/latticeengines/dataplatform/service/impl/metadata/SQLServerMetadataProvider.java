@@ -43,23 +43,24 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
-    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
-        jdbcTemplate.execute("SELECT * INTO [" + newTable + "] FROM [" + oldTable + "]");
+    public void createNewTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName) {
+        jdbcTemplate.execute(String.format("SELECT * INTO [%s] FROM [%s]", newTableName, oldTableName));
     }
 
     @Override
-    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
-        jdbcTemplate.execute("SELECT * INTO [" + newTable + "] FROM [" + oldTable + "] WHERE 1 = 0");
+    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName) {
+        jdbcTemplate.execute(String.format("SELECT * INTO [%s] FROM [%s] WHERE 1 = 0", newTableName, oldTableName));
     }
 
     @Override
-    public void dropTable(JdbcTemplate jdbcTemplate, String table) {
-        jdbcTemplate.execute("IF OBJECT_ID('" + table + "', 'U') IS NOT NULL DROP TABLE [" + table + "]");
+    public void dropTable(JdbcTemplate jdbcTemplate, String tableName) {
+        jdbcTemplate.execute(String.format("IF OBJECT_ID('%1$s', 'U') IS NOT NULL DROP TABLE [%1$s]", tableName));
     }
 
     @Override
-    public List<String> showTable(JdbcTemplate jdbcTemplate, String table) {
-        return jdbcTemplate.queryForList("SELECT [name] FROM SYS.TABLES WHERE [name] = '" + table + "'", String.class);
+    public List<String> showTable(JdbcTemplate jdbcTemplate, String tableName) {
+        return jdbcTemplate.queryForList(String.format("SELECT [name] FROM SYS.TABLES WHERE [name] = '%s'", tableName),
+                String.class);
     }
 
     @Override
@@ -73,15 +74,23 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
-    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String table, String pid) {
-        jdbcTemplate.execute("ALTER TABLE [" + table + "] ADD " + pid + " INT IDENTITY");
+    public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid) {
+        jdbcTemplate.execute(String.format("ALTER TABLE [%s] ADD %s INT IDENTITY", tableName, pid));
     }
 
     @Override
     public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
-        Integer positiveEventCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM [" + tableName + "] WHERE ["
-                + eventColName + "] = 1", Integer.class);
+        Integer positiveEventCount = jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM [%s] WHERE [%s] = 1", tableName, eventColName), Integer.class);
         return Long.valueOf(positiveEventCount);
     }
 
+    @Override
+    public void createNewTable(JdbcTemplate jdbcTemplate, String tableName, String columnInfo) {
+        jdbcTemplate.execute(String.format("create table [%s] " + columnInfo, tableName));
+    }
+
+    @Override
+    public int insertRow(JdbcTemplate jdbcTemplate, String tableName, String columnStatement, Object... args) {
+        return jdbcTemplate.update(String.format("insert into [%s] " + columnStatement, tableName), args);
+    }
 }

@@ -21,6 +21,7 @@ import com.latticeengines.camille.exposed.interfaces.data.DataInterfaceSubscribe
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -36,7 +37,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final String YARN_APPLICATION_ID = "yarnApplicationId";
-    private static final String TEMP_EVENTTABLE = "ModelStepOutputResultsProcessorImplTestNG_eventtable";
+    private static final String TEMP_EVENTTABLE = "2ModelStepOutputResultsProcessorImplTestNG_eventtable";
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
@@ -52,6 +53,9 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     @Mock
     private ModelingService modelingService;
+    
+    @Autowired
+    private MetadataService metadataService;
 
     private RestTemplate restTemplate = new RestTemplate();
 
@@ -65,6 +69,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";   
     private String hdfsArtifactsDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
     private String zkArtifactsPath = "/Models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
+    private String dbDriverName;
 
     @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
@@ -89,21 +94,14 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
         ReflectionTestUtils.setField(modelStepOutputResultsProcessor, "modelingService", modelingService);
 
-        String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
-        if (dbDriverName.contains("Microsoft")) {
-            // Microsoft JDBC Driver 4.0 for SQL Server
-            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE "
-                    + TEMP_EVENTTABLE);
-        } else {
-            // MySQL Connector Java
-            dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE);
-        }
-        dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE + " (Id int)");
+        metadataService.dropTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE);
+        dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
+        metadataService.createNewTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE, "(Id int)");
     }
 
     @AfterClass(groups = { "functional" })
     public void cleanup() throws Exception {
-        dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
+        metadataService.dropTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE);
         HdfsUtils.rmdir(yarnConfiguration, resultDirectory);
         super.clearTables();
     }
@@ -119,9 +117,17 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         modelCommandStateEntityMgr.createOrUpdate(commandState);
 
         modelStepOutputResultsProcessor.executeStep(command, commandParameters);
-
-        String outputAlgorithm = dlOrchestrationJdbcTemplate.queryForObject(
-                "select Algorithm from " + command.getEventTable(), String.class);
+        String outputAlgorithm = "";
+        if (dbDriverName.contains("Microsoft")) {
+            // Microsoft JDBC Driver 4.0 for SQL Server
+            outputAlgorithm = dlOrchestrationJdbcTemplate.queryForObject(
+                    "select Algorithm from [" + command.getEventTable() + "]", String.class);
+        } else {
+            // MySQL Connector Java
+            outputAlgorithm = dlOrchestrationJdbcTemplate.queryForObject(
+                    "select Algorithm from " + command.getEventTable() + "", String.class);
+        }
+       
         assertEquals(outputAlgorithm, ModelStepOutputResultsProcessorImpl.RANDOM_FOREST);
 
         List<String> outputLogs = dlOrchestrationJdbcTemplate.queryForList("select Message from LeadScoringCommandLog",
