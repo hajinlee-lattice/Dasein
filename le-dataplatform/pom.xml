@@ -294,7 +294,7 @@
             <groupId>org.apache.sqoop</groupId>
             <artifactId>sqoop</artifactId>
             <version>${sqoop.version}</version>
-            <classifier>hadoop23-ledp</classifier>
+            <classifier>ledp</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
