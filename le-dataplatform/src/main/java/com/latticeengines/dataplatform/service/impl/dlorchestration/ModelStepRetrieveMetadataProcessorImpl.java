@@ -33,6 +33,9 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     private static final Log log = LogFactory.getLog(ModelStepRetrieveMetadataProcessorImpl.class);
 
+    private static final String METADATA_DIAGNOSTIC_FILE = "metadata-diagnostics.json";
+    private static final String METADATA_FILE = "metadata.avsc";
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -134,14 +137,14 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         String customer = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
-        return String.format("%s/%s/data/%s/metadata.avsc", customerBaseDir, customer,
-                modelCommandParameters.getMetadataTable());
+        return String.format("%s/%s/data/%s/%s", customerBaseDir, customer, modelCommandParameters.getMetadataTable(),
+                METADATA_FILE);
     }
 
     String getHdfsPathForMetadataDiagnosticsFile(ModelCommand modelCommand,
             ModelCommandParameters modelCommandParameters) {
         String customer = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
-        return String.format("%s/%s/data/%s/metadata-diagnostics.json", customerBaseDir, customer,
-                modelCommandParameters.getMetadataTable());
+        return String.format("%s/%s/data/%s/%s", customerBaseDir, customer, modelCommandParameters.getMetadataTable(),
+                METADATA_DIAGNOSTIC_FILE);
     }
 }

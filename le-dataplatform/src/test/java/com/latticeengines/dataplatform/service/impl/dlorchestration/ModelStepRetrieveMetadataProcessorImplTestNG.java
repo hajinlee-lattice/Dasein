@@ -162,6 +162,9 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         assertEquals(displayNameError.size(), 2);
         JSONArray statTypeError = (JSONArray) jsonObject.get("StatisticalTypeAnnotationErrors");
         assertEquals(statTypeError.size(), 2);
+
+        // delete the metadata-diagnostics file
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
     }
 
     @Test(groups = "functional")
