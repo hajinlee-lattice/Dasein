@@ -56,7 +56,7 @@ public class ReleaseProcessConfiguration {
         init();
         List<Activity> releaseDPActivities = new ArrayList<>();
         releaseDPActivities.addAll(preReleaseActivities);
-        releaseDPActivities.addAll(Arrays.asList(new Activity[]{dpDeploymentTestActivity, jmxCheckActivity})); //dpDeploymentJobActivity, dpDeploymentTestActivity
+        //releaseDPActivities.addAll(Arrays.asList(new Activity[]{dpDeploymentTestActivity, jmxCheckActivity})); //dpDeploymentJobActivity, dpDeploymentTestActivity
         releaseDPActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseDPActivities);
     }
