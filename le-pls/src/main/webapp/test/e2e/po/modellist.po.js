@@ -14,7 +14,8 @@ var ModelList = function() {
         ModelNameInput:  '//input[@data-ng-model="data.name"]',
         SaveModelName : '//button[@data-ng-click="submit($event)"]',
         CancelEditModelName : '//button[@data-ng-click="cancel($event)"]',
-        EditModelNameError : '//label[@data-ng-show="showNameEditError"]'
+        EditModelNameError : '//label[@data-ng-show="showNameEditError"]',
+        DeleteModelLink: '//a[@data-ng-click="deleteModelClick($event)"]'
     };
 
 };

@@ -7,6 +7,7 @@ var UserDropdown = function() {
     this.SystemSetupLink = element(by.linkText('System Setup'));
     this.ModelCreationHistoryLink = element(by.linkText('Model Creation History'));
     this.updatePassword = element(by.linkText('Update Password'));
+    this.modelCreationHistory = element(by.linkText('Model Creation History'));
 
     this.getUserLink = function(name) {
         return element(by.linkText(name));

@@ -4,6 +4,7 @@ describe('model list', function() {
 
     var loginPage = require('./po/login.po');
     var modellist = require('./po/modellist.po');
+    var userDropdown = require('./po/userdropdown.po');
     var model, originalModelName;
     var createdDates;
 
@@ -114,7 +115,7 @@ describe('model list', function() {
 
     it('should alert for duplicate name', function () {
         element.all(by.xpath(modellist.xpath.ModelTileWidget)).last().getWebElement().then(
-            // the first model
+            // the last model
             function(webElem){
                 model = webElem;
                 model.findElement(By.css('i.fa-pencil')).click();
@@ -135,6 +136,66 @@ describe('model list', function() {
         elem.element(by.buttonText('Save')).click();
     });
 
+    it('should be able to delete model', function() {
+        element.all(by.xpath(modellist.xpath.ModelTileWidget)).count().then(function(count) {
+            if (count != 0) {
+                element.all(by.xpath(modellist.xpath.ModelTileWidget)).first().getWebElement().then(
+                    // the first element
+                    function(webElem) {
+                        model = webElem;
+                        model.findElement(by.css('h2.editable')).getText().then(function(text){
+                            originalModelName = text;
+                        });
+                        model.findElement(by.css('i.fa-trash-o')).click();
+                        browser.driver.sleep(1000);
+                        element(by.xpath(modellist.xpath.DeleteModelLink)).click();
+                        expect(element.all(by.xpath(modellist.xpath.ModelTileWidget)).count()).toBe(count - 1);
+                    }
+                );
+            }
+        });
+    });
+
+    it("should be able to see the deleted model in the creation history, restore the model and see it getting restored", function() {
+        // navigate to creation history table
+        userDropdown.toggleDropdown();
+        userDropdown.modelCreationHistory.click();
+
+        assertDeletedModelShowsupAsDeletedInModelCreationHistoryPage(originalModelName);
+        undoDeletionOfModelInHistoryPage_makeMakeSureThatModelIsRestored(originalModelName);
+
+        // logout
+        loginPage.logout();
+    });
+
+    function assertDeletedModelShowsupAsDeletedInModelCreationHistoryPage(modelName) {
+        if (modelName) {
+            element(by.cssContainingText('tr', modelName)).getText().then(function(text) {
+                expect(text).toContain('Deleted');
+            });
+        }
+    }
+
+    function undoDeletionOfModelInHistoryPage_makeMakeSureThatModelIsRestored(modelName) {
+        if (modelName) {
+            var deletedModelTableRow = element(by.cssContainingText('tr', modelName));
+            deletedModelTableRow.element(by.linkText('Undo')).click();
+            browser.driver.sleep(500);
+
+            // make sure that the model name shows up as not "Deleted" in the model creation history
+            element(by.cssContainingText('tr', modelName)).getText().then(function(text) {
+                expect(text).not.toContain('Deleted');
+            });
+
+            // navigate back to the home page
+            element(by.css('div.brand a')).click();
+            browser.driver.sleep(500);
+
+            // make sure the model with the deleted model name is present
+            expect(element(by.cssContainingText('h2', modelName)).isPresent()).toBe(true);
+        }
+    }
+    
     it('should log out', function () {
         loginPage.logout();
     }, 60000);
