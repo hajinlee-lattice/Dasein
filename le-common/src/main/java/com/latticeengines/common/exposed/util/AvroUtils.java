@@ -198,6 +198,31 @@ public class AvroUtils {
         
     }
 
+    public static String getHiveType(Type avroType) {
+        if (avroType == null) {
+            return null;
+        }
+        switch (avroType) {
+        case DOUBLE:
+            return "DOUBLE";
+        case FLOAT:
+            return "FLOAT";
+        case INT:
+            return "INT";
+        case LONG:
+            return "BIGINT";
+        case STRING:
+            return "STRING";
+        case BOOLEAN:
+            return "BOOLEAN";
+        case BYTES:
+            return "STRING";
+            
+        default:
+            throw new RuntimeException("Unknown hive type for avro type " + avroType);
+        }
+        
+    }
     public static Type getAvroType(Class<?> javaType) {
         if (javaType == null) {
             return null;
@@ -223,5 +248,18 @@ public class AvroUtils {
             throw new RuntimeException("Unknown avro type for java type " + javaType.getSimpleName());
         }
         
+    }
+    
+    public static String generateHiveCreateTableStatement(Schema schema) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("CREATE TABLE %s (\n", schema.getName()));
+        int size = schema.getFields().size();
+        int i = 1;
+        for (Field field : schema.getFields()) {
+            sb.append(String.format("  %s %s%s\n", field.name(), getHiveType(field.schema().getTypes().get(1).getType()), i == size ? ")" : ","));
+            i++;
+        }
+        sb.append("STORED AS PARQUET;");
+        return sb.toString();
     }
 }

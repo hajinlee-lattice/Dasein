@@ -8,14 +8,14 @@ import java.io.File;
 import java.net.URL;
 
 import org.apache.avro.Schema;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class AvroUtilsUnitTestNG {
 
     @SuppressWarnings("deprecation")
     @Test(groups = "unit")
-    public void testCombineSchemas() throws Exception {
-
+    public void combineSchemas() throws Exception {
         URL url1 = ClassLoader.getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/schema1.avsc");
         File avroFile1 = new File(url1.getFile());
         URL url2 = ClassLoader.getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/schema2.avsc");
@@ -39,5 +39,24 @@ public class AvroUtilsUnitTestNG {
         uuids = ((Schema) combinedSchema[0]).getProp("uuids");
         assertNotNull(uuids);
         assertEquals("abc,abc,xyz", uuids);
+    }
+    
+    @SuppressWarnings("deprecation")
+    @Test(groups = "unit", dataProvider = "avscFileProvider")
+    public void generateHiveCreateTableStatement(String avscFileName) throws Exception {
+        URL url = ClassLoader.getSystemResource(String.format("com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
+        File avscFile = new File(url.getFile());
+        Schema schema = Schema.parse(avscFile);
+        String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement(schema);
+        System.out.println(hiveTableDDL);
+    }
+    
+    @DataProvider(name = "avscFileProvider")
+    public Object[][] getAvscFile() {
+        return new Object[][] { 
+          { "aps.avsc" }, //
+          { "leaccount.avsc" }, //
+          { "leaccountextensions.avsc" }
+        };
     }
 }

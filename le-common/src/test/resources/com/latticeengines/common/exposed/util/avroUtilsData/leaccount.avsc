@@ -1,0 +1,295 @@
+{
+  "type" : "record",
+  "name" : "LEAccount",
+  "doc" : "Sqoop import of LEAccount",
+  "fields" : [ {
+    "name" : "LEAccount_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "LEAccount_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "Domain_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Domain_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "BusinessUnit_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "BusinessUnit_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "External_ID",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "External_ID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Prop_Data_Registration_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "Prop_Data_Registration_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "Alt_ID",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Alt_ID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Display_Name",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Display_Name",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Owner_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Owner_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "Parent_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Parent_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "IsCorporateAccount",
+    "type" : [ "null", "boolean" ],
+    "default" : null,
+    "columnName" : "IsCorporateAccount",
+    "sqlType" : "-7"
+  }, {
+    "name" : "Territory_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Territory_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "Vertical",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Vertical",
+    "sqlType" : "4"
+  }, {
+    "name" : "Address_Street_1",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Address_Street_1",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Address_Street_2",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Address_Street_2",
+    "sqlType" : "-9"
+  }, {
+    "name" : "City",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "City",
+    "sqlType" : "-9"
+  }, {
+    "name" : "State_Province",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "State_Province",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Country",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Country",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Zip",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Zip",
+    "sqlType" : "-9"
+  }, {
+    "name" : "URL",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "URL",
+    "sqlType" : "-9"
+  }, {
+    "name" : "URL_Source_System",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "URL_Source_System",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Twitter_Handle",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Twitter_Handle",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Twitter_Handle_Source_System",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Twitter_Handle_Source_System",
+    "sqlType" : "-9"
+  }, {
+    "name" : "NAICS_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "NAICS_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "NAICS_Code_Source_System",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "NAICS_Code_Source_System",
+    "sqlType" : "-9"
+  }, {
+    "name" : "SIC_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "SIC_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "SIC_Code_Source_System",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "SIC_Code_Source_System",
+    "sqlType" : "-9"
+  }, {
+    "name" : "LCI_Attribute_Synchronization_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "LCI_Attribute_Synchronization_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "CRM_Activity_Synchronization_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "CRM_Activity_Synchronization_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "CRM_Contact_Synchronization_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "CRM_Contact_Synchronization_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "CRM_Synchronization_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "CRM_Synchronization_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "CrmAccount_External_ID",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "CrmAccount_External_ID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Link_Url",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Link_Url",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Est_Yearly_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Est_Yearly_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Est_Yearly_Revenue_Currency_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Est_Yearly_Revenue_Currency_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "Cumulative_Revenue_Calculation_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "Cumulative_Revenue_Calculation_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "Cumulative_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Cumulative_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Cumulative_Revenue_Currency_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Cumulative_Revenue_Currency_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "First_Purchase_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "First_Purchase_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Latitude",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "Latitude",
+    "sqlType" : "8"
+  }, {
+    "name" : "Longitude",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "Longitude",
+    "sqlType" : "8"
+  }, {
+    "name" : "Number_Of_Employees",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Number_Of_Employees",
+    "sqlType" : "4"
+  }, {
+    "name" : "IsActive",
+    "type" : [ "null", "boolean" ],
+    "default" : null,
+    "columnName" : "IsActive",
+    "sqlType" : "-7"
+  }, {
+    "name" : "Matcher_Company_Name",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Matcher_Company_Name",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Version",
+    "type" : [ "null", "bytes" ],
+    "default" : null,
+    "columnName" : "Version",
+    "sqlType" : "-2"
+  }, {
+    "name" : "Creation_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "Creation_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "Last_Modification_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "Last_Modification_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "Created_By",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Created_By",
+    "sqlType" : "4"
+  }, {
+    "name" : "Last_Modified_By",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Last_Modified_By",
+    "sqlType" : "4"
+  } ],
+  "tableName" : "LEAccount"
+}
