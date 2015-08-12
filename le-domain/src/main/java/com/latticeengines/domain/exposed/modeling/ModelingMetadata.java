@@ -22,7 +22,7 @@ public class ModelingMetadata {
     private static final String ORDINAL_STAT_TYPE = "ordinal";
     private static final String INTERVAL_STAT_TYPE = "interval";
     private static final String RATIO_STAT_TYPE = "ratio";
-    private static final String CATEGORY_EXTENTION = "Category";
+    private static final String CATEGORY_EXTENSION = "Category";
 
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 
@@ -83,8 +83,11 @@ public class ModelingMetadata {
     }
 
     public static class AttributeMetadata {
-        @AllowedValues(values = { MODEL_APPROVED_USAGE, MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE,
-                MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE, NONE_APPROVED_USAGE })
+        @AllowedValues(values = { //
+                MODEL_APPROVED_USAGE, //
+                MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE, //
+                MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE, //
+                NONE_APPROVED_USAGE })
         @NotNull
         private List<String> approvedUsage;
         private String columnName;
@@ -95,7 +98,7 @@ public class ModelingMetadata {
         @NotEmptyString
         @NotNull
         private String displayName;
-        @RequiredKeysInMap(keys = { CATEGORY_EXTENTION })
+        @RequiredKeysInMap(keys = { CATEGORY_EXTENSION })
         private List<KV> extensions;
         private String fundamentalType;
         private List<DateTime> lastTimeSourceUpdated;
