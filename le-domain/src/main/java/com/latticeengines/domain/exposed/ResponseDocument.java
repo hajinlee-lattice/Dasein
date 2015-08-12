@@ -53,8 +53,8 @@ public class ResponseDocument<ResultType> {
         return JsonUtils.serialize(this);
     }
 
-    public static ResponseDocument emptyFailedResponse(List<String> errors) {
-        ResponseDocument response = new ResponseDocument<>();
+    public static ResponseDocument<?> emptyFailedResponse(List<String> errors) {
+        ResponseDocument<?> response = new ResponseDocument<>();
         response.setSuccess(false);
         response.setErrors(errors);
         return response;
