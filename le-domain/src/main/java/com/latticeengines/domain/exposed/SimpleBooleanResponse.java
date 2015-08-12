@@ -16,7 +16,7 @@ public class SimpleBooleanResponse extends ResponseDocument {
     }
 
     public static SimpleBooleanResponse failedResponse(List<String> errors) {
-        return (SimpleBooleanResponse) emptyFailedResponse(errors);
+        return new SimpleBooleanResponse(false, errors);
     }
 
 }
