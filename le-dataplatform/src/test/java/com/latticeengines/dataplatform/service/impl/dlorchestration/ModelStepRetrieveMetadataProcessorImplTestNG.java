@@ -77,21 +77,26 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
         String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataFile(command, commandParameters);
+        if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+            HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+        }
 
         try {
             modelStepRetrieveMetadataProcessor.writeStringToHdfs("Contents", hdfsPath);
         } catch (Exception e) {
-            assertTrue(true, "Writing to Hdfs should have passed.");
+            Assert.fail("Writing to Hdfs should have passed.");
         }
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, hdfsPath));
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
         assertTrue(content.equals("Contents"));
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
 
         try {
             URL metadataUrl = ClassLoader
                     .getSystemResource("com/latticeengines/dataplatform/service/incorrect-metadata.json");
             String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
             modelStepRetrieveMetadataProcessor.writeStringToHdfs(hdfsPath, metadata);
+            Assert.fail("Should have thrown exception.");
         } catch (Exception e) {
             assertTrue(e instanceof LedpException);
             assertTrue(((LedpException) e).getCode() == LedpCode.LEDP_16009);
@@ -141,11 +146,13 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         URL metadataUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/service/incorrect-metadata.json");
         String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
-
-        modelStepRetrieveMetadataProcessor.validateMetadata(metadata, command, commandParameters);
-
         String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataDiagnosticsFile(command,
                 commandParameters);
+        if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+            HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+        }
+
+        modelStepRetrieveMetadataProcessor.validateMetadata(metadata, command, commandParameters);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, hdfsPath));
 
         // Assert metadataValidationResult is in json format
@@ -176,14 +183,18 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         commandParameters.setDlUrl("http://visidb.lattice-engines.com/DLRestService");
         commandParameters.setDlQuery("View_Table_Cfg_PLS_Event");
 
+        String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataDiagnosticsFile(command,
+                commandParameters);
+        if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+            HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+        }
+
         URL metadataUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/service/correct-metadata.json");
         String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
 
         modelStepRetrieveMetadataProcessor.validateMetadata(metadata, command, commandParameters);
 
-        String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataDiagnosticsFile(command,
-                commandParameters);
         assertFalse(HdfsUtils.fileExists(yarnConfiguration, hdfsPath));
     }
 
