@@ -20,30 +20,17 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
                 <executions>
                     <execution>
-                        <id>python-unit-test</id>
-                        <phase>test</phase>
                         <goals>
-                            <goal>exec</goal>
+                            <goal>java</goal>
                         </goals>
-                        <configuration>
-                            <skip>${skipTests}</skip>
-                            <executable>/usr/local/bin/python2.7</executable>
-                            <workingDirectory>src/test/python</workingDirectory>
-                            <arguments>
-                                <argument>-m</argument>
-                                <argument>unittest</argument>
-                                <argument>discover</argument>
-                                <argument>-p</argument>
-                                <argument>*test.py</argument>
-                            </arguments>
-                            <environmentVariables>
-                                <PYTHONPATH>../../main/python:$PYTHONPATH</PYTHONPATH>
-                            </environmentVariables>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <mainClass>com.latticeengines.release.cli.ReleaseCLI</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
