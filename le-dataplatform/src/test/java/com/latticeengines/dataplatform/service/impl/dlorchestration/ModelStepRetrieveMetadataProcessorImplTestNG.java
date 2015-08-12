@@ -54,6 +54,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path("/user/s-analytics/customers/Nutanix"), true);
+        fs.delete(new Path("/user/s-analytics/customers/Nutanix.Nutanix.Production"), true);
         httpServer = new StandaloneHttpServer();
         httpServer.init();
         String[] cols = new String[] { "A", "B", "C" };

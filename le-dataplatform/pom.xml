@@ -12,7 +12,7 @@
         <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
         <le.dataflow.version>2.0.8-SNAPSHOT</le.dataflow.version>
         <avro.version>1.7.7</avro.version>
-        <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
+        <sqoop.version>1.4.6</sqoop.version>
         <le.db.version>2.0.8-SNAPSHOT</le.db.version>
         <le.perf.version>2.0.8-SNAPSHOT</le.perf.version>
         <le.common.version>2.0.8-SNAPSHOT</le.common.version>
@@ -294,7 +294,7 @@
             <groupId>org.apache.sqoop</groupId>
             <artifactId>sqoop</artifactId>
             <version>${sqoop.version}</version>
-            <classifier>ledp</classifier>
+            <classifier>hadoop23-ledp</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -417,6 +417,26 @@
             <artifactId>csvjdbc</artifactId>
             <version>1.0.25</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.kitesdk</groupId>
+            <artifactId>kite-data-mapreduce</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kitesdk</groupId>
+            <artifactId>kite-data-core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kitesdk</groupId>
+            <artifactId>kite-data-hive</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kitesdk</groupId>
+            <artifactId>kite-hadoop-compatibility</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

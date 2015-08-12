@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.sqoop.mapreduce;
 
 import java.io.File;
@@ -39,14 +57,13 @@ import com.cloudera.sqoop.util.ExportException;
 /**
  * Base class for running an export MapReduce job.
  */
-@SuppressWarnings("deprecation")
 public class ExportJobBase extends JobBase {
 
     /**
      * The (inferred) type of a file or group of files.
      */
     public enum FileType {
-        SEQUENCE_FILE, AVRO_DATA_FILE, HCATALOG_MANAGED_FILE, UNKNOWN
+        SEQUENCE_FILE, AVRO_DATA_FILE, HCATALOG_MANAGED_FILE, PARQUET_FILE, UNKNOWN
     }
 
     public static final Log LOG = LogFactory.getLog(ExportJobBase.class.getName());
@@ -63,13 +80,22 @@ public class ExportJobBase extends JobBase {
     /** Number of map tasks to use for an export. */
     public static final String EXPORT_MAP_TASKS_KEY = "sqoop.mapreduce.export.map.tasks";
 
+    /**
+     * Maximal number of attempts for map task during export
+     *
+     * Sqoop will default to "1" if this property is not set regardless of what
+     * is configured directly in your hadoop configuration.
+     */
+    public static final String SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS = "sqoop.export.mapred.map.max.attempts";
+
+    private static final String HADOOP_MAP_TASK_MAX_ATTEMTPS = "mapred.map.max.attempts";
+
     protected ExportJobContext context;
 
     public ExportJobBase(final ExportJobContext ctxt) {
         this(ctxt, null, null, null);
     }
 
-    @SuppressWarnings("rawtypes")
     public ExportJobBase(final ExportJobContext ctxt, final Class<? extends Mapper> mapperClass,
             final Class<? extends InputFormat> inputFormatClass, final Class<? extends OutputFormat> outputFormatClass) {
         super(ctxt.getOptions(), mapperClass, inputFormatClass, outputFormatClass);
@@ -171,6 +197,9 @@ public class ExportJobBase extends JobBase {
         if (header[0] == 'O' && header[1] == 'b' && header[2] == 'j') {
             return FileType.AVRO_DATA_FILE;
         }
+        if (header[0] == 'P' && header[1] == 'A' && header[2] == 'R') {
+            return FileType.PARQUET_FILE;
+        }
         return FileType.UNKNOWN;
     }
 
@@ -197,7 +226,6 @@ public class ExportJobBase extends JobBase {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     protected Class<? extends InputFormat> getInputFormatClass() throws ClassNotFoundException {
         Class<? extends InputFormat> configuredIF = super.getInputFormatClass();
@@ -208,7 +236,6 @@ public class ExportJobBase extends JobBase {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     protected Class<? extends OutputFormat> getOutputFormatClass() throws ClassNotFoundException {
         Class<? extends OutputFormat> configuredOF = super.getOutputFormatClass();
@@ -237,8 +264,8 @@ public class ExportJobBase extends JobBase {
     }
 
     @Override
-    protected int configureNumTasks(Job job) throws IOException {
-        int numMaps = super.configureNumTasks(job);
+    protected int configureNumMapTasks(Job job) throws IOException {
+        int numMaps = super.configureNumMapTasks(job);
         job.getConfiguration().setInt(EXPORT_MAP_TASKS_KEY, numMaps);
         return numMaps;
     }
@@ -270,7 +297,7 @@ public class ExportJobBase extends JobBase {
      * Submit the Map Reduce Job.
      */
     protected boolean doSubmitJob(Job job) throws IOException, InterruptedException, ClassNotFoundException {
-        LOG.info("Using ledp ImportJobBase.");
+        LOG.info("Using ledp ExportJobBase.");
         boolean doSync = job.getConfiguration().getBoolean("sqoop.sync", false);
         boolean success = true;
         if (doSync) {
@@ -481,5 +508,32 @@ public class ExportJobBase extends JobBase {
      * Subclasses may override if necessary.
      */
     protected void jobTeardown(Job job) throws IOException, ExportException {
+    }
+
+    @Override
+    protected void propagateOptionsToJob(Job job) {
+        super.propagateOptionsToJob(job);
+        Configuration conf = job.getConfiguration();
+
+        // This is export job where re-trying failed mapper mostly don't make
+        // sense. By
+        // default we will force MR to run only one attempt per mapper. User or
+        // connector
+        // developer can override this behavior by setting
+        // SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS:
+        //
+        // * Positive number - we will allow specified number of attempts
+        // * Negative number - we will default to Hadoop's default number of
+        // attempts
+        //
+        // This is important for most connectors as they are directly committing
+        // data to
+        // final table and hence re-running one mapper will lead to a misleading
+        // errors
+        // of inserting duplicate rows.
+        int sqoopMaxAttempts = conf.getInt(SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS, 1);
+        if (sqoopMaxAttempts > 1) {
+            conf.setInt(HADOOP_MAP_TASK_MAX_ATTEMTPS, sqoopMaxAttempts);
+        }
     }
 }
