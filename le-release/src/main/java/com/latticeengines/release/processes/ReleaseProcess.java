@@ -34,7 +34,7 @@ public class ReleaseProcess {
             if (log.isDebugEnabled())
                 log.debug("running activity:" + activity + " using arguments:" + context);
             if (processShouldStop(context, activity))
-                break;
+                throw new RuntimeException("The release process failed!");
             context.setResponseMessage("");
             context.setStatusCode(-1);
         }
