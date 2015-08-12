@@ -19,7 +19,6 @@ describe('internal admin page', function() {
         loginPage.loginAsSuperAdmin();
         var modelNamesElement = element.all(by.css('.model-title h2.editable'));
         modelNamesElement.getText().then(function(modelNamesOnPage) {
-            console.log(modelNamesOnPage);
             for (var i = 0; i < modelNamesOnPage.length; i++) {
                 var modelNameOnPage = modelNamesOnPage[i];
                 if (modelNamesOnHDFS.indexOf(modelNameOnPage.substring(0, modelNamesOnHDFS[0].length)) >= 0) {
