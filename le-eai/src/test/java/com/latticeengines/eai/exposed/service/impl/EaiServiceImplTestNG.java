@@ -93,7 +93,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
             @Override
             public boolean accept(String file) {
-                return file.endsWith(".avro");
+                return file.endsWith(".parquet");
             }
             
         });
@@ -103,7 +103,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
             @Override
             public boolean accept(String file) {
-                return file.endsWith(".avro");
+                return file.endsWith(".parquet");
             }
             
         });

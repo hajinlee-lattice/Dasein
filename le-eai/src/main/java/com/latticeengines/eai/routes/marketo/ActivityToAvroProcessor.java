@@ -10,7 +10,7 @@ import org.apache.camel.spring.SpringCamelContext;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.AvroContainer;
+import com.latticeengines.eai.routes.DataContainer;
 
 public class ActivityToAvroProcessor implements Processor {
 
@@ -31,10 +31,10 @@ public class ActivityToAvroProcessor implements Processor {
             throw new RuntimeException("Table to be imported not available.");
         }
 
-        AvroContainer avroContainer = exchange.getProperty(MarketoImportProperty.AVROCONTAINER, AvroContainer.class);
+        DataContainer avroContainer = exchange.getProperty(MarketoImportProperty.AVROCONTAINER, DataContainer.class);
 
         if (avroContainer == null) {
-            avroContainer = new AvroContainer(context, table);
+            avroContainer = new DataContainer(context, table);
             exchange.setProperty(MarketoImportProperty.AVROCONTAINER, avroContainer);
         }
         Map<String, Attribute> attrMap = table.getNameAttributeMap();

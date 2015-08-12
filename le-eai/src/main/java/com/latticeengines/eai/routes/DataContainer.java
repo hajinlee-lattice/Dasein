@@ -4,48 +4,46 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.zip.Deflater;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.file.CodecFactory;
-import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.DatumWriter;
 import org.apache.camel.spi.TypeConverterRegistry;
 import org.apache.camel.spring.SpringCamelContext;
+import org.apache.hadoop.fs.Path;
+
+import parquet.avro.AvroParquetWriter;
+import parquet.hadoop.metadata.CompressionCodecName;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 
-public class AvroContainer {
+public class DataContainer {
 
     private Table table;
-    private DataFileWriter<GenericRecord> dataFileWriter;
+    private AvroParquetWriter<GenericRecord> dataFileWriter;
     private File file;
     private GenericRecord record;
     private Schema schema;
     private TypeConverterRegistry typeConverterRegistry;
 
-    public AvroContainer(SpringCamelContext context, Table table) {
+    public DataContainer(SpringCamelContext context, Table table) {
         this.typeConverterRegistry = context.getTypeConverterRegistry();
         this.table = table;
         this.schema = table.getSchema();
         if (schema == null) {
             throw new RuntimeException("Schema cannot be null.");
         }
-        this.file = new File(String.format("%s-%s.avro", table.getName(),
+        this.file = new File(String.format("%s-%s.parquet", table.getName(),
                 new SimpleDateFormat("dd-MM-yyyy").format(new Date())));
-
-        DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
-        dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);
+        CompressionCodecName compressionCodecName = CompressionCodecName.SNAPPY;
+        int blockSize = 256 * 1024 * 1024;
+        int pageSize = 64 * 1024;
+        Path outputPath = new Path("file://" + System.getProperty("user.dir") + "/" + file.getName());
         try {
-            dataFileWriter.setCodec(CodecFactory.deflateCodec(Deflater.BEST_COMPRESSION));
-            dataFileWriter.create(schema, file);
-            return;
+            dataFileWriter = new AvroParquetWriter<>(outputPath, schema, compressionCodecName, blockSize, pageSize);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -62,7 +60,7 @@ public class AvroContainer {
     public void endRecord() {
         if (record != null) {
             try {
-                dataFileWriter.append(record);
+                dataFileWriter.write(record);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

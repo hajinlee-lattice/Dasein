@@ -14,7 +14,7 @@ public class AvroHdfsProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
         Table table = exchange.getProperty(MarketoImportProperty.TABLE, Table.class);
-        AvroContainer avroContainer = exchange.getProperty(MarketoImportProperty.AVROCONTAINER, AvroContainer.class);
+        DataContainer avroContainer = exchange.getProperty(MarketoImportProperty.AVROCONTAINER, DataContainer.class);
         avroContainer.endContainer();
         InputStream avroInputStream = new FileInputStream(avroContainer.getLocalAvroFile());
         exchange.getIn().setHeader("hdfsUri",

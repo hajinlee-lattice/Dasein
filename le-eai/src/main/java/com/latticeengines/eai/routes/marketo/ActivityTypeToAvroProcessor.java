@@ -10,7 +10,7 @@ import org.apache.camel.spring.SpringCamelContext;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.AvroContainer;
+import com.latticeengines.eai.routes.DataContainer;
 
 public class ActivityTypeToAvroProcessor implements Processor {
 
@@ -32,7 +32,7 @@ public class ActivityTypeToAvroProcessor implements Processor {
 
         Map<String, Object> body = exchange.getIn().getBody(Map.class);
         List<Map<String, Object>> activityList = (List) body.get("result");
-        AvroContainer avroContainer = new AvroContainer(context, table);
+        DataContainer avroContainer = new DataContainer(context, table);
 
         Map<String, Attribute> attrMap = table.getNameAttributeMap();
         for (Map<String, Object> entry : activityList) {

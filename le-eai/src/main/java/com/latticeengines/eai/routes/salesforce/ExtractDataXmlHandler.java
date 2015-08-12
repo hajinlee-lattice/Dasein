@@ -12,7 +12,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.AvroContainer;
+import com.latticeengines.eai.routes.DataContainer;
 
 public class ExtractDataXmlHandler extends DefaultHandler {
     private static final Log log = LogFactory.getLog(ExtractDataXmlHandler.class);
@@ -23,14 +23,14 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     private int processedRecords = 0;
     private int errorRecords = 0;
     private int totalRecords = 0;
-    private AvroContainer avroContainer;
+    private DataContainer dataContainer;
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (qName.equals("queryResult")) {
             log.info("Thread id = " + Thread.currentThread().getName());
         } else if (qName.equals("records")) {
-            avroContainer.newRecord();
+            dataContainer.newRecord();
             return;
         }
 
@@ -41,7 +41,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         String nilValue = attributes.getValue("xsi:nil");
 
         if (nilValue != null && nilValue.equals("true")) {
-            avroContainer.setValueForAttribute(attr, null);
+            dataContainer.setValueForAttribute(attr, null);
         }
         currentQname = qName;
     }
@@ -49,7 +49,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (qName.equals("queryResult")) {
-            avroContainer.endContainer();
+            dataContainer.endContainer();
             System.out.println("Total records = " + totalRecords);
             System.out.println("Successfully created records = " + processedRecords);
             System.out.println("Error records = " + errorRecords);
@@ -57,7 +57,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         } else if (qName.equals("records")) {
             totalRecords++;
             try {
-                avroContainer.endRecord();
+                dataContainer.endRecord();
                 processedRecords++;
             } catch (Exception e) {
                 errorRecords++;
@@ -78,17 +78,17 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         if (currentQname == null) {
             return;
         }
-        avroContainer.setValueForAttribute(attr, new String(ch, start, length));
+        dataContainer.setValueForAttribute(attr, new String(ch, start, length));
     }
 
     public String initialize(SpringCamelContext context, Table table) {
-        this.avroContainer = new AvroContainer(context, table);
+        this.dataContainer = new DataContainer(context, table);
         this.tableAttributeMap = table.getNameAttributeMap();
-        return avroContainer.getLocalAvroFile().getAbsolutePath();
+        return dataContainer.getLocalAvroFile().getAbsolutePath();
     }
 
     public File getFile() {
-        return avroContainer.getLocalAvroFile();
+        return dataContainer.getLocalAvroFile();
     }
 
 }

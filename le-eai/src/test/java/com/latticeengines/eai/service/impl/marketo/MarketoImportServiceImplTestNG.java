@@ -84,7 +84,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
             @Override
             public boolean accept(String file) {
-                return file.endsWith(".avro");
+                return file.endsWith(".parquet");
             }
             
         });
@@ -94,7 +94,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
             @Override
             public boolean accept(String file) {
-                return file.endsWith(".avro");
+                return file.endsWith(".parquet");
             }
             
         });
