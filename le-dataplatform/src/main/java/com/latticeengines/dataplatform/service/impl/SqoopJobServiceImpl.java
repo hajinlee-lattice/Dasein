@@ -156,10 +156,7 @@ public class SqoopJobServiceImpl {
     private ApplicationId runTool(List<String> cmds, Configuration config, boolean sync) {
         String appIdFileName = String.format("appid-%s.txt", UUID.randomUUID().toString());
         
-        if (sync) {
-            config.set("sqoop.sync", "true");
-        }
-        
+        config.set("sqoop.sync", Boolean.toString(sync));
         config.set("sqoop.app.id.file.name", appIdFileName);
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(config));
         return getApplicationId(appIdFileName);
