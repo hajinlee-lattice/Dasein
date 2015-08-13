@@ -1,12 +1,11 @@
 package com.latticeengines.release.exposed.activities;
 
 import org.springframework.beans.factory.BeanNameAware;
-
-import com.latticeengines.release.exposed.domain.ProcessContext;
+import com.latticeengines.release.exposed.domain.StatusContext;
 
 public interface Activity extends BeanNameAware{
 
-    public ProcessContext execute(ProcessContext context);
+    public StatusContext execute();
 
     public String getBeanName();
 }

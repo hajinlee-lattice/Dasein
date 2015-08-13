@@ -12,7 +12,7 @@ import com.latticeengines.release.error.handler.ErrorHandler;
 import com.latticeengines.release.exposed.domain.JenkinsBuildStatus;
 import com.latticeengines.release.exposed.domain.JenkinsJobParameters;
 import com.latticeengines.release.exposed.domain.JenkinsJobParameters.NameValuePair;
-import com.latticeengines.release.exposed.domain.ProcessContext;
+import com.latticeengines.release.exposed.domain.StatusContext;
 
 @Component("runReleaseProcessActivity")
 public class RunReleaseProcessActivity extends RunJenkinsJobActivity {
@@ -23,8 +23,8 @@ public class RunReleaseProcessActivity extends RunJenkinsJobActivity {
     }
 
     @Override
-    public ProcessContext runActivity(ProcessContext context) {
-        JenkinsJobParameters jenkinsParameters = constructReleaseProcessParameters(context);
+    public StatusContext runActivity() {
+        JenkinsJobParameters jenkinsParameters = constructReleaseProcessParameters();
         JenkinsBuildStatus status = jenkinsService.getLastBuildStatus(url);
         jenkinsService.triggerJenkinsJobWithParameters(url, jenkinsParameters);
         waitUtilNoJobIsRunning(status.getNumber(), url);
@@ -32,18 +32,18 @@ public class RunReleaseProcessActivity extends RunJenkinsJobActivity {
         String message = String.format("The release process %d has completed with result %s", status.getNumber(),
                 status.getResult());
         log.info(message);
-        context.setResponseMessage(message);
-        return context;
+        statusContext.setResponseMessage(message);
+        return statusContext;
     }
 
-    private JenkinsJobParameters constructReleaseProcessParameters(ProcessContext context) {
+    private JenkinsJobParameters constructReleaseProcessParameters() {
         JenkinsJobParameters jenkinsParameters = new JenkinsJobParameters();
         NameValuePair branchName = new NameValuePair("Branch_Name", "develop");
         NameValuePair copyBranchName = new NameValuePair("Copy_Branch_Name", "develop_copy");
-        NameValuePair releaseVersion = new NameValuePair("Release_Version", context.getReleaseVersion());
-        NameValuePair nextReleaseVersion = new NameValuePair("Next_Version_Number", context.getNextReleaseVersion());
-        NameValuePair product = new NameValuePair("Product", context.getProduct());
-        NameValuePair svnRevision = new NameValuePair("SVN_REVISION", context.getRevision());
+        NameValuePair releaseVersion = new NameValuePair("Release_Version", processContext.getReleaseVersion());
+        NameValuePair nextReleaseVersion = new NameValuePair("Next_Version_Number", processContext.getNextReleaseVersion());
+        NameValuePair product = new NameValuePair("Product", processContext.getProduct());
+        NameValuePair svnRevision = new NameValuePair("SVN_REVISION", processContext.getRevision());
         List<NameValuePair> nameValuePairs = Arrays.asList(new NameValuePair[] { branchName, copyBranchName,
                 releaseVersion, nextReleaseVersion, product, svnRevision });
 

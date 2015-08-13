@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.release.error.handler.ErrorHandler;
 import com.latticeengines.release.exposed.activities.BaseActivity;
-import com.latticeengines.release.exposed.domain.ProcessContext;
+import com.latticeengines.release.exposed.domain.StatusContext;
 import com.latticeengines.release.jmx.service.JMXCheckService;
 
 @Component("jmxCheckActivity")
@@ -31,10 +31,10 @@ public class JMXCheckActivity extends BaseActivity {
     }
 
     @Override
-    public ProcessContext runActivity(ProcessContext context) {
+    public StatusContext runActivity() {
         String response = jmxCheckService.checkJMX(jmxRMI, objectName, operation);
-        context.setResponseMessage(response);
-        return context;
+        statusContext.setResponseMessage(response);
+        return statusContext;
     }
 
 }

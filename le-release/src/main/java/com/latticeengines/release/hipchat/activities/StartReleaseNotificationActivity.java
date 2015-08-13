@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.release.error.handler.ErrorHandler;
 import com.latticeengines.release.exposed.activities.BaseActivity;
-import com.latticeengines.release.exposed.domain.ProcessContext;
+import com.latticeengines.release.exposed.domain.StatusContext;
 import com.latticeengines.release.hipchat.service.HipChatService;
 
 @Component("startReleaseNotificationActivity")
@@ -21,15 +21,15 @@ public class StartReleaseNotificationActivity extends BaseActivity {
     private String url;
 
     @Autowired
-    public StartReleaseNotificationActivity(@Qualifier("hipchatServiceErrorHandler") ErrorHandler errorHandler) {
+    public StartReleaseNotificationActivity(@Qualifier("defaultErrorHandler") ErrorHandler errorHandler) {
         super(errorHandler);
     }
 
     @Override
-    public ProcessContext runActivity(ProcessContext context) {
+    public StatusContext runActivity() {
         ResponseEntity<String> response = hipchatService.sendNotification(url, "green", "Release Process Started!");
-        context.setStatusCode(response.getStatusCode().value());
-        return context;
+        statusContext.setStatusCode(response.getStatusCode().value());
+        return statusContext;
     }
 
 }

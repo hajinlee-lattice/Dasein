@@ -56,7 +56,7 @@ public class ReleaseProcessConfiguration {
         init();
         List<Activity> releaseDPActivities = new ArrayList<>();
         releaseDPActivities.addAll(preReleaseActivities);
-        releaseDPActivities.addAll(Arrays.asList(new Activity[]{dpDeploymentTestActivity, jmxCheckActivity})); //dpDeploymentJobActivity, dpDeploymentTestActivity
+        //releaseDPActivities.addAll(Arrays.asList(new Activity[]{dpDeploymentTestActivity, jmxCheckActivity})); //dpDeploymentJobActivity, dpDeploymentTestActivity
         releaseDPActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseDPActivities);
     }
@@ -66,12 +66,12 @@ public class ReleaseProcessConfiguration {
         init();
         List<Activity> releasePLSActivities = new ArrayList<>();
         releasePLSActivities.addAll(preReleaseActivities);
-        releasePLSActivities.addAll(Arrays.asList(new Activity[]{plsDeploymentJobActivity, plsDeploymentTestActivity}));
+        releasePLSActivities.addAll(Arrays.asList(new Activity[]{plsDeploymentTestActivity}));
         releasePLSActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releasePLSActivities);
     }
 
-    @Bean(name = "releaseAllProductProcess")
+    @Bean(name = "releaseAllProductsProcess")
     public ReleaseProcess createReleaseAllProductProcess() {
         init();
         List<Activity> releaseAllActivities = new ArrayList<>();

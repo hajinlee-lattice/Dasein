@@ -1,7 +1,11 @@
 package com.latticeengines.release.exposed.domain;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component("processContext")
 public class ProcessContext {
 
     private String releaseVersion;
@@ -14,9 +18,9 @@ public class ProcessContext {
 
     private List<String> projectsShouldUploadToNexus;
 
-    private String responseMessage = "";
-
-    private int statusCode = -1;
+    public ProcessContext(){
+        projectsShouldUploadToNexus = Arrays.asList(new String[] { "le-pls", "le-propdata" });
+    }
 
     public String getReleaseVersion() {
         return this.releaseVersion;
@@ -58,27 +62,4 @@ public class ProcessContext {
         this.projectsShouldUploadToNexus = projectsShouldUploadToNexus;
     }
 
-    public String getResponseMessage() {
-        return this.responseMessage;
-    }
-
-    public void setResponseMessage(String responseMessage) {
-        this.responseMessage = responseMessage;
-    }
-
-    public int getStatusCode() {
-        return this.statusCode;
-    }
-
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public boolean stopProcess() {
-        if (statusCode >= 400 && statusCode < 600)
-            return true;
-        if (responseMessage.toLowerCase().contains("fail") || responseMessage.toLowerCase().contains("error"))
-            return true;
-        return false;
-    }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.release.error.handler.ErrorHandler;
 import com.latticeengines.release.exposed.activities.BaseActivity;
-import com.latticeengines.release.exposed.domain.ProcessContext;
+import com.latticeengines.release.exposed.domain.StatusContext;
 import com.latticeengines.release.nexus.service.NexusService;
 
 @Component("uploadProjectsToNexusActivity")
@@ -26,11 +26,11 @@ public class UploadProjectsToNexusActivity extends BaseActivity{
     }
 
     @Override
-    public ProcessContext runActivity(ProcessContext context) {
-        for(String project : context.getProjectsShouldUploadToNexus()){
-            ResponseEntity<String> response = nexusService.uploadArtifactToNexus(url, project, context.getReleaseVersion());
-            context.setStatusCode(response.getStatusCode().value());
+    public StatusContext runActivity() {
+        for(String project : processContext.getProjectsShouldUploadToNexus()){
+            ResponseEntity<String> response = nexusService.uploadArtifactToNexus(url, project, processContext.getReleaseVersion());
+            statusContext.setStatusCode(response.getStatusCode().value());
         }
-        return context;
+        return statusContext;
     }
 }

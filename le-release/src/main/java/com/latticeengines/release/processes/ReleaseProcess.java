@@ -8,12 +8,23 @@ import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.release.exposed.activities.Activity;
 import com.latticeengines.release.exposed.domain.ProcessContext;
+import com.latticeengines.release.exposed.domain.StatusContext;
 
 public class ReleaseProcess {
 
     private Log log = LogFactory.getLog(ReleaseProcess.class);
 
     private List<Activity> activities;
+
+    private ProcessContext processContext;
+
+    public ProcessContext getProcessContext() {
+        return this.processContext;
+    }
+
+    public void setProcessContext(ProcessContext processContext) {
+        this.processContext = processContext;
+    }
 
     public ReleaseProcess(List<Activity> activities) {
         this.activities = activities;
@@ -23,25 +34,23 @@ public class ReleaseProcess {
         return this.activities;
     }
 
-    public void execute(ProcessContext context) {
+    public void execute() {
         if (CollectionUtils.isEmpty(activities)) {
             throw new RuntimeException("Process should contain some activities");
         }
         for (Activity activity : activities) {
-            activity.execute(context);
-            log.info(activity.getBeanName() + " Status code: " + context.getStatusCode());
-            log.info(activity.getBeanName() + " Response message: " + context.getResponseMessage());
+            StatusContext statusContext = activity.execute();
+            log.info(activity.getBeanName() + " Status code: " + statusContext.getStatusCode());
+            log.info(activity.getBeanName() + " Response message: " + statusContext.getResponseMessage());
             if (log.isDebugEnabled())
-                log.debug("running activity:" + activity + " using arguments:" + context);
-            if (processShouldStop(context, activity))
+                log.debug("running activity:" + activity + " using arguments:" + processContext);
+            if (processShouldStop(statusContext, activity))
                 throw new RuntimeException("The release process failed!");
-            context.setResponseMessage("");
-            context.setStatusCode(-1);
         }
     }
 
-    private boolean processShouldStop(ProcessContext context, Activity activity) {
-        if (context != null && context.stopProcess()) {
+    private boolean processShouldStop(StatusContext statusContext, Activity activity) {
+        if (statusContext != null && statusContext.stopProcess()) {
             log.error("Interrupted workflow as requested by:" + activity.getBeanName());
             return true;
         }

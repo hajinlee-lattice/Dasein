@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.release.error.handler.ErrorHandler;
 import com.latticeengines.release.exposed.activities.BaseActivity;
 import com.latticeengines.release.exposed.domain.JiraParameters;
-import com.latticeengines.release.exposed.domain.ProcessContext;
 import com.latticeengines.release.exposed.domain.JiraParameters.JiraFields;
+import com.latticeengines.release.exposed.domain.StatusContext;
 import com.latticeengines.release.jira.service.ChangeManagementJiraService;
 
 @Component("createChangeManagementJiraActivity")
@@ -31,17 +31,17 @@ public class CreateChangeManagementJiraActivity extends BaseActivity {
     }
 
     @Override
-    public ProcessContext runActivity(ProcessContext context) {
-        JiraParameters jiraParameters = constructJiraParameters(context);
+    public StatusContext runActivity() {
+        JiraParameters jiraParameters = constructJiraParameters();
         ResponseEntity<String> response = changeManagementJiraService.createChangeManagementTicket(url, jiraParameters);
-        context.setStatusCode(response.getStatusCode().value());
-        return context;
+        statusContext.setStatusCode(response.getStatusCode().value());
+        return statusContext;
     }
 
-    private JiraParameters constructJiraParameters(ProcessContext context) {
+    private JiraParameters constructJiraParameters() {
         Map<String, String> project = new HashMap<>();
         project.put("key", "CR");
-        String summary = String.format("LEDP Release %s on version %s", context.getProduct(), context.getReleaseVersion());
+        String summary = String.format("LEDP Release %s on version %s", processContext.getProduct(), processContext.getReleaseVersion());
         Map<String, String> issueType = new HashMap<>();
         issueType.put("name", "Record");
         String backoutPlan = ".";
