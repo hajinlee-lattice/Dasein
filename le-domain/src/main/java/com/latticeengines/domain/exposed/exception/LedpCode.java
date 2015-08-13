@@ -55,6 +55,7 @@ public enum LedpCode {
     LEDP_15005("Input data has too few rows: {0}."), //
     LEDP_15006("Failed to validate the input data."), //
     LEDP_15007("No sample avro files found in path {0}."), //
+    LEDP_15008("Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
 
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
@@ -129,7 +130,8 @@ public enum LedpCode {
     LEDP_19105("The requested option list {0} does not contain the existing default choice [{1}]"), //
 
     // le-scoring 20000-20100
-    LEDP_20000("ScoringCommand Failed"), LEDP_20001("Validation of the datatype failed: {0}"), //
+    LEDP_20000("ScoringCommand Failed"), //
+    LEDP_20001("Validation of the datatype failed: {0}"), //
     LEDP_20002("Python script for scoring is not provided."), //
     LEDP_20003("Lead does not have 'LeadID' column."), //
     LEDP_20004("Lead does not have 'Model_GUID' column."), //
