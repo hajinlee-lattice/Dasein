@@ -8,9 +8,9 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import java.util.List;
 
 public class Query {
-    public Query(List<Lookup> lookups, List<Restriction> restrictions) {
+    public Query(List<Lookup> lookups, Restriction restriction) {
         this.lookups = lookups;
-        this.restrictions = restrictions;
+        this.restriction = restriction;
     }
 
     /**
@@ -24,7 +24,7 @@ public class Query {
     public List<Lookup> lookups;
 
     @JsonProperty
-    public List<Restriction> restrictions;
+    public Restriction restriction;
 
     @Override
     public int hashCode() {
