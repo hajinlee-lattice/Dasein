@@ -37,5 +37,6 @@
         <module>le-dellebi</module>
         <module>le-job</module>
         <module>le-admin</module>
+        <module>le-release</module>
     </modules>
 </project>
