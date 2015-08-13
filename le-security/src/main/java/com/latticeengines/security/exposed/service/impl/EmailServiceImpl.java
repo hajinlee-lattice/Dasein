@@ -37,7 +37,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSNewInternalUserEmail(Tenant tenant, User user, String password, String hostport) {
+    public void sendPlsNewInternalUserEmail(Tenant tenant, User user, String password, String hostport) {
         try {
 
             EmailTemplateBuilder builder =
@@ -61,7 +61,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSNewExternalUserEmail(User user, String password, String hostport) {
+    public void sendPlsNewExternalUserEmail(User user, String password, String hostport) {
         try {
             EmailTemplateBuilder builder =
                     new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_NEW_EXTERNAL_USER);
@@ -84,7 +84,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSExistingInternalUserEmail(Tenant tenant, User user, String hostport) {
+    public void sendPlsExistingInternalUserEmail(Tenant tenant, User user, String hostport) {
         try {
             EmailTemplateBuilder builder =
                     new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_EXISTING_INTERNAL_USER);
@@ -103,7 +103,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSExistingExternalUserEmail(Tenant tenant, User user, String hostport) {
+    public void sendPlsExistingExternalUserEmail(Tenant tenant, User user, String hostport) {
         try {
             EmailTemplateBuilder builder =
                     new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_EXISTING_EXTERNAL_USER);
@@ -122,7 +122,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPLSForgetPasswordEmail(User user, String password, String hostport) {
+    public void sendPlsForgetPasswordEmail(User user, String password, String hostport) {
         try {
             EmailTemplateBuilder builder =
                     new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_FORGET_PASSWORD);

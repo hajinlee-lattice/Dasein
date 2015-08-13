@@ -136,7 +136,7 @@ public class LoginResource {
         if (LatticeProduct.LPA.equals(request.getProduct())) {
             User user = userService.findByUsername(username);
             String host = request.getHostPort();
-            emailService.sendPLSForgetPasswordEmail(user, tempPass, host);
+            emailService.sendPlsForgetPasswordEmail(user, tempPass, host);
         }
 
         return true;

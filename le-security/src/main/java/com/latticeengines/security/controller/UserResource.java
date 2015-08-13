@@ -127,9 +127,9 @@ public class UserResource {
 
         String tempPass = result.getPassword();
         if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-            emailService.sendPLSNewExternalUserEmail(user, tempPass, apiHostPort);
+            emailService.sendPlsNewExternalUserEmail(user, tempPass, apiHostPort);
         } else {
-            emailService.sendPLSNewInternalUserEmail(tenant, user, tempPass, apiHostPort);
+            emailService.sendPlsNewInternalUserEmail(tenant, user, tempPass, apiHostPort);
         }
 
         response.setSuccess(true);
@@ -203,9 +203,9 @@ public class UserResource {
             if (newUser && user != null) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) ||
                         targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                    emailService.sendPLSExistingExternalUserEmail(tenant, user, apiHostPort);
+                    emailService.sendPlsExistingExternalUserEmail(tenant, user, apiHostPort);
                 } else {
-                    emailService.sendPLSExistingInternalUserEmail(tenant, user, apiHostPort);
+                    emailService.sendPlsExistingInternalUserEmail(tenant, user, apiHostPort);
                 }
             }
         }
