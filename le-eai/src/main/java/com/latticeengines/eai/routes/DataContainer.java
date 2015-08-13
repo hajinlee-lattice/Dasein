@@ -86,7 +86,7 @@ public class DataContainer {
         }
     }
 
-    public File getLocalAvroFile() {
+    public File getLocalDataFile() {
         return file;
     }
 }

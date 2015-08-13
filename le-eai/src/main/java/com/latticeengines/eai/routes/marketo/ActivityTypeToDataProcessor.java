@@ -12,43 +12,42 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.DataContainer;
 
-public class ActivityToAvroProcessor implements Processor {
+public class ActivityTypeToDataProcessor implements Processor {
 
     private SpringCamelContext context;
 
-    public ActivityToAvroProcessor(CamelContext context) {
+    public ActivityTypeToDataProcessor(CamelContext context) {
         this.context = (SpringCamelContext) context;
     }
 
-    @SuppressWarnings("unchecked")
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void process(Exchange exchange) throws Exception {
-        List<Map<String, Object>> activityList = exchange.getProperty(MarketoImportProperty.ACTIVITYRESULTLIST,
-                List.class);
         Table table = exchange.getProperty(MarketoImportProperty.TABLE, Table.class);
 
         if (table == null) {
             throw new RuntimeException("Table to be imported not available.");
         }
 
-        DataContainer avroContainer = exchange.getProperty(MarketoImportProperty.AVROCONTAINER, DataContainer.class);
+        Map<String, Object> body = exchange.getIn().getBody(Map.class);
+        List<Map<String, Object>> activityList = (List) body.get("result");
+        DataContainer dataContainer = new DataContainer(context, table);
 
-        if (avroContainer == null) {
-            avroContainer = new DataContainer(context, table);
-            exchange.setProperty(MarketoImportProperty.AVROCONTAINER, avroContainer);
-        }
         Map<String, Attribute> attrMap = table.getNameAttributeMap();
         for (Map<String, Object> entry : activityList) {
-            avroContainer.newRecord();
+            dataContainer.newRecord();
 
             for (Map.Entry<String, Object> mapEntry : entry.entrySet()) {
                 String attrName = mapEntry.getKey();
                 attrName = attrName.replace(" ", "_");
                 if (attrMap.containsKey(attrName)) {
-                    avroContainer.setValueForAttribute(attrMap.get(attrName), mapEntry.getValue());
+                    dataContainer.setValueForAttribute(attrMap.get(attrName), mapEntry.getValue());
                 }
             }
-            avroContainer.endRecord();
+            dataContainer.endRecord();
         }
+        exchange.setProperty(MarketoImportProperty.DATACONTAINER, dataContainer);
     }
+
 }

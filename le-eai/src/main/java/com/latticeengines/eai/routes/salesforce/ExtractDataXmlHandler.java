@@ -84,11 +84,11 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     public String initialize(SpringCamelContext context, Table table) {
         this.dataContainer = new DataContainer(context, table);
         this.tableAttributeMap = table.getNameAttributeMap();
-        return dataContainer.getLocalAvroFile().getAbsolutePath();
+        return dataContainer.getLocalDataFile().getAbsolutePath();
     }
 
     public File getFile() {
-        return dataContainer.getLocalAvroFile();
+        return dataContainer.getLocalDataFile();
     }
 
 }

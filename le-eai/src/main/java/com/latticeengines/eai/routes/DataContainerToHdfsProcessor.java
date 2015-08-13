@@ -9,17 +9,17 @@ import org.apache.camel.Processor;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
-public class AvroHdfsProcessor implements Processor {
+public class DataContainerToHdfsProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
         Table table = exchange.getProperty(MarketoImportProperty.TABLE, Table.class);
-        DataContainer avroContainer = exchange.getProperty(MarketoImportProperty.AVROCONTAINER, DataContainer.class);
-        avroContainer.endContainer();
-        InputStream avroInputStream = new FileInputStream(avroContainer.getLocalAvroFile());
+        DataContainer dataContainer = exchange.getProperty(MarketoImportProperty.DATACONTAINER, DataContainer.class);
+        dataContainer.endContainer();
+        InputStream dataInputStream = new FileInputStream(dataContainer.getLocalDataFile());
         exchange.getIn().setHeader("hdfsUri",
-                new HdfsUriGenerator().getHdfsUri(exchange, table, avroContainer.getLocalAvroFile().getName()));
-        exchange.getIn().setBody(avroInputStream);
+                new HdfsUriGenerator().getHdfsUri(exchange, table, dataContainer.getLocalDataFile().getName()));
+        exchange.getIn().setBody(dataInputStream);
     }
 
 }
