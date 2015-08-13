@@ -16,6 +16,7 @@
 
     <properties>
         <environment.type>default</environment.type>
+        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
 
     <build>
@@ -60,4 +61,11 @@
             </plugin>
         </plugins>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.fasterxml.version}</version>
+        </dependency>
+    </dependencies>
 </project>
