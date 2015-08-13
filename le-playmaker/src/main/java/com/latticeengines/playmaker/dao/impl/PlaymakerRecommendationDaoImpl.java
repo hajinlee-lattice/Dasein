@@ -23,7 +23,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination) {
         String sql = "SELECT * FROM (SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
-                + "L.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, L.[Description] AS Description, "
+                + "A.[Display_Name] + ' - ' + PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, L.[Description] AS Description, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, L.[Likelihood] AS Likelihood, "
                 + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) AS ExpirationDate, "
@@ -87,7 +87,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     private String getRecommendationFromWhereClause() {
         return "FROM [PreLead] L LEFT OUTER JOIN LaunchRun R "
                 + "ON L.[LaunchRun_ID] = R.[LaunchRun_ID] JOIN LEAccount A "
-                + "ON L.Account_ID = A.LEAccount_ID JOIN Priority P "
+                + "ON L.Account_ID = A.LEAccount_ID JOIN Play PL "
+                + "ON L.Play_ID = PL.Play_ID JOIN Priority P "
                 + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C "
                 + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M "
                 + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID "
