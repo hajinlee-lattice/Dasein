@@ -1,6 +1,7 @@
-package com.latticeengines.domain.exposed.eai;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,8 +9,11 @@ import java.util.Map;
 import org.apache.avro.Schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 
-public class AttributeOwner {
+public class AttributeOwner implements GraphNode {
 
     private List<Attribute> attributes = new ArrayList<>();
     private Schema schema;
@@ -40,6 +44,17 @@ public class AttributeOwner {
     @JsonIgnore
     public void setSchema(Schema schema) {
         this.schema = schema;
+    }
+
+    @Override
+    public void accept(Visitor visitor, VisitorContext ctx) {
+        visitor.visit(this, ctx);
+    }
+
+    @Override
+    @JsonIgnore
+    public Collection<? extends GraphNode> getChildren() {
+        return attributes;
     }
 
 }

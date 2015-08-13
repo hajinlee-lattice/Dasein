@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.eai;
+package com.latticeengines.domain.exposed.metadata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;

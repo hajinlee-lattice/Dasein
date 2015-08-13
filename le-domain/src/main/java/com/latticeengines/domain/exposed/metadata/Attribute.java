@@ -1,7 +1,8 @@
-package com.latticeengines.domain.exposed.eai;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,10 +10,13 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
 
-public class Attribute implements HasName, HasProperty, Serializable {
+public class Attribute implements HasName, HasProperty, Serializable, GraphNode {
 
     private static final long serialVersionUID = -4779448415471374224L;
 
@@ -149,6 +153,17 @@ public class Attribute implements HasName, HasProperty, Serializable {
     @Override
     public Set<Map.Entry<String, Object>> getEntries() {
         return properties.entrySet();
+    }
+
+    @Override
+    public void accept(Visitor visitor, VisitorContext ctx) {
+        visitor.visit(this, ctx);
+    }
+
+    @Override
+    @JsonIgnore
+    public Collection<? extends GraphNode> getChildren() {
+        return new ArrayList<>();
     }
 
 }

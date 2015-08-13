@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.sparkdb;
 
 import java.io.Serializable;
 
-import com.latticeengines.domain.exposed.eai.Attribute;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public class FunctionExpression implements Serializable {
 

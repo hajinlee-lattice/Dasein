@@ -8,6 +8,8 @@ import java.util.List;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class ImportConfigurationUnitTestNG {
 
