@@ -35,7 +35,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         return false;
     }
 
-    @Test(groups = "functional.scheduler")
+    @Test(groups = "functional")
     public void testExecuteYarnSteps() throws Exception {
         cleanUpHdfs("Nutanix");
         cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
