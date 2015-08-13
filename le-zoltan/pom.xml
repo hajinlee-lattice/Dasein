@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-zoltan</artifactId>
+    <packaging>jar</packaging>
+    <name>le-${component-name}</name>
+
+    <properties>
+        <component-name>zoltan</component-name>
+        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
+        <le.common.version>2.0.7-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.7-SNAPSHOT</le.domain.version>
+        <hibernate.version>4.1.9.Final</hibernate.version>
+        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
+    </properties>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>2.0.7-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${le.common.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+    </dependencies>
+
+</project>
