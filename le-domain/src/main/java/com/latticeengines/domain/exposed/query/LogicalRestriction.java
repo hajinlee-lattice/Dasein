@@ -7,7 +7,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.List;
 
-public class LogicalRestriction {
+public class LogicalRestriction extends Restriction {
 
     public LogicalRestriction(Connective connective, List<Restriction> restrictions) {
         this.connective = connective;

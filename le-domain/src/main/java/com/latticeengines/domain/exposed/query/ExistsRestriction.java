@@ -7,7 +7,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.List;
 
-public class ExistsRestriction {
+public class ExistsRestriction extends Restriction {
 
     public ExistsRestriction(boolean negate, String association, List<Restriction> restrictions) {
         this.negate = negate;
