@@ -12,7 +12,6 @@ public class Field implements HasName {
     private String columnName;
     private int sqlType;
     private List<String> typeInfo;
-    private String defaultValue;
 
     @Override
     @JsonProperty("name")
@@ -54,15 +53,4 @@ public class Field implements HasName {
         this.sqlType = sqlType;
     }
     
-    @JsonProperty("default")
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-    
-    @JsonProperty("default")
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-   
-
 }
