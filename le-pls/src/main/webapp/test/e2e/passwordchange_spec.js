@@ -1,16 +1,31 @@
 'use strict'
 
-describe('forgot password tests', function() {
+describe('forgot password tests:', function() {
 
     var loginPage = require('./po/login.po');
     var passwordChange = require('./po/passwordchange.po');
 
-    it('should all pass', function() {
+    it('forgot wrong user password should generate error', function() {
         changePasswordWithWrongUsername_assertError();
+    });
+
+    it('change password to empty string should generate error', function() {
         changePasswordToEmptyString_assertError();
+    });
+
+    it('change password to current password should generate error', function() {
         changePasswordToCurrentPassword_assertError();
+    });
+
+    it('change to password that fails security stands should generate error', function() {
         changePasswordToUnsafePassword_assertError();
+    });
+
+    it('change to password that does not match confirm password should generate error', function() {
         changePasswordButNewPasswordAndConfirmPasswordAreDifferent_assertError();
+    });
+
+    it('should pass happy case', function() {
         changePassword_assertItWorked();
     });
 
