@@ -56,7 +56,7 @@ public abstract class MetadataProvider {
         ConnManager connManager = getConnectionManager(options);
         avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
         try {
-            return avroSchemaGenerator.generate(null);
+            return avroSchemaGenerator.generate();
         } catch (IOException e) {
             return null;
         }

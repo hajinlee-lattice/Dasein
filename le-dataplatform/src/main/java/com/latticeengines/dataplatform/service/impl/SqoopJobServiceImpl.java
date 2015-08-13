@@ -129,7 +129,6 @@ public class SqoopJobServiceImpl {
         } finally {
             FileUtils.deleteQuietly(new File(table + ".avsc"));
             FileUtils.deleteQuietly(new File(table + ".java"));
-            FileUtils.deleteQuietly(new File(String.format("codegen_%s.java", table)));
             
             if (propsFileName != null) {
                 FileUtils.deleteQuietly(new File(propsFileName));

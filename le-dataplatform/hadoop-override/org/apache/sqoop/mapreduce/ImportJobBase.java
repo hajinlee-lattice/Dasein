@@ -1,21 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.sqoop.mapreduce;
 
 import java.io.File;
@@ -57,6 +39,7 @@ import com.cloudera.sqoop.util.ImportException;
  * Base class for running an import MapReduce job. Allows dependency injection,
  * etc, for easy customization of import job types.
  */
+@SuppressWarnings("deprecation")
 public class ImportJobBase extends JobBase {
 
     private ImportJobContext context;
@@ -79,6 +62,7 @@ public class ImportJobBase extends JobBase {
         this(opts, null, null, null, null);
     }
 
+    @SuppressWarnings("rawtypes")
     public ImportJobBase(final SqoopOptions opts, final Class<? extends Mapper> mapperClass,
             final Class<? extends InputFormat> inputFormatClass, final Class<? extends OutputFormat> outputFormatClass,
             final ImportJobContext context) {
@@ -138,16 +122,6 @@ public class ImportJobBase extends JobBase {
                     job.getConfiguration().set(AvroJob.OUTPUT_CODEC, shortName);
                 } else {
                     job.getConfiguration().set(AvroJob.OUTPUT_CODEC, DataFileConstants.DEFLATE_CODEC);
-                }
-            }
-
-            if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-                if (codecName != null) {
-                    Configuration conf = job.getConfiguration();
-                    String shortName = CodecMap.getCodecShortNameByName(codecName, conf);
-                    if (!shortName.equalsIgnoreCase("default")) {
-                        conf.set(ParquetJob.CONF_OUTPUT_CODEC, shortName);
-                    }
                 }
             }
         }
