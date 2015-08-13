@@ -13,8 +13,8 @@ import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
 import org.apache.commons.lang.StringUtils;
 
-import com.latticeengines.domain.exposed.eai.Attribute;
-import com.latticeengines.domain.exposed.eai.AttributeOwner;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeOwner;
 
 public class AvroSchemaBuilder {
     

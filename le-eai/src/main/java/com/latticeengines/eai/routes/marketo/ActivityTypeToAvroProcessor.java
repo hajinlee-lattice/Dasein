@@ -8,8 +8,8 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringCamelContext;
 
-import com.latticeengines.domain.exposed.eai.Attribute;
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.DataContainer;
 
 public class ActivityTypeToAvroProcessor implements Processor {

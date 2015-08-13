@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.ImportService;
 
 @Component("eloquaImportService")

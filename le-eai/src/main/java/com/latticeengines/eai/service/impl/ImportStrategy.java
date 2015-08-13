@@ -7,7 +7,7 @@ import org.apache.camel.ProducerTemplate;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class ImportStrategy {
 

@@ -15,9 +15,9 @@ import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.AndNode;
 import com.foundationdb.sql.parser.BinaryLogicalOperatorNode;
 import com.foundationdb.sql.parser.Visitable;
-import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportContext;
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
 @Component("activityImportStrategy")

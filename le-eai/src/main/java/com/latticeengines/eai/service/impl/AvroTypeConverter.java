@@ -10,7 +10,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.eai.Attribute;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public abstract class AvroTypeConverter {
 

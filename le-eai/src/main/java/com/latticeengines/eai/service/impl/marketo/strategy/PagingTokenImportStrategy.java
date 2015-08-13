@@ -6,7 +6,7 @@ import org.apache.camel.ProducerTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
 @Component("pagingTokenImportStrategy")

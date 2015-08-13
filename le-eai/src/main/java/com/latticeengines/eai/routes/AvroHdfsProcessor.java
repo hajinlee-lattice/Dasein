@@ -6,7 +6,7 @@ import java.io.InputStream;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
 public class AvroHdfsProcessor implements Processor {

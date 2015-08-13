@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class SetPropertiesFromImportContextProcessor implements Processor {
     

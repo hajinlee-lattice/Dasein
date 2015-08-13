@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.BinaryLogicalOperatorNode;
 import com.foundationdb.sql.parser.Visitable;
-import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportContext;
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component("leadImportStrategy")
 public class LeadImportStrategy extends MarketoImportStrategyBase {
