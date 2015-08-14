@@ -15,8 +15,8 @@ CREATE TABLE [dbo].[TENANT](
     [EXTERNAL_ID] [nvarchar](256) NULL,
     [JDBC_DRIVER] [nvarchar](256) NOT NULL,
     [JDBC_URL] [nvarchar](256) NOT NULL,
-    [JDBC_USERNAME] [nvarchar](256) NOT NULL,
-    [JDBC_PASSWORD] [nvarchar](256) NOT NULL,
+    [JDBC_USERNAME] [nvarchar](256) NULL,
+    [JDBC_PASSWORD] [nvarchar](256) NULL,
 ) ON [PRIMARY]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [tenant_name_idx] ON [dbo].[TENANT] 
@@ -184,12 +184,15 @@ INSERT INTO [dbo].[oauth_client_details]
 GO
 
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[OAuthUser]') AND type in (N'U'))
+DROP TABLE [dbo].[OAuthUser]
+GO
 CREATE TABLE [OAuthUser](
-	[PID] [bigint] IDENTITY(1,1) NOT NULL,
-	[UserId] [nvarchar](256) NOT NULL,
-	[EncryptedPassword] [nvarchar](256) NOT NULL,
-	[PasswordExpired] [bit] NOT NULL,
-	[PasswordExpiration] [datetime] NULL
+    [PID] [bigint] IDENTITY(1,1) NOT NULL,
+    [UserId] [nvarchar](256) NOT NULL,
+    [EncryptedPassword] [nvarchar](256) NOT NULL,
+    [PasswordExpired] [bit] NOT NULL,
+    [PasswordExpiration] [datetime] NULL
 ) 
 GO
 
