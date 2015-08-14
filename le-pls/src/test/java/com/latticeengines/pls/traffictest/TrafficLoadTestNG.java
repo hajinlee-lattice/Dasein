@@ -109,6 +109,8 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "load" })
     public void setup(String numOfThreads, String numOfTenants, String numOfUsers, String numOfRuns, String threadSleep)
             throws Exception {
+        turnOffSslChecking();
+
         this.numOfThreads = Integer.parseInt(numOfThreads);
         this.numOfTenants = Integer.parseInt(numOfTenants);
         this.numOfUsers = Integer.parseInt(numOfUsers);

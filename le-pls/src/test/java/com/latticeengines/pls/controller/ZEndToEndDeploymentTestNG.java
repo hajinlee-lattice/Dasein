@@ -59,6 +59,7 @@ public class ZEndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = "deployment", enabled = true)
     public void setup() throws Exception {
+        turnOffSslChecking();
         setUpMarketoEloquaTestEnvironment();
         tenantToAttach = testingTenants.get(1);
         if (tenantToAttach.getName().contains("Tenant 1")) {

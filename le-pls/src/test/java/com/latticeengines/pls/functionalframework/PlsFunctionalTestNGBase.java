@@ -2,7 +2,15 @@ package com.latticeengines.pls.functionalframework;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.*;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -533,7 +541,21 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         Mockito.when(token.getSession()).thenReturn(session);
         Mockito.when(securityContext.getAuthentication()).thenReturn(token);
         SecurityContextHolder.setContext(securityContext);
+    }
 
+    protected static void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
+        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers(){
+                        return null;
+                    }
+                    public void checkClientTrusted( X509Certificate[] certs, String authType ){}
+                    public void checkServerTrusted( X509Certificate[] certs, String authType ){}
+                }
+        };
+        final SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
 
 }
