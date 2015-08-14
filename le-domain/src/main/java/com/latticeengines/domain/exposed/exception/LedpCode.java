@@ -55,7 +55,7 @@ public enum LedpCode {
     LEDP_15005("Input data has too few rows: {0}."), //
     LEDP_15006("Failed to validate the input data."), //
     LEDP_15007("No sample avro files found in path {0}."), //
-    LEDP_15008("Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
+    LEDP_15014("Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
 
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
