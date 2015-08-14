@@ -23,7 +23,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination) {
         String sql = "SELECT * FROM (SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
-                + "A.[Display_Name] + ' - ' + PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, L.[Description] AS Description, "
+                + "PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, L.[Description] AS Description, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, L.[Likelihood] AS Likelihood, "
                 + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) AS ExpirationDate, "
