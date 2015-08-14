@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -33,6 +34,12 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
     private int maxPoolIdleTime;
     @Value("${playmaker.jdbc.pool.max.checkout}")
     private int maxPoolCheckoutTime;
+
+    @Value("${playmaker.datasource.user}")
+    private String dataSouceUser;
+
+    @Value("${playmaker.datasource.password.encrypted}")
+    private String dataSoucePassword;
 
     public NamedParameterJdbcTemplate getTemplate(String tenantName) {
 
@@ -85,8 +92,16 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
         try {
             ComboPooledDataSource cpds = new ComboPooledDataSource();
             cpds.setDriverClass(tenant.getJdbcDriver());
-            cpds.setUser(tenant.getJdbcUserName());
-            cpds.setPassword(tenant.getJdbcPassword());
+            if (StringUtils.isBlank(tenant.getJdbcUserName())) {
+                cpds.setUser(dataSouceUser);
+            } else {
+                cpds.setUser(tenant.getJdbcUserName());
+            }
+            if (StringUtils.isBlank(tenant.getJdbcPassword())) {
+                cpds.setPassword(dataSoucePassword);
+            } else {
+                cpds.setPassword(tenant.getJdbcPassword());
+            }
             cpds.setJdbcUrl(tenant.getJdbcUrl());
 
             cpds.setMinPoolSize(minPoolSize);
