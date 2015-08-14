@@ -49,7 +49,7 @@ public class EmailUtils {
 
             Transport.send(message);
         } catch (MessagingException e) {
-            throw new LedpException(LedpCode.LEDP_19000, "Error sending a simple email", e);
+            throw new LedpException(LedpCode.LEDP_19000, "Error sending a multipart email", e);
         }
     }
 
