@@ -13,6 +13,7 @@
         <le.domain.version>2.0.7-SNAPSHOT</le.domain.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
+        <le.db.version>2.0.7-SNAPSHOT</le.db.version>
     </properties>
 
     <parent>
@@ -33,6 +34,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${le.db.version}</version>
             <classifier>intf</classifier>
         </dependency>
     </dependencies>
