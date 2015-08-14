@@ -533,9 +533,10 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
                     Headers.getHeaders(), stringifiedPayload);
 
-            log.info("Get response from " + dlUrl + endpoint + ": "
-                    + response.substring(0, Math.min(response.length(), 200)));
         }
+
+        log.info("Get response from " + dlUrl + endpoint + ": "
+                + response.substring(0, Math.min(response.length(), 200)));
 
         return response;
 
