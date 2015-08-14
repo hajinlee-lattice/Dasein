@@ -2,13 +2,7 @@ package com.latticeengines.pls.functionalframework;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import junit.framework.Assert;
+import java.util.*;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -31,19 +25,8 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.pls.LoginDocument;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.domain.exposed.pls.PredictorElement;
-import com.latticeengines.domain.exposed.pls.Segment;
-import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.Session;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
+import com.latticeengines.domain.exposed.pls.*;
+import com.latticeengines.domain.exposed.security.*;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
@@ -54,6 +37,8 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.UserService;
+
+import junit.framework.Assert;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
@@ -156,7 +141,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected String getRestAPIHostPort() {
-        return hostPort;
+        return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 
     protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {

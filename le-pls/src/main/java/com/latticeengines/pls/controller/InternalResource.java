@@ -183,7 +183,7 @@ public class InternalResource extends InternalResourceBase {
         headers.add(new BasicNameValuePair("Accept", "application/json"));
 
         String payload = JsonUtils.serialize(creds);
-        String loginDocAsString = HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/login", true,
+        String loginDocAsString = HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/login", true,
                 headers, payload);
         LoginDocument loginDoc = JsonUtils.deserialize(loginDocAsString, LoginDocument.class);
 
@@ -192,8 +192,8 @@ public class InternalResource extends InternalResourceBase {
         for (Tenant tenant : loginDoc.getResult().getTenants()) {
             if (tenant.getId().equals(tenant2Id)) {
                 payload = JsonUtils.serialize(tenant);
-                HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/attach", true, headers, payload);
-                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(hostPort + "pls/modelsummaries",
+                HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers, payload);
+                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort() + "/pls/modelsummaries",
                         true, headers);
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(response);
@@ -207,9 +207,9 @@ public class InternalResource extends InternalResourceBase {
                     fakeTenant.setPid(-1L);
                     data.setTenant(fakeTenant);
                     data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                    HttpClientWithOptionalRetryUtils.sendPostRequest(hostPort + "pls/modelsummaries?raw=true", true,
+                    HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true", true,
                             headers, JsonUtils.serialize(data));
-                    response = HttpClientWithOptionalRetryUtils.sendGetRequest(hostPort + "pls/modelsummaries", true,
+                    response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort() + "/pls/modelsummaries", true,
                             headers);
                     jNode = mapper.readTree(response);
                 }
@@ -348,5 +348,9 @@ public class InternalResource extends InternalResourceBase {
         newCreds.setUsername(passwordTester);
         newCreds.setPassword(DigestUtils.sha256Hex(passwordTesterPwd));
         globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
+    }
+
+    private String getHostPort() {
+        return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 }
