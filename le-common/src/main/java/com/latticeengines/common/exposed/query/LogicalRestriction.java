@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.query;
+package com.latticeengines.common.exposed.query;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
@@ -10,11 +10,10 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.List;
 
-public class ExistsRestriction extends Restriction {
+public class LogicalRestriction extends Restriction {
 
-    public ExistsRestriction(boolean negate, String association, List<Restriction> restrictions) {
-        this.negate = negate;
-        this.association = association;
+    public LogicalRestriction(Connective connective, List<Restriction> restrictions) {
+        this.connective = connective;
         this.restrictions = restrictions;
     }
 
@@ -22,14 +21,11 @@ public class ExistsRestriction extends Restriction {
      * Serialization constructor
      */
     @Deprecated
-    public ExistsRestriction() {
+    public LogicalRestriction() {
     }
 
     @JsonProperty
-    public boolean negate;
-
-    @JsonProperty
-    public String association;
+    public Connective connective;
 
     @JsonProperty
     public List<Restriction> restrictions;

@@ -1,38 +1,38 @@
-package com.latticeengines.domain.exposed.query;
+package com.latticeengines.common.exposed.query;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public class ConcreteRestriction extends Restriction {
-    public ConcreteRestriction(boolean negate, Lookup lhs, ComparisonType relation, Lookup rhs) {
+import java.util.List;
+
+public class ExistsRestriction extends Restriction {
+
+    public ExistsRestriction(boolean negate, String association, List<Restriction> restrictions) {
         this.negate = negate;
-        this.lhs = lhs;
-        this.relation = relation;
-        this.rhs = rhs;
+        this.association = association;
+        this.restrictions = restrictions;
     }
 
     /**
      * Serialization constructor
      */
     @Deprecated
-    public ConcreteRestriction() {
+    public ExistsRestriction() {
     }
 
     @JsonProperty
     public boolean negate;
 
     @JsonProperty
-    public Lookup lhs;
+    public String association;
 
     @JsonProperty
-    public ComparisonType relation;
-
-    @JsonProperty
-    public Lookup rhs;
+    public List<Restriction> restrictions;
 
     @Override
     public int hashCode() {
@@ -52,5 +52,11 @@ public class ConcreteRestriction extends Restriction {
     @Override
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
+    }
+
+    @Override
+    @SuppressWarnings("Unchecked")
+    public List<GraphNode> getChildren() {
+        return List.class.cast(restrictions);
     }
 }

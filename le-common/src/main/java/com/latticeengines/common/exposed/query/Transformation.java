@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.query;
+package com.latticeengines.common.exposed.query;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;

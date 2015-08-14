@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.query;
+package com.latticeengines.common.exposed.query;
 
 /**
  * Defines how to interpret the references in Lookup.
