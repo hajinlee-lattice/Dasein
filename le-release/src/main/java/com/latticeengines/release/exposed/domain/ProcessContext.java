@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+
 @Component("processContext")
 public class ProcessContext {
 
@@ -18,7 +20,7 @@ public class ProcessContext {
 
     private List<String> projectsShouldUploadToNexus;
 
-    public ProcessContext(){
+    public ProcessContext() {
         projectsShouldUploadToNexus = Arrays.asList(new String[] { "le-pls", "le-propdata" });
     }
 
@@ -62,4 +64,7 @@ public class ProcessContext {
         this.projectsShouldUploadToNexus = projectsShouldUploadToNexus;
     }
 
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }

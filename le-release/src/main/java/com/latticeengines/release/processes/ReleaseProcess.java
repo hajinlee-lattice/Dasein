@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.release.exposed.activities.Activity;
 import com.latticeengines.release.exposed.domain.ProcessContext;
@@ -16,15 +17,8 @@ public class ReleaseProcess {
 
     private List<Activity> activities;
 
+    @Autowired
     private ProcessContext processContext;
-
-    public ProcessContext getProcessContext() {
-        return this.processContext;
-    }
-
-    public void setProcessContext(ProcessContext processContext) {
-        this.processContext = processContext;
-    }
 
     public ReleaseProcess(List<Activity> activities) {
         this.activities = activities;
@@ -35,6 +29,7 @@ public class ReleaseProcess {
     }
 
     public void execute() {
+        System.out.println(processContext);
         if (CollectionUtils.isEmpty(activities)) {
             throw new RuntimeException("Process should contain some activities");
         }

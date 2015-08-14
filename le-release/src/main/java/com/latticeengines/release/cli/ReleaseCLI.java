@@ -19,11 +19,11 @@ public class ReleaseCLI {
     }
 
     public static ReleaseProcess getReleaseProcessInstance(ApplicationContext applicationContext, ProcessContext processContext){
-        if(processContext.getProduct().toLowerCase().equals("modeling platform")){
+        if(processContext.getProduct().equalsIgnoreCase("modeling platform")){
             return  (ReleaseProcess) applicationContext.getBean("releaseDPProcess");
-        }else if(processContext.getProduct().toLowerCase().equals("lp")){
+        }else if(processContext.getProduct().equalsIgnoreCase("lp")){
             return (ReleaseProcess) applicationContext.getBean("releasePLSProcess");
-        }else if(processContext.getProduct().toLowerCase().equals("all")){
+        }else if(processContext.getProduct().equalsIgnoreCase("all")){
             return (ReleaseProcess) applicationContext.getBean("releaseAllProductsProcess");
         }
         return null;
