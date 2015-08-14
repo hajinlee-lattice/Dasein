@@ -10,13 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -161,8 +161,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         parameters.add("password", password);
         parameters.add("format", "json");
         try {
-            RestTemplate restTemplate = new RestTemplate();
-            String result = restTemplate.postForObject(url, parameters, String.class);
+            String result = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, null, JsonUtils.serialize(parameters));
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
 
