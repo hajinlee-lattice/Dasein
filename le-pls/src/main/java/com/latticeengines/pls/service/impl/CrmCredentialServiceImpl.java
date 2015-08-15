@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.zookeeper.ZooDefs;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -29,6 +30,9 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component("crmService")
 public class CrmCredentialServiceImpl implements CrmCredentialService {
@@ -161,7 +165,9 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         parameters.add("password", password);
         parameters.add("format", "json");
         try {
-            String result = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, null, JsonUtils.serialize(parameters));
+            List<BasicNameValuePair> headers = new ArrayList<>();
+            headers.add(new BasicNameValuePair("Content-Type", "application/json; charset=utf-8"));
+            String result = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, headers, JsonUtils.serialize(parameters));
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
 
