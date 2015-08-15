@@ -1,23 +1,12 @@
 package com.latticeengines.pls.service.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.zookeeper.ZooDefs;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.CipherUtils;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -30,14 +19,21 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.zookeeper.ZooDefs;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Component("crmService")
 public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private static final Log log = LogFactory.getLog(CrmCredentialServiceImpl.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
     TenantConfigServiceImpl tenantConfigService;
@@ -165,14 +161,10 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         parameters.add("password", password);
         parameters.add("format", "json");
         try {
-            List<BasicNameValuePair> headers = new ArrayList<>();
-            headers.add(new BasicNameValuePair("Content-Type", "application/json; charset=utf-8"));
-            String result = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, headers, JsonUtils.serialize(parameters));
-            JSONParser jsonParser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
-
-            String id = (String) jsonObject.get("id");
-
+            RestTemplate restTemplate = new RestTemplate();
+            String result = restTemplate.postForObject(url, parameters, String.class);
+            JsonNode jsonObject = MAPPER.readTree(result);
+            String id = jsonObject.get("id").asText();
             String[] tokens = id.split("/");
             return tokens[tokens.length - 2];
         } catch (Exception ex) {
