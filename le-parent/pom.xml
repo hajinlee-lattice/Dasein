@@ -27,6 +27,7 @@
         <hibernate.version>4.1.9.Final</hibernate.version>
         <cascading.version>2.5.0</cascading.version>
         <cascading.driven.version>1.2</cascading.driven.version>
+        <apache.http.version>4.4.1</apache.http.version>
 
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>
