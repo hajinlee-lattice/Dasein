@@ -1,7 +1,17 @@
 package com.latticeengines.pls.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.zookeeper.ZooDefs;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
@@ -19,21 +29,11 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.zookeeper.ZooDefs;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 @Component("crmService")
 public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private static final Log log = LogFactory.getLog(CrmCredentialServiceImpl.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
     TenantConfigServiceImpl tenantConfigService;
@@ -163,8 +163,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String result = restTemplate.postForObject(url, parameters, String.class);
-            JsonNode jsonObject = MAPPER.readTree(result);
-            String id = jsonObject.get("id").asText();
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+
+            String id = (String) jsonObject.get("id");
+
             String[] tokens = id.split("/");
             return tokens[tokens.length - 2];
         } catch (Exception ex) {
