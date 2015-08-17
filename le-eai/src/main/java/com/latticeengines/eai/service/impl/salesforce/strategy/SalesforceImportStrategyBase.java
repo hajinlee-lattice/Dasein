@@ -25,10 +25,10 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
-import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 

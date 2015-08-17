@@ -19,7 +19,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
-import com.latticeengines.eai.routes.ImportProperty;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 
 @Component("eaiClientCustomization")
 public class EaiClientCustomization extends DefaultYarnClientCustomization {
@@ -79,5 +79,5 @@ public class EaiClientCustomization extends DefaultYarnClientCustomization {
                 false));
         return hdfsEntries;
     }
-    
+
 }

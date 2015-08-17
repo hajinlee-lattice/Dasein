@@ -1,4 +1,4 @@
-package com.latticeengines.eai.routes;
+package com.latticeengines.domain.exposed.eai;
 
 public class ImportProperty {
 

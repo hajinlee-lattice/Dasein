@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 

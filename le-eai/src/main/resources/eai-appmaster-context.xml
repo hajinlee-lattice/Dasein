@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:yarn="http://www.springframework.org/schema/yarn" xmlns:yarn-int="http://www.springframework.org/schema/yarn/integration"
-    xmlns:yarn-batch="http://www.springframework.org/schema/yarn/batch" xmlns:int="http://www.springframework.org/schema/integration"
-    xmlns:int-ip="http://www.springframework.org/schema/integration/ip" xmlns:batch="http://www.springframework.org/schema/batch"
-    xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
+    xmlns:yarn-int="http://www.springframework.org/schema/yarn/integration"
+    xmlns:yarn-batch="http://www.springframework.org/schema/yarn/batch"
+    xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+    xmlns:batch="http://www.springframework.org/schema/batch"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
     xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn-2.0.xsd
         http://www.springframework.org/schema/yarn/integration http://www.springframework.org/schema/yarn/integration/spring-yarn-integration-2.0.xsd
         http://www.springframework.org/schema/yarn/batch http://www.springframework.org/schema/yarn/batch/spring-yarn-batch-2.0.xsd
@@ -31,10 +35,12 @@
 
     <bean id="itemProcessor" class="com.latticeengines.eai.yarn.runtime.EaiProcessor" />
 
-    <bean id="fileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+    <bean id="fileItemReader"
+        class="org.springframework.batch.item.file.FlatFileItemReader">
         <property name="resource" value="file:metadata.json" />
         <property name="lineMapper">
-            <bean class="com.latticeengines.eai.yarn.runtime.EaiTablesLineMapper" />
+            <bean
+                class="com.latticeengines.eai.yarn.runtime.EaiTablesLineMapper" />
         </property>
     </bean>
 
@@ -43,7 +49,8 @@
     <batch:job id="eaiJob" restartable="false">
         <batch:step id="master">
             <batch:tasklet transaction-manager="transactionManager">
-                <batch:chunk reader="fileItemReader" processor="itemProcessor" writer="fileItemWriter"
+                <batch:chunk reader="fileItemReader"
+                    processor="itemProcessor" writer="fileItemWriter"
                     commit-interval="0" />
             </batch:tasklet>
         </batch:step>
@@ -51,8 +58,9 @@
 
     <yarn-batch:master job-name="eaiJob" jobs="eaiJob" />
 
-    <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
+    <import
+        resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
     <import resource="classpath:eai-yarn-context.xml" />
-
+    <import resource="classpath:eai-import-context.xml"/>
 </beans>

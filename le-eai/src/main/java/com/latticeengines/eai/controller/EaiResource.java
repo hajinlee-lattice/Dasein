@@ -36,7 +36,7 @@ public class EaiResource {
     public AppSubmission createImportDataJob(@RequestBody ImportConfiguration importConfig) {
         return new AppSubmission(Arrays.<ApplicationId> asList(eaiService.extractAndImport(importConfig)));
     }
-    
+
     @RequestMapping(value = "/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status for submitted import job")

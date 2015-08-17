@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -33,7 +34,6 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
-import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
 public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {

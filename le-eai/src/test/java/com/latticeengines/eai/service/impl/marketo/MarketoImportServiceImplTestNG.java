@@ -17,11 +17,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
-import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 import com.latticeengines.eai.service.ImportService;
 
@@ -38,18 +38,19 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private Configuration yarnConfiguration;
     
     private SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
-    private ImportContext ctx = new ImportContext();
+    
+    @Autowired
+    private ImportContext importContext;
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/Activity");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/ActivityType");
-        ctx.setProperty(MarketoImportProperty.HOST, "976-KKC-431.mktorest.com");
-        ctx.setProperty(MarketoImportProperty.CLIENTID, "c98abab9-c62d-4723-8fd4-90ad5b0056f3");
-        ctx.setProperty(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
-        ctx.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
-        ctx.setProperty(ImportProperty.HADOOPCONFIG, yarnConfiguration);
-        ctx.setProperty(ImportProperty.TARGETPATH, "/tmp");
+        importContext.setProperty(MarketoImportProperty.HOST, "976-KKC-431.mktorest.com");
+        importContext.setProperty(MarketoImportProperty.CLIENTID, "c98abab9-c62d-4723-8fd4-90ad5b0056f3");
+        importContext.setProperty(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
+        importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
+        importContext.setProperty(ImportProperty.TARGETPATH, "/tmp");
         
         List<Table> tables = new ArrayList<>();
         Table activityType = createMarketoActivityType();
@@ -65,7 +66,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     
     @Test(groups = "functional", enabled = true)
     public void importMetadata() {
-        List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, ctx);
+        List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, importContext);
         
         for (Table table : tables) {
             for (Attribute attribute : table.getAttributes()) {
@@ -76,7 +77,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "importMetadata" }, enabled = true)
     public void importDataAndWriteToHdfs() throws Exception {
-        marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, ctx);
+        marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, importContext);
         Thread.sleep(10000L);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));

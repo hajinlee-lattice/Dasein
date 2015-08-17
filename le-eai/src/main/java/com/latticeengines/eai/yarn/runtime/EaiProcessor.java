@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
-import com.latticeengines.eai.routes.ImportProperty;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.eai.service.DataExtractionService;
 
 @Component
@@ -23,18 +23,19 @@ public class EaiProcessor implements ItemProcessor<ImportConfiguration, String> 
 
     @Autowired
     private DataExtractionService dataExtractionService;
-    
+
     @Autowired
     private ProducerTemplate producerTemplate;
 
+    @Autowired
+    private ImportContext importContext;
+
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
-        ImportContext context = new ImportContext();
-        context.setProperty(ImportProperty.HADOOPCONFIG, yarnConfiguration);
-        context.setProperty(ImportProperty.TARGETPATH, importConfig.getTargetPath());
-        context.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
+        importContext.setProperty(ImportProperty.TARGETPATH, importConfig.getTargetPath());
+        importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
         log.info("Starting extract and import.");
-        dataExtractionService.extractAndImport(importConfig, context);
+        dataExtractionService.extractAndImport(importConfig, importContext);
         log.info("Finished extract and import.");
         Thread.sleep(10000L);
         return null;

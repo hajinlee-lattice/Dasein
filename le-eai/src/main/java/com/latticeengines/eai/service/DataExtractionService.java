@@ -8,6 +8,6 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 public interface DataExtractionService {
 
     void extractAndImport(ImportConfiguration importConfig, ImportContext context);
-    
+
     ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig, ImportContext context);
 }

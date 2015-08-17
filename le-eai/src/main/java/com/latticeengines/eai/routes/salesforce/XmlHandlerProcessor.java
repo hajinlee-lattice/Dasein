@@ -8,9 +8,9 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.HdfsUriGenerator;
-import com.latticeengines.eai.routes.ImportProperty;
 
 public class XmlHandlerProcessor implements Processor {
 

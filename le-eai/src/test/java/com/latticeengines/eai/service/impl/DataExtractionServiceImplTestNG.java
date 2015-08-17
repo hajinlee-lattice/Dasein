@@ -12,12 +12,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
-import com.latticeengines.eai.routes.ImportProperty;
 import com.latticeengines.eai.service.DataExtractionService;
 
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml", "classpath:eai-yarn-context.xml" })
@@ -25,7 +25,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private DataExtractionService dataExtractionService;
-    
+
     @Autowired
     private ProducerTemplate producerTemplate;
 
@@ -44,17 +44,17 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         tables.add(contactRole);
 
         Configuration config = new YarnConfiguration();
-        ImportContext context = new ImportContext();
-        context.setProperty(ImportProperty.HADOOPCONFIG, config);
-        context.setProperty(ImportProperty.TARGETPATH, "/tmp");
-        context.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
+        ImportContext importContext = new ImportContext(config);
+        importContext.setProperty(ImportProperty.HADOOPCONFIG, config);
+        importContext.setProperty(ImportProperty.TARGETPATH, "/tmp");
+        importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
         ImportConfiguration importConfig = new ImportConfiguration();
         SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
         salesforceConfig.setSourceType(SourceType.SALESFORCE);
         salesforceConfig.setTables(tables);
         
         importConfig.addSourceConfiguration(salesforceConfig);
-        dataExtractionService.extractAndImport(importConfig, context);
+        dataExtractionService.extractAndImport(importConfig, importContext);
         Thread.sleep(60000L);
     }
     

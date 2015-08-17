@@ -10,22 +10,22 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.eai.routes.ImportProperty;
 
 public abstract class ImportService {
-    
+
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ImportService.class);
 
     private static Map<SourceType, ImportService> services = new HashMap<>();
-    
+
     protected ImportService(SourceType type) {
         services.put(type, this);
     }
-    
+
     public static ImportService getImportService(com.latticeengines.domain.exposed.eai.SourceType sourceType) {
         return services.get(sourceType);
     }
@@ -44,17 +44,17 @@ public abstract class ImportService {
     public abstract List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context);
 
     public abstract void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext context);
-    
+
     public void validate(SourceImportConfiguration extractionConfig, ImportContext context) {
         Configuration config = context.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);
         String targetPath = context.getProperty(ImportProperty.TARGETPATH, String.class);
-        
-        assert(config != null);
-        assert(targetPath != null);
+
+        assert (config != null);
+        assert (targetPath != null);
     }
-    
+
     protected ProducerTemplate getProducerTemplate(ImportContext context) {
         return context.getProperty(ImportProperty.PRODUCERTEMPLATE, ProducerTemplate.class);
     }
-    
+
 }
