@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.dataplatform.exposed.service.ModelingService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -23,12 +23,12 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/importjobs")
 public class EaiResource {
-    
+
     @Autowired
     private EaiService eaiService;
-    
+
     @Autowired
-    private ModelingService modelingService;
+    private JobService jobService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -41,6 +41,6 @@ public class EaiResource {
     @ResponseBody
     @ApiOperation(value = "Get status for submitted import job")
     public JobStatus getImportDataJobStatus(@PathVariable String applicationId) {
-        return modelingService.getJobStatus(applicationId);
+        return jobService.getJobStatus(applicationId);
     }
 }

@@ -25,7 +25,7 @@ public class EaiServiceImpl implements EaiService {
 
     @Autowired
     private DataExtractionService dataExtractionService;
-    
+
     @Autowired
     private JobService jobService;
     
@@ -41,7 +41,7 @@ public class EaiServiceImpl implements EaiService {
 
         return dataExtractionService.submitExtractAndImportJob(importConfig, context);
     }
-    
+
     @Override
     public JobStatus getJobStatus(String applicationId) {
         return jobService.getJobStatus(applicationId);

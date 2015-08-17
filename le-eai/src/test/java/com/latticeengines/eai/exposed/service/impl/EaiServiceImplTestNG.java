@@ -40,10 +40,10 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private EaiService eaiService;
-    
+
     @Autowired
     private MetadataService metadataService;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -95,7 +95,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
             public boolean accept(String file) {
                 return file.endsWith(".parquet");
             }
-            
+
         });
         assertEquals(filesForActivity.size(), 1);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
@@ -105,7 +105,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
             public boolean accept(String file) {
                 return file.endsWith(".parquet");
             }
-            
+
         });
         assertEquals(filesForActivityType.size(), 1);
     }
@@ -137,12 +137,12 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");
         DbCreds creds = new DbCreds(builder);
-        
+
         DataSchema schema = metadataService.createDataSchema(creds, "ConcurSample");
 
         Table file = new Table();
         file.setName("ConcurSample");
-        
+
         for (Field field : schema.getFields()) {
             Attribute attr = new Attribute();
             attr.setName(field.getName());
