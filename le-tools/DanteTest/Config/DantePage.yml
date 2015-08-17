@@ -1,0 +1,66 @@
+DantePage:
+  LogInPage:
+    Username: 'id=username'
+    Password: 'id=password'
+    LoginButton: 'id=Login'
+  HomePage:
+    TabsContainer: 'id=tabContainer'
+    AllTabsLink: 'Xpath=//div[@id="tabContainer"]/nav/ul[@id="tabBar"]/li[@id="AllTab_Tab"]/a'
+  AllTabPage:
+    TabsTable: 'Xpath=//td[@id="bodyCell"]/div[3]/div[2]/table'
+    LeadsLink: 'Xpath=//a[contains(@href,"/servlet/servlet.Integration?lid=") and text()="Leads"]'
+    AccountsLink: 'Xpath=//a[contains(@href,"/servlet/servlet.Integration?lid=") and text()="Accounts"]'
+    ContactLink: 'Xpath=//a[contains(@href,"/servlet/servlet.Integration?lid=") and text()="Contacts"]'
+  LeadListPage:
+    ListPane: 'Xpath=//div[@id="ext-gen11"]/div'
+    ViewSelector: 'Xpath=//select[@id="j_id0:leadList_listSelect"]'
+    OptionValue: '00B800000090aJb'
+    FullID: 'Xpath=//div[@id="ext-gen11"]/div/table/tbody/tr/td[5]/div'
+    FullName: 'Xpath=//div[@id="ext-gen11"]/div/table/tbody/tr/td[4]/div/a'
+    Iframe: 'latticeIframe'
+  VisualLeadPage:
+    LatticeTitle: 'Xpath=//div[img/@src="assets/images/lattice_logo_white.png"]/div'
+    ScoreDetailArea: 'Xpath=//div[@id="mainContentView"]/div/div/div[2]/div/div/div/div/div/span[2]'
+    ContentArea: 'Xpath=//div[@id="mainContentView"]'
+    ScoreTitle: 'Xpath=//div[@id="mainContentView"]/div/div/div[1]/div/div/div/div'
+    ScoreValue: 'Xpath=//div[@id="mainContentView"]/div/div/div[1]/div/div/div/div[2]'
+    External_buy_header: 'Xpath=//div[@id="mainContentView"]/div/div/div/div[1]/div/div/div/div[1]/span[1]'
+    Internal_buy_title: 'Xpath=//div[@id="mainContentView"]/div/div/div/div[2]/div/div/div/div[1]/span[1]'
+    External_buy_1: 'Xpath=//div[@id="mainContentView"]/div/div/div/div[2]/div/div/div/div[2]/div/div/div/div[3]/div[1]/div/div/div/div/div[2]'
+  LeadDetailPage:
+    DetailTable: 'Xpath=//table[@class="detailList"]'
+    Iframe_1: '0668000000071pD'
+  AccountListPage:
+    ListPane: 'Xpath=//div[@id="ext-gen11"]/div'
+    ViewSelector: 'Xpath=//select[@id="j_id0:accountList_listSelect"]'
+    OptionValue: '00B800000090aHV'
+    FullID: 'Xpath=//div[@id="ext-gen11"]/div[2]/table/tbody/tr/td[4]/div'
+    FullName: 'Xpath=//div[@id="ext-gen11"]/div[2]/table/tbody/tr/td[3]/div/a'
+    DanteLink: 'Xpath=//div[@id="ext-gen11"]/div[2]/table/tbody/tr/td[1]/div/a'
+    Iframe: 'latticeIframe'
+  VisualAccountPage:
+    LatticeTitle: 'Xpath=//div[img/@src="assets/images/lattice_logo_white.png"]/div'
+    DanteContentArea: 'Xpath=//div[@id="mainContentView"]'
+    PlayTitle: 'Xpath=//div[@id="playListScreen"]/div/div/div/div/div/div/div[Play_Index_Temp]/div/div/section/div/div/div/div[1]'
+    PlayScore: 'Xpath=//div[@id="playListScreen"]/div/div/div/div/div/div/div[Play_Index_Temp]/div/div/section/div/div/div/div[2]'
+    PlayList: '//div[@id="playListScreen"]/div/div/div/div/div/div/div'
+    PlayDetail: 'Xpath=//div[@id="playDetailsContent"]/div/div'
+    TPContentArea: 'Xpath=//div[@id="playTalkingPointsScreenWidget"]/div[2]'
+    TPHeaderArea: 'Xpath=//div[@id="playDetailsContent"]/div/div/ul'
+    TPLink: 'Xpath=//div[@id="playDetailsContent"]/div/div/ul/li/a[text()="Talking Points"]'
+    TPList: '//div[@id="playTalkingPointsScreenWidget"]/div[2]/div/div/div/div/div/div/div'
+    TPTitle: 'Xpath=//div[@id="playTalkingPointsScreenWidget"]/div[2]/div/div/div/div/div/div/div[TP_Index_Temp]/div/div/div/div/div[1]'
+    TPContent: 'Xpath=//div[@id="playTalkingPointsScreenWidget"]/div[2]/div/div/div/div/div/div/div[TP_Index_Temp]/div/div/div/div/div[2]/div'
+  AccountDetailPage:
+    DetailTable: 'Xpath=//table[@class="detailList"]'
+    Iframe_1: '06680000000716M'
+  ContactListPage:
+    ListPane: 'Xpath=//div[@id="ext-gen11"]/div'
+    ViewSelector: 'Xpath=//select[@id="j_id0:contactList_listSelect"]'
+    OptionValue: '00B800000090ag1'
+    FullID: 'Xpath=//div[@id="ext-gen11"]/div/table/tbody/tr/td[5]/div'
+    FullName: 'Xpath=//div[@id="ext-gen11"]/div/table/tbody/tr/td[4]/div/a'
+    Iframe: 'latticeIframe'
+  ContactDetailPage:
+    DetailTable: 'Xpath=//table[@class="detailList"]'
+    Iframe_1: '0668000000071pB'
