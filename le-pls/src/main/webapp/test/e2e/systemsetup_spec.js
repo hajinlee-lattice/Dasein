@@ -7,27 +7,27 @@ describe('system setup tests', function () {
     var userDropdown = require('./po/userdropdown.po');
     var systemSetup = require('./po/systemsetup.po');
 
-    //it('should validate that you can go to the System Setup page', function () {
-    //    //==================================================
-    //    // Login
-    //    //==================================================
-    //    loginPage.loginAsSuperAdmin();
-    //
-    //    //==================================================
-    //    // Select System Setup Tab
-    //    //==================================================
-    //    userDropdown.toggleDropdown();
-    //    browser.waitForAngular();
-    //    expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
-    //    userDropdown.SystemSetupLink.click();
-    //    browser.waitForAngular();
-    //    systemSetup.waitForSfdcCredentials();
-    //
-    //    //==================================================
-    //    // Logout
-    //    //==================================================
-    //    loginPage.logout();
-    //});
+    it('should validate that you can go to the System Setup page', function () {
+        //==================================================
+        // Login
+        //==================================================
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Select System Setup Tab
+        //==================================================
+        userDropdown.toggleDropdown();
+        browser.waitForAngular();
+        expect(userDropdown.SystemSetupLink.isPresent()).toBe(true);
+        userDropdown.SystemSetupLink.click();
+        browser.waitForAngular();
+        systemSetup.waitForSfdcCredentials();
+
+        //==================================================
+        // Logout
+        //==================================================
+        loginPage.logout();
+    });
 
     it('should validate that you can enter Eloqua credentials', function () {
         //==================================================
