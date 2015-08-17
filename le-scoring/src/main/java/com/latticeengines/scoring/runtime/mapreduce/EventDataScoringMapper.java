@@ -154,7 +154,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             }
         } catch (Exception e) {
             String errorMessage = String
-                    .format("TenantId=%s leadnputQueueId+%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
+                    .format("TenantId=%s leadnputQueueId=%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
                             tenantId, leadnputQueueId, e.getMessage(), ExceptionUtils.getStackTrace(e));
             log.error(errorMessage);
             File logFile = new File(logDir + "/" + UUID.randomUUID() + ".err");
