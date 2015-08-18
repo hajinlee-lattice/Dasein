@@ -35,6 +35,7 @@ import cascading.property.AppProps;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.util.DelimitedParser;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
@@ -47,7 +48,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class AvroRead {
 
-    @SuppressWarnings({ "deprecation", "rawtypes", "unused" })
+    @SuppressWarnings({ "rawtypes", "unused" })
     public static void main(String[] args) throws Exception {
         String lead = "file://"
                 + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
@@ -74,7 +75,7 @@ public class AvroRead {
         Tap<?, ?, ?> leadTap = new Lfs(new AvroScheme(), lead);
         Tap<?, ?, ?> opportunityTap = new Lfs(new AvroScheme(), opportunity);
         Tap<?, ?, ?> contactTap = new Lfs(new AvroScheme(), contact);
-        Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), wcPath, true);
+        Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), wcPath, SinkMode.KEEP);
         sources.put("lead", leadTap);
         //sources.put("oppty", opportunityTap);
         sources.put("contact", contactTap);
@@ -127,7 +128,7 @@ public class AvroRead {
         TextDelimited scheme = new TextDelimited(true, parser);
         Checkpoint c1 = new Checkpoint("ckpt1", join);
         Tap<?, ?, ?> c1Tap = new Lfs(new SequenceFile(Fields.UNKNOWN), //
-                "/tmp/ckpt1", true);
+                "/tmp/ckpt1", SinkMode.KEEP);
 
         ExpressionFunction function = new ExpressionFunction(new Fields("Domain"), //
                 "Email != null ? Email.substring(Email.indexOf(\"@\") + 1) : \"\"", //
@@ -136,7 +137,7 @@ public class AvroRead {
 
         Checkpoint c2 = new Checkpoint("ckpt2", each);
         Tap<?, ?, ?> c2Tap = new Lfs(new SequenceFile(Fields.UNKNOWN), //
-                "/tmp/ckpt2", true);
+                "/tmp/ckpt2", SinkMode.KEEP);
 
         ExpressionFunction domainFunction = new ExpressionFunction(new Fields("IsDomain"), //
                 "Domain == null ? false : Domain.contains(\".com\") || Domain.contains(\"www\")", //
@@ -146,7 +147,7 @@ public class AvroRead {
 
         Checkpoint c3 = new Checkpoint("ckpt3", each);
         Tap<?, ?, ?> c3Tap = new Lfs(new SequenceFile(Fields.UNKNOWN), //
-                "/tmp/ckpt3", true);
+                "/tmp/ckpt3", SinkMode.KEEP);
 
         Pipe grpby = new GroupBy(c3, new Fields("Domain"), new Fields("FirstName"));
 
@@ -157,7 +158,7 @@ public class AvroRead {
 
         Checkpoint c4 = new Checkpoint("ckpt4", grpby);
         Tap<?, ?, ?> c4Tap = new Lfs(new SequenceFile(Fields.UNKNOWN), //
-                "/tmp/ckpt4", true);
+                "/tmp/ckpt4", SinkMode.KEEP);
 
         each = new Each(c4, new Fields("Domain", "MaxRevenue", "TotalEmployees"), new AddMD5Hash(new Fields("PropDataHash")), Fields.ALL);
 

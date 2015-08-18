@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.service.impl.DataTransformationServiceImpl;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -41,6 +42,10 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         //createFinalEventTable.setLocal(true);
         //createInitialEventTable.setLocal(true);
         //createPropDataInput.setLocal(true);
+        Configuration config = new Configuration();
+        HdfsUtils.rmdir(config, "/tmp/PDTable");
+        HdfsUtils.rmdir(config, "/tmp/EventTable");
+        HdfsUtils.rmdir(config, "/tmp/TmpEventTable");
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
         opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro").getPath();

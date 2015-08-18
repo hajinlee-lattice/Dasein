@@ -47,6 +47,7 @@ import cascading.pipe.joiner.RightJoin;
 import cascading.property.AppProps;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
@@ -95,7 +96,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return taps;
     }
 
-    @SuppressWarnings({ "deprecation", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     private Pipe doCheckpoint(Pipe pipe) {
         if (isCheckpoint()) {
             DataFlowContext ctx = getDataFlowCtx();
@@ -103,9 +104,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             Checkpoint ckpt = new Checkpoint(ckptName, pipe);
             String targetPath = "/tmp/checkpoints/" + ctx.getProperty("CUSTOMER", String.class) + "/" + ckptName;
             Scheme scheme = new SequenceFile(Fields.UNKNOWN);
-            Tap ckptTap = new Lfs(scheme, targetPath, true);
+            Tap ckptTap = new Lfs(scheme, targetPath, SinkMode.KEEP);
             if (!isLocal()) {
-                ckptTap = new Hfs(scheme, targetPath, true);
+                ckptTap = new Hfs(scheme, targetPath, SinkMode.KEEP);
             }
             checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptTap));
             AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas
@@ -615,7 +616,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return pipesAndOutputSchemas.get(operator).getValue();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void runFlow(DataFlowContext dataFlowCtx) {
         @SuppressWarnings("unchecked")
@@ -628,10 +628,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         String lastOperator = constructFlowDefinition(dataFlowCtx, sourceTables);
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
         System.out.println(schema);
-        Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, true);
-        // Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), targetPath, true);
+        Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
         if (!isLocal()) {
-            sink = new Hfs(new AvroScheme(schema), targetPath, true);
+            sink = new Hfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
         }
         Properties properties = new Properties();
         properties.put("mapred.job.queue.name", queue);

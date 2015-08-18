@@ -14,6 +14,10 @@
         <le.common.version>2.0.8-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.8-SNAPSHOT</le.domain.version>
         <le.scheduler.version>2.0.8-SNAPSHOT</le.scheduler.version>
+        <cascading.version>3.0.1</cascading.version>
+        <cascading.avro.version>3.0.0</cascading.avro.version>
+        <cascading.driven.version>1.3.0-eap-2</cascading.driven.version>
+        
     </properties>
 
     <parent>
@@ -132,13 +136,13 @@
         </dependency>
         <dependency>
             <groupId>cascading</groupId>
-            <artifactId>cascading-xml</artifactId>
+            <artifactId>cascading-local</artifactId>
             <version>${cascading.version}</version>
         </dependency>
         <dependency>
             <groupId>cascading.avro</groupId>
             <artifactId>avro-scheme</artifactId>
-            <version>${cascading.version}</version>
+            <version>${cascading.avro.version}</version>
         </dependency>
         <dependency>
             <groupId>cascading</groupId>
