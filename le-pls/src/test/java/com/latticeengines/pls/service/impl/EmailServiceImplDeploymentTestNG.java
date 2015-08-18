@@ -3,9 +3,6 @@ package com.latticeengines.pls.service.impl;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.net.URI;
-
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -17,12 +14,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
-
-import microsoft.exchange.webservices.data.core.ExchangeService;
-import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
-import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
-import microsoft.exchange.webservices.data.credential.WebCredentials;
-import microsoft.exchange.webservices.data.search.ItemView;
 
 public class EmailServiceImplDeploymentTestNG extends PlsFunctionalTestNGBase {
 
@@ -78,16 +69,6 @@ public class EmailServiceImplDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
     private void verifyReceivedEmailInOutlook() {
-        try {
-            ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP2);
-            ExchangeCredentials credentials = new WebCredentials("build@lattice-engines.com", "");
-            service.setCredentials(credentials);
-            service.setUrl(new URI("https://mail.lattice-engines.com/ews/exchange.asmx"));
-            ItemView view = new ItemView(50);
-            // FindItemsResults<Item> findResults = service.findItems(WellKnownFolderName.Inbox, view);
-        } catch (Exception e) {
-            Assert.fail("Failed to verify email.", e);
-        }
     }
 
     @SuppressWarnings("unused")
