@@ -83,8 +83,7 @@ public class ReleaseProcessConfiguration {
     }
 
     public void init() {
-        preReleaseActivities = Arrays.asList(new Activity[] { startReleaseNotificationActivity,
-                uploadProjectsToNexusActivity, runReleaseProcessActivity }); //
+        preReleaseActivities = Arrays.asList(new Activity[] { startReleaseNotificationActivity, uploadProjectsToNexusActivity, runReleaseProcessActivity });
         postReleaseActivities = Arrays.asList(new Activity[] { finishReleaseNotificationActivity }); // createChangeManagementJiraActivity
     }
 }
