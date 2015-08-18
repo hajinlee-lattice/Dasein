@@ -1,14 +1,15 @@
 package com.latticeengines.common.exposed.query;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.graph.GraphNode;
-import com.latticeengines.common.exposed.visitor.Visitor;
-import com.latticeengines.common.exposed.visitor.VisitorContext;
+import java.util.List;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 public class ExistsRestriction extends Restriction {
 
@@ -55,7 +56,7 @@ public class ExistsRestriction extends Restriction {
     }
 
     @Override
-    @SuppressWarnings("Unchecked")
+    @SuppressWarnings("unchecked")
     public List<GraphNode> getChildren() {
         return List.class.cast(restrictions);
     }
