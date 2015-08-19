@@ -308,41 +308,37 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         ];
         var toReturn = []; 
         toReturn.push(columns);
-        var topCategories = this.GetTopCategories(modelSummary);
-        
+
         var totalPredictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
         var averageConversionRate = modelSummary.ModelDetails.TotalConversions/modelSummary.ModelDetails.TotalLeads;
-        for (var i = 0; i < topCategories.length; i++) {
-            category = topCategories[i];
+
+        for (var x = 0; x < totalPredictors.length; x++) {
+            var predictor = totalPredictors[x];
             
-            for (var x = 0; x < totalPredictors.length; x++) {
-                var predictor = totalPredictors[x];
-                
-                if (predictor.Category == category.name && 
-                    (this.ShowBasedOnTags(predictor, true) || this.ShowBasedOnTags(predictor, false)) &&
-                    AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
-                    this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
-                    for (var y = 0; y < predictor.Elements.length; y++) {
-                        var element = predictor.Elements[y];
-                        var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
-                        var isCategorical = this.IsPredictorElementCategorical(element);
-                        if (isCategorical && percentTotal < 1) {
-                            continue;
-                        }
-                        percentTotal = percentTotal.toFixed(1);
-                        var lift = element.Lift.toPrecision(2);
-                        var conversionRate = lift * averageConversionRate;
-                        var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
-                        var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
-                        if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
-                            attributeValue = "N/A";
-                        }
-                        //PLS-352 
-                        attributeValue = "'"+ attributeValue + "'";
-                        var predictivePower = predictor.UncertaintyCoefficient * 100;
-                        var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, conversionRate, predictivePower];
-                        toReturn.push(attributeRow);
+            if(!StringUtility.IsEmptyString(predictor.Category) && 
+                (this.ShowBasedOnTags(predictor, true) || this.ShowBasedOnTags(predictor, false)) &&
+                AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
+                this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
+                for (var y = 0; y < predictor.Elements.length; y++) {
+                    var element = predictor.Elements[y];
+                    var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
+                    var isCategorical = this.IsPredictorElementCategorical(element);
+                    if (isCategorical && percentTotal < 1) {
+                        continue;
                     }
+                    percentTotal = percentTotal.toFixed(1);
+                    var lift = element.Lift.toPrecision(2);
+                    var conversionRate = lift * averageConversionRate;
+                    var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
+                    var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+                    if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
+                        attributeValue = "N/A";
+                    }
+                    //PLS-352 
+                    attributeValue = "'"+ attributeValue + "'";
+                    var predictivePower = predictor.UncertaintyCoefficient * 100;
+                    var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, conversionRate, predictivePower];
+                    toReturn.push(attributeRow);
                 }
             }
         }
