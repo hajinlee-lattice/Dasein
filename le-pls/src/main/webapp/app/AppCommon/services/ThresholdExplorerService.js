@@ -79,16 +79,10 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
 
     this.GetDecileData = function (chartData) {
         var result = [];
-        var i;
-
-        //==================================================
-        // Conversions
-        //==================================================
-        var conversions = {Leads: ResourceUtility.getString("DECILE_GRID_CONVERSIONS")};
-        for (i = 1; i < 11; i++) {
-            conversions["D" + String(i)] = String(chartData[i * 10].conversions.toFixed(0)) + "%";
+        for (var i = 1; i < 11; i++) {
+            result.push(chartData[i * 10].conversions);
         }
-        result.push(conversions);
+
 
         return result;
     };

@@ -13,7 +13,10 @@ angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
             if ($scope.data == null) return;
 
             $scope.threasholdData = $scope.data.ThresholdChartData;
-            $scope.decileData = [ _.values($scope.data.ThresholdDecileData[0]) ];
+            $scope.decileData = [[ ResourceUtility.getString("DECILE_GRID_CONVERSIONS") ]];
+            $scope.data.ThresholdDecileData.forEach(function(d){
+                $scope.decileData[0].push(d.toFixed(0));
+            });
 
             var top_label = ResourceUtility.getString("DECILE_GRID_TOP_LABEL");
             $scope.decileColumns = [

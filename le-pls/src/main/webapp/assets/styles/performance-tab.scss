@@ -1,7 +1,68 @@
-.threshold-explorer-chart {
-  margin-left: -110px;
+#performanceTab .threshold-explorer-chart {
+  margin-left: -55px;
 }
 
-.model-details .data-table h2 {
+#performanceTab .data-table {
+  background: transparent;
+  border: none;
+}
+
+#performanceTab .threshold-data .data-table {
+  padding: 0;
+  margin: 0;
+  border-top: #cccccc solid 1px;
+  border-bottom: #cccccc solid 1px;
+  border-radius: 0;
+}
+
+#performanceTab .threshold-data table thead th {
+  border-top: none;
+}
+
+#performanceTab .threshold-data table thead tr th:last-of-type,
+#performanceTab .threshold-data table tbody tr td:last-of-type {
+  border-right: none;
+}
+
+#performanceTab h2 {
   text-align: center;
+  width: 100%;
+  font-size: 1.25em;
+  font-family: 'ProximaNova-Bold','Open Sans',sans-serif;
+}
+
+
+#performanceTab h2.strike-through {
+  position: relative;
+  z-index: 1;
+
+  &:before {
+    border-top: 1px solid #cccccc;
+    content:"";
+    margin: 0 auto;
+    position: absolute;
+    top: 50%; left: 0; right: 0; bottom: 0;
+    width: 100%;
+    z-index: -1;
+  }
+
+  span {
+    background: white;
+    padding: 0 15px;
+  }
+}
+
+#performanceTab h2.line-through {
+  display: table;
+  white-space: nowrap;
+  &:before, &:after {
+    border-top: 1px solid #CCCCCC;
+    content: '';
+    display: table-cell;
+    position: relative;
+    top: 0.5em;
+    width: 45%;
+  }
+  &:before { right: 1.5%; }
+  &:after { left: 1.5%; }
 }

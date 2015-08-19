@@ -102,15 +102,13 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
     //==================================================
     describe('decile-data tests', function () {
         it('decile-data should have 10 conversions', function () {
-            for (var i = 1; i < 10; i++) {
-                expect(thresholdDecileData[0].hasOwnProperty("D" + String(i))).toBe(true);
-            }
+            expect(thresholdDecileData.length).toBe(10);
         });
 
         it('decile-data conversions should increase', function () {
             for (var i = 1; i < 10; i++) {
-                expect(parseInt(thresholdDecileData[0]["D" + String(i + 1)].slice(0, -1)) >=
-                    parseInt(thresholdDecileData[0]["D" + String(i)].slice(0, -1))).toBe(true);
+                expect(parseInt(thresholdDecileData[i]) >=
+                    parseInt(thresholdDecileData[i - 1])).toBe(true);
             }
         });
     });
@@ -120,9 +118,9 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
     //==================================================
     describe('chart-decile tests', function () {
         it('chart-decile conversions should match', function () {
-            for (var i = 1; i < 10; i++) {
-                expect(thresholdChartData[10 * i].conversions.toFixed(0)).
-                    toEqual(thresholdDecileData[0]["D" + String(i)].slice(0, -1));
+            for (var i = 0; i < 10; i++) {
+                expect(thresholdChartData[10 * (i + 1)].conversions.toFixed(0)).
+                    toEqual(thresholdDecileData[i].toFixed(0));
             }
         });
     });
