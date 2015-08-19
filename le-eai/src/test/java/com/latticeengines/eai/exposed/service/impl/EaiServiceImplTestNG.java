@@ -55,6 +55,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/Activity");
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/ActivityType");
     }
 
     @Test(groups = { "functional", "functional.production" }, enabled = true)
