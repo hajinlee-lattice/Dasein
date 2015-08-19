@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.exposed.service.impl;
+package com.latticeengines.dataflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;

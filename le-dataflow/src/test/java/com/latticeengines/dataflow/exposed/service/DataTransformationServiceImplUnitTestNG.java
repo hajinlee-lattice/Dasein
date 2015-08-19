@@ -1,8 +1,9 @@
-package com.latticeengines.dataflow.exposed.service.impl;
+package com.latticeengines.dataflow.exposed.service;
 
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataflow.exposed.exception.DataFlowException;
+import com.latticeengines.dataflow.service.impl.DataTransformationServiceImpl;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 public class DataTransformationServiceImplUnitTestNG {
