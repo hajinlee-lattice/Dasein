@@ -108,7 +108,8 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
             cpds.setMaxPoolSize(maxPoolSize);
             cpds.setMaxIdleTime(maxPoolIdleTime);
             cpds.setCheckoutTimeout(maxPoolCheckoutTime);
-
+            cpds.setBreakAfterAcquireFailure(true);
+            
             NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(cpds);
             byte[] hash = getHash(tenant);
             TemplateInfo templateInfo = new TemplateInfo(template, hash);
