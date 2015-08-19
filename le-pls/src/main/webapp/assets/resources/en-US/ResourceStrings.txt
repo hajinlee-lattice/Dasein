@@ -232,6 +232,7 @@ ACTIVATE_MODEL_DELETE_SEGMENT_ERROR=There was error deleting {0} segment. Please
 ACTIVATE_MODEL_UPDATE_SEGMENT_ERROR=There was error updating {0} segment. Please try again later or contact your system administrator.
 ACTIVATE_MODEL_UPDATE_SEGMENTS_ERROR=There was error updating segments. Please try again later or contact your system administrator.
 THRESHOLD_EXPLORER_TAB_TITLE=Performance
+PERFORMANCE_TAB_TITLE=Performance
 TOP_PREDICTORS_TAB_TITLE=Attributes
 TOP_PREDICTORS_TITLE=Total Attribute Values
 TOP_PREDICTORS_INTERNAL_TITLE=Marketing Attributes

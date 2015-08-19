@@ -1,179 +1,143 @@
 {
-	"Applications" : [{
-			"ID" : "PredictiveLeadScoring",
-			"Type" : "ApplicationWidget",
-			"Version" : "1",
-			"Widgets" : [{
-					"ID" : "modelDetailsScreenWidget",
-					"Type" : "ScreenWidget",
-					"Widgets" : [{
-							"ID" : "modelDetailsWidget",
-							"Type" : "ModelDetailsWidget",
-							"ScoreProperty" : "RocScore",
-							"NameProperty" : "DisplayName",
-							"StatusProperty" : "Status",
-							"ExternalAttributesProperty" : "ExternalAttributes",
-							"InternalAttributesProperty" : "InternalAttributes",
-							"CreatedDateProperty" : "ConstructionTime",
-							"TotalLeadsProperty" : "TotalLeads",
-							"TestSetProperty" : "TestingLeads",
-							"TrainingSetProperty" : "TrainingLeads",
-							"TotalSuccessEventsProperty" : "TotalConversions",
-							"ConversionRateProperty" : "ConversionRate",
-							"LeadSourceProperty" : "LeadSource",
-							"OpportunityProperty" : "Opportunity",
-							"Widgets" : []
-						}, {
-                            "ID": "modelDetailsTabWidget",
-                            "Type": "SimpleTabWidget",
-                            "DefaultTab": 0,
-                            "Tabs": [{
-                                    "ID" : "modelDetailsAttributesTab",
-                                    "TitleString": "TOP_PREDICTORS_TAB_TITLE",
-                                    "Widgets": [{
-                                            "ID" : "modelDetailsAttributesWidget",
-                                            "Type" : "TopPredictorWidget"
-                                    }]
-                                }, {
-                                    "ID" : "modelDetailsExplorerTab",
-                                    "TitleString": "THRESHOLD_EXPLORER_TAB_TITLE",
-                                    "Widgets": [{
-                                            "ID" : "modelDetailsExplorerWidget",
-                                            "Type" : "ThresholdExplorerWidget"
-                                        }, {
-                                            "ID" : "modelDetailsDecileGridWidget",
-                                            "Type" : "SimpleGridWidget",
-                                            "TitleString": "DECILE_GRID_TITLE",
-                                            "DataProvider": "ThresholdDecileData",
-                                            "CustomGridClass": "threshold-data",
-                                            "Columns": [{
-                                                    "TitleString": "",
-                                                    "SubtitleString": "DECILE_GRID_LEADS_LABEL",
-                                                    "PropertyName": "Leads",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D1_LABEL",
-                                                    "PropertyName": "D1",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D2_LABEL",
-                                                    "PropertyName": "D2",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D3_LABEL",
-                                                    "PropertyName": "D3",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D4_LABEL",
-                                                    "PropertyName": "D4",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D5_LABEL",
-                                                    "PropertyName": "D5",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D6_LABEL",
-                                                    "PropertyName": "D6",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D7_LABEL",
-                                                    "PropertyName": "D7",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D8_LABEL",
-                                                    "PropertyName": "D8",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D9_LABEL",
-                                                    "PropertyName": "D9",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "DECILE_GRID_TOP_LABEL",
-                                                    "SubtitleString": "DECILE_GRID_D10_LABEL",
-                                                    "PropertyName": "D10",
-                                                    "DisplayType": "String"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }, {
-                                    "ID" : "modelDetailsLeadsTab",
-                                    "TitleString": "LEADS_TAB_TITLE",
-                                    "Widgets": [{
-                                        "ID" : "leadsTabWidget",
-                                        "Type" : "LeadsTabWidget"
-                                    }]
-                                }
-                            ]
-                        }
-					]
-				}, {
-					"ID" : "modelListScreenWidget",
-					"Type" : "ScreenWidget",
-					"Widgets" : [{
-							"ID" : "modelListTileRepeater",
-							"Type" : "RepeaterWidget",
-							"Sorts" : [],
-							"Widgets" : [{
-									"ID" : "modelListTileWidget",
-									"Type" : "ModelListTileWidget",
-									"NameProperty" : "DisplayName",
-									"StatusProperty" : "Status",
-									"CreatedDateProperty" : "CreatedDate",
-									"IncompleteProperty" : "Incomplete",
-									"Widgets" : []
-								}
-							]
-						}
-					]
-				}, {
-                    "ID" : "modelListCreationHistoryWidget",
-                    "Type" : "ModelListCreationHistoryWidget",
-                    "Widgets" : []
-                }, {
-                    "ID" : "userManagementScreenWidget",
-                    "Type" : "ScreenWidget",
-                    "Widgets" : [{
-                        "ID" : "userManagementWidget",
-                        "Type" : "UserManagementWidget",
-                        "Widgets" : []
-                    }]
-                }, {
-                    "ID" : "adminInfoScreenWidget",
-                    "Type" : "ScreenWidget",
-                    "Widgets" : [{
-                            "ID" : "adminInfoTabWidget",
-                            "Type" : "SimpleTabWidget",
-                            "DefaultTab" : 0,
-                            "Tabs" : [{
-                                    "ID" : "adminInfoSummaryTab",
-                                    "TitleString" : "ADMIN_INFO_SUMMARY_TAB_TITLE",
-                                    "Widgets" : [{
-                                            "ID" : "adminInfoSummaryWidget",
-                                            "Type" : "AdminInfoSummaryWidget"
-                                    }]
-                                },{
-                                    "ID" : "adminInfoAlertsTab",
-                                    "TitleString" : "ADMIN_INFO_ALERTS_TAB_TITLE",
-                                    "Widgets" : [{
-                                            "ID" : "adminInfoAlertsWidget",
-                                            "Type" : "AdminInfoAlertsWidget"
-                                    }]
-                                }
-                            ]
-                        }
-                    ]
+  "Applications": [
+    {
+      "ID": "PredictiveLeadScoring",
+      "Type": "ApplicationWidget",
+      "Version": "1",
+      "Widgets": [
+        {
+          "ID": "modelDetailsScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "modelDetailsWidget",
+              "Type": "ModelDetailsWidget",
+              "ScoreProperty": "RocScore",
+              "NameProperty": "DisplayName",
+              "StatusProperty": "Status",
+              "ExternalAttributesProperty": "ExternalAttributes",
+              "InternalAttributesProperty": "InternalAttributes",
+              "CreatedDateProperty": "ConstructionTime",
+              "TotalLeadsProperty": "TotalLeads",
+              "TestSetProperty": "TestingLeads",
+              "TrainingSetProperty": "TrainingLeads",
+              "TotalSuccessEventsProperty": "TotalConversions",
+              "ConversionRateProperty": "ConversionRate",
+              "LeadSourceProperty": "LeadSource",
+              "OpportunityProperty": "Opportunity",
+              "Widgets": []
+            },
+            {
+              "ID": "modelDetailsTabWidget",
+              "Type": "SimpleTabWidget",
+              "DefaultTab": 0,
+              "Tabs": [
+                {
+                  "ID": "modelDetailsAttributesTab",
+                  "TitleString": "TOP_PREDICTORS_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "modelDetailsAttributesWidget",
+                      "Type": "TopPredictorWidget"
+                    }
+                  ]
+                },
+                {
+                  "ID": "performanceTab",
+                  "TitleString": "PERFORMANCE_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "performanceTabWidget",
+                      "Type": "PerformanceTabWidget"
+                    }
+                  ]
+                },
+                {
+                  "ID": "modelDetailsLeadsTab",
+                  "TitleString": "LEADS_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "leadsTabWidget",
+                      "Type": "LeadsTabWidget"
+                    }
+                  ]
                 }
-			]
-		}
-	]
+              ]
+            }
+          ]
+        },
+        {
+          "ID": "modelListScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "modelListTileRepeater",
+              "Type": "RepeaterWidget",
+              "Sorts": [],
+              "Widgets": [
+                {
+                  "ID": "modelListTileWidget",
+                  "Type": "ModelListTileWidget",
+                  "NameProperty": "DisplayName",
+                  "StatusProperty": "Status",
+                  "CreatedDateProperty": "CreatedDate",
+                  "IncompleteProperty": "Incomplete",
+                  "Widgets": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ID": "modelListCreationHistoryWidget",
+          "Type": "ModelListCreationHistoryWidget",
+          "Widgets": []
+        },
+        {
+          "ID": "userManagementScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "userManagementWidget",
+              "Type": "UserManagementWidget",
+              "Widgets": []
+            }
+          ]
+        },
+        {
+          "ID": "adminInfoScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "adminInfoTabWidget",
+              "Type": "SimpleTabWidget",
+              "DefaultTab": 0,
+              "Tabs": [
+                {
+                  "ID": "adminInfoSummaryTab",
+                  "TitleString": "ADMIN_INFO_SUMMARY_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "adminInfoSummaryWidget",
+                      "Type": "AdminInfoSummaryWidget"
+                    }
+                  ]
+                },
+                {
+                  "ID": "adminInfoAlertsTab",
+                  "TitleString": "ADMIN_INFO_ALERTS_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "adminInfoAlertsWidget",
+                      "Type": "AdminInfoAlertsWidget"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

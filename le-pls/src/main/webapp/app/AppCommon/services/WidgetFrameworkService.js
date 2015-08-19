@@ -11,6 +11,7 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.TabWidget',
     'mainApp.appCommon.widgets.TopPredictorWidget',
     'mainApp.appCommon.widgets.ThresholdExplorerWidget',
+    'mainApp.appCommon.widgets.PerformanceTabWidget',
     'mainApp.appCommon.widgets.UserManagementWidget',
     'mainApp.appCommon.widgets.AdminInfoSummaryWidget',
     'mainApp.appCommon.widgets.AdminInfoAlertsWidget',
@@ -95,6 +96,9 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
                 break;
             case WidgetConfigUtility.THRESHOLD_EXPLORER_WIDGET:
                 $compile(options.element.html('<div data-threshold-explorer-widget></div>'))(scope);
+                break;
+            case WidgetConfigUtility.PERFORMANCE_TAB_WIDGET:
+                $compile(options.element.html('<div data-performance-tab-widget></div>'))(scope);
                 break;
             case WidgetConfigUtility.TOP_PREDICTOR_WIDGET:
                 $compile(options.element.html('<div data-top-predictor-widget></div>'))(scope);

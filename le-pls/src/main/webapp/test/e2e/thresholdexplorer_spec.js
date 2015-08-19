@@ -73,7 +73,7 @@ describe('threshold explorer', function() {
         //==================================================
         // Check DecileGrid
         //==================================================
-        var tab = element(by.id("modelDetailsExplorerTab"));
+        var tab = element(by.id("performanceTab"));
         var body = tab.element(by.tagName("tbody"));
         var rows = body.all(by.tagName("tr"));
         expect(rows.count()).toEqual(1);

@@ -1,0 +1,17 @@
+<div class="data-table">
+    <h2>{{title}}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th data-ng-repeat="column in columns">
+                    <span>{{column.superTitle}}</span> {{ column.title }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-ng-repeat="row in data">
+                <td data-ng-repeat="item in row track by $index">{{ item }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
