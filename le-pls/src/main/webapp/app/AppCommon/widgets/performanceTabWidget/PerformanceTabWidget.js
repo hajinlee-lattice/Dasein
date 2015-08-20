@@ -15,7 +15,7 @@ angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
             $scope.threasholdData = $scope.data.ThresholdChartData;
             $scope.decileData = [[ ResourceUtility.getString("DECILE_GRID_CONVERSIONS") ]];
             $scope.data.ThresholdDecileData.forEach(function(d){
-                $scope.decileData[0].push(d.toFixed(0));
+                $scope.decileData[0].push(d.toFixed(0) + "%");
             });
 
             var top_label = ResourceUtility.getString("DECILE_GRID_TOP_LABEL");
