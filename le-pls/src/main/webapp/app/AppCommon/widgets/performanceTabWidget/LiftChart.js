@@ -239,7 +239,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.LiftChart', [
 
                 svg.append("text")
                     .attr("x", -15)
-                    .attr("y", yLoc + 3.5)
+                    .attr("y", yLoc + 3.8)
                     .style("text-anchor", "middle")
                     .style("font-size", "11px")
                     .style("font-family", "ProximaNova-Bold")
