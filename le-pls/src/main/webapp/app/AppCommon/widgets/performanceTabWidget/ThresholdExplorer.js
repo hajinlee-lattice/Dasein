@@ -36,7 +36,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
 
             var yAxis = d3.svg.axis()
                 .scale(y)
-                .ticks(100)
+                .ticks(10)
                 .innerTickSize(3)
                 .orient("left");
 
@@ -143,7 +143,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
                 .append("text")
                 .attr("transform", "translate(" + (width / 2) + " , 77)")
                 .style("text-anchor", "middle")
-                .style("font-size", "14px")
+                .style("font-size", "12px")
                 .style("font-family", "ProximaNova-Semibold")
                 .style("fill", "#aaa")
                 .text(ResourceUtility.getString("THRESHOLD_EXPLORER_X_AXIS_LABEL"));
@@ -158,7 +158,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
                 .append("text")
                 .attr("transform", "translate(" + (-100) + ", " + (height / 2) + ") rotate(-90)")
                 .style("text-anchor", "middle")
-                .style("font-size", "14px")
+                .style("font-size", "12px")
                 .style("font-family", "ProximaNova-Semibold")
                 .style("fill", "#aaa")
                 .text(ResourceUtility.getString("THRESHOLD_EXPLORER_Y_AXIS_LABEL"));

@@ -6,6 +6,7 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
         thresholdData,
         thresholdChartData,
         thresholdDecileData,
+        thresholdLiftData,
         thresholdExportData;
 
     beforeEach(function () {
@@ -19,6 +20,7 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
                 thresholdData = ThresholdExplorerService.PrepareData(modelSummary);
                 thresholdChartData = thresholdData.ChartData;
                 thresholdDecileData = thresholdData.DecileData;
+                thresholdLiftData = thresholdData.LiftData;
                 thresholdExportData = ThresholdExplorerService.PrepareExportData(modelSummary);
             }
         ]);
@@ -110,6 +112,35 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
                 expect(parseInt(thresholdDecileData[i]) >=
                     parseInt(thresholdDecileData[i - 1])).toBe(true);
             }
+        });
+    });
+
+    //==================================================
+    // ChartDecile Tests
+    //==================================================
+    describe('chart-decile tests', function () {
+        it('chart-decile conversions should match', function () {
+            for (var i = 0; i < 10; i++) {
+                expect(thresholdChartData[10 * (i + 1)].conversions.toFixed(0)).
+                    toEqual(thresholdDecileData[i].toFixed(0));
+            }
+        });
+    });
+
+    //==================================================
+    // LiftData Tests
+    //==================================================
+    describe('lift-data tests', function () {
+        it('lift-data should have 10 values', function () {
+            expect(thresholdLiftData.length).toBe(10);
+        });
+
+        it('lift-data conversions should sum to 1', function () {
+            var sum = thresholdLiftData.reduce(function(agg, d){
+                return agg + d;
+            }, 0);
+            var avg = (sum/thresholdLiftData.length).toFixed(2);
+            expect(avg).toBe("1.00");
         });
     });
 

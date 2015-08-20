@@ -13,8 +13,9 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
 
         var chartData = this.GetChartData(modelSummary);
         var decileData = this.GetDecileData(chartData);
+        var liftData = this.GetLiftData(chartData);
 
-        return {"ChartData" : chartData, "DecileData": decileData};
+        return {ChartData : chartData, DecileData: decileData, LiftData: liftData};
     };
 
     this.GetChartData = function (modelSummary) {
@@ -84,6 +85,15 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
         }
 
 
+        return result;
+    };
+
+    this.GetLiftData = function (chartData) {
+        var result = [];
+        for (var i = 1; i < 11; i++) {
+            var bucket_conversion = chartData[i * 10].conversions - chartData[(i - 1) * 10].conversions;
+            result.push(bucket_conversion / 10.0);
+        }
         return result;
     };
 

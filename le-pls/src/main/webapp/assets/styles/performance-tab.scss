@@ -1,5 +1,14 @@
+#performanceTab {
+  padding: 0;
+  margin: 0;
+}
+
 #performanceTab .threshold-explorer-chart {
-  margin-left: -55px;
+  margin: -30px 0 0 -55px;
+}
+
+#performanceTab #liftChart {
+  margin: 0 0 0 20px;
 }
 
 #performanceTab .data-table {
@@ -9,14 +18,20 @@
 
 #performanceTab .threshold-data .data-table {
   padding: 0;
-  margin: 0;
+  margin: 0 20px;
   border-top: #cccccc solid 1px;
   border-bottom: #cccccc solid 1px;
   border-radius: 0;
 }
 
-#performanceTab .threshold-data table thead th {
+#performanceTab .threshold-data table thead tr th {
   border-top: none;
+  height: 44px;
+}
+
+#performanceTab .threshold-data table tbody tr td {
+  text-transform: none;
+  height: 44px;
 }
 
 #performanceTab .threshold-data table thead tr th:last-of-type,
@@ -25,6 +40,8 @@
 }
 
 #performanceTab h2 {
+  margin: 50px 0;
+  padding: 0;
   text-align: center;
   width: 100%;
   font-size: 1.25em;
@@ -42,7 +59,7 @@
     margin: 0 auto;
     position: absolute;
     top: 50%; left: 0; right: 0; bottom: 0;
-    width: 100%;
+    width: 936px;
     z-index: -1;
   }
 
@@ -56,7 +73,7 @@
   display: table;
   white-space: nowrap;
   &:before, &:after {
-    border-top: 1px solid #CCCCCC;
+    border-top: 1px solid #cccccc;
     content: '';
     display: table-cell;
     position: relative;
@@ -65,4 +82,9 @@
   }
   &:before { right: 1.5%; }
   &:after { left: 1.5%; }
+}
+
+#performanceTab .lift-data .data-table {
+  margin-top: 20px;
+  margin-bottom: 35px;
 }

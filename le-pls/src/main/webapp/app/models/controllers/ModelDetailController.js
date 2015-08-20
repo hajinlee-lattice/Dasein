@@ -49,6 +49,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             thresholdData = ThresholdExplorerService.PrepareData(model);
             model.ThresholdChartData = thresholdData.ChartData;
             model.ThresholdDecileData = thresholdData.DecileData;
+            model.ThresholdLiftData = thresholdData.LiftData;
 
             var contentContainer = $('#modelDetailContainer');
             WidgetFrameworkService.CreateWidget({
