@@ -37,7 +37,6 @@ public class EaiProcessor implements ItemProcessor<ImportConfiguration, String> 
         log.info("Starting extract and import.");
         dataExtractionService.extractAndImport(importConfig, importContext);
         log.info("Finished extract and import.");
-        Thread.sleep(10000L);
         return null;
     }
 
