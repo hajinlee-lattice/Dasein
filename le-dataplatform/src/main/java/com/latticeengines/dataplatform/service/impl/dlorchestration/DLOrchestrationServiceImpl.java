@@ -75,7 +75,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     private int positiveEventFailThreshold;
 
     private int positiveEventWarnThreshold;
-    
+
     private MetadataService metadataService;
 
     @Override
@@ -126,7 +126,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
                 // exceptions while processing
                 // An exception here indicates a problem outside of the
                 // workflow.
-                log.error(e.getMessage(), e);
+                log.fatal(e.getMessage(), e);
             }
         }
 
