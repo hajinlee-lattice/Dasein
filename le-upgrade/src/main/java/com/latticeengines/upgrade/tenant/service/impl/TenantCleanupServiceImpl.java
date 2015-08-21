@@ -150,6 +150,9 @@ public class TenantCleanupServiceImpl implements TenantUpgradeService {
             case UpgradeRunner.CMD_UPGRADE:
                 upgrade(customer);
                 return true;
+            case UpgradeRunner.CMD_SUMMARY:
+                populateUpgradeSummary(customer);
+                return true;
             default:
                 return false;
         }

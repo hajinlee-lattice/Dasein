@@ -25,6 +25,7 @@ public class UpgradeRunner {
     public static final String CMD_REGISTER_PLS = "register_pls";
     public static final String CMD_UPDATE_ACTIVE = "update_activity";
     public static final String CMD_UPGRADE = "upgrade";
+    public static final String CMD_SUMMARY = "summary";
 
     private static ArgumentParser parser;
     private UpgradeService upgrader;
@@ -61,7 +62,8 @@ public class UpgradeRunner {
                 CMD_REGISTER_ZK,
                 CMD_REGISTER_PLS,
                 CMD_UPDATE_ACTIVE,
-                CMD_UPGRADE
+                CMD_UPGRADE,
+                CMD_SUMMARY
         );
     }
 
@@ -76,11 +78,12 @@ public class UpgradeRunner {
         helper += "\n " + CMD_REGISTER_PLS + ":    register a tenant in PLS/GA.";
         helper += "\n " + CMD_UPDATE_ACTIVE + ":    update activity status of models.";
         helper += "\n " + CMD_UPGRADE + ":    end to end upgrade a tenant";
+        helper += "\n " + CMD_SUMMARY + ":    upload upgrade summary";
         return helper;
     }
 
     private List<String> cmdsNeedCustomer() {
-        return Arrays.asList(CMD_CP_MODELS, CMD_REGISTER_ZK, CMD_REGISTER_PLS, CMD_UPGRADE, CMD_UPDATE_ACTIVE);
+        return Arrays.asList(CMD_CP_MODELS, CMD_REGISTER_ZK, CMD_REGISTER_PLS, CMD_UPGRADE, CMD_UPDATE_ACTIVE, CMD_SUMMARY);
     }
 
     private List<String> cmdsAllowAll() {

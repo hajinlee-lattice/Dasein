@@ -118,11 +118,8 @@ public class YarnManager {
             String modelFolder = findModelFolderPathInTuple(customer, uuid);
             String destPath = modelFolder + MS_PATH;
             return hdfsPathExists(destPath);
-        } catch (LedpException e) {
-            if (LedpCode.LEDP_24000.equals(e.getCode())) {
-                return false;
-            }
-            throw e;
+        } catch (Exception e) {
+            return false;
         }
     }
 
