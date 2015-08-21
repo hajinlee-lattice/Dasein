@@ -175,6 +175,10 @@
                     <groupId>com.latticeengines</groupId>
                     <artifactId>le-dataplatform</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.avro</groupId>
+                    <artifactId>trevni-avro</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
