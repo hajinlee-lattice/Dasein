@@ -171,6 +171,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum) {
         String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, E.*, " 
+                + "DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY A.[Last_Modification_Date] ) RowNum "
                 + getAccountExtensionFromWhereClause()
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";

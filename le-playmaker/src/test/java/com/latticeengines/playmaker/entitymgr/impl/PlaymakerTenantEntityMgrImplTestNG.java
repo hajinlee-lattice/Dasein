@@ -92,7 +92,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
         tenant.setExternalId("externalId");
         tenant.setJdbcDriver("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         tenant.setJdbcPassword("playmaker");
-        tenant.setJdbcUrl("jdbc:sqlserver://10.41.1.83;instanceName=SQL2012STD;databaseName=ADEDTBDd72072nK28083n154");
+        tenant.setJdbcUrl("jdbc:sqlserver://10.41.1.83;instanceName=SQL2012STD;databaseName=ADEDTBDd720154nW280139n154");
         tenant.setJdbcUserName("playmaker");
         tenant.setTenantName("playmaker");
         return tenant;
