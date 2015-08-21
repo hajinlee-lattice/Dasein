@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-job</artifactId>
@@ -92,7 +93,7 @@
             </build>
         </profile>
     </profiles>
-    
+
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
@@ -157,30 +158,30 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-propdata</artifactId>
             <version>${le.propdata.version}</version>
-	    <exclusions>
+            <exclusions>
                 <exclusion>
                     <groupId>com.latticeengines</groupId>
                     <artifactId>le-dataflow</artifactId>
                 </exclusion>
-	        <exclusion>
+                <exclusion>
                     <groupId>org.springframework.data</groupId>
                     <artifactId>spring-data-cassandra</artifactId>
-	            </exclusion>
-	        <exclusion>
+                </exclusion>
+                <exclusion>
                     <groupId>com.latticeengines</groupId>
                     <artifactId>le-db</artifactId>
-	        </exclusion>
-	        <exclusion>
+                </exclusion>
+                <exclusion>
                     <groupId>com.latticeengines</groupId>
                     <artifactId>le-dataplatform</artifactId>
-	        </exclusion>
-	    </exclusions>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scoring</artifactId>
             <version>${le.scoring.version}</version>
-            <scope>runtime</scope> 
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -193,8 +194,8 @@
             <version>${le.pls.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId> 
-            1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
+        <!-- use this instead of <artifactId>persistence-api</artifactId> 1.0 due to a problem with "NoSuchMethodError: 
+            javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.0-api</artifactId>
