@@ -2,10 +2,8 @@ package com.latticeengines.scoring.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,12 +89,8 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
             try {
                 Long pid = future.get(waitTime, TimeUnit.SECONDS);
                 log.info("PId: " + pid);
-            } catch (InterruptedException e) {
-                log.error(e.getMessage(), e);
-            } catch (ExecutionException e) {
-                log.error(e.getMessage(), e);
-            } catch (TimeoutException e) {
-                log.error(e.getMessage(), e);
+            } catch (Exception e) {
+                log.fatal(e.getMessage(), e);
             }
         }
     }
