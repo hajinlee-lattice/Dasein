@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-${component-name}</artifactId>
+    <packaging>jar</packaging>
+    <name>le-${component-name}</name>
+    <description>LE MODELING</description>
+
+    <properties>
+        <component-name>microservice</component-name>
+        <le.dataplatform.version>2.0.8-SNAPSHOT</le.dataplatform.version>
+        <le.domain.version>2.0.8-SNAPSHOT</le.domain.version>
+        <le.monitor.version>2.0.8-SNAPSHOT</le.monitor.version>
+        <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
+        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
+    </properties>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-microservice-parent</artifactId>
+        <version>2.0.8-SNAPSHOT</version>
+        <relativePath>../le-microservice</relativePath>
+    </parent>
+
+    <dependencies>
+    </dependencies>
+</project>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-eai-microservice</artifactId>
+    <packaging>war</packaging>
+    <name>${component-name}</name>
+    <description>LE IMPORT/EXPORT</description>
+
+    <properties>
+        <component-name>eai</component-name>
+        <le.eai.version>2.0.8-SNAPSHOT</le.eai.version>
+        <le.domain.version>2.0.8-SNAPSHOT</le.domain.version>
+        <le.monitor.version>2.0.8-SNAPSHOT</le.monitor.version>
+        <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
+        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
+    </properties>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-microservice-parent</artifactId>
+        <version>2.0.8-SNAPSHOT</version>
+        <relativePath>../le-microservice</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-eai</artifactId>
+            <version>${le.eai.version}</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jsp-2.1</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jsp-api-2.1</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>servlet-api-2.1</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet.jsp</groupId>
+                    <artifactId>jsp-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>tomcat</groupId>
+                    <artifactId>jasper-compiler</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>tomcat</groupId>
+                    <artifactId>jasper-runtime</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-eai</artifactId>
+            <version>${le.eai.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+    </dependencies>
+</project>

@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-microservice-parent</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>le-microservice-parent</name>
 
     <properties>
@@ -15,12 +15,89 @@
         <version>2.0.8-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
+
+    <profiles>
+        <profile>
+            <id>functional</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>functional-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${functional.classes.include}</include>
+                                        <exclude>${functional.classes.exclude}</exclude>
+                                    </includes>
+                                    <groups>${functional.groups}</groups>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <webAppConfig>
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
+                            </webAppConfig>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm-commons</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     
     <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
         <dependency>
             <groupId>com.mangofactory</groupId>
             <artifactId>swagger-springmvc</artifactId>
             <version>0.9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ajar</groupId>
+            <artifactId>swagger-spring-mvc-ui</artifactId>
+            <version>0.4</version>
         </dependency>
     </dependencies>
 
