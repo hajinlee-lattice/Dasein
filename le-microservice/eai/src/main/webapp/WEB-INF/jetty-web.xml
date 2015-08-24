@@ -1,4 +1,4 @@
-<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+<Configure id="eai" class="org.eclipse.jetty.webapp.WebAppContext">
 
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -6,8 +6,8 @@
     <!--  + contextPath                                                  -->
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <Set name="contextPath">/</Set>
-    <Set name="war"><Property name="jetty.webapps" default="."/>/le-modeling-2.0.8-SNAPSHOT.war</Set>
+    <Set name="contextPath">/eai</Set>
+    <Set name="war"><Property name="jetty.webapps" default="."/>/le-eai-2.0.8-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
