@@ -1,4 +1,4 @@
-<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+<Configure id="modeling" class="org.eclipse.jetty.webapp.WebAppContext">
 
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -6,7 +6,7 @@
     <!--  + contextPath                                                  -->
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <Set name="contextPath">/</Set>
+    <Set name="contextPath">/modeling</Set>
     <Set name="war"><Property name="jetty.webapps" default="."/>/le-modeling-microservice-2.0.8-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

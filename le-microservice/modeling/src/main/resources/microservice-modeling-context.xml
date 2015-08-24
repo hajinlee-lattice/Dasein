@@ -10,5 +10,6 @@
 
     <import resource="classpath:microservice-context.xml"/>
     <import resource="classpath:dataplatform-context.xml"/>
+    <context:component-scan base-package="com.latticeengines.dataplatform.controller" />
 
 </beans>

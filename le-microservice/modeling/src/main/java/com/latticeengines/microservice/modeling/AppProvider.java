@@ -2,11 +2,11 @@ package com.latticeengines.microservice.modeling;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.microservice.exposed.ApiInfoProvider;
+import com.latticeengines.microservice.exposed.AppInfoProvider;
 import com.mangofactory.swagger.models.dto.ApiInfo;
 
-@Component("apiInfoProvider")
-public class ApiProvider implements ApiInfoProvider {
+@Component("appInfoProvider")
+public class AppProvider extends AppInfoProvider {
 
     @Override
     public ApiInfo apiInfo() {
