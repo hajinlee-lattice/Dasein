@@ -10,6 +10,6 @@
 
     <import resource="classpath:eai-context.xml"/>
     <import resource="classpath:eai-properties-context.xml"/>
-    <bean class="com.latticeengines.eai.swagger.SwaggerConfig" />
-
+    
+    <mvc:annotation-driven/>
 </beans>

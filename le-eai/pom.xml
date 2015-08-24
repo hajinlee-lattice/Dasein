@@ -36,6 +36,79 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>functional</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>functional-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <argLine>-XX:MaxPermSize=256m
+                                        ${argLine}</argLine>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${functional.classes.include}</include>
+                                        <exclude>${functional.classes.exclude}</exclude>
+                                    </includes>
+                                    <groups>${functional.groups}</groups>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <useTestClasspath>true</useTestClasspath>
+                            <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
+                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm-commons</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>javax.mail</groupId>
+                                <artifactId>mail</artifactId>
+                                <version>1.4.7</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
