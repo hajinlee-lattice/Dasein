@@ -108,7 +108,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     @Test(groups = "functional")
     public void testExecutePostStep() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE);
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L,TEMP_EVENTTABLE);
         modelCommandEntityMgr.create(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 

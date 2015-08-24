@@ -178,7 +178,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         httpServer.addServlet(new VisiDBMetadataServlet(colMetadata.getFirst(), colMetadata.getSecond()),
                 "/DLRestService/GetQueryMetaDataColumns");
         httpServer.start();
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
         List<ModelCommandParameter> commandParameters = command.getCommandParameters();
         modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));

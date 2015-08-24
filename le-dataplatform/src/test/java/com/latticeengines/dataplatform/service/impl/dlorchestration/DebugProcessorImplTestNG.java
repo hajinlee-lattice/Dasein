@@ -58,7 +58,7 @@ public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testExecute() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE, true,
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L,TEMP_EVENTTABLE, true,
                 false);
         modelCommandEntityMgr.create(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());

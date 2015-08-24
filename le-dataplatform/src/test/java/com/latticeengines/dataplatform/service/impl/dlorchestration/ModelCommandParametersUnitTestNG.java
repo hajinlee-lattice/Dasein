@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class ModelCommandParametersUnitTestNG {
 
     public ModelCommandParameters createModelCommandParameters() {
-        return new ModelCommandParameters(ModelingServiceTestUtils.createModelCommandWithCommandParameters()
+        return new ModelCommandParameters(ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L)
                 .getCommandParameters());
     }
 
@@ -49,14 +49,14 @@ public class ModelCommandParametersUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetEventColumnWithoutReadoutParams() {
-        ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
         assertEquals(commandParameters.getEventColumnName(), "P1_Event");
     }
 
     @Test(groups = "unit")
     public void testGetEventColumnWithReadoutParams() {
-        ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(
+        ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(1L,
                 "ModelCommandCallableTestNG_eventtable_fewrows", false, true);
         ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
         assertEquals(commandParameters.getEventColumnName(), "CATEGORY");

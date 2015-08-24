@@ -1,11 +1,18 @@
 package com.latticeengines.dataplatform.exposed.service.impl;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
-
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandId;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
@@ -42,18 +49,19 @@ public class ModelingServiceTestUtils {
         return excludeList;
     }
 
-    public static ModelCommand createModelCommandWithCommandParameters() {
-        return createModelCommandWithCommandParameters(EVENT_TABLE);
+    public static ModelCommand createModelCommandWithCommandParameters(long pid) {
+        return createModelCommandWithCommandParameters(pid, EVENT_TABLE);
     }
 
-    public static ModelCommand createModelCommandWithCommandParameters(String eventTable) {
-        return createModelCommandWithCommandParameters(eventTable, false, true);
+    public static ModelCommand createModelCommandWithCommandParameters(long pid, String eventTable) {
+        return createModelCommandWithCommandParameters(pid, eventTable, false, true);
     }
 
-    public static ModelCommand createModelCommandWithCommandParameters(String eventTable, boolean debug,
+    public static ModelCommand createModelCommandWithCommandParameters(long pid, String eventTable, boolean debug,
             boolean validate) {
         List<ModelCommandParameter> parameters = new ArrayList<>();
-        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, parameters,
+
+        ModelCommand command = new ModelCommand(pid, "Nutanix", "Nutanix", ModelCommandStatus.NEW, parameters,
                 ModelCommand.TAHOE, eventTable);
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE,
                 "Q_EventTableDepivot_Nutanix"));
@@ -65,8 +73,12 @@ public class ModelingServiceTestUtils {
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL,
-                "http://localhost:8082/DLRestService"));
+        try {
+            parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://"
+                    + getPublicIpAddress() + ":8082/DLRestService"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_QUERY, "Q_DataForModeling"));
         if (debug) {
             parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEBUG, "true"));
@@ -77,10 +89,10 @@ public class ModelingServiceTestUtils {
         return command;
     }
 
-    public static ModelCommand createModelCommandWithFewRowsAndReadoutTargets(String eventTable, boolean debug,
-            boolean validate) {
+    public static ModelCommand createModelCommandWithFewRowsAndReadoutTargets(long pid, String eventTable,
+            boolean debug, boolean validate) {
         List<ModelCommandParameter> parameters = new ArrayList<>();
-        ModelCommand command = new ModelCommand(1L, "FewRowsNutanix", "FewRowsNutanix", ModelCommandStatus.NEW,
+        ModelCommand command = new ModelCommand(pid, "FewRowsNutanix", "FewRowsNutanix", ModelCommandStatus.NEW,
                 parameters, ModelCommand.TAHOE, eventTable);
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE,
                 "Q_EventTableDepivot_Nutanix_FewRows"));
@@ -95,6 +107,7 @@ public class ModelingServiceTestUtils {
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL,
                 "http://localhost:8082/DLRestService"));
+
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_QUERY, "Q_DataForModeling"));
         if (debug) {
             parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEBUG, "true"));
@@ -103,5 +116,23 @@ public class ModelingServiceTestUtils {
             parameters.add(new ModelCommandParameter(command, ModelCommandParameters.VALIDATE, "false"));
         }
         return command;
+    }
+
+    public static ModelCommandId createModelCommandId() {
+        DateTime dt = new DateTime(DateTimeZone.UTC);
+        return new ModelCommandId(new Timestamp(dt.getMillis()), "orchestrator");
+    }
+
+    private static String getPublicIpAddress() throws SocketException {
+        NetworkInterface ni = NetworkInterface.getByName("eth0");
+        Enumeration<InetAddress> inetAddresses = ni.getInetAddresses();
+
+        while (inetAddresses.hasMoreElements()) {
+            InetAddress ia = inetAddresses.nextElement();
+            if (!ia.isLinkLocalAddress()) {
+                return ia.getHostAddress();
+            }
+        }
+        return "localhost";
     }
 }

@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -100,8 +99,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
     @Test(groups = "functional")
     public void testHandleJobFailed() throws ParseException {
-        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
-                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
+                ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.PROFILE_DATA);
         this.modelCommandEntityMgr.create(command);
 
@@ -145,8 +144,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
     @Test(groups = "functional")
     public void generateDataDiagnostics() throws Exception {
-        ModelCommand command = new ModelCommand(2L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
-                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand command = new ModelCommand(2L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
+                ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.SUBMIT_MODELS);
         this.modelCommandEntityMgr.create(command);
 

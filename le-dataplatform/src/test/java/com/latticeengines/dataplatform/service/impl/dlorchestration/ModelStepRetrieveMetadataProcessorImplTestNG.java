@@ -73,7 +73,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Test(groups = "functional")
     public void testWriteStringToHdfs() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
         String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataFile(command, commandParameters);
@@ -105,7 +105,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Test(groups = "functional")
     public void testSuccessfulExecuteStep() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
@@ -117,7 +117,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Test(groups = "functional")
     public void testMetadataJsonFormat() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
@@ -136,7 +136,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Test(groups = "functional")
     public void testMetadataDiagnosticJsonFormatAndExistsInHdfs() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
@@ -176,7 +176,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Test(groups = "functional")
     public void testDoNotUploadMetadataDiagnosticJsonWhenValidationPasses() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
@@ -200,7 +200,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Test(groups = "functional", enabled = true)
     public void testNoResponseExecuteStep() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
         commandParameters.setDlUrl("http://localhost:8082/bogusendpoint");
@@ -215,7 +215,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Test(groups = "functional", enabled = true)
     public void testEmptyResponseExecuteStep() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
         commandParameters.setDlUrl("http://localhost:8082/DLEmptyResponseRestService");
@@ -230,7 +230,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Test(groups = "functional", enabled = true)
     public void testErrorResponseExecuteStep() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 

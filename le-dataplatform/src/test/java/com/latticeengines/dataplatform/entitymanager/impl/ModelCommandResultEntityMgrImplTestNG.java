@@ -37,7 +37,7 @@ public class ModelCommandResultEntityMgrImplTestNG extends DataPlatformFunctiona
 
     @Test(groups = "functional")
     public void testFindByModelCommand() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.create(command);
 
         assertNull(modelCommandResultEntityMgr.findByModelCommand(command));

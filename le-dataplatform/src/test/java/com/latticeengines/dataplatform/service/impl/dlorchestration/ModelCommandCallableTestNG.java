@@ -2,7 +2,6 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -136,7 +135,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         // Comment out below 2 lines when testing against an integration
         // database
         // Validation failure due to too few rows
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(1L,
                 TEMP_EVENTTABLE_FEW_ROWS, false, true);
         modelCommandEntityMgr.create(command);
 
@@ -174,8 +173,8 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         // Comment out below 2 lines when testing against an integration
         // database
         // Set test flag to disable validation
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE, false,
-                false);
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, TEMP_EVENTTABLE,
+                false, false);
         modelCommandEntityMgr.create(command);
 
         int iterations = 0;
@@ -198,9 +197,9 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
         assertTrue(logs.size() >= 15);
-        for(ModelCommandLog log : logs){
+        for (ModelCommandLog log : logs) {
             String message = log.getMessage();
-            if(message.contains("http")){
+            if (message.contains("http")) {
                 String link = message.substring(message.indexOf("http"));
                 ResponseEntity<String> response = restTemplate.getForEntity(link, String.class);
                 assertTrue(response.getStatusCode().equals(HttpStatus.OK));

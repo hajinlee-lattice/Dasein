@@ -118,4 +118,8 @@
         <property name="sessionFactory" ref="sessionFactoryDlOrchestration" />
     </bean>
 
+    <bean id="modelCommandIdDao" class="com.latticeengines.dataplatform.dao.impl.ModelCommandIdDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryDlOrchestration" />
+    </bean>
+
 </beans>

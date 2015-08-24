@@ -35,7 +35,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGenerateSamplingConfiguration() {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         SamplingConfiguration samplingConfig = processor.generateSamplingConfiguration(
                 ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix", command,
                 createModelCommandParameters(command));
@@ -45,7 +45,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGenerateModel() {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         Model model = processor.generateModel(ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix", command,
                 createModelCommandParameters(command));
         assertEquals(1, model.getModelDefinition().getAlgorithms().size());

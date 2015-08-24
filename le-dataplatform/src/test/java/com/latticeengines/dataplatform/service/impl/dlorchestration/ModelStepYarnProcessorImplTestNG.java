@@ -40,7 +40,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         cleanUpHdfs("Nutanix");
         cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
         setupDBConfig();
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
