@@ -16,4 +16,8 @@ public interface InternalTestUserService {
     Map<AccessLevel, User> createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel();
 
     void logoutTicket(Ticket ticket);
+
+    String getUsernameForAccessLevel(AccessLevel accessLevel);
+
+    String getGeneralPassword();
 }

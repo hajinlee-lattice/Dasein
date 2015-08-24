@@ -19,24 +19,24 @@ import com.latticeengines.security.exposed.service.UserService;
 
 @Component("internalTestUserService")
 public class InternalTestUserServiceImpl implements InternalTestUserService {
-    protected static final String ADMIN_USERNAME = "bnguyen@lattice-engines.com";
-    protected static final String ADMIN_PASSWORD = "tahoe";
-    protected static final String ADMIN_PASSWORD_HASH = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
-    protected static final String GENERAL_USERNAME = "lming@lattice-engines.com";
-    protected static final String GENERAL_PASSWORD = "admin";
-    protected static final String GENERAL_PASSWORD_HASH = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
-    protected static final String PASSWORD_TESTER = "pls-password-tester@test.lattice-engines.ext";
-    protected static final String PASSWORD_TESTER_PASSWORD = "Lattice123";
-    protected static final String PASSWORD_TESTER_PASSWORD_HASH = "3OCRIbECCiTtJ8FyaNgvTjNES/eyjQUK59Z5rMCnrAk=";
+    private static final String ADMIN_USERNAME = "bnguyen@lattice-engines.com";
+    private static final String ADMIN_PASSWORD = "tahoe";
+    private static final String ADMIN_PASSWORD_HASH = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
+    private static final String GENERAL_USERNAME = "lming@lattice-engines.com";
+    private static final String GENERAL_PASSWORD = "admin";
+    private static final String GENERAL_PASSWORD_HASH = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+    private static final String PASSWORD_TESTER = "pls-password-tester@test.lattice-engines.ext";
+    private static final String PASSWORD_TESTER_PASSWORD = "Lattice123";
+    private static final String PASSWORD_TESTER_PASSWORD_HASH = "3OCRIbECCiTtJ8FyaNgvTjNES/eyjQUK59Z5rMCnrAk=";
 
-    protected static final String TESTING_USER_FIRST_NAME = "Lattice";
-    protected static final String TESTING_USER_LAST_NAME = "Tester";
-    protected static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@test.lattice-engines.com";
-    protected static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@test.lattice-engines.com";
-    protected static final String INTERNAL_USER_USERNAME = "pls-internal-user-tester@test.lattice-engines.com";
-    protected static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@test.lattice-engines.ext";
-    protected static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@test.lattice-engines.ext";
-    protected static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
+    private static final String TESTING_USER_FIRST_NAME = "Lattice";
+    private static final String TESTING_USER_LAST_NAME = "Tester";
+    private static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@test.lattice-engines.com";
+    private static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@test.lattice-engines.com";
+    private static final String INTERNAL_USER_USERNAME = "pls-internal-user-tester@test.lattice-engines.com";
+    private static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@test.lattice-engines.ext";
+    private static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@test.lattice-engines.ext";
+    private static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
 
     private static final Long NINETY_DAYS_IN_MILLISECONDS = 90 * 24 * 60 * 60 * 1000L;
 
@@ -110,32 +110,13 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     }
 
     private User createATestUserIfNecessary(AccessLevel accessLevel) {
-        String username;
-        switch (accessLevel) {
-        case SUPER_ADMIN:
-            username = SUPER_ADMIN_USERNAME;
-            break;
-        case INTERNAL_ADMIN:
-            username = INTERNAL_ADMIN_USERNAME;
-            break;
-        case INTERNAL_USER:
-            username = INTERNAL_USER_USERNAME;
-            break;
-        case EXTERNAL_ADMIN:
-            username = EXTERNAL_ADMIN_USERNAME;
-            break;
-        case EXTERNAL_USER:
-            username = EXTERNAL_USER_USERNAME;
-            break;
-        default:
-            return null;
-        }
+        String username = getUsernameForAccessLevel(accessLevel);
 
         if (shouldRecreateUserWithUsernameAndPassword(username, GENERAL_PASSWORD)) {
             User user = new User();
             user.setEmail(username);
-            user.setFirstName("Lattice");
-            user.setLastName("Tester");
+            user.setFirstName(TESTING_USER_FIRST_NAME);
+            user.setLastName(TESTING_USER_LAST_NAME);
 
             Credentials credentials = new Credentials();
             credentials.setUsername(user.getEmail());
@@ -192,5 +173,26 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     public void logoutTicket(Ticket ticket) {
         globalAuthenticationService.discard(ticket);
     }
+
+    @Override
+    public String getUsernameForAccessLevel(AccessLevel accessLevel) {
+        switch (accessLevel) {
+            case SUPER_ADMIN:
+                return SUPER_ADMIN_USERNAME;
+            case INTERNAL_ADMIN:
+                return INTERNAL_ADMIN_USERNAME;
+            case INTERNAL_USER:
+                return INTERNAL_USER_USERNAME;
+            case EXTERNAL_ADMIN:
+                return EXTERNAL_ADMIN_USERNAME;
+            case EXTERNAL_USER:
+                return EXTERNAL_USER_USERNAME;
+            default:
+                throw new IllegalArgumentException("Unknown access level!");
+        }
+    }
+
+    @Override
+    public String getGeneralPassword() { return GENERAL_PASSWORD; }
 
 }

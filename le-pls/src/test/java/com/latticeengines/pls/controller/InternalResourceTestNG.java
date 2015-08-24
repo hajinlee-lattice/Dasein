@@ -1,5 +1,21 @@
 package com.latticeengines.pls.controller;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.stereotype.Component;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -22,22 +38,6 @@ import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.Constants;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.stereotype.Component;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 @Component("internalResourceTestNG")
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
@@ -58,9 +58,6 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     private TenantConfigService tenantConfigService;
 
     private Tenant tenant;
-
-    @Value("${pls.api.hostport}")
-    private String hostPort;
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {

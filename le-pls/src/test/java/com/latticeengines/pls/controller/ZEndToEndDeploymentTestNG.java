@@ -1,8 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +12,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -23,10 +21,13 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 
-public class ZEndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
+/**
+ * This test needs access to remote Modeling Service API and PLS_MultiTenant DB.
+ */
+public class ZEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final Log LOGGER = LogFactory.getLog(ZEndToEndDeploymentTestNG.class);
 
@@ -60,7 +61,7 @@ public class ZEndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = "deployment", enabled = true)
     public void setup() throws Exception {
         turnOffSslChecking();
-        setUpMarketoEloquaTestEnvironment();
+        deleteAndCreateTwoTenants();
         tenantToAttach = testingTenants.get(1);
         if (tenantToAttach.getName().contains("Tenant 1")) {
             tenantToAttach = testingTenants.get(0);
@@ -68,6 +69,14 @@ public class ZEndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         tenant = tenantToAttach.getId();
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path(String.format("%s/%s", modelingServiceHdfsBaseDir, tenant)), true);
+    }
+
+    private void deleteAndCreateTwoTenants() {
+        setTestingTenants();
+        for(Tenant tenant: testingTenants) {
+            deleteTenantByRestCall(tenant.getId());
+            createTenantByRestCall(tenant);
+        }
     }
 
     private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table)
@@ -132,19 +141,20 @@ public class ZEndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
             numOfRetries--;
             Thread.sleep(1000L);
         } while (numOfRetries > 0 && (response == null || response.size() < 2));
-        assertNotNull(response);
-        assertTrue(response.size() >= 2, String.format("There is only %d models in tenant %s", response.size(), tenant));
+        Assert.assertNotNull(response);
+        Assert.assertTrue(response.size() >= 2, String.format("There is only %d models in tenant %s", response.size(), tenant));
         Map<String, String> map = (Map) response.get(0);
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
                 ModelSummary.class);
-        assertTrue(summary.getName().startsWith("PLSModel-Eloqua"));
-        assertNotNull(summary.getDetails());
+        Assert.assertTrue(summary.getName().startsWith("PLSModel-Eloqua"));
+        Assert.assertNotNull(summary.getDetails());
     }
 
     @DataProvider(name = "modelMetadataProvider")
     public static Object[][] getModelMetadataProvider() {
         return new Object[][] { //
-        { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant2" }, //
-                { tenant, "PLSModel-Eloqua2", "eloqua2", "Q_PLS_Modeling_Tenant2" } };
+            { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant1" }, //
+            { tenant, "PLSModel-Eloqua2", "eloqua2", "Q_PLS_Modeling_Tenant2" }
+        };
     }
 }

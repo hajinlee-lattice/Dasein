@@ -12,32 +12,48 @@ import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 
-public class EmailServiceImplDeploymentTestNG extends PlsFunctionalTestNGBase {
+public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final String INTERNAL_USER = "build@lattice-engines.com";
-    private static final String EXTERNAL_USER = "build.lattice.engines@gmail.com";
+    private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
+    private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";
+
+    private String testUsername;
 
     @BeforeClass(groups = "deployment")
-    public void setup() {
-        switchToSuperAdmin();
+    public void setup() throws Exception {
+        setupTestEnvironment();
     }
 
     @AfterClass(groups = { "deployment" })
-    public void tearDown() { }
+    public void tearDown() { deleteUserByRestCall(testUsername); }
 
     @Test(groups = "deployment")
     public void testSendAndReceiveInternalEmail() {
-        createNewUserAndSendEmail(INTERNAL_USER);    }
+        createNewUserAndSendEmail(INTERNAL_USER_EMAIL);    }
 
     @Test(groups = "deployment")
     public void testSendAndReceiveExternalEmail() {
-        createNewUserAndSendEmail(EXTERNAL_USER);
+        createNewUserAndSendEmail(EXTERNAL_USER_EMAIL);
     }
 
     private void createNewUserAndSendEmail(String email) {
+        UserRegistration userReg = getUserReg(email);
+        deleteUserByRestCall(testUsername);
+
+        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users/", userReg, String.class);
+        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
+                RegistrationResult.class);
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertNotNull(response.getResult().getPassword());
+
+        deleteUserByRestCall(testUsername);
+    }
+
+    private UserRegistration getUserReg(String email) {
         UserRegistration userReg = new UserRegistration();
 
         User user = new User();
@@ -57,14 +73,9 @@ public class EmailServiceImplDeploymentTestNG extends PlsFunctionalTestNGBase {
         userReg.setUser(user);
         userReg.setCredentials(creds);
 
-        deleteUserWithUsername(userReg.getCredentials().getUsername());
+        testUsername = userReg.getCredentials().getUsername();
 
-        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users/", userReg, String.class);
-        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
-                RegistrationResult.class);
-        assertNotNull(response);
-        assertTrue(response.isSuccess());
-        assertNotNull(response.getResult().getPassword());
+        return userReg;
     }
 
     @SuppressWarnings("unused")

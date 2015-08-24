@@ -14,7 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -32,7 +31,6 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
-@Component("adminResourceTestNG")
 public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant;
@@ -261,7 +259,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
                 { urwt4 } };
     }
 
-    private static User getUser() {
+    static User getUser() {
         User user = new User();
         user.setActive(true);
         user.setEmail("ron@lattice-engines.com");
@@ -271,10 +269,10 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         return user;
     }
 
-    private static Credentials getCreds() {
+    static Credentials getCreds() {
         Credentials creds = new Credentials();
         creds.setUsername("ron@lattice-engines.com");
-        creds.setPassword(adminPasswordHash);
+        creds.setPassword(generalPasswordHash);
         return creds;
 
     }

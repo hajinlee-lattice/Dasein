@@ -4,11 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,37 +17,28 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
-import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
+import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
-import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentTestNG;
+import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
-import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentTestNG;
-import com.latticeengines.domain.exposed.admin.BardJamsTenant;
-import com.latticeengines.domain.exposed.admin.CRMTopology;
-import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
-import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
-import com.latticeengines.domain.exposed.admin.TenantRegistration;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentDeploymentTestNG;
+import com.latticeengines.domain.exposed.admin.*;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
-import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
-import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.*;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
+public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private final static String tenantName = "Global Test Tenant";
     private static String tenantId = "EndToEnd";
@@ -70,10 +57,10 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private BardJamsEntityMgr bardJamsEntityMgr;
 
     @Autowired
-    private PLSComponentTestNG plsComponentTestNG;
+    private PLSComponentDeploymentTestNG plsComponentDeploymentTestNG;
 
     @Autowired
-    private VisiDBDLComponentTestNG visiDBDLComponentTestNG;
+    private VisiDBDLComponentDeploymentTestNG visiDBDLComponentDeploymentTestNG;
 
     @Value("${admin.test.contract}")
     private String testContract;
@@ -129,7 +116,6 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         contractId = tenantId;
 
         loginAD();
-        cleanupZK();
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
@@ -237,7 +223,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
         // VisiDBDL
-        DocumentDirectory confDir = visiDBDLComponentTestNG.constructVisiDBDLInstaller();
+        DocumentDirectory confDir = visiDBDLComponentDeploymentTestNG.constructVisiDBDLInstaller();
         SerializableDocumentDirectory vdbdlConfig = new SerializableDocumentDirectory(confDir);
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 
@@ -358,14 +344,14 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
         final String username = "bnguyen@lattice-engines.com";
         final String password = "tahoe";
 
-        UserDocument userDoc = plsComponentTestNG.loginAndAttach(username, password, PLSTenantId);
+        UserDocument userDoc = plsComponentDeploymentTestNG.loginAndAttach(username, password, PLSTenantId);
         Assert.assertNotNull(userDoc);
     }
 
     private void verifyVisiDBDLTenantExists() throws IOException {
         if (vdbdlSkipped) return;
 
-        visiDBDLComponentTestNG.verifyTenant(tenantId, dlUrl);
+        visiDBDLComponentDeploymentTestNG.verifyTenant(tenantId, dlUrl);
         // verify permstore and datastore
         String url = String.format("%s/admin/internal/datastore/", getRestHostPort());
         Assert.assertEquals(
@@ -383,7 +369,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
 
         String PLSTenantId =
                 String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-        RestTemplate plsRestTemplate = plsComponentTestNG.plsRestTemplate;
+        RestTemplate plsRestTemplate = plsComponentDeploymentTestNG.plsRestTemplate;
         String response = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
                 String.class);
         ObjectMapper mapper = new ObjectMapper();
@@ -420,7 +406,7 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     private void deletePLSTenants() {
         String PLSTenantId = String.format("%s.%s.%s",
                 contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-        plsComponentTestNG.deletePLSTestTenant(PLSTenantId);
+        plsComponentDeploymentTestNG.deletePLSTestTenant(PLSTenantId);
         try {
             // let GA recover from error deletion
             Thread.sleep(5000L);
@@ -430,9 +416,9 @@ public class EndToEndDeploymentTestNG extends AdminFunctionalTestNGBase {
     }
 
     private void deleteVisiDBDLTenants() {
-        visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenantId);
+        visiDBDLComponentDeploymentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenantId);
         try {
-            visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenantId);
+            visiDBDLComponentDeploymentTestNG.deleteVisiDBDLTenantWithRetry(tenantId);
         } catch (Exception e) {
             // ignore
         }

@@ -46,18 +46,18 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
-    @BeforeClass(groups = { "functional", "deployment" })
+    @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         setUpMarketoEloquaTestEnvironment();
     }
 
-    @BeforeMethod(groups = { "functional", "deployment" })
+    @BeforeMethod(groups = { "functional"})
     public void beforeMethod() {
         // using admin session by default
         switchToSuperAdmin();
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional" })
     public void deleteModelSummaryNoEditPlsModelsRight() {
         switchToInternalUser();
         assertDeleteModelSummaryGet403();
@@ -70,7 +70,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional" })
     public void getModelSummariesHasViewPlsModelsRight() {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
@@ -80,7 +80,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(summary.getDetails());
     }
 
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
     public void testUpdateModelSummary() {
         switchToSuperAdmin();
         assertChangeModelNameSuccess();
@@ -100,7 +100,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Deprecated
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "testUpdateModelSummary" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "testUpdateModelSummary" })
     public void updateAsDeletedModelSummaryHasEditPlsModelsRight() {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
@@ -136,7 +136,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateAsDeletedModelSummaryHasEditPlsModelsRight" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "updateAsDeletedModelSummaryHasEditPlsModelsRight" })
     public void deleteModelSummaryHasEditPlsModelsRight() {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
@@ -148,7 +148,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional" })
     public void testPostModelSummariesNoCreatePlsModelsRight() throws IOException {
         switchToSuperAdmin();
         assertCreateModelSummariesSuccess();
@@ -167,7 +167,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional" })
     public void postModelSummariesUsingRaw() throws IOException {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         int originalNumModels = response.size();
