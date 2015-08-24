@@ -5,6 +5,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.net.URL;
 import java.util.List;
@@ -13,6 +14,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -61,6 +63,8 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
     private String modelId;
 
+    private String fileContents;
+
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
 
@@ -83,11 +87,13 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/ANY_TABLE/" + modelId + "/container_01/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+        fileContents = IOUtils.toString(modelSummaryUrl);
 
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/diagnostics.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
+        HdfsUtils
+                .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
@@ -101,7 +107,6 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);
     }
 
-
     @Test(groups = { "functional" }, dataProvider = "dataFileProvider", enabled = true)
     public void downloadFile(final String mimeType, final String filter) {
 
@@ -114,6 +119,17 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
             verify(response).setHeader(eq("Content-Disposition"), anyString());
             verify(response).setContentType(mimeType);
 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Assert.fail(ex.getMessage());
+        }
+    }
+
+    @Test(groups = { "functional" }, dataProvider = "dataFileProvider", enabled = true)
+    public void getFileContents(final String mimeType, final String filter) {
+        try {
+            String contents = dataFileProviderService.getFileContents(modelId, mimeType, filter);
+            assertEquals(contents, fileContents);
         } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail(ex.getMessage());
@@ -147,8 +163,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
                 { "application/csv", ".*_readoutsample.csv" }, //
                 { "text/plain", ".*_scored.txt" }, //
                 { "application/csv", ".*_explorer.csv" }, //
-                { "text/plain", "rf_model.txt" }
-        };
+                { "text/plain", "rf_model.txt" } };
     }
 
     @DataProvider(name = "dataFileProviderNotFound")

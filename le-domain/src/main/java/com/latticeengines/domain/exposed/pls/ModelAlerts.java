@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,20 +38,21 @@ public class ModelAlerts {
     }
 
     @JsonInclude(Include.NON_NULL)
-    public class ModelQualityWarnings {
+    public static class ModelQualityWarnings {
 
         private Long lowSuccessEvents;
         private Long minSuccessEvents;
-        private Double lowConversionPercentage; // if conversion rate is 0.8%, this value will be 0.8
+        private Double lowConversionPercentage; // if conversion rate is 0.8%,
+                                                // this value will be 0.8
         private Double minConversionPercentage;
         private Double outOfRangeRocScore;
         private Double minRocScore;
         private Double maxRocScore;
-        private List<Map.Entry<String, String>> excessiveDiscreteValuesAttributes = new ArrayList<>();
+        private List<String> excessiveDiscreteValuesAttributes;
         private Long maxNumberOfDiscreteValues;
-        private List<Map.Entry<String, String>> excessivePredictiveAttributes = new ArrayList<>();
+        private List<Map.Entry<String, String>> excessivePredictiveAttributes;
         private Double maxFeatureImportance;
-        private List<Map.Entry<String, String>> excessivePredictiveNullValuesAttributes = new ArrayList<>();
+        private List<Map.Entry<String, String>> excessivePredictiveNullValuesAttributes;
         private Double maxLiftForNull;
 
         @JsonProperty("LowSuccessEvents")
@@ -126,13 +126,12 @@ public class ModelAlerts {
         }
 
         @JsonProperty("ExcessiveDiscreteValuesAttributes")
-        public List<Map.Entry<String, String>> getExcessiveDiscreteValuesAttributes() {
+        public List<String> getExcessiveDiscreteValuesAttributes() {
             return excessiveDiscreteValuesAttributes;
         }
 
         @JsonProperty("ExcessiveDiscreteValuesAttributes")
-        public void setExcessiveDiscreteValuesAttributes(
-                List<Map.Entry<String, String>> excessiveDiscreteValuesAttributes) {
+        public void setExcessiveDiscreteValuesAttributes(List<String> excessiveDiscreteValuesAttributes) {
             this.excessiveDiscreteValuesAttributes = excessiveDiscreteValuesAttributes;
         }
 
@@ -152,8 +151,7 @@ public class ModelAlerts {
         }
 
         @JsonProperty("ExcessivePredictiveAttributes")
-        public void setExcessivePredictiveAttributes(
-                List<Map.Entry<String, String>> excessivePredictiveAttributes) {
+        public void setExcessivePredictiveAttributes(List<Map.Entry<String, String>> excessivePredictiveAttributes) {
             this.excessivePredictiveAttributes = excessivePredictiveAttributes;
         }
 
@@ -190,15 +188,13 @@ public class ModelAlerts {
     }
 
     @JsonInclude(Include.NON_NULL)
-    public class MissingMetaDataWarnings {
+    public static class MissingMetaDataWarnings {
 
-        private List<String> invalidApprovedUsageAttributes = new ArrayList<>();
-        private List<String> invalidTagsAttributes = new ArrayList<>();
-        private List<String> invalidCategoryAttributes = new ArrayList<>();
-        private List<String> invalidDisplayNameAttributes = new ArrayList<>();
-        private List<String> invalidStatisticalTypeAttributes = new ArrayList<>();
-        private List<String> excessiveCategoriesInModelSummary = new ArrayList<>();
-        private Long maxCategoriesInModelSummary;
+        private List<String> invalidApprovedUsageAttributes;
+        private List<String> invalidTagsAttributes;
+        private List<String> invalidCategoryAttributes;
+        private List<String> invalidDisplayNameAttributes;
+        private List<String> invalidStatisticalTypeAttributes;
 
         @JsonProperty("InvalidApprovedUsageAttributes")
         public List<String> getInvalidApprovedUsageAttributes() {
@@ -206,8 +202,7 @@ public class ModelAlerts {
         }
 
         @JsonProperty("InvalidApprovedUsageAttributes")
-        public void setInvalidApprovedUsageMissingAttributes(
-                List<String> invalidApprovedUsageAttributes) {
+        public void setInvalidApprovedUsageMissingAttributes(List<String> invalidApprovedUsageAttributes) {
             this.invalidApprovedUsageAttributes = invalidApprovedUsageAttributes;
         }
 
@@ -237,8 +232,7 @@ public class ModelAlerts {
         }
 
         @JsonProperty("InvalidDisplayNameAttributes")
-        public void setInvalidDisplayNameAttributes(
-                List<String> invalidDisplayNameAttributes) {
+        public void setInvalidDisplayNameAttributes(List<String> invalidDisplayNameAttributes) {
             this.invalidDisplayNameAttributes = invalidDisplayNameAttributes;
         }
 
@@ -248,31 +242,9 @@ public class ModelAlerts {
         }
 
         @JsonProperty("InvalidStatisticalTypeAttributes")
-        public void setInvalidStatisticalTypeAttributes(
-                List<String> invalidStatisticalTypeAttributes) {
+        public void setInvalidStatisticalTypeAttributes(List<String> invalidStatisticalTypeAttributes) {
             this.invalidStatisticalTypeAttributes = invalidStatisticalTypeAttributes;
         }
-
-        @JsonProperty("ExcessiveCategoriesInModelSummary")
-        public List<String> getExcessiveCategoriesInModelSummary() {
-            return excessiveCategoriesInModelSummary;
-        }
-
-        @JsonProperty("ExcessiveCategoriesInModelSummary")
-        public void setExcessiveCategoriesInModelSummary(List<String> excessiveCategoriesInModelSummary) {
-            this.excessiveCategoriesInModelSummary = excessiveCategoriesInModelSummary;
-        }
-
-        @JsonProperty("MaxCategoriesInModelSummary")
-        public Long getMaxCategoriesInModelSummary() {
-            return maxCategoriesInModelSummary;
-        }
-
-        @JsonProperty("MaxCategoriesInModelSummary")
-        public void setMaxCategoriesInModelSummary(Long maxCategoriesInModelSummary) {
-            this.maxCategoriesInModelSummary = maxCategoriesInModelSummary;
-        }
-
     }
 
 }

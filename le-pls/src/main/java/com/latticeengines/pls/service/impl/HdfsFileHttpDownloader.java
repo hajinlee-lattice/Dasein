@@ -3,10 +3,9 @@ package com.latticeengines.pls.service.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -19,9 +18,10 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.util.ModelIdUtils;
 
 public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
-    
+
     private String modelId;
     private Configuration yarnConfiguration;
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -30,7 +30,6 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String modelingServiceHdfsBaseDir;
 
     private String filePath;
-    
 
     public HdfsFileHttpDownloader(DownloadRequestBuilder requestBuilder) {
         super(requestBuilder.mimeType);
@@ -53,10 +52,15 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         return fs.open(new Path(filePath));
     }
 
+    public String getFileContents() throws Exception {
+        getFileName();
+        return IOUtils.toString(getFileInputStream(), "UTF-8");
+    }
+
     private String getFilePath() throws Exception {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         String customer = summary.getTenant().getId();
-        final String uuid = extractUuid(modelId);
+        final String uuid = ModelIdUtils.extractUuid(modelId);
 
         // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
         HdfsUtils.HdfsFileFilter fileFilter = new HdfsUtils.HdfsFileFilter() {
@@ -86,15 +90,6 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
             throw new LedpException(LedpCode.LEDP_18023);
         }
         return paths.get(0);
-    }
-
-    public static String extractUuid(String modelGuid) {
-        Pattern pattern = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
-        Matcher matcher = pattern.matcher(modelGuid);
-        if (matcher.find()) {
-            return matcher.group(0);
-        }
-        throw new IllegalArgumentException("Cannot find uuid pattern in the model GUID " + modelGuid);
     }
 
     public static class DownloadRequestBuilder {

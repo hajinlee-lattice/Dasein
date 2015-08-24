@@ -7,7 +7,9 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface DataFileProviderService {
 
-    void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId,
-            String mimeType, String filter) throws IOException;
+    void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
+            String filter) throws IOException;
+
+    String getFileContents(String modelId, String mimeType, String filter) throws Exception;
 
 }

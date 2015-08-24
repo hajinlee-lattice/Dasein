@@ -32,8 +32,14 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         downloader.downloadFile(request, response);
     }
 
+    @Override
+    public String getFileContents(String modelId, String mimeType, String filter) throws Exception {
+        HdfsFileHttpDownloader downloader = getDownloader(modelId, mimeType, filter);
+        return downloader.getFileContents();
+    }
+
     private HdfsFileHttpDownloader getDownloader(String modelId, String mimeType, String filter) {
-        
+
         DownloadRequestBuilder requestBuilder = new DownloadRequestBuilder();
         requestBuilder.setMimeType(mimeType).setFilter(filter).setModelId(modelId)
                 .setYarnConfiguration(yarnConfiguration);
