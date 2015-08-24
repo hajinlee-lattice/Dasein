@@ -118,6 +118,11 @@ public enum LedpCode {
     LEDP_18038("Install DL Template Failed: {0}"), //
     LEDP_18039("Salesforce URL with name {0} not found."), //
     LEDP_18040("The URL field is empty of Salesforce URL with name {0}."), //
+    LEDP_18041("Failed to extract information from modelSummary file."), //
+    LEDP_18042("Failed to extract information from data-diagnostics file."), //
+    LEDP_18043("Failed to extract information from rfModel file."), //
+    LEDP_18044("Failed to extract information from top predictor file."), //
+    LEDP_18045("Failed to extract information from metadata-diagnostics file."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
