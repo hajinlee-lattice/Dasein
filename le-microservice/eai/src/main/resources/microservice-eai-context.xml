@@ -8,8 +8,8 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
 
-    <import resource="classpath:microservice-eai-context.xml"/>
-    <import resource="classpath:microservice-eai-properties-context.xml"/>
-    <bean class="com.latticeengines.microservice.swagger.SwaggerConfig" />
+    <import resource="classpath:microservice-context.xml"/>
+    <import resource="classpath:eai-context.xml"/>
+    <context:component-scan base-package="com.latticeengines.eai.controller" />
 
 </beans>
