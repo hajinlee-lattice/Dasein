@@ -11,6 +11,9 @@
     <context:component-scan base-package="com.latticeengines.microservice">
         <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.swagger.SwaggerConfig" />
     </context:component-scan>
+
     <mvc:annotation-driven/>
+    
     <import resource="classpath:monitor-aspects-context.xml"/>
+    
 </beans>

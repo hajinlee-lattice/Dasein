@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.latticeengines.microservice.exposed.ApiInfoProvider;
+import com.latticeengines.microservice.exposed.AppInfoProvider;
 import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
 import com.mangofactory.swagger.models.dto.ApiInfo;
 import com.mangofactory.swagger.plugin.EnableSwagger;
@@ -16,7 +16,7 @@ import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;
 public class SwaggerConfig {
     
     private SpringSwaggerConfig springSwaggerConfig;
-    private ApiInfoProvider apiInfoProvider;
+    private AppInfoProvider appInfoProvider;
 
     @Autowired
     public void setSpringSwaggerConfig(SpringSwaggerConfig springSwaggerConfig) {
@@ -24,8 +24,8 @@ public class SwaggerConfig {
     }
     
     @Autowired
-    public void setApiInfoProvider(ApiInfoProvider apiInfoProvider) {
-        this.apiInfoProvider = apiInfoProvider;
+    public void setAppInfoProvider(AppInfoProvider appInfoProvider) {
+        this.appInfoProvider = appInfoProvider;
     }
 
     @Bean
@@ -34,7 +34,7 @@ public class SwaggerConfig {
     }
 
     private ApiInfo apiInfo() {
-        return apiInfoProvider.apiInfo();
+        return appInfoProvider.apiInfo();
     }
 
 }
