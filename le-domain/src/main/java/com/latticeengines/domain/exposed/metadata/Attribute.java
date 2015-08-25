@@ -167,6 +167,7 @@ public class Attribute implements HasName, HasProperty, Serializable, GraphNode 
     }
 
     @Override
+    @JsonIgnore
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         return new HashMap<>();
     }

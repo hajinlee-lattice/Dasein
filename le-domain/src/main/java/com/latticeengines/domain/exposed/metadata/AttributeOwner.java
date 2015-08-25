@@ -58,6 +58,7 @@ public class AttributeOwner implements GraphNode {
     }
 
     @Override
+    @JsonIgnore
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
         map.put("attributes", attributes);

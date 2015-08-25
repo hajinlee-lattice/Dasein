@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -48,11 +49,13 @@ public class Extract implements HasName, GraphNode {
     }
 
     @Override
+    @JsonIgnore
     public Collection<? extends GraphNode> getChildren() {
         return new ArrayList<>();
     }
 
     @Override
+    @JsonIgnore
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         return new HashMap<>();
     }

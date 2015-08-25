@@ -66,6 +66,7 @@ public class Table extends AttributeOwner implements HasName {
     }
 
     @Override
+    @JsonIgnore
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         Map<String, Collection<? extends GraphNode>> map = super.getChildMap();
         map.put("primaryKey", Arrays.<GraphNode>asList(new GraphNode[] { primaryKey }));
