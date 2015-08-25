@@ -137,9 +137,8 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception e) {
             Assert.fail("Should NOT have thrown an exception");
         }
-        System.out.println("modelingWarning is " + modelingWarning);
+
         assertNotNull(modelingWarning);
-        System.out.println("Low success events are: " + modelingWarning.getLowSuccessEvents());
         assertEquals(modelingWarning.getLowSuccessEvents().compareTo(420L), 0);
         assertEquals(modelingWarning.getMinSuccessEvents().compareTo(500L), 0);
         assertEquals(modelingWarning.getMinConversionPercentage().compareTo(5.0D), 0);
