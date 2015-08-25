@@ -75,6 +75,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
             }
         };
 
+        customer = CustomerSpace.parse(customer).getTenantId();
         String singularIdPath = modelingServiceHdfsBaseDir + customer + "/models/";
         List<String> paths = new ArrayList<>();
         if (HdfsUtils.fileExists(yarnConfiguration, singularIdPath)) {
