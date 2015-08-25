@@ -1,6 +1,8 @@
 package com.latticeengines.common.exposed.query;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -55,5 +57,11 @@ public class LogicalRestriction extends Restriction {
     @SuppressWarnings("unchecked")
     public List<GraphNode> getChildren() {
         return List.class.cast(restrictions);
+    }
+
+    @Override
+    public Map<String, Collection<? extends GraphNode>> getChildMap() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

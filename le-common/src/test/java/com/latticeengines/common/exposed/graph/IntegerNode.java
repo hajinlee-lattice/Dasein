@@ -1,7 +1,9 @@
 package com.latticeengines.common.exposed.graph;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.common.exposed.visitor.Visitor;
@@ -26,6 +28,13 @@ class IntegerNode implements GraphNode {
     public boolean equals(Object that) {
         return that.getClass().equals(IntegerNode.class)
                 && this.value.equals(((IntegerNode) that).value);
+    }
+
+    @Override
+    public Map<String, Collection<? extends GraphNode>> getChildMap() {
+        Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
+        map.put("integers", children);
+        return map;
     }
 
 }

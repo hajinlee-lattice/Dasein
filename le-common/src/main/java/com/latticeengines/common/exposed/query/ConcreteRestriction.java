@@ -1,11 +1,16 @@
 package com.latticeengines.common.exposed.query;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.visitor.Visitor;
-import com.latticeengines.common.exposed.visitor.VisitorContext;
+import java.util.Collection;
+import java.util.Map;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 public class ConcreteRestriction extends Restriction {
     public ConcreteRestriction(boolean negate, Lookup lhs, ComparisonType relation, Lookup rhs) {
@@ -52,5 +57,11 @@ public class ConcreteRestriction extends Restriction {
     @Override
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
+    }
+
+    @Override
+    public Map<String, Collection<? extends GraphNode>> getChildMap() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

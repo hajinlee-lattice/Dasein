@@ -1,7 +1,10 @@
 package com.latticeengines.common.exposed.vdb;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
@@ -87,4 +90,10 @@ public class SpecNode implements GraphNode {
         return getValueWithoutQuotes();
     }
 
+    @Override
+    public Map<String, Collection<? extends GraphNode>> getChildMap() {
+        Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
+        map.put("specnode", children);
+        return map;
+    }
 }
