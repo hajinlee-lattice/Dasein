@@ -19,6 +19,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
+import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -26,16 +28,22 @@ import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.CrmConfigService;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private CrmConfigService crmService;
 
+    @Autowired
+    private DataLoaderService dataLoaderService;
+
     @Value("${pls.dataloader.rest.api}")
     private String dataLoaderUrl;
 
     private final String tenant = "PLSCrmConfigTestTenant";
+
+    private final static int SUCCESS = 3;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
@@ -46,36 +54,36 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception ex) {
             // ignore
         }
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("tenantName", tenant);
-        parameters.put("tenantAlias", tenant);
-        parameters.put("ownerEmail", "richard.liu@lattice-engines.com");
-        parameters.put("visiDBLocation", "ServerName=127.0.0.1");
-        parameters.put("visiDBName", tenant);
-        parameters.put("dmDeployment", tenant);
-        parameters.put("contractExternalID", tenant);
-        parameters.put("createNewVisiDB", "true");
+//        Map<String, Object> parameters = new HashMap<>();
+//        parameters.put("tenantName", tenant);
+//        parameters.put("tenantAlias", tenant);
+//        parameters.put("ownerEmail", "richard.liu@lattice-engines.com");
+//        parameters.put("visiDBLocation", "ServerName=127.0.0.1");
+//        parameters.put("visiDBName", tenant);
+//        parameters.put("dmDeployment", tenant);
+//        parameters.put("contractExternalID", tenant);
+//        parameters.put("createNewVisiDB", "true");
+//
+//        excuteHttpRequest(url, parameters);
 
-        excuteHttpRequest(url, parameters);
+        CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, tenant, tenant);
+        builder.ownerEmail("richard.liu@lattice-engines.com").visiDBLocation("ServerName=127.0.0.1").visiDBName(tenant).createNewVisiDB(true);
+        CreateVisiDBDLRequest createRequest = builder.build();
+        InstallResult response = dataLoaderService.createDLTenant(createRequest, dataLoaderUrl);
+        Assert.assertEquals(response.getStatus(), SUCCESS, response.getErrorMessage());
 
-        url = dataLoaderUrl + "/InstallVisiDBStructureFile_Sync";
-        uploadFile(url, tenant, "Template_MKTO.specs");
-
-        url = dataLoaderUrl + "/InstallConfigFile_Sync";
-        uploadFile(url, tenant, "Template_MKTO.config");
-
-    }
-
-    private void uploadFile(String url, String tenantId, String fileName) throws Exception {
-
-        ClassPathResource resource = new ClassPathResource(fileName);
+        ClassPathResource resource = new ClassPathResource("Template_MKTO.specs");
         String value = IOUtils.toString(resource.getURL());
-        InstallTemplateRequest request = new InstallTemplateRequest(tenantId, value);
+        InstallTemplateRequest request = new InstallTemplateRequest(tenant, value);
+        response = dataLoaderService.installVisiDBStructureFile(request, dataLoaderUrl);
+        Assert.assertEquals(response.getStatus(), SUCCESS, response.getErrorMessage());
 
-        String jsonStr = JsonUtils.serialize(request);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(url, false, getHeaders(), jsonStr);
 
-        Assert.assertEquals(checkStatus(response), true);
+        resource = new ClassPathResource("Template_MKTO.config");
+        value = IOUtils.toString(resource.getURL());
+        request = new InstallTemplateRequest(tenant, value);
+        response = dataLoaderService.installDataLoaderConfigFile(request, dataLoaderUrl);
+        Assert.assertEquals(response.getStatus(), SUCCESS, response.getErrorMessage());
     }
 
     public List<BasicNameValuePair> getHeaders() {
@@ -97,7 +105,6 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void config() {
-
         CrmCredential crmCredential;
         CrmConfig crmConfig;
 
