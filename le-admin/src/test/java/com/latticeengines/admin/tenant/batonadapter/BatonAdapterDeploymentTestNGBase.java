@@ -8,7 +8,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
+import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -21,7 +21,7 @@ import junit.framework.Assert;
  * we also register the testing component's installer,
  * in case it has not been registered already by ServiceServiceImpl
  */
-public abstract class BatonAdapterDeploymentTestNGBase extends AdminFunctionalTestNGBase {
+public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTestNGBase {
 
     protected String contractId, tenantId, serviceName;
 
@@ -35,7 +35,6 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminFunctionalTe
         tenantId = TestContractId + serviceName + "Tenant";
 
         loginAD();
-        cleanupZK();
         try {
             deleteTenant(contractId, tenantId);
         } catch (Exception e) {
