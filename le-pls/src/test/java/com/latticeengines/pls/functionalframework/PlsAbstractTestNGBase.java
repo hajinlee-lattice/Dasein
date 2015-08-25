@@ -163,7 +163,7 @@ abstract public class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant, UserDocument.class);
     }

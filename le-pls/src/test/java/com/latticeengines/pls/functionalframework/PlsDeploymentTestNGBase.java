@@ -1,5 +1,6 @@
 package com.latticeengines.pls.functionalframework;
 
+import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -7,9 +8,13 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.Constants;
+
+import junit.framework.Assert;
 
 public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     @Value("${pls.test.deployment.api}")
@@ -22,13 +27,19 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
         return deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1) : deployedHostPort;
     }
 
-    protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException {
+    protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        turnOffSslChecking();
+
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        String response = sendHttpPutForObject(magicRestTemplate, getRestAPIHostPort() + "/pls/internal/testtenants/", "", String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode json = mapper.readTree(response);
+        Assert.assertTrue(json.get("Success").asBoolean());
+
         setTestingTenants();
         loginTestingUsersToMainTenant();
         switchToSuperAdmin();
-        turnOffSslChecking();
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
     }
 
     protected void deleteUserByRestCall(String username) {
@@ -41,19 +52,15 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     }
 
     protected void createTenantByRestCall(Tenant tenant) {
-        try {
-            magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class);
-        } catch (Exception e) {
-            // ignore
-        }
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class);
     }
 
     protected void deleteTenantByRestCall(String tenantId) {
-        try {
-            sendHttpDeleteForObject(magicRestTemplate, getRestAPIHostPort() + "/pls/admin/tenants/" + tenantId, Boolean.class);
-        } catch (Exception e) {
-            // ignore
-        }
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        sendHttpDeleteForObject(magicRestTemplate, getRestAPIHostPort() + "/pls/admin/tenants/" + tenantId, Boolean.class);
     }
 
 

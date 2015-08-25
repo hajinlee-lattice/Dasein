@@ -25,7 +25,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 
 /**
- * This test needs access to remote Modeling Service API and PLS_MultiTenant DB.
+ * This test needs access to remote Modeling Service API and HDP cluster.
  */
 public class ZEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -60,8 +60,9 @@ public class ZEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment", enabled = true)
     public void setup() throws Exception {
-        turnOffSslChecking();
         deleteAndCreateTwoTenants();
+        setupTestEnvironment();
+
         tenantToAttach = testingTenants.get(1);
         if (tenantToAttach.getName().contains("Tenant 1")) {
             tenantToAttach = testingTenants.get(0);
