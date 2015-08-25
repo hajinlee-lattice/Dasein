@@ -3,8 +3,10 @@ package com.latticeengines.admin.tenant.batonadapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -162,6 +164,13 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     @Override
     public List<? extends LatticeComponent> getChildren(){ return new ArrayList<>(dependencies); }
+
+    @Override
+    public Map<String, Collection<? extends GraphNode>> getChildMap() {
+        Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
+        map.put("dependencies", dependencies);
+        return map;
+    }
 
     @Override
     public void accept(Visitor visitor, VisitorContext ctx) { visitor.visit(this, ctx); }
