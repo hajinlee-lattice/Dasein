@@ -1,4 +1,4 @@
-package com.latticeengines.eai.exposed.service.impl;
+package com.latticeengines.eai.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

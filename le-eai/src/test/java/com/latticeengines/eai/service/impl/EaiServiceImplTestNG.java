@@ -1,4 +1,4 @@
-package com.latticeengines.eai.exposed.service.impl;
+package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
