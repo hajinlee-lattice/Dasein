@@ -54,7 +54,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
 
     private String tenant;
 
-    @BeforeClass(groups = { "deployment", "functional" })
+    @BeforeClass(groups = { "deployment" })
     @Override
     public void setup() throws Exception {
         super.setup();
@@ -67,7 +67,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
         visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
     }
 
-    @AfterClass(groups = {"deployment", "functional"})
+    @AfterClass(groups = {"deployment"})
     @Override
     public void tearDown() throws Exception {
         visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
