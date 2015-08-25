@@ -7,8 +7,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +24,6 @@ import com.latticeengines.pls.service.ModelAlertService;
 
 public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ModelAlertServiceImplTestNG.class);
     private static final String MODEL_ID = "ms__8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a-PLSModel";
     private String tenantId;
     private String dir;
@@ -140,9 +137,9 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception e) {
             Assert.fail("Should NOT have thrown an exception");
         }
-
+        System.out.println("modelingWarning is " + modelingWarning);
         assertNotNull(modelingWarning);
-        log.info("Low success events are: " + modelingWarning.getLowSuccessEvents());
+        System.out.println("Low success events are: " + modelingWarning.getLowSuccessEvents());
         assertEquals(modelingWarning.getLowSuccessEvents().compareTo(420L), 0);
         assertEquals(modelingWarning.getMinSuccessEvents().compareTo(500L), 0);
         assertEquals(modelingWarning.getMinConversionPercentage().compareTo(5.0D), 0);
