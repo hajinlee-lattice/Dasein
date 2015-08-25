@@ -47,24 +47,11 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        String url = dataLoaderUrl + "/CreateDLTenant";
-
         try {
             afterClass();
         } catch (Exception ex) {
             // ignore
         }
-//        Map<String, Object> parameters = new HashMap<>();
-//        parameters.put("tenantName", tenant);
-//        parameters.put("tenantAlias", tenant);
-//        parameters.put("ownerEmail", "richard.liu@lattice-engines.com");
-//        parameters.put("visiDBLocation", "ServerName=127.0.0.1");
-//        parameters.put("visiDBName", tenant);
-//        parameters.put("dmDeployment", tenant);
-//        parameters.put("contractExternalID", tenant);
-//        parameters.put("createNewVisiDB", "true");
-//
-//        excuteHttpRequest(url, parameters);
 
         CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, tenant, tenant);
         builder.ownerEmail("richard.liu@lattice-engines.com").visiDBLocation("ServerName=127.0.0.1").visiDBName(tenant).createNewVisiDB(true);
