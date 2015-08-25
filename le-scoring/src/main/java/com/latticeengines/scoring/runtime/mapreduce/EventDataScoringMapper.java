@@ -159,8 +159,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             log.error(errorMessage);
             File logFile = new File(logDir + "/" + UUID.randomUUID() + ".err");
             FileUtils.writeStringToFile(logFile, errorMessage);
-            throw new LedpException(LedpCode.LEDP_20014,
-                    new String[] { e.getMessage(), ExceptionUtils.getStackTrace(e) });
+            throw new LedpException(LedpCode.LEDP_20014, e);
         }
     }
 }
