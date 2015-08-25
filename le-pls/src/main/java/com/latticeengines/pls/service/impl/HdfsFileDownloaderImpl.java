@@ -50,7 +50,7 @@ public class HdfsFileDownloaderImpl implements HdfsFileDownloader {
             }
         };
 
-        String singularIdPath = modelingServiceHdfsBaseDir + customer + "/models/";
+        String singularIdPath = modelingServiceHdfsBaseDir + CustomerSpace.parse(customer).getTenantId() + "/models/";
         List<String> paths = new ArrayList<>();
         if (HdfsUtils.fileExists(yarnConfiguration, singularIdPath)) {
             paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, singularIdPath, fileFilter));
