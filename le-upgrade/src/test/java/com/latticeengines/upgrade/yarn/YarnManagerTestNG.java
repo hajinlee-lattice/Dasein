@@ -88,9 +88,9 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testCheckModelSummary" })
     public void testGenerateModelSummary() {
         JsonNode summary = yarnManager.generateModelSummary(CUSTOMER, UUID);
-        Assert.assertTrue(summary.has("ModelDetail"), "modelsummary.json should have ModelDetail");
+        Assert.assertTrue(summary.has("ModelDetails"), "modelsummary.json should have ModelDetail");
 
-        JsonNode detail = summary.get("ModelDetail");
+        JsonNode detail = summary.get("ModelDetails");
         Assert.assertTrue(detail.has("Name"), "ModelDetail should have Name");
         Assert.assertTrue(detail.has("ConstructionTime"), "ModelDetail should have ConstructionTime");
         Assert.assertTrue(detail.has("LookupId"), "ModelDetail should have LookupId");
@@ -108,9 +108,9 @@ public class YarnManagerTestNG extends UpgradeFunctionalTestNGBase {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode json = mapper.readTree(HdfsUtils.getHdfsFileContents(yarnConfiguration, summaryPath));
 
-        Assert.assertTrue(json.has("ModelDetail"), "modelsummary.json should have ModelDetail");
+        Assert.assertTrue(json.has("ModelDetails"), "modelsummary.json should have ModelDetail");
 
-        JsonNode detail = json.get("ModelDetail");
+        JsonNode detail = json.get("ModelDetails");
         Assert.assertTrue(detail.has("Name"), "ModelDetail should have Name");
         Assert.assertTrue(detail.has("ConstructionTime"), "ModelDetail should have ConstructionTime");
         Assert.assertTrue(detail.has("LookupId"), "ModelDetail should have LookupId");
