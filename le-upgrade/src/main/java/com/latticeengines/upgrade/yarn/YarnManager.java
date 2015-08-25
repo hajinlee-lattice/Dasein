@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,6 +63,14 @@ public class YarnManager {
         }
 
         return modelJsonPaths.size();
+    }
+
+    public void moveModelFolderFromSingularToTupleId(String customer, String uuid) {
+        String modelPathInSingular = findModelPathInSingular(customer, uuid);
+        String modelPathInTuple = YarnPathUtils.substituteByTupleId(modelPathInSingular);
+        copyHdfsToHdfs(new Path(modelPathInSingular).getParent().toString(),
+                new Path(modelPathInTuple).getParent().toString());
+        fixModelNameInTupleId(customer, uuid);
     }
 
     public void fixModelNameInTupleId(String customer, String uuid) {

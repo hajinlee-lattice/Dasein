@@ -1,11 +1,6 @@
 package com.latticeengines.upgrade.model.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
@@ -28,7 +23,6 @@ import com.latticeengines.upgrade.jdbc.PlsMultiTenantJdbcManager;
 import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
-import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
 @Component("modelUpgrader")
 public class ModelUpgradeServiceImpl implements ModelUpgradeService {
@@ -67,13 +61,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
     private static final DateTimeFormatter FMT = DateTimeFormat.forPattern("yyyy-MM-dd");
-    private static final Map<String, String> modelNames = new HashMap<>();
     private static final Set<String> originalUuids = new HashSet<>();
-
-    @Override
-    public Map<String, String> getUuidModelNameMap() {
-        return modelNames;
-    }
 
     @Override
     public Set<String> getLpUuidsBeforeUpgrade() {
@@ -196,6 +184,9 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
         if (in1_4) {
             originalUuids.add(uuid);
+            System.out.print("Copying the whole model folder ...");
+            yarnManager.moveModelFolderFromSingularToTupleId(customer, uuid);
+            System.out.println("OK");
         }
 
         boolean toBeDeleted = exists && !in1_4;
@@ -208,15 +199,6 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         }
 
         if (toBeGenerated) {
-            System.out.print("Checking if the model has a customized name in PLS 1.4 ...");
-            String name = plsMultiTenantJdbcManager.findNameByUuid(uuid);
-            if (StringUtils.isNotEmpty(name)) {
-                modelNames.put(uuid, name);
-                System.out.println("YES. The name is: " + name);
-            } else {
-                System.out.println("NO");
-            }
-
             System.out.print("Generating incomplete modelsummary based on model.json ...");
             JsonNode jsonNode = yarnManager.generateModelSummary(customer, uuid);
             System.out.println("OK");
