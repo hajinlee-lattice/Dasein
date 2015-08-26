@@ -415,8 +415,8 @@
 
     <distributionManagement>
         <repository>
-            <id>releases</id>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases</url>
+            <id>snapshots</id>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/snapshots</url>
         </repository>
     </distributionManagement>
 
