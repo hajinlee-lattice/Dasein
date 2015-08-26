@@ -46,8 +46,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
-        String dataFileDirPath = ctx.getProperty(ImportProperty.DATAFILEDIR, String.class);
-        String url = String.format("jdbc:relique:csv:%s", dataFileDirPath);
+        String url = createJdbcUrl(ctx);
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver);
@@ -112,5 +111,23 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Override
     protected AvroTypeConverter getAvroTypeConverter() {
         return null;
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected String createJdbcUrl(ImportContext ctx) {
+        String dataFileDirPath = ctx.getProperty(ImportProperty.DATAFILEDIR, String.class);
+        String url = String.format("jdbc:relique:csv:%s", dataFileDirPath);
+        
+        String serializedMap = ctx.getProperty(ImportProperty.FILEURLPROPERTIES, String.class);
+        Map<String, String> fileUrlProperties = JsonUtils.deserialize(serializedMap, HashMap.class);
+        
+        if (fileUrlProperties != null && fileUrlProperties.size() > 0) {
+            List<String> props = new ArrayList<>();
+            for (Map.Entry<String, String> entry : fileUrlProperties.entrySet()) {
+                props.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
+            }
+            url += "?" + StringUtils.join(props, "&");
+        }
+        return url;
     }
 }

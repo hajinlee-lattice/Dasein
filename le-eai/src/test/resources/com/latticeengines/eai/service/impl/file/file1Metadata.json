@@ -1,0 +1,263 @@
+{
+  "Attributes": [
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "ID",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "String",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "Lead ID",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "NVarChar(255)"
+        },
+        {
+          "Key": "IsCustom",
+          "Value": "False"
+        }
+      ],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "Column1",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "String",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "Column1",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "NVarChar(255)"
+        },
+        {
+          "Key": "IsCustom",
+          "Value": "False"
+        }
+      ],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "Column2",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "String",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "Column2",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "NVarChar(255)"
+        },
+        {
+          "Key": "IsCustom",
+          "Value": "False"
+        }
+      ],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "Column3",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "String",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "Column3",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "NVarChar(255)"
+        },
+        {
+          "Key": "IsCustom",
+          "Value": "False"
+        }
+      ],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "Column4",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "String",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "Column4",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "NVarChar(255)"
+        },
+        {
+          "Key": "IsCustom",
+          "Value": "False"
+        }
+      ],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "Column5",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "String",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "Column5",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "NVarChar(255)"
+        },
+        {
+          "Key": "IsCustom",
+          "Value": "False"
+        }
+      ],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },    
+     {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "LastUpdatedDate",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "Date",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "Last Updated Date",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "NVarChar(255)"
+        },
+        {
+          "Key": "IsCustom",
+          "Value": "False"
+        }
+      ],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    }
+ ]
+}

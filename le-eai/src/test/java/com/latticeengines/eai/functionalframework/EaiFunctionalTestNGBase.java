@@ -1,8 +1,18 @@
 package com.latticeengines.eai.functionalframework;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.net.URL;
+import java.util.List;
+
+import org.apache.avro.Schema;
+import org.apache.avro.file.FileReader;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -11,9 +21,15 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.DataSchema;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.Field;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
@@ -27,6 +43,9 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     
     @Autowired
     private YarnClient defaultYarnClient;
+    
+    @Autowired
+    private MetadataService metadataService;
     
     protected DataPlatformFunctionalTestNGBase platformTestBase;
     
@@ -168,6 +187,46 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         table.addAttribute(facebookReferredVisits);
 
         return table;
+    }
+
+    protected Table createFile(URL inputUrl, String fileName) {
+        String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
+        String driver = "org.relique.jdbc.csv.CsvDriver";
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");
+        DbCreds creds = new DbCreds(builder);
+
+        DataSchema schema = metadataService.createDataSchema(creds, fileName);
+
+        Table file = new Table();
+        file.setName(fileName);
+
+        for (Field field : schema.getFields()) {
+            Attribute attr = new Attribute();
+            attr.setName(field.getName());
+            file.addAttribute(attr);
+        }
+        
+       return file;
+    }
+
+    protected void verifyAllDataNotNullWithNumRows(Configuration config, String targetDir, int expectedNumRows) throws Exception {
+        List<String> avroFiles = HdfsUtils.getFilesByGlob(config, String.format("%s/*.avro", targetDir));
+
+        int numRows = 0;
+        for (String avroFile : avroFiles) {
+            try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config, new Path(avroFile))) {
+                while (reader.hasNext()) {
+                    GenericRecord record = reader.next();
+                    Schema schema = record.getSchema();
+                    for (org.apache.avro.Schema.Field field : schema.getFields()) {
+                        assertNotNull(record.get(field.name()));
+                    }
+                    numRows++;
+                }
+            }
+        }
+        assertEquals(numRows, expectedNumRows);
     }
 
 }

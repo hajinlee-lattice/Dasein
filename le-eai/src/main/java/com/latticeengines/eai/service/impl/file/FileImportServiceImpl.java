@@ -45,9 +45,12 @@ public class FileImportServiceImpl extends ImportService {
     public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext context) {
         context.setProperty(ImportProperty.DATAFILEDIR, //
                 srcImportConfig.getProperties().get(ImportProperty.DATAFILEDIR));
-        ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.FILE, "EventTable");
         context.setProperty(ImportProperty.METADATAFILE, //
                 srcImportConfig.getProperties().get(ImportProperty.METADATAFILE));
+        context.setProperty(ImportProperty.FILEURLPROPERTIES, //
+                srcImportConfig.getProperties().get(ImportProperty.FILEURLPROPERTIES));
+
+        ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.FILE, "EventTable");
         List<Table> tables = srcImportConfig.getTables();
         for (Table table : tables) {
             strategy.importData(null, table, null, context);

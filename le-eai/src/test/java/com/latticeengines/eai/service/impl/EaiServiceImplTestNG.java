@@ -18,6 +18,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -27,11 +28,7 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modeling.DataSchema;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
@@ -58,7 +55,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/ActivityType");
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional", "functional.production" }, enabled = false)
     public void extractAndImport() throws Exception {
         SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
         Map<String, String> props = new HashMap<>();
@@ -111,45 +108,41 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertEquals(filesForActivityType.size(), 1);
     }
     
-    @Test(groups = { "functional" }, enabled = true)
-    public void extractAndImportForFile() throws Exception {
+    @Test(groups = { "functional" }, dataProvider = "fileProvider", enabled = true)
+    public void extractAndImportForFile(String fileName, boolean verifyDataAndRowCount, int expectedNumRows) throws Exception {
         URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/exposed/service/impl");
-        URL metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/exposed/service/impl/ConcurSampleMetadata.xml");
+        URL metadataUrl = ClassLoader.getSystemResource( //
+                String.format("com/latticeengines/eai/exposed/service/impl/%sMetadata.json", fileName));
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
-        Table file = createFile(dataUrl);
+        Table file = createFile(dataUrl, fileName);
         fileImportConfig.setSourceType(SourceType.FILE);
         fileImportConfig.setTables(Arrays.<Table>asList(new Table[] { file }));
         Map<String, String> props = new HashMap<>();
         props.put(ImportProperty.DATAFILEDIR, dataUrl.getPath());
         props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
         fileImportConfig.setProperties(props);
-        String targetPath = "/tmp/dataFromFile";
+        String targetPath = "/tmp/dataFromFile/" + fileName;
         ImportConfiguration importConfig = new ImportConfiguration();
         importConfig.setCustomer(customer);
         importConfig.addSourceConfiguration(fileImportConfig);
         importConfig.setTargetPath(targetPath);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        if (verifyDataAndRowCount) {
+            verifyAllDataNotNullWithNumRows(yarnConfiguration, targetPath, expectedNumRows);
+        }
     }
     
-    private Table createFile(URL inputUrl) {
-        String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
-        String driver = "org.relique.jdbc.csv.CsvDriver";
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");
-        DbCreds creds = new DbCreds(builder);
-
-        DataSchema schema = metadataService.createDataSchema(creds, "ConcurSample");
-
-        Table file = new Table();
-        file.setName("ConcurSample");
-
-        for (Field field : schema.getFields()) {
-            Attribute attr = new Attribute();
-            attr.setName(field.getName());
-            file.addAttribute(attr);
-        }
-        
-       return file;
+    @DataProvider(name = "fileProvider")
+    public Object[][] getFiles() {
+        return new Object[][] {
+                { "ConcurSample", false, -1 }, //
+                { "file1", true, 4 }, //
+                { "file2", true, 3 }, //
+                { "file3", true, 4 }
+        };
     }
+    
 }
