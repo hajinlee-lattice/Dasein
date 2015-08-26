@@ -20,6 +20,38 @@
 
     <profiles>
         <profile>
+            <id>buildmachine</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>buildmachine</value>
+                </property>
+            </activation>
+            <properties>
+                <job.properties.path>conf/env/buildmachine</job.properties.path>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/buildmachine
+                </dataplatform.properties.path>
+                <dataflow.properties.path>
+                    ../le-dataflow/conf/env/buildmachine
+                </dataflow.properties.path>
+                <propdata.properties.path>
+                    ../le-propdata/conf/env/buildmachine
+                </propdata.properties.path>
+                <score.properties.path>
+                    ../le-scoring/conf/env/buildmachine
+                </score.properties.path>
+                <dellebi.properties.path>
+                    ../le-dellebi/conf/env/buildmachine
+                </dellebi.properties.path>
+                <pls.properties.path>
+                    ../le-pls/conf/env/buildmachine
+                </pls.properties.path>
+                <bin.env.path>bin/env/buildmachine</bin.env.path>
+            </properties>
+        </profile>
+        <profile>
             <id>development</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
