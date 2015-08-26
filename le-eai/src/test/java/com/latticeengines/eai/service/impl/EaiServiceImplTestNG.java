@@ -55,7 +55,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/ActivityType");
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = false)
+    @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void extractAndImport() throws Exception {
         SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
         Map<String, String> props = new HashMap<>();
