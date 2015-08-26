@@ -19,6 +19,21 @@
 
     <profiles>
         <profile>
+            <id>buildmachine</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>buildmachine</value>
+                </property>
+            </activation>
+            <properties>
+                <pls.properties.path>conf/env/buildmachine</pls.properties.path>
+                <bin.env.path>bin/env/buildmachine</bin.env.path>
+                <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
+            </properties>
+        </profile>
+        <profile>
             <id>development</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
