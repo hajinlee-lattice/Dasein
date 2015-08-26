@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 from optparse import OptionParser
 import subprocess
@@ -14,7 +14,7 @@ class TenantDeployer(object):
         self.url = "%s/pls/admin/tenants" % hostPortWithProtocol
     
     def createTenant(self):
-        cmd = ["curl", "--insecure", "-H", "Content-Type: application/json", "-H", \
+        cmd = ["curl", "-k", "-H", "Content-Type: application/json", "-H", \
                "MagicAuthentication: Security through obscurity!", "-X", "POST", \
                "-d",  self.filledInRequest, \
                self.url]
