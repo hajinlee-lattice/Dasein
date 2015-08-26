@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.playmaker.controller.Oauth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 import com.wordnik.swagger.annotations.Api;

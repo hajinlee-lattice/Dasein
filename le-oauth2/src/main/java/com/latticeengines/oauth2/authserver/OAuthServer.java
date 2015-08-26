@@ -21,6 +21,8 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
+import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
+
 @Configuration
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
@@ -67,11 +69,14 @@ public class OAuthServer extends SpringBootServletInitializer {
         @Override
         public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
             endpoints.tokenServices(tokenServices()).authenticationManager(authenticationManager);
+
+            ExceptionEncodingTranslator translator = new ExceptionEncodingTranslator();
+            endpoints.exceptionTranslator(translator);
         }
 
         @Override
         public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
         }
-
     }
+
 }

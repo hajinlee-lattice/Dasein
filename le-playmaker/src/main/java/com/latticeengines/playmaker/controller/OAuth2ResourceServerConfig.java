@@ -11,7 +11,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+
+import com.latticeengines.playmaker.exception.ExceptionEncodingTranslator;
 
 @Configuration
 @EnableAutoConfiguration
@@ -31,6 +34,11 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
         resources.tokenStore(tokenStore()).resourceId(PLAYMAKER_REST_RESOURCE_ID).stateless(false);
+        OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
+
+        ExceptionEncodingTranslator translator = new ExceptionEncodingTranslator();
+        authenticationEntryPoint.setExceptionTranslator(translator);
+        resources.authenticationEntryPoint(authenticationEntryPoint);
     }
 
     @Override
@@ -45,4 +53,5 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                 .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))")
                 .antMatchers("/api-docs", "/api-docs/**", "/swagger/**").permitAll();
     }
+
 }
