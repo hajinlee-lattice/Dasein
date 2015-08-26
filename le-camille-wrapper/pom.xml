@@ -6,18 +6,18 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-camille-wrapper</artifactId>
     <packaging>jar</packaging>
-    <version>2.0.8-SNAPSHOT</version>
+    <version>2.0.9-SNAPSHOT</version>
     <name>${component-name}</name>
 
     <properties>
         <component-name>le-camille-wrapper</component-name>
-        <le.domain.version>2.0.8-SNAPSHOT</le.domain.version>
+        <le.domain.version>2.0.9-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.8-SNAPSHOT</version>
+        <version>2.0.9-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
-            <version>2.0.8-SNAPSHOT</version>
+            <version>2.0.9-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

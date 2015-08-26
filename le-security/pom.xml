@@ -8,9 +8,9 @@
 
     <properties>
         <component-name>security</component-name>
-        <le.common.version>2.0.8-SNAPSHOT</le.common.version>
-        <le.domain.version>2.0.8-SNAPSHOT</le.domain.version>
-        <le.camille.version>2.0.8-SNAPSHOT</le.camille.version>
+        <le.common.version>2.0.9-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.9-SNAPSHOT</le.domain.version>
+        <le.camille.version>2.0.9-SNAPSHOT</le.camille.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
         <certificate.name>laca-ldap.dev.lattice.local.jks</certificate.name>
@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.8-SNAPSHOT</version>
+        <version>2.0.9-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
