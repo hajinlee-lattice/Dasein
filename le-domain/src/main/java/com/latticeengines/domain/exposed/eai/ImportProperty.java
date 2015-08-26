@@ -12,4 +12,5 @@ public class ImportProperty {
     public static final String METADATAFILE = "metadataFile";
     public static final String DATAFILEDIR = "dataFile";
     public static final String PRODUCERTEMPLATE = "producerTemplate";
+    public static final String FILEURLPROPERTIES = "fileUrlProperties";
 }
