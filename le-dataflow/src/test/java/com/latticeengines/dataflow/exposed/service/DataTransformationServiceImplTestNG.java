@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.exposed.service;
 
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +10,8 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -31,14 +33,16 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     private String opportunity;
     private String contact;
 
-    @BeforeClass(groups = "functional")
+    @BeforeMethod(groups = "functional")
     public void setup() throws Exception {
+        sampleDataFlowBuilder.reset();
         if (sampleDataFlowBuilder.isLocal()) {
             config.set("fs.defaultFS", "file:///");
         }
         
         HdfsUtils.rmdir(config, "/tmp/EventTable");
         HdfsUtils.rmdir(config, "/tmp/checkpoints");
+        HdfsUtils.rmdir(config, "/tmp/avro");
 
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
         opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
@@ -56,11 +60,10 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
             FileSystem fs = FileSystem.get(config);
             doCopy(fs, entries);
         } 
+    }
 
-}
-
-    @Test(groups = "functional")
-    public void executeNamedTransformation() throws Exception {
+    @Test(groups = "functional", dataProvider = "engineProvider")
+    public void executeNamedTransformation(String engine) throws Exception {
         Map<String, String> sources = new HashMap<>();
         sources.put("Lead", lead);
         sources.put("Opportunity", opportunity);
@@ -73,6 +76,17 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("FLOWNAME", "SampleDataFlow-Lead*Oppty");
         ctx.setProperty("CHECKPOINT", true);
         ctx.setProperty("HADOOPCONF", config);
+        ctx.setProperty("ENGINE", "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
+        verifyNumRows(config, "/tmp/EventTable", 308);
+    }
+    
+    
+    @DataProvider(name = "engineProvider")
+    public Object[][] getEngine() {
+        return new Object[][] {
+                { "MR" }, //
+                { "TEZ" }
+        };
     }
 }

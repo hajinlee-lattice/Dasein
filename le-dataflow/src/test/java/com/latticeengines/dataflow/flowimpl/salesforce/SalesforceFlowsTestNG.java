@@ -9,12 +9,13 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
-import com.latticeengines.dataflow.service.impl.DataTransformationServiceImpl;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -30,22 +31,23 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     private CreatePropDataInput createPropDataInput;
 
     @Autowired
-    private DataTransformationServiceImpl dataTransformationService;
+    private DataTransformationService dataTransformationService;
 
     private String lead;
     private String opportunity;
     private String contact;
     private String opportunityContactRole;
+    private Configuration config = new Configuration();
 
-    @BeforeClass(groups = "functional")
+    @BeforeMethod(groups = "functional")
     public void setup() throws Exception {
-        //createFinalEventTable.setLocal(true);
-        //createInitialEventTable.setLocal(true);
-        //createPropDataInput.setLocal(true);
-        Configuration config = new Configuration();
+        createInitialEventTable.reset();
+        createPropDataInput.reset();
+        createFinalEventTable.reset();
         HdfsUtils.rmdir(config, "/tmp/PDTable");
         HdfsUtils.rmdir(config, "/tmp/EventTable");
         HdfsUtils.rmdir(config, "/tmp/TmpEventTable");
+        HdfsUtils.rmdir(config, "/tmp/checkpoints");
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
         opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro").getPath();
@@ -58,12 +60,12 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, "/tmp/avro"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunityContactRole, "/tmp/avro"));
 
-        FileSystem fs = FileSystem.get(new Configuration());
+        FileSystem fs = FileSystem.get(config);
         doCopy(fs, entries);
     }
 
-    @Test(groups = "functional")
-    public void constructFlowDefinition() {
+    @Test(groups = "functional", dataProvider = "checkpointProvider")
+    public void constructFlowDefinition(boolean checkpoint) throws Exception {
         Map<String, String> sources = new HashMap<>();
 
         if (createInitialEventTable.isLocal()) {
@@ -85,15 +87,18 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty("TARGETPATH", "/tmp/TmpEventTable");
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", new Configuration());
+        ctx.setProperty("CHECKPOINT", checkpoint);
+        ctx.setProperty("HADOOPCONF", config);
+        ctx.setProperty("ENGINE", "MR");
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
+        verifyNumRows(config, "/tmp/TmpEventTable", 10787);
 
         // Execute the second flow, with the output of the first flow as input into the second
         sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
         ctx.setProperty("TARGETPATH", "/tmp/PDTable");
         ctx.setProperty("FLOWNAME", "CreatePropDataInput");
         dataTransformationService.executeNamedTransformation(ctx, "createPropDataInput");
+        verifyNumRows(config, "/tmp/PDTable", 106);
 
         // Execute the third flow, with the output of the first flow as input into the third
         sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
@@ -106,4 +111,13 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
         dataTransformationService.executeNamedTransformation(ctx, "createFinalEventTable");
     }
+    
+    @DataProvider(name = "checkpointProvider")
+    public Object[][] getEngine() {
+        return new Object[][] {
+                { true }, //
+                { false }
+        };
+    }
+
 }

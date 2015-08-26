@@ -30,7 +30,12 @@ public class AddMD5Hash extends BaseOperation implements Function {
             if (i > 0) {
                 data += "|"; 
             }
-            data += entry.getTuple().getObject(i).toString();
+            Object tupleValue = entry.getTuple().getObject(i);
+            
+            if (tupleValue == null) {
+                tupleValue = "<null>";
+            }
+            data += tupleValue.toString();
         }
         
         

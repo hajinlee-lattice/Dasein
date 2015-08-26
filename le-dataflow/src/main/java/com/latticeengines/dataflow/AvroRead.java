@@ -35,6 +35,7 @@ import cascading.property.AppProps;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.util.DelimitedParser;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Lfs;
@@ -48,10 +49,14 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class AvroRead {
 
-    @SuppressWarnings({ "rawtypes", "unused" })
+    @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
     public static void main(String[] args) throws Exception {
         String lead = "file://"
                 + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
+        String leadLess4Cols = "file://"
+                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead-Less-4-Columns.avro").getPath();
+        String leadLess5Cols = "file://"
+                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead-Less-5-Columns.avro").getPath();
         String opportunity = "file://"
                 + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro")
                         .getPath();
@@ -71,12 +76,15 @@ public class AvroRead {
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
         //FlowConnector flowConnector = new LocalFlowConnector();
 
+        AvroScheme leadScheme = new AvroScheme();
         Map<String, Tap> sources = new HashMap<>();
         Tap<?, ?, ?> leadTap = new Lfs(new AvroScheme(), lead);
+        Tap<?, ?, ?> leadLess4Tap = new Lfs(new AvroScheme(), leadLess4Cols);
+        Tap<?, ?, ?> leadLess5Tap = new Lfs(new AvroScheme(), leadLess5Cols);
         Tap<?, ?, ?> opportunityTap = new Lfs(new AvroScheme(), opportunity);
         Tap<?, ?, ?> contactTap = new Lfs(new AvroScheme(), contact);
         Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), wcPath, SinkMode.KEEP);
-        sources.put("lead", leadTap);
+        sources.put("lead", new MultiSourceTap(leadTap, leadLess4Tap, leadLess5Tap));
         //sources.put("oppty", opportunityTap);
         sources.put("contact", contactTap);
 
@@ -226,3 +234,4 @@ public class AvroRead {
     }
 
 }
+

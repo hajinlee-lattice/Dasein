@@ -19,8 +19,8 @@ import org.apache.hadoop.fs.Path;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
-import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.Aggregator;
 import cascading.operation.Function;
 import cascading.operation.aggregator.Count;
@@ -45,7 +45,6 @@ import cascading.pipe.joiner.LeftJoin;
 import cascading.pipe.joiner.OuterJoin;
 import cascading.pipe.joiner.RightJoin;
 import cascading.property.AppProps;
-import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -83,6 +82,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     public CascadingDataFlowBuilder() {
         this(false, false);
     }
+    
+    public void reset() {
+        counter = 1;
+        taps = new HashMap<>();
+        schemas = new HashMap<>();
+        pipesAndOutputSchemas = new HashMap<>();
+        checkpoints = new HashMap<>();
+    }
 
     public CascadingDataFlowBuilder(boolean local, boolean checkpoint) {
         super(local, checkpoint);
@@ -96,18 +103,19 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return taps;
     }
 
-    @SuppressWarnings({ "unchecked" })
     private Pipe doCheckpoint(Pipe pipe) {
+        if (isLocal()) {
+            return pipe;
+        }
         if (isCheckpoint()) {
             DataFlowContext ctx = getDataFlowCtx();
             String ckptName = "ckpt-" + counter++;
             Checkpoint ckpt = new Checkpoint(ckptName, pipe);
-            String targetPath = "/tmp/checkpoints/" + ctx.getProperty("CUSTOMER", String.class) + "/" + ckptName;
-            Scheme scheme = new SequenceFile(Fields.UNKNOWN);
-            Tap ckptTap = new Lfs(scheme, targetPath, SinkMode.KEEP);
-            if (!isLocal()) {
-                ckptTap = new Hfs(scheme, targetPath, SinkMode.KEEP);
-            }
+            String targetPath = String.format("/tmp/checkpoints/%s/%s/%s", //
+                    ctx.getProperty("CUSTOMER", String.class), //
+                    ctx.getProperty("FLOWNAME", String.class), //
+                    ckptName);
+            Tap ckptTap = new Hfs(new SequenceFile(Fields.UNKNOWN), targetPath, SinkMode.REPLACE);
             checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptTap));
             AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas
                     .get(pipe.getName());
@@ -622,37 +630,38 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Map<String, String> sourceTables = dataFlowCtx.getProperty("SOURCES", Map.class);
         String flowName = dataFlowCtx.getProperty("FLOWNAME", String.class);
         String targetPath = dataFlowCtx.getProperty("TARGETPATH", String.class);
-        String queue = dataFlowCtx.getProperty("QUEUE", String.class);
         Properties jobProperties = dataFlowCtx.getProperty("JOBPROPERTIES", Properties.class);
+        String engineType = dataFlowCtx.getProperty("ENGINE", String.class);
+        ExecutionEngine engine = ExecutionEngine.get(engineType);
 
         String lastOperator = constructFlowDefinition(dataFlowCtx, sourceTables);
+        
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
         System.out.println(schema);
         Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
         if (!isLocal()) {
             sink = new Hfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
         }
+        
+        
         Properties properties = new Properties();
-        properties.put("mapred.job.queue.name", queue);
         if (jobProperties != null) {
             properties.putAll(jobProperties);
         }
-
         AppProps.setApplicationJarClass(properties, getClass());
-        HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
+        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
 
         FlowDef flowDef = FlowDef.flowDef().setName(flowName) //
                 .addSources(getSources()) //
                 .addTailSink(getPipeByName(lastOperator), sink);
-
+        
         for (AbstractMap.SimpleEntry<Checkpoint, Tap> entry : checkpoints.values()) {
             flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());
         }
 
         Flow<?> flow = flowConnector.connect(flowDef);
-        if (isLocal()) {
-            flow.writeDOT("dot/wcr.dot");
-        }
+
+        flow.writeDOT("dot/wcr.dot");
         flow.complete();
     }
 

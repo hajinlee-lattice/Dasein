@@ -19,24 +19,30 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     @Autowired
     private ApplicationContext appContext;
-    
+
     @Override
     public void executeNamedTransformation(DataFlowContext dataFlowCtx, String dataFlowBldrBeanName) {
-        validateParameters(dataFlowCtx, "SOURCES", "QUEUE", "TARGETPATH", "CUSTOMER", "FLOWNAME", "CHECKPOINT");
-        
+        validateParameters(dataFlowCtx, //
+                "SOURCES", //
+                "QUEUE", //
+                "TARGETPATH", //
+                "CUSTOMER", //
+                "FLOWNAME", //
+                "CHECKPOINT");
+
         Object dataFlowBldrBean = appContext.getBean(dataFlowBldrBeanName);
-        
+
         if (!(dataFlowBldrBean instanceof DataFlowBuilder)) {
             throw new DataFlowException(DataFlowCode.DF_00000, new String[] { dataFlowBldrBeanName });
         }
-        
+
         DataFlowBuilder dataFlow = (DataFlowBuilder) dataFlowBldrBean;
-        
+
         boolean doCheckpoint = dataFlowCtx.getProperty("CHECKPOINT", Boolean.class);
         dataFlow.setCheckpoint(doCheckpoint);
         dataFlow.runFlow(dataFlowCtx);
     }
-    
+
     private void validateParameters(DataFlowContext dataFlowCtx, String... keys) {
         List<String> missingProps = new ArrayList<>();
         for (String key : keys) {
@@ -44,7 +50,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                 missingProps.add(key);
             }
         }
-        
+
         if (missingProps.size() > 0) {
             throw new DataFlowException(DataFlowCode.DF_10000, new String[] { StringUtils.join(missingProps, ", ") });
         }

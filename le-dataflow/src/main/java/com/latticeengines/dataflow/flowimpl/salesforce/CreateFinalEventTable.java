@@ -35,14 +35,14 @@ public class CreateFinalEventTable extends CascadingDataFlowBuilder {
         // Convert booleans to integers
         List<FieldMetadata> metadata = getMetadata(withEvent);
 
+        String convertBooleanToInt = withEvent;
         for (FieldMetadata m : metadata) {
-            String convertBooleanToInt = withEvent;
             if (m.getJavaType() == Boolean.class) {
                 FieldMetadata intM = new FieldMetadata(Type.INT, Integer.class, m.getFieldName(), null);
                 convertBooleanToInt = addFunction(convertBooleanToInt, m.getFieldName() + " == true ? 1 : 0",
                         new FieldList(m.getFieldName()), intM);
             }
         }
-        return withEvent;
+        return convertBooleanToInt;
     }
 }
