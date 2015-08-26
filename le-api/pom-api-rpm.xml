@@ -20,6 +20,23 @@
 
     <profiles>
         <profile>
+            <id>buildmachine</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>buildmachine</value>
+                </property>
+            </activation>
+            <properties>
+                <api.properties.path>conf/env/buildmachine</api.properties.path>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/buildmachine
+                </dataplatform.properties.path>
+                <bin.env.path>bin/env/buildmachine</bin.env.path>
+            </properties>
+        </profile>
+        <profile>
             <id>development</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
