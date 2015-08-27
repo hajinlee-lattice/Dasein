@@ -28,6 +28,9 @@ public class ComponentOrchestrator {
     private static Map<String, LatticeComponent> componentMap;
     private static BatonService batonService = new BatonServiceImpl();
 
+    private static final long TIMEOUT = 180000L;
+    private static final long WAIT_INTERVAL = 1000L;
+
     public ComponentOrchestrator() {}
 
     public ComponentOrchestrator(List<LatticeComponent> components) {
@@ -111,13 +114,13 @@ public class ComponentOrchestrator {
                     Map<String, String> bootstrapProperties = properties.get(component.getName());
                     batonService.bootstrap(contractId, tenantId, spaceId, component.getName(), bootstrapProperties);
 
-                    int numOfRetries = 100;
+                    long numOfRetries = TIMEOUT/WAIT_INTERVAL;
                     BootstrapState state;
                     do {
                         state = batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId, component.getName());
                         numOfRetries--;
                         try {
-                            Thread.sleep(200L);
+                            Thread.sleep(WAIT_INTERVAL);
                         } catch (InterruptedException e) {
                             break;
                         }

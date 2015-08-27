@@ -32,9 +32,6 @@ public class BardJamsComponent extends LatticeComponent {
     @Autowired
     private TenantService tenantService;
 
-    @Value("${admin.bardjams.timeout}")
-    private int timeout;
-
     @Value("${admin.bardjams.dryrun}")
     private boolean dryrun;
 
@@ -69,7 +66,6 @@ public class BardJamsComponent extends LatticeComponent {
 
         ((BardJamsInstaller) installer).setBardJamsEntityMgr(bardJamsEntityMgr);
         ((BardJamsInstaller) installer).setTenantService(tenantService);
-        ((BardJamsInstaller) installer).setTimeout(timeout);
         installer.setDryrun(dryrun);
         return installer;
     }

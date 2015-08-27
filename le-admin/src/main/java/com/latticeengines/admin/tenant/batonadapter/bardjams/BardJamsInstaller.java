@@ -18,8 +18,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class BardJamsInstaller extends LatticeComponentInstaller {
 
-    private long timeout = 60000L;
-    private long wait_interval_mills = 3000L;
+    private static final long TIMEOUT = 180000L;
+    private static final long WAIT_INTERVAL = 3000L;
 
     private final Log log = LogFactory.getLog(this.getClass());
 
@@ -65,13 +65,9 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
         this.tenantService = tenantService;
     }
 
-    protected void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
-
     private boolean checkTenant(BardJamsTenant tenant) {
         long currTime = System.currentTimeMillis();
-        long endTime = currTime + timeout;
+        long endTime = currTime + TIMEOUT;
         boolean isSuccessful = false;
         while (currTime < endTime) {
             log.info("Starting to check status of tenant=" + tenant.toString());
@@ -86,7 +82,7 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
                 break;
             }
             try {
-                Thread.sleep(wait_interval_mills);
+                Thread.sleep(WAIT_INTERVAL);
             } catch (Exception ex) {
                 log.warn("Warning!", ex);
             }
@@ -96,7 +92,7 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
         String status = newTenant.getStatus().trim();
         if (BardJamsTenantStatus.NEW.getStatus().equals(status)) {
             Exception e = new IllegalStateException("The status of tenant " + tenant.getTenant()
-                    + " remains NEW after " + String.valueOf(timeout/1000.) + " seconds.");
+                    + " remains NEW after " + String.valueOf(TIMEOUT /1000.) + " seconds.");
             throw new LedpException(LedpCode.LEDP_18027, e);
         }
         return isSuccessful;

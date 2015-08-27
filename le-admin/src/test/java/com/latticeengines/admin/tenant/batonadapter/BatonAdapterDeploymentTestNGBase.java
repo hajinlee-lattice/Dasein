@@ -24,6 +24,8 @@ import junit.framework.Assert;
 public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTestNGBase {
 
     protected String contractId, tenantId, serviceName;
+    private static final long TIMEOUT = 180000L;
+    private static final long WAIT_INTERVAL = 3000L;
 
     @Value("${pls.api.hostport}")
     private String plsHostPort;
@@ -84,12 +86,12 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
     protected String getPlsHostPort() { return plsHostPort; }
 
     public BootstrapState waitForSuccess(String componentName) throws InterruptedException{
-        int numOfRetries = 10;
+        long numOfRetries = TIMEOUT/WAIT_INTERVAL;
         BootstrapState state;
         do {
             state = batonService.getTenantServiceBootstrapState(contractId, tenantId, componentName);
             numOfRetries--;
-            Thread.sleep(1000L);
+            Thread.sleep(WAIT_INTERVAL);
         } while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
 
         if (!state.state.equals(BootstrapState.State.OK)) {
