@@ -31,6 +31,9 @@ public class ReleaseProcessConfiguration {
     private Activity dpDeploymentTestActivity;
 
     @Autowired
+    private Activity orcDeploymentTestActivity;
+
+    @Autowired
     private Activity scoringDeploymentTestActivity;
 
     @Autowired
@@ -38,6 +41,9 @@ public class ReleaseProcessConfiguration {
 
     @Autowired
     private Activity plsDeploymentTestActivity;
+
+    @Autowired
+    private Activity plsProtractorTestActivity;
 
     @Autowired
     private Activity createChangeManagementJiraActivity;
@@ -55,7 +61,7 @@ public class ReleaseProcessConfiguration {
         List<Activity> releaseDPActivities = new ArrayList<>();
         releaseDPActivities.addAll(preReleaseActivities);
         releaseDPActivities.addAll(Arrays.asList(new Activity[] { dpDeploymentJobActivity, dpDeploymentTestActivity,
-                jmxCheckActivity }));
+                orcDeploymentTestActivity, jmxCheckActivity }));
         releaseDPActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseDPActivities);
     }
@@ -65,8 +71,8 @@ public class ReleaseProcessConfiguration {
         init();
         List<Activity> releasePLSActivities = new ArrayList<>();
         releasePLSActivities.addAll(preReleaseActivities);
-        releasePLSActivities.addAll(Arrays
-                .asList(new Activity[] { plsDeploymentJobActivity, plsDeploymentTestActivity }));
+        releasePLSActivities.addAll(Arrays.asList(new Activity[] { plsDeploymentJobActivity, plsProtractorTestActivity,
+                plsDeploymentTestActivity }));
         releasePLSActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releasePLSActivities);
     }
@@ -77,13 +83,15 @@ public class ReleaseProcessConfiguration {
         List<Activity> releaseAllActivities = new ArrayList<>();
         releaseAllActivities.addAll(preReleaseActivities);
         releaseAllActivities.addAll(Arrays.asList(new Activity[] { dpDeploymentJobActivity, plsDeploymentJobActivity,
-                dpDeploymentTestActivity, jmxCheckActivity, plsDeploymentTestActivity }));
+                dpDeploymentTestActivity, orcDeploymentTestActivity, jmxCheckActivity, plsProtractorTestActivity,
+                plsDeploymentTestActivity }));
         releaseAllActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseAllActivities);
     }
 
     public void init() {
-        preReleaseActivities = Arrays.asList(new Activity[] { startReleaseNotificationActivity, uploadProjectsToNexusActivity, runReleaseProcessActivity });
+        preReleaseActivities = Arrays.asList(new Activity[] { startReleaseNotificationActivity,
+                uploadProjectsToNexusActivity, runReleaseProcessActivity });
         postReleaseActivities = Arrays.asList(new Activity[] { finishReleaseNotificationActivity }); // createChangeManagementJiraActivity
     }
 }
