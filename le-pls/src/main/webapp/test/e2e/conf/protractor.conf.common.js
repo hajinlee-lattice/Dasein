@@ -4,6 +4,13 @@ var Config = function() {
 
     this.generateConfig = function(specBasePath) {
 
+        var chromeDownloadPath;
+        if (process.platform.indexOf('win') > -1) {
+            chromeDownloadPath = process.env['HOMEDRIVE'] + process.env['HOMEPATH'] + '\\Downloads\\';
+        } else {
+            chromeDownloadPath = process.env['HOME'] + '/Downloads/';
+        }
+
         return {
             specs: [
                 specBasePath + '/mainflow_spec.js',
@@ -28,7 +35,7 @@ var Config = function() {
                 externalAdminUsername:  'pls-external-admin-tester@test.lattice-engines.ext',
                 externalUserUsername:   'pls-external-user-tester@test.lattice-engines.ext',
                 testingUserPassword:    'admin',
-                downloadRoot:           'C:/Users/%USERNAME%/Downloads/'
+                downloadRoot:           chromeDownloadPath
             },
 
             allScriptsTimeout: 110000,
