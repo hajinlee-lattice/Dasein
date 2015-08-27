@@ -47,7 +47,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
                 RegistrationResult.class);
         assertNotNull(response);
-        assertTrue(response.isSuccess());
+        assertTrue(response.isSuccess(), response.getErrors().toString());
         assertNotNull(response.getResult().getPassword());
 
         deleteUserByRestCall(testUsername);
