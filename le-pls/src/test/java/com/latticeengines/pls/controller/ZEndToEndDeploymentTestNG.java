@@ -72,7 +72,8 @@ public class ZEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         fs.delete(new Path(String.format("%s/%s", modelingServiceHdfsBaseDir, tenant)), true);
     }
 
-    private void deleteAndCreateTwoTenants() {
+    private void deleteAndCreateTwoTenants() throws Exception {
+        turnOffSslChecking();
         setTestingTenants();
         for(Tenant tenant: testingTenants) {
             deleteTenantByRestCall(tenant.getId());
