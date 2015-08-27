@@ -84,7 +84,7 @@ JETTY_HOME=/opt/jetty
 JETTY_USER=yarn
 JETTY_HOST=0.0.0.0
 JETTY_LOGS=logs
-JETTY_ARGS="jetty.host=0.0.0.0, jetty.port=8090"
+JETTY_ARGS=jetty.host=0.0.0.0
 HADOOP_HOME=/usr/hdp/current/hadoop-client
 HADOOP_MAPRED_HOME=/usr/hdp/current/hadoop-mapreduce-client
 HADOOP_CONF=--lib=/etc/hadoop/conf
