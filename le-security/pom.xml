@@ -72,6 +72,9 @@
                         <artifactId>jetty-maven-plugin</artifactId>
                         <version>${jetty.version}</version>
                         <configuration>
+                            <httpConnector>
+                                <port>8084</port>
+                            </httpConnector>
                             <webAppConfig>
                                 <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
                             </webAppConfig>
