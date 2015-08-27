@@ -1,6 +1,7 @@
 #!/bin/bash
 rm -rf /opt/jetty/webapps/le-api-*.war
-rm -rf /etc/ledp/*
+rm -rf /etc/ledp/api.properties
+rm -rf /etc/ledp/dataplatform.properties
 rm -rf /opt/jetty/bin/jetty.sh
 rm -rf /home/yarn/.bashrc
 adduser yarn

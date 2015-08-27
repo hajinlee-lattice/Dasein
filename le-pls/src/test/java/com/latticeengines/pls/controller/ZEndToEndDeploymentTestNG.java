@@ -58,7 +58,7 @@ public class ZEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static String tenant;
     private static Tenant tenantToAttach;
 
-    @BeforeClass(groups = "deployment", enabled = true)
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         deleteAndCreateTwoTenants();
         setupTestEnvironment();
