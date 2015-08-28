@@ -54,6 +54,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        teardown();
         modelSummaryDownloadService.setTenantEntityMgr(tenantEntityMgr);
         modelSummaryDownloadService.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
         modelSummaryDownloadService.setYarnConfiguration(yarnConfiguration);
@@ -94,12 +95,11 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         
         setupSecurityContext(tenant);
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
-        assertEquals(summaries.size(), 1);
+        assertEquals(summaries.size(), 1, "One new summaries should have been created");
         
         modelSummaryDownloadService.executeInternal(null);
         summaries = modelSummaryEntityMgr.findAll();
-        // No new summaries should have been created
-        assertEquals(summaries.size(), 1);
+        assertEquals(summaries.size(), 1, "No new summaries should have been created");
     }
 
     @Test(groups = "functional")
