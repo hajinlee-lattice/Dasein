@@ -9,7 +9,13 @@ public enum DataFlowCode {
     DF_10002("Unknown field name {0} from previous pipe {1}."), //
     DF_10003("Unseen prior pipe {0}."), //
     DF_10004("Getting schema failed."), //
-    DF_10005("Getting schema failed for path {0}.");
+    DF_10005("Getting schema failed for path {0}."), //
+    DF_10006("Table {0} has no primary key."), //
+    DF_10007("Primary key of table {0} has no attributes."), //
+    DF_10008("Table has no name."), //
+    DF_10009("Extract for table {0} has no name."), //
+    DF_10010("Extract {0} for table {1} has no path."), //
+    DF_10011("Table {0} has no extracts."); //
 
     private String message;
 

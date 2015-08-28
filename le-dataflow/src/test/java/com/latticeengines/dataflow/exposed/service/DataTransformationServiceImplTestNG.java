@@ -1,6 +1,9 @@
 package com.latticeengines.dataflow.exposed.service;
 
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,9 +19,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -113,7 +119,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         };
     }
     
-    @Test(groups = "functional", dataProvider = "engineProvider")
+    @Test(groups = "functional", dataProvider = "engineProvider", enabled = true)
     public void executeNamedTransformationForTableSource(String engine) throws Exception {
         Map<String, String> sources = new HashMap<>();
         Table table = new Table();
@@ -130,6 +136,11 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         table.addExtract(e1);
         table.addExtract(e2);
         table.addExtract(e3);
+        PrimaryKey pk = new PrimaryKey();
+        Attribute pkAttr = new Attribute();
+        pkAttr.setName("ID");
+        pk.addAttribute(pkAttr);
+        table.setPrimaryKey(pk);
 
         sources.put("Source", table.toString());
 
@@ -144,6 +155,77 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("ENGINE", "MR");
         dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
         verifyNumRows(config, "/tmp/CombinedImportTable", 7);
+    }
+    
+    @Test(groups = "functional", dataProvider = "errorUseCaseProvider", //
+            dependsOnMethods = { "executeNamedTransformationForTableSource" })
+    public void executeNamedTransformationForErrors(Table table, String message) throws Exception {
+        Map<String, String> sources = new HashMap<>();
+        sources.put("Source", table.toString());
+
+        DataFlowContext ctx = new DataFlowContext();
+        ctx.setProperty("SOURCES", sources);
+        ctx.setProperty("CUSTOMER", "customer2");
+        ctx.setProperty("TARGETPATH", "/tmp/CombinedImportTable");
+        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty("FLOWNAME", "TableWithExtractsDataFlow");
+        ctx.setProperty("CHECKPOINT", false);
+        ctx.setProperty("HADOOPCONF", config);
+        ctx.setProperty("ENGINE", "MR");
+        
+        boolean exception = false;
+        try {
+            dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
+        } catch (DataFlowException e) {
+            exception = true;
+            assertEquals(e.getMessage(), message);
+        }
+        assertTrue(exception);
+        
+    }
+    
+    @DataProvider(name = "errorUseCaseProvider")
+    public Object[][] getErrorUseCaseProvider() {
+        Table tableNoName = new Table();
+        
+        Table tableNoExtracts = new Table();
+        tableNoExtracts.setName("tableNoExtract");
+        
+        Table tableExtractNoName = new Table();
+        tableExtractNoName.setName("tableExtractNoName");
+        Extract tableExtractNoNameExtract = new Extract();
+        tableExtractNoName.addExtract(tableExtractNoNameExtract);
+        
+        Table tableExtractNoPath = new Table();
+        tableExtractNoPath.setName("tableExtractNoPath");
+        Extract tableExtractNoPathExtract = new Extract();
+        tableExtractNoPathExtract.setName("extract1");
+        tableExtractNoPath.addExtract(tableExtractNoPathExtract);
+        
+        Table tableExtractNoPK = new Table();
+        tableExtractNoPK.setName("tableExtractNoPK");
+        Extract tableExtractNoPKExtract = new Extract();
+        tableExtractNoPKExtract.setName("extract1");
+        tableExtractNoPKExtract.setPath("/extract1");
+        tableExtractNoPK.addExtract(tableExtractNoPKExtract);
+
+        Table tableExtractNoPKAttribute = new Table();
+        tableExtractNoPKAttribute.setName("tableExtractNoPKAttribute");
+        Extract tableExtractNoPKAttributeExtract = new Extract();
+        tableExtractNoPKAttributeExtract.setName("extract1");
+        tableExtractNoPKAttributeExtract.setPath("/extract1");
+        tableExtractNoPKAttribute.addExtract(tableExtractNoPKAttributeExtract);
+        PrimaryKey pk = new PrimaryKey();
+        tableExtractNoPKAttribute.setPrimaryKey(pk);
+
+        return new Object[][] {
+                { tableNoName, "Table has no name." }, //
+                { tableNoExtracts, "Table tableNoExtract has no extracts." }, //
+                { tableExtractNoName, "Extract for table tableExtractNoName has no name." }, //
+                { tableExtractNoPath, "Extract extract1 for table tableExtractNoPath has no path." }, //
+                { tableExtractNoPK, "Table tableExtractNoPK has no primary key." }, //
+                { tableExtractNoPKAttribute, "Primary key of table tableExtractNoPKAttribute has no attributes." }
+        };
     }
     
 }

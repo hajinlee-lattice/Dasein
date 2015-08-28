@@ -71,6 +71,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
@@ -145,6 +146,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     
     @Override
     protected String addSource(Table sourceTable) {
+        validateTableForSource(sourceTable);
+        
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
         List<Extract> extracts = sourceTable.getExtracts();
@@ -199,10 +202,40 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Pipe merge = new Merge(pipes);
         Fields sortFields = new Fields("LastUpdatedDate");
         sortFields.setComparator("LastUpdatedDate", Collections.reverseOrder());
-        Pipe groupby = new GroupBy(merge, new Fields("ID"), sortFields);
+        
+        Pipe groupby = new GroupBy(merge, new Fields(sourceTable.getPrimaryKey().getAttributeNames()), sortFields);
         Pipe first = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
         pipesAndOutputSchemas.put(first.getName(), new AbstractMap.SimpleEntry<>(first, getFieldMetadata(allColumns)));
         return doCheckpoint(first).getName();
+    }
+    
+    private void validateTableForSource(Table sourceTable) {
+        if (sourceTable.getName() == null) {
+            throw new DataFlowException(DataFlowCode.DF_10008);
+        }
+        
+        if (sourceTable.getExtracts().size() == 0) {
+            throw new DataFlowException(DataFlowCode.DF_10011, new String[] { sourceTable.getName() });
+        }
+        
+        for (Extract extract : sourceTable.getExtracts()) {
+            if (extract.getName() == null) {
+                throw new DataFlowException(DataFlowCode.DF_10009, new String[] { sourceTable.getName() });
+            }
+            if (extract.getPath() == null) {
+                throw new DataFlowException(DataFlowCode.DF_10010, new String[] { extract.getName(), sourceTable.getName() });
+            }
+        }
+        
+        PrimaryKey key = sourceTable.getPrimaryKey();
+        
+        if (key == null) {
+            throw new DataFlowException(DataFlowCode.DF_10006, new String[] { sourceTable.getName() });
+        }
+        
+        if (key.getAttributes().size() == 0) {
+            throw new DataFlowException(DataFlowCode.DF_10007, new String[] { sourceTable.getName() });
+        }
     }
 
     @Override
