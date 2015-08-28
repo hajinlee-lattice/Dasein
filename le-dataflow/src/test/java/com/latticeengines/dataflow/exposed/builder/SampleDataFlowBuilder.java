@@ -25,11 +25,11 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         setDataFlowCtx(dataFlowCtx);
-        addSource("Lead", sources.get("Lead"));
-        addSource("Opportunity", sources.get("Opportunity"));
+        String lead = addSource("Lead", sources.get("Lead"));
+        String oppty = addSource("Opportunity", sources.get("Opportunity"));
 
         // SELECT a.*, b.* FROM lead a, oppty b WHERE a.ConvertedOpportunityId = b.Id
-        String joinOperatorName = addInnerJoin("Lead", new FieldList("ConvertedOpportunityId"), "Opportunity",
+        String joinOperatorName = addInnerJoin(lead, new FieldList("ConvertedOpportunityId"), oppty,
                 new FieldList("Id"));
 
         String createDomain = addFunction(joinOperatorName, //

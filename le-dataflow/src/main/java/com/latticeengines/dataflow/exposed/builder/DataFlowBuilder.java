@@ -19,6 +19,7 @@ import org.apache.avro.SchemaBuilder.RecordBuilder;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class DataFlowBuilder {
 
@@ -31,10 +32,12 @@ public abstract class DataFlowBuilder {
     public abstract Schema getSchema(String flowName, String operatorName, DataFlowContext dataFlowCtx);
 
     public abstract void runFlow(DataFlowContext dataFlowCtx);
+    
+    protected abstract String addSource(Table sourceTable);
 
-    protected abstract void addSource(String sourceName, String sourcePath);
+    protected abstract String addSource(String sourceName, String sourcePath);
 
-    protected abstract void addSource(String sourceName, String sourcePath, boolean regex);
+    protected abstract String addSource(String sourceName, String sourcePath, boolean regex);
 
     protected abstract String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields);
 

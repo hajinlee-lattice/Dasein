@@ -1,16 +1,13 @@
 package com.latticeengines.dataflow;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
@@ -20,43 +17,36 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
 import cascading.flow.hadoop.HadoopFlowConnector;
-import cascading.operation.aggregator.Last;
-import cascading.operation.aggregator.MaxValue;
-import cascading.operation.aggregator.Sum;
-import cascading.operation.expression.ExpressionFunction;
-import cascading.pipe.Checkpoint;
-import cascading.pipe.CoGroup;
+import cascading.operation.aggregator.First;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
+import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
-import cascading.pipe.joiner.InnerJoin;
 import cascading.property.AppProps;
-import cascading.scheme.hadoop.SequenceFile;
 import cascading.scheme.hadoop.TextDelimited;
-import cascading.scheme.util.DelimitedParser;
-import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
-import cascading.util.NullNotEquivalentComparator;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
-import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class AvroRead {
 
     @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
     public static void main(String[] args) throws Exception {
+        FileUtils.deleteDirectory(new File("/tmp/AvroReadResults"));
         String lead = "file://"
                 + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
-        String leadLess4Cols = "file://"
-                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead-Less-4-Columns.avro").getPath();
-        String leadLess5Cols = "file://"
-                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead-Less-5-Columns.avro").getPath();
+        String file1 = "file://"
+                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file1.avro").getPath();
+        String file2 = "file://"
+                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file2.avro").getPath();
+        String file3 = "file://"
+                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file3.avro").getPath();
         String opportunity = "file://"
                 + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro")
                         .getPath();
@@ -78,13 +68,31 @@ public class AvroRead {
 
         AvroScheme leadScheme = new AvroScheme();
         Map<String, Tap> sources = new HashMap<>();
+        Schema s = AvroUtils.getSchema(new Configuration(), new Path(file1));
         Tap<?, ?, ?> leadTap = new Lfs(new AvroScheme(), lead);
-        Tap<?, ?, ?> leadLess4Tap = new Lfs(new AvroScheme(), leadLess4Cols);
-        Tap<?, ?, ?> leadLess5Tap = new Lfs(new AvroScheme(), leadLess5Cols);
+        Tap<?, ?, ?> file1Tap = new Lfs(new AvroScheme(), file1);
+        Tap<?, ?, ?> file2Tap = new Lfs(new AvroScheme(), file2);
+        Tap<?, ?, ?> file3Tap = new Lfs(new AvroScheme(), file3);
         Tap<?, ?, ?> opportunityTap = new Lfs(new AvroScheme(), opportunity);
         Tap<?, ?, ?> contactTap = new Lfs(new AvroScheme(), contact);
         Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), wcPath, SinkMode.KEEP);
-        sources.put("lead", new MultiSourceTap(leadTap, leadLess4Tap, leadLess5Tap));
+        
+        sources.put("file1", file1Tap);
+        sources.put("file2", file2Tap);
+        sources.put("file3", file3Tap);
+        //Pipe[] mergedPipes = Pipe.pipes(new Pipe("file1"), new Pipe("file2"), new Pipe("file3"));
+        Pipe file2Pipe = new Each(new Pipe("file2"), new AddNullColumns(new Fields("Column3")), //
+                new Fields("ID", "Column1", "Column2", "Column3", "Column4", "Column5", "LastUpdatedDate"));
+        Pipe file3Pipe = new Each(new Pipe("file3"), new AddNullColumns(new Fields("Column1")), //
+                new Fields("ID", "Column1", "Column2", "Column3", "Column4", "Column5", "LastUpdatedDate"));
+        
+        Pipe merge = new Merge(new Pipe("file1"), file2Pipe, file3Pipe);
+        Fields sortFields = new Fields("LastUpdatedDate");
+        sortFields.setComparator("LastUpdatedDate", Collections.reverseOrder());
+        Pipe groupby = new GroupBy(merge, new Fields("ID"), sortFields);
+        Every first = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
+        
+        /*
         //sources.put("oppty", opportunityTap);
         sources.put("contact", contactTap);
 
@@ -186,7 +194,7 @@ public class AvroRead {
 
         //join = new Every(join, Fields.ALL, new Last(), Fields.GROUP);
          *
-         */
+
         FlowDef flowDef = FlowDef.flowDef().setName("wc") //
                 .addSources(sources) //
                 .addTailSink(each, sink) //
@@ -194,7 +202,10 @@ public class AvroRead {
                 .addCheckpoint(c2, c2Tap) //
                 .addCheckpoint(c3, c3Tap) //
                 .addCheckpoint(c4, c4Tap); //
-
+         */
+        FlowDef flowDef = FlowDef.flowDef().setName("wc") //
+                .addSources(sources) //
+                .addTailSink(first, sink); //
         // write a DOT file and run the flow
         Flow<?> flow = flowConnector.connect(flowDef);
         flow.writeDOT("dot/wcr.dot");

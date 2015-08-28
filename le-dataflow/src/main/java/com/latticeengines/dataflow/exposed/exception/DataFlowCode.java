@@ -8,7 +8,8 @@ public enum DataFlowCode {
     DF_10001("Unknown field name {0} from previous pipe."), //
     DF_10002("Unknown field name {0} from previous pipe {1}."), //
     DF_10003("Unseen prior pipe {0}."), //
-    DF_10004("Getting schema failed.");
+    DF_10004("Getting schema failed."), //
+    DF_10005("Getting schema failed for path {0}.");
 
     private String message;
 

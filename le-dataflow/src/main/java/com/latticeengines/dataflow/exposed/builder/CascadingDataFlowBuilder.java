@@ -1,7 +1,9 @@
 package com.latticeengines.dataflow.exposed.builder;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +25,7 @@ import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.operation.Aggregator;
 import cascading.operation.Function;
+import cascading.operation.NoOp;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
 import cascading.operation.aggregator.Last;
@@ -37,6 +40,7 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
+import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Retain;
 import cascading.pipe.joiner.BaseJoiner;
@@ -59,12 +63,15 @@ import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.GroupByCriter
 import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
 import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
 import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
 import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
@@ -102,6 +109,17 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     public Map<String, Tap> getSources() {
         return taps;
     }
+    
+    private List<FieldMetadata> getFieldMetadata(Map<String, Field> fieldMap) {
+        List<FieldMetadata> fields = new ArrayList<>(fieldMap.size());
+
+        for (Field field : fieldMap.values()) {
+            Type avroType = field.schema().getTypes().get(0).getType();
+            FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
+            fields.add(fm);
+        }
+        return fields;
+    }
 
     private Pipe doCheckpoint(Pipe pipe) {
         if (isLocal()) {
@@ -124,14 +142,76 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         return pipe;
     }
-
+    
     @Override
-    protected void addSource(String sourceName, String sourcePath) {
-        addSource(sourceName, sourcePath, true);
+    protected String addSource(Table sourceTable) {
+        DataFlowContext ctx = getDataFlowCtx();
+        Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+        List<Extract> extracts = sourceTable.getExtracts();
+        
+        Map<String, Field> allColumns = new HashMap<>();
+        Schema[] allSchemas = new Schema[extracts.size()];
+        int i = 0;
+        for (Extract extract : extracts) {
+            String path = null;
+            try {
+                path = HdfsUtils.getFilesByGlob(config, extract.getPath()).get(0);
+                allSchemas[i] = AvroUtils.getSchema(config, new Path(path));
+                for (Field field : allSchemas[i].getFields()) {
+                    allColumns.put(field.name(), field);
+                }
+                i++;
+            } catch (IllegalArgumentException | IOException e) {
+                if (path != null) {
+                    throw new DataFlowException(DataFlowCode.DF_10005, e, new String[] { path });
+                } else {
+                    throw new DataFlowException(DataFlowCode.DF_10004, e);
+                }
+                
+            }
+        }
+        
+        i = 0;
+        String[] sortedAllColumns = new String[allColumns.size()];
+        new ArrayList<>(allColumns.keySet()).toArray(sortedAllColumns);
+        Fields declaredFields = new Fields(sortedAllColumns);
+        Pipe[] pipes = new Pipe[extracts.size()];
+        for (Extract extract : extracts) {
+            Set<String> allColumnsClone = new HashSet<>(allColumns.keySet());
+            for (Field field : allSchemas[i].getFields()) {
+                allColumnsClone.remove(field.name());
+            }
+
+            String source = addSource(String.format("%s-%s", sourceTable.getName(), extract.getName()), //
+                    extract.getPath(), true);
+            String[] extraCols = new String[allColumnsClone.size()];
+            allColumnsClone.toArray(extraCols);
+            
+            if (allColumnsClone.size() > 0) {
+                pipes[i] = new Each(new Pipe(source),new AddNullColumns(new Fields(extraCols)), //
+                        declaredFields);
+            } else {
+                pipes[i] = new Each(new Pipe(source),new NoOp(), //
+                        declaredFields);
+            }
+            i++;
+        }
+        Pipe merge = new Merge(pipes);
+        Fields sortFields = new Fields("LastUpdatedDate");
+        sortFields.setComparator("LastUpdatedDate", Collections.reverseOrder());
+        Pipe groupby = new GroupBy(merge, new Fields("ID"), sortFields);
+        Pipe first = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
+        pipesAndOutputSchemas.put(first.getName(), new AbstractMap.SimpleEntry<>(first, getFieldMetadata(allColumns)));
+        return doCheckpoint(first).getName();
     }
 
     @Override
-    protected void addSource(String sourceName, String sourcePath, boolean regex) {
+    protected String addSource(String sourceName, String sourcePath) {
+        return addSource(sourceName, sourcePath, true);
+    }
+
+    @Override
+    protected String addSource(String sourceName, String sourcePath, boolean regex) {
         Tap<?, ?, ?> tap = new GlobHfs(new AvroScheme(), sourcePath);
         if (isLocal()) {
             sourcePath = "file://" + sourcePath;
@@ -162,6 +242,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         pipesAndOutputSchemas.put(sourceName, new AbstractMap.SimpleEntry<>(new Pipe(sourceName), fields));
         schemas.put(sourceName, sourceSchema);
+        return sourceName;
     }
 
     private Configuration getConfig() {
