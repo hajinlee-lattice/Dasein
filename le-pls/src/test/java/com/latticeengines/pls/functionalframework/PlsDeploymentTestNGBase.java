@@ -44,11 +44,7 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 
     protected void deleteUserByRestCall(String username) {
         String url = getRestAPIHostPort() + "/pls/users/\"" + username + "\"";
-        try {
-            sendHttpDeleteForObject(restTemplate, url, ResponseDocument.class);
-        } catch (Exception e) {
-            // ignore
-        }
+        sendHttpDeleteForObject(restTemplate, url, ResponseDocument.class);
     }
 
     protected void createTenantByRestCall(Tenant tenant) {
