@@ -7,6 +7,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -47,7 +48,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
                 RegistrationResult.class);
         assertNotNull(response);
-        assertTrue(response.isSuccess(), response.getErrors().toString());
+        assertTrue(response.isSuccess(), JsonUtils.serialize(response));
         assertNotNull(response.getResult().getPassword());
 
         deleteUserByRestCall(testUsername);
