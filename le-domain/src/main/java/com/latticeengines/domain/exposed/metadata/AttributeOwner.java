@@ -64,4 +64,14 @@ public class AttributeOwner implements GraphNode {
         map.put("attributes", attributes);
         return map;
     }
+
+    @JsonIgnore
+    public String[] getAttributeNames() {
+        List<Attribute> attributes = getAttributes();
+        String[] attrs = new String[attributes.size()];
+        for (int i = 0; i < attributes.size(); i++) {
+            attrs[i] = attributes.get(i).getName();
+        }
+        return attrs;
+    }
 }
