@@ -15,6 +15,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -52,9 +53,10 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
+    private static final String TENANT_ID = "MS_DOWNLOAD_TEST";
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        teardown();
         modelSummaryDownloadService.setTenantEntityMgr(tenantEntityMgr);
         modelSummaryDownloadService.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
         modelSummaryDownloadService.setYarnConfiguration(yarnConfiguration);
@@ -62,13 +64,18 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         modelSummaryDownloadService.setModelSummaryDownloadExecutor(modelSummaryDownloadExecutor);
         modelSummaryDownloadService.setModelSummaryParser(modelSummaryParser);
         modelSummaryDownloadService.setTimeStampContainer(timeStampContainer);
-        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
+        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);
     }
 
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
-        Tenant tenant = tenantService.findByTenantId("TENANT1");
+        Tenant tenant = tenantService.findByTenantId(newTenant().getId());
         if (tenant != null) {
+            setupSecurityContext(tenant);
+            List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+            for (ModelSummary summary: summaries) {
+                modelSummaryEntityMgr.delete(summary);
+            }
             tenantService.discardTenant(tenant);
         }
     }
@@ -78,21 +85,13 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation() throws Exception {
-        Tenant tenant = new Tenant();
-        tenant.setId("TENANT1");
-        tenant.setName("TENANT1");
+        Tenant tenant = newTenant();
         tenantEntityMgr.create(tenant);
-        
-        String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1.TENANT1.Production/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
-        URL modelSummaryUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
-
-        HdfsUtils.mkdir(yarnConfiguration, dir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
-        
+        uploadModelSummary();
         modelSummaryDownloadService.executeInternal(null);
-        
+
+        Thread.sleep(1000L);
+
         setupSecurityContext(tenant);
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1, "One new summaries should have been created");
@@ -104,49 +103,55 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void executeInternalWithTenantRegistrationLaterThanHdfsModelCreation() throws Exception {
-        String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1.TENANT1.Production/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0002/enhancements";
-        URL modelSummaryUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
-        HdfsUtils.mkdir(yarnConfiguration, dir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
-
+        uploadModelSummary();
         Thread.sleep(5000L);
-        Tenant tenant = new Tenant();
-        tenant.setId("TENANT1");
-        tenant.setName("TENANT1");
-        tenantEntityMgr.create(tenant);
+        tenantEntityMgr.create(newTenant());
         
         modelSummaryDownloadService.executeInternal(null);
-        setupSecurityContext(tenant);
+        setupSecurityContext(newTenant());
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
-        assertEquals(summaries.size(), 0);
+        assertEquals(summaries.size(), 0, "No new summaries should have been created");
     }
 
     @Test(groups = "functional")
     public void downloadDetailsOnlyModelSummary() throws Exception {
-        Tenant tenant = new Tenant();
-        tenant.setId("TENANT1");
-        tenant.setName("TENANT1");
-        tenantEntityMgr.create(tenant);
-
-        String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1.TENANT1.Production/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
-        URL modelSummaryUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/modelsummary-detailsonly.json");
-
-        HdfsUtils.mkdir(yarnConfiguration, dir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
-
+        tenantEntityMgr.create(newTenant());
+        uploadDetailsOnlyModelSummary();
         modelSummaryDownloadService.executeInternal(null);
 
-        setupSecurityContext(tenant);
+        setupSecurityContext(newTenant());
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
-        assertEquals(summaries.size(), 1);
+        assertEquals(summaries.size(), 1, "One new summaries should have been created");
 
         modelSummaryDownloadService.executeInternal(null);
         summaries = modelSummaryEntityMgr.findAll();
-        // No new summaries should have been created
-        assertEquals(summaries.size(), 1);
+        assertEquals(summaries.size(), 1, "No new summaries should have been created");
+    }
+
+    private void uploadModelSummary() throws Exception {
+        String dir = modelingServiceHdfsBaseDir
+                + "/" + CustomerSpace.parse(TENANT_ID) + "/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
+        URL modelSummaryUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+        HdfsUtils.rmdir(yarnConfiguration, dir);
+        HdfsUtils.mkdir(yarnConfiguration, dir);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
+    }
+
+    private void uploadDetailsOnlyModelSummary() throws Exception {
+        String dir = modelingServiceHdfsBaseDir
+                + "/" + CustomerSpace.parse(TENANT_ID) + "/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
+        URL modelSummaryUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/modelsummary-detailsonly.json");
+        HdfsUtils.rmdir(yarnConfiguration, dir);
+        HdfsUtils.mkdir(yarnConfiguration, dir);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
+    }
+
+    private Tenant newTenant() {
+        Tenant tenant = new Tenant();
+        tenant.setId(CustomerSpace.parse(TENANT_ID).toString());
+        tenant.setName(TENANT_ID);
+        return tenant;
     }
 }
