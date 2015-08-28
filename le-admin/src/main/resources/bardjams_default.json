@@ -27,7 +27,7 @@
     },
     {
       "Node": "NotifyEmailJob",
-      "Data": "DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL"
+      "Data": "LEO\\DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL"
     },
     {
       "Node": "JAMSUser",
@@ -35,11 +35,11 @@
     },
     {
       "Node": "ImmediateFolderStruct",
-      "Data": "DanteTesting\\Immediate"
+      "Data": "LEO\\DataLoader\\DL PROD\\Immediate Jobs"
     },
     {
       "Node": "ScheduledFolderStruct",
-      "Data": "DataLoader\\DL TEST\\Scheduled Jobs"
+      "Data": "LEO\\DataLoader\\DL PROD\\Scheduled Jobs"
     },
     {
       "Node": "DanteManifestPath",
