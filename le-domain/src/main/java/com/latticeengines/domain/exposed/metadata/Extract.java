@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -27,18 +28,22 @@ public class Extract implements HasName, GraphNode {
         this.name = name;
     }
     
+    @JsonProperty("path")
     public String getPath() {
         return path;
     }
     
+    @JsonProperty("display_name")
     public void setPath(String path) {
         this.path = path;
     }
 
+    @JsonProperty("extraction_ts")
     public Long getExtractionTimestamp() {
         return extractionTimestamp;
     }
 
+    @JsonProperty("extraction_ts")
     public void setExtractionTimestamp(Long extractionTimestamp) {
         this.extractionTimestamp = extractionTimestamp;
     }
