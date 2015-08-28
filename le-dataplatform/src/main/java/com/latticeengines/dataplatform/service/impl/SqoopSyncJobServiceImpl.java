@@ -27,9 +27,6 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     private Configuration hadoopConfiguration;
 
     @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
     private JobNameService jobNameService;
 
     @Autowired
@@ -68,7 +65,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 creds.getDriverClass(), //
                 props, //
                 metadataService, //
-                yarnConfiguration, //
+                hadoopConfiguration, //
                 false);
         long time2 = System.currentTimeMillis();
         log.info(String.format("Time for %s load submission = %d ms.", table, (time2 - time1)));
@@ -105,7 +102,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 javaColumnTypeMappings, //
                 null, //
                 metadataService, //
-                yarnConfiguration, //
+                hadoopConfiguration, //
                 false);
     }
 
@@ -123,7 +120,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         cmds.add(jdbcUrl);
         cmds.add("--query");
         cmds.add(sql);
-        LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
+        LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(hadoopConfiguration));
     }
 
     @Override
@@ -143,7 +140,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 creds.getDriverClass(), //
                 null, //
                 metadataService, //
-                yarnConfiguration, //
+                hadoopConfiguration, //
                 true);
         long time2 = System.currentTimeMillis();
         log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));
@@ -178,7 +175,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 javaColumnTypeMappings, //
                 exportColumns, //
                 metadataService, //
-                yarnConfiguration, //
+                hadoopConfiguration, //
                 true);
     }
 
