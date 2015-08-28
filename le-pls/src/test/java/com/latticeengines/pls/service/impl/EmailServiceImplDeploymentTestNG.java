@@ -26,14 +26,20 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
+        deleteUserByRestCall(INTERNAL_USER_EMAIL);
+        deleteUserByRestCall(EXTERNAL_USER_EMAIL);
     }
 
     @AfterClass(groups = { "deployment" })
-    public void tearDown() { deleteUserByRestCall(testUsername); }
+    public void tearDown() {
+        deleteUserByRestCall(INTERNAL_USER_EMAIL);
+        deleteUserByRestCall(EXTERNAL_USER_EMAIL);
+    }
 
     @Test(groups = "deployment")
     public void testSendAndReceiveInternalEmail() {
-        createNewUserAndSendEmail(INTERNAL_USER_EMAIL);    }
+        createNewUserAndSendEmail(INTERNAL_USER_EMAIL);
+    }
 
     @Test(groups = "deployment")
     public void testSendAndReceiveExternalEmail() {
