@@ -23,7 +23,6 @@
         <module>le-db</module>
         <module>le-perf</module>
         <module>le-camille</module>
-        <module>le-security</module>
         <module>le-monitor</module>
         <module>le-dataflow</module>
         <module>le-eai</module>
