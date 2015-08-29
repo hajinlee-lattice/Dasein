@@ -137,7 +137,6 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
             tenant.setName("T" + i);
             deleteTenantByRestCall(tenant.getId());
             createTenantByRestCall(tenant);
-            tenantEntityMgr.create(tenant);
             tenantList.add(tenant);
             createModel(tenant);
         }
