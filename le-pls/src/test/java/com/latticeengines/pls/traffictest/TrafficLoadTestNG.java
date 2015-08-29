@@ -35,14 +35,13 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
 public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
@@ -63,12 +62,6 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private KeyValueEntityMgr keyValueEntityMgr;
-
-    @Autowired
-    private GlobalTenantManagementService globalTenantManagementService;
-
-    @Autowired
-    private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
@@ -98,7 +91,7 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
     @BeforeClass(groups = { "load" })
     public void setup(String numOfThreads, String numOfTenants, String numOfUsers, String numOfRuns, String threadSleep)
             throws Exception {
-        turnOffSslChecking();
+        setupTestEnvironment();
 
         this.numOfThreads = Integer.parseInt(numOfThreads);
         this.numOfTenants = Integer.parseInt(numOfTenants);
@@ -130,7 +123,7 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
                     }
                     tenantEntityMgr.delete(existingTenant);
                 }
-                globalTenantManagementService.discardTenant(tenant);
+                deleteTenantByRestCall(tenant.getId());
             } catch (Exception e) {
             }
         }
@@ -142,11 +135,8 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
             Tenant tenant = new Tenant();
             tenant.setId(tenantId);
             tenant.setName("T" + i);
-            try {
-                globalTenantManagementService.discardTenant(tenant);
-            } catch (Exception e) {
-            }
-            globalTenantManagementService.registerTenant(tenant);
+            deleteTenantByRestCall(tenant.getId());
+            createTenantByRestCall(tenant);
             tenantEntityMgr.create(tenant);
             tenantList.add(tenant);
             createModel(tenant);
@@ -190,8 +180,13 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
                 userCreds.setUsername(tenant.getName() + "_testuser_" + i);
                 user.setUsername(userCreds.getUsername());
                 userCreds.setPassword(password);
-                globalUserManagementService.deleteUser(user.getUsername());
-                globalUserManagementService.registerUser(user, userCreds);
+                deleteUserByRestCall(user.getUsername());
+
+                UserRegistration userReg = new UserRegistration();
+                userReg.setUser(user);
+                userReg.setCredentials(userCreds);
+
+                userService.createUser(userReg);
                 users.get(tenant).add(user);
                 grantRights(tenant, user);
             }
