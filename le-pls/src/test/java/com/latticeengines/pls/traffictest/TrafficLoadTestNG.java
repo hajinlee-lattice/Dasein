@@ -1,22 +1,11 @@
 package com.latticeengines.pls.traffictest;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.*;
+import java.util.concurrent.*;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -49,14 +38,14 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
+public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
 
     private static Log log = LogFactory.getLog(TrafficLoadTestNG.class);
 
@@ -126,7 +115,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
     public void destroy() {
         for (Tenant tenant : tenantList) {
             for (User user : users.get(tenant)) {
-                deleteUserWithUsername(user.getUsername());
+                deleteUserByRestCall(user.getUsername());
             }
             try {
                 String tenantId = tenant.getId();
