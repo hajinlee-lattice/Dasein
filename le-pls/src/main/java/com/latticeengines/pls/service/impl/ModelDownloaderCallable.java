@@ -61,7 +61,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         List<String> files = new ArrayList<>();
         try {
             files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
-            //log.info(String.format("%d file(s) downloaded from modeling service for tenant %s.", files.size(), tenant.getId()));
+            log.info(String.format("%d file(s) downloaded from modeling service for tenant %s.", files.size(), tenant.getId()));
         } catch (FileNotFoundException e) {
             log.warn(String.format("No models seem to have been created yet for tenant with id %s. Error message: %s",
                     tenant.getId(), e.getMessage()));
