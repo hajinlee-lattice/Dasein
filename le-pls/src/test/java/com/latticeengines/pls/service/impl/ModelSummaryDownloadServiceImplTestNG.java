@@ -64,7 +64,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         modelSummaryDownloadService.setModelSummaryDownloadExecutor(modelSummaryDownloadExecutor);
         modelSummaryDownloadService.setModelSummaryParser(modelSummaryParser);
         modelSummaryDownloadService.setTimeStampContainer(timeStampContainer);
-        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);
+        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID));
     }
 
     @AfterClass(groups = "functional")
@@ -76,8 +76,8 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
             for (ModelSummary summary: summaries) {
                 modelSummaryEntityMgr.delete(summary);
             }
-            tenantService.discardTenant(tenant);
         }
+        tenantService.discardTenant(newTenant());
     }
     
     @BeforeMethod(groups = "functional")
