@@ -86,7 +86,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
     @Test(groups = "functional")
     public void executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation() throws Exception {
         Tenant tenant = newTenant();
-        tenantEntityMgr.create(tenant);
+        tenantService.registerTenant(tenant);
         uploadModelSummary();
         modelSummaryDownloadService.executeInternal(null);
 
@@ -105,7 +105,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
     public void executeInternalWithTenantRegistrationLaterThanHdfsModelCreation() throws Exception {
         uploadModelSummary();
         Thread.sleep(5000L);
-        tenantEntityMgr.create(newTenant());
+        tenantService.registerTenant(newTenant());
         
         modelSummaryDownloadService.executeInternal(null);
         setupSecurityContext(newTenant());
@@ -115,7 +115,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void downloadDetailsOnlyModelSummary() throws Exception {
-        tenantEntityMgr.create(newTenant());
+        tenantService.registerTenant(newTenant());
         uploadDetailsOnlyModelSummary();
         modelSummaryDownloadService.executeInternal(null);
 
