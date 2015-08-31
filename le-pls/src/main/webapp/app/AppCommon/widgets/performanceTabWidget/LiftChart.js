@@ -108,7 +108,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.LiftChart', [
                     .attr("x", x(i * 0.1 + 0.05))
                     .attr("y", height + 15)
                     .style("text-anchor", "middle")
-                    .style("font-size", "9px")
+                    .style("font-size", "11px")
                     .style("font-family", "ProximaNova-Semibold")
                     .style("fill", "#aaa")
                     .text(bucketLabel(i));
@@ -126,7 +126,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.LiftChart', [
             svg.append("g")
                 .attr("class", "y axis")
                 .attr("transform", "translate(-3, 0)")
-                .style("font-size", "9px")
+                .style("font-size", "11px")
                 .style("font-weight", "700")
                 .style("fill", "#999")
                 .call(yAxis);
