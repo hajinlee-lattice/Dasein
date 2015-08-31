@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.propdata.*;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })
-public class EntitlementManagementResourceTest extends AbstractTestNGSpringContextTests{
+public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringContextTests{
     
     @Value("${propdata.api.hostport}")
     private String hostPort;
