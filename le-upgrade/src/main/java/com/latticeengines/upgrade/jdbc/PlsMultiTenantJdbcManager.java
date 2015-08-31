@@ -1,18 +1,20 @@
 package com.latticeengines.upgrade.jdbc;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.upgrade.yarn.YarnPathUtils;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
 @Component
 public class PlsMultiTenantJdbcManager {
@@ -41,7 +43,7 @@ public class PlsMultiTenantJdbcManager {
     public Set<String> getModelGuidsForCustomer(String tenantName) {
         List<String> ids = plsJdbcTemlate.queryForList("SELECT ID FROM " + MODEL_SUMMARY_TABLE
                 + " lhs INNER JOIN " + TENANT_TABLE + " rhs ON lhs.[FK_TENANT_ID] = rhs.[TENANT_PID] "
-                + " AND rhs.[TenantName] = \'" + tenantName + "\'", String.class);
+                + " AND rhs.[NAME] = \'" + tenantName + "\'", String.class);
         Set<String> toReturn = new HashSet<>();
         for (String id: ids) {
             toReturn.add(YarnPathUtils.extractUuid(id));
@@ -70,9 +72,13 @@ public class PlsMultiTenantJdbcManager {
     }
 
     public boolean isActive(String modelGuid) {
-        Integer status =  plsJdbcTemlate.queryForObject("SELECT Status FROM " + MODEL_SUMMARY_TABLE
-                + " WHERE ID = \'" + modelGuid + "\'", Integer.class);
-        return ModelSummaryStatus.ACTIVE.getStatusId() == status;
+        try {
+            Integer status = plsJdbcTemlate.queryForObject("SELECT Status FROM " + MODEL_SUMMARY_TABLE
+                    + " WHERE ID = \'" + modelGuid + "\'", Integer.class);
+            return ModelSummaryStatus.ACTIVE.getStatusId() == status;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     public void deleteModelSummariesByUuid(String modelId) {
