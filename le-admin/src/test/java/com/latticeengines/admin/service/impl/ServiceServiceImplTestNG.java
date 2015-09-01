@@ -89,7 +89,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         doc.setComponent("TestComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
         field.setNode("/Config1");
-        field.setOptions(Arrays.asList("1","2"));
+        field.setOptions(Arrays.asList("1", "2"));
 
         SerializableDocumentDirectory conf = serviceService.getDefaultServiceConfig("TestComponent");
         Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 3);

@@ -14,6 +14,7 @@ import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.dynamicopts.OptionsProvider;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
     private static final Map<Path, OptionsProvider> optionMap = new ConcurrentHashMap<>();
+    private static final String VDB_SERVER_PATH = "/VisiDBServers";
 
     @Value("${admin.mount.rootpath}")
     private String mountRoot;
@@ -39,17 +41,29 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
     private void registerProviders() {
         // CRM Topologies
         OptionsProvider topologyProvider = new EnumOptionsProvider(CRMTopology.class);
-        register(new Path(LatticeComponent.spaceConfigNode, "Topology"), topologyProvider);
 
         // Lattice Products
         OptionsProvider productProvider = new EnumOptionsProvider(LatticeProduct.class);
-        register(new Path(LatticeComponent.spaceConfigNode, "Product"), productProvider);
 
+        // VisiDB servers
+        String podId = CamilleEnvironment.getPodId();
+        ZNodeProvider vdbServerProvider = new ZNodeProvider(new Path("/Pods/" + podId + VDB_SERVER_PATH));
+
+        // register providers
         Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStore");
         register(zkPath, dataStoreProvider);
 
-        zkPath = new Path(VisiDBDLComponent.componentName, "VisiDBDL", "TemplateVersion");
+        zkPath = new Path(VisiDBDLComponent.componentName, "TemplateVersion");
         register(zkPath, templateProvider);
+
+        zkPath = new Path(LatticeComponent.spaceConfigNode, "Topology");
+        register(zkPath, topologyProvider);
+
+        zkPath = new Path(LatticeComponent.spaceConfigNode, "Product");
+        register(zkPath, productProvider);
+
+        zkPath = new Path(VisiDBDLComponent.componentName, "VisiDB", "ServerName");
+        register(zkPath, vdbServerProvider);
     }
 
     private void register(Path path, OptionsProvider provider) { optionMap.put(path, provider); }
@@ -78,6 +92,15 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
             }
         }
         return sDir;
+    }
+
+    @Override
+    public OptionsProvider getProvider(Path node) {
+        if (optionMap.containsKey(node)) {
+            return optionMap.get(node);
+        } else {
+            return new OptionsProvider.NullProvider();
+        }
     }
 
     private void bindToNode(SerializableDocumentDirectory.Node node, List<String> options) {

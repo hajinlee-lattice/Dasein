@@ -179,7 +179,8 @@
             "Options":[
               "bodcdevvint207",
               "bodcdevvint187"
-            ]
+            ],
+            "DynamicOptions":true
           }
         },
         {

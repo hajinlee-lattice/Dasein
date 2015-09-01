@@ -13,7 +13,7 @@
           { "Node": "VisiDBName", "Data": {"Type": "string", "Helper": "Leave it blank if it is the same as Tenant Id."}},
           { "Node": "CacheLimit", "Data": {"Type": "number", "Required": true}},
           { "Node": "DiskspaceLimit", "Data": {"Type": "number", "Required": true}},
-          { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"]}},
+          { "Node": "ServerName", "Data": {"Type": "options", "Options": ["bodcdevvint207", "bodcdevvint187"], "DynamicOptions": true}},
           { "Node": "PermanentStoreOption", "Data": {"Type": "options", "Options": ["Master", "StandAlone"]}},
           {
             "Node": "PermanentStore",
