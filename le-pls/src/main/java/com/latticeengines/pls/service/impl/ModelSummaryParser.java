@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.util.ModelIdUtils;
 
 @Component("modelSummaryParser")
 public class ModelSummaryParser {
@@ -77,6 +78,17 @@ public class ModelSummaryParser {
         } else {
             String uuid = UUID.randomUUID().toString();
             summary.setId(String.format("ms__%s-%s", uuid, name));
+        }
+
+        // the Id will be used to find hdfs path, make sure they are in sync.
+        try {
+            String uuidInPath = ModelIdUtils.extractUuid(hdfsPath);
+            String uuidInId = ModelIdUtils.extractUuid(summary.getId());
+            if (! uuidInPath.equals(uuidInId)) {
+                summary.setId("ms__" + uuidInPath + "-PLSModel");
+            }
+        } catch (Exception e) {
+            // ignore
         }
 
         try {

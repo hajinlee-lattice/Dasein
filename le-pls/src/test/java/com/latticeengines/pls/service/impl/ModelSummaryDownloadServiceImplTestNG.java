@@ -54,6 +54,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
     private String modelingServiceHdfsBaseDir;
 
     private static final String TENANT_ID = "MS_DOWNLOAD_TEST";
+    private static final String UUID="8195dcf3-0898-4ad3-b94d-0d0f806e979e";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -130,7 +131,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     private void uploadModelSummary() throws Exception {
         String dir = modelingServiceHdfsBaseDir
-                + "/" + CustomerSpace.parse(TENANT_ID) + "/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
+                + "/" + CustomerSpace.parse(TENANT_ID) + "/models/Q_EventTable_TENANT1/" + UUID + "/1423547416066_0001/enhancements";
         URL modelSummaryUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         HdfsUtils.rmdir(yarnConfiguration, dir);
@@ -140,7 +141,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     private void uploadDetailsOnlyModelSummary() throws Exception {
         String dir = modelingServiceHdfsBaseDir
-                + "/" + CustomerSpace.parse(TENANT_ID) + "/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
+                + "/" + CustomerSpace.parse(TENANT_ID) + "/models/Q_EventTable_TENANT1/" + UUID + "/1423547416066_0001/enhancements";
         URL modelSummaryUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/pls/service/impl/modelsummary-detailsonly.json");
         HdfsUtils.rmdir(yarnConfiguration, dir);
