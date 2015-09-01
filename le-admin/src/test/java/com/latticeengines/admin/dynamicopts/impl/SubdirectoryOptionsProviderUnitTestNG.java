@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.dynamicopts.OptionsProvider;
@@ -22,7 +22,7 @@ public class SubdirectoryOptionsProviderUnitTestNG {
     private String rootPath;
     private OptionsProvider provider;
 
-    @BeforeClass(groups = "unit")
+    @BeforeMethod(groups = "unit")
     public void createTestFolders() throws IOException {
         File cwd = new File(".");
         rootPath = cwd.getCanonicalPath();
@@ -36,7 +36,7 @@ public class SubdirectoryOptionsProviderUnitTestNG {
         provider = new SubdirectoryOptionsProvider(path.toString());
     }
 
-    @AfterClass(groups = "unit", alwaysRun = true)
+    @AfterMethod(groups = "unit", alwaysRun = true)
     public void deleteTestFolders() {
         Path parentDir = FileSystems.getDefault().getPath(rootPath, parent);
         FileUtils.deleteQuietly(parentDir.toFile());

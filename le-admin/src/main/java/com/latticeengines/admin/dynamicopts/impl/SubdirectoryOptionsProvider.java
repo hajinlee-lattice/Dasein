@@ -34,7 +34,7 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
     private final boolean recursive;
     private final List<String> options;
     private WatchService watcher;
-    private final Map<WatchKey,Path> keys = new HashMap<>();
+    private final Map<WatchKey, Path> keys = new HashMap<>();
     private boolean initialized = false;
     private Thread watcherThread;
 
@@ -44,7 +44,9 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
         this.recursive = recursive;
         this.path = path;
         File dir = this.path.toFile();
-        if (dir.isFile()) { FileUtils.deleteQuietly(dir); }
+        if (dir.isFile()) {
+            FileUtils.deleteQuietly(dir);
+        }
         if (!dir.exists()) {
             try {
                 FileUtils.forceMkdir(path.toFile());
@@ -53,11 +55,12 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
             }
         }
         this.options = readSubdirectories();
-        startWatcherThread();
+        // startWatcherThread();
     }
 
-    public SubdirectoryOptionsProvider(Path path) { this(path, false); }
-
+    public SubdirectoryOptionsProvider(Path path) {
+        this(path, false);
+    }
 
     public SubdirectoryOptionsProvider(String path) {
         this(FileSystems.getDefault().getPath(path));
@@ -69,8 +72,9 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
         if (dir.exists()) {
             File[] files = dir.listFiles();
             if (files != null) {
-                for (File file: files) {
-                    if (file.isDirectory()) options.add(file.getName());
+                for (File file : files) {
+                    if (file.isDirectory())
+                        options.add(file.getName());
                 }
             }
         }
@@ -84,11 +88,11 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
 
     @Override
     public List<String> getOptions() {
-        if (!watcherIsWorking()) {
-            // directly read option list
-            updateOptions();
-            startWatcherThread();
-        }
+        // if (!watcherIsWorking()) {
+        // directly read option list
+        updateOptions();
+        // startWatcherThread();
+        // }
         return options;
     }
 
@@ -110,8 +114,7 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
         if (this.recursive) {
             Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
                 @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                        throws IOException {
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     register(dir);
                     return FileVisitResult.CONTINUE;
                 }
@@ -126,16 +129,18 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
 
     private void startWatching() throws IOException, InterruptedException {
         log.info(String.format("Start watching path %s as an options provider.", path));
-        while(true) {
+        while (true) {
             // wait for key to be signalled
             WatchKey key;
             key = watcher.take();
             if (key != null) {
                 Path dir = keys.get(key);
-                if (dir == null) continue;
+                if (dir == null)
+                    continue;
 
                 for (WatchEvent<?> event : key.pollEvents()) {
-            		// Context for directory entry event is the file name of entry
+                    // Context for directory entry event is the file name of
+                    // entry
                     WatchEvent<Path> watchEvent = cast(event);
                     Kind<?> kind = event.kind();
 
@@ -146,14 +151,16 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
                     log.info(String.format("%s: %s", event.kind().name(), relativePath));
                     updateOptions();
 
-                    // if directory is created, then register it and its sub-directories
+                    // if directory is created, then register it and its
+                    // sub-directories
                     if (kind == ENTRY_CREATE && recursive && Files.isDirectory(child, NOFOLLOW_LINKS)) {
                         registerAll(child);
                     }
 
                 }
 
-                // reset key and remove from set if directory no longer accessible
+                // reset key and remove from set if directory no longer
+                // accessible
                 boolean valid = key.reset();
                 if (!valid) {
                     keys.remove(key);
@@ -169,9 +176,10 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
 
     @SuppressWarnings("unchecked")
     private static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>)event;
+        return (WatchEvent<T>) event;
     }
 
+    @SuppressWarnings("unused")
     private void startWatcherThread() {
         if (watcherThread != null) {
             watcherThread.interrupt();
@@ -184,7 +192,7 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
                     registerAll(path);
                     startWatching();
                     watcher.close();
-                } catch (IOException|InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     // ignore
                 }
             }
@@ -192,6 +200,7 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
         watcherThread.start();
     }
 
+    @SuppressWarnings("unused")
     private boolean watcherIsWorking() {
         return watcherThread != null && watcherThread.isAlive();
     }
