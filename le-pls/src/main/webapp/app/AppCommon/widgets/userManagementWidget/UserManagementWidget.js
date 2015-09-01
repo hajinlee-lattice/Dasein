@@ -5,13 +5,14 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.utilities.RightsUtility',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.userManagement.modals.AddUserModal',
     'mainApp.userManagement.modals.DeleteUserModal',
     'mainApp.userManagement.modals.EditUserModal',
     'mainApp.userManagement.services.UserManagementService',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('UserManagementWidgetController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, RightsUtility, AddUserModal, DeleteUserModal, EditUserModal) {
+.controller('UserManagementWidgetController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, RightsUtility, FeatureFlagService, AddUserModal, DeleteUserModal, EditUserModal) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.deleteInProgress = false;
 
@@ -22,10 +23,12 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
         return RightsUtility.getAccessLevel(u.AccessLevel).ordinal;
     });
 
-    $scope.mayAddUsers = RightsUtility.mayAddUsers();
-    $scope.mayDeleteUsers = RightsUtility.mayDeleteUsers();
-    $scope.showEditUserButton = RightsUtility.mayChangeUserAccessLevels();
-    $scope.showDeleteUserButton = RightsUtility.mayDeleteUsers();
+    var flags = FeatureFlagService.Flags();
+    $scope.mayAddUsers = FeatureFlagService.FlagIsEnabled(flags.ADD_USER);
+    $scope.mayDeleteUsers = FeatureFlagService.FlagIsEnabled(flags.DELETE_USER);
+    $scope.showEditUserButton = FeatureFlagService.FlagIsEnabled(flags.CHANGE_USER_ACCESS);
+    $scope.showDeleteUserButton = FeatureFlagService.FlagIsEnabled(flags.DELETE_USER);
+
     var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
 
     $scope.addUserClicked = function($event) {

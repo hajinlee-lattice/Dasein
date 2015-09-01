@@ -1,32 +1,23 @@
 angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.login.services.LoginService'
+    'mainApp.login.services.LoginService',
+    'mainApp.core.services.FeatureFlagService'
 ])
 
-.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, NavUtility, LoginService) {
+.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
 
     var clientSession = BrowserStorageUtility.getClientSession();
     if (clientSession != null) {
+        var flags = FeatureFlagService.Flags();
         $scope.userDisplayName = clientSession.DisplayName;
-        $scope.showUserManagement = RightsUtility.maySeeUserManagement();
-        $scope.showSystemSetup =  RightsUtility.maySeeSystemSetup();
-        $scope.showModelCreationHistoryDropdown = RightsUtility.maySeeModelCreationHistory();
-        $scope.showActivateModel = RightsUtility.mayEditActivateModel();
-    }
-
-    var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
-    if (featureFlags) {
-        if (featureFlags.hasOwnProperty("ActivateModel")) {
-            $scope.showActivateModel = $scope.showActivateModel && featureFlags['ActivateModel'];
-        }
-        if (featureFlags.hasOwnProperty("SystemSetup")) {
-            $scope.showSystemSetup = $scope.showSystemSetup && featureFlags['SystemSetup'];
-        }
+        $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
+        $scope.showSystemSetup = FeatureFlagService.FlagIsEnabled(flags.SYSTEM_SETUP_PAGE);
+        $scope.showModelCreationHistoryDropdown = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
+        $scope.showActivateModel = FeatureFlagService.FlagIsEnabled(flags.ACTIVATE_MODEL_PAGE);
     }
 
     $scope.dropdownClicked = function ($event) {

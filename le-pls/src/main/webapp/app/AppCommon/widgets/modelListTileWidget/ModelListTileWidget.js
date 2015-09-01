@@ -5,14 +5,14 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.utilities.RightsUtility',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.models.services.ModelService',
     'mainApp.models.modals.DeleteModelModal',
     'mainApp.models.modals.StaleModelModal'
 ])
-.controller('ModelListTileWidgetController', function ($scope, $rootScope, $element, ResourceUtility, BrowserStorageUtility, RightsUtility, DateTimeFormatUtility,
-    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal) {
+.controller('ModelListTileWidgetController', function ($scope, $rootScope, $element, ResourceUtility, BrowserStorageUtility, DateTimeFormatUtility,
+    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
@@ -20,10 +20,11 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     var widgetConfig = $scope.widgetConfig;
     var data = $scope.data;
 
-    $scope.mayChangeModelNames = RightsUtility.mayChangeModelNames();
-    $scope.mayDeleteModels = RightsUtility.mayDeleteModels();
+    var flags = FeatureFlagService.Flags();
+    $scope.mayChangeModelNames = FeatureFlagService.FlagIsEnabled(flags.CHANGE_MODEL_NAME);
+    $scope.mayDeleteModels = FeatureFlagService.FlagIsEnabled(flags.DELETE_MODEL);
 
-    $scope.mayEditModelsClass = $scope.mayEditModels ? "model-name-editable" : "";
+    $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
     if (widgetConfig == null || data == null) {
         return;
     }

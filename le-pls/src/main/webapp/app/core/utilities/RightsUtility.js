@@ -29,19 +29,4 @@ app.service('RightsUtility', function (_, BrowserStorageUtility) {
         return this.may(clientSession.AvailableRights, operation, category);
     };
 
-    this.mayChangeModelNames = function() { return this.currentUserMay("Edit", "Models"); };
-    this.mayDeleteModels = function() { return this.currentUserMay("Edit", "Models"); };
-    this.mayUploadModelJson = function() { return this.currentUserMay("Create", "Models"); };
-
-    this.mayAddUsers = function() { return this.currentUserMay("Edit", "Users"); };
-    this.mayChangeUserAccessLevels = function() { return this.currentUserMay("Edit", "Users"); };
-    this.mayDeleteUsers = function() { return this.currentUserMay("Edit", "Users"); };
-    this.maySeeUserManagement = function() { return this.currentUserMay("View", "Users"); };
-
-    this.maySeeAdminInfo = function() { return this.currentUserMay("View", "Reporting"); };
-    this.maySeeModelCreationHistory = function() { return this.currentUserMay("View", "Reporting"); };
-
-    this.maySeeSystemSetup = function() { return this.currentUserMay("Edit", "Configuration"); };
-    this.mayEditActivateModel = function() { return this.currentUserMay("Edit", "Configuration"); };
-
 });

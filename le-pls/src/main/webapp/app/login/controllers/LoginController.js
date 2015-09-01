@@ -9,21 +9,22 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.core.utilities.NavUtility',
     'mainApp.login.services.LoginService',
     'mainApp.core.services.HelpService',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.login.modals.TenantSelectionModal',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
 .controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, ServiceErrorUtility, EvergageUtility,
-    BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal) {
-    
+                                         BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal, FeatureFlagService) {
+
     $("body").addClass("login-body");
     $('[autofocus]').focus();
-    
+
     // Property bindings
     $scope.copyrightString = ResourceUtility.getString('LOGIN_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;
-    
+
     $scope.username = "";
     $scope.password = "";
     $scope.loginMessage = null;
@@ -44,7 +45,7 @@ angular.module('mainApp.login.controllers.LoginController', [
         datasetPrefix: "pls",
         company: null
     });
-    
+
     // Controller methods
     $scope.loginClick = function () {
         $scope.showLoginError = false;
@@ -52,13 +53,13 @@ angular.module('mainApp.login.controllers.LoginController', [
         if ($scope.loginInProgess) {
             return;
         }
-        
+
         $scope.usernameInvalid = $scope.username === "";
         $scope.passwordInvalid = $scope.password === "";
         if ($scope.usernameInvalid || $scope.passwordInvalid) {
             return;
         }
-        
+
         $scope.loginInProgess = true;
         LoginService.Login($scope.username, $scope.password).then(function(result) {
             $scope.loginInProgess = false;
@@ -85,7 +86,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             $scope.showLoginHeaderMessage(ResourceUtility.getString("NO_TENANT_MESSAGE"));
             return;
         }
-        
+
         if (tenantList.length == 1) {
             $scope.getSessionDocument(tenantList[0]);
         } else {
@@ -95,53 +96,53 @@ angular.module('mainApp.login.controllers.LoginController', [
             TenantSelectionModal.show(tenantList, tenantSelectionCallback);
         }
     };
-    
+
     $scope.getSessionDocument = function (tenant) {
         LoginService.GetSessionDocument(tenant).then(function(data) {
             if (data != null && data.Success === true) {
                 //Initialize Evergage
                 EvergageUtility.Initialize({
-                    userID: data.Result.User.Identifier, 
+                    userID: data.Result.User.Identifier,
                     title: data.Result.User.Title,
                     datasetPrefix: "pls",
                     company: data.Ticket.Tenants[0].DisplayName
                 });
-                
+
                 $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
             } else {
                 $scope.showLoginHeaderMessage(ResourceUtility.getString("LOGIN_UNKNOWN_ERROR"));
             }
         });
     };
-    
+
     $scope.getLocaleSpecificResourceStrings = function (locale) {
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
             $scope.getWidgetConfigDoc();
         });
     };
-    
+
     $scope.getWidgetConfigDoc = function () {
-        ConfigService.GetWidgetConfigDocument().then(function(result) {
+        ConfigService.GetWidgetConfigDocument().then(function() {
             $("body").removeClass("login-body");
             $rootScope.$broadcast("ShowFooterEvent", true);
-
-            if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
-                constructMainView();
-            } else {
-                ConfigService.GetCurrentTopology().then(function(result){
-                    if (result.success) {
-                        constructMainView();
-                    } else {
-                        var featureFlags = BrowserStorageUtility.getFeatureFlagsDocument();
-                        if (featureFlags == null) featureFlags = {};
-                        featureFlags['ActivateModel'] = false;
-                        featureFlags['SystemSetup'] = false;
-                        BrowserStorageUtility.setFeatureFlagsDocument(featureFlags, constructMainView);
-                    }
-                });
-            }
+            getFeatureFlags();
         });
     };
+
+    function getFeatureFlags() {
+        FeatureFlagService.GetAllFlags().then(function() {
+            constructMainView();
+        });
+    }
+
+    function constructMainView() {
+        $http.get('./app/core/views/MainView.html').success(function (html) {
+            var scope = $rootScope.$new();
+            scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
+            scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
+            $compile($("#mainView").html(html))(scope);
+        });
+    }
 
     $scope.showLoginHeaderMessage = function (message) {
         if (message == null) {
@@ -155,16 +156,16 @@ angular.module('mainApp.login.controllers.LoginController', [
         $scope.loginErrorMessage = message;
         $scope.showLoginError = true;
     };
-    
+
     $scope.forgotPasswordClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
-        
+
         $scope.showLoginForm = false;
         $scope.showForgotPassword = true;
     };
-    
+
     $scope.cancelForgotPasswordClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
@@ -172,7 +173,7 @@ angular.module('mainApp.login.controllers.LoginController', [
         $scope.showLoginForm = true;
         $scope.showForgotPasswordError = false;
     };
-    
+
     $scope.forgotPasswordOkClick = function () {
         $scope.resetPasswordSuccess = false;
         $scope.showForgotPasswordError = false;
@@ -188,7 +189,7 @@ angular.module('mainApp.login.controllers.LoginController', [
                 $scope.showForgotPassword = false;
                 $scope.resetPasswordSuccess = true;
             } else {
-                $scope.showForgotPasswordError = true;                
+                $scope.showForgotPasswordError = true;
 
                 if (result.Error.errorCode == 'LEDP_18018') {
                     $scope.forgotPasswordUsernameInvalid = true;
@@ -196,7 +197,7 @@ angular.module('mainApp.login.controllers.LoginController', [
                 } else {
                     $scope.forgotPasswordUsernameInvalid = false;
                     $scope.forgotPasswordErrorMessage = ResourceUtility.getString('RESET_PASSWORD_FAIL');
-                }                            
+                }
             }
         });
     };
@@ -207,13 +208,4 @@ angular.module('mainApp.login.controllers.LoginController', [
         }
         HelpService.OpenPrivacyPolicy();
     };
-
-    function constructMainView() {
-        $http.get('./app/core/views/MainView.html').success(function (html) {
-            var scope = $rootScope.$new();
-            scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
-            scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
-            $compile($("#mainView").html(html))(scope);
-        });
-    }
 });

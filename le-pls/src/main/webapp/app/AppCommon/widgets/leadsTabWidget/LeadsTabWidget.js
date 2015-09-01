@@ -3,14 +3,16 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.appCommon.utilities.TenantIdParsingUtility',
     'mainApp.core.utilities.RightsUtility',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility'
 ])
-.controller('LeadsTabWidgetController', function ($scope, $rootScope, ResourceUtility, TenantIdParsingUtility, BrowserStorageUtility, RightsUtility, NavUtility) {
+.controller('LeadsTabWidgetController', function ($scope, $rootScope, ResourceUtility, TenantIdParsingUtility, BrowserStorageUtility, RightsUtility, FeatureFlagService, NavUtility) {
     $scope.ResourceUtility = ResourceUtility;
 
     var clientSession = BrowserStorageUtility.getClientSession();
-    $scope.showAdminLink = RightsUtility.maySeeAdminInfo();
+    var flags = FeatureFlagService.Flags();
+    $scope.showAdminLink = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
     $scope.data.TenantId = clientSession.Tenant.Identifier;
     $scope.data.TenantName = clientSession.Tenant.DisplayName;
     $scope.data.DataLoaderTenantName = TenantIdParsingUtility.getDataLoaderTenantNameFromTenantId($scope.data.TenantId);

@@ -2,16 +2,17 @@ var app = angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidg
     'mainApp.models.services.ModelService',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.core.utilities.RightsUtility',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.models.modals.ImportModelModal'
 ]);
 
 app.controller('ModelListCreationHistoryWidgetController', function ($scope, $rootScope, ModelService, ResourceUtility,
-                                                                     RightsUtility, NavUtility, ImportModelModal) {
-    
+                                                                     FeatureFlagService, NavUtility, ImportModelModal) {
+
     $scope.ResourceUtility = ResourceUtility;
     $scope.models = $scope.data;
-    $scope.showUploadModel = RightsUtility.mayUploadModelJson();
+    var flags = FeatureFlagService.Flags();
+    $scope.showUploadModel = FeatureFlagService.FlagIsEnabled(flags.UPLOAD_JSON);
 
     $scope.undoDeleteModel = function (modelId) {
         if (modelId == null) {
@@ -32,8 +33,8 @@ app.controller('ModelListCreationHistoryWidgetController', function ($scope, $ro
         ImportModelModal.show();
     };
 })
-.directive('modelListCreationHistoryWidget', function () {
-    return {
-        templateUrl: 'app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidgetTemplate.html'
-    };
-});
+    .directive('modelListCreationHistoryWidget', function () {
+        return {
+            templateUrl: 'app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidgetTemplate.html'
+        };
+    });

@@ -4,10 +4,11 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.WidgetService',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.models.services.ModelService'
+    'mainApp.models.services.ModelService',
+    'mainApp.core.services.FeatureFlagService'
 ])
 .controller('AdminInfoController', function ($scope, $rootScope, $http, ResourceUtility, WidgetService,
-    WidgetConfigUtility, WidgetFrameworkService, NavUtility, ModelService) {
+    WidgetConfigUtility, WidgetFrameworkService, NavUtility, ModelService, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
 
     var widgetConfig = WidgetService.GetApplicationWidgetConfig();
@@ -42,7 +43,8 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
         $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, model);
     };
 
-    var showAlertsTab = false;
+    var flags = FeatureFlagService.Flags();
+    var showAlertsTab = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
     if (showAlertsTab) {
         $scope.loading= true;
         ModelService.GetModelAlertsByModelId(data.ModelId).then(function(result) {
