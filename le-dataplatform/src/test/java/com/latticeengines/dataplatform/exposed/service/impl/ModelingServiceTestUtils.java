@@ -7,8 +7,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+
 import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -124,15 +126,20 @@ public class ModelingServiceTestUtils {
     }
 
     private static String getPublicIpAddress() throws SocketException {
-        NetworkInterface ni = NetworkInterface.getByName("eth0");
-        Enumeration<InetAddress> inetAddresses = ni.getInetAddresses();
+        String result = "localhost";
 
-        while (inetAddresses.hasMoreElements()) {
-            InetAddress ia = inetAddresses.nextElement();
-            if (!ia.isLinkLocalAddress()) {
-                return ia.getHostAddress();
+        NetworkInterface ni = NetworkInterface.getByName("eth0");
+        if (ni != null) {
+            Enumeration<InetAddress> inetAddresses = ni.getInetAddresses();
+
+            while (inetAddresses.hasMoreElements()) {
+                InetAddress ia = inetAddresses.nextElement();
+                if (!ia.isLinkLocalAddress()) {
+                    result = ia.getHostAddress();
+                    break;
+                }
             }
         }
-        return "localhost";
+        return result;
     }
 }
