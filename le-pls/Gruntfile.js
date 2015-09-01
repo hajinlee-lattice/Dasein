@@ -41,6 +41,11 @@ module.exports = function (grunt) {
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.qa.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.qa.js'
             },
+            stage:        {
+                url:            'https://app.lattice-engines.com',
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.prod.js',
+                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
+            },
             prod:        {
                 url:            'https://app.lattice-engines.com',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.prod.js',
@@ -58,6 +63,8 @@ module.exports = function (grunt) {
         chosenEnv = appConfig.env.integration;
     } else if (env === 'qa') {
         chosenEnv = appConfig.env.qa;
+    } else if (env === 'stage') {
+        chosenEnv = appConfig.env.stage;
     } else if (env === 'prod') {
         chosenEnv = appConfig.env.prod;
     }
