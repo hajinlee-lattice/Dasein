@@ -33,7 +33,7 @@ public class Extract implements HasName, GraphNode {
         return path;
     }
     
-    @JsonProperty("display_name")
+    @JsonProperty("path")
     public void setPath(String path) {
         this.path = path;
     }
