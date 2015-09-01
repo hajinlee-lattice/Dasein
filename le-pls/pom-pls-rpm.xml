@@ -92,16 +92,16 @@
             </properties>
         </profile>
         <profile>
-            <id>load</id>
+            <id>stage</id>
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>loadtest</value>
+                    <value>stage</value>
                 </property>
             </activation>
             <properties>
-                <pls.properties.path>conf/env/loadtest</pls.properties.path>
-                <bin.env.path>bin/env/loadtest</bin.env.path>
+                <pls.properties.path>conf/env/stage</pls.properties.path>
+                <bin.env.path>bin/env/stage</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
