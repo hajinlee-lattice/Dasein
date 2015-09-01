@@ -61,7 +61,7 @@ public class ReleaseProcessConfiguration {
         List<Activity> releaseDPActivities = new ArrayList<>();
         releaseDPActivities.addAll(preReleaseActivities);
         releaseDPActivities.addAll(Arrays.asList(new Activity[] { dpDeploymentJobActivity, dpDeploymentTestActivity,
-                orcDeploymentTestActivity, jmxCheckActivity }));
+                orcDeploymentTestActivity, scoringDeploymentTestActivity, jmxCheckActivity }));
         releaseDPActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseDPActivities);
     }
@@ -83,7 +83,7 @@ public class ReleaseProcessConfiguration {
         List<Activity> releaseAllActivities = new ArrayList<>();
         releaseAllActivities.addAll(preReleaseActivities);
         releaseAllActivities.addAll(Arrays.asList(new Activity[] { dpDeploymentJobActivity, plsDeploymentJobActivity,
-                dpDeploymentTestActivity, orcDeploymentTestActivity, jmxCheckActivity, plsProtractorTestActivity,
+                dpDeploymentTestActivity, orcDeploymentTestActivity, scoringDeploymentTestActivity, jmxCheckActivity, plsProtractorTestActivity,
                 plsDeploymentTestActivity }));
         releaseAllActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseAllActivities);
