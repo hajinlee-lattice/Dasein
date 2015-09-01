@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +32,9 @@ public class ComponentOrchestrator {
 
     private static final long TIMEOUT = 180000L;
     private static final long WAIT_INTERVAL = 1000L;
+    private static final int NUM_RETRIES = (int) (TIMEOUT/WAIT_INTERVAL);
+
+    private static final Log log = LogFactory.getLog(ComponentOrchestrator.class);
 
     public ComponentOrchestrator() {}
 
@@ -99,6 +104,8 @@ public class ComponentOrchestrator {
             if (o instanceof LatticeComponent) {
                 LatticeComponent component = (LatticeComponent) o;
 
+                log.info("Attempt to install component " + component.getName());
+
                 List<? extends LatticeComponent> dependencies = component.getChildren();
                 for(LatticeComponent dependency : dependencies) {
                     if (this.failed.contains(dependency.getName()) ||
@@ -114,11 +121,13 @@ public class ComponentOrchestrator {
                     Map<String, String> bootstrapProperties = properties.get(component.getName());
                     batonService.bootstrap(contractId, tenantId, spaceId, component.getName(), bootstrapProperties);
 
-                    long numOfRetries = TIMEOUT/WAIT_INTERVAL;
+                    int numOfRetries = NUM_RETRIES;
                     BootstrapState state;
                     do {
                         state = batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId, component.getName());
                         numOfRetries--;
+                        log.info(String.format("Bootstrap status of [%s] is %s, %d out of %d retries remained.",
+                                component.getName(), state.state.toString(), numOfRetries, NUM_RETRIES));
                         try {
                             Thread.sleep(WAIT_INTERVAL);
                         } catch (InterruptedException e) {
@@ -126,7 +135,7 @@ public class ComponentOrchestrator {
                         }
                     } while(numOfRetries > 0 && state.state.equals(BootstrapState.State.INITIAL));
 
-                    if (state == null || !state.state.equals(BootstrapState.State.OK)) {
+                    if (!state.state.equals(BootstrapState.State.OK)) {
                         failed.add(component.getName());
                     }
 
