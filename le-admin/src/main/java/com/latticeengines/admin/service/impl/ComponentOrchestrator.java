@@ -117,6 +117,8 @@ public class ComponentOrchestrator {
                     }
                 }
 
+                log.info("Dependencies for installing component " + component.getName() + " are all satisfied.");
+
                 if (properties.containsKey(component.getName())) {
                     Map<String, String> bootstrapProperties = properties.get(component.getName());
                     batonService.bootstrap(contractId, tenantId, spaceId, component.getName(), bootstrapProperties);
