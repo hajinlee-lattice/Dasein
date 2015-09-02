@@ -6,27 +6,108 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.apache.avro.Schema;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenantId;
+import com.latticeengines.domain.exposed.security.Tenant;
 
-public class AttributeOwner implements GraphNode {
+@Entity
+@Table(name = "ATTRIBUTE_OWNER")
+@Inheritance(strategy = InheritanceType.JOINED)
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
 
+    private Long pid;
+    private String name;
+    private String displayName;
     private List<Attribute> attributes = new ArrayList<>();
     private Schema schema;
+    private Tenant tenant;
+    private Long tenantId;
 
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    @Basic(optional = false)
+    @Column(name = "PID", unique = true, nullable = false)
+    @Override
+    public Long getPid() {
+        return pid;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    @Column(name = "NAME", unique = true, nullable = false)
+    @Override
+    @JsonProperty("name")
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    @JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Column(name = "DISPLAY_NAME", nullable = false)
+    @JsonProperty("display_name")
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @JsonProperty("display_name")
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+    
     public void addAttribute(Attribute attribute) {
         attributes.add(attribute);
     }
-
+    
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "attributeOwner")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public List<Attribute> getAttributes() {
         return attributes;
     }
+    
+    public void setAttributes(List<Attribute> attributes) {
+        this.attributes = attributes;
+    }
 
     @JsonIgnore
+    @Transient
     public Map<String, Attribute> getNameAttributeMap() {
         Map<String, Attribute> map = new HashMap<String, Attribute>();
 
@@ -37,11 +118,13 @@ public class AttributeOwner implements GraphNode {
     }
 
     @JsonIgnore
+    @Transient
     public Schema getSchema() {
         return schema;
     }
 
     @JsonIgnore
+    @Transient
     public void setSchema(Schema schema) {
         this.schema = schema;
     }
@@ -53,12 +136,14 @@ public class AttributeOwner implements GraphNode {
 
     @Override
     @JsonIgnore
+    @Transient
     public Collection<? extends GraphNode> getChildren() {
         return attributes;
     }
 
     @Override
     @JsonIgnore
+    @Transient
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
         map.put("attributes", attributes);
@@ -66,12 +151,40 @@ public class AttributeOwner implements GraphNode {
     }
 
     @JsonIgnore
+    @Transient
     public String[] getAttributeNames() {
-        List<Attribute> attributes = getAttributes();
         String[] attrs = new String[attributes.size()];
         for (int i = 0; i < attributes.size(); i++) {
             attrs[i] = attributes.get(i).getName();
         }
         return attrs;
     }
+
+    @Override
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    @JsonIgnore
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+        setTenantId(tenant.getPid());
+    }
+
+    @JsonIgnore
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public Tenant getTenant() {
+        return tenant;
+    }
+
 }

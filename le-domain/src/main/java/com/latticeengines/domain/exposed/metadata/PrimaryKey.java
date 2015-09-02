@@ -1,20 +1,15 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import com.latticeengines.common.exposed.graph.GraphNode;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
+import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 
-public class PrimaryKey extends AttributeOwner implements HasName, GraphNode {
-    private String name;
+import org.hibernate.annotations.Filter;
 
-    @Override
-    public String getName() {
-        return name;
-    }
 
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-
+@Entity
+@Table(name = "PRIMARY_KEY")
+@PrimaryKeyJoinColumn(name = "PID")
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+public class PrimaryKey extends AttributeOwner {
 }

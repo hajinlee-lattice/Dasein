@@ -172,14 +172,12 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.rocScore = rocScore;
     }
 
-    //@JsonIgnore // cannot ignore because of the POST API in ModelsummariesResource
     @JsonProperty("LookupId")
     @Column(name = "LOOKUP_ID", nullable = false)
     public String getLookupId() {
         return lookupId;
     }
 
-    //@JsonIgnore
     @JsonProperty("LookupId")
     public void setLookupId(String lookupId) {
         this.lookupId = lookupId;
