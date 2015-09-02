@@ -16,7 +16,8 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.AdminInfoSummaryWidget',
     'mainApp.appCommon.widgets.AdminInfoAlertsWidget',
     'mainApp.appCommon.widgets.LeadsTabWidget',
-    'mainApp.appCommon.widgets.ModelListCreationHistoryWidget'
+    'mainApp.appCommon.widgets.ModelListCreationHistoryWidget',
+    'mainApp.appCommon.widgets.ManageFieldsWidget'
 ])
 .service('WidgetFrameworkService', function ($compile, $rootScope, WidgetConfigUtility, MetadataUtility) {
 
@@ -114,6 +115,9 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
                 break;
             case WidgetConfigUtility.USER_MANAGEMENT_WIDGET:
                 $compile(options.element.html('<div data-user-management-widget></div>'))(scope);
+                break;
+            case WidgetConfigUtility.MANAGE_FIELDS_WIDGET:
+                $compile(options.element.html('<div data-manage-fields-widget></div>'))(scope);
                 break;
             default:
                 return;

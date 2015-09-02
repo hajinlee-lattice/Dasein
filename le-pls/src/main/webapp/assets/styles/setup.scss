@@ -1,0 +1,116 @@
+#setup {
+  position: relative;
+  margin-top: 4px;
+  min-height:600px;
+}
+
+#setup .setup-sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom:0;
+  width: 240px;
+  background: white;
+}
+
+#setup .setup-sidebar .fa {
+  width: 12px;
+}
+
+#setup .setup-sidebar .nav-stacked > li {
+  margin-top: 0;
+}
+
+#setup .setup-sidebar li.active > a,
+#setup .setup-sidebar li.active > a:focus,
+#setup .setup-sidebar li.active > a:hover {
+  color: white;
+  background-color: #337ab7;
+}
+
+#setup .setup-sidebar .ident {
+  margin-left: 16px;
+}
+
+#setup .setup-main-panel {
+  position: absolute;
+  left: 243px;
+  top: 0;
+  right: 0;
+  bottom:0;
+  padding: 10px;
+  background: white;
+  overflow: auto;
+}
+
+#setup .setup-main-panel .manage-fields {
+  position: relative;
+}
+
+#setup .setup-main-panel .title h2 {
+  display: inline-block;
+}
+
+#setup .setup-main-panel .title button {
+  margin: 10px 0 0 16px;
+  float: right;
+}
+
+#setup .setup-main-panel .form-control {
+  display: inline-block;
+  width: 200px;
+  margin-right: 16px;
+}
+
+#setup .setup-main-panel .form-group .btn {
+  margin-top: -1px;
+}
+
+#setup .setup-main-panel .checkbox {
+  display: inline-block;
+  margin-left: 16px;
+}
+
+#setup .setup-main-panel table {
+  table-layout: fixed;
+}
+
+#setup .setup-main-panel table td {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+}
+
+#setup .setup-main-panel table td .disabled {
+  color: #bbb;
+}
+
+#setup .setup-main-panel table input[type="text"] {
+  height: 2em;
+  text-indent: 0;
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+}
+
+#setup .setup-main-panel .warning:after {
+   margin-right: 4px;
+   content: "\f071";
+}
+
+#setup .field-details {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: white;
+}
+
+#setup .field-details .data-table {
+  width: 600px;
+}

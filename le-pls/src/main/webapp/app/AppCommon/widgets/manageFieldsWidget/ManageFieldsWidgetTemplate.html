@@ -1,0 +1,49 @@
+<div data-ng-controller="ManageFieldsWidgetController" id="manageFieldsWidget" class="manage-fields">
+    <div class="title">
+        <h2>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</h2>
+        <button data-ng-click="editButtonClicked($event)" data-ng-show="!editable" class="btn btn-primary">Edit</button>
+        <button data-ng-click="cancelButtonClicked($event)" data-ng-show="editable" class="btn btn-primary">Cancel</button>
+        <button data-ng-click="saveButtonClicked($event)" data-ng-show="editable" class="btn btn-primary">Save</button>
+    </div>
+    <div data-ng-show="!editable">
+	    <div class="form-group">
+	        <input data-ng-model="field" data-ng-keypress="keyEnterFilter($event)" class="form-control" placeholder="{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SEARCH_FEILD_PLACEHOLDER')}}"/>
+	        <button data-ng-click="filterFields($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SEARCH_LABEL')}}</button>
+	    </div>
+	    <div class="form-group">
+	        <select data-ng-options="s as s for s in sourcesToSelect" data-ng-model="source" data-ng-change="selectChanged($event, 'source')" class="form-control">
+	            <option value="">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SELECT_ALL_SOURCES')}}</option>
+	        </select>
+	        <select data-ng-options="o for o in objectsToSelect" data-ng-model="object" data-ng-change="selectChanged($event, 'object')" class="form-control">
+	            <option value="">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SELECT_ALL_OBJECTS')}}</option>
+	        </select>
+	        <select data-ng-options="c for c in categoriesToSelect" data-ng-model="category" data-ng-change="selectChanged($event, 'category')" class="form-control">
+	            <option value="">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SELECT_ALL_CATEGORIES')}}</option>
+	        </select>
+	        <label class="checkbox"><input type="checkbox" data-ng-change="filterFields($event)" data-ng-model="onlyShowErrorFields"/>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_CHECKBOX_ONLY_SHOW_ERROR_FIELDS')}}</label>
+	    </div>
+    </div>
+    <div>
+        <div ng-show="loading">
+            <div class="loader"> </div>
+            <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+        </div>
+        <div ng-show="showLoadingError">
+            <div class="alert alert-danger">{{loadingError}}</div>
+        </div>
+        <div id="fieldsGrid" kendo-grid="grid"
+             k-options="gridOptions"
+             k-ng-delay="gridOptions"
+             ng-show="!loading">
+        </div>
+    </div>
+    <script id="fieldTemplate" type="text/x-kendo-tmpl">
+        <a data-ng-if="!editable" href="\#" data-ng-click="fieldLinkClicked($event, dataItem)">#:ColumnName == null || ColumnName == '' ? "(blank)" : ColumnName#</a>
+        <span data-ng-if="editable" class="disabled">#:ColumnName == null || ColumnName == '' ? "(blank)" : ColumnName#</span>
+        <span data-ng-if="#:ColumnName == null || ColumnName == '' || Category == null || Category == '' || DisplayName == null || DisplayName == '' || ApprovedUsage == null || ApprovedUsage == '' || Tags == null || Tags == '' || FundamentalType == null || FundamentalType == ''#" class='fa warning'></span>
+    </script>
+    <script id="sourceTemplate" type="text/x-kendo-tmpl">
+        <span data-ng-class="editable ? 'disabled' : ''">#:Source == null ? "" : Source#</span>
+    </script>
+    <div id="fieldDetails" class="field-details" data-ng-show="showFieldDetails"></div>
+</div>

@@ -1,0 +1,53 @@
+<div data-ng-controller="EditFieldController">
+    <div class="title">
+        <h2>{{field.ColumnName}}&nbsp;({{field.Source}})</h2>
+        <button data-ng-click="cancelEditClicked($event)" class="btn btn-primary">Cancel</button>
+        <button data-ng-click="saveEditClicked($event)" class="btn btn-primary">Save</button>
+    </div>
+    <div class="data-table">
+        <table>
+            <thead>
+                <th>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_FIELD_DETILS_COLUMN_KEY')}}</th>
+                <th>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_FIELD_DETILS_COLUMN_VALUE')}}</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_COLUMN_NAME')}}</td>
+                    <td>{{field.ColumnName}}</td>
+                </tr>
+                   <tr data-ng-class="shaded">
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME')}}</td>
+                       <td><input type="text" class="form-control" data-ng-model="field.DisplayName" /></td>
+                   </tr>
+                   <tr>
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DESCRIPTION')}}</td>
+                       <td><textarea class="form-control" data-ng-model="field.Description"></textarea></td>
+                   </tr>
+                   <tr data-ng-class="shaded">
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_APPROVED_USAGE')}}</td>
+                       <td><select class="form-control" data-ng-model="field.ApprovedUsage"></select></td>
+                   </tr>
+                   <tr>
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_CATEGORY')}}</td>
+                       <td><select class="form-control" data-ng-model="field.Category"></select></td>
+                   </tr>
+                   <tr data-ng-class="shaded">
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_TAGS')}}</td>
+                       <td><select class="form-control" data-ng-model="field.Tags"></select></td>
+                   </tr>
+                   <tr>
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_DISCRETIZATION')}}</td>
+                       <td><textarea class="form-control" data-ng-model="field.DisplayDiscretization"></textarea></td>
+                   </tr>
+                   <tr data-ng-class="shaded">
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FUNDAMENTAL_TYPE')}}</td>
+                       <td><select class="form-control" data-ng-model="field.FundementalType"></select></td>
+                   </tr>
+                   <tr>
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_STATISTICAL_TYPE')}}</td>
+                       <td><select class="form-control" data-ng-model="field.StatisticalType"></select></td>
+                   </tr>
+               </tbody>
+        </table>
+    </div>
+</div>

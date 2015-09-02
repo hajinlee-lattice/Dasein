@@ -15,6 +15,7 @@ var ExternalAdmin = function() {
                 userManagement.canSeeSystemSetupLink(false);
                 userManagement.canSeeActivateModelLink(false);
                 userManagement.canSeeModelCreationHistoryLink(false);
+                userManagement.canSeeSetupLink(false);
                 userDropdown.toggleDropdown();
 
                 userManagement.canSeeHiddenAdminLink(false);

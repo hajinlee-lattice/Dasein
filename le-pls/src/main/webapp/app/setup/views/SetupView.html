@@ -1,0 +1,22 @@
+<div id="setup" data-ng-controller="SetupController">
+    <div class="setup-sidebar">
+        <ul class="nav nav-pills nav-stacked">
+            <li data-ng-click="nodeClicked($event)" node-name="home" class="{{selectedNode == 'home' ? 'active' : ''}}">
+                <a href="#">{{ResourceUtility.getString('SETUP_NAV_NODE_HOME')}}</a>
+            </li>
+        </ul>
+        <ul class="nav nav-pills nav-stacked">
+            <li data-ng-click="nodeClicked($event)" node-name="data" class="{{selectedNode == 'data' ? 'active' : ''}}">
+                <a href="#"><i class="fa fa-caret-down" data-ng-click="nodeHandleClicked($event)"></i>{{ResourceUtility.getString('SETUP_NAV_NODE_DATA')}}</a>
+            </li>
+            <li data-ng-click="nodeClicked($event)" node-name="manageFields" class="{{selectedNode == 'manageFields' ? 'active' : ''}}">
+                <a href="#"><i class="fa"></i><span class="ident"></span>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</a>
+            </li>
+        </ul>
+    </div>
+    <div class="setup-main-panel">
+        <data-setup-home data-ng-show="selectedNode == 'home'"></data-setup-home>
+        <data-setup-data data-ng-show="selectedNode == 'data'"></data-setup-data>
+        <data-manage-fields data-ng-show="selectedNode == 'manageFields'"></data-manage-fields>
+    </div>
+</div>

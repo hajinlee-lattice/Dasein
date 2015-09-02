@@ -109,6 +109,8 @@ mod.service('FeatureFlagService', function ($q, BrowserStorageUtility, RightsUti
         UpdateFlag(flags.MODEL_HISTORY_PAGE, RightsUtility.currentUserMay("View", "Reporting"));
         UpdateFlag(flags.SYSTEM_SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configuration"));
         UpdateFlag(flags.ACTIVATE_MODEL_PAGE, RightsUtility.currentUserMay("Edit", "Configuration"));
+
+        UpdateFlag(flags.SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configuration"));
     }
 
 });

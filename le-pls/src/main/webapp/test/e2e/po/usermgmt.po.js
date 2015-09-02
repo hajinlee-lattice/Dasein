@@ -41,6 +41,11 @@ var UserManagement = function() {
             expected ? "should see Model Creation History" : "should not see Model Creation History");
     };
 
+    this.canSeeSetupLink = function (expected) {
+        helper.elementExists(userDropdown.SetupLink, expected,
+            expected ? "should see Setup" : "should not see Setup");
+    };
+
     this.canSeeHiddenAdminLink = function(expected) {
         element.all(by.css('a.model')).first().click();
         browser.driver.wait(element(by.css('a.back-button')).isPresent(),

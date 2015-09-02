@@ -11,12 +11,23 @@
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.css"/>
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.dataviz.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.mobile.all.min.css">
     <link rel="stylesheet" type="text/css" href="assets/styles/production_<%= versionString %>.min.css"/>
     /build -->
     <!-- build:remove:dist -->
     <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css"/>
     <link rel="stylesheet" type="text/css" href="lib/css/jquery.qtip.css"/>
     <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.css"/>
+
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.mobile.all.min.css">
 
     <link href="assets/styles/production.css" rel="stylesheet" type="text/css" />
     <!-- /build -->
@@ -80,6 +91,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="lib/js/jstorage.js"></script>
 <script src="lib/js/alasql.min.js"></script>
 <script src="lib/js/FileSaver.js"></script>
+<script src="lib/js/kendo.all.min.js"></script>
 
 <!-- self-host vendors -->
 <script src="app/AppCommon/vendor/date.format.js"></script>
@@ -146,6 +158,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidget.js"></script>
 <script src="app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidget.js"></script>
 <script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
+<script src="app/AppCommon/widgets/manageFieldsWidget/ManageFieldsWidget.js"></script>
 
 <!-- app specific -->
 <script src="app/app.js"></script>
@@ -164,6 +177,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/config/services/ConfigService.js"></script>
 <script src="app/models/services/ModelService.js"></script>
 <script src="app/userManagement/services/UserManagementService.js"></script>
+<script src="app/setup/services/ManageFieldsService.js"></script>
 
 <script src="app/login/controllers/LoginController.js"></script>
 <script src="app/login/controllers/UpdatePasswordController.js"></script>
@@ -186,6 +200,10 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/userManagement/modals/AddUserModal.js"></script>
 <script src="app/userManagement/modals/DeleteUserModal.js"></script>
 <script src="app/userManagement/modals/EditUserModal.js"></script>
+
+<script src="app/setup/controllers/SetupController.js"></script>
+<script src="app/setup/controllers/ManageFieldsController.js"></script>
+<script src="app/setup/modals/EditFieldModel.js"></script>
 <!-- /build -->
 
 <!-- build:js inline -->
@@ -215,6 +233,7 @@ Use DOMUtil.isIE() to detect internet explorer.
         {path:cdnroot + "jStorage/<%= version.jStorage %>/jstorage.min.js", fallback:"lib/js/jstorage.js"},
         {path:cdnroot + "alasql/<%= version.alasql %>/alasql.min.js", fallback:"lib/js/alasql.min.js"},
         {path:cdnroot + "FileSaver.js/<%= version.FileSaver %>/FileSaver.min.js", fallback:"lib/js/FileSaver.js"},
+        {path:"//cdn.kendostatic.com/<%= version.kendo %>/js/kendo.all.min.js", fallback:"/lib/js/kendo.all.min.js"},
 
         {path:cdnroot + "webfont/<%= version.webfont %>/webfontloader.js", fallback:"lib/js/webfontloader.js"},
 

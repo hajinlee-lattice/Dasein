@@ -23,7 +23,9 @@ module.exports = function (grunt) {
             FileSaver: '2014-11-29',
 
             bootstrap: '3.3.4',
-            "font-awesome": '4.3.0'
+            "font-awesome": '4.3.0',
+
+            kendo: '2015.2.805'
         },
         env:  {
             dev:         {
@@ -155,6 +157,44 @@ module.exports = function (grunt) {
                     'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.woff2'
                 ],
                 dest: '<%= pls.app %>/lib/fonts'
+            },
+
+            kendojs: {
+                options: {
+                    baseUrl: 'http://cdn.kendostatic.com/<%= pls.version.kendo %>/js/'
+                },
+                src: ['kendo.all.min.js', 'kendo.all.min.js'],
+                dest: '<%= pls.app %>/lib/js'
+            },
+
+            kendocss: {
+                options: {
+                    baseUrl: 'http://cdn.kendostatic.com/<%= pls.version.kendo %>/styles/'
+                },
+                src: [
+                    'kendo.common-bootstrap.min.css',
+                    'kendo.bootstrap.min.css',
+                    'kendo.dataviz.min.css',
+                    'kendo.dataviz.bootstrap.min.css',
+                    'kendo.mobile.all.min.css'
+                ],
+                dest: '<%= pls.app %>/lib/css'
+            },
+
+            kendofonts: {
+                options: {
+                    baseUrl: 'http://cdn.kendostatic.com/<%= pls.version.kendo %>/styles/images/'
+                },
+                src: ['kendoui.woff', 'kendoui.woff'],
+                dest: '<%= pls.app %>/lib/css/images'
+            },
+
+            kendoimages: {
+                options: {
+                    baseUrl: 'http://cdn.kendostatic.com/<%= pls.version.kendo %>/styles/'
+                },
+                src: ['Bootstrap/sprite.png', 'Bootstrap/loading-image.gif'],
+                dest: '<%= pls.app %>/lib/css/Bootstrap'
             }
         },
 
@@ -537,7 +577,7 @@ module.exports = function (grunt) {
         },
 
         concurrent: {
-            wget:    ['wget:angular', 'wget:crypto', 'wget:js', 'wget:css', 'wget:fonts'],
+            wget:    ['wget:angular', 'wget:crypto', 'wget:js', 'wget:css', 'wget:fonts', 'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages'],
             test:    ['jshint:dist', 'karma:unit'],
             mac:     ['e2eChrome', 'e2eFirefox', 'e2eSafari'],
             windows: ['e2eChrome']

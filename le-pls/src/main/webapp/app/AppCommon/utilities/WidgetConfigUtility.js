@@ -32,6 +32,7 @@ angular.module('mainApp.appCommon.utilities.WidgetConfigUtility', [
     this.ADMIN_INFO_ALERTS_WIDGET = 'AdminInfoAlertsWidget';
     this.LEADS_TAB_WIDGET = 'LeadsTabWidget';
     this.USER_MANAGEMENT_WIDGET = 'UserManagementWidget';
+    this.MANAGE_FIELDS_WIDGET = 'ManageFieldsWidget';
 
     // Values for "ActiveWidgets" WidgetConfig property
     this.ACTIVE_WIDGET_ALL = "All";

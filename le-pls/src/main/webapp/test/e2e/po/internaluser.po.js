@@ -15,6 +15,7 @@ var InternalUser = function() {
                 userManagement.canSeeSystemSetupLink(false);
                 userManagement.canSeeActivateModelLink(false);
                 userManagement.canSeeModelCreationHistoryLink(true);
+                userManagement.canSeeSetupLink(false);
                 userDropdown.toggleDropdown();
 
                 userManagement.canSeeHiddenAdminLink(true);
