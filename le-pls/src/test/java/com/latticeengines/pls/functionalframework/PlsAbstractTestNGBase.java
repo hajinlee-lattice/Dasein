@@ -17,7 +17,12 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -41,7 +46,7 @@ import com.latticeengines.security.exposed.service.InternalTestUserService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
-abstract public class PlsAbstractTestNGBase extends AbstractTestNGSpringContextTests {
+public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected static final String adminUsername = "bnguyen@lattice-engines.com";
     protected static final String adminPassword = "tahoe";
