@@ -48,14 +48,14 @@ public class PLSComponentManager {
                 tenantService.updateTenant(tenant);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028, String.format("Updating tenant %s error. " +
-                        "May because the tenant name already exists.", tenant.getId()), e);
+                        "Tenant name possibly already exists.", tenant.getId()), e);
             }
         } else {
             try {
                 tenantService.registerTenant(tenant);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028, String.format("Registrating tenant %s error. " +
-                        "May because the tenant name already exists.", tenant.getId()), e);
+                        "Tenant name possibly already exists.", tenant.getId()), e);
             }
         }
 
