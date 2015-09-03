@@ -22,9 +22,9 @@ angular.module('mainApp.setup.controllers.SetupController', [
             $event.preventDefault();
         }
 
-        var nodeName = $event.currentTarget.attributes["node-name"].value
+        var nodeName = $event.currentTarget.attributes["node-name"].value;
         $scope.selectedNode = nodeName;
-    }
+    };
 
     $scope.nodeHandleClicked = function ($event) {
         if ($event != null) {
@@ -40,6 +40,6 @@ angular.module('mainApp.setup.controllers.SetupController', [
             element.removeClass("fa-caret-right").addClass("fa-caret-down");
             element.parents("li:first").siblings().show();
         }
-    }
+    };
 
 });

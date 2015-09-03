@@ -16,7 +16,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
             var contentContainer = $('#fieldDetails');
             $compile(contentContainer.html(html))(scope);
         });
-    }
+    };
 
 })
 
@@ -30,5 +30,5 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
         }
 
         $scope.$parent.showFieldDetails = false;
-    }
+    };
 });

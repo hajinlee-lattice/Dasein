@@ -41,9 +41,9 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
             var exist = false; 
             for (var j = 0; j < allOptions.length; j++) {
-                if (allOptions[j][0] == field.Source 
-                    && allOptions[j][1] == field.Object 
-                    && allOptions[j][2] == field.Category) {
+                if (allOptions[j][0] == field.Source && 
+                        allOptions[j][1] == field.Object &&
+                        allOptions[j][2] == field.Category) {
                     exist = true;
                     break;
                 }
@@ -88,10 +88,9 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         $scope.gridOptions = {
             dataSource: dataSource,
+            pageable: pageable,
             sortable: true,
             scrollable: false,
-            pageable: pageable,
-            navigatable: true,
             columns: [
                 {
                     field: "ColumnName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FIELD'),
@@ -137,72 +136,86 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     }
 
     $scope.selectChanged = function($event, filerColumn) {
-        var allOptions = $scope.allOptions;
         if (filerColumn == "source") {
-            var objects = [];
-            var categories = [];
-            var selectedSource = $scope.source;
-            var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
-            for (var i = 0; i < allOptions.length; i++) {
-                if (sourceIsEmpty || allOptions[i][0] == selectedSource) {
-                    var object = allOptions[i][1];
-                    if (!StringUtility.IsEmptyString(object) && objects.indexOf(object) < 0) {
-                        objects.push(object);
-                    }
-                }
-            }
-            for (var i = 0; i < allOptions.length; i++) {
-                if (sourceIsEmpty || allOptions[i][0] == selectedSource) {
-                    var category = allOptions[i][2];
-                    if (!StringUtility.IsEmptyString(category) && categories.indexOf(category) < 0) {
-                        categories.push(category);
-                    }
-                }
-            }
-            $scope.objectsToSelect = objects.sort();
-            $scope.categoriesToSelect = categories.sort();
+            sourceSelectChanged();
         } else if (filerColumn == "object") {
-            var categories = [];
-            var selectedSource = $scope.source;
-            var selectedObject = $scope.object;
-            var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
-            var objectIsEmpty = StringUtility.IsEmptyString(selectedObject);
-            for (var i = 0; i < allOptions.length; i++) {
-                if ((sourceIsEmpty || allOptions[i][0] == selectedSource) 
-                    && (objectIsEmpty || allOptions[i][1] == selectedObject)) {
-                    var category = allOptions[i][2];
-                    if (!StringUtility.IsEmptyString(category) && categories.indexOf(category) < 0) {
-                        categories.push(category);
-                    }
-                }
-            }
-            $scope.categoriesToSelect = categories.sort();
+            objectSelectChanged();
         } else if (filerColumn == "category") {
-            var objects = [];
-            var selectedSource = $scope.source;
-            var selectedCategory = $scope.category;
-            var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
-            var categoryIsEmpty = StringUtility.IsEmptyString(selectedCategory);
-            for (var i = 0; i < allOptions.length; i++) {
-                if ((sourceIsEmpty || allOptions[i][0] == selectedSource) 
-                    && (categoryIsEmpty || allOptions[i][2] == selectedCategory)) {
-                    var object = allOptions[i][1];
-                    if (!StringUtility.IsEmptyString(object) && objects.indexOf(object) < 0) {
-                        objects.push(object);
-                    }
-                }
-            }
-            $scope.objectsToSelect = objects.sort();
+            categorySelectChanged();
         }
 
         $scope.filterFields($event);
+    };
+
+    function sourceSelectChanged() {
+        var objects = [];
+        var categories = [];
+        var allOptions = $scope.allOptions;
+        var selectedSource = $scope.source;
+        var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
+        for (var i = 0; i < allOptions.length; i++) {
+            if (sourceIsEmpty || allOptions[i][0] == selectedSource) {
+                var object = allOptions[i][1];
+                if (!StringUtility.IsEmptyString(object) && objects.indexOf(object) < 0) {
+                    objects.push(object);
+                }
+            }
+        }
+        for (var j = 0; j < allOptions.length; j++) {
+            if (sourceIsEmpty || allOptions[j][0] == selectedSource) {
+                var category = allOptions[j][2];
+                if (!StringUtility.IsEmptyString(category) && categories.indexOf(category) < 0) {
+                    categories.push(category);
+                }
+            }
+        }
+        $scope.objectsToSelect = objects.sort();
+        $scope.categoriesToSelect = categories.sort();
+    }
+
+    function objectSelectChanged() {
+        var categories = [];
+        var allOptions = $scope.allOptions;
+        var selectedSource = $scope.source;
+        var selectedObject = $scope.object;
+        var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
+        var objectIsEmpty = StringUtility.IsEmptyString(selectedObject);
+        for (var i = 0; i < allOptions.length; i++) {
+            if ((sourceIsEmpty || allOptions[i][0] == selectedSource) &&
+                    (objectIsEmpty || allOptions[i][1] == selectedObject)) {
+                var category = allOptions[i][2];
+                if (!StringUtility.IsEmptyString(category) && categories.indexOf(category) < 0) {
+                    categories.push(category);
+                }
+            }
+        }
+        $scope.categoriesToSelect = categories.sort();
+    }
+
+    function categorySelectChanged() {
+        var objects = [];
+        var allOptions = $scope.allOptions;
+        var selectedSource = $scope.source;
+        var selectedCategory = $scope.category;
+        var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
+        var categoryIsEmpty = StringUtility.IsEmptyString(selectedCategory);
+        for (var i = 0; i < allOptions.length; i++) {
+            if ((sourceIsEmpty || allOptions[i][0] == selectedSource) &&
+                    (categoryIsEmpty || allOptions[i][2] == selectedCategory)) {
+                var object = allOptions[i][1];
+                if (!StringUtility.IsEmptyString(object) && objects.indexOf(object) < 0) {
+                    objects.push(object);
+                }
+            }
+        }
+        $scope.objectsToSelect = objects.sort();
     }
 
     $scope.keyEnterFilter = function($event) {
         if ($event.keyCode === 13) {
             $scope.filterFields($event);
         }
-    }
+    };
 
     $scope.filterFields = function($event) {
         if ($event != null) {
@@ -262,7 +275,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                         { logic: "or", filters: orFilters },
                         { logic: "or", filters: errorFilters }
                     ]
-                }
+                };
             } else {
                 filter = { logic: "or", filters: orFilters };
             }
@@ -274,7 +287,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                         { logic: "and", filters: andFilters },
                         { logic: "or", filters: errorFilters }
                     ]
-                }
+                };
             } else {
                 filter = { logic: "and", filters: andFilters };
             }
@@ -286,7 +299,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             }
         }
         $("#fieldsGrid").data("kendoGrid").dataSource.filter(filter);
-    }
+    };
 
     $scope.editButtonClicked = function($event) {
         if ($event != null) {
@@ -299,7 +312,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         } else {
             $("#fieldsGrid").data("kendoGrid").setOptions({editable: false});
         }
-    }
+    };
 
     $scope.saveButtonClicked = function($event) {
         if ($event != null) {
@@ -310,7 +323,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         data.saveChanges();
         data.setOptions({editable: false});
         $scope.editable = false;
-    }
+    };
 
     $scope.cancelButtonClicked = function($event) {
         if ($event != null) {
@@ -321,7 +334,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         data.cancelChanges();
         data.setOptions({editable: false});
         $scope.editable = false;
-    }
+    };
 
     $scope.fieldLinkClicked = function($event, field) {
         if ($event != null) {
@@ -329,7 +342,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         }
 
         EditFieldModel.show(field);
-    }
+    };
 })
 
 .directive('manageFieldsWidget', function () {
