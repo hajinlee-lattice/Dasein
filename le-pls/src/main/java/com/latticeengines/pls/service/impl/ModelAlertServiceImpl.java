@@ -109,11 +109,15 @@ public class ModelAlertServiceImpl implements ModelAlertService {
             Long totalLeads = modelSummaryInfo.getTotalLeads();
             Long totalConversions = modelSummaryInfo.getTotalConversions();
             Double conversionRate = ((double) totalConversions / totalLeads) * 100;
+
+            if (totalConversions < minSuccessEvents) {
+                modelQualityWarnings.setLowSuccessEvents(totalConversions);
+                modelQualityWarnings.setMinSuccessEvents(minSuccessEvents);
+            }
+
             if (conversionRate < minConversionPercentage) {
                 modelQualityWarnings.setLowConversionPercentage(conversionRate);
                 modelQualityWarnings.setMinConversionPercentage(minConversionPercentage);
-                modelQualityWarnings.setLowSuccessEvents(totalConversions);
-                modelQualityWarnings.setMinSuccessEvents(minSuccessEvents);
             }
 
             Double rocScore = modelSummaryInfo.getRocScore();
@@ -280,6 +284,9 @@ public class ModelAlertServiceImpl implements ModelAlertService {
 
     private List<String> fillListFromJsonArray(JSONArray array) {
         List<String> returnList = new ArrayList<String>();
+        if (array == null) {
+            return returnList;
+        }
         for (int i = 0; i < array.size(); i++) {
             JSONObject obj = (JSONObject) array.get(i);
             String key = (String) obj.get(METADATA_DIAGNOSTICS_KEY);

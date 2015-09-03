@@ -7,6 +7,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelAlertService;
+import com.latticeengines.pls.util.ModelIdUtils;
 
 public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -54,7 +56,8 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
         setupUsers();
 
         tenantId = testingTenants.get(0).getId();
-        dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + MODEL_ID + "/container_01/";
+        dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + ModelIdUtils.extractUuid(MODEL_ID)
+                + "/container_01/";
         modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
         metadataDiagnosticsUrl = ClassLoader
@@ -122,6 +125,30 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
         }
         assertNotNull(metadataWarning);
         assertEquals(metadataWarning.getInvalidApprovedUsageAttributes().size(), 2);
+        assertEquals(metadataWarning.getInvalidCategoryAttributes().size(), 2);
+        assertEquals(metadataWarning.getInvalidDisplayNameAttributes().size(), 2);
+        assertEquals(metadataWarning.getInvalidStatisticalTypeAttributes().size(), 2);
+        assertEquals(metadataWarning.getInvalidTagsAttributes().size(), 3);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testGenerateMissingMetaDataWarningsReturnsCorrectWarningWithFileInHdfs")
+    public void testGenerateMissingMetaDataWarningsReturnsCorrectWarningWithSomeAnnotationMissing() throws Exception {
+        if (HdfsUtils.fileExists(yarnConfiguration, metadataDiagnosticsFileHdfsPath)) {
+            HdfsUtils.rmdir(yarnConfiguration, metadataDiagnosticsFileHdfsPath);
+        }
+
+        URL metadataUrl = ClassLoader
+                .getSystemResource("com/latticeengines/pls/functionalframework/metadata-diagnostics-missing-approvedUsageAnnotation.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, metadataUrl.getFile(), metadataDiagnosticsFileHdfsPath);
+
+        ModelAlerts.MissingMetaDataWarnings metadataWarning = null;
+        try {
+            metadataWarning = modelAlertService.generateMissingMetaDataWarnings(tenantId, MODEL_ID);
+        } catch (Exception e) {
+            System.out.println(ExceptionUtils.getFullStackTrace(e));
+            Assert.fail("Should NOT have thrown an exception");
+        }
+        assertNotNull(metadataWarning);
         assertEquals(metadataWarning.getInvalidCategoryAttributes().size(), 2);
         assertEquals(metadataWarning.getInvalidDisplayNameAttributes().size(), 2);
         assertEquals(metadataWarning.getInvalidStatisticalTypeAttributes().size(), 2);

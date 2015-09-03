@@ -1,0 +1,74 @@
+{
+  "correct": false,
+  "TagsAnnotationErrors": [
+    {
+      "key": "Activity_Count_Fill_Out_Form",
+      "value": {
+        "FieldName": "tags",
+        "AnnotationName": "NotNullAnnotationValidator"
+      }
+    },
+    {
+      "key": "Activity_Count_Interesting_Moment_Any",
+      "value": {
+        "FieldName": "tags",
+        "AnnotationName": "AllowedValuesAnnotationValidator"
+      }
+    },
+    {
+      "key": "Activity_Count_Interesting_Moment_Any_2",
+      "value": {
+        "FieldName": "tags",
+        "AnnotationName": "AllowedValuesAnnotationValidator"
+      }
+    }
+  ],
+  "CategoryAnnotationErrors": [
+    {
+      "key": "Activity_Count_Fill_Out_Form",
+      "value": {
+        "FieldName": "extensions",
+        "AnnotationName": "RequiredKeysInMapAnnotationValidator"
+      }
+    },
+    {
+      "key": "Activity_Count_Interesting_Moment_Any",
+      "value": {
+        "FieldName": "extensions",
+        "AnnotationName": "RequiredKeysInMapAnnotationValidator"
+      }
+    }
+  ],
+  "DisplayNameAnnotationErrors": [
+    {
+      "key": "Activity_Count_Fill_Out_Form",
+      "value": {
+        "FieldName": "displayName",
+        "AnnotationName": "NotNullAnnotationValidator"
+      }
+    },
+    {
+      "key": "Activity_Count_Interesting_Moment_Any",
+      "value": {
+        "FieldName": "displayName",
+        "AnnotationName": "NotEmptyStringAnnotationValidator"
+      }
+    }
+  ],
+  "StatisticalTypeAnnotationErrors": [
+    {
+      "key": "Activity_Count_Fill_Out_Form",
+      "value": {
+        "FieldName": "statisticalType",
+        "AnnotationName": "NotNullAnnotationValidator"
+      }
+    },
+    {
+      "key": "Activity_Count_Interesting_Moment_Any",
+      "value": {
+        "FieldName": "statisticalType",
+        "AnnotationName": "AllowedValuesAnnotationValidator"
+      }
+    }
+  ]
+}
