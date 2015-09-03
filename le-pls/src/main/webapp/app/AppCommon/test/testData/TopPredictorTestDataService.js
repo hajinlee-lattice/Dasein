@@ -7912,7 +7912,7 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                         "ModelAndAllInsights"
                     ], 
                     "FundamentalType": "numeric", 
-                    "Category": "Technologies", 
+                    "Category": "C", 
                     "UncertaintyCoefficient": 0.05654259110461181
                 }, 
                 {
@@ -8514,7 +8514,7 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                         "ModelAndAllInsights"
                     ], 
                     "FundamentalType": "numeric", 
-                    "Category": "Firmographics", 
+                    "Category": "B", 
                     "UncertaintyCoefficient": 0.022376288714367518
                 }, 
                 {
@@ -8555,7 +8555,7 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                         "Model"
                     ], 
                     "FundamentalType": "boolean", 
-                    "Category": null, 
+                    "Category": "A", 
                     "UncertaintyCoefficient": 0.02017346597890798
                 }, 
                 {

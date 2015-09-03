@@ -5,7 +5,8 @@ angular.module('mainApp.appCommon.widgets.AdminInfoAlertsWidget', [
 ])
 .controller('AdminInfoAlertsWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ModelAlertsService) {
     var modelAlerts = $scope.data.ModelAlerts;
-    $scope.warnings = ModelAlertsService.GetWarnings(modelAlerts);
+    var suppressedCategories = $scope.data.SuppressedCategories;
+    $scope.warnings = ModelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
 })
 .directive('adminInfoAlertsWidget', function () {
     return {

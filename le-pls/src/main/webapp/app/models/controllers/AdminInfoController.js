@@ -2,6 +2,7 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
+    'mainApp.appCommon.services.TopPredictorService',
     'mainApp.core.services.WidgetService',
     'mainApp.core.utilities.NavUtility',
     'mainApp.models.services.ModelService',
@@ -47,10 +48,14 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
     var showAlertsTab = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
     if (showAlertsTab) {
         $scope.loading= true;
+
+        var suppressedCategories = data.SuppressedCategories;
+
         ModelService.GetModelAlertsByModelId(data.ModelId).then(function(result) {
             $scope.loading= false;
             if (result != null && result.success === true) {
                 data.ModelAlerts = result.resultObj;
+                data.SuppressedCategories = suppressedCategories;
 
                 var contentContainer = $('#adminInfoContainer');
                 WidgetFrameworkService.CreateWidget({

@@ -4,7 +4,7 @@ angular.module('mainApp.appCommon.services.ModelAlertsService', [
 ])
 .service('ModelAlertsService', function ($filter, StringUtility, ResourceUtility) {
 
-    this.GetWarnings = function (modelAlerts) {
+    this.GetWarnings = function (modelAlerts, suppressedCategories) {
         var warnings = {};
         warnings.noWarning = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_NO_WARNING");
         warnings.modelQualityWarningsTitle = ResourceUtility.getString('ADMIN_INFO_ALERTS_PAGE_MODEL_QUALITY_TITLE');
@@ -35,7 +35,7 @@ angular.module('mainApp.appCommon.services.ModelAlertsService', [
             addInvalidCategoryAttributesWarning(missingMetaDataWarnings, missingMetaDataWarningsObj);
             addInvalidDisplayNameAttributesWarning(missingMetaDataWarnings, missingMetaDataWarningsObj);
             addInvalidStatisticalTypeAttributesWarning(missingMetaDataWarnings, missingMetaDataWarningsObj);
-            addExcessiveCategoriesInModelSummaryWarning(missingMetaDataWarnings, missingMetaDataWarningsObj);
+            addExcessiveCategoriesInModelSummaryWarning(missingMetaDataWarnings, suppressedCategories);
         }
         warnings.noMissingMetaDataWarnings = (missingMetaDataWarnings.length === 0);
         warnings.missingMetaDataWarnings = missingMetaDataWarnings;
@@ -207,21 +207,34 @@ angular.module('mainApp.appCommon.services.ModelAlertsService', [
         }
     }
 
-    function addExcessiveCategoriesInModelSummaryWarning(warnings, missingMetaDataWarnings) {
-        var categories = missingMetaDataWarnings.ExcessiveCategoriesInModelSummary;
-        var maxValue = missingMetaDataWarnings.MaxCategoriesInModelSummary;
-        if (categories != null && categories.length > 0 && maxValue != null) {
+    function addExcessiveCategoriesInModelSummaryWarning(warnings, suppressedCategories) {
+        var categories = suppressedCategories;
+        //  We currently only show top 8 categories in the UI
+        if (categories != null && categories.length > 0) {
             var warning = {};
-            var count = $filter('number')(categories.length, 0);
-            maxValue = $filter('number')(maxValue, 0);
+            var count = $filter('number')(categories.length + 8, 0);
+            var maxValue = 8;
+            var categoryNames = getCategoryNames(categories);
             warning.title = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_MODEL_SUMMARY_CONTAINS_OVERLY_CATEFORIES", [count, maxValue]);
             warning.description = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_TWO_CATEFORIES_AND_ATTRIBUTES_SUPPRESSED_FROM_TOP_PREDICTORS_UI");
             warning.impactedLabel = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_IMPACTED_CATEGORIES");
-            warning.impactedContent = joinStringList(categories);
+            warning.impactedContent = joinStringList(categoryNames);
             warning.count = count;
             warning.maxValue = maxValue;
             warnings.push(warning);
         }
+    }
+
+    function getCategoryNames(categories) {
+        var categoryNames = [];
+        if (categories == null) {
+            return categoryNames;
+        }
+        for (var i = 0; i < categories.length; i++) {
+            var category = categories[i];
+            categoryNames.push(category.name);
+        }
+        return categoryNames;
     }
 
     function joinMapList(elements, fractionSize) {

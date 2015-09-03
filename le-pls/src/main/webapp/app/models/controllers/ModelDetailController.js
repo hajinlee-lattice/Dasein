@@ -51,6 +51,8 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             model.ThresholdDecileData = thresholdData.DecileData;
             model.ThresholdLiftData = thresholdData.LiftData;
 
+            model.SuppressedCategories = TopPredictorService.GetSuppressedCategories(model);
+
             var contentContainer = $('#modelDetailContainer');
             WidgetFrameworkService.CreateWidget({
                 element: contentContainer,

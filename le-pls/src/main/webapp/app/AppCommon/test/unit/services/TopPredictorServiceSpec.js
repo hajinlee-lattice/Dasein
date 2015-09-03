@@ -26,61 +26,27 @@ describe('TopPredictorServiceSpec Tests', function () {
         ]);
 
     });
-    
-    describe('ShowBasedOnTags tests', function () {
-        var nullPredictor = {
-            Tags: null
-        };
-        it('should return false if Tags is null', function () {
-            var toReturn = topPredictorService.ShowBasedOnTags(nullPredictor, true);
-            expect(toReturn).toEqual(false);
-        });
 
-        var externalPredictor = {
-            Tags: ["External"]
-        };
-        it('should return true if Tags contains External and we are looking for External', function () {
-            var toReturn = topPredictorService.ShowBasedOnTags(externalPredictor, true);
-            expect(toReturn).toEqual(true);
-        });
-
-        var externalPredictor2 = {
-            Tags: ["External"]
-        };
-        it('should return false if Tags contains External and we are looking for Internal', function () {
-            var toReturn = topPredictorService.ShowBasedOnTags(externalPredictor2, false);
-            expect(toReturn).toEqual(false);
-        });
-
-        var internalPredictor = {
-            Tags: ["Internal"]
-        };
-        it('should return true if Tags contains Internal and we are looking for Internal', function () {
-            var toReturn = topPredictorService.ShowBasedOnTags(internalPredictor, false);
-            expect(toReturn).toEqual(true);
-        });
-
-        var internalPredictor2 = {
-            Tags: ["Internal"]
-        };
-        it('should return false if Tags contains Internal and we are looking for External', function () {
-            var toReturn = topPredictorService.ShowBasedOnTags(internalPredictor, true);
-            expect(toReturn).toEqual(false);
-        });
-
-        var badPredictor = {
-            Tags: ["Nope"]
-        };
-        it('should return false if Tags contains an invalid value', function () {
-            var toReturn = topPredictorService.ShowBasedOnTags(badPredictor, true);
-            expect(toReturn).toEqual(false);
+    describe('GetSuppressedCategories tests', function () {
+        it('should return 1 as the suppressed category in the test modelSummary', function () {
+            var toReturn = topPredictorService.GetSuppressedCategories(sampleModelSummary);
+            var expected = [{name: 'Financial', categoryName: 'Financial', UncertaintyCoefficient: 0.000023156115769041482, size: 1, color: null, children: []}];
+            expect(toReturn.length).toEqual(1);
+            expect(toReturn).toEqual(expected);
         });
     });
-
-    describe('GetAttributesByCategory tests', function () {
-        it('should only return 50 attributes if 50 is specified and there are more than 50 in total', function () {
-            var categoryList = topPredictorService.GetAttributesByCategory(sampleModelSummary, "Technologies", "blah", 50);
-            expect(categoryList.length).toEqual(50);
+    
+    describe('GetTopCategories tests', function () {
+        it('should return 8 as the top categories in the test modelSummary', function () {
+            var toReturn = topPredictorService.GetTopCategories(sampleModelSummary);
+            expect(toReturn.length).toEqual(8);
+        });
+    });
+    
+    describe('GetAllCategories tests', function () {
+        it('should return 9 as the total number of categories in the test modelSummary', function () {
+            var toReturn = topPredictorService.GetAllCategories(sampleModelSummary);
+            expect(toReturn.length).toEqual(9);
         });
     });
 
@@ -93,16 +59,16 @@ describe('TopPredictorServiceSpec Tests', function () {
         };
 
         var expected = {
-            totalAttributeValues: 188,
-            total: 58,
+            totalAttributeValues: 186,
+            total: 57,
             categories: [{
                 name: "Technologies",
-                count: 58,
+                count: 57,
                 color: "#4bd1bb",
                 activeClass: ""
             }]
         };
-        it('should return 58 as the total for Technologies attribute-value in the test modelSummary', function () {
+        it('should return 57 as the total for Technologies attribute-value in the test modelSummary', function () {
             var toReturn = topPredictorService.GetNumberOfAttributesByCategory([testCategory], true, sampleModelSummary);
             expect(toReturn).toEqual(expected);
         });
@@ -267,6 +233,64 @@ describe('TopPredictorServiceSpec Tests', function () {
 
             var internalAttributesObj = topPredictorService.GetNumberOfAttributesByCategory(chartData.children, false, sampleModelSummary);
             expect(internalAttributesObj.total).toEqual(0);
+        });
+    });
+    
+    describe('ShowBasedOnInternalOrExternal tests', function () {
+        var nullPredictor = {
+            Tags: null
+        };
+        it('should return false if Tags is null', function () {
+            var toReturn = topPredictorService.ShowBasedOnInternalOrExternal(nullPredictor, true);
+            expect(toReturn).toEqual(false);
+        });
+
+        var externalPredictor = {
+            Tags: ["External"]
+        };
+        it('should return true if Tags contains External and we are looking for External', function () {
+            var toReturn = topPredictorService.ShowBasedOnInternalOrExternal(externalPredictor, true);
+            expect(toReturn).toEqual(true);
+        });
+
+        var externalPredictor2 = {
+            Tags: ["External"]
+        };
+        it('should return false if Tags contains External and we are looking for Internal', function () {
+            var toReturn = topPredictorService.ShowBasedOnInternalOrExternal(externalPredictor2, false);
+            expect(toReturn).toEqual(false);
+        });
+
+        var internalPredictor = {
+            Tags: ["Internal"]
+        };
+        it('should return true if Tags contains Internal and we are looking for Internal', function () {
+            var toReturn = topPredictorService.ShowBasedOnInternalOrExternal(internalPredictor, false);
+            expect(toReturn).toEqual(true);
+        });
+
+        var internalPredictor2 = {
+            Tags: ["Internal"]
+        };
+        it('should return false if Tags contains Internal and we are looking for External', function () {
+            var toReturn = topPredictorService.ShowBasedOnInternalOrExternal(internalPredictor, true);
+            expect(toReturn).toEqual(false);
+        });
+
+        var badPredictor = {
+            Tags: ["Nope"]
+        };
+        it('should return false if Tags contains an invalid value', function () {
+            var toReturn = topPredictorService.ShowBasedOnInternalOrExternal(badPredictor, true);
+            expect(toReturn).toEqual(false);
+        });
+    });
+    
+    
+    describe('GetAttributesByCategory tests', function () {
+        it('should only return 50 attributes if 50 is specified and there are more than 50 in total', function () {
+            var categoryList = topPredictorService.GetAttributesByCategory(sampleModelSummary, "Technologies", "blah", 50);
+            expect(categoryList.length).toEqual(50);
         });
     });
 

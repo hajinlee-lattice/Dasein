@@ -5,7 +5,152 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
     'mainApp.appCommon.utilities.UnderscoreUtility'
 ])
 .service('TopPredictorService', function (_, StringUtility, AnalyticAttributeUtility, ResourceUtility) {
-    this.ShowBasedOnTags = function (predictor, isExternal) {
+
+    this.GetSuppressedCategories = function (modelSummary) {
+        var categories = this.GetAllCategories(modelSummary);
+        return this.SelectSuppressedCategories(modelSummary, categories);
+    };
+
+    this.GetTopCategories = function (modelSummary) {
+        var categories = this.GetAllCategories(modelSummary);
+        return this.SelectTopCategories(modelSummary, categories);
+    };
+
+    this.GetAllCategories = function (modelSummary) {
+        if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
+            return null;
+        }
+
+        // First sort all predictors by UncertaintyCoefficient
+        modelSummary.Predictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
+
+        var categories = [];
+        var categoryNames = [];
+        var category;
+        for (var i = 0; i < modelSummary.Predictors.length; i++) {
+            var predictor = modelSummary.Predictors[i];
+            if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
+                this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads) &&
+                !StringUtility.IsEmptyString(predictor.Category) &&
+                categoryNames.indexOf(predictor.Category) === -1) {
+                categoryNames.push(predictor.Category);
+                category = {
+                    name: predictor.Category,
+                    categoryName: predictor.Category,
+                    UncertaintyCoefficient: predictor.UncertaintyCoefficient,
+                    size: 1, // This doesn't matter because the inner ring takes on the size of the outer
+                    color: null,
+                    children: []
+                };
+                categories.push(category);
+            }
+        }
+        return categories;
+    };
+
+    //=======================================================================
+    // Top categories should be determined based on sum of predictive power
+    // for top X attributes in a given category. Note: X is currently 3.
+    //=======================================================================
+    this.SelectTopCategories = function (modelSummary, categories) {
+        var sortedCategories = this.SortCategoriesByPowerSumDescending(modelSummary, categories);
+        var topCategories = sortedCategories;
+        //Select Maximum of 8 Categories
+        if (sortedCategories.length > 8) {
+            topCategories = sortedCategories.slice(0, 8);
+        }
+
+        return topCategories;
+    };
+
+    this.SelectSuppressedCategories = function (modelSummary, categories) {
+        var sortedCategories = this.SortCategoriesByPowerSumDescending(modelSummary, categories);
+        var suppressedCategories = null;
+        //Select Categories Except for The Top 8
+        if (sortedCategories.length > 8) {
+            suppressedCategories = sortedCategories.slice(8, sortedCategories.length);
+        }
+
+        return suppressedCategories;
+    };
+
+    this.SortCategoriesByPowerSumDescending = function (modelSummary, categories) {
+        if (categories == null) {
+            return null;
+        }
+
+        //Introduce PowerSum
+        var category, attributes;
+        for (var i = 0; i < categories.length; i++) {
+            category = categories[i];
+            attributes = this.GetAttributesByCategory(modelSummary, category.name, category.color, 3);
+            category.PowerSum = _.reduce(attributes, function(acc, e) { return acc + e.power; }, 0);
+        }
+
+        //Sort Descending and Remove PowerSum
+        categories = _.sortBy(categories, function(e) { return -e.PowerSum; });
+        _.each(categories, function(e) { delete e.PowerSum; });
+        return categories;
+    };
+
+    this.PredictorHasValidBuckets = function (predictor, totalLeads) {
+        if (predictor == null || totalLeads == null) {
+            return false;
+        }
+        var toReturn = true;
+        for (var y = 0; y < predictor.Elements.length; y++) {
+            var element = predictor.Elements[y];
+            var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+            var percentTotal = (element.Count / totalLeads) * 100;
+            if (attributeValue != null &&
+                (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE" ||
+                            attributeValue === "") && 
+                percentTotal >= 99.5) {
+                toReturn = false;
+                break;
+            }
+        }
+
+        return toReturn;
+    };
+
+    this.GetAttributesByCategory = function (modelSummary, categoryName, categoryColor, maxNumber) {
+        if (StringUtility.IsEmptyString(categoryName) || modelSummary.Predictors == null  || maxNumber == null) {
+            return [];
+        }
+
+        var totalPredictors = [];
+        for (var i = 0; i < modelSummary.Predictors.length; i++) {
+            if (categoryName == modelSummary.Predictors[i].Category) {
+                totalPredictors.push(modelSummary.Predictors[i]);
+            }
+        }
+        totalPredictors = totalPredictors.sort(this.SortByPredictivePower);
+
+        var toReturn = [];
+        for (var x = 0; x < totalPredictors.length; x++) {
+            if (toReturn.length == maxNumber) {
+                break;
+            }
+            var predictor = totalPredictors[x];
+            if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
+                        this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads) &&
+                (this.ShowBasedOnInternalOrExternal(predictor, true) || this.ShowBasedOnInternalOrExternal(predictor, false))) {
+
+                var displayPredictor = {
+                  name: predictor.Name,
+                  categoryName: categoryName,
+                  power: predictor.UncertaintyCoefficient,
+                  size: 1,
+                  color: categoryColor
+                };
+                toReturn.push(displayPredictor);
+            }
+        }
+        return toReturn;
+    };
+
+    this.ShowBasedOnInternalOrExternal = function (predictor, isExternal) {
         var toReturn = false;
         var tag = isExternal ? "External" : "Internal";
         if (predictor != null && predictor.Tags != null) {
@@ -40,9 +185,9 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
             for (var i = 0; i < modelSummary.Predictors.length; i++) {
                 var predictor = modelSummary.Predictors[i];
-                
-                if (predictor.Category == category.name && 
-                    this.ShowBasedOnTags(predictor, isExternal) &&
+
+                if (predictor.Category == category.name &&
+                    this.ShowBasedOnInternalOrExternal(predictor, isExternal) &&
                     AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
                     this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
                     for (var y = 0; y < predictor.Elements.length; y++) {
@@ -66,7 +211,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         return toReturn;
     };
-    
+
     this.SortByCategoryName = function (a, b) {
         if (a.name.toUpperCase() < b.name.toUpperCase()) {
             return -1;
@@ -77,7 +222,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         // a must be equal to b
         return 0;
     };
-    
+
     this.SortBySize = function (a, b) {
         if (a.size > b.size) {
             return -1;
@@ -88,7 +233,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         // a must be equal to b
         return 0;
     };
-    
+
     this.SortByPredictivePower = function (a, b) {
         if (a.UncertaintyCoefficient > b.UncertaintyCoefficient) {
             return -1;
@@ -99,7 +244,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         // a must be equal to b
         return 0;
     };
-    
+
     this.SortByLift = function (a, b) {
         if (a.Lift > b.Lift) {
             return -1;
@@ -110,7 +255,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         // a must be equal to b
         return 0;
     };
-    
+
     this.AssignColorsToCategories = function (categoryList) {
         if (categoryList == null || categoryList.length === 0) {
             return;
@@ -122,64 +267,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             categoryList[i].color = colorChoices[i];
         }
     };
-    
-    this.GetAttributesByCategory = function (modelSummary, categoryName, categoryColor, maxNumber) {
-        if (StringUtility.IsEmptyString(categoryName) || modelSummary.Predictors == null  || maxNumber == null) {
-            return [];
-        }
-        
-        var totalPredictors = [];
-        for (var i = 0; i < modelSummary.Predictors.length; i++) {
-            if (categoryName == modelSummary.Predictors[i].Category) {
-                totalPredictors.push(modelSummary.Predictors[i]);
-            }
-        }
-        totalPredictors = totalPredictors.sort(this.SortByPredictivePower);
-        
-        var toReturn = [];
-        for (var x = 0; x < totalPredictors.length; x++) {
-            if (toReturn.length == maxNumber) {
-                break;
-            }
-            var predictor = totalPredictors[x];
-            if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) && 
-                this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads) &&
-                (this.ShowBasedOnTags(predictor, true) || this.ShowBasedOnTags(predictor, false))) {
-                
-                var displayPredictor = {
-                  name: predictor.Name,
-                  categoryName: categoryName,
-                  power: predictor.UncertaintyCoefficient,
-                  size: 1,
-                  color: categoryColor
-                };
-                toReturn.push(displayPredictor);
-            } 
-        }
-        return toReturn;
-    };
-    
-    this.PredictorHasValidBuckets = function (predictor, totalLeads) {
-        if (predictor == null || totalLeads == null) {
-            return false;
-        }
-        var toReturn = true;
-        for (var y = 0; y < predictor.Elements.length; y++) {
-            var element = predictor.Elements[y];
-            var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
-            var percentTotal = (element.Count / totalLeads) * 100;
-            if (attributeValue != null && 
-                (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE" || 
-                		attributeValue === "") && 
-                percentTotal >= 99.5) {
-                toReturn = false;
-                break;
-            }
-        }
-        
-        return toReturn;
-    };
-    
+
     this.CalculateAttributeSize = function (attributeList, numLargeCategories, numMediumCategories) {
         if (attributeList == null || attributeList.length === 0) {
             return null;
@@ -192,7 +280,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (numMediumCategories == null) {
             numMediumCategories = Math.round(attributeList.length * 0.32);
         }
-        
+
         for (var i = 0; i < attributeList.length; i++) {
             var attribute = attributeList[i];
             if (numLargeCategories > 0) {
@@ -206,79 +294,17 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
         }
     };
-    
-    this.GetTopCategories = function (modelSummary) {
-        if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
-            return null;
-        }
-        
-        // First sort all predictors by UncertaintyCoefficient
-        modelSummary.Predictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
-        
-        var categories = [];
-        var categoryNames = [];
-        var category;
-        for (var i = 0; i < modelSummary.Predictors.length; i++) {
-            var predictor = modelSummary.Predictors[i];
-            if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
-                this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads) &&
-                !StringUtility.IsEmptyString(predictor.Category) && 
-                categoryNames.indexOf(predictor.Category) === -1) {
-                categoryNames.push(predictor.Category);
-                category = {
-                    name: predictor.Category,
-                    categoryName: predictor.Category,
-                    UncertaintyCoefficient: predictor.UncertaintyCoefficient,
-                    size: 1, // This doesn't matter because the inner ring takes on the size of the outer
-                    color: null,
-                    children: []
-                };
-                categories.push(category);
-            }
-        }
-
-        return this.SelectTopCategories(modelSummary, categories);
-    };
-
-    //=======================================================================
-    // Top categories should be determined based on sum of predictive power
-    // for top X attributes in a given category. Note: X is currently 3.
-    //=======================================================================
-    this.SelectTopCategories = function (modelSummary, categories) {
-        if (categories == null) {
-            return null;
-        }
-
-        //Introduce PowerSum
-        var category, attributes;
-        for (var i = 0; i < categories.length; i++) {
-            category = categories[i];
-            attributes = this.GetAttributesByCategory(modelSummary, category.name, category.color, 3);
-            category.PowerSum = _.reduce(attributes, function(acc, e) { return acc + e.power; }, 0);
-        }
-
-        //Sort Descending and Remove PowerSum
-        categories = _.sortBy(categories, function(e) { return -e.PowerSum; });
-        _.each(categories, function(e) { delete e.PowerSum; });
-
-        //Select Maximum of 8 Categories
-        if (categories.length > 8) {
-            categories = categories.slice(0, 8);
-        }
-
-        return categories;
-    };
 
     this.IsPredictorElementCategorical = function (predictorElement) {
         if (predictorElement == null) {
             return false;
         }
-        
+
         return predictorElement.LowerInclusive == null && predictorElement.UpperExclusive == null && 
             predictorElement.Values != null && predictorElement.Values.length > 0 &&
             predictorElement.Values[0] != null;
     };
-    
+
     this.GetTopPredictorExport = function (modelSummary) {
         if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
             return null;
@@ -314,9 +340,9 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         for (var x = 0; x < totalPredictors.length; x++) {
             var predictor = totalPredictors[x];
-            
+
             if(!StringUtility.IsEmptyString(predictor.Category) && 
-                (this.ShowBasedOnTags(predictor, true) || this.ShowBasedOnTags(predictor, false)) &&
+                (this.ShowBasedOnInternalOrExternal(predictor, true) || this.ShowBasedOnInternalOrExternal(predictor, false)) &&
                 AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
                 this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
                 for (var y = 0; y < predictor.Elements.length; y++) {
@@ -342,24 +368,24 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 }
             }
         }
-        
+
         return toReturn;
     };
-    
+
     this.FormatDataForTopPredictorChart = function (modelSummary) {
         if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
             return null;
         }
-        
+
         // Get all unique categories
         var topCategories = this.GetTopCategories(modelSummary);
-        
+
         // Need to assign colors based on alphabetical name, which will change the sort
         this.AssignColorsToCategories(topCategories);
-        
+
         // So we need to re-sort it by UncertaintyCoefficient after the color assignment
         topCategories = topCategories.sort(this.SortByPredictivePower);
-        
+
         //And finally calculate the size based on predictive power
         var attributesPerCategory = 3;
         var numLargeCategories = Math.round((topCategories.length * attributesPerCategory) * 0.16);
@@ -389,7 +415,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         return toReturn;
     };
-    
+
     this.GetAttributeByName = function (attributeName, predictorList) {
         if (attributeName == null || predictorList == null) {
             return null;
@@ -631,7 +657,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         return ticks;
     };
-    
+
     this.ClearCategoryClasses = function (categoryList) {
         if (categoryList == null || categoryList.length === 0) {
             return;

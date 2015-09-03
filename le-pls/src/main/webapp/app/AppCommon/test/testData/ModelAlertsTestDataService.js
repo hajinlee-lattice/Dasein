@@ -74,19 +74,7 @@ angular.module('test.testData.ModelAlertsTestDataService', [
                     "attribuite3",
                     "attribuite4",
                     "attribuite5",
-                ],
-                "ExcessiveCategoriesInModelSummary": [
-                    "category1",
-                    "category2",
-                    "category3",
-                    "category4",
-                    "category5",
-                    "category6",
-                    "category7",
-                    "category8",
-                    "category9"
-                ],
-                "MaxCategoriesInModelSummary": 8
+                ]
             }
         };
     }; //end GetSampleModelAlerts()

@@ -5,6 +5,7 @@ describe('ModelAlertsServiceSpec Tests', function () {
         resourceUtility,
         modelAlertsService,
         modelAlerts,
+        suppressedCategories,
         filter;
 
     beforeEach(function () {
@@ -12,13 +13,15 @@ describe('ModelAlertsServiceSpec Tests', function () {
         module('mainApp.appCommon.utilities.ResourceUtility');
         module('mainApp.appCommon.services.ModelAlertsService');
         module('test.testData.ModelAlertsTestDataService');
+        module('test.testData.SuppressedCategoriesTestDataService');
 
-        inject(['StringUtility', 'ResourceUtility', 'ModelAlertsService', 'ModelAlertsTestDataService', '$filter',
-            function (StringUtility, ResourceUtility, ModelAlertsService, ModelAlertsTestDataService, $filter) {
+        inject(['StringUtility', 'ResourceUtility', 'ModelAlertsService', 'ModelAlertsTestDataService', 'SuppressedCategoriesTestDataService', '$filter',
+            function (StringUtility, ResourceUtility, ModelAlertsService, ModelAlertsTestDataService, SuppressedCategoriesTestDataService, $filter) {
                 stringUtility = StringUtility;
                 resourceUtility = ResourceUtility;
                 modelAlertsService = ModelAlertsService;
                 modelAlerts = ModelAlertsTestDataService.GetSampleModelAlerts();
+                suppressedCategories = SuppressedCategoriesTestDataService.GetTwoSampleSuppressedCategories();
                 filter = $filter;
             }
         ]);
@@ -29,7 +32,7 @@ describe('ModelAlertsServiceSpec Tests', function () {
     //==================================================
     describe('model-alerts contains all warnings tests', function () {
         it('model-alerts all', function () {
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(false);
             expect(warnings.noMissingMetaDataWarnings).toBe(false);
 
@@ -53,7 +56,7 @@ describe('ModelAlertsServiceSpec Tests', function () {
             checkInvalidCategoryWarning(warnings.missingMetaDataWarnings[2], missingMetaDataWarnings);
             checkInvalidDisplayNameWarning(warnings.missingMetaDataWarnings[3], missingMetaDataWarnings);
             checkInvalidStatisticalTypeWarning(warnings.missingMetaDataWarnings[4], missingMetaDataWarnings);
-            checkExcessiveCategoriesWarning(warnings.missingMetaDataWarnings[5], missingMetaDataWarnings);
+            checkExcessiveCategoriesWarning(warnings.missingMetaDataWarnings[5], suppressedCategories);
         });
     });
 
@@ -66,7 +69,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                 "ModelQualityWarnings": {},
                 "MissingMetaDataWarnings": {}
             };
-            var warnings = modelAlertsService.GetWarnings(alerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(alerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(true);
             expect(warnings.noMissingMetaDataWarnings).toBe(true);
             expect(warnings.noWarning).toEqual(resourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_NO_WARNING"));
@@ -85,7 +89,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                 },
                 "MissingMetaDataWarnings": {}
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(false);
             expect(warnings.noMissingMetaDataWarnings).toBe(true);
             expect(warnings.modelQualityWarnings.length).toEqual(1);
@@ -100,7 +105,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                 },
                 "MissingMetaDataWarnings": {}
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(false);
             expect(warnings.noMissingMetaDataWarnings).toBe(true);
             expect(warnings.modelQualityWarnings.length).toEqual(1);
@@ -116,7 +122,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                 },
                 "MissingMetaDataWarnings": {}
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(false);
             expect(warnings.noMissingMetaDataWarnings).toBe(true);
             expect(warnings.modelQualityWarnings.length).toEqual(1);
@@ -135,7 +142,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                 },
                 "MissingMetaDataWarnings": {}
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(false);
             expect(warnings.noMissingMetaDataWarnings).toBe(true);
             expect(warnings.modelQualityWarnings.length).toEqual(1);
@@ -154,7 +162,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                 },
                 "MissingMetaDataWarnings": {}
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(false);
             expect(warnings.noMissingMetaDataWarnings).toBe(true);
             expect(warnings.modelQualityWarnings.length).toEqual(1);
@@ -173,7 +182,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                 },
                 "MissingMetaDataWarnings": {}
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(false);
             expect(warnings.noMissingMetaDataWarnings).toBe(true);
             expect(warnings.modelQualityWarnings.length).toEqual(1);
@@ -189,7 +199,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                     ]
                 }
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(true);
             expect(warnings.noMissingMetaDataWarnings).toBe(false);
             expect(warnings.missingMetaDataWarnings.length).toEqual(1);
@@ -205,7 +216,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                     ]
                 }
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(true);
             expect(warnings.noMissingMetaDataWarnings).toBe(false);
             expect(warnings.missingMetaDataWarnings.length).toEqual(1);
@@ -221,7 +233,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                     ]
                 }
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(true);
             expect(warnings.noMissingMetaDataWarnings).toBe(false);
             expect(warnings.missingMetaDataWarnings.length).toEqual(1);
@@ -237,7 +250,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                     ]
                 }
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(true);
             expect(warnings.noMissingMetaDataWarnings).toBe(false);
             expect(warnings.missingMetaDataWarnings.length).toEqual(1);
@@ -253,7 +267,8 @@ describe('ModelAlertsServiceSpec Tests', function () {
                     ]
                 }
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(true);
             expect(warnings.noMissingMetaDataWarnings).toBe(false);
             expect(warnings.missingMetaDataWarnings.length).toEqual(1);
@@ -263,18 +278,23 @@ describe('ModelAlertsServiceSpec Tests', function () {
         it('model-alerts excessive categories warning', function () {
             var modelAlerts = {
                 "ModelQualityWarnings": {},
-                "MissingMetaDataWarnings": {
-                    "ExcessiveCategoriesInModelSummary": [
-                        "category1"
-                    ],
-                    "MaxCategoriesInModelSummary": 8
-                }
+                "MissingMetaDataWarnings": {}
             };
-            var warnings = modelAlertsService.GetWarnings(modelAlerts);
+            var suppressedCategories = [];
+            var category = {
+                    name: "category1",
+                    categoryName: "category1",
+                    UncertaintyCoefficient: 0.1,
+                    size: 1,
+                    color: null,
+                    children: []
+                };
+            suppressedCategories.push(category);
+            var warnings = modelAlertsService.GetWarnings(modelAlerts, suppressedCategories);
             expect(warnings.noModelQualityWarnings).toBe(true);
             expect(warnings.noMissingMetaDataWarnings).toBe(false);
             expect(warnings.missingMetaDataWarnings.length).toEqual(1);
-            checkExcessiveCategoriesWarning(warnings.missingMetaDataWarnings[0], modelAlerts.MissingMetaDataWarnings);
+            checkExcessiveCategoriesWarning(warnings.missingMetaDataWarnings[0], suppressedCategories);
         });
     });
 
@@ -416,17 +436,30 @@ describe('ModelAlertsServiceSpec Tests', function () {
         expect(warning.count).toEqual(count);
     }
 
-    function checkExcessiveCategoriesWarning(warning, missingMetaDataWarnings) {
+    function checkExcessiveCategoriesWarning(warning, suppressedCategories) {
         var title = resourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_MODEL_SUMMARY_CONTAINS_OVERLY_CATEFORIES");
         expect(warning.title).toEqual(title);
         var description = resourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_TWO_CATEFORIES_AND_ATTRIBUTES_SUPPRESSED_FROM_TOP_PREDICTORS_UI");
         expect(warning.description).toEqual(description);
         var impactedLabel = resourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_IMPACTED_CATEGORIES");
         expect(warning.impactedLabel).toEqual(impactedLabel);
-        var impactedContent = joinStringList(missingMetaDataWarnings.ExcessiveCategoriesInModelSummary);
+        var categoryNames = getCategoryNames(suppressedCategories);
+        var impactedContent = joinStringList(categoryNames);
         expect(warning.impactedContent).toEqual(impactedContent);
-        var count = filter('number')(missingMetaDataWarnings.ExcessiveCategoriesInModelSummary.length, 0);
+        var count = filter('number')(categoryNames.length + 8, 0);
         expect(warning.count).toEqual(count);
+    }
+
+    function getCategoryNames(categories) {
+        var categoryNames = [];
+        if (categories == null) {
+            return categoryNames;
+        }
+        for (var i = 0; i < categories.length; i++) {
+            var category = categories[i];
+            categoryNames.push(category.name);
+        }
+        return categoryNames;
     }
 
     function joinMapList(elements, fractionSize) {
