@@ -70,7 +70,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     private String resultDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
     private String dataDiagnosticsPath = "/user/s-analytics/customers/Nutanix.Nutanix.Production/data/EventMetadata/diagnostics.json";
-    private String matadatadataDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/data/EventMetadata/";
+    private String metadataDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/data/EventMetadata/";
     private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";
     private String hdfsArtifactsDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
     private String zkArtifactsPath = "/Models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
@@ -96,7 +96,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
                 scoreDerivationContents);
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/DataComposition.json",
                 dataCompositionContents);
-        HdfsUtils.writeToFile(yarnConfiguration, matadatadataDirectory + METADATA_DIAGNOSTIC_FILE,
+        HdfsUtils.writeToFile(yarnConfiguration, metadataDirectory + METADATA_DIAGNOSTIC_FILE,
                 metadataDiagnosticsContents);
         when(modelingService.getJobStatus(YARN_APPLICATION_ID)).thenReturn(jobStatus);
 
@@ -116,7 +116,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     @Test(groups = "functional")
     public void testExecutePostStep() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L,TEMP_EVENTTABLE);
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, TEMP_EVENTTABLE);
         modelCommandEntityMgr.create(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
