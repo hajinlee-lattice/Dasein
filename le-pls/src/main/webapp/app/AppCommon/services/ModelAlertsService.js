@@ -98,7 +98,7 @@ angular.module('mainApp.appCommon.services.ModelAlertsService', [
             warning.title = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MODEL_QUALITY_ATTRIBUTES_OVERLY_DISCRETE_VALUES_TITLE", [count, maxValue]);
             warning.description = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MODEL_QUALITY_ATTRIBUTES_REMOVED_FROM_MODELING");
             warning.impactedLabel = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_IMPACTED_ATTRIBUTES");
-            warning.impactedContent = joinMapList(attributes, 0);
+            warning.impactedContent = joinStringList(attributes, 0);
             warning.count = count;
             warning.maxValue = maxValue;
             warnings.push(warning);

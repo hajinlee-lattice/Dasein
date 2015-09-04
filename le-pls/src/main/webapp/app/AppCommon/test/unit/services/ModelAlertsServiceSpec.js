@@ -133,11 +133,7 @@ describe('ModelAlertsServiceSpec Tests', function () {
         it('model-alerts excessive discrete values warning', function () {
             var modelAlerts = {
                 "ModelQualityWarnings": {
-                    "ExcessiveDiscreteValuesAttributes": [{
-                            "key": "attribuite1",
-                            "value": "220"
-                        }
-                    ],
+                    "ExcessiveDiscreteValuesAttributes": ["attribute1", "attribute2"],
                     "MaxNumberOfDiscreteValues": 200,
                 },
                 "MissingMetaDataWarnings": {}
@@ -335,7 +331,7 @@ describe('ModelAlertsServiceSpec Tests', function () {
         expect(warning.description).toEqual(description);
         var impactedLabel = resourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_IMPACTED_ATTRIBUTES");
         expect(warning.impactedLabel).toEqual(impactedLabel);
-        var impactedContent = joinMapList(modelQualityWarnings.ExcessiveDiscreteValuesAttributes, 0);
+        var impactedContent = joinStringList(modelQualityWarnings.ExcessiveDiscreteValuesAttributes, 0);
         expect(warning.impactedContent).toEqual(impactedContent);
         var count = filter('number')(modelQualityWarnings.ExcessiveDiscreteValuesAttributes.length, 0);
         expect(warning.count).toEqual(count);
