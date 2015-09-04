@@ -170,7 +170,7 @@ angular.module('mainApp.appCommon.services.ModelAlertsService', [
         if (attributes != null && attributes.length > 0) {
             var warning = {};
             var count = $filter('number')(attributes.length, 0);
-            warning.title = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_ATTRIBUTES_INVALID_CATEGORY", count);
+            warning.title = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_ATTRIBUTES_INVALID_CATEGORY", [count]);
             warning.description = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_ATTRIBUTES_SUPPRESSED_FROM_TOP_PREDICTORS_UI_CSV_BUYER_INSIGHTS");
             warning.impactedLabel = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_IMPACTED_ATTRIBUTES");
             warning.impactedContent = joinStringList(attributes);
@@ -184,7 +184,7 @@ angular.module('mainApp.appCommon.services.ModelAlertsService', [
         if (attributes != null && attributes.length > 0) {
             var warning = {};
             var count = $filter('number')(attributes.length, 0);
-            warning.title = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_ATTRIBUTES_INVALID_DISPLAY_NAME", count);
+            warning.title = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_ATTRIBUTES_INVALID_DISPLAY_NAME", [count]);
             warning.description = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_MISSING_META_DATA_ATTRIBUTES_SUPPRESSED_FROM_TOP_PREDICTORS_UI_CSV_BUYER_INSIGHTS");
             warning.impactedLabel = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_IMPACTED_ATTRIBUTES");
             warning.impactedContent = joinStringList(attributes);
