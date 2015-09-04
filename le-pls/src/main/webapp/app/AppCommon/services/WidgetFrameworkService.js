@@ -16,7 +16,8 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.AdminInfoSummaryWidget',
     'mainApp.appCommon.widgets.AdminInfoAlertsWidget',
     'mainApp.appCommon.widgets.LeadsTabWidget',
-    'mainApp.appCommon.widgets.ModelListCreationHistoryWidget'
+    'mainApp.appCommon.widgets.ModelListCreationHistoryWidget',
+    'mainApp.appCommon.widgets.ManageFieldsWidget'
 ])
 .service('WidgetFrameworkService', function ($compile, $rootScope, WidgetConfigUtility, MetadataUtility) {
 
