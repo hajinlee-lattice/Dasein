@@ -38,6 +38,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     private static final String YARN_APPLICATION_ID = "yarnApplicationId";
     private static final String TEMP_EVENTTABLE = "2ModelStepOutputResultsProcessorImplTestNG_eventtable";
+    private static final String METADATA_DIAGNOSTIC_FILE = "metadata-diagnostics.json";
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
@@ -53,7 +54,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     @Mock
     private ModelingService modelingService;
-    
+
     @Autowired
     private MetadataService metadataService;
 
@@ -63,10 +64,14 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private String modelSummaryContents = "MSC";
     private String scoreDerivationContents = "Deciles!";
     private String dataCompositionContents = "Transforms!";
-    private List<String> linkContents = Arrays.<String> asList(new String[] { "a", "b", "c", "d", "e", modelSummaryContents });
+    private String metadataDiagnosticsContents = "MDC";
+    private List<String> linkContents = Arrays.<String> asList(new String[] { "a", "b", "c", "d", "e",
+            modelSummaryContents });
 
     private String resultDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
-    private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";   
+    private String dataDiagnosticsPath = "/user/s-analytics/customers/Nutanix.Nutanix.Production/data/EventMetadata/diagnostics.json";
+    private String matadatadataDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/data/EventMetadata/";
+    private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";
     private String hdfsArtifactsDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
     private String zkArtifactsPath = "/Models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
     private String dbDriverName;
@@ -76,6 +81,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         initMocks(this);
         JobStatus jobStatus = new JobStatus();
         jobStatus.setResultDirectory(resultDirectory);
+        jobStatus.setDataDiagnosticsPath(dataDiagnosticsPath);
 
         HdfsUtils.rmdir(yarnConfiguration, consumerDirectory);
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.json", linkContents.get(0));
@@ -90,6 +96,8 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
                 scoreDerivationContents);
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/DataComposition.json",
                 dataCompositionContents);
+        HdfsUtils.writeToFile(yarnConfiguration, matadatadataDirectory + METADATA_DIAGNOSTIC_FILE,
+                metadataDiagnosticsContents);
         when(modelingService.getJobStatus(YARN_APPLICATION_ID)).thenReturn(jobStatus);
 
         ReflectionTestUtils.setField(modelStepOutputResultsProcessor, "modelingService", modelingService);
@@ -127,7 +135,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
             outputAlgorithm = dlOrchestrationJdbcTemplate.queryForObject(
                     "select Algorithm from " + command.getEventTable() + "", String.class);
         }
-       
+
         assertEquals(outputAlgorithm, ModelStepOutputResultsProcessorImpl.RANDOM_FOREST);
 
         List<String> outputLogs = dlOrchestrationJdbcTemplate.queryForList("select Message from LeadScoringCommandLog",
@@ -138,19 +146,19 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
             assertEquals(restTemplate.getForObject(link, String.class), linkContents.get(i));
         }
 
-        checkModel(command);
-        checkHdfsArtifacts(command);
+        checkModel();
+        checkHdfsArtifacts();
         checkZkArtifacts(command);
+        checkMetadataDiagnostics();
     }
 
-    private void checkModel(ModelCommand command) throws Exception {
-
+    private void checkModel() throws Exception {
         String modelFile = consumerDirectory + "1.json";
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
         Assert.assertEquals(content, linkContents.get(0));
     }
 
-    private void checkHdfsArtifacts(ModelCommand command) throws Exception {
+    private void checkHdfsArtifacts() throws Exception {
         String pmmlFile = hdfsArtifactsDirectory + "ModelPmml.xml";
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, pmmlFile);
         Assert.assertEquals(content, pmmlContents);
@@ -168,5 +176,11 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         relativePath = new Path(zkArtifactsPath + "DataComposition.json");
         document = subscriber.get(relativePath);
         Assert.assertEquals(document.getData(), dataCompositionContents);
+    }
+
+    private void checkMetadataDiagnostics() throws Exception {
+        String metadataDiagnosticsFile = resultDirectory + "/" + METADATA_DIAGNOSTIC_FILE;
+        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, metadataDiagnosticsFile);
+        Assert.assertEquals(content, metadataDiagnosticsContents);
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -45,6 +46,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
             + "    SampleSize int NOT NULL,\n" + "    Algorithm varchar(50) NOT NULL,\n"
             + "    JsonPath varchar(512) NULL,\n" + "    Timestamp datetime NULL\n" + ")\n" + "";
     private static final String HTTPFS_SUFFIX = "?op=OPEN&user.name=yarn";
+    private static final String METADATA_DIAGNOSTIC_FILE = "metadata-diagnostics.json";
 
     private static final String INSERT_OUTPUT_TABLE_SQL = "(Id, CommandId, SampleSize, Algorithm, JsonPath, Timestamp) values (?, ?, ?, ?, ?, ?)";
 
@@ -84,6 +86,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         try {
             publishModel(modelCommand, jobStatus, modelCommandParameters, modelFilePath, appId);
             publishModelArtifacts(modelCommand, jobStatus, modelCommandParameters, appId);
+            publishMetadataDiagnosticsFile(modelCommand, jobStatus, modelCommandParameters, appId);
         } finally {
             publishLinks(modelCommand, jobStatus, modelFilePath);
             updateEventTable(modelCommand, modelFilePath);
@@ -95,12 +98,11 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
             String hdfsResultDirectory = jobStatus.getResultDirectory();
 
-            // Assume one non-diagnostic json file in hdfsResultDirectory!
             List<String> jsonFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsResultDirectory,
                     new HdfsFilenameFilter() {
                         @Override
                         public boolean accept(String filename) {
-                            if (filename.equals("diagnostics" + JSON_SUFFIX)) {
+                            if (filename.contains("diagnostics" + JSON_SUFFIX)) {
                                 return false;
                             }
                             Pattern p = Pattern.compile(".*" + JSON_SUFFIX);
@@ -231,6 +233,24 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         }
     }
 
+    private void publishMetadataDiagnosticsFile(ModelCommand modelCommand, JobStatus jobStatus,
+            ModelCommandParameters modelCommandParameters, String appId) {
+        String sourceMetadataDiagnosticsFileDirecotory = StringUtils.substringBeforeLast(
+                jobStatus.getDataDiagnosticsPath(), "/");
+        String sourceMetadataDiagnosticsFilePath = sourceMetadataDiagnosticsFileDirecotory + "/"
+                + METADATA_DIAGNOSTIC_FILE;
+        String destinationMetadataDiagnosticsFilePath = jobStatus.getResultDirectory() + "/" + METADATA_DIAGNOSTIC_FILE;
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, sourceMetadataDiagnosticsFilePath)) {
+                HdfsUtils.copyFiles(yarnConfiguration, sourceMetadataDiagnosticsFilePath,
+                        destinationMetadataDiagnosticsFilePath);
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_15014, new String[] { modelCommand.getContractExternalId(),
+                    sourceMetadataDiagnosticsFilePath, destinationMetadataDiagnosticsFilePath });
+        }
+    }
+
     private void publishLinks(ModelCommand modelCommand, JobStatus jobStatus, String modelFilePath) {
 
         // Provide link to result files
@@ -269,7 +289,8 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         ModelCommandOutput output = new ModelCommandOutput(1, modelCommand.getPid().intValue(), SAMPLE_SIZE,
                 RANDOM_FOREST, modelFilePath, new Date());
         metadataService.dropTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
-        metadataService.createNewTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(), CREATE_OUTPUT_TABLE_SQL);
+        metadataService.createNewTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(),
+                CREATE_OUTPUT_TABLE_SQL);
         metadataService.insertRow(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(), INSERT_OUTPUT_TABLE_SQL,
                 output.getId(), output.getCommandId(), output.getSampleSize(), output.getAlgorithm(),
                 output.getJsonPath(), output.getTimestamp());
