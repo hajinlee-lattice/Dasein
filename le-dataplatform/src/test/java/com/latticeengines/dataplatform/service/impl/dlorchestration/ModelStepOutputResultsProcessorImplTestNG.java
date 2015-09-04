@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,8 +14,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.interfaces.data.DataInterfaceSubscriber;
@@ -60,6 +61,10 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     private RestTemplate restTemplate = new RestTemplate();
 
+    private ModelCommand command;
+    private ModelCommandParameters commandParameters;
+    private ModelCommandState commandState;
+
     private String pmmlContents = "XML!";
     private String modelSummaryContents = "MSC";
     private String scoreDerivationContents = "Deciles!";
@@ -76,7 +81,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private String zkArtifactsPath = "/Models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
     private String dbDriverName;
 
-    @BeforeClass(groups = "functional")
+    @BeforeMethod(groups = "functional")
     public void beforeClass() throws Exception {
         initMocks(this);
         JobStatus jobStatus = new JobStatus();
@@ -107,23 +112,27 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         metadataService.createNewTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE, "(Id int)");
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterMethod(groups = { "functional" })
     public void cleanup() throws Exception {
         metadataService.dropTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE);
         HdfsUtils.rmdir(yarnConfiguration, resultDirectory);
+        HdfsUtils.rmdir(yarnConfiguration, metadataDirectory);
         super.clearTables();
+    }
+
+    private void createCommandAndParameters() {
+        command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, TEMP_EVENTTABLE);
+        modelCommandEntityMgr.create(command);
+        commandParameters = new ModelCommandParameters(command.getCommandParameters());
+
+        commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
+        commandState.setYarnApplicationId(YARN_APPLICATION_ID);
+        modelCommandStateEntityMgr.createOrUpdate(commandState);
     }
 
     @Test(groups = "functional")
     public void testExecutePostStep() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, TEMP_EVENTTABLE);
-        modelCommandEntityMgr.create(command);
-        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
-
-        ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
-        commandState.setYarnApplicationId(YARN_APPLICATION_ID);
-        modelCommandStateEntityMgr.createOrUpdate(commandState);
-
+        createCommandAndParameters();
         modelStepOutputResultsProcessor.executeStep(command, commandParameters);
         String outputAlgorithm = "";
         if (dbDriverName.contains("Microsoft")) {
@@ -149,7 +158,15 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         checkModel();
         checkHdfsArtifacts();
         checkZkArtifacts(command);
-        checkMetadataDiagnostics();
+        checkMetadataDiagnosticsExist();
+    }
+
+    @Test(groups = "functional")
+    public void testExecutePostStepWithoutMetadataDiagnosticsFile() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, metadataDirectory + METADATA_DIAGNOSTIC_FILE);
+        createCommandAndParameters();
+        modelStepOutputResultsProcessor.executeStep(command, commandParameters);
+        checkMetadataDiagnosticsNotExist();
     }
 
     private void checkModel() throws Exception {
@@ -178,9 +195,14 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         Assert.assertEquals(document.getData(), dataCompositionContents);
     }
 
-    private void checkMetadataDiagnostics() throws Exception {
+    private void checkMetadataDiagnosticsExist() throws Exception {
         String metadataDiagnosticsFile = resultDirectory + "/" + METADATA_DIAGNOSTIC_FILE;
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, metadataDiagnosticsFile);
         Assert.assertEquals(content, metadataDiagnosticsContents);
+    }
+
+    private void checkMetadataDiagnosticsNotExist() throws Exception {
+        String metadataDiagnosticsFile = resultDirectory + "/" + METADATA_DIAGNOSTIC_FILE;
+        assertFalse(HdfsUtils.fileExists(yarnConfiguration, metadataDiagnosticsFile));
     }
 }
