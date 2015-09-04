@@ -36,7 +36,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class AvroRead {
 
-    @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
+    @SuppressWarnings({ "rawtypes", "unused" })
     public static void main(String[] args) throws Exception {
         FileUtils.deleteDirectory(new File("/tmp/AvroReadResults"));
         String lead = "file://"
