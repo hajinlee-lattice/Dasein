@@ -12,8 +12,7 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
 
     var clientSession = BrowserStorageUtility.getClientSession();
     var flags = FeatureFlagService.Flags();
-//    $scope.showAdminLink = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
-    $scope.showAdminLink = true;
+    $scope.showAdminLink = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
     $scope.data.TenantId = clientSession.Tenant.Identifier;
     $scope.data.TenantName = clientSession.Tenant.DisplayName;
     $scope.data.DataLoaderTenantName = TenantIdParsingUtility.getDataLoaderTenantNameFromTenantId($scope.data.TenantId);
