@@ -9,8 +9,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {

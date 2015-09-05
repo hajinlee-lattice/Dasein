@@ -11,6 +11,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.pls.dao.KeyValueDao;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
+import com.latticeengines.security.exposed.entitymanager.impl.BasePLSEntityMgrImpl;
 
 @Component("keyValueEntityMgr")
 public class KeyValueEntityMgrImpl extends BasePLSEntityMgrImpl<KeyValue> implements KeyValueEntityMgr {

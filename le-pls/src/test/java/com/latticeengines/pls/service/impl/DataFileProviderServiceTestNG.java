@@ -32,10 +32,10 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.DataFileProviderService;
-import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.service.TenantService;
 
 public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 

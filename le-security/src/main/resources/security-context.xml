@@ -10,5 +10,6 @@
 
     <context:component-scan base-package="com.latticeengines.security" />
     <import resource="classpath:security-email-settings-context.xml"/>
+    <import resource="classpath:security-persistence-context.xml"/>
 
 </beans>

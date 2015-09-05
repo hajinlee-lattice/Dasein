@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.security.exposed.service.impl;
 
 import java.util.Date;
 import java.util.List;
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
-import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Component("tenantService")

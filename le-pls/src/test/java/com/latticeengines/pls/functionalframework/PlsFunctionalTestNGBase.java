@@ -16,13 +16,13 @@ import com.latticeengines.domain.exposed.pls.*;
 import com.latticeengines.domain.exposed.security.*;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
-import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 import junit.framework.Assert;

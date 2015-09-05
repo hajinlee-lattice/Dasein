@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.security.exposed.entitymanager.impl;
 
 import java.util.Date;
 
@@ -9,15 +9,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.dao.TenantDao;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.dao.TenantDao;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("tenantEntityMgr")
 public class TenantEntityMgrImpl extends BasePLSEntityMgrImpl<Tenant> implements TenantEntityMgr {
 
     @Autowired
     private TenantDao tenantDao;
-    
+
     @Override
     public BaseDao<Tenant> getDao() {
         return tenantDao;
@@ -34,7 +34,7 @@ public class TenantEntityMgrImpl extends BasePLSEntityMgrImpl<Tenant> implements
     public Tenant findByTenantName(String tenantName) {
         return tenantDao.findByTenantName(tenantName);
     }
-    
+
     @Override
     @Transactional(value = "pls", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
@@ -50,5 +50,5 @@ public class TenantEntityMgrImpl extends BasePLSEntityMgrImpl<Tenant> implements
         Tenant tenant1 = findByTenantId(tenant.getId());
         super.delete(tenant1);
     }
-    
+
 }

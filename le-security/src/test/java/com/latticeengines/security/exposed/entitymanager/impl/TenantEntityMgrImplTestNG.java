@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.security.exposed.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 
@@ -7,11 +7,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
-public class TenantEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class TenantEntityMgrImplTestNG extends SecurityFunctionalTestNGBase {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -32,7 +32,7 @@ public class TenantEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         }
         tenantEntityMgr.create(tenant);
     }
-    
+
     @Test(groups = "functional")
     public void findByTenantId() {
         Tenant t = tenantEntityMgr.findByTenantId("TENANT1");

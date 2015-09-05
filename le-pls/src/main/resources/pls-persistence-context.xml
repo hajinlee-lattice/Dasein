@@ -17,49 +17,17 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-    <bean id="readOnlyDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${pls.datasource.driver}" />
-        <property name="url"      value="${pls.datasource.url}" />
-        <property name="username" value="${pls.datasource.user}" />
-        <property name="password" value="${pls.datasource.password.encrypted}" />
-    </bean>
-
-    <!-- Hibernate session factory -->
-    <bean id="sessionFactoryPLS" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="readOnlyDataSource" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.pls, 
-            com.latticeengines.domain.exposed.security" />
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">${pls.datasource.dialect}</prop>
-                <prop key="hibernate.show_sql">false</prop>
-                <prop key="hibernate.globally_quoted_identifiers">true</prop>
-                <!-- <prop key="hibernate.current_session_context_class">thread</prop> -->
-                <!--   <prop key="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</prop>  -->
-            </props>
-        </property>
-    </bean>
-
-    <bean id="transactionManagerPLS" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-        p:sessionFactory-ref="sessionFactoryPLS">
-        <qualifier value="pls" />
-    </bean>
-
-    <tx:annotation-driven transaction-manager="transactionManagerPLS" />
+    <import resource="classpath:security-persistence-context.xml"/>
 
     <bean id="modelSummaryDao" class="com.latticeengines.pls.dao.impl.ModelSummaryDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
-    
+
     <bean id="predictorDao" class="com.latticeengines.pls.dao.impl.PredictorDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
-    
-    <bean id="predictorElementDao" class="com.latticeengines.pls.dao.impl.PredictorElementDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPLS" />
-    </bean>
 
-    <bean id="tenantDao" class="com.latticeengines.pls.dao.impl.TenantDaoImpl">
+    <bean id="predictorElementDao" class="com.latticeengines.pls.dao.impl.PredictorElementDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
 

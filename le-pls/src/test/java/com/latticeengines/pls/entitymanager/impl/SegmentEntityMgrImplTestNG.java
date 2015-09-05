@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.service.TenantService;
 
 public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     

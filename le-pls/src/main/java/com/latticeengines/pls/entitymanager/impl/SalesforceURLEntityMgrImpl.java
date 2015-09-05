@@ -9,6 +9,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.SalesforceURL;
 import com.latticeengines.pls.dao.SalesforceURLDao;
 import com.latticeengines.pls.entitymanager.SalesforceURLEntityMgr;
+import com.latticeengines.security.exposed.entitymanager.impl.BasePLSEntityMgrImpl;
 
 @Component("salesforceURLEntityMgr")
 public class SalesforceURLEntityMgrImpl extends BasePLSEntityMgrImpl<SalesforceURL> implements SalesforceURLEntityMgr {

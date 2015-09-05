@@ -24,8 +24,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.CrmCredentialService;
-import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("internalResourceTestNG")
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {

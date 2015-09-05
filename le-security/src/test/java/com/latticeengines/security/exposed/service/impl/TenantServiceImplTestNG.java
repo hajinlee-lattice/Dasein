@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.security.exposed.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -8,12 +8,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
 
-public class TenantServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class TenantServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @Autowired
     TenantService tenantService;

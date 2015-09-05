@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.pls.dao.SegmentDao;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
+import com.latticeengines.security.exposed.entitymanager.impl.BasePLSEntityMgrImpl;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BasePLSEntityMgrImpl<Segment> implements SegmentEntityMgr {

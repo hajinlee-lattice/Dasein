@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -36,6 +36,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -59,6 +60,9 @@ public class LoginResource {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TenantService tenantService;
+
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Login to Lattice external application")
@@ -77,9 +81,10 @@ public class LoginResource {
             LoginResult result = doc.new LoginResult();
             result.setMustChangePassword(ticket.isMustChangePassword());
             result.setPasswordLastModified(ticket.getPasswordLastModified());
-            List<Tenant> sortedTenants = new ArrayList<>(ticket.getTenants());
-            Collections.sort(sortedTenants, new TenantNameSorter());
-            result.setTenants(sortedTenants);
+            List<Tenant> tenants = new ArrayList<>(ticket.getTenants());
+            tenants.retainAll(tenantService.getAllTenants());
+            Collections.sort(tenants, new TenantNameSorter());
+            result.setTenants(tenants);
             doc.setResult(result);
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {

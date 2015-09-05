@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-security</artifactId>
@@ -9,6 +10,7 @@
     <properties>
         <component-name>security</component-name>
         <le.common.version>2.0.9-SNAPSHOT</le.common.version>
+        <le.db.version>2.0.9-SNAPSHOT</le.db.version>
         <le.domain.version>2.0.9-SNAPSHOT</le.domain.version>
         <le.camille.version>2.0.9-SNAPSHOT</le.camille.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
@@ -83,6 +85,16 @@
                             <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
                         </configuration>
                         <dependencies>
+                            <dependency>
+                                <groupId>com.microsoft.sqlserver</groupId>
+                                <artifactId>sqljdbc4</artifactId>
+                                <version>4.0</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>mysql</groupId>
+                                <artifactId>mysql-connector-java</artifactId>
+                                <version>5.1.30</version>
+                            </dependency>
                             <dependency>
                                 <groupId>org.ow2.asm</groupId>
                                 <artifactId>asm</artifactId>
@@ -189,8 +201,10 @@
                                 <phase>initialize</phase>
                                 <configuration>
                                     <tasks>
-                                        <delete dir="${project.build.directory}/generated-sources" />
-                                        <mkdir dir="${project.build.directory}/generated-sources" />
+                                        <delete
+                                            dir="${project.build.directory}/generated-sources" />
+                                        <mkdir
+                                            dir="${project.build.directory}/generated-sources" />
                                     </tasks>
                                 </configuration>
                                 <goals>
@@ -375,6 +389,18 @@
     </profiles>
 
     <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${le.db.version}</version>
+            <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.python</groupId>
+                    <artifactId>jython-standalone</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>

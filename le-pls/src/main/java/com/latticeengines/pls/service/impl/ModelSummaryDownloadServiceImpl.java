@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.pls.service.ModelSummaryDownloadService;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @DisallowConcurrentExecution
 @Component("modelSummaryDownloadService")

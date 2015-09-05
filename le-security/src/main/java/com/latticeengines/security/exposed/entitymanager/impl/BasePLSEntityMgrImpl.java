@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.security.exposed.entitymanager.impl;
 
 import java.util.List;
 

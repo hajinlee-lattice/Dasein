@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service;
+package com.latticeengines.security.exposed.service;
 
 import java.util.List;
 

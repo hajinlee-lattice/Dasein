@@ -23,8 +23,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.service.TenantConfigService;
-import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Component
