@@ -29,6 +29,7 @@
             </activation>
             <properties>
                 <admin.properties.path>conf/env/buildmachine</admin.properties.path>
+                <security.properties.path>../le-security/conf/env/buildmachine</security.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -44,22 +45,8 @@
             </activation>
             <properties>
                 <admin.properties.path>conf/env/devcluster</admin.properties.path>
+                <security.properties.path>../le-security/conf/env/devcluster</security.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
-                <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
-            </properties>
-        </profile>
-        <profile>
-            <id>integration</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>intcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <admin.properties.path>conf/env/intcluster</admin.properties.path>
-                <bin.env.path>bin/env/intcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
@@ -73,6 +60,7 @@
             </activation>
             <properties>
                 <admin.properties.path>conf/env/qacluster</admin.properties.path>
+                <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -87,6 +75,7 @@
             </activation>
             <properties>
                 <admin.properties.path>conf/env/prodcluster</admin.properties.path>
+                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
