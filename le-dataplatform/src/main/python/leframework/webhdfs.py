@@ -57,7 +57,7 @@ class WebHDFS(object):
         httpClient.close()
      
      
-    def copyFromLocal(self, source_path, target_path, replication=1):
+    def copyFromLocal(self, source_path, target_path, replication=3):
         if os.path.isabs(target_path) == False:
             raise Exception("Only absolute paths supported: %s" % (target_path))
         
