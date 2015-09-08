@@ -26,7 +26,7 @@ public class LedpPlaymakerExceptionHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ModelAndView handleException(LedpException ex) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         String stackTrace = ex.getCause() != null ? ExceptionUtils.getFullStackTrace(ex.getCause()) : ExceptionUtils
