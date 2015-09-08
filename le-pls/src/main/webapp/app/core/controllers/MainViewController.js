@@ -13,16 +13,17 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.models.controllers.ModelDetailController',
     'mainApp.models.controllers.ModelCreationHistoryController',
     'mainApp.models.controllers.ActivateModelController',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.setup.controllers.SetupController'
 ])
 
-.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, ConfigService) {
+.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
     if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
         createUpdatePasswordView();
     } else {
-        createModelListView();
+        createModelViewAndRefreshFeatures();
     }
 
     // Handle Initial View
@@ -129,6 +130,12 @@ angular.module('mainApp.core.controllers.MainViewController', [
     $scope.$on(NavUtility.MODEL_LIST_NAV_EVENT, function (event, data) {
         createModelListView();
     });
+
+    function createModelViewAndRefreshFeatures() {
+        FeatureFlagService.GetAllFlags().then(function() {
+            createModelListView();
+        });
+    }
 
     function createModelListView() {
         // Set the hash

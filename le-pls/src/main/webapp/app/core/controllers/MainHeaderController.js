@@ -12,13 +12,15 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
 
     var clientSession = BrowserStorageUtility.getClientSession();
     if (clientSession != null) {
-        var flags = FeatureFlagService.Flags();
-        $scope.userDisplayName = clientSession.DisplayName;
-        $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
-        $scope.showSystemSetup = FeatureFlagService.FlagIsEnabled(flags.SYSTEM_SETUP_PAGE);
-        $scope.showModelCreationHistoryDropdown = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
-        $scope.showActivateModel = FeatureFlagService.FlagIsEnabled(flags.ACTIVATE_MODEL_PAGE);
-        $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
+        FeatureFlagService.GetAllFlags().then(function() {
+            var flags = FeatureFlagService.Flags();
+            $scope.userDisplayName = clientSession.DisplayName;
+            $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
+            $scope.showSystemSetup = FeatureFlagService.FlagIsEnabled(flags.SYSTEM_SETUP_PAGE);
+            $scope.showModelCreationHistoryDropdown = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
+            $scope.showActivateModel = FeatureFlagService.FlagIsEnabled(flags.ACTIVATE_MODEL_PAGE);
+            $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
+        });
     }
 
     $scope.dropdownClicked = function ($event) {
