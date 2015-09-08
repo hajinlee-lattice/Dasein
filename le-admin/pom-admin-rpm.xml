@@ -118,6 +118,9 @@
                                     <location>${admin.properties.path}/admin.properties</location>
                                 </source>
                                 <source>
+                                    <location>${security.properties.path}/security.properties</location>
+                                </source>
+                                <source>
                                     <location>certificates/${jks.name}</location>
                                 </source>
                                 <source>
