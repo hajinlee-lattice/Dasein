@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
-@Component("tenantService")
+@Component("adminTenantService")
 public class TenantServiceImpl implements TenantService {
     private static final String spaceConfigNode = LatticeComponent.spaceConfigNode;
     private static final String danteFeatureFlag = "Dante";
