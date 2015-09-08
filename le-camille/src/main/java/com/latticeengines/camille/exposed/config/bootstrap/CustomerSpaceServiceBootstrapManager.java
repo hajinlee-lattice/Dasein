@@ -160,6 +160,7 @@ public class CustomerSpaceServiceBootstrapManager {
         }
 
         public void bootstrap(int executableVersion) throws Exception {
+            log.info("{}On entry to bootstrap, bootstrapped = {}", logPrefix, bootstrapped);
             if (!bootstrapped) {
                 synchronized (this) {
                     if (!bootstrapped) {

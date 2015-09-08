@@ -2,6 +2,7 @@ package com.latticeengines.camille.exposed.config.bootstrap;
 
 import java.util.Map;
 
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +81,11 @@ public class ServiceWarden {
 
         // Serialization constructor
         public BootstrapMessage() {
+        }
+
+        @Override
+        public String toString() {
+            return ReflectionToStringBuilder.toString(this);
         }
 
         public String serviceName;

@@ -69,7 +69,7 @@ public class MessageQueue<T> {
 
         @Override
         public void consumeMessage(M message) throws Exception {
-            log.debug("Received message {} on queue {}", message, path);
+            log.info("Received message {} on queue {}", message, path);
             try {
                 inner.consume(message);
             } catch (Exception e) {
