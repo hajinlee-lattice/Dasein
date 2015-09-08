@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
-@Component("tenantEntityMgr")
+@Component("adminTenantEntityMgr")
 public class TenantEntityMgrImpl implements TenantEntityMgr {
     private static final Log LOGGER = LogFactory.getLog(TenantEntityMgrImpl.class);
 
