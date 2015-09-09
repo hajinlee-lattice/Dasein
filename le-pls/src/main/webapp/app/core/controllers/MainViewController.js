@@ -181,14 +181,14 @@ angular.module('mainApp.core.controllers.MainViewController', [
         });
     }
 
-    // Handle when the User Management link is clicked
+    // Handle when the Setup link is clicked
     $scope.$on(NavUtility.SETUP_NAV_EVENT, function (event, data) {
         createSetupView();
     });
 
     function createSetupView() {
         // Set the hash
-        window.location.hash = NavUtility.SETUP_NAV_EVENT;
+        window.location.hash = NavUtility.SETUP_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/setup/views/SetupView.html').success(function (html) {

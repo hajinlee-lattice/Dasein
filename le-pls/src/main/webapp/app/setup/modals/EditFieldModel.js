@@ -3,15 +3,17 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.setup.services.ManageFieldsService'
+    'mainApp.setup.utilities.SetupUtility',
+    'mainApp.setup.services.MetadataService'
 ])
 
 .service('EditFieldModel', function ($compile, $rootScope, $http) {
 
-    this.show = function(fieldToBeEdited) {
+    this.show = function(fieldToBeEdited, $manageFieldsScope) {
         $http.get('./app/setup/views/EditFieldView.html').success(function (html) {
-            var scope = $rootScope.$new();
+            var scope = $manageFieldsScope.$new();
             scope.field = fieldToBeEdited;
+            scope.manageFieldsScope = $manageFieldsScope;
 
             var contentContainer = $('#fieldDetails');
             $compile(contentContainer.html(html))(scope);
@@ -20,15 +22,52 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
 
 })
 
-.controller('EditFieldController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility) {
-    $scope.$parent.showFieldDetails = true;
+.controller('EditFieldController', function ($scope, ResourceUtility, BrowserStorageUtility, StringUtility, SetupUtility, MetadataService) {
+    $scope.manageFieldsScope.showFieldDetails = true;
     $scope.ResourceUtility = ResourceUtility;
 
-    $scope.cancelEditClicked = function($event) {
+    $scope.saveInProgress = false;
+    $scope.approvedUsagesToSelect = $scope.$parent.ApprovedUsageOptions;
+    $scope.categoriesToSelect = $scope.$parent.CategoryOptions;
+    $scope.tagsToSelect = $scope.$parent.TagsOptions;
+    $scope.fundamentalTypesToSelect = $scope.$parent.FundamentalTypeOptions;
+    $scope.statisticalTypesToSelect = $scope.$parent.StatisticalTypeOptions;
+    $scope.categoryEditable = $scope.$parent.categoryEditable($scope.field);
+
+    $scope.tagsChanged = function($event) {
+        $scope.categoryEditable = $scope.$parent.categoryEditable($scope.field);
+    };
+
+    $scope.saveClicked = function($event) {
         if ($event != null) {
             $event.preventDefault();
         }
 
-        $scope.$parent.showFieldDetails = false;
+        if ($scope.saveInProgress) { return; }
+        $scope.saveInProgress = true;
+        $scope.showEditFieldError = false;
+
+        MetadataService.UpdateField($scope.field).then(function(result){
+            if (result.Success) {
+                $scope.saveInProgress = false;
+                $scope.manageFieldsScope.showFieldDetails = false;
+
+                $scope.$emit(SetupUtility.LOAD_FIELDS_EVENT);
+            } else {
+                $scope.editFieldErrorMessage = result.ResultErrors;
+                $scope.showEditFieldError = true;
+                $scope.saveInProgress = false;
+            }
+        });
+    };
+
+    $scope.cancelClicked = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        if ($scope.saveInProgress) { return; }
+        $scope.showEditFieldError = false;
+        $scope.manageFieldsScope.showFieldDetails = false;
     };
 });

@@ -7,7 +7,7 @@ angular.module('mainApp.setup.controllers.SetupController', [
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.WidgetService',
     'mainApp.setup.controllers.ManageFieldsController',
-    'mainApp.setup.services.ManageFieldsService'
+    'mainApp.setup.services.MetadataService'
 ])
 
 .controller('SetupController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, RightsUtility, NavUtility, WidgetConfigUtility, WidgetFrameworkService, WidgetService) {

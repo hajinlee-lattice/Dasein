@@ -1,7 +1,7 @@
 #setup {
   position: relative;
   margin-top: 4px;
-  min-height:600px;
+  min-height: 596px;
 }
 
 #setup .setup-sidebar {
@@ -52,14 +52,14 @@
 }
 
 #setup .setup-main-panel .title button {
-  margin: 10px 0 0 16px;
+  margin: 10px 0 0 20px;
   float: right;
 }
 
 #setup .setup-main-panel .form-control {
   display: inline-block;
   width: 200px;
-  margin-right: 16px;
+  margin-right: 20px;
 }
 
 #setup .setup-main-panel .form-group .btn {
@@ -68,11 +68,19 @@
 
 #setup .setup-main-panel .checkbox {
   display: inline-block;
-  margin-left: 16px;
+  margin-left: 20px;
+}
+
+#setup .setup-main-panel .fields-panel {
+  overflow: hidden;
 }
 
 #setup .setup-main-panel table {
   table-layout: fixed;
+}
+
+#setup .setup-main-panel table th.k-state-focused {
+  box-shadow: none;
 }
 
 #setup .setup-main-panel table td {
@@ -87,7 +95,7 @@
   color: #bbb;
 }
 
-#setup .setup-main-panel table input[type="text"] {
+#setup .setup-main-panel .k-grid table input[type="text"] {
   height: 2em;
   text-indent: 0;
   -webkit-transition: none !important;
@@ -97,9 +105,31 @@
   transition: none !important;
 }
 
+#setup .setup-main-panel table .k-dropdown .k-input {
+  height: 1.7em;
+  line-height: 1.7em;
+  text-indent: .6em;
+}
+
 #setup .setup-main-panel .warning:after {
    margin-right: 4px;
    content: "\f071";
+}
+
+#setup .setup-main-panel .k-icon {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+}
+
+.k-animation-container, .k-list-container > *, .k-list-container ul, .k-list-container li {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
 }
 
 #setup .field-details {
@@ -112,5 +142,37 @@
 }
 
 #setup .field-details .data-table {
-  width: 600px;
+  width: 580px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+#setup .field-details tbody {
+  border: none;
+}
+
+#setup .field-details th {
+  padding: .5em 1em;
+  background: #f5f5f5;
+  font-size: 14px;
+}
+
+#setup .field-details td {
+  padding: .2em 1em;
+}
+
+#setup .field-details th.key {
+  width: 200px;
+}
+
+#setup .field-details .data-table tr:nth-child(odd) {
+  background: white;
+}
+
+#setup .field-details .data-table tr:nth-child(even) {
+  background: #f5f5f5;
+}
+
+#setup .field-details .form-control {
+  width: 320px;
 }

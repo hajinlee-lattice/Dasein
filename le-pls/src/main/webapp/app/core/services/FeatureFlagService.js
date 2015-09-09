@@ -60,7 +60,7 @@ mod.service('FeatureFlagService', function ($q, BrowserStorageUtility, RightsUti
         // hard-coded & dynamic flags ==> to be moved to backend in next commit
         // ======================================================================
         SetFlag(flags.ADMIN_ALERTS_TAB, true);
-        SetFlag(flags.SETUP_PAGE, false);
+        SetFlag(flags.SETUP_PAGE, true);
 
         UpdateDropdownLinksIfTenantInZK(function(){
             // update user-level flags

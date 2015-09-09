@@ -143,11 +143,7 @@
           "Widgets": [
             {
               "ID": "manageFieldsWidget",
-              "Type": "ManageFieldsWidget",
-              "ApprovedUsageOptions": ["None", "Model", "ModelAndModelInsights", "ModelAndAllInsights"],
-              "FundamentalTypeOptions": ["currency", "email", "probability", "percent", "phone", "enum", "URI"],
-              "StatisticalTypeOptions": ["nominal", "ordinal", "interval", "ratio"],
-              "TagsOptions": ["Internal", "External"]
+              "Type": "ManageFieldsWidget"
             }
           ]
         }
