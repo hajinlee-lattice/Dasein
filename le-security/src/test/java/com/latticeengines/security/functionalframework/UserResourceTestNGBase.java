@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 
@@ -26,7 +26,7 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
     private UserService userService;
 
     @Autowired
-    private GlobalTenantManagementService globalTenantManagementService;
+    private TenantService tenantService;
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -41,7 +41,7 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
         testTenant.setId("USER_RESOURCE_TEST_TENANT");
         destroyTestTenant();
         try {
-            globalTenantManagementService.registerTenant(testTenant);
+            tenantService.registerTenant(testTenant);
         } catch (ConstraintViolationException e) {
             //ignore
         }
@@ -56,7 +56,7 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
             // ignore
         }
         try {
-            globalTenantManagementService.discardTenant(testTenant);
+            tenantService.discardTenant(testTenant);
         } catch (Exception e) {
             // ignore
         }
