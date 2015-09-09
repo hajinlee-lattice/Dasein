@@ -9,7 +9,13 @@ public interface FeatureFlagProvider {
 
     void setEnabled(CustomerSpace space, String id, boolean enabled);
 
+    void removeFlagFromSpace(CustomerSpace space, String id);
+
     void setDefinition(String id, FeatureFlagDefinition definition);
 
     void remove(String id);
+
+    FeatureFlagDefinitionMap getDefinitions();
+
+    FeatureFlagValueMap getFlags(CustomerSpace space);
 }

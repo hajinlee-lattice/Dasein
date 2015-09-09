@@ -133,6 +133,11 @@ public enum LedpCode {
     LEDP_19103("Getting files in a server-side directory failed."), //
     LEDP_19104("The default choice [{0}] is not valid among the options {1}."), //
     LEDP_19105("The requested option list {0} does not contain the existing default choice [{1}]"), //
+    LEDP_19106("Cannot define new feature flag."), //
+    LEDP_19107("Cannot retrieve all the feature flag definitions."), //
+    LEDP_19108("Cannot toggle the feature flag {0} for the tenant {1}."), //
+    LEDP_19109("Cannot retrieve all the feature flags for the tenant {0}."), //
+    LEDP_19110("Cannot remove the feature flag {0} from the tenant {1}."), //
 
     // le-scoring 20000-20100
     LEDP_20000("ScoringCommand Failed"), //

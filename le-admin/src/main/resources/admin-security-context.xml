@@ -45,4 +45,12 @@
         <security:custom-filter ref="restActiveDirectoryServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>
 
+    <security:http use-expressions="true"
+                   pattern="/admin/featureflags/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:custom-filter ref="restActiveDirectoryServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
+
 </beans>

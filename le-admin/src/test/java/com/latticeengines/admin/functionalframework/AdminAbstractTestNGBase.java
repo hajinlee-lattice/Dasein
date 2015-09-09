@@ -28,12 +28,14 @@ import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
 import com.latticeengines.domain.exposed.camille.lifecycle.*;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.security.exposed.Constants;
@@ -52,6 +54,8 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     protected static final String ADTesterUsername = "testuser1";
     protected static final String ADTesterPassword = "Lattice1";
     protected static final BatonService batonService = new BatonServiceImpl();
+    protected static final FeatureFlagDefinition FLAG_DEFINITION = newFlagDefinition();
+    protected static final String FLAG_ID = "TestFlag";
 
     @Autowired
     private TenantService tenantService;
@@ -238,5 +242,26 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         Boolean permStoreExists = magicRestTemplate.getForObject(url + "permstore/" + permStoreOption + "/"
                 + visiDBServerName + "/" + tenant, Boolean.class);
         Assert.assertFalse(permStoreExists);
+    }
+
+    private static FeatureFlagDefinition newFlagDefinition() {
+        FeatureFlagDefinition definition = new FeatureFlagDefinition();
+        definition.displayName = "TestFlag";
+        definition.documentation = "This flag is for functional test.";
+        return definition;
+    }
+
+    protected void defineFeatureFlagByRestCall(String flagId, FeatureFlagDefinition definition) {
+        undefineFeatureFlagByRestCall(FLAG_ID);
+
+        String url = getRestHostPort() + "/admin/featureflags/" + flagId;
+        ResponseDocument response = restTemplate.postForObject(url, definition,
+                ResponseDocument.class);
+        Assert.assertTrue(response.isSuccess(), "should be able to define a new flag.");
+    }
+
+    protected void undefineFeatureFlagByRestCall(String flagId) {
+        String url = getRestHostPort() + "/admin/featureflags/" + flagId;
+        restTemplate.delete(url);
     }
 }

@@ -27,7 +27,6 @@ import com.latticeengines.security.exposed.Constants;
 public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
 
     private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
-
     private static boolean ZKIsClean = false;
 
     @Value("${admin.test.functional.api}")

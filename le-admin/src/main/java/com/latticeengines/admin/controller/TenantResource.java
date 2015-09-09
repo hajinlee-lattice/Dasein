@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
+import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -35,6 +37,9 @@ public class TenantResource {
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private FeatureFlagService featureFlagService;
 
     @Autowired
     private DynamicOptionsService dynamicOptionsService;
@@ -135,5 +140,35 @@ public class TenantResource {
             products.add(product.getName());
         }
         return products;
+    }
+
+    @RequestMapping(value = "/{tenantId}/featureflags",
+            method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get feature flags for a tenant")
+    public FeatureFlagValueMap getFlags(@PathVariable String tenantId) {
+        return featureFlagService.getFlags(tenantId);
+    }
+
+    @RequestMapping(value = "/{tenantId}/featureflags",
+            method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Set feature flags for a tenant")
+    public FeatureFlagValueMap setFlag(@PathVariable String tenantId,
+                                       @RequestBody FeatureFlagValueMap flags) {
+        for (Map.Entry<String, Boolean> flag: flags.entrySet()) {
+            featureFlagService.setFlag(tenantId, flag.getKey(), flag.getValue());
+        }
+        return featureFlagService.getFlags(tenantId);
+    }
+
+    @RequestMapping(value = "/{tenantId}/featureflags/{flagId}",
+            method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Remove a feature flag from a tenant")
+    public FeatureFlagValueMap removeFlag(@PathVariable String tenantId,
+                                          @PathVariable String flagId) {
+        featureFlagService.removeFlag(tenantId, flagId);
+        return featureFlagService.getFlags(tenantId);
     }
 }

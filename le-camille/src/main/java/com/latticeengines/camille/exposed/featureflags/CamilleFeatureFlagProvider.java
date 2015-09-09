@@ -87,6 +87,29 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     }
 
     @Override
+    public void removeFlagFromSpace(CustomerSpace space, final String id) {
+        SafeUpserter upserter = new SafeUpserter();
+        upserter.upsert(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE),
+                new Function<FeatureFlagValueMap, FeatureFlagValueMap>() {
+                    @Override
+                    public FeatureFlagValueMap apply(FeatureFlagValueMap existing) {
+                        FeatureFlagValueMap toReturn = new FeatureFlagValueMap();
+
+                        if (existing != null) {
+                            toReturn.putAll(existing);
+                        }
+
+                        if (toReturn.containsKey(id)) {
+                            toReturn.remove(id);
+                        }
+
+                        return toReturn;
+                    }
+                }, FeatureFlagValueMap.class);
+        rebuildValues(space);
+    }
+
+    @Override
     public void setDefinition(final String id, final FeatureFlagDefinition definition) {
         SafeUpserter upserter = new SafeUpserter();
         upserter.upsert(new PodScope(), new Path("/" + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE),
@@ -107,9 +130,26 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     }
 
     @Override
-    public void remove(String id) {
-        // TODO Auto-generated method stub
+    public void remove(final String id) {
+        SafeUpserter upserter = new SafeUpserter();
+        upserter.upsert(new PodScope(), new Path("/" + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE),
+                new Function<FeatureFlagDefinitionMap, FeatureFlagDefinitionMap>() {
+                    @Override
+                    public FeatureFlagDefinitionMap apply(FeatureFlagDefinitionMap existing) {
+                        FeatureFlagDefinitionMap toReturn = new FeatureFlagDefinitionMap();
 
+                        if (existing != null) {
+                            toReturn.putAll(existing);
+                        }
+
+                        if (toReturn.containsKey(id)) {
+                            toReturn.remove(id);
+                        }
+
+                        return toReturn;
+                    }
+                }, FeatureFlagDefinitionMap.class);
+        rebuildDefinitions();
     }
 
     private void rebuildValues(CustomerSpace space) {
@@ -132,7 +172,8 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
      * TODO This is slow - in the future this should be cached and updated via a
      * cache listener.
      */
-    private FeatureFlagDefinitionMap getDefinitions() {
+    @Override
+    public FeatureFlagDefinitionMap getDefinitions() {
         Document doc = definitionCache.get();
         return DocumentUtils.toTypesafeDocument(doc, FeatureFlagDefinitionMap.class);
     }
@@ -141,7 +182,8 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
      * TODO This is slow - in the future this should be cached and updated via a
      * cache listener.
      */
-    private FeatureFlagValueMap getFlags(CustomerSpace space) {
+    @Override
+    public FeatureFlagValueMap getFlags(CustomerSpace space) {
         return valueCache.get(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE),
                 FeatureFlagValueMap.class);
     }

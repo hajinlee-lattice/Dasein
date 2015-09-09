@@ -2,7 +2,9 @@ package com.latticeengines.camille.exposed.featureflags;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagProvider;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 
 public class FeatureFlagClient {
 
@@ -23,6 +25,16 @@ public class FeatureFlagClient {
         return provider.getDefinition(id);
     }
 
+    public static FeatureFlagDefinitionMap getDefinitions() {
+        initialize();
+        return provider.getDefinitions();
+    }
+
+    public static FeatureFlagValueMap getFlags(CustomerSpace space) {
+        initialize();
+        return provider.getFlags(space);
+    }
+
     public static void setEnabled(CustomerSpace space, String id, boolean enabled) {
         initialize();
         provider.setEnabled(space, id, enabled);
@@ -36,6 +48,11 @@ public class FeatureFlagClient {
     public static void remove(String id) {
         initialize();
         provider.remove(id);
+    }
+
+    public static void removeFromSpace(CustomerSpace space, String id) {
+        initialize();
+        provider.removeFlagFromSpace(space, id);
     }
 
     private static void initialize() {
