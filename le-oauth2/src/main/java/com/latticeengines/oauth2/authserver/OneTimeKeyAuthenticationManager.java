@@ -43,7 +43,7 @@ public class OneTimeKeyAuthenticationManager implements AuthenticationManager {
         OAuthUser user = users.get(authentication.getName());
 
         if (user == null) {
-            throw new BadCredentialsException(String.format("Unknown user %s provided", authentication.getName()));
+            throw new BadCredentialsException("Invalid credentials");
         }
 
         DateTime now = DateTime.now(DateTimeZone.UTC);
