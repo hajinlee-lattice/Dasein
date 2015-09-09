@@ -48,4 +48,15 @@
         <property name="sessionFactory" ref="sessionFactoryMDS" />
     </bean>
 
+    <bean id="extractDao" class="com.latticeengines.metadata.dao.impl.ExtractDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryMDS" />
+    </bean>
+
+    <bean id="primaryKeyDao" class="com.latticeengines.metadata.dao.impl.PrimaryKeyDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryMDS" />
+    </bean>
+
+    <bean id="attributeDao" class="com.latticeengines.metadata.dao.impl.AttributeDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryMDS" />
+    </bean>
 </beans>

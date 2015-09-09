@@ -35,7 +35,7 @@ public class MetadataResource {
     public void createTable(@RequestBody Table table) {
     }
 
-    @RequestMapping(value = "tables/{tableName}/extracts", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/tables/{tableName}/extracts", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Add extract to existing table")
     public void addExtractToTable(@RequestBody Extract extract) {
