@@ -126,6 +126,7 @@ public enum LedpCode {
     LEDP_18046("Failed to get metadata fields: {0}."), //
     LEDP_18047("Failed to update metadata field: {0}."), //
     LEDP_18048("Failed to update metadata fields: {0}."), //
+    LEDP_18049("Failed to retrieve feature flags from ZK for the tenant {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
@@ -171,6 +172,7 @@ public enum LedpCode {
     LEDP_21005("Problem getting DataLoader tenant settings via DataLoader REST: {0}"), //
     LEDP_21006("Problem creating DataLoader tenant via DataLoader REST: {0}"), //
     LEDP_21007("Problem deleting DataLoader tenant via DataLoader REST: {0}"), //
+
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"), //
     LEDP_22001("Can not find DB connection info for tenant {0}"), //

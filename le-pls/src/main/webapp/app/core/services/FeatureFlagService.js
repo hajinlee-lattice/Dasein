@@ -1,10 +1,9 @@
 var mod = angular.module('mainApp.core.services.FeatureFlagService', [
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.config.services.ConfigService'
+    'mainApp.core.utilities.BrowserStorageUtility'
 ]);
 
-mod.service('FeatureFlagService', function ($q, BrowserStorageUtility, RightsUtility, ConfigService) {
+mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {
 
     this.GetAllFlags = function() {
         var deferred = $q.defer();
@@ -54,29 +53,33 @@ mod.service('FeatureFlagService', function ($q, BrowserStorageUtility, RightsUti
             return;
         }
 
-        //TODO: use http to get server-level/tenant-level flags from backend
+        var tenantId = sessionDoc.Tenant.Identifier;
 
-        // ======================================================================
-        // hard-coded & dynamic flags ==> to be moved to backend in next commit
-        // ======================================================================
-        SetFlag(flags.ADMIN_ALERTS_TAB, true);
-        SetFlag(flags.SETUP_PAGE, true);
+        $http({
+            method: 'GET',
+            url: '/pls/config/featureflags?tenantId=' + tenantId
+        })
+        .success(function(data) {
+            for(var key in data) {
+                flagValues[key] = data[key];
+            }
 
-        UpdateDropdownLinksIfTenantInZK(function(){
             // update user-level flags
             UpdateFlagsBasedOnRights();
 
             promise.resolve(flagValues);
-        });
-    }
+        })
+        .error(function() {
+            // if cannot get feature flags from backend
+            SetFlag(flags.ADMIN_ALERTS_TAB, false);
+            SetFlag(flags.SETUP_PAGE, false);
+            SetFlag(flags.ACTIVATE_MODEL_PAGE, false);
+            SetFlag(flags.SYSTEM_SETUP_PAGE, false);
 
-    function UpdateDropdownLinksIfTenantInZK(callback) {
-        ConfigService.GetCurrentTopology().then(function(result){
-            if (!result.success) {
-                SetFlag(flags.ACTIVATE_MODEL_PAGE, false);
-                SetFlag(flags.SYSTEM_SETUP_PAGE, false);
-            }
-            callback();
+            // update user-level flags
+            UpdateFlagsBasedOnRights();
+
+            promise.resolve(flagValues);
         });
     }
 

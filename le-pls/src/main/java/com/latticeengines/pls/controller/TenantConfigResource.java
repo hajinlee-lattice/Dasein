@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -29,6 +30,13 @@ public class TenantConfigResource {
     public TopologyJson getTopology(@RequestParam(value = "tenantId") String tenantId) {
         CRMTopology topology = configService.getTopology(tenantId);
         return new TopologyJson(topology);
+    }
+
+    @RequestMapping(value = "/featureflags", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get tenant's feature flags")
+    public FeatureFlagValueMap getFeatureFlags(@RequestParam(value = "tenantId") String tenantId) {
+        return configService.getFeatureFlags(tenantId);
     }
 
     // this class can bubble up the schema to swagger UI

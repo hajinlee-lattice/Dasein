@@ -175,7 +175,11 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     @Override
     public FeatureFlagDefinitionMap getDefinitions() {
         Document doc = definitionCache.get();
-        return DocumentUtils.toTypesafeDocument(doc, FeatureFlagDefinitionMap.class);
+        if (doc != null) {
+            return DocumentUtils.toTypesafeDocument(doc, FeatureFlagDefinitionMap.class);
+        } else {
+            return new FeatureFlagDefinitionMap();
+        }
     }
 
     /**
@@ -184,8 +188,10 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
      */
     @Override
     public FeatureFlagValueMap getFlags(CustomerSpace space) {
-        return valueCache.get(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE),
+        FeatureFlagValueMap toReturn = valueCache.get(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE),
                 FeatureFlagValueMap.class);
+        if (toReturn == null) { toReturn = new FeatureFlagValueMap(); }
+        return toReturn;
     }
 
     private ConfigurationCache<PodScope> definitionCache;
