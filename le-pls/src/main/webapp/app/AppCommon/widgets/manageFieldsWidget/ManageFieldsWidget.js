@@ -94,7 +94,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                 {
                     field: "SourceToDisplay", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_SOURCE'),
                     template: kendo.template($("#sourceTemplate").html()),
-                    width: 100
+                    width: 110
                 },
                 /*{
                     field: "Object", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_OBJECT'),
