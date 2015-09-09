@@ -7,6 +7,7 @@ public class MetadataField {
 
     private String columnName;
     private String source; // source type
+    private String sourceToDisplay;
     private String object; // table name
     private String category;
     private String displayName;
@@ -35,6 +36,16 @@ public class MetadataField {
     @JsonProperty("Source")
     public void setSource(String source) {
         this.source = source;
+    }
+
+    @JsonProperty("SourceToDisplay")
+    public String getSourceToDisplay() {
+        return sourceToDisplay;
+    }
+
+    @JsonProperty("SourceToDisplay")
+    public void setSourceToDisplay(String sourceToDisplay) {
+        this.sourceToDisplay = sourceToDisplay;
     }
 
     @JsonProperty("Object")

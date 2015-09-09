@@ -123,6 +123,9 @@ public enum LedpCode {
     LEDP_18043("Failed to extract information from rfModel file."), //
     LEDP_18044("Failed to extract information from top predictor file."), //
     LEDP_18045("Failed to extract information from metadata-diagnostics file."), //
+    LEDP_18046("Failed to get metadata fields: {0}."), //
+    LEDP_18047("Failed to update metadata field: {0}."), //
+    LEDP_18048("Failed to update metadata fields: {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
