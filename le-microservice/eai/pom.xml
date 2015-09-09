@@ -37,13 +37,7 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-microservice</artifactId>
             <version>${le.microservice.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-microservice</artifactId>
-            <version>${le.microservice.version}</version>
-            <classifier>intf</classifier>
+            <classifier>classes</classifier>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
