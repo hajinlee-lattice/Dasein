@@ -3,7 +3,6 @@ package com.latticeengines.security.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
@@ -35,6 +35,9 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private InternalTestUserService internalTestUserService;
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
 
@@ -48,7 +51,6 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
 
         LoginDocument loginDoc = restTemplate
                 .postForObject(getRestAPIHostPort() + "/login", creds, LoginDocument.class);
-        assertTrue(loginDoc.getResult().getTenants().size() >= 2);
         assertNotNull(loginDoc.getData());
     }
 
