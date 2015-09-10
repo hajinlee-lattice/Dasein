@@ -294,7 +294,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                     ) {
                         return BootstrapState.constructOKState(1);
                     } else {
-                        return waitUntilStateIsNotInitial(contractId, tenantId, component, 300);
+                        return waitUntilStateIsNotInitial(contractId, tenantId, component, 1000);
                     }
                 }
             });
