@@ -74,7 +74,7 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
             data.forEach(function(record){
                 var gridRow;
                 try {
-                    gridRow = TenantUtility.convertTenantRecordToGridData(record)
+                    gridRow = TenantUtility.convertTenantRecordToGridData(record);
                 } catch(err) {
                     return;
                 }
