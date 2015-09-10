@@ -70,7 +70,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void testSendAndReceiveExternalEmail() throws InterruptedException {
         Date registrationTimestamp = new Date(System.currentTimeMillis());
         createNewUserAndSendEmail(EXTERNAL_USER_EMAIL);
-        int numOfRetries = 10;
+        int numOfRetries = 30;
         boolean verified = false;
         while(numOfRetries-- > 0 && !verified) {
             Thread.sleep(3000L);
