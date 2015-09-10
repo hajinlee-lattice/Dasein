@@ -15,11 +15,17 @@
     </parent>
     
     <modules>
-        <module>le-common</module>
         <module>le-domain</module>
+        <module>le-common</module>
+        <module>le-remote</module>
         <module>le-parent</module>
+        <module>le-scheduler</module>
         <module>le-db</module>
+        <module>le-perf</module>
+        <module>le-camille</module>
         <module>le-monitor</module>
+        <module>le-dataflow</module>
+        <module>le-eai</module>
         <module>le-dataplatform</module>
         <module>le-scoring</module>
     </modules>
