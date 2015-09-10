@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +62,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         List<String> files = new ArrayList<>();
         try {
             files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
-            log.info(String.format("%d file(s) downloaded from modeling service for tenant %s.", files.size(), tenant.getId()));
+            log.info(String.format("%d file(s) downloaded from modeling service for tenant %s.", files.size(),
+                    tenant.getId()));
         } catch (FileNotFoundException e) {
             log.warn(String.format("No models seem to have been created yet for tenant with id %s. Error message: %s",
                     tenant.getId(), e.getMessage()));
@@ -74,8 +76,9 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             set.add(summary.getId());
         }
         boolean foundFilesToDownload = false;
-        try {
-            for (String file : files) {
+
+        for (String file : files) {
+            try {
                 String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
                 ModelSummary summary = parser.parse(file, contents);
                 summary.setTenant(tenant);
@@ -85,9 +88,13 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                     modelSummaryEntityMgr.create(summary);
                     foundFilesToDownload = true;
                 }
+            } catch (Exception e) {
+                if (e instanceof IOException) {
+                    log.fatal(e); // will trigger pagerDuty
+                } else {
+                    log.error(e);
+                }
             }
-        } catch (Exception e) {
-            log.error(e);
         }
 
         return foundFilesToDownload;

@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -40,10 +41,10 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private AsyncTaskExecutor modelSummaryDownloadExecutor;
-    
+
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
@@ -54,7 +55,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
     private String modelingServiceHdfsBaseDir;
 
     private static final String TENANT_ID = "MS_DOWNLOAD_TEST";
-    private static final String UUID="8195dcf3-0898-4ad3-b94d-0d0f806e979e";
+    private static final String UUID = "8195dcf3-0898-4ad3-b94d-0d0f806e979e";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -74,15 +75,17 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         if (tenant != null) {
             setupSecurityContext(tenant);
             List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
-            for (ModelSummary summary: summaries) {
+            for (ModelSummary summary : summaries) {
                 modelSummaryEntityMgr.delete(summary);
             }
         }
         tenantService.discardTenant(newTenant());
     }
-    
+
     @BeforeMethod(groups = "functional")
-    public void setupMethod() throws Exception { teardown(); }
+    public void setupMethod() throws Exception {
+        teardown();
+    }
 
     @Test(groups = "functional")
     public void executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation() throws Exception {
@@ -96,7 +99,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         setupSecurityContext(tenant);
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1, "One new summaries should have been created");
-        
+
         modelSummaryDownloadService.executeInternal(null);
         summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1, "No new summaries should have been created");
@@ -107,7 +110,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         uploadModelSummary();
         Thread.sleep(5000L);
         tenantService.registerTenant(newTenant());
-        
+
         modelSummaryDownloadService.executeInternal(null);
         setupSecurityContext(newTenant());
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
@@ -129,21 +132,62 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         assertEquals(summaries.size(), 1, "No new summaries should have been created");
     }
 
+    @Test(groups = "functional", dependsOnMethods = {
+            "executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation",
+            "executeInternalWithTenantRegistrationLaterThanHdfsModelCreation", "downloadDetailsOnlyModelSummary" })
+    public void modelDownloaderShouldSkipBadModel() throws Exception {
+        ModelSummaryParser parser = Mockito.mock(ModelSummaryParser.class);
+        Mockito.when(parser.parse(Mockito.anyString(), Mockito.anyString())).thenThrow(new RuntimeException())
+                .thenCallRealMethod();
+
+        modelSummaryDownloadService.setModelSummaryParser(parser);
+
+        Tenant tenant = newTenant();
+        tenantService.registerTenant(tenant);
+        uploadTwoModelSummaries();
+        modelSummaryDownloadService.executeInternal(null);
+
+        Thread.sleep(1000L);
+
+        setupSecurityContext(tenant);
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+        assertEquals(summaries.size(), 1, "One new summaries should have been created because the first model is bad.");
+
+    }
+
     private void uploadModelSummary() throws Exception {
-        String dir = modelingServiceHdfsBaseDir
-                + "/" + CustomerSpace.parse(TENANT_ID) + "/models/Q_EventTable_TENANT1/" + UUID + "/1423547416066_0001/enhancements";
-        URL modelSummaryUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+        String dir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID)
+                + "/models/Q_EventTable_TENANT1/" + UUID + "/1423547416066_0001/enhancements";
+        URL modelSummaryUrl = ClassLoader
+                .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         HdfsUtils.rmdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
     }
 
+    private void uploadTwoModelSummaries() throws Exception {
+        String dir1 = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID)
+                + "/models/Q_EventTable_TENANT1/" + UUID + "/1423547416066_0001/enhancements";
+        String secondUUID = "8195dcf3-0898-4ad3-b94d-0d0f806e979a";
+        String dir2 = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID)
+                + "/models/Q_EventTable_TENANT1/" + secondUUID + "/1423547416066_0001/enhancements";
+        URL modelSummaryUrl1 = ClassLoader
+                .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+        URL modelSummaryUrl2 = ClassLoader
+                .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
+        HdfsUtils.rmdir(yarnConfiguration, dir1);
+        HdfsUtils.mkdir(yarnConfiguration, dir1);
+        HdfsUtils.rmdir(yarnConfiguration, dir2);
+        HdfsUtils.mkdir(yarnConfiguration, dir2);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl1.getFile(), dir1 + "/modelsummary.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl2.getFile(), dir2 + "/modelsummary.json");
+    }
+
     private void uploadDetailsOnlyModelSummary() throws Exception {
-        String dir = modelingServiceHdfsBaseDir
-                + "/" + CustomerSpace.parse(TENANT_ID) + "/models/Q_EventTable_TENANT1/" + UUID + "/1423547416066_0001/enhancements";
-        URL modelSummaryUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/modelsummary-detailsonly.json");
+        String dir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID)
+                + "/models/Q_EventTable_TENANT1/" + UUID + "/1423547416066_0001/enhancements";
+        URL modelSummaryUrl = ClassLoader
+                .getSystemResource("com/latticeengines/pls/service/impl/modelsummary-detailsonly.json");
         HdfsUtils.rmdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
