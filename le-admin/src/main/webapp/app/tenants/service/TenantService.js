@@ -69,7 +69,18 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
             method: 'GET',
             url: '/admin/tenants'
         }).success(function(data){
-            result.resultObj = _.map(data, TenantUtility.convertTenantRecordToGridData);
+            result.resultObj = [];
+
+            data.forEach(function(record){
+                var gridRow;
+                try {
+                    gridRow = TenantUtility.convertTenantRecordToGridData(record)
+                } catch(err) {
+                    return;
+                }
+                result.resultObj.push(gridRow);
+            });
+
             defer.resolve(result);
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
