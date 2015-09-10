@@ -40,7 +40,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     function renderSelects(fields) {
         var obj = ManageFieldsService.GetOptionsForSelects(fields);
         $scope.sourcesToSelect = obj.sourcesToSelect;
-        //$scope.objectsToSelect = obj.objectsToSelect;
         $scope.categoriesToSelect = obj.categoriesToSelect;
         $scope.allOptions = obj.allOptions;
     }
@@ -96,11 +95,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                     template: kendo.template($("#sourceTemplate").html()),
                     width: 110
                 },
-                /*{
-                    field: "Object", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_OBJECT'),
-                    template: kendo.template($("#objectTemplate").html()),
-                    width:60
-                },*/
                 {
                     field: "Category", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_CATEGORY'),
                     editor: categoryEditor,
@@ -178,11 +172,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         if (filerColumn == "source") {
             sourceSelectChanged();
         }
-        /*} else if (filerColumn == "object") {
-            objectSelectChanged();
-        } else if (filerColumn == "category") {
-            categorySelectChanged();
-        }*/
 
         $scope.filterFields($event);
     };
@@ -193,63 +182,19 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         var allOptions = $scope.allOptions;
         var selectedSource = $scope.source;
         var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
-        /*for (var i = 0; i < allOptions.length; i++) {
-            if (sourceIsEmpty || allOptions[i][0] == selectedSource) {
-                var object = allOptions[i][1];
-                if (!StringUtility.IsEmptyString(object) && objects.indexOf(object) < 0) {
-                    objects.push(object);
-                }
-            }
-        }*/
         for (var j = 0; j < allOptions.length; j++) {
             if (sourceIsEmpty || allOptions[j][0] == selectedSource) {
-                var category = allOptions[j][2];
+                var category = allOptions[j][1];
                 if (!StringUtility.IsEmptyString(category) && categories.indexOf(category) < 0) {
                     categories.push(category);
                 }
             }
         }
-        //$scope.objectsToSelect = objects.sort();
         $scope.categoriesToSelect = categories.sort();
+        if ($scope.categoriesToSelect.indexOf($scope.category) < 0) {
+            $scope.category = "";
+        }
     }
-
-    /*function objectSelectChanged() {
-        var categories = [];
-        var allOptions = $scope.allOptions;
-        var selectedSource = $scope.source;
-        var selectedObject = $scope.object;
-        var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
-        var objectIsEmpty = StringUtility.IsEmptyString(selectedObject);
-        for (var i = 0; i < allOptions.length; i++) {
-            if ((sourceIsEmpty || allOptions[i][0] == selectedSource) &&
-                    (objectIsEmpty || allOptions[i][1] == selectedObject)) {
-                var category = allOptions[i][2];
-                if (!StringUtility.IsEmptyString(category) && categories.indexOf(category) < 0) {
-                    categories.push(category);
-                }
-            }
-        }
-        $scope.categoriesToSelect = categories.sort();
-    }*/
-
-    /*function categorySelectChanged() {
-        var objects = [];
-        var allOptions = $scope.allOptions;
-        var selectedSource = $scope.source;
-        var selectedCategory = $scope.category;
-        var sourceIsEmpty = StringUtility.IsEmptyString(selectedSource);
-        var categoryIsEmpty = StringUtility.IsEmptyString(selectedCategory);
-        for (var i = 0; i < allOptions.length; i++) {
-            if ((sourceIsEmpty || allOptions[i][0] == selectedSource) &&
-                    (categoryIsEmpty || allOptions[i][2] == selectedCategory)) {
-                var object = allOptions[i][1];
-                if (!StringUtility.IsEmptyString(object) && objects.indexOf(object) < 0) {
-                    objects.push(object);
-                }
-            }
-        }
-        $scope.objectsToSelect = objects.sort();
-    }*/
 
     $scope.keyEnterFilter = function($event) {
         if ($event.keyCode === 13) {

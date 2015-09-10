@@ -30,13 +30,12 @@ describe('ManageFieldsServiceSpec Tests', function () {
             var warnings = manageFieldsService.GetOptionsForSelects(fields);
             var expectedObj = {
                 sourcesToSelect: ["Lattice Data Cloud", "Marketo", "Salesforce"],
-                //objectsToSelect: ["Account", "Lead"],
                 categoriesToSelect: ["Lead Information", "Marketing Activity"],
                 allOptions: [
-                    ["Marketo", "Lead", "Lead Information"],
-                    ["Marketo", "Account", "Marketing Activity"],
-                    ["Salesforce", "Lead", "Marketing Activity"],
-                    ["Lattice Data Cloud", null, "Lead Information"]
+                    ["Marketo", "Lead Information"],
+                    ["Marketo", "Marketing Activity"],
+                    ["Salesforce", "Marketing Activity"],
+                    ["Lattice Data Cloud", "Lead Information"]
                 ]
             }
 
@@ -44,10 +43,6 @@ describe('ManageFieldsServiceSpec Tests', function () {
             for (var i = 0; i < warnings.sourcesToSelect.length; i++) {
                 expect(warnings.sourcesToSelect[i]).toEqual(expectedObj.sourcesToSelect[i]);
             }
-            /*expect(warnings.objectsToSelect.length).toEqual(expectedObj.objectsToSelect.length);
-            for (var i = 0; i < warnings.objectsToSelect.length; i++) {
-                expect(warnings.objectsToSelect[i]).toEqual(expectedObj.objectsToSelect[i]);
-            }*/
             expect(warnings.categoriesToSelect.length).toEqual(expectedObj.categoriesToSelect.length);
             for (var i = 0; i < warnings.categoriesToSelect.length; i++) {
                 expect(warnings.categoriesToSelect[i]).toEqual(expectedObj.categoriesToSelect[i]);

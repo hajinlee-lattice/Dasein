@@ -59,7 +59,7 @@
     </security:http>
 
     <security:http use-expressions="true"
-                   pattern="/pls/metadata/**"
+                   pattern="/pls/vdbmetadata/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">

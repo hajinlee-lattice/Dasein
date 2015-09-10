@@ -8,7 +8,7 @@ angular.module('mainApp.setup.controllers.ManageFieldsController', [
     'mainApp.core.services.WidgetService'
 ])
 
-.controller('ManageFieldsController', function ($scope, ResourceUtility, BrowserStorageUtility, RightsUtility, NavUtility, WidgetConfigUtility, WidgetFrameworkService, WidgetService) {
+.controller('ManageFieldsController', function ($scope, $timeout, ResourceUtility, BrowserStorageUtility, RightsUtility, NavUtility, WidgetConfigUtility, WidgetFrameworkService, WidgetService) {
     $scope.ResourceUtility = ResourceUtility;
 
     if (BrowserStorageUtility.getClientSession() == null) { return; }
@@ -36,6 +36,15 @@ angular.module('mainApp.setup.controllers.ManageFieldsController', [
         parentData:   null
     });
 
+    $scope.topNavClicked = function ($event, nodeName) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        $timeout(function () {
+            $("#setup .setup-sidebar li[node-name='" + nodeName + "']").trigger('click');
+        });
+    };
 })
 
 .directive('manageFields', function () {

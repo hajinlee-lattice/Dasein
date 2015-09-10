@@ -1,7 +1,9 @@
 #setup {
-  position: relative;
-  margin-top: 4px;
-  min-height: 596px;
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  bottom: 34px;
 }
 
 #setup .setup-sidebar {
@@ -58,8 +60,8 @@
 
 #setup .setup-main-panel .form-control {
   display: inline-block;
-  width: 200px;
-  margin-right: 20px;
+  width: 240px;
+  margin-right: 32px;
 }
 
 #setup .setup-main-panel .form-group .btn {
@@ -112,7 +114,6 @@
 }
 
 #setup .setup-main-panel .warning:after {
-   margin-right: 4px;
    content: "\f071";
 }
 

@@ -13,7 +13,7 @@ angular.module('mainApp.setup.services.MetadataService', [
 
         $http({
             method: 'GET',
-            url: '/pls/metadata/fields?' + new Date().getTime(),
+            url: '/pls/vdbmetadata/fields?' + new Date().getTime(),
             headers: {
                 'Content-Type': "application/json"
             }
@@ -49,7 +49,7 @@ angular.module('mainApp.setup.services.MetadataService', [
 
         $http({
             method: 'PUT',
-            url: '/pls/metadata/fields/' + field.ColumnName,
+            url: '/pls/vdbmetadata/fields/' + field.ColumnName,
             headers: {
                 'Content-Type': "application/json"
             },
@@ -86,7 +86,7 @@ angular.module('mainApp.setup.services.MetadataService', [
 
         $http({
             method: 'PUT',
-            url: '/pls/metadata/fields',
+            url: '/pls/vdbmetadata/fields',
             headers: {
                 'Content-Type': "application/json"
             },

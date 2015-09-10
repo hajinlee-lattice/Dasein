@@ -22,22 +22,22 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.MetadataField;
+import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.service.MetadataService;
+import com.latticeengines.pls.service.VdbMetadataService;
 import com.latticeengines.pls.service.impl.TenantConfigServiceImpl;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "metadata", description = "REST resource for metadata")
+@Api(value = "metadata", description = "REST resource for metadata in VisiDB")
 @RestController
-@RequestMapping(value = "/metadata")
+@RequestMapping(value = "/vdbmetadata")
 @PreAuthorize("hasRole('Edit_PLS_Configuration')")
-public class MetadataResource {
+public class VdbMetadataResource {
 
-    private static final Log log = LogFactory.getLog(MetadataResource.class);
+    private static final Log log = LogFactory.getLog(VdbMetadataResource.class);
 
     @Autowired
     private SessionService sessionService;
@@ -46,19 +46,19 @@ public class MetadataResource {
     private TenantConfigServiceImpl tenantConfigService;
 
     @Autowired
-    private MetadataService metadataService;
+    private VdbMetadataService vdbMetadataService;
 
     @RequestMapping(value = "/fields", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of metadata fields")
-    public ResponseDocument<List<MetadataField>> getFields(HttpServletRequest request) {
-        ResponseDocument<List<MetadataField>> response = new ResponseDocument<>();
+    public ResponseDocument<List<VdbMetadataField>> getFields(HttpServletRequest request) {
+        ResponseDocument<List<VdbMetadataField>> response = new ResponseDocument<>();
         try
         {
             Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
             String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
-            List<MetadataField> fields = metadataService.getMetadataFields(tenantName, dlUrl);
+            List<VdbMetadataField> fields = vdbMetadataService.getFields(tenantName, dlUrl);
 
             response.setSuccess(true);
             response.setResult(fields);
@@ -73,14 +73,14 @@ public class MetadataResource {
     @RequestMapping(value = "/fields/{fieldName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a metadata field")
-    public SimpleBooleanResponse updateField(@PathVariable String fieldName, @RequestBody MetadataField field, HttpServletRequest request) {
+    public SimpleBooleanResponse updateField(@PathVariable String fieldName, @RequestBody VdbMetadataField field, HttpServletRequest request) {
         try {
             log.info("updateField:" + field);
 
             Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
             String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
-            metadataService.UpdateField(tenantName, dlUrl, field);
+            vdbMetadataService.UpdateField(tenantName, dlUrl, field);
 
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
@@ -94,14 +94,14 @@ public class MetadataResource {
     @RequestMapping(value = "/fields", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a list of metadata fields")
-    public SimpleBooleanResponse updateFields(@RequestBody List<MetadataField> fields, HttpServletRequest request) {
+    public SimpleBooleanResponse updateFields(@RequestBody List<VdbMetadataField> fields, HttpServletRequest request) {
         try {
             log.info("updateFields:" + fields);
 
             Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
             String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
-            metadataService.UpdateFields(tenantName, dlUrl, fields);
+            vdbMetadataService.UpdateFields(tenantName, dlUrl, fields);
 
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {

@@ -14,13 +14,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.MetadataField;
+import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.pls.service.MetadataConstants;
-import com.latticeengines.pls.service.MetadataService;
+import com.latticeengines.pls.service.VdbMetadataService;
 import com.latticeengines.remote.exposed.service.Headers;
 
-@Component("metadataService")
-public class MetadataServiceImpl implements MetadataService {
+@Component("vdbMetadataService")
+public class VdbMetadataServiceImpl implements VdbMetadataService {
 
     private static final String DL_REST_SERVICE = "/DLRestService";
     private static final int STATUS_SUCCESS = 3;
@@ -30,10 +30,10 @@ public class MetadataServiceImpl implements MetadataService {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public List<MetadataField> getMetadataFields(String tenantName, String dlUrl) {
+    public List<VdbMetadataField> getFields(String tenantName, String dlUrl) {
         try {
             // TODO: this is a mock up completion
-            List<MetadataField> fields = new ArrayList<MetadataField>();
+            List<VdbMetadataField> fields = new ArrayList<VdbMetadataField>();
             String[] queries = new String[] { "Q_PLS_Modeling" };
             for (String query : queries) {
                 Map<String, String> paramerters = new HashMap<>();
@@ -45,7 +45,7 @@ public class MetadataServiceImpl implements MetadataService {
                 if (json.get("Status").asInt() != STATUS_SUCCESS) {
                     for (Integer i = 0; i < 60; i++) {
                         String idx = i > 0 ? i.toString() : "";
-                        MetadataField field = createField("ID" + idx, "Marketo", "Lead", "Lead Information", "ID", "None", "Internal", "URI", null, "ratio", null);
+                        VdbMetadataField field = createField("ID" + idx, "Marketo", "Lead", "Lead Information", "ID", "None", "Internal", "URI", null, "ratio", null);
                         fields.add(field);
                         field = createField("Email" + idx, "Marketo", "Lead", "Lead Information", "Email Address", "Model", "Internal", "URI", null, "ratio", null);
                         fields.add(field);
@@ -67,7 +67,7 @@ public class MetadataServiceImpl implements MetadataService {
                     } else {
                         approvedUsage = getNodeText(approvedUsageNode);
                     }
-                    MetadataField field = createField(
+                    VdbMetadataField field = createField(
                         getNodeText(kvpair.get("ColumnName")),
                         getNodeText(kvpair.get("DataSource")),
                         getNodeText(kvpair.get("Object")),
@@ -117,10 +117,10 @@ public class MetadataServiceImpl implements MetadataService {
         return false;
     }
 
-    private MetadataField createField(String columnName, String source, String object, String category,
+    private VdbMetadataField createField(String columnName, String source, String object, String category,
             String displayName, String approvedUsage, String tags, String fundamentalType,
             String displayDiscretization, String statisticalType, String description) {
-        MetadataField field = new MetadataField();
+        VdbMetadataField field = new VdbMetadataField();
         field.setColumnName(columnName);
         field.setSource(source);
         field.setObject(object);
@@ -160,7 +160,7 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void UpdateField(String tenantName, String dlUrl, MetadataField field) {
+    public void UpdateField(String tenantName, String dlUrl, VdbMetadataField field) {
         try {
             // TODO Auto-generated method stub
             Thread.sleep(1000);
@@ -171,7 +171,7 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void UpdateFields(String tenantName, String dlUrl, List<MetadataField> fields) {
+    public void UpdateFields(String tenantName, String dlUrl, List<VdbMetadataField> fields) {
         try {
             // TODO Auto-generated method stub
             Thread.sleep(1000);

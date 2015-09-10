@@ -1,4 +1,8 @@
 <div data-ng-controller="ManageFieldsController">
-    <div class="header-nav"><a href="#">{{ResourceUtility.getString('SETUP_NAV_NODE_HOME')}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;<a href="#">{{ResourceUtility.getString('SETUP_NAV_NODE_DATA')}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</div>
-    <section id="manageFieldsContainer"> </section>
+    <div class="header-nav">
+        <a href="#" data-ng-click="topNavClicked($event, 'home')">{{ResourceUtility.getString('SETUP_NAV_NODE_HOME')}}</a>
+        <span>&nbsp;&gt;&nbsp;&nbsp;<a href="#" data-ng-click="topNavClicked($event, 'data')">{{ResourceUtility.getString('SETUP_NAV_NODE_DATA')}}</a></span>
+        <span>&nbsp;&gt;&nbsp;&nbsp;{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</span>
+    </div>
+    <section id="manageFieldsContainer"></section>
 </div>
