@@ -61,12 +61,12 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         deleteUserByRestCall(EXTERNAL_USER_EMAIL);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testSendAndReceiveInternalEmail() {
         createNewUserAndSendEmail(INTERNAL_USER_EMAIL);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testSendAndReceiveExternalEmail() throws InterruptedException {
         Date registrationTimestamp = new Date(System.currentTimeMillis());
         createNewUserAndSendEmail(EXTERNAL_USER_EMAIL);
