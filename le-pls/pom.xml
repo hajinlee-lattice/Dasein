@@ -101,8 +101,8 @@
                             </dependency>
                             <dependency>
                                 <groupId>javax.mail</groupId>
-                                <artifactId>mail</artifactId>
-                                <version>1.4.7</version>
+                                <artifactId>javax.mail-api</artifactId>
+                                <version>1.5.3</version>
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -466,11 +466,6 @@
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
             <version>1.5.3</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>1.4.7</version>
         </dependency>
     </dependencies>
 

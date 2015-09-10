@@ -3,6 +3,24 @@ package com.latticeengines.pls.service.impl;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
+import java.util.Date;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.mail.BodyPart;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.internet.MimeMessage;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,12 +34,19 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 
+
 public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
     private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";
+    private static final String EXTERNAL_USER_EMAIL_PASSWORD = "MrB2uild";
+    private static final String EMAIL_SUBJECT = "Welcome to Lattice Lead Prioritization";
+    private static final String APP_URL_PATTERN = "href=\"[^\"]*";
 
     private String testUsername;
+
+    @Value("${security.pls.app.hostport}")
+    private String appUrl;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -42,8 +67,16 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testSendAndReceiveExternalEmail() {
+    public void testSendAndReceiveExternalEmail() throws InterruptedException {
+        Date registrationTimestamp = new Date(System.currentTimeMillis());
         createNewUserAndSendEmail(EXTERNAL_USER_EMAIL);
+        int numOfRetries = 10;
+        boolean verified = false;
+        while(numOfRetries-- > 0 && !verified) {
+            Thread.sleep(3000L);
+            verified = verifyReceivedEmailInGmail(registrationTimestamp);
+        }
+        Assert.assertTrue(verified, "Should find the new user email in Gmail's INBOX.");
     }
 
     private void createNewUserAndSendEmail(String email) {
@@ -90,8 +123,64 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     @SuppressWarnings("unused")
-    private void verifyReceivedEmailInGmail() {
+    private boolean verifyReceivedEmailInGmail(Date registrationTimestamp) {
+        String receivingHost="imap.gmail.com";
 
+        Properties props=System.getProperties();
+        props.setProperty("mail.store.protocol", "imaps");
+        props.put("mail.imaps.ssl.trust", "*");
+        Session session=Session.getDefaultInstance(props, null);
+
+        try {
+            Store store = session.getStore("imaps");
+            store.connect(receivingHost, EXTERNAL_USER_EMAIL, EXTERNAL_USER_EMAIL_PASSWORD);
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_WRITE);
+            Message messages[] = folder.getMessages();
+
+            for (Message message : messages) {
+                if (!message.getSubject().equalsIgnoreCase(EMAIL_SUBJECT)) { continue; }
+
+                Date receivedDate = message.getReceivedDate();
+
+                MimeMessage m = (MimeMessage) message;
+
+                if (message.getReceivedDate().after(registrationTimestamp)) {
+                    String url = getHrefUrlFromMultiPart((Multipart) m.getContent());
+
+                    if (appUrl.equalsIgnoreCase(url)) {
+                        // delete the message
+                        message.setFlag(Flags.Flag.DELETED, true);
+                        return true;
+                    }
+
+                }
+            }
+
+            folder.close(true);
+            store.close();
+
+            return false;
+
+        } catch (Exception e) {
+            Assert.fail("Failed to verify receiving Gmail.", e);
+            return false;
+        }
+    }
+
+    private static String getHrefUrlFromMultiPart(Multipart multipart) throws MessagingException, IOException {
+        for (int j = 0; j < multipart.getCount(); j++) {
+            BodyPart bodyPart = multipart.getBodyPart(j);
+            if (bodyPart.getDisposition() == null) {
+                String content = bodyPart.getContent().toString();
+                Pattern pattern = Pattern.compile(APP_URL_PATTERN);
+                Matcher matcher = pattern.matcher(content);
+                if (matcher.find()) {
+                    return matcher.group(0).substring(6);
+                }
+            }
+        }
+        return "";
     }
 
 }
