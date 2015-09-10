@@ -107,6 +107,8 @@ public class BardJamsTenant implements HasPid {
     private String LoadGroupList;
     @Column(name = "Status", nullable = true)
     private String status;
+    @Column(name = "Dante_Status", nullable = true)
+    private String danteStatus;
 
     public BardJamsTenant() {
         super();
@@ -464,6 +466,12 @@ public class BardJamsTenant implements HasPid {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDanteStatus() { return danteStatus; }
+
+    public void setDanteStatus(String danteStatus) {
+        this.danteStatus = danteStatus;
     }
 
     @Override

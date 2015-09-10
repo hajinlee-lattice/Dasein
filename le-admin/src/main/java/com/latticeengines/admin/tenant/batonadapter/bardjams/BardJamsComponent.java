@@ -107,6 +107,7 @@ public class BardJamsComponent extends LatticeComponent {
         tenant.setActive(Integer.parseInt(active));
 
         tenant.setStatus(BardJamsTenantStatus.NEW.getStatus());
+        tenant.setDanteStatus(BardJamsTenantStatus.NEW.getStatus());
 
         //==================================================
         // derived
