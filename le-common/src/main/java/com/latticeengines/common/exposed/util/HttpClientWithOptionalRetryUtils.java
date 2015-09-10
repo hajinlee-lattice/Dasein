@@ -34,7 +34,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 
-@SuppressWarnings("deprecation")
 public class HttpClientWithOptionalRetryUtils {
     private static final long INITIAL_WAIT_INTERVAL = 100L;
     private static final long MAX_WAIT_INTERVAL = 60000L;
