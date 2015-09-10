@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class MetadataField {
+public class VdbMetadataField {
 
     private String columnName;
     private String source; // source type
