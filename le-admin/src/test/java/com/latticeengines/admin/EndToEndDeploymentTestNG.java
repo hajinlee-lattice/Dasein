@@ -120,6 +120,9 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
+        //TODO: skip Dante until it becomes idempotent
+        danteSkipped = true;
+
         cleanup();
 
         provisionEndToEndTestTenants();
