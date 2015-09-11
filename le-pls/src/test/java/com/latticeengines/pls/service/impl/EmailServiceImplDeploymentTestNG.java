@@ -19,6 +19,7 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -66,7 +67,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         createNewUserAndSendEmail(INTERNAL_USER_EMAIL);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testSendAndReceiveExternalEmail() throws InterruptedException {
         Date registrationTimestamp = new Date(System.currentTimeMillis());
         createNewUserAndSendEmail(EXTERNAL_USER_EMAIL);
@@ -128,12 +129,16 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         Properties props=System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");
-        props.put("mail.imaps.ssl.trust", "*");
+        props.setProperty("mail.imaps.starttls.enable", "true");
+        props.setProperty("mail.imaps.port", "993");
+        props.setProperty("mail.imaps.ssl.trust", "*");
         Session session=Session.getDefaultInstance(props, null);
 
         try {
             Store store = session.getStore("imaps");
-            store.connect(receivingHost, EXTERNAL_USER_EMAIL, EXTERNAL_USER_EMAIL_PASSWORD);
+            String appCode = System.getProperty("GMAIL_APP_PASSWORD");
+            String password = StringUtils.isNotEmpty(appCode) ? appCode : EXTERNAL_USER_EMAIL_PASSWORD;
+            store.connect(receivingHost, EXTERNAL_USER_EMAIL, password);
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_WRITE);
             Message messages[] = folder.getMessages();
