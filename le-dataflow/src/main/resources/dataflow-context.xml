@@ -21,6 +21,8 @@
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
    
     <context:annotation-config/> 
-    <context:component-scan base-package="com.latticeengines.dataflow"/>
+    <context:component-scan base-package="com.latticeengines.dataflow">
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.dataflow.controller.*" />
+    </context:component-scan>
 
 </beans>

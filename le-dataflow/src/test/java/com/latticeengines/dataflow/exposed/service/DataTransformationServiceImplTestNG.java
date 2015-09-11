@@ -19,9 +19,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
@@ -176,7 +176,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         boolean exception = false;
         try {
             dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
-        } catch (DataFlowException e) {
+        } catch (LedpException e) {
             exception = true;
             assertEquals(e.getMessage(), message);
         }

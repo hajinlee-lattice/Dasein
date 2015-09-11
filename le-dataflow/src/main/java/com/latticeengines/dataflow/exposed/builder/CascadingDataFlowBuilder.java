@@ -60,8 +60,6 @@ import cascading.tuple.Fields;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.GroupByCriteria.AggregationType;
-import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
-import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
@@ -166,9 +164,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 i++;
             } catch (IllegalArgumentException | IOException e) {
                 if (path != null) {
-                    throw new DataFlowException(DataFlowCode.DF_10005, e, new String[] { path });
+                    throw new LedpException(LedpCode.LEDP_26006, e, new String[] { path });
                 } else {
-                    throw new DataFlowException(DataFlowCode.DF_10004, e);
+                    throw new LedpException(LedpCode.LEDP_26005, e);
                 }
                 
             }
@@ -211,30 +209,30 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     
     private void validateTableForSource(Table sourceTable) {
         if (sourceTable.getName() == null) {
-            throw new DataFlowException(DataFlowCode.DF_10008);
+            throw new LedpException(LedpCode.LEDP_26009);
         }
         
         if (sourceTable.getExtracts().size() == 0) {
-            throw new DataFlowException(DataFlowCode.DF_10011, new String[] { sourceTable.getName() });
+            throw new LedpException(LedpCode.LEDP_26012, new String[] { sourceTable.getName() });
         }
         
         for (Extract extract : sourceTable.getExtracts()) {
             if (extract.getName() == null) {
-                throw new DataFlowException(DataFlowCode.DF_10009, new String[] { sourceTable.getName() });
+                throw new LedpException(LedpCode.LEDP_26010, new String[] { sourceTable.getName() });
             }
             if (extract.getPath() == null) {
-                throw new DataFlowException(DataFlowCode.DF_10010, new String[] { extract.getName(), sourceTable.getName() });
+                throw new LedpException(LedpCode.LEDP_26011, new String[] { extract.getName(), sourceTable.getName() });
             }
         }
         
         PrimaryKey key = sourceTable.getPrimaryKey();
         
         if (key == null) {
-            throw new DataFlowException(DataFlowCode.DF_10006, new String[] { sourceTable.getName() });
+            throw new LedpException(LedpCode.LEDP_26007, new String[] { sourceTable.getName() });
         }
         
         if (key.getAttributes().size() == 0) {
-            throw new DataFlowException(DataFlowCode.DF_10007, new String[] { sourceTable.getName() });
+            throw new LedpException(LedpCode.LEDP_26008, new String[] { sourceTable.getName() });
         }
     }
 
@@ -313,10 +311,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> rhsPipesAndFields = pipesAndOutputSchemas.get(rhs);
         if (lhsPipesAndFields == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { lhs });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { lhs });
         }
         if (rhsPipesAndFields == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { rhs });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { rhs });
         }
         Set<String> seenFields = new HashSet<>();
 
@@ -391,7 +389,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             FieldMetadata fm = nameToFieldMetadataMap.get(fieldName);
 
             if (fm == null) {
-                throw new DataFlowException(DataFlowCode.DF_10001, new String[] { fieldName });
+                throw new LedpException(LedpCode.LEDP_26002, new String[] { fieldName });
             }
             partialFieldMetadata.add(fm);
         }
@@ -461,7 +459,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(name);
         if (pipeAndMetadata == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { name });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { name });
         }
         return super.createSchema(flowName, pipeAndMetadata.getValue(), dataFlowCtx);
     }
@@ -473,7 +471,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             try {
                 return AvroUtils.getSchema(config, new Path(getSchemaPath(config, taregetSchemaPath)));
             } catch (Exception ex) {
-                throw new DataFlowException(DataFlowCode.DF_10004, ex);
+                throw new LedpException(LedpCode.LEDP_26005, ex);
             }
         }
         return null;
@@ -490,7 +488,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         List<String> groupByFields = groupByFieldList.getFieldsAsList();
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(pm.getValue());
 
@@ -528,7 +526,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 if (fm == null) {
                     fm = nameToFieldMetadataMap.get(aggFieldName);
                     if (fm == null) {
-                        throw new DataFlowException(DataFlowCode.DF_10002, new String[] { aggFieldName, prior });
+                        throw new LedpException(LedpCode.LEDP_26003, new String[] { aggFieldName, prior });
                     }
                 }
                 FieldMetadata newfm = new FieldMetadata(fm);
@@ -550,7 +548,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         List<String> groupByFields = groupByFieldList.getFieldsAsList();
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         Pipe groupby = null;
         groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields));
@@ -594,7 +592,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
 
         if (pm == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         ExpressionFunction function = new ExpressionFunction(new Fields(targetField.getFieldName()), //
                 expression, //
@@ -609,7 +607,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
 
         if (pm == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         Fields fieldStrategy = Fields.ALL;
 
@@ -650,7 +648,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     protected String addRetainFunction(String prior, FieldList outputFields) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
 
         Pipe retain = new Retain(pm.getKey(), convertToFields(outputFields.getFields()));
@@ -682,7 +680,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     protected String addMD5(String prior, FieldList fieldsToApply, String targetFieldName) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFields()), new AddMD5Hash(new Fields(
                 targetFieldName)), Fields.ALL);
@@ -701,7 +699,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     protected String addRowId(String prior, String targetFieldName, String tableName) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowId(new Fields(targetFieldName), tableName), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
@@ -721,7 +719,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             FieldMetadata targetField) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
-            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         return addFunction(prior, //
                 new JythonFunction(scriptName, //

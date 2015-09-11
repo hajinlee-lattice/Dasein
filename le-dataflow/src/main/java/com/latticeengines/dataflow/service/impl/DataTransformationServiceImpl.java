@@ -9,10 +9,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
-import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("dataTransformationService")
 public class DataTransformationServiceImpl implements DataTransformationService {
@@ -33,7 +33,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         Object dataFlowBldrBean = appContext.getBean(dataFlowBldrBeanName);
 
         if (!(dataFlowBldrBean instanceof DataFlowBuilder)) {
-            throw new DataFlowException(DataFlowCode.DF_00000, new String[] { dataFlowBldrBeanName });
+            throw new LedpException(LedpCode.LEDP_26000, new String[] { dataFlowBldrBeanName });
         }
 
         DataFlowBuilder dataFlow = (DataFlowBuilder) dataFlowBldrBean;
@@ -52,7 +52,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         }
 
         if (missingProps.size() > 0) {
-            throw new DataFlowException(DataFlowCode.DF_10000, new String[] { StringUtils.join(missingProps, ", ") });
+            throw new LedpException(LedpCode.LEDP_26001, new String[] { StringUtils.join(missingProps, ", ") });
         }
     }
 
