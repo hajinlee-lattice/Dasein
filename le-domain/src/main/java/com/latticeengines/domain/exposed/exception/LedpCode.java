@@ -190,7 +190,22 @@ public enum LedpCode {
 
     // le-propdata
     LEDP_25000("Can not create new derived entitlement package {0}."),
-    LEDP_25001("Derived entitlement resource error.");//
+    LEDP_25001("Derived entitlement resource error."), //
+    
+    // le-dataflow
+    LEDP_26000("Builder bean {0} not instance of builder."), //
+    LEDP_26001("Data flow context does not have values for required properties: {0}"), //
+    LEDP_26002("Unknown field name {0} from previous pipe."), //
+    LEDP_26003("Unknown field name {0} from previous pipe {1}."), //
+    LEDP_26004("Unseen prior pipe {0}."), //
+    LEDP_26005("Getting schema failed."), //
+    LEDP_26006("Getting schema failed for path {0}."), //
+    LEDP_26007("Table {0} has no primary key."), //
+    LEDP_26008("Primary key of table {0} has no attributes."), //
+    LEDP_26009("Table has no name."), //
+    LEDP_26010("Extract for table {0} has no name."), //
+    LEDP_26011("Extract {0} for table {1} has no path."), //
+    LEDP_26012("Table {0} has no extracts.");
 
     private String message;
 
