@@ -29,18 +29,19 @@ describe('internal admin page', function() {
         });
     });
 
-    it('should have all the necessary attributes on the table', function() {
-        element(by.cssContainingText('.editable', modelOnHDFSAndPage)).click();
-        modelTabs.getTabByIndex(2).click();
-        browser.driver.sleep(1000);
-        element(by.linkText('Admin')).click();
-        browser.driver.sleep(2000);
-
-        var headers = element.all(by.css('table.table tbody tr th')).map(function(tableHeader) {
-            return tableHeader.getText();
-        });
-        expect(headers).toEqual(expectedAttributesPresentOnInternalAdminPage);
-    });
+    //TODO: resume when DP-1603 is resolved
+    //it('should have all the necessary attributes on the table', function() {
+    //    element(by.cssContainingText('.editable', modelOnHDFSAndPage)).click();
+    //    modelTabs.getTabByIndex(2).click();
+    //    browser.driver.sleep(1000);
+    //    element(by.linkText('Admin')).click();
+    //    browser.driver.sleep(2000);
+    //
+    //    var headers = element.all(by.css('table.table tbody tr th')).map(function(tableHeader) {
+    //        return tableHeader.getText();
+    //    });
+    //    expect(headers).toEqual(expectedAttributesPresentOnInternalAdminPage);
+    //});
 
     it('all the links should be downloadable', function() {
         var modelDetails = element(by.cssContainingText('td', 'Model Summary JSON'));
