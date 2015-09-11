@@ -1,8 +1,8 @@
 package com.latticeengines.upgrade.model.service.impl;
 
 import java.util.*;
-
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -21,8 +22,10 @@ import com.latticeengines.upgrade.jdbc.AuthoritativeDBJdbcManager;
 import com.latticeengines.upgrade.jdbc.BardJdbcManager;
 import com.latticeengines.upgrade.jdbc.PlsMultiTenantJdbcManager;
 import com.latticeengines.upgrade.jdbc.TenantModelJdbcManager;
+import com.latticeengines.upgrade.model.decrypt.ModelDecryptor;
 import com.latticeengines.upgrade.model.service.ModelUpgradeService;
 import com.latticeengines.upgrade.yarn.YarnManager;
+import com.latticeengines.upgrade.yarn.YarnPathUtils;
 
 @Component("modelUpgrader")
 public class ModelUpgradeServiceImpl implements ModelUpgradeService {
@@ -58,6 +61,9 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     private String instance;
 
     private String dlTenantName;
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
     private static final DateTimeFormatter FMT = DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -111,7 +117,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         System.out.println("OK");
     }
 
-    private List<String> getActiveModelKeyList(String deploymentId) {
+    private List<String> getActiveModelKeyList(String deploymentId){
         try {
             List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDBInfos(deploymentId);
             setInfos(bardInfos);
@@ -119,6 +125,55 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             return bardJdbcManager.getActiveModelKey();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_24001, e);
+        }
+    }
+
+    private Set<String> getModelKeyList(String deploymentId) {
+        try {
+            Set<String> modelKeys = new HashSet<>();
+            modelKeys.addAll(bardJdbcManager.getActiveModelKey());
+            modelKeys.addAll(bardJdbcManager.getModelGuidsWithinLast2Weeks());
+            return modelKeys;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_24001, e);
+        }
+    }
+
+    public void exportModelsFromBardToHdfs(String customer){
+        bardJdbcManager.init("CitrixSaas_PLS2_DB_BARD", "");
+        System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer)
+                .toString()));
+        yarnManager.createTupleIdCustomerRootIfNotExist(customer);
+        System.out.println("OK");
+
+        Set<String> modelKeyList = getModelKeyList(customer);
+        for(String modelKey : modelKeyList){
+            String modelContent;
+            try {
+                modelContent = ModelDecryptor.decrypt(bardJdbcManager.getModelContent(modelKey));
+            } catch (Exception e){
+                throw new LedpException(LedpCode.LEDP_24000, "Cannot decrypt the file", e);
+            }
+
+            String uuid = YarnPathUtils.extractUuid(modelKey);
+            String modelPath;
+            try{
+                modelPath = yarnManager.findModelPathInSingular(customer, uuid);
+                System.out.println("Find the model " + modelPath + " in singular id. About to write to tuple id folder");
+                HdfsUtils.writeToFile(yarnConfiguration, YarnPathUtils.substituteByTupleId(modelPath), modelContent);
+            }catch(LedpException e){
+                System.out.println("Cannot find such model in singular id; now try to search for tuple id.");
+                modelPath = yarnManager.findModelPathInTuple(customer, uuid);
+                System.out.println("Find the model " + modelPath + " in tuple id. About to write the content");
+                try {
+                    HdfsUtils.writeToFile(yarnConfiguration, modelPath, modelContent);
+                } catch (Exception e1) {
+                    throw new LedpException(LedpCode.LEDP_24000, "Failed to copy file from one src to dest path.", e1);
+                }
+            }catch(Exception e){
+                throw new LedpException(LedpCode.LEDP_24000, "Failed to copy file from one src to dest path.", e);
+            }
+            yarnManager.fixModelNameInTupleId(customer, uuid);
         }
     }
 
@@ -296,7 +351,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     private void upgrade(String customer) {
-        copyCustomerModelsToTupleId(customer);
+        exportModelsFromBardToHdfs(customer);
         upgradeModelSummaryForCustomerModels(customer);
     }
 
@@ -312,6 +367,14 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         String customer = (String) parameters.get("customer");
         Boolean all = (Boolean) parameters.get("all");
 
+        try {
+            List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDBInfos(customer);
+            setInfos(bardInfos);
+            bardJdbcManager.init(bardDB, instance);
+        } catch (Exception e2) {
+            throw new LedpException(LedpCode.LEDP_24000, e2);
+        }
+
         switch (command) {
         case UpgradeRunner.CMD_LIST:
             if (all) {
@@ -324,7 +387,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
             populateTenantModelInfo();
             return true;
         case UpgradeRunner.CMD_CP_MODELS:
-            copyCustomerModelsToTupleId(customer);
+            exportModelsFromBardToHdfs(customer);
             return true;
         case UpgradeRunner.CMD_UPGRADE:
             upgrade(customer);

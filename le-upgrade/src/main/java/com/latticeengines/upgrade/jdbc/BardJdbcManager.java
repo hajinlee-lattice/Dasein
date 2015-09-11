@@ -33,8 +33,11 @@ public class BardJdbcManager {
     @Value("${upgrade.dao.bard.db.address.test}")
     private String useTestAddress;
 
+    @Value("${dataloss.date}")
+    private String dataLossDate; 
+
     private String getHostAddress(String instance) {
-        if(StringUtils.isNotEmpty(useTestAddress))
+        if (StringUtils.isNotEmpty(useTestAddress))
             return useTestAddress.toLowerCase();
         String hostAddr = SQLServer200;
         if (instance.equals("SQL100")) {
@@ -59,6 +62,17 @@ public class BardJdbcManager {
             activeModelKeys.add(subNode.asText());
         }
         return activeModelKeys;
+    }
+
+    public List<String> getModelGuidsWithinLast2Weeks(){
+        List<String> modelGuids = bardJdbcTemplate.queryForList(
+                "select [Key] from KeyValueStore where [Key] Like 'Model_%' and [Creation_Date] > ' "+  dataLossDate + "'", String.class);
+        return modelGuids;
+    }
+
+    public String getModelContent(String modelKey){
+        return bardJdbcTemplate.queryForObject(
+                String.format("select value from KeyValueStore where [key] = '%s'", modelKey), String.class);
     }
 
 }

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
@@ -241,13 +241,10 @@ public class YarnManager {
 
     private String findModelFolderPathInSingular(String customer, String uuid) {
         String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
-        String eventTable = YarnPathUtils.parseEventTable(srcModelJsonFullPath);
-        String containerId = YarnPathUtils.parseContainerId(srcModelJsonFullPath);
-        String modelsRoot = YarnPathUtils.constructSingularIdModelsRoot(customerBase, customer);
-        return modelsRoot + "/" + eventTable + "/" + uuid + "/" + containerId;
+        return StringUtils.substringBeforeLast(srcModelJsonFullPath, "/");
     }
 
-    private String findModelPathInTuple(String customer, String uuid) {
+    public String findModelPathInTuple(String customer, String uuid) {
         List<String> paths = findAllModelPathsInTuplerId(customer);
         for (String path : paths) {
             if (path.contains(uuid))
@@ -257,7 +254,7 @@ public class YarnManager {
         throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
     }
 
-    private String findModelPathInSingular(String customer, String uuid) {
+    public String findModelPathInSingular(String customer, String uuid) {
         List<String> paths = findAllModelPathsInSingularId(customer);
         for (String path : paths) {
             if (path.contains(uuid))
