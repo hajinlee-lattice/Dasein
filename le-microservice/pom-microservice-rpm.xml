@@ -29,7 +29,7 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>../le-api/conf/env/buildmachine</api.properties.path>
+                <eai.properties.path>../le-eai/conf/env/buildmachine</eai.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/buildmachine
                 </dataplatform.properties.path>
@@ -46,7 +46,7 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>../le-api/conf/env/devcluster</api.properties.path>
+                <eai.properties.path>../le-eai/conf/env/dev</eai.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/devcluster
                 </dataplatform.properties.path>
@@ -63,7 +63,7 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>../le-api/conf/env/intcluster</api.properties.path>
+                <eai.properties.path>../le-eai/conf/env/intcluster</eai.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/intcluster
                 </dataplatform.properties.path>
@@ -79,7 +79,7 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>../le-api/conf/env/qacluster</api.properties.path>
+                <eai.properties.path>../le-eai/conf/env/qacluster</eai.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/qacluster
                 </dataplatform.properties.path>
@@ -95,7 +95,7 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>../le-api/conf/env/deployment</api.properties.path>
+                <eai.properties.path>../le-eai/conf/env/prodcluster</eai.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/prodcluster
                 </dataplatform.properties.path>
@@ -140,7 +140,7 @@
                             <groupname>root</groupname>
                             <sources>
                                 <source>
-                                    <location>${api.properties.path}/api.properties</location>
+                                    <location>${eai.properties.path}/eai.properties</location>
                                 </source>
                                 <source>
                                     <location>${dataplatform.properties.path}/dataplatform.properties</location>
