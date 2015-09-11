@@ -186,7 +186,11 @@ public enum LedpCode {
     LEDP_24001("Jdbc operation exception: {0}"), //
     LEDP_24002("DL operation exception: {0}"), //
     LEDP_24003("PLS operation exception: {0}"), //
-    LEDP_24004("ZK operation exception: {0}");
+    LEDP_24004("ZK operation exception: {0}"), //
+
+    // le-propdata
+    LEDP_25000("Can not create new derived entitlement package {0}."),
+    LEDP_25001("Derived entitlement resource error.");//
 
     private String message;
 
