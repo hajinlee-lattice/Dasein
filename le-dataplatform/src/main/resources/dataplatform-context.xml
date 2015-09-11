@@ -23,6 +23,7 @@
     <context:annotation-config/>
     <context:component-scan base-package="com.latticeengines.dataplatform">
         <context:exclude-filter type="aspectj" expression="com.latticeengines.dataplatform.controller.*" />
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.dataplatform.mbean.*" />
     </context:component-scan>
 
     <import resource="classpath:dataplatform-camille-context.xml"/>
@@ -30,7 +31,6 @@
     <import resource="classpath:dataplatform-yarn-client-context.xml"/>
     <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />
     <import resource="classpath:dataplatform-persistence-context.xml" />
-    <import resource="classpath:common-jmx-component-context.xml" />
     <import resource="classpath:dataplatform-validation-context.xml" />
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:remote-context.xml"/>
