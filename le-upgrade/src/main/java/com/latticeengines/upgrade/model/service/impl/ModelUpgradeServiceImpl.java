@@ -140,7 +140,6 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     }
 
     public void exportModelsFromBardToHdfs(String customer){
-        bardJdbcManager.init("CitrixSaas_PLS2_DB_BARD", "");
         System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer)
                 .toString()));
         yarnManager.createTupleIdCustomerRootIfNotExist(customer);
