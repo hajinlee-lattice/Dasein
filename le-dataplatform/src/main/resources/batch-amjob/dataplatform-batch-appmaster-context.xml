@@ -21,8 +21,6 @@
         <constructor-arg value="info" />
     </bean>
     
-    <import resource="classpath:dataplatform-yarn-config-context.xml" />
-
     <bean id="transactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
 
     <bean id="jobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
@@ -60,5 +58,8 @@
     </batch:job>
 
     <yarn-batch:master job-name="singleContainerJob" jobs="singleContainerJob" />
+    
+    <import resource="classpath:dataplatform-yarn-config-context.xml" />
+    <import resource="classpath:dataplatform-context.xml" />
 
 </beans>
