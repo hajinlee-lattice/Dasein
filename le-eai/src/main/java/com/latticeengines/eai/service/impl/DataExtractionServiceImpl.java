@@ -103,7 +103,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
 
         Properties containerProperties = new Properties();
-        containerProperties.put(ImportProperty.IMPORTCONFIG, importConfig.toString());
+        containerProperties.put(ImportProperty.EAICONFIG, importConfig.toString());
         containerProperties.put(ImportProperty.TARGETPATH, targetPath);
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "128");

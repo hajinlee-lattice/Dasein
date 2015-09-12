@@ -108,7 +108,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertEquals(filesForActivityType.size(), 1);
     }
     
-    @Test(groups = { "functional" }, dataProvider = "fileProvider", enabled = true)
+    @Test(groups = { "functional" }, dataProvider = "fileProvider", enabled = false)
     public void extractAndImportForFile(String fileName, boolean verifyDataAndRowCount, int expectedNumRows) throws Exception {
         URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/exposed/service/impl");
         URL metadataUrl = ClassLoader.getSystemResource( //
