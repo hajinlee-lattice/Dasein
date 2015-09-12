@@ -36,4 +36,29 @@
     <context:component-scan base-package="org.springframework.yarn.batch.am" />
     <bean id="yarnService" class="com.latticeengines.dataplatform.service.impl.YarnServiceImpl" />
 
+    <bean id="itemReader"
+        class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="resource" value="file:metadata.json" />
+        <property name="lineMapper" value="#{itemProcessor.getLineMapper()}" />
+    </bean>
+    
+    <bean id="itemWriter" class="com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerWriter" />
+
+    <util:properties id="props">
+        <prop key="jobName">singleContainerJob</prop>
+    </util:properties>
+
+    <batch:job id="singleContainerJob" restartable="false">
+        <batch:step id="master">
+            <batch:tasklet transaction-manager="transactionManager">
+                <batch:chunk reader="itemReader"
+                    processor="itemProcessor" 
+                    writer="itemWriter"
+                    commit-interval="0" />
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <yarn-batch:master job-name="singleContainerJob" jobs="singleContainerJob" />
+
 </beans>

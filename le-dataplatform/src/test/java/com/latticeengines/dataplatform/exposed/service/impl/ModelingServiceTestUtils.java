@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.exposed.service.impl;
 
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -134,7 +135,7 @@ public class ModelingServiceTestUtils {
 
             while (inetAddresses.hasMoreElements()) {
                 InetAddress ia = inetAddresses.nextElement();
-                if (!ia.isLinkLocalAddress()) {
+                if (!ia.isLinkLocalAddress() && !(ia instanceof Inet6Address)) {
                     result = ia.getHostAddress();
                     break;
                 }
