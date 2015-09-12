@@ -65,6 +65,8 @@ import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
 import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
 import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -84,6 +86,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     private Map<String, AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>>> pipesAndOutputSchemas = new HashMap<>();
 
     private Map<String, AbstractMap.SimpleEntry<Checkpoint, Tap>> checkpoints = new HashMap<>();
+    
+    private DataFlowListener dataFlowListener = new DataFlowListener();
+    
+    private DataFlowStepListener dataFlowStepListener = new DataFlowStepListener();
 
     public CascadingDataFlowBuilder() {
         this(false, false);
@@ -774,6 +780,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Flow<?> flow = flowConnector.connect(flowDef);
 
         flow.writeDOT("dot/wcr.dot");
+        flow.addListener(dataFlowListener);
+        flow.addStepListener(dataFlowStepListener);
         flow.complete();
     }
 
