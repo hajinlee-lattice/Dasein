@@ -197,6 +197,11 @@
             <artifactId>le-scheduler</artifactId>
             <version>${le.scheduler.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.mangofactory</groupId>
+            <artifactId>swagger-springmvc</artifactId>
+            <version>0.9.4</version>
+        </dependency>
     </dependencies>
 
 </project>
