@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
-import com.latticeengines.dataflow.exposed.exception.DataFlowException;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Component("madisonDataFlowGroupAndExpandBuilder")
@@ -42,7 +42,7 @@ public class MadisonDataFlowGroupAndExpandBuilder extends CascadingDataFlowBuild
     private FieldList buildDeclaredFieldList(DataFlowContext dataFlowCtx) {
         Schema schema = getSchemaFromFile(dataFlowCtx);
         if (schema == null) {
-            throw new DataFlowException(DataFlowCode.DF_10004);
+            throw new LedpException(LedpCode.LEDP_26005);
         }
         List<String> fieldNames = new ArrayList<>();
         for (Field field : schema.getFields()) {
