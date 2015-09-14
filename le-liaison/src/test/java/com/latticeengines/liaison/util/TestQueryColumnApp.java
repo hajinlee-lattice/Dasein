@@ -1,4 +1,4 @@
-package com.latticeengines.liaison.exposed.util;
+package com.latticeengines.liaison.util;
 
 import java.util.Map;
 

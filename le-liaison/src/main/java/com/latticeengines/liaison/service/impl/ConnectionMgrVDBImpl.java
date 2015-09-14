@@ -89,10 +89,10 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
         	}
         	
         	if( colData.getDisplayDiscretizationStrategy() != null ) {
-        		metadata.put("DisplayDiscretization",colData.getDisplayDiscretizationStrategy());
+        		metadata.put("DisplayDiscretizationStrategy",colData.getDisplayDiscretizationStrategy());
         	}
         	else {
-        		metadata.put("DisplayDiscretization","<NULL>");
+        		metadata.put("DisplayDiscretizationStrategy","<NULL>");
         	}
         	
         	if( colData.getExtensions() != null && colData.getExtensions().size() > 0 ) {

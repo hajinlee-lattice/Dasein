@@ -1,4 +1,4 @@
-package com.latticeengines.liaison.exposed.util;
+package com.latticeengines.liaison.util;
 
 
 import com.latticeengines.liaison.exposed.service.Query;
