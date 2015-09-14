@@ -24,10 +24,8 @@ var Config = function() {
                 specBasePath + '/activatemodel_spec.js',
                 specBasePath + '/systemsetup_spec.js',
                 specBasePath + '/passwordchange_spec.js',
-                specBasePath + '/multitenant_spec.js'
-
-                //TODO: resume this test when DP-1603 is resolved
-                //specBasePath + '/internaladmin_spec.js'
+                specBasePath + '/multitenant_spec.js',
+                specBasePath + '/internaladmin_spec.js'
             ],
 
             params: {
