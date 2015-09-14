@@ -24,6 +24,8 @@
     <import resource="classpath:dataplatform-context.xml"/>
     <import resource="classpath:dataplatform-camille-context.xml"/>
     <import resource="classpath:dataplatform-properties-context.xml"/>
+    <import resource="classpath:common-jmx-component-context.xml"/>
+    <context:component-scan base-package="com.latticeengines.dataplatform.mbean" />
     <!-- <context:component-scan base-package="com.latticeengines.dataplatform.functionalframework"/> -->
 
 </beans>
