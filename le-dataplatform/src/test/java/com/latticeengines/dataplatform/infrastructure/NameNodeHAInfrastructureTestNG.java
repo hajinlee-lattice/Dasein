@@ -30,7 +30,7 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
             assertTrue(result.trim().contains(ACTIVE));
 
             log.info("Get directory list from nn1");
-            result = executeCommand(hdfs + "dfs -ls -R /app");
+            result = executeCommand(hdfs + "hadoop fs -ls -R /app");
             directoryListPrimary = result.substring(result.indexOf("/app/dataplatform"));
             log.info("directoryListPrimary: " + directoryListPrimary);
 
