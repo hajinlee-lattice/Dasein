@@ -56,16 +56,18 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
             if (result != null && result.success === true) {
                 data.ModelAlerts = result.resultObj;
                 data.SuppressedCategories = suppressedCategories;
-
-                var contentContainer = $('#adminInfoContainer');
-                WidgetFrameworkService.CreateWidget({
-                    element: contentContainer,
-                    widgetConfig: screenWidgetConfig,
-                    metadata: null,
-                    data: data,
-                    parentData: null
-                });
+            } else if (result != null && result.success === false) {
+                data.ModelAlerts = result.resultObj;
+                data.SuppressedCategories = null;
             }
+            var contentContainer = $('#adminInfoContainer');
+            WidgetFrameworkService.CreateWidget({
+                element: contentContainer,
+                widgetConfig: screenWidgetConfig,
+                metadata: null,
+                data: data,
+                parentData: null
+            });
         });
     } else {
         var screenWidgetConfigNoAlertsTab = angular.copy(screenWidgetConfig);
