@@ -26,4 +26,18 @@ public class BardJdbcManagerTestNG extends UpgradeFunctionalTestNGBase{
         List<String> activeModelKey = bardJdbcManager.getActiveModelKey();
         Assert.assertTrue(activeModelKey.size() == 4, "Didn't find exactly 4 active models.");
     }
+
+    @Test(groups = "functional")
+    public void testGetModelGuidsWithinLast2Weeks() throws Exception {
+        bardJdbcManager.init("CitrixSaas_PLS2_DB_BARD", "");
+        List<String> modelKeys = bardJdbcManager.getModelGuidsWithinLast2Weeks();
+        Assert.assertTrue(modelKeys.size() == 6, "Didn't find exactly 6 models within last 2 weeks.");
+    }
+
+    @Test(groups = "functional")
+    public void testGetMOdelContents(){
+        bardJdbcManager.init("CitrixSaas_PLS2_DB_BARD", "");
+        String modelContent = bardJdbcManager.getModelContent("Model_ms__245bf5af-c420-4657-996e-647e8a07ab63-PLSModel");
+        Assert.assertTrue(modelContent.startsWith("dt"));
+    }
 }
