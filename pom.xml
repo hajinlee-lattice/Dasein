@@ -38,5 +38,6 @@
         <module>le-job</module>
         <module>le-admin</module>
         <module>le-release</module>
+        <module>le-liaison</module>
     </modules>
 </project>
