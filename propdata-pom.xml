@@ -24,7 +24,6 @@
         <module>le-dataflow</module>
         <module>le-perf</module>
         <module>le-scheduler</module>
-        <module>le-security</module>
         <module>le-monitor</module>
         <module>le-camille</module>
     </modules>
