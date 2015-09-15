@@ -1,6 +1,0 @@
-#!/bin/bash -x
-
-rm -rf /home/yarn/logs/*
-
-echo "finishing"
-

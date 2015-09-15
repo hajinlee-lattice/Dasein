@@ -34,7 +34,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
     private RestTemplate restTemplate = new RestTemplate();
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = "functional")
+    @Test(groups = "disabled")
     public void testDerivedAttributePackage() {
         Object sourcePackageName = new String("Test");
         Object sourcePackageDescription = new String("Test");
@@ -101,7 +101,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = "functional")
+    @Test(groups = "disabled")
     public void createSourcePackage() {
         Object packageName = new String("Test");
         Object packageDescription = new String("Test");
@@ -165,7 +165,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = "functional")
+    @Test(groups = "disabled")
     public void createSourceColumnPackage() {
         Object sourceColumnPackageName = new String("Test");
         Object sourceColumnPackageDescription = new String("Test");

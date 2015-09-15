@@ -31,7 +31,7 @@ public class MatchCommandResourceTestNG extends AbstractTestNGSpringContextTests
     private RestTemplate restTemplate = new RestTemplate();
     
     @SuppressWarnings("rawtypes")
-    @Test(groups =  "functional")
+    @Test(groups =  "disable")
     public void testMatchCommands() {
         Object sourceTable = new String("PayPal_matching_elements_small");
         Object destTables = new String("Alexa_Source|DerivedColumns");
