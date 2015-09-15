@@ -46,6 +46,9 @@ public class TenantServiceImpl implements TenantService {
     private final BatonService batonService = new BatonServiceImpl();
 
     @Autowired
+    private DanteComponent danteComponent;
+
+    @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
@@ -99,6 +102,9 @@ public class TenantServiceImpl implements TenantService {
             Map<String, String> flatDir = configSDir.flatten();
             props.put(serviceName, flatDir);
         }
+
+        //as a short term patch, waking up Dante's .NET App Pool is necessary for it to pick up the bootstrap command.
+        danteComponent.wakeUpAppPool();
 
         final Map<String, Map<String, String>> orchestratorProps = props;
         executorService.submit(new Runnable() {
@@ -210,8 +216,8 @@ public class TenantServiceImpl implements TenantService {
 
 
     @Override
-    public boolean danteIsEnabled(String contracId, String tenantId) {
-        TenantDocument tenant = getTenant(contracId, tenantId);
+    public boolean danteIsEnabled(String contractId, String tenantId) {
+        TenantDocument tenant = getTenant(contractId, tenantId);
         String str = tenant.getSpaceInfo().featureFlags;
         if (!str.contains(danteFeatureFlag)) return false;
 
