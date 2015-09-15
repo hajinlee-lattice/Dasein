@@ -251,7 +251,7 @@ public class YarnManager {
                 return path;
         }
         RuntimeException e = new RuntimeException("No model json with specific uuid can be found.");
-        throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
+        throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model " + uuid, e);
     }
 
     public String findModelPathInSingular(String customer, String uuid) {
@@ -261,7 +261,7 @@ public class YarnManager {
                 return path;
         }
         RuntimeException e = new RuntimeException("No model json with specific uuid can be found.");
-        throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model" + uuid, e);
+        throw new LedpException(LedpCode.LEDP_24000, "Cannot find the path for model " + uuid, e);
     }
 
     private List<String> findAllModelPathsInSingularId(String customer) {

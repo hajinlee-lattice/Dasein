@@ -193,24 +193,24 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         tenantModelJdbcManager.populateInternalTenantModelInfo(dlTenantName, modelGuid);
     }
 
-    private void copyCustomerModelsToTupleId(String customer) {
-        System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer)
-                .toString()));
-        yarnManager.createTupleIdCustomerRootIfNotExist(customer);
-        System.out.println("OK");
-
-        System.out.print("Moving models from singular to tuple ID ... ");
-        int nModels = yarnManager.moveModelsFromSingularToTupleId(customer);
-        System.out.println(String.format("OK. %02d models have been moved.", nModels));
-
-        System.out.println("Fix model.json filenames ... ");
-        List<String> uuids = yarnManager.findAllUuidsInTupleId(customer);
-        for (String uuid: uuids) {
-            System.out.print("    " + uuid + " ... ");
-            yarnManager.fixModelNameInTupleId(customer, uuid);
-            System.out.println("OK");
-        }
-    }
+//    private void copyCustomerModelsToTupleId(String customer) {
+//        System.out.print(String.format("Create customer folder %s, if not exists ... ", CustomerSpace.parse(customer)
+//                .toString()));
+//        yarnManager.createTupleIdCustomerRootIfNotExist(customer);
+//        System.out.println("OK");
+//
+//        System.out.print("Moving models from singular to tuple ID ... ");
+//        int nModels = yarnManager.moveModelsFromSingularToTupleId(customer);
+//        System.out.println(String.format("OK. %02d models have been moved.", nModels));
+//
+//        System.out.println("Fix model.json filenames ... ");
+//        List<String> uuids = yarnManager.findAllUuidsInTupleId(customer);
+//        for (String uuid: uuids) {
+//            System.out.print("    " + uuid + " ... ");
+//            yarnManager.fixModelNameInTupleId(customer, uuid);
+//            System.out.println("OK");
+//        }
+//    }
 
     private void upgradeModelSummaryForCustomerModels(String customer){
         List<String> uuids = yarnManager.findAllUuidsInSingularId(customer);
