@@ -40,7 +40,8 @@ public class TestConnectionMgrVDBImplApp {
 			
 			// Put the updated metadata in a map
 			Map<String,String> newMetadata = new HashMap<>();
-			newMetadata.put("Category","Something New");
+			newMetadata.put("Category","Something Old");
+			newMetadata.put("StatisticalType","ratio");
 			
 			// Update the column
 			qc.setMetadata( newMetadata );
