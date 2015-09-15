@@ -29,6 +29,9 @@ public class OneTimeKeyAuthenticationManager implements AuthenticationManager {
     @Autowired
     private OAuthUserEntityMgr users;
 
+    @Autowired
+    private OrgIdRegister orgIdRegister;
+
     private PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public OneTimeKeyAuthenticationManager() {
@@ -36,12 +39,12 @@ public class OneTimeKeyAuthenticationManager implements AuthenticationManager {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+
         String password = (String) authentication.getCredentials();
         if (password == null) {
             throw new BadCredentialsException("Missing credentials");
         }
         OAuthUser user = users.get(authentication.getName());
-
         if (user == null) {
             throw new BadCredentialsException("Invalid credentials");
         }
@@ -61,6 +64,8 @@ public class OneTimeKeyAuthenticationManager implements AuthenticationManager {
 
         List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("ROLE_PLAYMAKER_ADMIN"));
+
+        orgIdRegister.registerOrgId(authentication.getName());
 
         return new UsernamePasswordAuthenticationToken(authentication.getName(), password, authorities);
     }

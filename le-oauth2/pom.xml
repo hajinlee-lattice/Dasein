@@ -14,6 +14,7 @@
         <le.common.version>2.0.9-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.9-SNAPSHOT</le.domain.version>
         <le.oauth2.db.version>2.0.9-SNAPSHOT</le.oauth2.db.version>
+        <le.baton.version>2.0.9-SNAPSHOT</le.baton.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
         <java.version>1.7</java.version>
@@ -131,10 +132,16 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-baton</artifactId>
+            <version>${le.baton.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-oauth2db</artifactId>
             <version>${le.oauth2.db.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -159,6 +166,12 @@
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
             <version>1.2.17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.8.5</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
