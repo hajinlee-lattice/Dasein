@@ -67,8 +67,8 @@ public class ModelUpgradeServiceImplTestNG extends UpgradeFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void cleanUp() throws Exception {
-         HdfsUtils.rmdir(yarnConfiguration, userBaseDir + "/" + customer);
-         HdfsUtils.rmdir(yarnConfiguration, userBaseDir + "/" + CustomerSpace.parse(customer));
+         //HdfsUtils.rmdir(yarnConfiguration, userBaseDir + "/" + customer);
+         //HdfsUtils.rmdir(yarnConfiguration, userBaseDir + "/" + CustomerSpace.parse(customer));
     }
 
     @Test(groups = "functional")
