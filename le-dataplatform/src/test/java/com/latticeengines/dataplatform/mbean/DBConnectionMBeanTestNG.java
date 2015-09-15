@@ -4,11 +4,12 @@ import static org.testng.Assert.assertTrue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
-
+@ContextConfiguration(locations = { "classpath:common-jmx-component-context.xml" })
 public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Value("${dataplatform.dlorchestration.datasource.url}")
