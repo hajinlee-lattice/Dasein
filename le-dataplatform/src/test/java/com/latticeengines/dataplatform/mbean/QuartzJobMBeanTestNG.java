@@ -10,8 +10,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 
 @ContextConfiguration(locations = { //
         "classpath:dataplatform-dlorchestration-quartz-context.xml", //
-        "classpath:dataplatform-quartz-context.xml", //
-        "classpath:common-jmx-component-context.xml" })
+        "classpath:dataplatform-quartz-context.xml" })
 public class QuartzJobMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired

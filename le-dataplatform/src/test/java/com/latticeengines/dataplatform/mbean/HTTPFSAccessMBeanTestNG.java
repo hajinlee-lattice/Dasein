@@ -8,7 +8,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:common-jmx-component-context.xml" })
 public class HTTPFSAccessMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
