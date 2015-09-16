@@ -263,21 +263,7 @@ public class ScoringMapperTransformUtil {
     }
 
     public static void main(String[] args) throws Exception {
-        // String type = "Float";
-        // String value = "'123.00'wx";
-        //
-        // String typeAndValue = type + "|\'" + value + "\'";
-        // String trpeAndValue2 = String.format("%s|\'%s\'", type, value);
-        // System.out.println(value);
-        // if (typeAndValue.equals(trpeAndValue2)) {
-        // System.out.println("jaja");
-        // }
 
-        /*
-         * Decompose the model.json
-         */
-        // HashMap<String, JSONObject> models = new HashMap<String,
-        // JSONObject>();
         File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
         String modelStr = FileUtils.readFileToString(modelFile);
         JSONObject modelObject;
