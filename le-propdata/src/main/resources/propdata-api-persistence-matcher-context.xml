@@ -1,84 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:security="http://www.springframework.org/schema/security"
-	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-      http://www.springframework.org/schema/aop
-      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
       http://www.springframework.org/schema/tx
-      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
-      http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context-4.0.xsd
-      http://www.springframework.org/schema/jee
-      http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
-      http://www.springframework.org/schema/security
-      http://www.springframework.org/schema/security/spring-security-4.0.xsd
-      http://www.springframework.org/schema/util
-      http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-	<!-- DAOs for PropData Matching -->
-	<bean id="propDataEntitlements"
+	<bean id="propDataMatcherDataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="${propdata.matchcommand.driver}" />
-		<property name="url" value="${propdata.matchcommand.url}" />
-		<property name="username" value="${propdata.matchcommand.user}" />
-		<property name="password" value="${propdata.matchcommand.password.encrypted}" />
+		<property name="driverClassName" value="${propdata.matcher.driver}" />
+		<property name="url" value="${propdata.matcher.url}" />
+		<property name="username" value="${propdata.matcher.user}" />
+		<property name="password" value="${propdata.matcher.password.encrypted}" />
 	</bean>
 
-	<bean id="sessionFactoryPropDataEntitlements"
+	<bean id="sessionFactoryPropDataMatcher"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-		<property name="dataSource" ref="propDataEntitlements" />
+		<property name="dataSource" ref="propDataMatcherDataSource" />
 		<property name="packagesToScan" value="com.latticeengines.domain.exposed" />
 		<property name="hibernateProperties">
 			<props>
-				<prop key="hibernate.dialect">${propdata.entitlements.dialect}</prop>
+				<prop key="hibernate.dialect">${propdata.matcher.dialect}</prop>
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.globally_quoted_identifiers">true</prop>
 			</props>
 		</property>
 	</bean>
-	<bean id="transactionManagerPropDataEntitlements"
-		class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-		p:sessionFactory-ref="sessionFactoryPropDataEntitlements">
-		<qualifier value="propdataEntitlements" />
-	</bean>
-	<tx:annotation-driven transaction-manager="transactionManagerPropDataEntitlements" />
 
-	<bean id="dataColumnMapDao" class="com.latticeengines.propdata.api.dao.impl.DataColumnMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+	<bean id="transactionManagerPropDataDataSource"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+		p:sessionFactory-ref="sessionFactoryPropDataMatcher">
+		<qualifier value="propDataMatcherDataSource" />
 	</bean>
-	<bean id="domainFeatureTableDao" class="com.latticeengines.propdata.api.dao.impl.DomainFeatureTableDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementColumnMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementColumnMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementContractPackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementContractPackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementPackagesDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementPackagesDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourceColumnsContractPackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourceColumnsContractPackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourceColumnsPackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourceColumnsPackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourceColumnsPackagesDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourceColumnsPackagesDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourceContractPackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourceContractPackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourcePackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourcePackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourcePackagesDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourcePackagesDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
+	<tx:annotation-driven transaction-manager="transactionManagerPropDataDataSource" />
+
 </beans>
