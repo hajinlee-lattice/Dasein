@@ -3,7 +3,6 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-liaison</artifactId>
-    <packaging>war</packaging>
     <name>le-${component-name}</name>
 
     <properties>
