@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ ! -d "/tmp/app/dataflow" ]; then
+    rm -rf /tmp/app/dataflow
+else
+    mkdir -p /tmp/app/dataflow
+fi
+hadoop dfs -mkdir -p /app/dataflow/lib
+hadoop dfs -rm -f /app/dataflow/lib/le-propdata*-shaded.jar
+mvn -Pshaed -DskipTests clean install

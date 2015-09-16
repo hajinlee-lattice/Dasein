@@ -1,0 +1,3 @@
+#!/bin/bash
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataflow/le-dataflow*-shaded.jar /tmp/dataflow/lib'
+
