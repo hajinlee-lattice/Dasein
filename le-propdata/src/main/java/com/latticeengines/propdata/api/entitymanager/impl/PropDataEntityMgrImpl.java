@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.eai.entitymanager.impl;
+package com.latticeengines.propdata.api.entitymanager.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.CommandIds;
-import com.latticeengines.domain.exposed.propdata.Commands;
-import com.latticeengines.propdata.eai.dao.CommandIdsDao;
-import com.latticeengines.propdata.eai.dao.CommandsDao;
-import com.latticeengines.propdata.eai.entitymanager.PropDataEntityMgr;
+import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.CommandId;
+import com.latticeengines.propdata.api.dao.CommandIdDao;
+import com.latticeengines.propdata.api.dao.CommandDao;
+import com.latticeengines.propdata.api.entitymanager.PropDataEntityMgr;
 
 @Component("propDataEntityMgr")
 public class PropDataEntityMgrImpl implements PropDataEntityMgr {
@@ -19,10 +19,10 @@ public class PropDataEntityMgrImpl implements PropDataEntityMgr {
     private final Log log = LogFactory.getLog(this.getClass());
 
     @Autowired
-    private CommandIdsDao commandIdsDao;
+    private CommandIdDao commandIdsDao;
 
     @Autowired
-    private CommandsDao commandsDao;
+    private CommandDao commandDao;
 
     public PropDataEntityMgrImpl() {
         super();
@@ -30,46 +30,46 @@ public class PropDataEntityMgrImpl implements PropDataEntityMgr {
 
     @Override
     @Transactional(value = "propdata", propagation = Propagation.REQUIRED)
-    public void createCommands(Commands commands) {
-        CommandIds commandIds = commands.getCommandIds();
+    public void createCommands(Command commands) {
+        CommandId commandIds = commands.getCommandIds();
         if (commandIds == null) {
-            log.error("There's no CommandIds for :" + commands);
-            throw new IllegalStateException("There's no CommandIds specified.");
+            log.error("There's no CommandId for :" + commands);
+            throw new IllegalStateException("There's no CommandId specified.");
         }
 
         commandIdsDao.create(commandIds);
         commands.setPid(commandIds.getPid());
-        commandsDao.create(commands);
+        commandDao.create(commands);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
-    public Commands getCommands(Long pid) {
-        return commandsDao.findByKey(Commands.class, pid);
+    public Command getCommands(Long pid) {
+        return commandDao.findByKey(Command.class, pid);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
-    public CommandIds getCommandIds(Long pid) {
-        return commandIdsDao.findByKey(CommandIds.class, pid);
+    public CommandId getCommandIds(Long pid) {
+        return commandIdsDao.findByKey(CommandId.class, pid);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
     public void dropTable(String tableName) {
-        commandsDao.dropTable(tableName);
+        commandDao.dropTable(tableName);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
     public void executeQueryUpdate(String sql) {
-        commandsDao.executeQueryUpdate(sql);
+        commandDao.executeQueryUpdate(sql);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
     public void executeProcedure(String procedure) {
-        commandsDao.executeProcedure(procedure);
+        commandDao.executeProcedure(procedure);
     }
 
 }

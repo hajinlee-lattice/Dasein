@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.eai.dao.impl;
+package com.latticeengines.propdata.api.dao.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,18 +8,18 @@ import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.propdata.Commands;
-import com.latticeengines.propdata.eai.dao.CommandsDao;
+import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.propdata.api.dao.CommandDao;
 
-public class CommandsDaoImpl extends BaseDaoImpl<Commands> implements CommandsDao {
+public class CommandDaoImpl extends BaseDaoImpl<Command> implements CommandDao {
 
-    public CommandsDaoImpl() {
+    public CommandDaoImpl() {
         super();
     }
 
     @Override
-    protected Class<Commands> getEntityClass() {
-        return Commands.class;
+    protected Class<Command> getEntityClass() {
+        return Command.class;
     }
 
     @Override

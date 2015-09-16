@@ -1,30 +1,32 @@
 package com.latticeengines.propdata.api.controller;
 
-import static org.testng.Assert.*;
-
-import java.util.List;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.propdata.*;
+import com.latticeengines.domain.exposed.propdata.DataColumnMap;
+import com.latticeengines.domain.exposed.propdata.EntitlementPackages;
+import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackageMap;
+import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackages;
+import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackageMap;
+import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackages;
+import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })
-public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringContextTests{
+import java.util.List;
+
+public class EntitlementManagementResourceTestNG extends PropDataApiFunctionalTestNGBase {
     
-    @Value("${propdata.api.hostport}")
+    @Value("${propdata.api.functional.hostport}")
     private String hostPort;
     
     protected String getRestAPIHostPort() {
@@ -52,7 +54,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
             ,HttpMethod.PUT,requestEntity,ResponseDocument.class);
         assertNotNull(packageID);
         
-        List<EntitlementPackages> packages = restTemplate.getForObject(getRestAPIHostPort() 
+        List<EntitlementPackages> packages = restTemplate.getForObject(getRestAPIHostPort()
             + "/PropData/entitlements/derived/",List.class);
         assertFalse(packages.isEmpty());
         
@@ -67,7 +69,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
             ,requestEntity,ResponseDocument.class);
         assertNotNull(columnID);
         
-        List<DataColumnMap> columns = restTemplate.getForObject(getRestAPIHostPort() 
+        List<DataColumnMap> columns = restTemplate.getForObject(getRestAPIHostPort()
             + "/PropData/entitlements/derived/details/" 
             + packageID.getBody().getResult(),List.class);
         assertFalse(columns.isEmpty());
@@ -120,7 +122,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
             ,requestEntity,ResponseDocument.class);
         assertNotNull(packageID);
         
-        List<EntitlementSourcePackages> packages 
+        List<EntitlementSourcePackages> packages
             = restTemplate.getForObject(getRestAPIHostPort() + "/PropData/entitlements/source/"
             ,List.class);
         assertFalse(packages.isEmpty());
@@ -133,7 +135,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
             builder.build().encode().toUri()
             , HttpMethod.PUT,requestEntity,ResponseDocument.class);
         assertNotNull(sourceID);
-            List<EntitlementSourcePackageMap> sourcePackageMap 
+            List<EntitlementSourcePackageMap> sourcePackageMap
             = restTemplate.getForObject(getRestAPIHostPort() 
             + "/PropData/entitlements/source/details/" + packageID.getBody().getResult(),List.class);
         assertFalse(sourcePackageMap.isEmpty());
@@ -184,7 +186,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
             ,requestEntity,ResponseDocument.class);
         assertNotNull(packageID);
           
-        List<EntitlementSourceColumnsPackages> packages 
+        List<EntitlementSourceColumnsPackages> packages
             = restTemplate.getForObject(getRestAPIHostPort() + "/PropData/entitlements/columns/"
             ,List.class);
         assertFalse(packages.isEmpty());
@@ -200,7 +202,7 @@ public class EntitlementManagementResourceTestNG extends AbstractTestNGSpringCon
             ,HttpMethod.PUT,requestEntity,ResponseDocument.class);
         assertNotNull(columnID);
           
-        List<EntitlementSourceColumnsPackageMap> columns 
+        List<EntitlementSourceColumnsPackageMap> columns
             = restTemplate.getForObject(getRestAPIHostPort() 
             + "/PropData/entitlements/columns/details/" + packageID.getBody().getResult()
             ,List.class);

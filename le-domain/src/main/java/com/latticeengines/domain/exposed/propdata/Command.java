@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "Commands")
-public class Commands implements HasPid {
+public class Command implements HasPid {
 
     @Id
     @Column(name = "CommandId", unique = true, nullable = false)
@@ -29,7 +29,7 @@ public class Commands implements HasPid {
 
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    private CommandIds commandIds;
+    private CommandId commandIds;
 
     @Column(name = "CommandName", nullable = false)
     private String commandName;
@@ -68,7 +68,7 @@ public class Commands implements HasPid {
     @Column(name = "ProfileID", nullable = true)
     private String profileID;
 
-    public Commands() {
+    public Command() {
         super();
     }
 
@@ -82,11 +82,11 @@ public class Commands implements HasPid {
         this.commandId = id;
     }
 
-    public CommandIds getCommandIds() {
+    public CommandId getCommandIds() {
         return commandIds;
     }
 
-    public void setCommandIds(CommandIds commandIds) {
+    public void setCommandIds(CommandId commandIds) {
         this.commandIds = commandIds;
     }
 
@@ -203,7 +203,7 @@ public class Commands implements HasPid {
         if (!other.getClass().equals(this.getClass())) {
             return false;
         }
-        CommandIds theOther = (CommandIds) other;
+        CommandId theOther = (CommandId) other;
 
         return new EqualsBuilder().append(commandId, theOther.getPid())
                 .isEquals();
@@ -212,7 +212,7 @@ public class Commands implements HasPid {
 
     @Override
     public String toString() {
-        return "Commands [commandId=" + commandId + ", commandName="
+        return "Command [commandId=" + commandId + ", commandName="
                 + commandName + ", sourceTable=" + sourceTable
                 + ", destTables=" + destTables + ", commandStatus="
                 + commandStatus + ", createTime=" + createTime

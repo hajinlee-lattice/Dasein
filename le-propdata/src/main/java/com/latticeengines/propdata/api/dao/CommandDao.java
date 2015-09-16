@@ -1,9 +1,9 @@
-package com.latticeengines.propdata.eai.dao;
+package com.latticeengines.propdata.api.dao;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.propdata.Commands;
+import com.latticeengines.domain.exposed.propdata.Command;
 
-public interface CommandsDao extends BaseDao<Commands> {
+public interface CommandDao extends BaseDao<Command> {
 
     void dropTable(String tableName);
 

@@ -7,13 +7,7 @@
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-	<bean id="propDataMatcherDataSource"
-		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="${propdata.matcher.driver}" />
-		<property name="url" value="${propdata.matcher.url}" />
-		<property name="username" value="${propdata.matcher.user}" />
-		<property name="password" value="${propdata.matcher.password.encrypted}" />
-	</bean>
+	<import resource="classpath:propdata-api-persistence-matcher-datasource-context.xml" />
 
 	<bean id="sessionFactoryPropDataMatcher"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
@@ -21,7 +15,7 @@
 		<property name="packagesToScan" value="com.latticeengines.domain.exposed" />
 		<property name="hibernateProperties">
 			<props>
-				<prop key="hibernate.dialect">${propdata.matcher.dialect}</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.globally_quoted_identifiers">true</prop>
 			</props>
@@ -34,5 +28,13 @@
 		<qualifier value="propDataMatcherDataSource" />
 	</bean>
 	<tx:annotation-driven transaction-manager="transactionManagerPropDataDataSource" />
+
+	<bean id="commandIdDao" class="com.latticeengines.propdata.api.dao.impl.CommandIdDaoImpl">
+		<property name="sessionFactory" ref="sessionFactoryPropDataMatcher" />
+	</bean>
+
+	<bean id="commandDao" class="com.latticeengines.propdata.api.dao.impl.CommandDaoImpl">
+		<property name="sessionFactory" ref="sessionFactoryPropDataMatcher" />
+	</bean>
 
 </beans>

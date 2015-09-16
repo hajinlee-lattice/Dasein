@@ -1,15 +1,19 @@
 package com.latticeengines.propdata.api.service.impl;
 
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.sql.*;
-
 import com.latticeengines.propdata.api.service.MatchCommandService;
 
-@Component("MatchCommandService")
+@Component("matchCommandService")
 public class MatchCommandServiceImpl implements MatchCommandService {
 
     private static final Log log = LogFactory.getLog(MatchCommandServiceImpl.class);
@@ -30,7 +34,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     @Override
     public Long createMatchCommand(String sourceTable, String destTables,
             String contractExternalID, String matchClient) {
-        Long results = new Long(-1);
+        Long results;
         if(matchClient==null)
             matchClient=jdbcHost;
         
@@ -47,14 +51,14 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         }
         catch (Exception e) {
             log.error(e.getMessage());
-            results = new Long(-1);
+            results = -1L;
         }
         return results;
     }
 
     @Override
     public String getMatchCommandStatus(String commandID, String matchClient) {
-        String results = "";
+        String results;
         if(matchClient==null)
             matchClient=jdbcHost;
         

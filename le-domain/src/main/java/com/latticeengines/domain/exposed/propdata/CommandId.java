@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "CommandIds")
-public class CommandIds implements HasPid {
+public class CommandId implements HasPid {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -79,7 +79,7 @@ public class CommandIds implements HasPid {
             return false;
         }
 
-        CommandIds theOther = (CommandIds) other;
+        CommandId theOther = (CommandId) other;
 
         return new EqualsBuilder().append(id, theOther.getPid()).isEquals();
 
@@ -87,7 +87,7 @@ public class CommandIds implements HasPid {
 
     @Override
     public String toString() {
-        return "CommandIds [id=" + id + ", createTime=" + createTime
+        return "CommandId [id=" + id + ", createTime=" + createTime
                 + ", createdBy=" + createdBy + "]";
     }
     

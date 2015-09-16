@@ -7,21 +7,16 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-propdata-context.xml" })
-public class MatchCommandResourceTestNG extends AbstractTestNGSpringContextTests{
+public class MatchCommandResourceTestNG extends PropDataApiFunctionalTestNGBase {
 
-    @Value("${propdata.api.hostport}")
+    @Value("${propdata.api.functional.hostport}")
     private String hostPort;
     
     protected String getRestAPIHostPort() {
