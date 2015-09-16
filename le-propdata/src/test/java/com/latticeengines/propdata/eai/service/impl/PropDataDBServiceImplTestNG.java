@@ -12,12 +12,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.propdata.eai.service.PropDataContext;
+import com.latticeengines.propdata.eai.context.PropDataContext;
 import com.latticeengines.propdata.eai.service.PropDataDBService;
 import com.latticeengines.propdata.eai.service.PropDataKey.CommandIdsKey;
 import com.latticeengines.propdata.eai.service.PropDataKey.CommandsKey;
 import com.latticeengines.propdata.eai.service.PropDataKey.ImportExportKey;
-import com.latticeengines.propdata.eai.service.impl.PropDataDBServiceImpl;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:propdata-eai-context.xml", "classpath:propdata-eai-properties-context.xml" })

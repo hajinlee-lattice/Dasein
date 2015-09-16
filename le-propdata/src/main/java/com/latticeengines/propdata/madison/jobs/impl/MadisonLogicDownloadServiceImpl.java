@@ -9,7 +9,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.eai.service.PropDataContext;
+import com.latticeengines.propdata.eai.context.PropDataContext;
 import com.latticeengines.propdata.madison.jobs.MadisonLogicJobService;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
 

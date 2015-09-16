@@ -20,15 +20,13 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-	<import resource="classpath:propdata-api-persistence-matching-context.xml" />
-
-	<!-- DAOs for PropData -->
+	<!-- DAOs for PropData Matching -->
 	<bean id="propDataEntitlements"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="${propdata.entitlements.driver}" />
-		<property name="url" value="${propdata.entitlements.url}" />
-		<property name="username" value="${propdata.entitlements.user}" />
-		<property name="password" value="${propdata.entitlements.password.encrypted}" />
+		<property name="driverClassName" value="${propdata.matchcommand.driver}" />
+		<property name="url" value="${propdata.matchcommand.url}" />
+		<property name="username" value="${propdata.matchcommand.user}" />
+		<property name="password" value="${propdata.matchcommand.password.encrypted}" />
 	</bean>
 
 	<bean id="sessionFactoryPropDataEntitlements"

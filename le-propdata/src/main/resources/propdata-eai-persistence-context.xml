@@ -41,6 +41,7 @@
 			</props>
 		</property>
 	</bean>
+
 	<bean id="transactionManagerPropData"
 		class="org.springframework.orm.hibernate4.HibernateTransactionManager"
 		p:sessionFactory-ref="sessionFactoryPropData">
@@ -50,6 +51,7 @@
 	<bean id="commandIdsDao" class="com.latticeengines.propdata.eai.dao.impl.CommandIdsDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropData" />
 	</bean>
+
 	<bean id="commandsDao" class="com.latticeengines.propdata.eai.dao.impl.CommandsDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropData" />
 	</bean>

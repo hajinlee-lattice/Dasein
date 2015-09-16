@@ -14,17 +14,17 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
     private static final Log log = LogFactory.getLog(MatchCommandServiceImpl.class);
     
-    @Value("${propdata.matchcommand.host}")
+    @Value("${propdata.matcher.host}")
     private String jdbcHost;
-    @Value("${propdata.matchcommand.port}")
+    @Value("${propdata.matcher.port}")
     private String jdbcPort;
-    @Value("${propdata.matchcommand.dbname}")
+    @Value("${propdata.matcher.dbname}")
     private String jdbcDb;
-    @Value("${propdata.matchcommand.type}")
+    @Value("${propdata.matcher.type}")
     private String jdbcType;
-    @Value("${propdata.matchcommand.user}")
+    @Value("${propdata.matcher.user}")
     private String jdbcUser;
-    @Value("${propdata.matchcommand.password.encrypted}")
+    @Value("${propdata.matcher.password.encrypted}")
     private String jdbcPassword;
 
     @Override
@@ -75,13 +75,8 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
     
     private Connection getConnection(String hostURL) throws SQLException{
-        String url = "";
-        url = "jdbc:sqlserver://" + hostURL + ":" + jdbcPort + ";databaseName=" + jdbcDb 
+        String url = "jdbc:sqlserver://" + hostURL + ":" + jdbcPort + ";databaseName=" + jdbcDb
                     + ";user=" + jdbcUser + ";password=" + jdbcPassword;
-        /*url = "jdbc:sqlserver://192.168.4.44:" + jdbcPort + ";databaseName=" + jdbcDb 
-                + ";integratedSecurity=true;user=" + jdbcUser + ";password=" + jdbcPassword;*/
-            
-        Connection conn = DriverManager.getConnection(url);
-        return conn;
+        return DriverManager.getConnection(url);
     }
 }

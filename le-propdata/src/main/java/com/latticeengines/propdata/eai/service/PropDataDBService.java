@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.eai.service;
 
 
+import com.latticeengines.propdata.eai.context.PropDataContext;
 
 public interface PropDataDBService {
 
