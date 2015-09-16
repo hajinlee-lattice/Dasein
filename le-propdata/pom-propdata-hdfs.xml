@@ -19,6 +19,7 @@
         <mapping.groupname>hdfs</mapping.groupname>
         <pre.install.script>preinstall</pre.install.script>
         <post.install.script>postinstall</post.install.script>
+        <le.rpm.version>2.0.9-SNAPSHOT</le.rpm.version>
     </properties>
 
     <build>
@@ -42,7 +43,7 @@
                             <groupname>${mapping.groupname}</groupname>
                             <sources>
                                 <source>
-                                    <location>target/*-shaded.jar</location>
+                                    <location>target/le-propdata-${le.rpm.version}-shaded.jar</location>
                                 </source>
                             </sources>
                         </mapping>
