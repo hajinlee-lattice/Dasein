@@ -66,7 +66,7 @@ public class BardJdbcManager {
 
     public List<String> getModelGuidsWithinLast2Weeks(){
         List<String> modelGuids = bardJdbcTemplate.queryForList(
-                "select [Key] from KeyValueStore where [Key] Like 'Model_%' and [Creation_Date] > ' "+  dataLossDate + "'", String.class);
+                "select [Key] from KeyValueStore where [Key] Like 'Model_ms__%' and [Creation_Date] > ' "+  dataLossDate + "'", String.class);
         return modelGuids;
     }
 
