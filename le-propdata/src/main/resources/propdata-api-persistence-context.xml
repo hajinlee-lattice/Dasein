@@ -20,7 +20,7 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-	<import resource="classpath:propdata-api-persistence-matching-context.xml" />
+	<import resource="classpath:propdata-api-persistence-matcher-context.xml" />
 
 	<!-- DAOs for PropData -->
 	<bean id="propDataEntitlements"
