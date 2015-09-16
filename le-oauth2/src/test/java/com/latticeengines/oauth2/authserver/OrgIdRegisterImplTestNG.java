@@ -19,12 +19,20 @@ import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
 public class OrgIdRegisterImplTestNG {
+
+    private BatonServiceImpl batonService;
+    private String tenantId = "playmakerOrgID";
 
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
+        batonService = new BatonServiceImpl();
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(new CustomerSpaceProperties(), "");
+        batonService.createTenant(customerSpace.getContractId(), tenantId, customerSpace.getSpaceId(), spaceInfo);
     }
 
     @AfterMethod(groups = "unit")
@@ -35,15 +43,11 @@ public class OrgIdRegisterImplTestNG {
     @Test(groups = "unit")
     public void registerOrgId() throws Exception {
 
-        String tenantId = "playmakerOrgID";
-
         HttpServletRequest request = mock(HttpServletRequest.class);
         ServletRequestAttributes attributes = new ServletRequestAttributes(request);
 
         RequestContextHolder.setRequestAttributes(attributes);
         OrgIdRegisterImpl orgIdRegister = new OrgIdRegisterImpl();
-        BatonServiceImpl batonService = new BatonServiceImpl();
-        orgIdRegister.setBatonService(batonService);
 
         orgIdRegister.registerOrgId(tenantId);
         verify(request, times(0)).getParameter("isProduction");
@@ -56,6 +60,7 @@ public class OrgIdRegisterImplTestNG {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
         CustomerSpaceInfo spaceInfo = SpaceLifecycleManager.getInfo(customerSpace.getContractId(),
                 customerSpace.getTenantId(), customerSpace.getSpaceId());
+
         Assert.assertEquals(spaceInfo.properties.sfdcOrgId, "prod123");
 
         // Sandbox orgId
