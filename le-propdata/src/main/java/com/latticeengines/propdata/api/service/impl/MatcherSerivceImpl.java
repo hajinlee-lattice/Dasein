@@ -1,6 +1,8 @@
 package com.latticeengines.propdata.api.service.impl;
 
-public class MatcherSerivceImpl {
+import com.latticeengines.propdata.api.service.MatcherService;
+
+public class MatcherSerivceImpl implements MatcherService {
 
 
 
