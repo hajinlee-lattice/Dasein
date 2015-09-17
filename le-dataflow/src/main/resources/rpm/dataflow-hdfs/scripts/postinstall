@@ -1,4 +1,4 @@
 #!/bin/bash
 echo 'Running Postinstall'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataflow/le-dataflow*-shaded.jar /tmp/dataflow/lib'
+hdfs dfs -copyFromLocal /tmp/app/dataflow/le-dataflow*-shaded.jar /app/dataflow/lib
 

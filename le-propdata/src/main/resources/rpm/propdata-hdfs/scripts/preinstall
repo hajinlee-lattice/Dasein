@@ -1,10 +1,10 @@
 #!/bin/bash
 echo 'Running Preinstall'
 if [ ! -d "/tmp/app/dataflow" ]; then
-    rm -rf /tmp/app/dataflow
+    rm -rf /tmp/app/dataflow/le-propdata*-shaded.jar
 else
     mkdir -p /tmp/app/dataflow
 fi
-hadoop dfs -mkdir -p /app/dataflow/lib
-hadoop dfs -rm -f /app/dataflow/lib/le-propdata*-shaded.jar
-mvn -Pshaded -DskipTests clean install
+hdfs dfs -mkdir -p /app/dataflow/lib
+hdfs dfs -rm -f /app/dataflow/lib/le-propdata*-shaded.jar
+
