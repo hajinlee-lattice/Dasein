@@ -37,7 +37,7 @@
                     <changelogFile>src/main/resources/rpm/dependency/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/app/propdata</directory>
+                            <directory>/tmp/app/dataflow</directory>
                             <filemode>644</filemode>
                             <username>${mapping.username}</username>
                             <groupname>${mapping.groupname}</groupname>
