@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -41,6 +43,7 @@ import com.latticeengines.security.exposed.service.UserService;
 public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private final static String tenantName = "Global Test Tenant";
+    private final static Log log = LogFactory.getLog(EndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
 
@@ -423,6 +426,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         try {
             visiDBDLComponentDeploymentTestNG.deleteVisiDBDLTenantWithRetry(tenantId);
         } catch (Exception e) {
+            log.warn("Deleting VDB/DL tenant " + tenantId + " encountered an exception.", e);
             // ignore
         }
     }
@@ -432,6 +436,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             BardJamsTenant jamsTenant = bardJamsEntityMgr.findByTenant(tenantId);
             bardJamsEntityMgr.delete(jamsTenant);
         } catch (Exception e) {
+            log.warn("Deleting BardJams tenant " + tenantId + " encountered an exception.", e);
             // ignore
         }
     }
