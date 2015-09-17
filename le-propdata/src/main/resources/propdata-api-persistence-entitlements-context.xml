@@ -7,8 +7,6 @@
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-	<import resource="classpath:propdata-api-persistence-matcher-context.xml" />
-
 	<!-- DAOs for PropData -->
 	<bean id="propDataEntitlements"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">

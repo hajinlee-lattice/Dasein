@@ -1,21 +1,21 @@
-package com.latticeengines.propdata.api.entitymanager;
+package com.latticeengines.propdata.api.service;
 
 import java.util.Collection;
 
 import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 
-public interface PropDataEntityMgr {
+public interface MatchCommandService {
 
-    Command createCommand(String sourceTable, String contractExternalID, String destTables);
+    Command createMatchCommand(CreateCommandRequest request);
 
-    Command getCommand(Long pid);
+    Command findMatchCommandById(Long commandId);
 
     MatchCommandStatus getMatchCommandStatus(Long commandID);
-
-    void dropTable(String tableName);
 
     Collection<String> generatedResultTables(Long commandId);
 
     boolean resultTablesAreReady(Long commandId);
+
 }

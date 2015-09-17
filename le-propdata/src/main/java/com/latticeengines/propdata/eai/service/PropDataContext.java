@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.eai.context;
+package com.latticeengines.propdata.eai.service;
 
 import java.util.HashMap;
 import java.util.Map;

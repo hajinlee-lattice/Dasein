@@ -1,10 +1,15 @@
 package com.latticeengines.propdata.api.testframework;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,14 +21,14 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
+import com.latticeengines.domain.exposed.propdata.MatchClient;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-api-context.xml" })
 public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpringContextTests {
+
+    @Value("${propdata.test.match.client}")
+    protected String testMatchClientName;
 
     protected static <T> T sendHttpDeleteForObject(RestTemplate restTemplate, String url, Class<T> responseType) {
         ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.DELETE, jsonRequestEntity(""), responseType);
@@ -56,6 +61,10 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
         final SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+
+    protected MatchClient getMatchClient() {
+        return MatchClient.valueOf(testMatchClientName);
     }
 
     abstract protected String getRestAPIHostPort();

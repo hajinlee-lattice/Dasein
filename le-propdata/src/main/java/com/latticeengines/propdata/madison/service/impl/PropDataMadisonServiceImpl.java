@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
-import com.latticeengines.propdata.eai.context.PropDataContext;
+import com.latticeengines.propdata.eai.service.PropDataContext;
 import com.latticeengines.propdata.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;

@@ -1,75 +1,108 @@
 package com.latticeengines.propdata.api.entitymanager.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.propdata.Command;
-import com.latticeengines.domain.exposed.propdata.CommandId;
-import com.latticeengines.propdata.api.dao.CommandIdDao;
+import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.api.dao.CommandDao;
+import com.latticeengines.propdata.api.datasource.MatchClientRoutingDataSource;
 import com.latticeengines.propdata.api.entitymanager.PropDataEntityMgr;
 
 @Component("propDataEntityMgr")
 public class PropDataEntityMgrImpl implements PropDataEntityMgr {
 
-    private final Log log = LogFactory.getLog(this.getClass());
-
-    @Autowired
-    private CommandIdDao commandIdsDao;
-
     @Autowired
     private CommandDao commandDao;
+
+    @Autowired
+    private MatchClientRoutingDataSource dataSource;
+
+    private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
     public PropDataEntityMgrImpl() {
         super();
     }
 
+    @PostConstruct
+    private void linkDataSourceToJdbcTemplate() {
+        jdbcTemplate.setDataSource(dataSource);
+    }
+
     @Override
     @Transactional(value = "propdata", propagation = Propagation.REQUIRED)
-    public void createCommands(Command commands) {
-        CommandId commandIds = commands.getCommandIds();
-        if (commandIds == null) {
-            log.error("There's no CommandId for :" + commands);
-            throw new IllegalStateException("There's no CommandId specified.");
-        }
-
-        commandIdsDao.create(commandIds);
-        commands.setPid(commandIds.getPid());
-        commandDao.create(commands);
+    synchronized public Command createCommand(String sourceTable, String contractExternalID, String destTables) {
+        return commandDao.createCommandByStoredProcedure(sourceTable, contractExternalID, destTables);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
-    public Command getCommands(Long pid) {
+    public Command getCommand(Long pid) {
         return commandDao.findByKey(Command.class, pid);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
-    public CommandId getCommandIds(Long pid) {
-        return commandIdsDao.findByKey(CommandId.class, pid);
+    public MatchCommandStatus getMatchCommandStatus(Long commandID) {
+        return commandDao.getMatchCommandStatus(commandID);
     }
 
     @Override
-    @Transactional(value = "propdata", readOnly = true)
-    public void dropTable(String tableName) {
+    @Transactional(value = "propdata", readOnly = false)
+    synchronized public void dropTable(String tableName) {
         commandDao.dropTable(tableName);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
-    public void executeQueryUpdate(String sql) {
-        commandDao.executeQueryUpdate(sql);
+    public Collection<String> generatedResultTables(Long commandId) {
+        Command command = getCommand(commandId);
+        Set<String> targetTables = mangledResultTables(command);
+        for (String table: targetTables) {
+            if (tableExists(table)) {
+                targetTables.add(table);
+            }
+        }
+        return targetTables;
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
-    public void executeProcedure(String procedure) {
-        commandDao.executeProcedure(procedure);
+    public boolean resultTablesAreReady(Long commandId) {
+        Command command = getCommand(commandId);
+        Set<String> targetTables = mangledResultTables(command);
+        for (String table: targetTables) {
+            if (!tableExists(table)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Set<String> mangledResultTables(Command command) {
+        String[] destTables = command.getDestTables().split("\\|");
+        String commandName = command.getCommandName();
+        Set<String> resultTables = new HashSet<>();
+        for (String destTable: destTables) {
+            String mangledTableName = String.format("%s_%s_%s",
+                    commandName, String.valueOf(command.getPid()), destTable);
+            resultTables.add(mangledTableName);
+        }
+        return resultTables;
+    }
+
+    private boolean tableExists(String tableName) {
+        String sql = String.format("IF OBJECT_ID (N'dbo.%s', N'U') IS NOT NULL SELECT 1 ELSE SELECT 0", tableName);
+        return jdbcTemplate.queryForObject(sql, Boolean.class);
     }
 
 }

@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.madison.service;
 
-import com.latticeengines.propdata.eai.context.PropDataContext;
+import com.latticeengines.propdata.eai.service.PropDataContext;
 
 public interface PropDataMadisonService {
 

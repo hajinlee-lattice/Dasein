@@ -7,11 +7,11 @@
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-	<import resource="classpath:propdata-api-persistence-matcher-datasource-context.xml" />
+	<import resource="classpath:propdata-api-persistence-match-datasource-context.xml" />
 
-	<bean id="sessionFactoryPropDataMatcher"
+	<bean id="sessionFactoryPropDataMatch"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-		<property name="dataSource" ref="propDataMatcherDataSource" />
+		<property name="dataSource" ref="propDataMatchDataSource" />
 		<property name="packagesToScan" value="com.latticeengines.domain.exposed" />
 		<property name="hibernateProperties">
 			<props>
@@ -22,19 +22,15 @@
 		</property>
 	</bean>
 
-	<bean id="transactionManagerPropDataDataSource"
+	<bean id="transactionManagerPropDataMatch"
 		class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-		p:sessionFactory-ref="sessionFactoryPropDataMatcher">
-		<qualifier value="propDataMatcherDataSource" />
+		p:sessionFactory-ref="sessionFactoryPropDataMatch">
+		<qualifier value="propdata" />
 	</bean>
-	<tx:annotation-driven transaction-manager="transactionManagerPropDataDataSource" />
-
-	<bean id="commandIdDao" class="com.latticeengines.propdata.api.dao.impl.CommandIdDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataMatcher" />
-	</bean>
+	<tx:annotation-driven transaction-manager="transactionManagerPropDataMatch" />
 
 	<bean id="commandDao" class="com.latticeengines.propdata.api.dao.impl.CommandDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataMatcher" />
+		<property name="sessionFactory" ref="sessionFactoryPropDataMatch" />
 	</bean>
 
 </beans>
