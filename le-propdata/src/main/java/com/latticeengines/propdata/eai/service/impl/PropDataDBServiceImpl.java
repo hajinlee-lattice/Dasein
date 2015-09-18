@@ -1,8 +1,11 @@
 package com.latticeengines.propdata.eai.service.impl;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -22,6 +25,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.propdata.api.datasource.MatchClientRoutingDataSource;
 import com.latticeengines.propdata.eai.entitymanager.PropDataEntityMgr;
 import com.latticeengines.propdata.eai.service.PropDataContext;
 import com.latticeengines.propdata.eai.service.PropDataDBService;
@@ -31,8 +35,6 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
 public class PropDataDBServiceImpl implements PropDataDBService {
-
-    private static final int MATCHING_TIMEOUT_MINUTES = 120;
 
     private final Log log = LogFactory.getLog(this.getClass());
 
@@ -48,19 +50,15 @@ public class PropDataDBServiceImpl implements PropDataDBService {
     @Autowired
     protected Configuration yarnConfiguration;
 
-    @Value("${propdata.datasource.url}")
-    private String jdbcUrl;
-    @Value("${propdata.datasource.host}")
-    private String jdbcHost;
-    @Value("${propdata.datasource.port}")
-    private String jdbcPort;
-    @Value("${propdata.datasource.dbname}")
-    private String jdbcDb;
-    @Value("${propdata.datasource.type}")
-    private String jdbcType;
-    @Value("${propdata.datasource.user}")
+    @Autowired
+    private MatchClientRoutingDataSource dataSource;
+
+    private static final String jdbcType = "SQLServer";
+
+    @Value("${propdata.matcher.user}")
     private String jdbcUser;
-    @Value("${propdata.datasource.password.encrypted}")
+
+    @Value("${propdata.matcher.password.encrypted}")
     private String jdbcPassword;
 
     @Value("${dataplatform.customer.basedir}")
@@ -83,10 +81,10 @@ public class PropDataDBServiceImpl implements PropDataDBService {
             generateNewTables(requestContext, tableList, keyColsList);
 
             String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-            DbCreds.Builder builder = new DbCreds.Builder();
-            builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
-                    .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
-            DbCreds creds = new DbCreds(builder);
+
+            String url = dataSource.getConnection().getMetaData().getURL();
+            DbCreds creds = constructDbCresFromUrl(url);
+
             for (int i = 0; i < tableList.size(); i++) {
                 String newTable = tableList.get(i);
                 String keyCols = keyColsList.get(i);
@@ -126,10 +124,8 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         String keyCols = requestContext.getProperty(ImportExportKey.KEY_COLS.getKey(), String.class);
 
         try {
-            DbCreds.Builder builder = new DbCreds.Builder();
-            builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
-                    .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
-            DbCreds creds = new DbCreds(builder);
+            String url = dataSource.getConnection().getMetaData().getURL();
+            DbCreds creds = constructDbCresFromUrl(url);
             String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
             ApplicationId appId = propDataJobService.importDataSync(tableName,
                     getDataHdfsPath(customer, tableName, PROPDATA_OUTPUT), creds, assignedQueue, customer, Arrays.asList(keyCols),
@@ -208,58 +204,6 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 
         return responseContext;
     }
-
-//    @Override
-//    public PropDataContext addCommandAndWaitForComplete(PropDataContext requestContext) {
-//
-//        PropDataContext responseContext = new PropDataContext();
-//        Commands commands = convertToCommands(requestContext);
-//
-//        propDataEntityMgr.createCommands(commands);
-//
-//        boolean isComplete = waitForComplete(commands);
-//        if (!isComplete) {
-//            return responseContext;
-//        }
-//
-//        responseContext.setProperty(CommandsKey.COMMAND_ID.getKey(), commands.getPid());
-//        responseContext.setProperty(CommandsKey.DESTTABLES.getKey(),
-//                requestContext.getProperty(CommandsKey.DESTTABLES.getKey(), String.class));
-//        responseContext.setProperty(CommandsKey.COMMAND_NAME.getKey(),
-//                requestContext.getProperty(CommandsKey.COMMAND_NAME.getKey(), String.class));
-//        return responseContext;
-//    }
-//
-//    private boolean waitForComplete(Commands commands) {
-//
-//        Long commandId = null;
-//        Date startTime = new Date(System.currentTimeMillis());
-//        commandId = commands.getPid();
-//        while (true) {
-//            Commands newCommands = propDataEntityMgr.getCommands(commandId);
-//            if (newCommands.getCommandStatus() == 3) {
-//                break;
-//            }
-//            try {
-//                Thread.sleep(10000L);
-//            } catch (InterruptedException e) {
-//                log.warn("Thread sleep was interrupted!");
-//            }
-//
-//            Date endTime = new Date(System.currentTimeMillis());
-//            if (DateUtils.addMinutes(startTime, MATCHING_TIMEOUT_MINUTES).before(endTime)) {
-//                log.error("CommandId=" + commandId + " has run more than 60 minutes or failed. CommandStatus="
-//                        + newCommands.getCommandStatus());
-//                return false;
-//            }
-//
-//            long duration = endTime.getTime() - startTime.getTime();
-//            long minutes = TimeUnit.MILLISECONDS.toMinutes(duration);
-//
-//            log.info("CommandId=" + commandId + " has already run for minutes=" + minutes);
-//        }
-//        return true;
-//    }
 
     @Override
     public void createSingleTableFromAvro(PropDataContext requestContext) throws Exception {
@@ -369,21 +313,19 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         try {
             propDataEntityMgr.dropTable(tableName);
         } catch (Exception ex) {
-            log.warn("Exception where drop table=" + tableName + " Message=" + ex.getMessage());
+            log.warn("Exception when dropping table " + tableName, ex);
         }
     }
 
-    private PropDataContext exportFromHdfsToDB(PropDataContext requestContext) {
+    private PropDataContext exportFromHdfsToDB(PropDataContext requestContext) throws SQLException {
         PropDataContext responseContext = new PropDataContext();
 
         String customer = requestContext.getProperty(ImportExportKey.CUSTOMER.getKey(), String.class);
         String table = requestContext.getProperty(ImportExportKey.TABLE.getKey(), String.class);
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
 
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
-                .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
-        DbCreds creds = new DbCreds(builder);
+        String url = dataSource.getConnection().getMetaData().getURL();
+        DbCreds creds = constructDbCresFromUrl(url);
 
         Integer appId = propDataJobService.exportDataSync(table, getDataHdfsPath(customer, table, PROPDATA_INPUT),
                 creds, assignedQueue, customer, 1, null).getId();
@@ -409,44 +351,32 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         return customerBaseDir + "/" + customer + "/data/" + inputOutputDir + "/" + table;
     }
 
-//    private Commands convertToCommands(PropDataContext requestContext) {
-//
-//        CommandIds commandIds = new CommandIds();
-//        commandIds.setCreatedBy(requestContext.getProperty(CommandIdsKey.CREATED_BY.getKey(), String.class));
-//        Date now = new Date();
-//        commandIds.setCreateTime(now);
-//
-//        Commands commands = new Commands();
-//        commands.setCommandIds(commandIds);
-//
-//        commands.setCommandName(requestContext.getProperty(CommandsKey.COMMAND_NAME.getKey(), String.class));
-//        commands.setCommandStatus(0);
-//        commands.setContractExternalID(requestContext.getProperty(CommandsKey.CONTRACT_EXTERNAL_ID.getKey(),
-//                String.class));
-//        commands.setCreateTime(now);
-//        commands.setDeploymentExternalID(requestContext.getProperty(CommandsKey.DEPLOYMENT_EXTERNAL_ID.getKey(),
-//                String.class));
-//        commands.setDestTables(requestContext.getProperty(CommandsKey.DESTTABLES.getKey(), String.class));
-//
-//        Boolean isDownloading = requestContext.getProperty(CommandsKey.IS_DOWNLOADING.getKey(), Boolean.class);
-//        if (isDownloading != null) {
-//            commands.setIsDownloading(isDownloading);
-//        } else {
-//            commands.setIsDownloading(false);
-//        }
-//
-//        Integer maxNumRetries = requestContext.getProperty(CommandsKey.MAX_NUMR_ETRIES.getKey(), Integer.class);
-//        if (maxNumRetries != null) {
-//            commands.setMaxNumRetries(maxNumRetries);
-//        } else {
-//            commands.setMaxNumRetries(5);
-//        }
-//
-//        commands.setNumRetries(0);
-//        commands.setProcessUID(UUID.randomUUID().toString());
-//        String sourceTable = requestContext.getProperty(CommandsKey.SOURCE_TABLE.getKey(), String.class);
-//        commands.setSourceTable(sourceTable);
-//
-//        return commands;
-//    }
+    private DbCreds constructDbCresFromUrl(String url) {
+        DbCreds.Builder builder = new DbCreds.Builder();
+        String[] hostport = findHostPortInUrl(url).split(":");
+        String dbName = findDbNameInUrl(url);
+        builder.host(hostport[0]).port(Integer.parseInt(hostport[1])).db(dbName)
+                .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
+        return new DbCreds(builder);
+    }
+
+    private static String findHostPortInUrl(String url) {
+        Pattern pattern = Pattern.compile("://[^;]*");
+        Matcher matcher = pattern.matcher(url);
+        if (matcher.find()) {
+            return matcher.group(0).replace("://", "");
+        }
+        throw new IllegalArgumentException("Cannot find host pattern in the url " + url);
+    }
+
+    private static String findDbNameInUrl(String url) {
+        Pattern pattern = Pattern.compile("databaseName=[^;]*");
+        Matcher matcher = pattern.matcher(url);
+        if (matcher.find()) {
+            return matcher.group(0).replace("databaseName=", "");
+        }
+        throw new IllegalArgumentException("Cannot find database name in the url " + url);
+    }
+
+
 }

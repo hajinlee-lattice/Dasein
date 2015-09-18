@@ -8,13 +8,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.propdata.Command;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
-import com.latticeengines.propdata.api.entitymanager.PropDataEntityMgr;
+import com.latticeengines.propdata.api.entitymanager.CommandEntityMgr;
 import com.latticeengines.propdata.api.service.MatchCommandService;
 
 @Component("matchCommandService")
 public class MatchCommandServiceImpl implements MatchCommandService {
     @Autowired
-    private PropDataEntityMgr entityMgr;
+    private CommandEntityMgr entityMgr;
 
     @Override
     public Command createMatchCommand(CreateCommandRequest request) {

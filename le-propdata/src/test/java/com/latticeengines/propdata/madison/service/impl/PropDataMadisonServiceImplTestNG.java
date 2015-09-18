@@ -25,8 +25,7 @@ import com.latticeengines.propdata.madison.service.PropDataMadisonService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:propdata-madison-context.xml",
-        "classpath:propdata-madison-properties-context.xml", "classpath:dataflow-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-propdata-madison-context.xml" })
 public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired

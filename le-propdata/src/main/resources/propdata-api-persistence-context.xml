@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-	<import resource="classpath:propdata-api-persistence-match-context.xml" />
-	<import resource="classpath:propdata-api-persistence-entitlements-context.xml" />
+	<import resource="classpath:propdata-persistence-match-context.xml" />
+	<import resource="classpath:propdata-persistence-entitlements-context.xml" />
 
 </beans>

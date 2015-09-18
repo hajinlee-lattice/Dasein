@@ -10,10 +10,4 @@ public interface CommandDao extends BaseDao<Command> {
 
     MatchCommandStatus getMatchCommandStatus(Long commandID);
 
-    void dropTable(String tableName);
-
-    void executeQueryUpdate(String sql);
-
-    void executeProcedure(String procedure);
-
 }

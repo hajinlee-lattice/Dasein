@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -16,20 +18,23 @@ import com.latticeengines.domain.exposed.propdata.Command;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.api.dao.CommandDao;
 import com.latticeengines.propdata.api.datasource.MatchClientRoutingDataSource;
-import com.latticeengines.propdata.api.entitymanager.PropDataEntityMgr;
+import com.latticeengines.propdata.api.entitymanager.CommandEntityMgr;
 
-@Component("propDataEntityMgr")
-public class PropDataEntityMgrImpl implements PropDataEntityMgr {
+@Component
+public class CommandEntityMgrImpl implements CommandEntityMgr {
 
     @Autowired
     private CommandDao commandDao;
+
+    @Resource(name="sessionFactoryPropDataMatch")
+    private SessionFactory sessionFactory;
 
     @Autowired
     private MatchClientRoutingDataSource dataSource;
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
-    public PropDataEntityMgrImpl() {
+    public CommandEntityMgrImpl() {
         super();
     }
 
@@ -56,11 +61,6 @@ public class PropDataEntityMgrImpl implements PropDataEntityMgr {
         return commandDao.getMatchCommandStatus(commandID);
     }
 
-    @Override
-    @Transactional(value = "propdata", readOnly = false)
-    synchronized public void dropTable(String tableName) {
-        commandDao.dropTable(tableName);
-    }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)

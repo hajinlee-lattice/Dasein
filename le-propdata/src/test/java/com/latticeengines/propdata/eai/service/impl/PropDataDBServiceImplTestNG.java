@@ -10,9 +10,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.eai.service.PropDataContext;
 import com.latticeengines.propdata.eai.service.PropDataDBService;
-import com.latticeengines.propdata.eai.service.PropDataKey.CommandIdsKey;
-import com.latticeengines.propdata.eai.service.PropDataKey.CommandsKey;
-import com.latticeengines.propdata.eai.service.PropDataKey.ImportExportKey;
+import com.latticeengines.propdata.eai.service.PropDataKey;
 import com.latticeengines.propdata.eai.testframework.PropDataEaiFunctionalTestNGBase;
 
 public class PropDataDBServiceImplTestNG extends PropDataEaiFunctionalTestNGBase {
@@ -44,7 +42,8 @@ public class PropDataDBServiceImplTestNG extends PropDataEaiFunctionalTestNGBase
 
     @Value("${dataplatform.customer.basedir}")
     protected String customerBaseDir;
-    private PropDataContext previousResponseContext;
+
+    private PropDataContext previousResponseContext = null;
 
     @Test(groups = "functional", dataProvider = "initData", enabled=false)
     public void init(String customer, String table, String inputFile) throws Exception {
@@ -67,9 +66,9 @@ public class PropDataDBServiceImplTestNG extends PropDataEaiFunctionalTestNGBase
         PropDataContext responseContext = propDataDBService.exportToDB(requestContext);
 
         Assert.assertNotNull(responseContext);
-        Assert.assertNotNull(responseContext.getProperty(ImportExportKey.APPLICATION_ID.getKey(), Integer.class));
-        Assert.assertEquals(responseContext.getProperty(ImportExportKey.TABLE.getKey(), String.class), table);
-        Assert.assertEquals(responseContext.getProperty(ImportExportKey.CUSTOMER.getKey(), String.class), customer);
+        Assert.assertNotNull(responseContext.getProperty(PropDataKey.ImportExportKey.APPLICATION_ID.getKey(), Integer.class));
+        Assert.assertEquals(responseContext.getProperty(PropDataKey.ImportExportKey.TABLE.getKey(), String.class), table);
+        Assert.assertEquals(responseContext.getProperty(PropDataKey.ImportExportKey.CUSTOMER.getKey(), String.class), customer);
     }
 
     @Test(groups = "functional", dataProvider = "importFromDBData", dependsOnMethods = { "addCommand" }, enabled=false)
@@ -80,8 +79,8 @@ public class PropDataDBServiceImplTestNG extends PropDataEaiFunctionalTestNGBase
         PropDataContext responseContext = propDataDBService.importFromDB(requestContext);
 
         Assert.assertNotNull(responseContext);
-        Assert.assertNotNull(responseContext.getProperty(ImportExportKey.APPLICATION_ID.getKey(), String.class));
-        Assert.assertNotNull(responseContext.getProperty(ImportExportKey.TABLE.getKey(), String.class));
+        Assert.assertNotNull(responseContext.getProperty(PropDataKey.ImportExportKey.APPLICATION_ID.getKey(), String.class));
+        Assert.assertNotNull(responseContext.getProperty(PropDataKey.ImportExportKey.TABLE.getKey(), String.class));
 
     }
 
@@ -97,8 +96,8 @@ public class PropDataDBServiceImplTestNG extends PropDataEaiFunctionalTestNGBase
         PropDataContext responseContext = propDataDBService.createSingleAVROFromTable(requestContext);
 
         Assert.assertNotNull(responseContext);
-        Assert.assertNotNull(responseContext.getProperty(ImportExportKey.APPLICATION_ID.getKey(), String.class));
-        Assert.assertNotNull(responseContext.getProperty(ImportExportKey.TABLE.getKey(), String.class));
+        Assert.assertNotNull(responseContext.getProperty(PropDataKey.ImportExportKey.APPLICATION_ID.getKey(), String.class));
+        Assert.assertNotNull(responseContext.getProperty(PropDataKey.ImportExportKey.TABLE.getKey(), String.class));
 
     }
 
@@ -136,17 +135,17 @@ public class PropDataDBServiceImplTestNG extends PropDataEaiFunctionalTestNGBase
     private PropDataContext getRequestContextForAddCommand(String customer, String table) {
         PropDataContext requestContext = new PropDataContext();
 
-        requestContext.setProperty(CommandIdsKey.CREATED_BY.getKey(), "propdata@lattice-engines.com");
+        requestContext.setProperty(PropDataKey.CommandIdsKey.CREATED_BY.getKey(), "propdata@lattice-engines.com");
 
-        requestContext.setProperty(CommandsKey.COMMAND_NAME.getKey(), "RunMatchWithLEUniverse");
-        requestContext.setProperty(CommandsKey.CONTRACT_EXTERNAL_ID.getKey(), customer);
-        requestContext.setProperty(CommandsKey.DEPLOYMENT_EXTERNAL_ID.getKey(), customer);
-        requestContext.setProperty(CommandsKey.DESTTABLES.getKey(), "DerivedColumns|Alexa_Source");
+        requestContext.setProperty(PropDataKey.CommandsKey.COMMAND_NAME.getKey(), "RunMatchWithLEUniverse");
+        requestContext.setProperty(PropDataKey.CommandsKey.CONTRACT_EXTERNAL_ID.getKey(), customer);
+        requestContext.setProperty(PropDataKey.CommandsKey.DEPLOYMENT_EXTERNAL_ID.getKey(), customer);
+        requestContext.setProperty(PropDataKey.CommandsKey.DESTTABLES.getKey(), "DerivedColumns|Alexa_Source");
 
-        requestContext.setProperty(CommandsKey.IS_DOWNLOADING.getKey(), Boolean.FALSE);
+        requestContext.setProperty(PropDataKey.CommandsKey.IS_DOWNLOADING.getKey(), Boolean.FALSE);
 
-        requestContext.setProperty(CommandsKey.MAX_NUMR_ETRIES.getKey(), 5);
-        requestContext.setProperty(CommandsKey.SOURCE_TABLE.getKey(), table);
+        requestContext.setProperty(PropDataKey.CommandsKey.MAX_NUMR_ETRIES.getKey(), 5);
+        requestContext.setProperty(PropDataKey.CommandsKey.SOURCE_TABLE.getKey(), table);
 
         return requestContext;
     }
@@ -157,18 +156,18 @@ public class PropDataDBServiceImplTestNG extends PropDataEaiFunctionalTestNGBase
         if (requestContext == null) {
             requestContext = new PropDataContext();
         }
-        requestContext.setProperty(ImportExportKey.CUSTOMER.getKey(), customer);
-        requestContext.setProperty(ImportExportKey.TABLE.getKey(), table);
-        requestContext.setProperty(ImportExportKey.KEY_COLS.getKey(), keyCols);
+        requestContext.setProperty(PropDataKey.ImportExportKey.CUSTOMER.getKey(), customer);
+        requestContext.setProperty(PropDataKey.ImportExportKey.TABLE.getKey(), table);
+        requestContext.setProperty(PropDataKey.ImportExportKey.KEY_COLS.getKey(), keyCols);
 
         return requestContext;
     }
 
     private PropDataContext getRequestContextForExport(String customer, String table, boolean mapColumn) {
         PropDataContext requestContext = new PropDataContext();
-        requestContext.setProperty(ImportExportKey.CUSTOMER.getKey(), customer);
-        requestContext.setProperty(ImportExportKey.TABLE.getKey(), table);
-        requestContext.setProperty(ImportExportKey.MAP_COLUMN.getKey(), mapColumn);
+        requestContext.setProperty(PropDataKey.ImportExportKey.CUSTOMER.getKey(), customer);
+        requestContext.setProperty(PropDataKey.ImportExportKey.TABLE.getKey(), table);
+        requestContext.setProperty(PropDataKey.ImportExportKey.MAP_COLUMN.getKey(), mapColumn);
         return requestContext;
     }
 
