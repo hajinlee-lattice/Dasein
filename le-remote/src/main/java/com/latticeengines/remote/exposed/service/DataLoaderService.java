@@ -5,8 +5,12 @@ import java.util.List;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
+import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
+import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
+import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
+import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.Segment;
@@ -22,6 +26,10 @@ public interface DataLoaderService {
     InstallResult installVisiDBStructureFile(InstallTemplateRequest request, String dlUrl);
 
     InstallResult installDataLoaderConfigFile(InstallTemplateRequest request, String dlUrl);
+    
+    GetSpecResult getSpecDetails(GetSpecRequest request, String dlUrl);
+    
+    GetQueryMetaDataColumnsResponse getQueryMetadataColumns(GetQueryMetaDataColumnsRequest request, String dlUrl);
 
     String getTemplateVersion(String tenantName, String dlUrl);
 

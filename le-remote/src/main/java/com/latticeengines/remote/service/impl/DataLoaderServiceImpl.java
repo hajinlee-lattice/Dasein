@@ -31,6 +31,8 @@ import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
+import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
+import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
@@ -60,6 +62,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String VALIDATE_CREDS = "/ValidateExternalAPICredentials";
     private static final String UPDATE_DATA_PROVIDER = "/UpdateDataProvider";
     private static final String DOWNLOAD_CONFIG = "/DownloadConfigFile";
+    private static final String GET_QUERY_METADATA_COLUMNS = "/GetQueryMetadataColumns";
 
     private static final String SEGMENT_PREFIX = "DefnSegment_";
     private static final String MODELID_PREFIX = "LatticeFunctionExpressionConstant(\"";
@@ -334,6 +337,28 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             throw new LedpException(LedpCode.LEDP_21004, ex);
         }
 
+    }
+    
+    @Override
+    @RestApiCall
+    public GetSpecResult getSpecDetails(GetSpecRequest request, String dlUrl) {
+    	try {
+            String response = callDLRestService(dlUrl, GET_SPEC_DETAILS, request);
+            return JsonUtils.deserialize(response, GetSpecResult.class);
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21008, ex);
+        }
+    }
+    
+    @Override
+    @RestApiCall
+    public GetQueryMetaDataColumnsResponse getQueryMetadataColumns(GetQueryMetaDataColumnsRequest request, String dlUrl) {
+    	try {
+            String response = callDLRestService(dlUrl, GET_QUERY_METADATA_COLUMNS, request);
+            return JsonUtils.deserialize(response, GetQueryMetaDataColumnsResponse.class);
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21009, ex);
+        }
     }
 
     @Override
