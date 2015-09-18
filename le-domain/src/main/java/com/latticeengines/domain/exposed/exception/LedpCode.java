@@ -172,6 +172,8 @@ public enum LedpCode {
     LEDP_21005("Problem getting DataLoader tenant settings via DataLoader REST: {0}"), //
     LEDP_21006("Problem creating DataLoader tenant via DataLoader REST: {0}"), //
     LEDP_21007("Problem deleting DataLoader tenant via DataLoader REST: {0}"), //
+    LEDP_21008("Problem getting spec details via DataLoader REST: {0}"), //
+    LEDP_21009("Problem getting query metadata via DataLoader REST: {0}"), //
 
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"), //
