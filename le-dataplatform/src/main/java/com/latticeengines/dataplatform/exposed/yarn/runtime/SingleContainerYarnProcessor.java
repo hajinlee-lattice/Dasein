@@ -13,8 +13,8 @@ import org.springframework.batch.item.file.LineMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T, String> {
-    private static final Log log = LogFactory.getLog(SingleContainerYarnProcessor.class);
-    
+    protected static final Log log = LogFactory.getLog(SingleContainerYarnProcessor.class);
+
     private LineMapper<T> lineMapper = new SingleContainerLineMapper();
     private ItemWriter<String> itemWriter = new SingleContainerWriter();
 

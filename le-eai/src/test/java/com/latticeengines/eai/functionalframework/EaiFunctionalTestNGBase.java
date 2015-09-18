@@ -12,7 +12,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -20,7 +19,6 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
-
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
@@ -35,26 +33,25 @@ import com.latticeengines.domain.exposed.modeling.Field;
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
 public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
-    
+    protected static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private YarnClient defaultYarnClient;
-    
+
     @Autowired
     private MetadataService metadataService;
-    
+
     protected DataPlatformFunctionalTestNGBase platformTestBase;
-    
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
     }
-    
+
     protected Table createMarketoActivity() {
         Table table = new Table();
         table.setName("Activity");
@@ -80,7 +77,7 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         table.addAttribute(activityTypeId);
         return table;
     }
-    
+
     protected Table createMarketoActivityType() {
         Table table = new Table();
         table.setName("ActivityType");
@@ -88,29 +85,29 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         id.setName("id");
         id.setDisplayName("Id");
         id.setLogicalDataType("String");
-        
+
         Attribute name = new Attribute();
         name.setName("name");
         name.setDisplayName("Name");
         name.setLogicalDataType("String");
-        
+
         Attribute description = new Attribute();
         description.setName("description");
         description.setDisplayName("Description");
         description.setLogicalDataType("String");
-        
+
         Attribute attributes = new Attribute();
         attributes.setName("attributes");
         attributes.setDisplayName("Attributes");
         attributes.setLogicalDataType("String");
-        
+
         table.addAttribute(id);
         table.addAttribute(name);
         table.addAttribute(description);
         table.addAttribute(attributes);
         return table;
     }
-    
+
     protected Table createMarketoLead() {
         Table table = new Table();
         table.setName("Lead");
@@ -206,16 +203,18 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             attr.setName(field.getName());
             file.addAttribute(attr);
         }
-        
-       return file;
+
+        return file;
     }
 
-    protected void verifyAllDataNotNullWithNumRows(Configuration config, String targetDir, int expectedNumRows) throws Exception {
+    protected void verifyAllDataNotNullWithNumRows(Configuration config, String targetDir, int expectedNumRows)
+            throws Exception {
         List<String> avroFiles = HdfsUtils.getFilesByGlob(config, String.format("%s/*.avro", targetDir));
 
         int numRows = 0;
         for (String avroFile : avroFiles) {
-            try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config, new Path(avroFile))) {
+            try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config, new org.apache.hadoop.fs.Path(
+                    avroFile))) {
                 while (reader.hasNext()) {
                     GenericRecord record = reader.next();
                     Schema schema = record.getSchema();

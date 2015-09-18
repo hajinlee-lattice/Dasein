@@ -17,21 +17,28 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
+import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
@@ -44,15 +51,35 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private CrmCredentialZKService crmCredentialZKService;
+
     protected static final Log log = LogFactory.getLog(EaiServiceImplTestNG.class);
 
-    private String customer = "Eai-" + System.currentTimeMillis();
+    private String customer = "Marketo-Eai";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/Activity");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/ActivityType");
+        BatonService baton = new BatonServiceImpl();
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
+        spaceInfo.properties = new CustomerSpaceProperties();
+        spaceInfo.properties.displayName = "";
+        spaceInfo.properties.description = "";
+        spaceInfo.featureFlags = "";
+        baton.createTenant(customer, customer, "defaultspaceId", spaceInfo);
+        crmCredentialZKService.removeCredentials("sfdc", customer, true);
+        CrmCredential crmCredential = new CrmCredential();
+        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
+        crmCredential.setPassword("Happy2010oIogZVEFGbL3n0qiAp6F66TC");
+        crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
+    }
+
+    @AfterClass(groups = "functional")
+    private void cleanUp() {
+        crmCredentialZKService.removeCredentials("sfdc", customer, true);
     }
 
     @Test(groups = { "functional", "functional.production" }, enabled = true)
@@ -63,7 +90,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         props.put(MarketoImportProperty.HOST, "976-KKC-431.mktorest.com");
         props.put(MarketoImportProperty.CLIENTID, "c98abab9-c62d-4723-8fd4-90ad5b0056f3");
         props.put(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
-        
+
         List<Table> tables = new ArrayList<>();
         Table activityType = createMarketoActivityType();
         Table lead = createMarketoLead();
@@ -71,7 +98,7 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         tables.add(activityType);
         tables.add(lead);
         tables.add(activity);
-        
+
         marketoImportConfig.setSourceType(SourceType.MARKETO);
         marketoImportConfig.setTables(tables);
         marketoImportConfig.setFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
@@ -87,36 +114,39 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivity = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity", new HdfsFilenameFilter() {
+        List<String> filesForActivity = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity",
+                new HdfsFilenameFilter() {
 
-            @Override
-            public boolean accept(String file) {
-                return file.endsWith(".avro");
-            }
+                    @Override
+                    public boolean accept(String file) {
+                        return file.endsWith(".avro");
+                    }
 
-        });
+                });
         assertEquals(filesForActivity.size(), 1);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivityType = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/ActivityType", new HdfsFilenameFilter() {
+        List<String> filesForActivityType = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/ActivityType",
+                new HdfsFilenameFilter() {
 
-            @Override
-            public boolean accept(String file) {
-                return file.endsWith(".avro");
-            }
+                    @Override
+                    public boolean accept(String file) {
+                        return file.endsWith(".avro");
+                    }
 
-        });
+                });
         assertEquals(filesForActivityType.size(), 1);
     }
-    
+
     @Test(groups = { "functional" }, dataProvider = "fileProvider", enabled = false)
-    public void extractAndImportForFile(String fileName, boolean verifyDataAndRowCount, int expectedNumRows) throws Exception {
+    public void extractAndImportForFile(String fileName, boolean verifyDataAndRowCount, int expectedNumRows)
+            throws Exception {
         URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/exposed/service/impl");
         URL metadataUrl = ClassLoader.getSystemResource( //
                 String.format("com/latticeengines/eai/exposed/service/impl/%sMetadata.json", fileName));
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         Table file = createFile(dataUrl, fileName);
         fileImportConfig.setSourceType(SourceType.FILE);
-        fileImportConfig.setTables(Arrays.<Table>asList(new Table[] { file }));
+        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { file }));
         Map<String, String> props = new HashMap<>();
         props.put(ImportProperty.DATAFILEDIR, dataUrl.getPath());
         props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
@@ -134,15 +164,13 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
             verifyAllDataNotNullWithNumRows(yarnConfiguration, targetPath, expectedNumRows);
         }
     }
-    
+
     @DataProvider(name = "fileProvider")
     public Object[][] getFiles() {
-        return new Object[][] {
-                { "ConcurSample", false, -1 }, //
+        return new Object[][] { { "ConcurSample", false, -1 }, //
                 { "file1", true, 4 }, //
                 { "file2", true, 3 }, //
-                { "file3", true, 4 }
-        };
+                { "file3", true, 4 } };
     }
-    
+
 }

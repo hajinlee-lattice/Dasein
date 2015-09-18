@@ -8,6 +8,7 @@
         <component-name>remote</component-name>
         <le.common.version>2.0.9-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.9-SNAPSHOT</le.domain.version>
+        <le.camille.version>2.0.9-SNAPSHOT</le.camille.version>
     </properties>
 
     <parent>
@@ -37,6 +38,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
+            <classifier>intf</classifier>
         </dependency>
     </dependencies>
 

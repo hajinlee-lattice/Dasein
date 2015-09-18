@@ -15,9 +15,9 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.CrmConstants;
 import com.latticeengines.pls.service.CrmCredentialService;
 
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
@@ -117,7 +117,6 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "verifyCredential")
     public void getCredential() {
-        CrmCredentialService crmService = new CrmCredentialServiceImpl();
         CrmCredential newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
         Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
@@ -131,7 +130,6 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "getCredential")
     public void removeCredentials() {
-        CrmCredentialService crmService = new CrmCredentialServiceImpl();
         crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, true);
         crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, false);
         crmService.removeCredentials(CrmConstants.CRM_MARKETO, fullId, true);

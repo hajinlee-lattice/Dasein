@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-eai</artifactId>
@@ -14,6 +15,7 @@
         <le.domain.version>2.0.9-SNAPSHOT</le.domain.version>
         <le.dataplatform.version>2.0.9-SNAPSHOT</le.dataplatform.version>
         <le.scheduler.version>2.0.9-SNAPSHOT</le.scheduler.version>
+        <le.baton.version>2.0.9-SNAPSHOT</le.baton.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <parquet.avro.version>1.4.3</parquet.avro.version>
         <avro.version>1.7.7</avro.version>
@@ -212,6 +214,26 @@
             <version>${le.dataplatform.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-baton</artifactId>
+            <version>${le.baton.version}</version>
+            <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -552,6 +574,5 @@
             <version>4.0.0.RELEASE</version>
         </dependency>
     </dependencies>
-
 </project>
 

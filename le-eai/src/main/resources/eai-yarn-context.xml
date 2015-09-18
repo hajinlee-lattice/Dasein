@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-        xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
-        xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
-        xmlns:security="http://www.springframework.org/schema/security"
-        xmlns:util="http://www.springframework.org/schema/util"
-        xmlns:camel="http://camel.apache.org/schema/spring"
-        xsi:schemaLocation="http://www.springframework.org/schema/beans
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:security="http://www.springframework.org/schema/security"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:camel="http://camel.apache.org/schema/spring"
+    xmlns:yarn-int="http://www.springframework.org/schema/yarn/integration"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
       http://www.springframework.org/schema/aop
       http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
@@ -20,19 +20,16 @@
       http://www.springframework.org/schema/security/spring-security-4.0.xsd
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd
+      http://www.springframework.org/schema/yarn/integration http://www.springframework.org/schema/yarn/integration/spring-yarn-integration-2.0.xsd
       http://camel.apache.org/schema/spring
       http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-    <context:component-scan base-package="com.latticeengines.eai.routes"/>
-    <context:component-scan base-package="com.latticeengines.eai.service"/>
-    <context:component-scan base-package="com.latticeengines.eai.yarn"/>
-    
-    <camel:camelContext id="eai">
-        <camel:package>com.latticeengines.eai.routes</camel:package>
-    </camel:camelContext>
+    <context:component-scan base-package="com.latticeengines.eai.service" />
+    <context:component-scan base-package="com.latticeengines.eai.yarn" />
+    <context:component-scan base-package="com.latticeengines.eai.components" />
+    <context:component-scan base-package="com.latticeengines.remote.exposed.service" />
 
-    <import resource="classpath:eai-salesforce-context.xml"/>
-    <import resource="classpath:eai-marketo-context.xml"/>
-    <import resource="classpath:eai-eloqua-context.xml"/>
-    
+    <import resource="classpath:eai-marketo-context.xml" />
+    <import resource="classpath:eai-eloqua-context.xml" />
+
 </beans>

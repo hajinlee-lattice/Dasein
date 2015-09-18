@@ -7,10 +7,10 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.camel.ProducerTemplate;
+import org.apache.camel.CamelContext;
+import org.apache.camel.spring.SpringCamelContext;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -23,35 +23,40 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
+import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.service.ImportService;
 
-@ContextConfiguration(locations = { "classpath:test-eai-context.xml", "classpath:eai-yarn-context.xml" })
 public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private ImportService marketoImportService;
-    
-    @Autowired
-    private ProducerTemplate producerTemplate;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     private SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
-    
+
     @Autowired
     private ImportContext importContext;
-    
+
+    @Autowired
+    private MarketoRouteConfig marketoRouteConfig;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/Activity");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/ActivityType");
+
+        CamelContext camelContext = new SpringCamelContext(applicationContext);
+        camelContext.addRoutes(marketoRouteConfig);
+        camelContext.start();
+
         importContext.setProperty(MarketoImportProperty.HOST, "976-KKC-431.mktorest.com");
         importContext.setProperty(MarketoImportProperty.CLIENTID, "c98abab9-c62d-4723-8fd4-90ad5b0056f3");
         importContext.setProperty(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
-        importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, producerTemplate);
+        importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         importContext.setProperty(ImportProperty.TARGETPATH, "/tmp");
-        
+
         List<Table> tables = new ArrayList<>();
         Table activityType = createMarketoActivityType();
         Table lead = createMarketoLead();
@@ -59,15 +64,15 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         tables.add(activityType);
         tables.add(lead);
         tables.add(activity);
-        
+
         marketoImportConfig.setTables(tables);
         marketoImportConfig.setFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
     }
-    
+
     @Test(groups = "functional", enabled = true)
     public void importMetadata() {
         List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, importContext);
-        
+
         for (Table table : tables) {
             for (Attribute attribute : table.getAttributes()) {
                 assertNotNull(attribute.getPhysicalDataType());
@@ -81,24 +86,26 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         Thread.sleep(10000L);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivity = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity", new HdfsFilenameFilter() {
+        List<String> filesForActivity = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity",
+                new HdfsFilenameFilter() {
 
-            @Override
-            public boolean accept(String file) {
-                return file.endsWith(".avro");
-            }
-            
-        });
+                    @Override
+                    public boolean accept(String file) {
+                        return file.endsWith(".avro");
+                    }
+
+                });
         assertEquals(filesForActivity.size(), 1);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivityType = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/ActivityType", new HdfsFilenameFilter() {
+        List<String> filesForActivityType = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/ActivityType",
+                new HdfsFilenameFilter() {
 
-            @Override
-            public boolean accept(String file) {
-                return file.endsWith(".avro");
-            }
-            
-        });
+                    @Override
+                    public boolean accept(String file) {
+                        return file.endsWith(".avro");
+                    }
+
+                });
         assertEquals(filesForActivityType.size(), 1);
     }
 

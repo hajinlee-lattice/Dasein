@@ -4,9 +4,11 @@ import org.apache.camel.Processor;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.eai.routes.DataContainerToHdfsProcessor;
 
+@Component("marketoRouteConfig")
 public class MarketoRouteConfig extends SpringRouteBuilder {
     
     @Value("${eai.max.redeliveries}")

@@ -4,7 +4,9 @@ import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component("salesforceRouteConfig")
 public class SalesforceRouteConfig extends SpringRouteBuilder {
 
     @SuppressWarnings("unused")
@@ -15,7 +17,6 @@ public class SalesforceRouteConfig extends SpringRouteBuilder {
 
     @Value("${eai.backoff.multiplier}")
     private int backoffMultiplier;
-
 
     public SalesforceRouteConfig() {
     }
