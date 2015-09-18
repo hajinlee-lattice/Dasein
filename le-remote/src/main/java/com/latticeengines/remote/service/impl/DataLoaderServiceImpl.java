@@ -342,7 +342,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     @Override
     @RestApiCall
     public GetSpecResult getSpecDetails(GetSpecRequest request, String dlUrl) {
-    	try {
+        try {
             String response = callDLRestService(dlUrl, GET_SPEC_DETAILS, request);
             return JsonUtils.deserialize(response, GetSpecResult.class);
         } catch (IOException ex) {
@@ -353,7 +353,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     @Override
     @RestApiCall
     public GetQueryMetaDataColumnsResponse getQueryMetadataColumns(GetQueryMetaDataColumnsRequest request, String dlUrl) {
-    	try {
+        try {
             String response = callDLRestService(dlUrl, GET_QUERY_METADATA_COLUMNS, request);
             return JsonUtils.deserialize(response, GetQueryMetaDataColumnsResponse.class);
         } catch (IOException ex) {
