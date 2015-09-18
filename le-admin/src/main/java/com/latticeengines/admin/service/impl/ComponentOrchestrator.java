@@ -127,9 +127,10 @@ public class ComponentOrchestrator {
                     BootstrapState state;
                     do {
                         state = batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId, component.getName());
-                        numOfRetries--;
-                        log.info(String.format("Bootstrap status of [%s] is %s, %d out of %d retries remained.",
-                                component.getName(), state.state.toString(), numOfRetries, NUM_RETRIES));
+                        if (numOfRetries-- % 10 == 0) {
+                            log.info(String.format("Bootstrap status of [%s] is %s, %d out of %d retries remained.",
+                                    component.getName(), state.state.toString(), numOfRetries, NUM_RETRIES));
+                        }
                         try {
                             Thread.sleep(WAIT_INTERVAL);
                         } catch (InterruptedException e) {
