@@ -34,7 +34,7 @@ public class MatchCommandResource {
     @ResponseBody
     @ApiOperation(value = "Get status of match command")
     public Commands createMatchCommand(@RequestBody CreateCommandRequest request,
-                                      @RequestParam(value="matchClient", required=false) String clientName) {
+                                      @RequestParam(value="matchClient", required=false, defaultValue = "PD130") String clientName) {
         MatchClient client = MatchClient.valueOf(clientName);
         MatchClientContextHolder.setMatchClient(client);
         return matchCommandService.createMatchCommand(request);
