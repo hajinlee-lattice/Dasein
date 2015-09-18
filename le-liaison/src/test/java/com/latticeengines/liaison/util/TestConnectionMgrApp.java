@@ -1,7 +1,7 @@
 package com.latticeengines.liaison.util;
 
 
-import com.latticeengines.liaison.service.impl.ConnectionMgrVDBImpl;
+import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import com.latticeengines.liaison.exposed.service.Query;
-import com.latticeengines.liaison.service.impl.QueryVDBImpl;
 import com.latticeengines.liaison.exposed.service.QueryColumn;
+import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
 
-public class TestConnectionMgrVDBImplApp {
+public class TestConnectionMgrApp {
 
 	public static void main(String[] args) {
 		
@@ -22,7 +22,8 @@ public class TestConnectionMgrVDBImplApp {
 		String queryName = "Q_PLS_Modeling";
 		//String queryName = "Q_Timestamp_PreScoringIncr";
 		
-		ConnectionMgrVDBImpl conn_mgr = new ConnectionMgrVDBImpl( tenantName, dlURL );
+		ConnectionMgr conn_mgr = ConnectionMgrFactory.getConnectionMgr( "visiDB", tenantName, dlURL );
+		// ConnectionMgr conn_mgr = new ConnectionMgrVDBImpl( tenantName, dlURL );
 		
 		try {
 			System.out.print( "Initializing..." );

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
@@ -21,13 +21,15 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
 import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.Query;
 import com.latticeengines.liaison.service.impl.QueryVDBImpl;
-import com.latticeengines.remote.service.impl.DataLoaderServiceImpl;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 public class ConnectionMgrVDBImpl implements ConnectionMgr {
 	
 	private final String tenantName;
 	private final String dlURL;
-	private static final DataLoaderServiceImpl dlsvc = new DataLoaderServiceImpl();
+	
+	@Autowired
+	private DataLoaderService dataLoaderService;
 
 	public ConnectionMgrVDBImpl( String tenantName, String dlURL ) {
 		this.tenantName = tenantName;
@@ -43,13 +45,8 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
 		
 		final Set<String> allowedExtensions = new HashSet<String>( Arrays.asList("Category","DataType") );
 		
-		String GET_QUERY_METADATA_COLUMNS = "/GetQueryMetadataColumns";
-		String payload = JsonUtils.serialize(new GetQueryMetaDataColumnsRequest(tenantName,queryName));
+		GetQueryMetaDataColumnsResponse getMetadataResponse = dataLoaderService.getQueryMetadataColumns( new GetQueryMetaDataColumnsRequest(tenantName,queryName), dlURL );
 		
-		String response = dlsvc.callDLRestService( dlURL, GET_QUERY_METADATA_COLUMNS, payload );
-		
-		GetQueryMetaDataColumnsResponse getMetadataResponse = JsonUtils.deserialize(response,GetQueryMetaDataColumnsResponse.class);
-
         if( getMetadataResponse.getStatus() != 3 ) {
         	throw new RuntimeException( String.format("Query \"%s\" not found for tenant \"%s\" at DataLoader URL %s",queryName,tenantName,dlURL) );
         }
@@ -143,14 +140,9 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
 	
 	public String getSpec( String specName ) throws IOException, RuntimeException {
 		
-		String GET_SPEC_DETAILS = "/GetSpecDetails";
-		String payload = JsonUtils.serialize(new GetSpecRequest(tenantName,specName));
+		GetSpecResult getSpecResult = dataLoaderService.getSpecDetails( new GetSpecRequest(tenantName,specName), dlURL );
 		
-		String response = dlsvc.callDLRestService( dlURL, GET_SPEC_DETAILS, payload );
-		
-		GetSpecResult getSpecResult = JsonUtils.deserialize(response,GetSpecResult.class);
-
-        if( !getSpecResult.getSuccess().equalsIgnoreCase("true") ) {
+		if( !getSpecResult.getSuccess().equalsIgnoreCase("true") ) {
         	if( getSpecResult.getErrorMessage().equals( String.format("Tenant \'%s\' does not exist.",tenantName) ) ) {
         		throw new RuntimeException( String.format("Tenant \"%s\" not found at DataLoader URL %s",tenantName,dlURL) );
         	}
@@ -162,17 +154,13 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
 	
 	public void setSpec( String objName, String specLatticeNamedElements ) throws IOException, RuntimeException {
 		
-		String INSTALL_VISIDB_STRUC_SYNC = "/InstallVisiDBStructureFile_Sync";
 		StringBuilder vfile = new StringBuilder(100000);
 		
 		vfile.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VisiDBStructures appName=\"\">\n  <workspaces>\n    <workspace name=\"Workspace\">\n      <specs>\n");
 		vfile.append(specLatticeNamedElements);
 		vfile.append("\n      </specs>\n    </workspace>\n  </workspaces>\n</VisiDBStructures>");
 		
-		String payload = JsonUtils.serialize(new InstallTemplateRequest(tenantName,vfile.toString()));
-		
-		String response = dlsvc.callDLRestService( dlURL, INSTALL_VISIDB_STRUC_SYNC, payload );
-		InstallResult getInstallResult = JsonUtils.deserialize( response, InstallResult.class );
+		InstallResult getInstallResult = dataLoaderService.installVisiDBStructureFile( new InstallTemplateRequest(tenantName,vfile.toString()), dlURL );
 		
 		if( getInstallResult.getStatus() != 3 ) {
         	throw new RuntimeException( String.format("Failed to set specs for tenant \"%s\" at DataLoader URL %s",tenantName,dlURL) );
