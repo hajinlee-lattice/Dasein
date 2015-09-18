@@ -6,7 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum MatchCommandStatus {
 
@@ -33,14 +34,13 @@ public enum MatchCommandStatus {
 
     MatchCommandStatus(String status) { this.status = status.toUpperCase(); }
 
-    @JsonProperty("Status")
     public String getStatus() { return this.status; }
 
-    public static MatchCommandStatus fromStatus(String message) {
-        if (statusMap.containsKey(message.toUpperCase())) {
-            return statusMap.get(message.toUpperCase());
+    public static MatchCommandStatus fromStatus(String status) {
+        if (statusMap.containsKey(status.toUpperCase())) {
+            return statusMap.get(status.toUpperCase());
         } else {
-            log.warn("Unknown PropData match status " + message);
+            log.warn("Unknown PropData match status " + status);
             return MatchCommandStatus.UNKNOWN;
         }
     }
