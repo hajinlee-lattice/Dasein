@@ -20,12 +20,12 @@ public class CreateCommandRequest {
         this.sourceTable = sourceTable;
     }
 
-    @JsonProperty("DestTable")
+    @JsonProperty("DestTables")
     public String getDestTables() {
         return destTables;
     }
 
-    @JsonProperty("DestTable")
+    @JsonProperty("DestTables")
     public void setDestTables(String destTables) {
         this.destTables = destTables;
     }
