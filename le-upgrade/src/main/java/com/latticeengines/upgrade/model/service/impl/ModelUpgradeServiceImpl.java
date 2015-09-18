@@ -238,9 +238,9 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
         if (in1_4) {
             originalUuids.add(uuid);
-            System.out.print("Copying the whole model folder ...");
-            yarnManager.moveModelFolderFromSingularToTupleId(customer, uuid);
-            System.out.println("OK");
+            //System.out.print("Copying the whole model folder ...");
+            //yarnManager.moveModelFolderFromSingularToTupleId(customer, uuid);
+            //System.out.println("OK");
         }
 
         boolean toBeDeleted = exists && !in1_4;
