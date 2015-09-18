@@ -1,14 +1,12 @@
 package com.latticeengines.domain.exposed.eai;
 
-public class ImportProperty {
+import com.latticeengines.domain.exposed.BaseProperty;
+
+public class ImportProperty extends BaseProperty {
 
     public static final String TABLE = "table";
-    public static final String HADOOPCONFIG = "hadoopConfig";
     public static final String EAICONFIG = "eaiConfig";
     public static final String IMPORTCTX = "importContext";
-    public static final String TARGETPATH = "targetPath";
-    public static final String CUSTOMER = "customer";
-    public static final String APPID = "appId";
     public static final String METADATAFILE = "metadataFile";
     public static final String DATAFILEDIR = "dataFile";
     public static final String PRODUCERTEMPLATE = "producerTemplate";

@@ -209,8 +209,14 @@ public enum LedpCode {
     LEDP_26009("Table has no name."), //
     LEDP_26010("Extract for table {0} has no name."), //
     LEDP_26011("Extract {0} for table {1} has no path."), //
-    LEDP_26012("Table {0} has no extracts.");
-
+    LEDP_26012("Table {0} has no extracts."), //
+    
+    // le-swlib
+    LEDP_27000("Software library cannot be initialized."), //
+    LEDP_27001("Cannot copy local file {0} to hdfs path {1}."), //
+    LEDP_27002("Software package {0} already exists."), //
+    LEDP_27003("JSON file {0} not a software package.");
+    
     private String message;
 
     LedpCode(String message) {
