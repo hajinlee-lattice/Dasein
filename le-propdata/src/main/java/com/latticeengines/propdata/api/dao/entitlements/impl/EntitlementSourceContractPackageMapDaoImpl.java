@@ -1,14 +1,16 @@
-package com.latticeengines.propdata.api.dao.impl;
+package com.latticeengines.propdata.api.dao.entitlements.impl;
 
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourceContractPackageMap;
-import com.latticeengines.propdata.api.dao.EntitlementSourceContractPackageMapDao;
+import com.latticeengines.propdata.api.dao.entitlements.EntitlementSourceContractPackageMapDao;
 
+@Component
 public class EntitlementSourceContractPackageMapDaoImpl extends
         BaseDaoImpl<EntitlementSourceContractPackageMap> implements
         EntitlementSourceContractPackageMapDao {
@@ -18,26 +20,31 @@ public class EntitlementSourceContractPackageMapDaoImpl extends
         return EntitlementSourceContractPackageMap.class;
     }
 
-    public EntitlementSourceContractPackageMapDaoImpl() {
-        super();
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public List<EntitlementSourceContractPackageMap> findByPackageId(Long packageId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<EntitlementSourceContractPackageMap> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where SourcePackage_ID = :packageId", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setLong("packageId", packageId);
+        return query.list();
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public List<EntitlementSourceContractPackageMap> findByContractID(
-            String contract_ID) {
+    public List<EntitlementSourceContractPackageMap> findByContractId(String contractId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<EntitlementSourceContractPackageMap> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where Contract_ID = :contract_ID", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where Contract_ID = :contractId", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("contract_ID", contract_ID);
-        List list = query.list();
-        return list;
+        query.setString("contractId", contractId);
+        return query.list();
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public EntitlementSourceContractPackageMap findByContent(Long packageID,
+    public EntitlementSourceContractPackageMap findByIds(Long packageID,
             String externalID) {
         Session session = getSessionFactory().getCurrentSession();
         Class<EntitlementSourceContractPackageMap> entityClz = getEntityClass();

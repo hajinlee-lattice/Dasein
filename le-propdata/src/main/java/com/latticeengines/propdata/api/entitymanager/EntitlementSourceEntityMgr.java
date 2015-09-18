@@ -2,29 +2,18 @@ package com.latticeengines.propdata.api.entitymanager;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.propdata.DomainFeatureTable;
+import com.latticeengines.domain.exposed.propdata.EntitlementSourceContractPackageMap;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackageMap;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackages;
 
-public interface EntitlementSourceEntityMgr {
+public interface EntitlementSourceEntityMgr extends EntitlementEntityMgr<EntitlementSourcePackages,
+        EntitlementSourcePackageMap, EntitlementSourceContractPackageMap> {
 
-    EntitlementSourcePackages getSourcePackage(Long pid);
-    
-    List<EntitlementSourcePackages> getAllSourcePackages();
-    
-    List<EntitlementSourcePackages> getEntitledSourcePackages(String Contract_ID);
-    
-    List<EntitlementSourcePackageMap> getPackageSources(Long packageID);
-    
-    EntitlementSourcePackageMap getSourceFromPackage(Long packageID,String lookupID);
+    List<EntitlementSourcePackageMap> getSourceEntitlementContents(Long packageId);
 
-    Long createSourcePackage(EntitlementSourcePackages entitlementPackage);
-    
-    Long assignSourceToPackage(Long packageID, String lookupID);
-    
-    void removeSourceFromPackage(EntitlementSourcePackageMap sourcePackageMap);
-    
-    Long assignCustomerToSourcePackage(Long packageID,String externalID);
-    
-    void removeCustomerFromSourcePackage(Long packageID,String externalID);
-    
+    DomainFeatureTable getDomainFeatureTable(String lookupId);
+
+    EntitlementSourcePackageMap getSourcePackageMag(Long packageId, String lookupId);
+
 }

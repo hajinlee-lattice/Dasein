@@ -1,21 +1,19 @@
-package com.latticeengines.propdata.api.dao.impl;
+package com.latticeengines.propdata.api.dao.entitlements.impl;
 
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackageMap;
-import com.latticeengines.propdata.api.dao.EntitlementSourceColumnsPackageMapDao;
+import com.latticeengines.propdata.api.dao.entitlements.EntitlementSourceColumnsPackageMapDao;
 
+@Component
 public class EntitlementSourceColumnsPackageMapDaoImpl extends
         BaseDaoImpl<EntitlementSourceColumnsPackageMap> implements
         EntitlementSourceColumnsPackageMapDao {
-
-    public EntitlementSourceColumnsPackageMapDaoImpl() {
-        super();
-    }
 
     @Override
     protected Class<EntitlementSourceColumnsPackageMap> getEntityClass() {
@@ -24,7 +22,7 @@ public class EntitlementSourceColumnsPackageMapDaoImpl extends
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public List<EntitlementSourceColumnsPackageMap> findByPackageID(
+    public List<EntitlementSourceColumnsPackageMap> getByPackageId(
             Long packageID) {
         Session session = getSessionFactory().getCurrentSession();
         Class<EntitlementSourceColumnsPackageMap> entityClz = getEntityClass();

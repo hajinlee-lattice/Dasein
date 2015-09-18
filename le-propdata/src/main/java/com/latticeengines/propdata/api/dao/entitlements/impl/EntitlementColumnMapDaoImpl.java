@@ -1,14 +1,16 @@
-package com.latticeengines.propdata.api.dao.impl;
+package com.latticeengines.propdata.api.dao.entitlements.impl;
 
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.propdata.EntitlementColumnMap;
-import com.latticeengines.propdata.api.dao.EntitlementColumnMapDao;
+import com.latticeengines.propdata.api.dao.entitlements.EntitlementColumnMapDao;
 
+@Component("entitlementColumnMapDao")
 public class EntitlementColumnMapDaoImpl extends
         BaseDaoImpl<EntitlementColumnMap> implements EntitlementColumnMapDao {
 
@@ -23,14 +25,13 @@ public class EntitlementColumnMapDaoImpl extends
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public List<EntitlementColumnMap> findByPackageID(Long packageID){
+    public List<EntitlementColumnMap> getByPackageId(Long packageID){
         Session session = getSessionFactory().getCurrentSession();
         Class<EntitlementColumnMap> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Package_ID = :packageID", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("packageID", packageID);
-        List list = query.list();
-        return list;
+        return query.list();
     }
 
     @SuppressWarnings("rawtypes")

@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "EntitlementSourcePackageMap")
-public class EntitlementSourcePackageMap implements HasPid{
+public class EntitlementSourcePackageMap implements HasPid, HasPackageId{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -170,4 +170,13 @@ public class EntitlementSourcePackageMap implements HasPid{
         this.EntitlementSourcePackageMap_ID = pid;
     }
 
+    @Override
+    @JsonIgnore
+    public Long getPackageId() { return getSourcePackage_ID(); }
+
+    @Override
+    @JsonIgnore
+    public void setPackageId(Long packageId) {
+        setSourcePackage_ID(packageId);
+    }
 }

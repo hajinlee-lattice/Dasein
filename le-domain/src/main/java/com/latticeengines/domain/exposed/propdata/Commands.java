@@ -170,12 +170,12 @@ public class Commands implements HasPid {
         return isDownloading;
     }
 
-    @JsonProperty("NumRetries")
+    @JsonProperty("IsDownloading")
     public void setIsDownloading(Boolean isDownloading) {
         this.isDownloading = isDownloading;
     }
 
-    @JsonProperty("CreateTime")
+    @JsonProperty("NumRetries")
     public Integer getNumRetries() {
         return numRetries;
     }

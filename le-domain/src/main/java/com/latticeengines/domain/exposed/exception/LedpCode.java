@@ -193,6 +193,8 @@ public enum LedpCode {
     // le-propdata
     LEDP_25000("Can not create new derived entitlement package {0}."),
     LEDP_25001("Derived entitlement resource error."), //
+    LEDP_25002("Source entitlement resource error."), //
+    LEDP_25003("Source column entitlement resource error."), //
     
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

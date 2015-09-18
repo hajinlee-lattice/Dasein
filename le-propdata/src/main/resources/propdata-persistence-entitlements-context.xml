@@ -41,31 +41,32 @@
 	<bean id="domainFeatureTableDao" class="com.latticeengines.propdata.api.dao.impl.DomainFeatureTableDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementColumnMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementColumnMapDaoImpl">
+	<bean id="entitlementColumnMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementColumnMapDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementContractPackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementContractPackageMapDaoImpl">
+	<bean id="entitlementContractPackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementContractPackageMapDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementPackagesDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementPackagesDaoImpl">
+	<bean id="entitlementPackagesDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementPackagesDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementSourceColumnsContractPackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourceColumnsContractPackageMapDaoImpl">
+	<bean id="entitlementSourceColumnsContractPackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsContractPackageMapDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementSourceColumnsPackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourceColumnsPackageMapDaoImpl">
+	<bean id="entitlementSourceColumnsPackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsPackageMapDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementSourceColumnsPackagesDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourceColumnsPackagesDaoImpl">
+	<bean id="entitlementSourceColumnsPackagesDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsPackagesDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementSourceContractPackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourceContractPackageMapDaoImpl">
+	<bean id="entitlementSourceContractPackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceContractPackageMapDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementSourcePackageMapDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourcePackageMapDaoImpl">
+	<bean id="entitlementSourcePackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourcePackageMapDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
-	<bean id="entitlementSourcePackagesDao" class="com.latticeengines.propdata.api.dao.impl.EntitlementSourcePackagesDaoImpl">
+	<bean id="entitlementSourcePackagesDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourcePackagesDaoImpl">
 		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
 	</bean>
+
 </beans>

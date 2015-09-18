@@ -30,6 +30,9 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
     @Value("${propdata.test.match.client}")
     protected String testMatchClientName;
 
+    @Value("${propdata.test.env}")
+    protected String testEnv;
+
     protected static <T> T sendHttpDeleteForObject(RestTemplate restTemplate, String url, Class<T> responseType) {
         ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.DELETE, jsonRequestEntity(""), responseType);
         return response.getBody();

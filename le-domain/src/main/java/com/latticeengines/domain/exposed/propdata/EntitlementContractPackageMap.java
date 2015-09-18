@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,6 +18,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,32 +32,33 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "EntitlementContractPackageMap")
-public class EntitlementContractPackageMap  implements HasPid{
+public class EntitlementContractPackageMap  implements HasPid, HasPackageId, HasContractId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "EntitlementContractPackageMap_ID", unique = true, nullable = false)
     private Long EntitlementContractPackageMap_ID;
-    
+
     @Column(name = "Package_ID", nullable = false, insertable = false, updatable = false)
     private Long Package_ID;
-    
+
     @Column(name = "Contract_ID", nullable = false)
     private String Contract_ID;
-    
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "Expiration_Date", nullable = true)
     private Date Expiration_Date;
-    
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "Last_Modification_Date", nullable = false)
     private Date Last_Modification_Date;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
+
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name="Package_ID")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private EntitlementPackages entitlementPackage;
-    
+
     public EntitlementContractPackageMap() {
         super();
     }
@@ -78,7 +83,7 @@ public class EntitlementContractPackageMap  implements HasPid{
     public void setPackage_ID(Long package_ID) {
         Package_ID = package_ID;
     }
-    
+
     @JsonProperty("Contract_ID")
     public String getContract_ID() {
         return Contract_ID;
@@ -173,6 +178,24 @@ public class EntitlementContractPackageMap  implements HasPid{
     @JsonIgnore
     public void setPid(Long pid) {
         this.EntitlementContractPackageMap_ID = pid;
-        
     }
+
+    @Override
+    @JsonIgnore
+    public Long getPackageId() { return getPackage_ID(); }
+
+    @Override
+    @JsonIgnore
+    public void setPackageId(Long packageId) {
+        setPackage_ID(packageId);
+    }
+
+    @Override
+    @JsonIgnore
+    public String getContractId() { return getContract_ID(); }
+
+    @Override
+    @JsonIgnore
+    public void setContractId(String contractId) { setContract_ID(contractId); }
+
 }

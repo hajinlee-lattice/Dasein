@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "EntitlementSourceColumnsPackages")
-public class EntitlementSourceColumnsPackages implements HasPid{
+public class EntitlementSourceColumnsPackages implements HasPid, HasPackageName{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -152,5 +152,17 @@ public class EntitlementSourceColumnsPackages implements HasPid{
     public void setPid(Long pid) {
         this.SourceColumnsPackage_ID = pid;
         
+    }
+
+    @Override
+    @JsonIgnore
+    public String getPackageName() {
+        return SourceColumnsPackageName;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setPackageName(String SourceColumnsPackageName) {
+        this.SourceColumnsPackageName = SourceColumnsPackageName;
     }
 }

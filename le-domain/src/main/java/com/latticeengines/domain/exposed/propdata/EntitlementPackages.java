@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "EntitlementPackages")
-public class EntitlementPackages  implements HasPid{
+public class EntitlementPackages  implements HasPid, HasPackageName{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
