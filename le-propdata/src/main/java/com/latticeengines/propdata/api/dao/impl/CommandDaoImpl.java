@@ -7,21 +7,21 @@ import java.sql.SQLException;
 import org.hibernate.internal.SessionImpl;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.api.dao.CommandDao;
 
-public class CommandDaoImpl extends BaseDaoImpl<Command> implements CommandDao {
+public class CommandDaoImpl extends BaseDaoImpl<Commands> implements CommandDao {
 
     public CommandDaoImpl() { super(); }
 
     @Override
-    protected Class<Command> getEntityClass() {
-        return Command.class;
+    protected Class<Commands> getEntityClass() {
+        return Commands.class;
     }
 
     @Override
-    public Command createCommandByStoredProcedure(String sourceTable, String contractExternalID, String destTables) {
+    public Commands createCommandByStoredProcedure(String sourceTable, String contractExternalID, String destTables) {
         try {
             Connection conn = ((SessionImpl) sessionFactory.getCurrentSession()).connection();
             CallableStatement cstmt = conn.prepareCall("{call dbo.MatcherClient_CreateCommand(?, ?, ?, ?)}");

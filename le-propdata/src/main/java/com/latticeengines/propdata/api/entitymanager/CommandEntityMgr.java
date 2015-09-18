@@ -2,14 +2,14 @@ package com.latticeengines.propdata.api.entitymanager;
 
 import java.util.Collection;
 
-import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 
 public interface CommandEntityMgr {
 
-    Command createCommand(String sourceTable, String contractExternalID, String destTables);
+    Commands createCommand(String sourceTable, String contractExternalID, String destTables);
 
-    Command getCommand(Long pid);
+    Commands getCommand(Long pid);
 
     MatchCommandStatus getMatchCommandStatus(Long commandID);
 

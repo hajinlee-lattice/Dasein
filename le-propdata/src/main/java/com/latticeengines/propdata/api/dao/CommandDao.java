@@ -1,12 +1,12 @@
 package com.latticeengines.propdata.api.dao;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 
-public interface CommandDao extends BaseDao<Command> {
+public interface CommandDao extends BaseDao<Commands> {
 
-    Command createCommandByStoredProcedure(String sourceTable, String contractExternalID, String destTables);
+    Commands createCommandByStoredProcedure(String sourceTable, String contractExternalID, String destTables);
 
     MatchCommandStatus getMatchCommandStatus(Long commandID);
 

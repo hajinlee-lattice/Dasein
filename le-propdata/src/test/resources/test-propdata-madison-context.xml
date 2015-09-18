@@ -5,5 +5,7 @@
   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
   <import resource="classpath:propdata-madison-context.xml"/>
+  <import resource="classpath:propdata-madison-properties-context.xml" />
+  <import resource="classpath:dataflow-context.xml" />
 
 </beans>

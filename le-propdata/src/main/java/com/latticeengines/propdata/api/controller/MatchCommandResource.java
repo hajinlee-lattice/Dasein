@@ -3,7 +3,7 @@ package com.latticeengines.propdata.api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
@@ -33,7 +33,7 @@ public class MatchCommandResource {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status of match command")
-    public Command createMatchCommand(@RequestBody CreateCommandRequest request,
+    public Commands createMatchCommand(@RequestBody CreateCommandRequest request,
                                       @RequestParam(value="matchClient", required=false) String clientName) {
         MatchClient client = MatchClient.valueOf(clientName);
         MatchClientContextHolder.setMatchClient(client);

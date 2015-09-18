@@ -13,14 +13,14 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "Commands")
-public class Command implements HasPid {
+public class Commands implements HasPid {
     @Id
     @Column(name = "CommandId", unique = true, nullable = false)
     private Long commandId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    private CommandId commandIdEntity;
+    private CommandIds commandIdsEntity;
 
     @Column(name = "CommandName", nullable = false)
     private String commandName;
@@ -59,7 +59,7 @@ public class Command implements HasPid {
     @Column(name = "ProfileID", nullable = true)
     private String profileID;
 
-    public Command() {
+    public Commands() {
         super();
     }
 
@@ -76,13 +76,13 @@ public class Command implements HasPid {
     }
 
     @JsonIgnore
-    public CommandId getCommandIdEntity() {
-        return commandIdEntity;
+    public CommandIds getCommandIdsEntity() {
+        return commandIdsEntity;
     }
 
     @JsonIgnore
-    public void setCommandIdEntity(CommandId commandIdEntity) {
-        this.commandIdEntity = commandIdEntity;
+    public void setCommandIdsEntity(CommandIds commandIdsEntity) {
+        this.commandIdsEntity = commandIdsEntity;
     }
 
     @JsonProperty("CommandName")
@@ -222,7 +222,7 @@ public class Command implements HasPid {
         if (!other.getClass().equals(this.getClass())) {
             return false;
         }
-        CommandId theOther = (CommandId) other;
+        CommandIds theOther = (CommandIds) other;
 
         return new EqualsBuilder().append(commandId, theOther.getPid())
                 .isEquals();

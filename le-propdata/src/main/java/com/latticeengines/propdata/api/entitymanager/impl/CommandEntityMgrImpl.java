@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.api.dao.CommandDao;
 import com.latticeengines.propdata.api.datasource.MatchClientRoutingDataSource;
@@ -45,14 +45,14 @@ public class CommandEntityMgrImpl implements CommandEntityMgr {
 
     @Override
     @Transactional(value = "propdata", propagation = Propagation.REQUIRED)
-    synchronized public Command createCommand(String sourceTable, String contractExternalID, String destTables) {
+    synchronized public Commands createCommand(String sourceTable, String contractExternalID, String destTables) {
         return commandDao.createCommandByStoredProcedure(sourceTable, contractExternalID, destTables);
     }
 
     @Override
     @Transactional(value = "propdata", readOnly = true)
-    public Command getCommand(Long pid) {
-        return commandDao.findByKey(Command.class, pid);
+    public Commands getCommand(Long pid) {
+        return commandDao.findByKey(Commands.class, pid);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class CommandEntityMgrImpl implements CommandEntityMgr {
     @Override
     @Transactional(value = "propdata", readOnly = true)
     public Collection<String> generatedResultTables(Long commandId) {
-        Command command = getCommand(commandId);
+        Commands command = getCommand(commandId);
         Set<String> targetTables = mangledResultTables(command);
         for (String table: targetTables) {
             if (tableExists(table)) {
@@ -78,7 +78,7 @@ public class CommandEntityMgrImpl implements CommandEntityMgr {
     @Override
     @Transactional(value = "propdata", readOnly = true)
     public boolean resultTablesAreReady(Long commandId) {
-        Command command = getCommand(commandId);
+        Commands command = getCommand(commandId);
         Set<String> targetTables = mangledResultTables(command);
         for (String table: targetTables) {
             if (!tableExists(table)) {
@@ -88,7 +88,7 @@ public class CommandEntityMgrImpl implements CommandEntityMgr {
         return true;
     }
 
-    private Set<String> mangledResultTables(Command command) {
+    private Set<String> mangledResultTables(Commands command) {
         String[] destTables = command.getDestTables().split("\\|");
         String commandName = command.getCommandName();
         Set<String> resultTables = new HashSet<>();

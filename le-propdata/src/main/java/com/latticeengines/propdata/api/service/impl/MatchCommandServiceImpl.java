@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.api.entitymanager.CommandEntityMgr;
@@ -17,7 +17,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     private CommandEntityMgr entityMgr;
 
     @Override
-    public Command createMatchCommand(CreateCommandRequest request) {
+    public Commands createMatchCommand(CreateCommandRequest request) {
         return entityMgr.createCommand(
                 request.getSourceTable(),
                 request.getContractExternalID(),
@@ -25,7 +25,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
 
     @Override
-    public Command findMatchCommandById(Long commandId) {
+    public Commands findMatchCommandById(Long commandId) {
         return entityMgr.getCommand(commandId);
     }
 

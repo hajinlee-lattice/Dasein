@@ -11,7 +11,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
@@ -43,7 +43,7 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         request.setContractExternalID(contractId);
         request.setDestTables(destTables);
         request.setSourceTable(sourceTable);
-        Command command = matchCommandService.createMatchCommand(request);
+        Commands command = matchCommandService.createMatchCommand(request);
 
         verifier.verify(command.getPid(), request);
     }
@@ -111,7 +111,7 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
     // verify methods
     // ==================================================
     private void verifyCreateCommandRequest(Long commandId, CreateCommandRequest request) {
-        Command command = matchCommandService.findMatchCommandById(commandId);
+        Commands command = matchCommandService.findMatchCommandById(commandId);
         Assert.assertEquals(command.getContractExternalID(), request.getContractExternalID());
         Assert.assertEquals(command.getDeploymentExternalID(), request.getContractExternalID());
         Assert.assertEquals(command.getCommandName(), MatchCommandType.MATCH_WITH_UNIVERSE.getCommandName());

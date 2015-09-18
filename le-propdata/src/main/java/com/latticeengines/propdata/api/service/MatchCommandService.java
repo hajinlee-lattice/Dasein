@@ -2,15 +2,15 @@ package com.latticeengines.propdata.api.service;
 
 import java.util.Collection;
 
-import com.latticeengines.domain.exposed.propdata.Command;
+import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 
 public interface MatchCommandService {
 
-    Command createMatchCommand(CreateCommandRequest request);
+    Commands createMatchCommand(CreateCommandRequest request);
 
-    Command findMatchCommandById(Long commandId);
+    Commands findMatchCommandById(Long commandId);
 
     MatchCommandStatus getMatchCommandStatus(Long commandID);
 
