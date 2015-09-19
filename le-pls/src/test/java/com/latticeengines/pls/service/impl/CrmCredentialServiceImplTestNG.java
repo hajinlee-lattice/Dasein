@@ -81,7 +81,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         // eloqua
         crmCredential = new CrmCredential();
         crmCredential.setUserName("Matt.Sable");
-        crmCredential.setPassword("Lattice1");
+        crmCredential.setPassword("Lattice2");
         crmCredential.setCompany("TechnologyPartnerLatticeEngines");
         newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_ELOQUA, fullId, null, crmCredential);
         Assert.assertNotNull(newCrmCredential);
