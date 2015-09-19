@@ -42,12 +42,14 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
         pkgVersion1.setArtifactId("le-serviceflows");
         pkgVersion1.setVersion("1.0.0");
         pkgVersion1.setModule("dataflow");
+        pkgVersion1.setInitializerClass("xyz");
 
         pkgVersion2 = new SoftwarePackage();
         pkgVersion2.setGroupId("com.latticeengines");
         pkgVersion2.setArtifactId("le-serviceflows");
         pkgVersion2.setVersion("1.0.1");
         pkgVersion2.setModule("dataflow");
+        pkgVersion2.setInitializerClass("abc");
 }
     
     @Test(groups = "functional")
