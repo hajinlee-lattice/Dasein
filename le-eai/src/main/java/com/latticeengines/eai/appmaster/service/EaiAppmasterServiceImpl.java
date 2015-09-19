@@ -10,7 +10,7 @@ public class EaiAppmasterServiceImpl extends EaiAppmasterService {
     private Exception e;
 
     @Override
-    public void handelException(Exception e) {
+    public void handleException(Exception e) {
         log.error(e);
         this.e = e;
     }

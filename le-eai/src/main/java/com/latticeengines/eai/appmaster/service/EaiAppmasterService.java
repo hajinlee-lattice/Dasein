@@ -18,6 +18,6 @@ public abstract class EaiAppmasterService extends MindAppmasterService implement
         return "Port is :" + getPort();
     }
 
-    public abstract void handelException(Exception e);
+    public abstract void handleException(Exception e);
 
 }
