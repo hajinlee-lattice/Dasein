@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class SoftwarePackageUnitTestNG {
 
     @Test(groups = "unit")
-    public void getHdfsJarPathWithoutClassifier() {
+    public void getHdfsPathWithoutClassifier() {
         SoftwarePackage pkg = new SoftwarePackage();
         pkg.setModule("dataflow");
         pkg.setGroupId("org.latticeengines");
@@ -18,7 +18,7 @@ public class SoftwarePackageUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void getHdfsJarPathWithClassifier() {
+    public void getHdfsPathWithClassifier() {
         SoftwarePackage pkg = new SoftwarePackage();
         pkg.setModule("dataflow");
         pkg.setGroupId("org.latticeengines");

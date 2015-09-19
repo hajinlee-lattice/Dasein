@@ -215,7 +215,8 @@ public enum LedpCode {
     LEDP_27000("Software library cannot be initialized."), //
     LEDP_27001("Cannot copy local file {0} to hdfs path {1}."), //
     LEDP_27002("Software package {0} already exists."), //
-    LEDP_27003("JSON file {0} not a software package.");
+    LEDP_27003("JSON file {0} not a software package."), //
+    LEDP_27004("Cannot instantiate class {0} for software library initialization.");
     
     private String message;
 

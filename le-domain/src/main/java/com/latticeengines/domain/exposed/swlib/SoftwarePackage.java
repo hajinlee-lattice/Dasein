@@ -8,9 +8,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public class SoftwarePackage implements HasName {
-
+    
     private String name;
-    private String fullyQualifiedMainClass;
+    private String initializerClassName;
     private String module;
     private String groupId;
     private String artifactId;
@@ -29,14 +29,14 @@ public class SoftwarePackage implements HasName {
         this.name = name;
     }
 
-    @JsonProperty("fq_main_class")
-    public String getFullyQualifiedMainClass() {
-        return fullyQualifiedMainClass;
+    @JsonProperty("initializer_class")
+    public String getInitializerClass() {
+        return initializerClassName;
     }
 
-    @JsonProperty("fq_main_class")
-    public void setFullyQualifiedMainClass(String fullyQualifiedMainClass) {
-        this.fullyQualifiedMainClass = fullyQualifiedMainClass;
+    @JsonProperty("initializer_class")
+    public void setInitializerClass(String initializerClassName) {
+        this.initializerClassName = initializerClassName;
     }
     
     @JsonIgnore
