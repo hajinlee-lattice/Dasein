@@ -14,8 +14,6 @@ public class DataFlowJob extends Job {
 
     private String customer;
 
-    private String targetPath;
-    
     private String dataFlowBeanName;
 
     @Column(name = "CUSTOMER")
@@ -26,16 +24,6 @@ public class DataFlowJob extends Job {
     @Column(name = "CUSTOMER")
     public void setCustomer(String customer) {
         this.customer = customer;
-    }
-
-    @Column(name = "TARGET_PATH")
-    public String getTargetPath() {
-        return targetPath;
-    }
-
-    @Column(name = "TARGET_PATH")
-    public void setTargetPath(String targetPath) {
-        this.targetPath = targetPath;
     }
 
     @Column(name = "DATAFLOW_BEAN_NAME")
