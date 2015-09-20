@@ -21,7 +21,6 @@ public class ImportConfigurationUnitTestNG {
         ImportConfiguration importConfig = new ImportConfiguration();
         importConfig.setName("Extraction-" + System.currentTimeMillis());
         importConfig.setCustomer("C1");
-        importConfig.setTargetPath("/a/b/c");
         
         SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
         marketoImportConfig.setSourceType(SourceType.MARKETO);

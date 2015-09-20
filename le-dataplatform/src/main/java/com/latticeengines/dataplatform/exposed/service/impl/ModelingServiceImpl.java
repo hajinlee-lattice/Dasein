@@ -359,6 +359,7 @@ public class ModelingServiceImpl implements ModelingService {
         // containerProperties.put(PythonContainerProperty.TABLE.name(),
         // model.getTable());
         modelingJob.setClient("pythonClient");
+        modelingJob.setCustomer(model.getCustomer());
         modelingJob.setAppMasterPropertiesObject(appMasterProperties);
         modelingJob.setContainerPropertiesObject(containerProperties);
         return modelingJob;

@@ -6,8 +6,6 @@ import java.util.List;
 import org.springframework.yarn.integration.ip.mind.MindAppmasterServiceClient;
 import org.springframework.yarn.integration.ip.mind.binding.BaseObject;
 import org.springframework.yarn.integration.ip.mind.binding.BaseResponseObject;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.am.AppmasterServiceClient;
 import org.testng.annotations.AfterClass;
@@ -16,11 +14,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
-import com.latticeengines.domain.exposed.eai.ImportContext;
-import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -62,7 +60,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    private void cleanUp() {
+    private void cleanUp() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath("Production", customer).toString());
         crmCredentialZKService.removeCredentials(customer, customer, true);
     }
 
@@ -80,27 +79,21 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         tables.add(contact);
         tables.add(contactRole);
 
-        Configuration config = new YarnConfiguration();
-        ImportContext importContext = new ImportContext(config);
-        importContext.setProperty(ImportProperty.HADOOPCONFIG, config);
-        importContext.setProperty(ImportProperty.TARGETPATH, "/tmp");
-        // importContext.setProperty(ImportProperty.PRODUCERTEMPLATE,
-        // producerTemplate);
         ImportConfiguration importConfig = new ImportConfiguration();
         SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
         salesforceConfig.setSourceType(SourceType.SALESFORCE);
         salesforceConfig.setTables(tables);
+
         importConfig.addSourceConfiguration(salesforceConfig);
         importConfig.setCustomer(customer);
-        importConfig.setTargetPath("/tmp/mytest");
-        dataExtractionService.submitExtractAndImportJob(importConfig, importContext);
+        dataExtractionService.submitExtractAndImportJob(importConfig);
         
         BaseObject request = new AppmasterServiceRequest();
         Thread.sleep(20000);
         BaseResponseObject obj = ((MindAppmasterServiceClient) appmasterServiceClient).doMindRequest(request);
         System.out.println(((AppMasterServiceResponse)obj));
 
-        Thread.sleep(60000L);
+        Thread.sleep(30000L);
     }
 
     private Table createLead() {

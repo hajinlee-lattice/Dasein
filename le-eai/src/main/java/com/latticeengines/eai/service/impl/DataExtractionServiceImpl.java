@@ -10,10 +10,12 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -36,10 +38,15 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @Autowired
     private JobService jobService;
 
+    @Autowired
+    private ImportContext importContext;
+
     @Override
     public void extractAndImport(ImportConfiguration importConfig, ImportContext context) {
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
         context.setProperty(ImportProperty.CUSTOMER, importConfig.getCustomer());
+        String targetPath = createTargetPath(importConfig.getCustomer());
+        context.setProperty(ImportProperty.TARGETPATH, targetPath);
 
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
@@ -66,20 +73,20 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     }
 
     @Override
-    public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig, ImportContext context) {
+    public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig) {
         ApplicationId appId = null;
 
         boolean hasNonEaiJobSourceType = false;
         for (SourceImportConfiguration sourceImportConfig : importConfig.getSourceConfigurations()) {
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
-            importService.validate(sourceImportConfig, context);
+            importService.validate(sourceImportConfig, importContext);
             if (!sourceImportConfig.getSourceType().willSubmitEaiJob()) {
                 hasNonEaiJobSourceType = true;
             }
         }
         if (hasNonEaiJobSourceType) {
-            extractAndImport(importConfig, context);
-            return context.getProperty(ImportProperty.APPID, ApplicationId.class);
+            extractAndImport(importConfig, importContext);
+            return importContext.getProperty(ImportProperty.APPID, ApplicationId.class);
         } else {
             EaiJob eaiJob = createJob(importConfig);
             appId = jobService.submitJob(eaiJob);
@@ -93,10 +100,9 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         EaiJob eaiJob = new EaiJob();
 
         String customer = importConfig.getCustomer();
-        String targetPath = importConfig.getTargetPath();
+
         eaiJob.setClient("eaiClient");
         eaiJob.setCustomer(customer);
-        eaiJob.setTargetPath(targetPath);
 
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
@@ -104,7 +110,6 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
         Properties containerProperties = new Properties();
         containerProperties.put(ImportProperty.EAICONFIG, importConfig.toString());
-        containerProperties.put(ImportProperty.TARGETPATH, targetPath);
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "128");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
@@ -114,5 +119,9 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         return eaiJob;
     }
 
+    public String createTargetPath(String customer){
+        Path customerSpacePath = PathBuilder.buildCustomerSpacePath("Production", customer, customer, "Production");
+        return (customerSpacePath + "/Data/Tables").toString();
+    }
 
 }

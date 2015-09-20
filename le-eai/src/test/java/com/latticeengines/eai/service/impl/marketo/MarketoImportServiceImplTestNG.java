@@ -15,7 +15,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -86,26 +85,11 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         Thread.sleep(10000L);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivity = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity",
-                new HdfsFilenameFilter() {
+        List<String> filesForActivity = getFilesFromHdfs("Activity", "/tmp"); 
 
-                    @Override
-                    public boolean accept(String file) {
-                        return file.endsWith(".avro");
-                    }
-
-                });
         assertEquals(filesForActivity.size(), 1);
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivityType = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/ActivityType",
-                new HdfsFilenameFilter() {
-
-                    @Override
-                    public boolean accept(String file) {
-                        return file.endsWith(".avro");
-                    }
-
-                });
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/"));
+        List<String> filesForActivityType = getFilesFromHdfs("ActivityType", "/tmp");
         assertEquals(filesForActivityType.size(), 1);
     }
 

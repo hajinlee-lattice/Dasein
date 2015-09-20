@@ -34,6 +34,7 @@ public class Job implements HasPid, HasId<String> {
     protected Long pid;
     protected String id;
     protected String client;
+    protected String customer;
     protected Properties appMasterProperties = new Properties();
     protected Properties containerProperties = new Properties();
 
@@ -68,6 +69,16 @@ public class Job implements HasPid, HasId<String> {
     @Transient
     public ApplicationId getAppId() {
         return ConverterUtils.toApplicationId(id);
+    }
+
+    @Column(name = "CUSTOMER")
+    public String getCustomer() {
+        return customer;
+    }
+
+    @Column(name = "CUSTOMER")
+    public void setCustomer(String customer) {
+        this.customer = customer;
     }
 
     @JsonIgnore

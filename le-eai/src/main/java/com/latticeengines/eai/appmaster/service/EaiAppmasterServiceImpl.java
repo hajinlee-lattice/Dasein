@@ -17,7 +17,7 @@ public class EaiAppmasterServiceImpl extends EaiAppmasterService {
 
     @Override
     protected MindRpcMessageHolder handleMindMessageInternal(MindRpcMessageHolder message) {
-        log.info("Send out error message !!");
+        log.info("Send out messages from Appmaster Service !!");
         if (e != null) {
             return getConversionService().convert(new AppMasterServiceResponse(e.getMessage() + ":  " + ExceptionUtils.getStackTrace(e)), MindRpcMessageHolder.class);
         }

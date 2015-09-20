@@ -9,5 +9,7 @@ public interface DataExtractionService {
 
     void extractAndImport(ImportConfiguration importConfig, ImportContext context);
 
-    ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig, ImportContext context);
+    ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig);
+
+    String createTargetPath(String customer);
 }

@@ -61,8 +61,8 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
         try {
             CamelContext camelContext = constructCamelContext(importConfig);
             camelContext.start();
+            log.info("Routes are:" + camelContext.getRoutes());
             importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
-            importContext.setProperty(ImportProperty.TARGETPATH, importConfig.getTargetPath());
             log.info("Starting extract and import.");
             dataExtractionService.extractAndImport(importConfig, importContext);
             
@@ -70,7 +70,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
                 Thread.sleep(10000L);
             }
             log.info("Finished extract and import.");
-        } catch (Exception e) {
+        }catch(Exception e){
             Thread.sleep(20000);
             eaiAppmasterService.handleException(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -89,8 +89,6 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
         CamelContext camelContext = new SpringCamelContext(applicationContext);
         camelContext.addRoutes(salesforceRouteConfig);
         camelContext.addRoutes(marketoRouteConfig);
-        log.info("Routes are:" + camelContext.getRoutes());
-        Thread.sleep(5000);
         return camelContext;
     }
 

@@ -17,21 +17,7 @@ import com.latticeengines.domain.exposed.dataplatform.Job;
 @PrimaryKeyJoinColumn(name = "JOB_PID")
 public class EaiJob extends Job {
 
-    private String customer;
-
     private List<String> tables = new ArrayList<>();
-
-    private String targetPath;
-
-    @Column(name = "CUSTOMER")
-    public String getCustomer() {
-        return customer;
-    }
-
-    @Column(name = "CUSTOMER")
-    public void setCustomer(String customer) {
-        this.customer = customer;
-    }
 
     @Transient
     public List<String> getTableList() {
@@ -50,15 +36,5 @@ public class EaiJob extends Job {
     @Column(name = "TABLES")
     public void setTables(String tablesString) {
         this.tables = StringTokenUtils.stringToList(tablesString);
-    }
-
-    @Column(name = "TARGET_PATH")
-    public String getTargetPath() {
-        return targetPath;
-    }
-
-    @Column(name = "TARGET_PATH")
-    public void setTargetPath(String targetPath) {
-        this.targetPath = targetPath;
     }
 }

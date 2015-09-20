@@ -1,5 +1,8 @@
 package com.latticeengines.eai.routes;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.camel.Exchange;
 import org.apache.hadoop.conf.Configuration;
 
@@ -14,8 +17,8 @@ public class HdfsUriGenerator {
         Configuration config = importContext.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);
         String defaultFS = config.get("fs.defaultFS").replace("hdfs://", "hdfs2://");
         String targetPath = importContext.getProperty(ImportProperty.TARGETPATH, String.class);
-        
-        return defaultFS + targetPath + "/" + table.getName() + "/" + fileName;
+        return String.format("%s%s/%s/Extracts/%s/%s", defaultFS, targetPath, table.getName(),
+                new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()), fileName).toString();
     }
 
 }

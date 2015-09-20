@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 public class ImportConfiguration implements HasName {
     private String name;
     private String customer;
-    private String targetPath;
+//    private String targetPath;
     private List<SourceImportConfiguration> sourceConfigurations = new ArrayList<>();
 
     @Override
@@ -56,14 +56,14 @@ public class ImportConfiguration implements HasName {
         this.customer = customer;
     }
 
-    @JsonProperty("target_path")
-    public String getTargetPath() {
-        return targetPath;
-    }
-
-    @JsonProperty("target_path")
-    public void setTargetPath(String targetPath) {
-        this.targetPath = targetPath;
-    }
-    
+//    @JsonProperty("target_path")
+//    public String getTargetPath() {
+//        return targetPath;
+//    }
+//
+//    @JsonProperty("target_path")
+//    public void setTargetPath(String targetPath) {
+//        this.targetPath = targetPath;
+//    }
+//    
 }

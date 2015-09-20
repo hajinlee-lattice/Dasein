@@ -47,10 +47,8 @@ public abstract class ImportService {
 
     public void validate(SourceImportConfiguration extractionConfig, ImportContext context) {
         Configuration config = context.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);
-        String targetPath = context.getProperty(ImportProperty.TARGETPATH, String.class);
 
         assert (config != null);
-        assert (targetPath != null);
     }
 
     protected ProducerTemplate getProducerTemplate(ImportContext context) {

@@ -12,6 +12,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -19,8 +20,10 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
+
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -36,7 +39,7 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
 
     @Autowired
-    private Configuration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     @Autowired
     private YarnClient defaultYarnClient;
@@ -228,4 +231,15 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         assertEquals(numRows, expectedNumRows);
     }
 
+    protected List<String> getFilesFromHdfs(String table, String targetPath) throws Exception{
+        return HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath + "/" + table,
+                new HdfsFileFilter() {
+
+            @Override
+            public boolean accept(FileStatus file) {
+                return file.getPath().getName().endsWith(".avro");
+            }
+
+        });
+    }
 }

@@ -24,8 +24,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
+import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
@@ -54,15 +55,21 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
 
+    @Autowired
+    private DataExtractionService dataExtractionService;
+
     protected static final Log log = LogFactory.getLog(EaiServiceImplTestNG.class);
 
     private String customer = "Marketo-Eai";
+    
+    private String targetPath;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/Activity");
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/ActivityType");
+        targetPath = dataExtractionService.createTargetPath(customer);
+        HdfsUtils.rmdir(yarnConfiguration, targetPath + "/dataFromFile");
+        HdfsUtils.rmdir(yarnConfiguration, targetPath + "/Activity");
+        HdfsUtils.rmdir(yarnConfiguration, targetPath + "/ActivityType");
         BatonService baton = new BatonServiceImpl();
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
         spaceInfo.properties = new CustomerSpaceProperties();
@@ -78,7 +85,8 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    private void cleanUp() {
+    private void cleanUp() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath("Production", customer).toString());
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
     }
 
@@ -103,37 +111,19 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         marketoImportConfig.setTables(tables);
         marketoImportConfig.setFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
         marketoImportConfig.setProperties(props);
-        String targetPath = "/tmp";
         ImportConfiguration importConfig = new ImportConfiguration();
         importConfig.setCustomer(customer);
         importConfig.addSourceConfiguration(marketoImportConfig);
-        importConfig.setTargetPath(targetPath);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivity = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/Activity",
-                new HdfsFilenameFilter() {
-
-                    @Override
-                    public boolean accept(String file) {
-                        return file.endsWith(".avro");
-                    }
-
-                });
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath + "/Activity"));
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath + "/ActivityType"));
+        List<String> filesForActivity = getFilesFromHdfs("Activity", targetPath);
         assertEquals(filesForActivity.size(), 1);
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivityType = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/ActivityType",
-                new HdfsFilenameFilter() {
-
-                    @Override
-                    public boolean accept(String file) {
-                        return file.endsWith(".avro");
-                    }
-
-                });
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath + "/ActivityType"));
+        List<String> filesForActivityType = getFilesFromHdfs("ActivityType", targetPath);
         assertEquals(filesForActivityType.size(), 1);
     }
 
@@ -151,17 +141,15 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         props.put(ImportProperty.DATAFILEDIR, dataUrl.getPath());
         props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
         fileImportConfig.setProperties(props);
-        String targetPath = "/tmp/dataFromFile/" + fileName;
         ImportConfiguration importConfig = new ImportConfiguration();
         importConfig.setCustomer(customer);
         importConfig.addSourceConfiguration(fileImportConfig);
-        importConfig.setTargetPath(targetPath);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         if (verifyDataAndRowCount) {
-            verifyAllDataNotNullWithNumRows(yarnConfiguration, targetPath, expectedNumRows);
+            verifyAllDataNotNullWithNumRows(yarnConfiguration, targetPath + "/dataFromFile/" + fileName, expectedNumRows);
         }
     }
 

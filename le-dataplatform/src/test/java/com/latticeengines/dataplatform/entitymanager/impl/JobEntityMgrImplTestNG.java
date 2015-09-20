@@ -78,6 +78,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelingJob = new ModelingJob();
         modelingJob.setId("application_12345_00001_" + suffix);
         modelingJob.setClient("CLIENT");
+        modelingJob.setCustomer("SomeCustomer");
         Properties appMasterProperties = new Properties();
         appMasterProperties.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         Properties containerProperties = new Properties();

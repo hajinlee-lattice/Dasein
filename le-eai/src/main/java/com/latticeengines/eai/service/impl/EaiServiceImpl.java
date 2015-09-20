@@ -12,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
-import com.latticeengines.domain.exposed.eai.ImportContext;
-import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.service.DataExtractionService;
 
@@ -32,14 +30,10 @@ public class EaiServiceImpl implements EaiService {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private ImportContext importContext;
-
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId extractAndImport(ImportConfiguration importConfig) {
-        importContext.setProperty(ImportProperty.TARGETPATH, importConfig.getTargetPath());
-        return dataExtractionService.submitExtractAndImportJob(importConfig, importContext);
+        return dataExtractionService.submitExtractAndImportJob(importConfig);
     }
 
     @Override

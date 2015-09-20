@@ -36,7 +36,8 @@ public class XmlHandlerProcessor implements Processor {
         ExtractDataXmlHandler handler = context.getApplicationContext().getBean(beanName, ExtractDataXmlHandler.class);
         String fileName = handler.initialize(context, table);
         exchange.getIn().setHeader("staxUri", "stax:#" + beanName);
-        exchange.getIn().setHeader("hdfsUri", new HdfsUriGenerator().getHdfsUri(exchange, table, fileName));
+        String uri = new HdfsUriGenerator().getHdfsUri(exchange, table, fileName);
+        exchange.getIn().setHeader("hdfsUri", uri);
     }
 
 }

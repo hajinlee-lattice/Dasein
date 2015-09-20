@@ -37,7 +37,7 @@ public class ModelCommand implements HasPid, Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "CommandId", unique = true, nullable = false)
+    @Column(name = "CommandId", nullable = false)
     private Long commandId;
 
     @Column(name = "Deployment_External_ID", nullable = false)
