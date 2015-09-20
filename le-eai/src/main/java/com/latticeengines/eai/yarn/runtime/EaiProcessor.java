@@ -55,7 +55,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     @Autowired
     private EaiAppmasterService eaiAppmasterService;
-
+    
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
         try {
@@ -65,10 +65,14 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
             importContext.setProperty(ImportProperty.TARGETPATH, importConfig.getTargetPath());
             log.info("Starting extract and import.");
             dataExtractionService.extractAndImport(importConfig, importContext);
+            
+            while (camelContext.getInflightRepository().size() > 0) {
+                Thread.sleep(10000L);
+            }
             log.info("Finished extract and import.");
         } catch (Exception e) {
-            eaiAppmasterService.handleException(e);
             Thread.sleep(20000);
+            eaiAppmasterService.handleException(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         return null;
