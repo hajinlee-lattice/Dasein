@@ -78,7 +78,7 @@ public class BatonServiceImpl implements BatonService {
             return false;
         }
 
-        log.info(String.format("Succesfully created tenant %s", tenantId));
+        log.info(String.format("Successfully created tenant %s", tenantId));
         return true;
     }
 
@@ -124,7 +124,7 @@ public class BatonServiceImpl implements BatonService {
             return false;
         }
 
-        log.info(String.format("Succesfully loaded files into directory %s", rawPath));
+        log.info(String.format("Successfully loaded files into directory %s", rawPath));
         return true;
     }
 
