@@ -125,7 +125,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(newCrmCredential.getUserName(), "latticeenginessandbox1_9026948050BD016F376AE6");
 
         newCrmCredential = crmService.getCredential(CrmConstants.CRM_ELOQUA, fullId, Boolean.TRUE);
-        Assert.assertEquals(newCrmCredential.getPassword(), "Lattice1");
+        Assert.assertEquals(newCrmCredential.getPassword(), "Lattice2");
     }
 
     @Test(groups = "functional", dependsOnMethods = "getCredential")
