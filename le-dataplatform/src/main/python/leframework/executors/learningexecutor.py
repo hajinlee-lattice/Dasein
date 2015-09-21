@@ -144,11 +144,15 @@ class LearningExecutor(Executor):
             stateMachine.run()
         else:
             logger.warn("Generated classifier is null.")
-    
+
     @overrides(Executor)
     def getModelDirPath(self, schema):
         if "CONTAINER_ID" in os.environ:
-            appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
+            tokens = os.environ['CONTAINER_ID'].split("_")
+            if(tokens[1].startswith("e07")):
+                appIdList = tokens[2:4]
+            else:
+                appIdList = tokens[1:3]
             modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
             return modelDirPath
         else:
