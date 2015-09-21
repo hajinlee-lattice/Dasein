@@ -65,7 +65,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
             importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
             log.info("Starting extract and import.");
             dataExtractionService.extractAndImport(importConfig, importContext);
-            
+
             while (camelContext.getInflightRepository().size() > 0) {
                 Thread.sleep(10000L);
             }

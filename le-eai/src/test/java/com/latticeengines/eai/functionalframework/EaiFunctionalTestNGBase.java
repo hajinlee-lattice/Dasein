@@ -2,6 +2,7 @@ package com.latticeengines.eai.functionalframework;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.List;
@@ -9,6 +10,10 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.camel.CamelContext;
+import org.apache.camel.component.salesforce.SalesforceComponent;
+import org.apache.camel.component.salesforce.SalesforceLoginConfig;
+import org.apache.camel.spring.SpringCamelContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -26,11 +31,17 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
+import com.latticeengines.domain.exposed.pls.CrmConstants;
+import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
+import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
+import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
@@ -49,144 +60,22 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
+    @Autowired
+    private CrmCredentialZKService crmCredentialZKService;
+
+    @Autowired
+    private SalesforceComponent salesforce;
+
+    @Autowired
+    private MarketoRouteConfig marketoRouteConfig;
+
+    @Autowired
+    private SalesforceRouteConfig salesforceRouteConfig;
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
-    }
-
-    protected Table createMarketoActivity() {
-        Table table = new Table();
-        table.setName("Activity");
-        Attribute id = new Attribute();
-        id.setName("id");
-        id.setDisplayName("Id");
-        id.setLogicalDataType("String");
-        Attribute leadId = new Attribute();
-        leadId.setName("leadId");
-        leadId.setDisplayName("Lead Id");
-        leadId.setLogicalDataType("Int");
-        Attribute activityDate = new Attribute();
-        activityDate.setName("activityDate");
-        activityDate.setDisplayName("Activity Date");
-        activityDate.setLogicalDataType("Timestamp");
-        Attribute activityTypeId = new Attribute();
-        activityTypeId.setName("activityTypeId");
-        activityTypeId.setDisplayName("Activity Type Id");
-        activityTypeId.setLogicalDataType("Int");
-        table.addAttribute(id);
-        table.addAttribute(leadId);
-        table.addAttribute(activityDate);
-        table.addAttribute(activityTypeId);
-        return table;
-    }
-
-    protected Table createMarketoActivityType() {
-        Table table = new Table();
-        table.setName("ActivityType");
-        Attribute id = new Attribute();
-        id.setName("id");
-        id.setDisplayName("Id");
-        id.setLogicalDataType("String");
-
-        Attribute name = new Attribute();
-        name.setName("name");
-        name.setDisplayName("Name");
-        name.setLogicalDataType("String");
-
-        Attribute description = new Attribute();
-        description.setName("description");
-        description.setDisplayName("Description");
-        description.setLogicalDataType("String");
-
-        Attribute attributes = new Attribute();
-        attributes.setName("attributes");
-        attributes.setDisplayName("Attributes");
-        attributes.setLogicalDataType("String");
-
-        table.addAttribute(id);
-        table.addAttribute(name);
-        table.addAttribute(description);
-        table.addAttribute(attributes);
-        return table;
-    }
-
-    protected Table createMarketoLead() {
-        Table table = new Table();
-        table.setName("Lead");
-
-        Attribute id = new Attribute();
-        id.setName("id");
-        Attribute anonymousIP = new Attribute();
-        anonymousIP.setName("anonymousIP");
-        Attribute inferredCompany = new Attribute();
-        inferredCompany.setName("inferredCompany");
-        Attribute inferredCountry = new Attribute();
-        inferredCountry.setName("inferredCountry");
-        Attribute title = new Attribute();
-        title.setName("title");
-        Attribute department = new Attribute();
-        department.setName("department");
-        Attribute unsubscribed = new Attribute();
-        unsubscribed.setName("unsubscribed");
-        Attribute unsubscribedReason = new Attribute();
-        unsubscribedReason.setName("unsubscribedReason");
-        Attribute doNotCall = new Attribute();
-        doNotCall.setName("doNotCall");
-        Attribute country = new Attribute();
-        country.setName("country");
-        Attribute website = new Attribute();
-        website.setName("website");
-        Attribute email = new Attribute();
-        email.setName("email");
-        Attribute leadStatus = new Attribute();
-        leadStatus.setName("leadStatus");
-        Attribute company = new Attribute();
-        company.setName("company");
-        Attribute leadSource = new Attribute();
-        leadSource.setName("leadSource");
-        Attribute industry = new Attribute();
-        industry.setName("industry");
-        Attribute annualRevenue = new Attribute();
-        annualRevenue.setName("annualRevenue");
-        Attribute numEmployees = new Attribute();
-        numEmployees.setName("numberOfEmployees");
-        Attribute doNotCallReason = new Attribute();
-        doNotCallReason.setName("doNotCallReason");
-        Attribute sicCode = new Attribute();
-        sicCode.setName("sicCode");
-        Attribute phone = new Attribute();
-        phone.setName("phone");
-        Attribute facebookReferredEnrollments = new Attribute();
-        facebookReferredEnrollments.setName("facebookReferredEnrollments");
-        Attribute facebookReferredVisits = new Attribute();
-        facebookReferredVisits.setName("facebookReferredVisits");
-
-        table.addAttribute(id);
-        table.addAttribute(anonymousIP);
-        table.addAttribute(inferredCompany);
-        table.addAttribute(inferredCountry);
-        table.addAttribute(title);
-        table.addAttribute(department);
-        table.addAttribute(unsubscribed);
-        table.addAttribute(unsubscribedReason);
-        table.addAttribute(doNotCall);
-        table.addAttribute(country);
-        table.addAttribute(website);
-        table.addAttribute(email);
-        table.addAttribute(leadStatus);
-        table.addAttribute(company);
-        table.addAttribute(leadSource);
-        table.addAttribute(industry);
-        table.addAttribute(annualRevenue);
-        table.addAttribute(numEmployees);
-        table.addAttribute(doNotCallReason);
-        table.addAttribute(sicCode);
-        table.addAttribute(phone);
-        table.addAttribute(facebookReferredEnrollments);
-        table.addAttribute(facebookReferredVisits);
-
-        return table;
     }
 
     protected Table createFile(URL inputUrl, String fileName) {
@@ -231,9 +120,8 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         assertEquals(numRows, expectedNumRows);
     }
 
-    protected List<String> getFilesFromHdfs(String table, String targetPath) throws Exception{
-        return HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath + "/" + table,
-                new HdfsFileFilter() {
+    protected List<String> getFilesFromHdfs(String targetPath, String table) throws Exception {
+        return HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath + "/" + table, new HdfsFileFilter() {
 
             @Override
             public boolean accept(FileStatus file) {
@@ -241,5 +129,27 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             }
 
         });
+    }
+
+    protected void checkDataExists(String targetPath, List<String> tables) throws Exception {
+        for (String table : tables) {
+            assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath + "/" + table));
+            List<String> filesForTable = getFilesFromHdfs(targetPath, table);
+            assertEquals(filesForTable.size(), 1);
+        }
+    }
+
+    protected CamelContext constructCamelContext(ImportConfiguration importConfig) throws Exception {
+        String tenantId = importConfig.getCustomer();
+        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, tenantId, true);
+
+        SalesforceLoginConfig loginConfig = salesforce.getLoginConfig();
+        loginConfig.setUserName(crmCredential.getUserName());
+        loginConfig.setPassword(crmCredential.getPassword());
+
+        CamelContext camelContext = new SpringCamelContext(applicationContext);
+        camelContext.addRoutes(salesforceRouteConfig);
+        camelContext.addRoutes(marketoRouteConfig);
+        return camelContext;
     }
 }

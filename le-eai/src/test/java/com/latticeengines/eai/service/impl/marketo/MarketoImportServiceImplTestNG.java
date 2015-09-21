@@ -1,10 +1,8 @@
 package com.latticeengines.eai.service.impl.marketo;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
@@ -21,6 +19,7 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.functionalframework.MarketoExtractAndImportUtil;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.service.ImportService;
@@ -57,9 +56,9 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         importContext.setProperty(ImportProperty.TARGETPATH, "/tmp");
 
         List<Table> tables = new ArrayList<>();
-        Table activityType = createMarketoActivityType();
-        Table lead = createMarketoLead();
-        Table activity = createMarketoActivity();
+        Table activityType = MarketoExtractAndImportUtil.createMarketoActivityType();
+        Table lead = MarketoExtractAndImportUtil.createMarketoLead();
+        Table activity = MarketoExtractAndImportUtil.createMarketoActivity();
         tables.add(activityType);
         tables.add(lead);
         tables.add(activity);
@@ -83,14 +82,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     public void importDataAndWriteToHdfs() throws Exception {
         marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, importContext);
         Thread.sleep(10000L);
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/Activity"));
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/ActivityType"));
-        List<String> filesForActivity = getFilesFromHdfs("Activity", "/tmp"); 
-
-        assertEquals(filesForActivity.size(), 1);
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, "/tmp/"));
-        List<String> filesForActivityType = getFilesFromHdfs("ActivityType", "/tmp");
-        assertEquals(filesForActivityType.size(), 1);
+        checkDataExists("/tmp", Arrays.<String>asList(new String[]{"Activity", "ActivityType"}));
     }
 
 }

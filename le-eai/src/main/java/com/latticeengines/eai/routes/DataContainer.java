@@ -37,7 +37,7 @@ public class DataContainer {
         if (schema == null) {
             throw new RuntimeException("Schema cannot be null.");
         }
-        this.file = new File(String.format("%s-%s.avro", table.getName(), new SimpleDateFormat("dd-MM-yyyy").format(new Date())));
+        this.file = new File(String.format("%s-%s.avro", table.getName(), new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
 
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
         dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);

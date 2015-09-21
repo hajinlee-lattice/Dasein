@@ -2,7 +2,6 @@ package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -11,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -37,11 +34,12 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.functionalframework.MarketoExtractAndImportUtil;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
-public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
+public class MarketoEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private EaiService eaiService;
@@ -57,19 +55,17 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private DataExtractionService dataExtractionService;
-
-    protected static final Log log = LogFactory.getLog(EaiServiceImplTestNG.class);
+    
+    private List<String> tableNameList = Arrays. <String>asList(new String[]{"Activity","ActivityType"});
 
     private String customer = "Marketo-Eai";
-    
+
     private String targetPath;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         targetPath = dataExtractionService.createTargetPath(customer);
-        HdfsUtils.rmdir(yarnConfiguration, targetPath + "/dataFromFile");
-        HdfsUtils.rmdir(yarnConfiguration, targetPath + "/Activity");
-        HdfsUtils.rmdir(yarnConfiguration, targetPath + "/ActivityType");
+        HdfsUtils.rmdir(yarnConfiguration, targetPath);
         BatonService baton = new BatonServiceImpl();
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
         spaceInfo.properties = new CustomerSpaceProperties();
@@ -100,9 +96,9 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         props.put(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
 
         List<Table> tables = new ArrayList<>();
-        Table activityType = createMarketoActivityType();
-        Table lead = createMarketoLead();
-        Table activity = createMarketoActivity();
+        Table activityType = MarketoExtractAndImportUtil.createMarketoActivityType();
+        Table lead = MarketoExtractAndImportUtil.createMarketoLead();
+        Table activity = MarketoExtractAndImportUtil.createMarketoActivity();
         tables.add(activityType);
         tables.add(lead);
         tables.add(activity);
@@ -114,17 +110,12 @@ public class EaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         ImportConfiguration importConfig = new ImportConfiguration();
         importConfig.setCustomer(customer);
         importConfig.addSourceConfiguration(marketoImportConfig);
+
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath + "/Activity"));
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath + "/ActivityType"));
-        List<String> filesForActivity = getFilesFromHdfs("Activity", targetPath);
-        assertEquals(filesForActivity.size(), 1);
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath + "/ActivityType"));
-        List<String> filesForActivityType = getFilesFromHdfs("ActivityType", targetPath);
-        assertEquals(filesForActivityType.size(), 1);
+        checkDataExists(targetPath, tableNameList);
     }
 
     @Test(groups = { "functional" }, dataProvider = "fileProvider", enabled = false)
