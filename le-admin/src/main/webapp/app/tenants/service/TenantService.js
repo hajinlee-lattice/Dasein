@@ -72,13 +72,12 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
             result.resultObj = [];
 
             data.forEach(function(record){
-                var gridRow;
                 try {
-                    gridRow = TenantUtility.convertTenantRecordToGridData(record);
+                    var gridRow = TenantUtility.convertTenantRecordToGridData(record);
+                    result.resultObj.push(gridRow);
                 } catch(err) {
-                    return;
+                    console.error("Error when converting tenant doc to grid record: " + record);
                 }
-                result.resultObj.push(gridRow);
             });
 
             defer.resolve(result);
