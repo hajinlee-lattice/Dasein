@@ -32,6 +32,7 @@ public class Table extends AttributeOwner {
 
     private List<Extract> extracts = new ArrayList<>();
     private PrimaryKey primaryKey;
+    private LastModifiedKey lastModifiedKey;
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -86,6 +87,14 @@ public class Table extends AttributeOwner {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public LastModifiedKey getLastModifiedKey() {
+        return lastModifiedKey;
+    }
+
+    public void setLastModifiedKey(LastModifiedKey lastModifiedKey) {
+        this.lastModifiedKey = lastModifiedKey;
     }
 
 }
