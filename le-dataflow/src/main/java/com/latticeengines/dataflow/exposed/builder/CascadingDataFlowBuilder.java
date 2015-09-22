@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
@@ -77,6 +79,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
+    private static final Log log = LogFactory.getLog(CascadingDataFlowBuilder.class);
+    
     private Integer counter = 1;
 
     private Map<String, Tap> taps = new HashMap<>();
@@ -339,7 +343,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             String originalFieldName = fieldName;
 
             if (seenFields.contains(fieldName)) {
-                fieldName = rhs + "__" + fieldName;
+                fieldName = rhs.replaceAll("\\*", "__") + "__" + fieldName;
             }
             seenFields.add(fieldName);
             FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
@@ -776,6 +780,17 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         for (AbstractMap.SimpleEntry<Checkpoint, Tap> entry : checkpoints.values()) {
             flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());
         }
+        DataFlowContext ctx = getDataFlowCtx();
+        Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+
+        try {
+            List<String> files = HdfsUtils.getFilesForDir(config, "/app/dataflow/lib/");
+            for (String file : files) {
+                flowDef.addToClassPath(file);
+            }
+        } catch (Exception e) {
+            log.warn("Exception writing jars to hdfs for this flow's classpath.", e);
+        }
 
         Flow<?> flow = flowConnector.connect(flowDef);
 
@@ -825,4 +840,5 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         out += '$';
         return out;
     }
+    
 }
