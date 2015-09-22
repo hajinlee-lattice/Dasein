@@ -9,13 +9,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
-import com.latticeengines.propdata.api.datasource.MatchClientContextHolder;
 import com.latticeengines.propdata.api.datasource.MatchClientRoutingDataSource;
 import com.latticeengines.propdata.api.service.MatchCommandService;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
@@ -35,18 +33,18 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         jdbcTemplate.setDataSource(dataSource);
     }
 
-    @Test(groups = "api.functional", dataProvider = "matchDataProvider", threadPoolSize = 3)
-    public void testMatch(String sourceTable, String destTables, String contractId, MatchVerifier verifier) {
-        MatchClientContextHolder.setMatchClient(getMatchClient()); // set match client for current thread.
-
-        CreateCommandRequest request = new CreateCommandRequest();
-        request.setContractExternalID(contractId);
-        request.setDestTables(destTables);
-        request.setSourceTable(sourceTable);
-        Commands command = matchCommandService.createMatchCommand(request);
-
-        verifier.verify(command.getPid(), request);
-    }
+//    @Test(groups = "api.functional", dataProvider = "matchDataProvider", threadPoolSize = 3)
+//    public void testMatch(String sourceTable, String destTables, String contractId, MatchVerifier verifier) {
+//        MatchClientContextHolder.setMatchClient(getMatchClient()); // set match client for current thread.
+//
+//        CreateCommandRequest request = new CreateCommandRequest();
+//        request.setContractExternalID(contractId);
+//        request.setDestTables(destTables);
+//        request.setSourceTable(sourceTable);
+//        Commands command = matchCommandService.createMatchCommand(request);
+//
+//        verifier.verify(command.getPid(), request);
+//    }
 
     @DataProvider(name = "matchDataProvider", parallel = true)
     private Object[][] MatchDataProvider() {
