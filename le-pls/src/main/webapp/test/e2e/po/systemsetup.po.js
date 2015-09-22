@@ -86,7 +86,7 @@ var SystemSetup = function() {
         element(by.css('.js-eloqua-form input.js-user-name')).clear();
         element(by.css('.js-eloqua-form input.js-user-name')).sendKeys("Matt.Sable");
         element(by.css('.js-eloqua-form input.js-password')).clear();
-        element(by.css('.js-eloqua-form input.js-password')).sendKeys("Lattice1");
+        element(by.css('.js-eloqua-form input.js-password')).sendKeys("Lattice2");
         element(by.css('.js-eloqua-form input.js-company')).clear();
         element(by.css('.js-eloqua-form input.js-company')).sendKeys("TechnologyPartnerLatticeEngines");
         element(by.css('.js-eloqua-save-button')).click();
