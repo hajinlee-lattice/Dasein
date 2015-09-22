@@ -2,11 +2,13 @@ package com.latticeengines.serviceflows.functionalframework;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
+import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -18,9 +20,15 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
     @Autowired
     private DataTransformationService dataTransformationService;
     
+    @Autowired
+    private ApplicationContext appContext;
+    
     protected Configuration yarnConfiguration = new Configuration();
     
     protected void executeDataFlow(DataFlowContext dataFlowContext, String beanName) throws Exception {
+        CascadingDataFlowBuilder dataFlowBuilder = appContext.getBean(beanName, //
+                CascadingDataFlowBuilder.class);
+        dataFlowBuilder.setLocal(true);
         dataTransformationService.executeNamedTransformation(dataFlowContext, beanName);
     }
     
