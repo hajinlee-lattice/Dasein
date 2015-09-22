@@ -10,7 +10,6 @@
         <component-name>dataplatform</component-name>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
-        <le.dataflow.version>2.0.9-SNAPSHOT</le.dataflow.version>
         <avro.version>1.7.7</avro.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <le.db.version>2.0.9-SNAPSHOT</le.db.version>
@@ -449,21 +448,6 @@
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
             <version>1.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataflow</artifactId>
-            <version>${le.dataflow.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>cascading</groupId>
-                    <artifactId>cascading-local</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.avro</groupId>
-                    <artifactId>avro-mapred</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.csvjdbc</groupId>
