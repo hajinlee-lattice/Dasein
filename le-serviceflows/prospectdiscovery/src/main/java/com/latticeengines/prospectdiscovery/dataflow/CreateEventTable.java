@@ -6,37 +6,29 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component("createEventTable")
 public class CreateEventTable extends CascadingDataFlowBuilder {
 
     @Override
-    public String constructFlowDefinition(DataFlowContext dataFlowCtx, //
-            Map<String, String> sources, //
-            Map<String, Table> sourceTables) { 
+    public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         setDataFlowCtx(dataFlowCtx);
-        String account = addSource(sourceTables.get("Account"));
-        String contact = addSource(sourceTables.get("Contact"));
-        String oppty = addSource(sourceTables.get("Opportunity"));
+        addSource("Account", sources.get("Account"));
+        addSource("Contact", sources.get("Contact"));
+        addSource("Opportunity", sources.get("Opportunity"));
 
-        String account$contact = addJoin(account, //
+        String account$contact = addJoin("Account", //
                 new FieldList("Id"), //
-                contact, //
+                "Contact", //
                 new FieldList("AccountId"), //
                 JoinType.INNER);
         
-        String oppty$account$contact = addJoin(oppty, //
+        String oppty$account$contact = addJoin("Opportunity", //
                 new FieldList("AccountId"), //
                 account$contact, //
                 new FieldList("Id"), //
                 JoinType.LEFT);
         
         return oppty$account$contact;
-    }
-
-    @Override
-    public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
-        return null;
     }
 }

@@ -208,9 +208,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             i++;
         }
         Pipe merge = new Merge(pipes);
-        String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0).getName(); 
-        Fields sortFields = new Fields(lastModifiedKeyColName);
-        sortFields.setComparator(lastModifiedKeyColName, Collections.reverseOrder());
+        Fields sortFields = new Fields("LastUpdatedDate");
+        sortFields.setComparator("LastUpdatedDate", Collections.reverseOrder());
         
         Pipe groupby = new GroupBy(merge, new Fields(sourceTable.getPrimaryKey().getAttributeNames()), sortFields);
         Pipe first = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
@@ -344,7 +343,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             String originalFieldName = fieldName;
 
             if (seenFields.contains(fieldName)) {
-                fieldName = rhs.replaceAll("\\*|-", "__") + "__" + fieldName;
+                fieldName = rhs.replaceAll("\\*", "__") + "__" + fieldName;
             }
             seenFields.add(fieldName);
             FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
@@ -750,21 +749,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     @Override
     public void runFlow(DataFlowContext dataFlowCtx) {
         @SuppressWarnings("unchecked")
-        Map<String, String> sourcePaths = dataFlowCtx.getProperty("SOURCES", Map.class);
-        @SuppressWarnings("unchecked")
-        Map<String, Table> sourceTables = dataFlowCtx.getProperty("SOURCETABLES", Map.class);
+        Map<String, String> sourceTables = dataFlowCtx.getProperty("SOURCES", Map.class);
         String flowName = dataFlowCtx.getProperty("FLOWNAME", String.class);
         String targetPath = dataFlowCtx.getProperty("TARGETPATH", String.class);
         Properties jobProperties = dataFlowCtx.getProperty("JOBPROPERTIES", Properties.class);
         String engineType = dataFlowCtx.getProperty("ENGINE", String.class);
         ExecutionEngine engine = ExecutionEngine.get(engineType);
 
-        String lastOperator = null;
-        if (sourceTables != null) {
-            lastOperator = constructFlowDefinition(dataFlowCtx, sourcePaths, sourceTables);
-        } else {
-            lastOperator = constructFlowDefinition(dataFlowCtx, sourcePaths);
-        }
+        String lastOperator = constructFlowDefinition(dataFlowCtx, sourceTables);
         
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
         System.out.println(schema);
