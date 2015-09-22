@@ -12,7 +12,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     this.show = function(fieldToBeEdited, $manageFieldsScope) {
         $http.get('./app/setup/views/EditFieldView.html').success(function (html) {
             var scope = $manageFieldsScope.$new();
-            scope.field = fieldToBeEdited;
+            scope.field = angular.copy(fieldToBeEdited);
             scope.manageFieldsScope = $manageFieldsScope;
 
             var contentContainer = $('#fieldDetails');

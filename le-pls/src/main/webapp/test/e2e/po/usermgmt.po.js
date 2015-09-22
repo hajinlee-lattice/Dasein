@@ -43,7 +43,7 @@ var UserManagement = function() {
 
     this.canSeeSetupLink = function (expected) {
         helper.elementExists(userDropdown.SetupLink, expected,
-            expected ? "should see Setup" : "should not see Setup");
+            expected ? "should see Manage Fields" : "should not see Manage Fields");
     };
 
     this.canSeeHiddenAdminLink = function(expected) {

@@ -28,7 +28,7 @@ angular.module('mainApp.setup.services.MetadataService', [
                 result.Success = true;
                 result.ResultObj = data.Result;
             } else {
-                result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_FIELDS_ERROR');
             }
             deferred.resolve(result);
         })
@@ -36,7 +36,7 @@ angular.module('mainApp.setup.services.MetadataService', [
             SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_FIELDS_ERROR')
             };
             deferred.resolve(result);
         });
@@ -65,7 +65,7 @@ angular.module('mainApp.setup.services.MetadataService', [
                 result.Success = true;
                 result.ResultObj = data.Result;
             } else {
-                result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR');
             }
             deferred.resolve(result);
         })
@@ -73,7 +73,7 @@ angular.module('mainApp.setup.services.MetadataService', [
             SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR')
             };
             deferred.resolve(result);
         });
@@ -102,7 +102,7 @@ angular.module('mainApp.setup.services.MetadataService', [
                 result.Success = true;
                 result.ResultObj = data.Result;
             } else {
-                result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELDS_ERROR');
             }
             deferred.resolve(result);
         })
@@ -110,7 +110,7 @@ angular.module('mainApp.setup.services.MetadataService', [
             SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR')
             };
             deferred.resolve(result);
         });

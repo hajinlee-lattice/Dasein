@@ -3,14 +3,15 @@ package com.latticeengines.pls.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface VdbMetadataService {
 
-    List<VdbMetadataField> getFields(String tenantName, String dlUrl);
+    List<VdbMetadataField> getFields(Tenant tenant);
 
     String getSourceToDisplay(String source);
 
-    void UpdateField(String tenantName, String dlUrl, VdbMetadataField field);
+    void UpdateField(Tenant tenant, VdbMetadataField field);
 
-    void UpdateFields(String tenantName, String dlUrl, List<VdbMetadataField> fields);
+    void UpdateFields(Tenant tenant, List<VdbMetadataField> fields);
 }

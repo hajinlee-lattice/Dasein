@@ -12,13 +12,14 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 .controller('ManageFieldsWidgetController', function ($scope, $rootScope, StringUtility, ResourceUtility, SetupUtility, MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel) {
     $scope.TagsOptions = ["Internal", "External"];
     $scope.CategoryOptions = ["Lead Information", "Marketing Activity"];
-    $scope.StatisticalTypeOptions = ["nominal", "ordinal", "interval", "ratio"];
-    $scope.ApprovedUsageOptions = ["None", "Model", "ModelAndModelInsights", "ModelAndAllInsights"];
-    $scope.FundamentalTypeOptions = ["currency", "email", "probability", "percent", "phone", "enum", "URI"];
+    $scope.StatisticalTypeOptions = ["interval", "nominal", "ordinal", "ratio"];
+    $scope.ApprovedUsageOptions = ["None", "Model", "ModelAndAllInsights", "ModelAndModelInsights"];
+    $scope.FundamentalTypeOptions = ["boolean", "currency", "numeric", "percentage", "year"];
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
     $scope.showFieldDetails = false;
+    $scope.fieldAttributes = [];
 
     loadFields();
 
@@ -29,6 +30,12 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                 $scope.fields = result.ResultObj;
                 renderSelects($scope.fields);
                 renderGrid($scope.fields);
+                if ($scope.fields.length > 0) {
+                    $scope.fieldAttributes = [];
+                    for (var attr in $scope.fields[0]) {
+                        $scope.fieldAttributes.push(attr);
+                    }
+                }
             } else {
                 $scope.showLoadingError = true;
                 $scope.loadingError = result.ResultErrors;
@@ -45,12 +52,10 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     }
 
     function renderGrid(fields) {
-        var pageable = false;
         var pageSize = fields.length;
 
         if (fields.length > 10) {
             pageSize = 10;
-            pageable = true;
         }
 
         var dataSource = new kendo.data.DataSource({
@@ -60,11 +65,10 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                     fields: {
                         ColumnName: { type: "string", editable: false },
                         SourceToDisplay: { type: "string", editable: false },
-                        Object: { type: "string", editable: false },
-                        Category: { type: "string" },
                         DisplayName: { type: "string" },
-                        ApprovedUsage: { type: "string" },
                         Tags: { type: "string" },
+                        Category: { type: "string" },
+                        ApprovedUsage: { type: "string" },
                         FundamentalType: { type: "string" }
                     }
                 }
@@ -74,21 +78,23 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         $scope.gridOptions = {
             dataSource: dataSource,
-            pageable: pageable,
-            sortable: true,
-            scrollable: false,
-            navigatable: true,
-            edit: function(e) {
-                if (e.container.find("input").attr("data-bind") === "value:Category" &&
-                    !$scope.categoryEditable(e.model)) {
-                    this.closeCell();
+            sortable: { mode: "single", allowUnsort: false },
+            pageable: {
+                messages: {
+                    first: "",
+                    previous: "",
+                    next: "",
+                    last: "",
+                    display: "{0} - {1} of {2}",
+                    empty: "No data"
                 }
             },
+            scrollable: false,
             columns: [
                 {
                     field: "ColumnName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FIELD'),
                     template: kendo.template($("#fieldTemplate").html()),
-                    width: 200
+                    width: 184
                 },
                 {
                     field: "SourceToDisplay", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_SOURCE'),
@@ -96,77 +102,37 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                     width: 110
                 },
                 {
+                    field: "DisplayName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME'),
+                    template: kendo.template($("#displayNameTemplate").html()),
+                    width: 150
+                },
+                {
+                    field: "Tags", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_TAGS'),
+                    template: kendo.template($("#tagsTemplate").html()),
+                    width: 90
+                },
+                {
                     field: "Category", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_CATEGORY'),
-                    editor: categoryEditor,
                     template: kendo.template($("#categoryTemplate").html()),
                     width: 120
                 },
                 {
-                    field: "DisplayName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME'),
-                    template: kendo.template($("#displayNameTemplate").html()),
-                    width: 160
-                },
-                {
                     field: "ApprovedUsage", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_APPROVED_USAGE'),
-                    editor: approvedUsageEditor,
                     template: kendo.template($("#approvedUsageTemplate").html()),
-                    width: 120
-                },
-                {
-                    field: "Tags", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_TAGS'),
-                    editor: tagsEditor,
-                    template: kendo.template($("#tagsTemplate").html()),
-                    width: 80
+                    width: 128
                 },
                 {
                     field: "FundamentalType", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FUNDAMENTAL_TYPE'),
-                    editor: fundamentalTypeEditor,
                     template: kendo.template($("#fundamentalTypeTemplate").html()),
-                    width: 120
+                    width: 128
                 }
             ]
         };
     }
 
-    function approvedUsageEditor(container, options) {
-        $('<input data-bind="value:' + options.field + '"/>')
-        .appendTo(container)
-        .kendoDropDownList({
-            autoBind: false,
-            dataSource: $scope.ApprovedUsageOptions
-        });
-    }
-
-    function tagsEditor(container, options) {
-        $('<input data-bind="value:' + options.field + '"/>')
-        .appendTo(container)
-        .kendoDropDownList({
-            autoBind: false,
-            dataSource: $scope.TagsOptions
-        });
-    }
-
-    function categoryEditor(container, options) {
-        $('<input data-bind="value:' + options.field + '"/>')
-        .appendTo(container)
-        .kendoDropDownList({
-            autoBind: false,
-            dataSource: $scope.CategoryOptions
-        });
-    }
-
     $scope.categoryEditable = function(dataItem) {
         return ManageFieldsService.CategoryEditable(dataItem);
     };
-
-    function fundamentalTypeEditor(container, options) {
-        $('<input data-bind="value:' + options.field + '"/>')
-        .appendTo(container)
-        .kendoDropDownList({
-            autoBind: false,
-            dataSource: $scope.FundamentalTypeOptions
-        });
-    }
 
     $scope.selectChanged = function($event, filerColumn) {
         if (filerColumn == "source") {
@@ -223,9 +189,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         if (!StringUtility.IsEmptyString($scope.source)) {
             andFilters.push({ field: "SourceToDisplay", operator: "eq", value: $scope.source });
         }
-        if (!StringUtility.IsEmptyString($scope.object)) {
-            andFilters.push({ field: "Object", operator: "eq", value: $scope.object });
-        }
         if (!StringUtility.IsEmptyString($scope.category)) {
             andFilters.push({ field: "Category", operator: "eq", value: $scope.category });
         }
@@ -234,7 +197,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         if ($scope.onlyShowErrorFields) {
             var columns = $scope.gridOptions.columns;
             for (var i = 0; i < columns.length; i++) {
-                if (columns[i].field != "SourceToDisplay" && columns[i].field != "Object") {
+                if (columns[i].field != "SourceToDisplay") {
                     errorFilters.push({ field: columns[i].field, operator: "eq", value: "" });
                 }
             }
@@ -292,11 +255,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         }
 
         $scope.batchEdit = true;
-        if ($scope.batchEdit) {
-            $("#fieldsGrid").data("kendoGrid").setOptions({editable: true});
-        } else {
-            $("#fieldsGrid").data("kendoGrid").setOptions({editable: false});
-        }
     };
 
     $scope.saveClicked = function($event) {
@@ -308,18 +266,14 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         $scope.saveInProgress = true;
         $scope.showEditFieldsError = false;
 
-        var grid = $("#fieldsGrid").data("kendoGrid");
-        var editedData = $.grep(grid.dataSource.data(), function(item) {
-            return item.dirty;
-        });
+        var editedData = getEditedData();
         if (editedData != null && editedData.length > 0) {
             MetadataService.UpdateFields(editedData).then(function(result){
                 if (result.Success) {
-                    grid.setOptions({editable: false});
                     $scope.batchEdit = false;
                     $scope.saveInProgress = false;
 
-                    reloadFields();
+                    loadFields();
                 } else {
                     $scope.editFieldsErrorMessage = result.ResultErrors;
                     $scope.showEditFieldsError = true;
@@ -327,7 +281,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                 }
             });
         } else {
-            grid.setOptions({editable: false});
             $scope.batchEdit = false;
             $scope.saveInProgress = false;
         }
@@ -340,8 +293,66 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         if ($scope.saveInProgress) { return; }
 
-        DiscardEditFieldsModel.show($scope);
+        var editedData = getEditedData();
+        if (editedData != null && editedData.length > 0) {
+            DiscardEditFieldsModel.show($scope);
+        } else {
+            $scope.discardChanges();
+        }
     };
+
+    $scope.discardChanges = function () {
+        $("#fieldsGrid").data("kendoGrid").cancelChanges();
+        $scope.showEditFieldsError = false;
+        $scope.batchEdit = false;
+    };
+
+    $scope.textboxClicked = function ($event) {
+        if ($scope.activeTextbox != $event.target) {
+            $event.target.select();
+            $scope.activeTextbox = $event.target;
+        }
+    };
+
+    $scope.valueChanged = function ($event, dataItem, field, newValue, originalValue) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        dataItem.dirty = true;
+        dataItem.dirtyFields = dataItem.dirtyFields || {};
+        dataItem.dirtyFields[field] = (newValue !== originalValue);
+    };
+
+    function getEditedData() {
+        var grid = $("#fieldsGrid").data("kendoGrid");
+        var editDataItems = $.grep(grid.dataSource.data(), function(item) {
+            if (item.dirty && item.dirtyFields != null) {
+                for (var dirtyField in item.dirtyFields) {
+                    if (dirtyField) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+
+        var editedData = [];
+        if (editDataItems != null && editDataItems.length > 0) {
+            for (var i = 0; i < editDataItems.length; i++) {
+                var data = {};
+                var dataItem = editDataItems[i];
+                for (var field in dataItem) {
+                    if ($scope.fieldAttributes.indexOf(field) > -1) {
+                        data[field] = dataItem[field];
+                    }
+                }
+                editedData.push(data);
+            }
+        }
+
+        return editedData;
+    }
 
     $scope.fieldLinkClicked = function($event, field) {
         if ($event != null) {
@@ -352,13 +363,12 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     };
 
     $scope.$on(SetupUtility.LOAD_FIELDS_EVENT, function (event, data) {
-        reloadFields();
+        loadFields();
     });
 
-    function reloadFields() {
-        loadFields();
-        $("#fieldsGrid").data("kendoGrid").dataSource.read();
-    }
+    $scope.isEmpty = function(value) {
+        return value == null || value === '';
+    };
 })
 
 .directive('manageFieldsWidget', function () {

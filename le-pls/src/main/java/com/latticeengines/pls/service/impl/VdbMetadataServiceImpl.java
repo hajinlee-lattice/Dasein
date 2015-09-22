@@ -1,88 +1,43 @@
 package com.latticeengines.pls.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
-import com.latticeengines.pls.service.MetadataConstants;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.liaison.exposed.service.ConnectionMgr;
+import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
+import com.latticeengines.liaison.exposed.service.Query;
+import com.latticeengines.liaison.exposed.service.QueryColumn;
+import com.latticeengines.pls.service.VdbMetadataConstants;
+import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.VdbMetadataService;
-import com.latticeengines.remote.exposed.service.Headers;
 
 @Component("vdbMetadataService")
 public class VdbMetadataServiceImpl implements VdbMetadataService {
 
-    private static final String DL_REST_SERVICE = "/DLRestService";
-    private static final int STATUS_SUCCESS = 3;
-    private static final int MAX_RETRIES = 3;
-    private static final String[] RETRY_TRIGGERS = new String[] {"Collection was modified"};
+    @Autowired
+    private TenantConfigService tenantConfigService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ConnectionMgrFactory connectionMgrFactory;
 
     @Override
-    public List<VdbMetadataField> getFields(String tenantName, String dlUrl) {
+    public List<VdbMetadataField> getFields(Tenant tenant) {
         try {
-            // TODO: this is a mock up completion
-            List<VdbMetadataField> fields = new ArrayList<VdbMetadataField>();
-            String[] queries = new String[] { "Q_PLS_Modeling" };
-            for (String query : queries) {
-                Map<String, String> paramerters = new HashMap<>();
-                paramerters.put("tenantName", tenantName);
-                paramerters.put("queryName", query);
-
-                String response = callDLRestService(dlUrl, "/GetQueryMetadataColumns", paramerters);
-                JsonNode json = objectMapper.readTree(response);
-                if (json.get("Status").asInt() != STATUS_SUCCESS) {
-                    for (Integer i = 0; i < 60; i++) {
-                        String idx = i > 0 ? i.toString() : "";
-                        VdbMetadataField field = createField("ID" + idx, "Marketo", "Lead", "Lead Information", "ID", "None", "Internal", "URI", null, "ratio", null);
-                        fields.add(field);
-                        field = createField("Email" + idx, "Marketo", "Lead", "Lead Information", "Email Address", "Model", "Internal", "URI", null, "ratio", null);
-                        fields.add(field);
-                        field = createField("Phone" + idx, "Marketo", "Account", "Marketing Activity", "Phone Number", "Model", "Internal", "URI", null, "ratio", null);
-                        fields.add(field);
-                        field = createField("Address" + idx, "Salesforce", "Lead", "Marketing Activity", "Address", "", "Internal", "URI", null, "ratio", null);
-                        fields.add(field);
-                        field = createField("Employees" + idx, "PD_Alexa_Source_Import", null, "Lead Information", "Address", "", "", null, null, null, null);
-                        fields.add(field);
-                    }
-                    return fields;
-                    //throw new IllegalStateException("Returned status from DL is not SUCCESS.");
-                }
-                for (JsonNode kvpair: json.get("Metadata")) {
-                    String approvedUsage;
-                    JsonNode approvedUsageNode = kvpair.get("ApprovedUsage");
-                    if (approvedUsageNode.isArray()) {
-                        approvedUsage = getNodeText(approvedUsageNode.get(approvedUsageNode.size() - 1));
-                    } else {
-                        approvedUsage = getNodeText(approvedUsageNode);
-                    }
-                    VdbMetadataField field = createField(
-                        getNodeText(kvpair.get("ColumnName")),
-                        getNodeText(kvpair.get("DataSource")),
-                        getNodeText(kvpair.get("Object")),
-                        getNodeText(kvpair.get("Category")),
-                        getNodeText(kvpair.get("DisplayName")),
-                        approvedUsage,
-                        getNodeText(kvpair.get("Tags")),
-                        getNodeText(kvpair.get("FundamentalType")),
-                        getNodeText(kvpair.get("DisplayDiscretizationStrategy")),
-                        getNodeText(kvpair.get("StatisticalType")),
-                        getNodeText(kvpair.get("Description"))
-                    );
-                    fields.add(field);
-                }
-            }
+            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
+            ConnectionMgr connMgr = connectionMgrFactory.getConnectionMgr("visiDB", tenantName, dlUrl);
+            Map<String, Map<String, String>> colsMetadata = connMgr.getMetadata(VdbMetadataConstants.MODELING_QUERY_NAME);
+            List<VdbMetadataField> fields = getFields(colsMetadata);
 
             return fields;
         } catch (Exception ex) {
@@ -90,58 +45,42 @@ public class VdbMetadataServiceImpl implements VdbMetadataService {
         }
     }
 
-    private <T> String callDLRestService(String dlUrl, String endpoint, T payload) throws IOException {
-        if (dlUrl.endsWith("/")) dlUrl = dlUrl.substring(0, dlUrl.length() - 1);
-        if (!dlUrl.endsWith(DL_REST_SERVICE)) dlUrl += DL_REST_SERVICE;
+    private List<VdbMetadataField> getFields(Map<String, Map<String, String>> columnsMetadata) {
+        List<VdbMetadataField> fields = new ArrayList<VdbMetadataField>();
+        for (Map.Entry<String, Map<String, String>> entry : columnsMetadata.entrySet()) {
+            VdbMetadataField field = new VdbMetadataField();
+            field.setColumnName(entry.getKey());
+            Map<String, String> attributes = entry.getValue();
+            field.setSource(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_SOURCE));
+            field.setCategory(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_CATEGORY));
+            field.setDisplayName(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_DISPLAYNAME));
+            field.setDescription(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_DESCRIPTION));
+            field.setApprovedUsage(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_APPROVED_USAGE));
+            field.setTags(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_TAGS));
+            field.setFundamentalType(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE));
+            field.setDisplayDiscretization(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_DISPLAY_DISCRETIZATION));
+            field.setStatisticalType(getFieldValue(attributes, VdbMetadataConstants.ATTRIBUTE_STATISTICAL_TYPE));
+            String sourceToDisplay = getSourceToDisplay(field.getSource());
+            field.setSourceToDisplay(sourceToDisplay);
+            fields.add(field);
+        }
 
-        String stringifiedPayload;
-        if (payload.getClass().equals(String.class)) {
-            stringifiedPayload = ( String ) payload;
+        return fields;
+    }
+
+    private String getFieldValue(Map<String, String> map, String key) {
+        if (map.containsKey(key)) {
+            String value = map.get(key);
+            if (VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE.equals(key) &&
+                    VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE.equalsIgnoreCase(value)) {
+                return null;
+            } else if (VdbMetadataConstants.ATTRIBUTE_NULL_VALUE.equalsIgnoreCase(value)) {
+                return null;
+            } else {
+                return value;
+            }
         } else {
-            stringifiedPayload =  JsonUtils.serialize(payload);
-        }
-
-        int retry = 0;
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
-                Headers.getHeaders(), stringifiedPayload);
-        while (retry < MAX_RETRIES && shouldRetry(response)) {
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
-                    Headers.getHeaders(), stringifiedPayload);
-        }
-
-        return response;
-    }
-
-    private static boolean shouldRetry(String response) {
-        for (String trigger : RETRY_TRIGGERS) { if (response.contains(trigger)) return true; }
-        return false;
-    }
-
-    private VdbMetadataField createField(String columnName, String source, String object, String category,
-            String displayName, String approvedUsage, String tags, String fundamentalType,
-            String displayDiscretization, String statisticalType, String description) {
-        VdbMetadataField field = new VdbMetadataField();
-        field.setColumnName(columnName);
-        field.setSource(source);
-        field.setObject(object);
-        field.setCategory(category);
-        field.setDisplayName(displayName);
-        field.setApprovedUsage(approvedUsage);
-        field.setTags(tags);
-        field.setFundamentalType(fundamentalType);
-        field.setDisplayDiscretization(displayDiscretization);
-        field.setStatisticalType(statisticalType);
-        field.setDescription(description);
-        String sourceToDisplay = getSourceToDisplay(source);
-        field.setSourceToDisplay(sourceToDisplay);
-        return field;
-    }
-
-    private String getNodeText(JsonNode node) {
-        if (node == null || node.isNull()) {
             return null;
-        } else {
-            return node.asText();
         }
     }
 
@@ -151,34 +90,111 @@ public class VdbMetadataServiceImpl implements VdbMetadataService {
             return "";
         }
 
-        boolean exist = MetadataConstants.SOURCE_MAPPING.containsKey(source);
+        boolean exist = VdbMetadataConstants.SOURCE_MAPPING.containsKey(source);
         if (exist) {
-            return MetadataConstants.SOURCE_MAPPING.get(source);
+            return VdbMetadataConstants.SOURCE_MAPPING.get(source);
         } else {
             return source;
         }
     }
 
     @Override
-    public void UpdateField(String tenantName, String dlUrl, VdbMetadataField field) {
+    public void UpdateField(Tenant tenant, VdbMetadataField field) {
         try {
-            // TODO Auto-generated method stub
-            Thread.sleep(1000);
+            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
+            ConnectionMgr connMgr = connectionMgrFactory.getConnectionMgr("visiDB", tenantName, dlUrl);
 
+            Query modelingQuery = connMgr.getQuery(VdbMetadataConstants.MODELING_QUERY_NAME);
+            if (modelingQuery == null) {
+                throw new LedpException(LedpCode.LEDP_18050, new String[] { VdbMetadataConstants.MODELING_QUERY_NAME });
+            }
+            Query customQuery = connMgr.getQuery(VdbMetadataConstants.CUSTOM_QUERY_NAME);
+            if (customQuery == null) {
+                throw new LedpException(LedpCode.LEDP_18050, new String[] { VdbMetadataConstants.CUSTOM_QUERY_NAME });
+            }
+            QueryColumn queryColumn = modelingQuery.getColumn(field.getColumnName());
+            if (queryColumn == null) {
+                throw new LedpException(LedpCode.LEDP_18051, new String[] { field.getColumnName() });
+            }
+
+            Map<String, String> metadata = getMetadataMap(field);
+            queryColumn.setMetadata(metadata);
+            modelingQuery.updateColumn(queryColumn);
+            customQuery.updateColumn(queryColumn);
+            connMgr.setQuery(modelingQuery);
+            connMgr.setQuery(customQuery);
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18047, ex, new String[] { ex.getMessage() });
         }
     }
 
     @Override
-    public void UpdateFields(String tenantName, String dlUrl, List<VdbMetadataField> fields) {
+    public void UpdateFields(Tenant tenant, List<VdbMetadataField> fields) {
         try {
-            // TODO Auto-generated method stub
-            Thread.sleep(1000);
+            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
+            ConnectionMgr connMgr = connectionMgrFactory.getConnectionMgr("visiDB", tenantName, dlUrl);
 
+            Query modelingQuery = connMgr.getQuery(VdbMetadataConstants.MODELING_QUERY_NAME);
+            if (modelingQuery == null) {
+                throw new LedpException(LedpCode.LEDP_18050, new String[] { VdbMetadataConstants.MODELING_QUERY_NAME });
+            }
+            Query customQuery = connMgr.getQuery(VdbMetadataConstants.CUSTOM_QUERY_NAME);
+            if (customQuery == null) {
+                throw new LedpException(LedpCode.LEDP_18050, new String[] { VdbMetadataConstants.CUSTOM_QUERY_NAME });
+            }
+
+            for (Integer i = 0; i < fields.size(); i++) {
+                VdbMetadataField field = fields.get(i);
+                QueryColumn queryColumn = modelingQuery.getColumn(field.getColumnName());
+                if (queryColumn == null) {
+                    throw new LedpException(LedpCode.LEDP_18051, new String[] { field.getColumnName() });
+                }
+
+                Map<String, String> metadata = getMetadataMap(field);
+                queryColumn.setMetadata(metadata);
+                modelingQuery.updateColumn(queryColumn);
+                customQuery.updateColumn(queryColumn);
+            }
+            connMgr.setQuery(modelingQuery);
+            connMgr.setQuery(customQuery);
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18048, ex, new String[] { ex.getMessage() });
         }
+    }
+
+    private Map<String, String> getMetadataMap(VdbMetadataField field) {
+        Map<String, String> metadata = new HashMap<>();
+        String displayName = field.getDisplayName() == null ? "" : field.getDisplayName();
+        metadata.put(VdbMetadataConstants.ATTRIBUTE_DISPLAYNAME, displayName);
+        String tags = field.getTags();
+        if (tags != null && !tags.isEmpty()) {
+            metadata.put(VdbMetadataConstants.ATTRIBUTE_TAGS, tags);
+        }
+        String category = field.getCategory();
+        if (category != null && !category.isEmpty()) {
+            metadata.put(VdbMetadataConstants.ATTRIBUTE_CATEGORY, category);
+        }
+        String approvedUsage = field.getApprovedUsage();
+        if (approvedUsage != null && !approvedUsage.isEmpty()) {
+            metadata.put(VdbMetadataConstants.ATTRIBUTE_APPROVED_USAGE, approvedUsage);
+        }
+        String fundamentalType = field.getFundamentalType();
+        if (fundamentalType != null && !fundamentalType.isEmpty() &&
+                !VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE.equalsIgnoreCase(fundamentalType)) {
+            metadata.put(VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE, fundamentalType);
+        }
+        String description = field.getDescription() == null ? "" : field.getDescription();
+        metadata.put(VdbMetadataConstants.ATTRIBUTE_DESCRIPTION, description);
+        String displayDiscretization = field.getDisplayDiscretization() == null ? "" : field.getDisplayDiscretization();
+        metadata.put(VdbMetadataConstants.ATTRIBUTE_DISPLAY_DISCRETIZATION, displayDiscretization);
+        String statisticalType = field.getStatisticalType();
+        if (statisticalType != null && !statisticalType.isEmpty()) {
+            metadata.put(VdbMetadataConstants.ATTRIBUTE_STATISTICAL_TYPE, statisticalType);
+        }
+
+        return metadata;
     }
 
 }

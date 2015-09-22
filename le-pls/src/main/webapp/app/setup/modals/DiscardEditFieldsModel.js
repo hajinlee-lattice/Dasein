@@ -38,12 +38,7 @@ angular.module('mainApp.setup.controllers.DiscardEditFieldsModel', [
             $event.preventDefault();
         }
 
-        var grid = $("#fieldsGrid").data("kendoGrid");
-        grid.cancelChanges();
-        grid.setOptions({editable: false});
-        $scope.manageFieldsScope.showEditFieldsError = false;
-        $scope.manageFieldsScope.batchEdit = false;
-
+        $scope.manageFieldsScope.discardChanges();
         $("#modalContainer").modal('hide');
     };
 

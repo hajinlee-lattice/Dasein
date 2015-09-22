@@ -25,7 +25,8 @@ var Config = function() {
                 specBasePath + '/systemsetup_spec.js',
                 specBasePath + '/passwordchange_spec.js',
                 specBasePath + '/multitenant_spec.js',
-                specBasePath + '/internaladmin_spec.js'
+                specBasePath + '/internaladmin_spec.js',
+                specBasePath + '/setup_spec.js'
             ],
 
             params: {

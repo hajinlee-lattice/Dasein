@@ -20,12 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.VdbMetadataService;
-import com.latticeengines.pls.service.impl.TenantConfigServiceImpl;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 import com.wordnik.swagger.annotations.Api;
@@ -43,9 +41,6 @@ public class VdbMetadataResource {
     private SessionService sessionService;
 
     @Autowired
-    private TenantConfigServiceImpl tenantConfigService;
-
-    @Autowired
     private VdbMetadataService vdbMetadataService;
 
     @RequestMapping(value = "/fields", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -56,9 +51,7 @@ public class VdbMetadataResource {
         try
         {
             Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
-            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
-            List<VdbMetadataField> fields = vdbMetadataService.getFields(tenantName, dlUrl);
+            List<VdbMetadataField> fields = vdbMetadataService.getFields(tenant);
 
             response.setSuccess(true);
             response.setResult(fields);
@@ -78,9 +71,7 @@ public class VdbMetadataResource {
             log.info("updateField:" + field);
 
             Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
-            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
-            vdbMetadataService.UpdateField(tenantName, dlUrl, field);
+            vdbMetadataService.UpdateField(tenant, field);
 
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
@@ -99,9 +90,7 @@ public class VdbMetadataResource {
             log.info("updateFields:" + fields);
 
             Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
-            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
-            vdbMetadataService.UpdateFields(tenantName, dlUrl, fields);
+            vdbMetadataService.UpdateFields(tenant, fields);
 
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {

@@ -27,7 +27,7 @@
 #setup .setup-sidebar li.active > a:focus,
 #setup .setup-sidebar li.active > a:hover {
   color: white;
-  background-color: #337ab7;
+  background: #337ab7;
 }
 
 #setup .setup-sidebar .ident {
@@ -49,43 +49,61 @@
   position: relative;
 }
 
-#setup .setup-main-panel .title h2 {
+#setup .manage-fields .title h2 {
   display: inline-block;
+  max-width: 580px;
 }
 
-#setup .setup-main-panel .title button {
+#setup .manage-fields .title button {
   margin: 10px 0 0 20px;
   float: right;
 }
 
-#setup .setup-main-panel .form-control {
+#setup .manage-fields .form-group .form-control {
   display: inline-block;
   width: 240px;
   margin-right: 32px;
 }
 
-#setup .setup-main-panel .form-group .btn {
+#setup .manage-fields .form-group .btn {
   margin-top: -1px;
 }
 
-#setup .setup-main-panel .checkbox {
+#setup .manage-fields .form-group .checkbox {
   display: inline-block;
   margin-left: 20px;
 }
 
-#setup .setup-main-panel .fields-panel {
+#setup .manage-fields .k-icon {
+  /* Kendo icon not shown in Chrome of ios, so replace it */
+  background-image: none;
+  background-position: 0 0;
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#setup .fields-panel {
   overflow: hidden;
 }
 
-#setup .setup-main-panel table {
+#setup .fields-grid {
+  padding: 0;
+  overflow: auto;
+  border: none;
+}
+
+#setup .fields-grid table {
   table-layout: fixed;
+  min-width: 1024px;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
-#setup .setup-main-panel table th.k-state-focused {
-  box-shadow: none;
-}
-
-#setup .setup-main-panel table td {
+#setup .fields-grid table tr * {
   -webkit-transition: none !important;
   -moz-transition: none !important;
   -o-transition: none !important;
@@ -93,13 +111,127 @@
   transition: none !important;
 }
 
-#setup .setup-main-panel table td .disabled {
-  color: #bbb;
+#setup .fields-grid table th {
+  border-style: solid;
+  border-width: 0 0 1px 0;
+  padding: 0.25em 0.4em;
+  font-size: 10px;
+  color: #666;
+  white-space: nowrap;
 }
 
-#setup .setup-main-panel .k-grid table input[type="text"] {
-  height: 2em;
+#setup .fields-grid th .k-link {
+  overflow: visible;
+}
+
+#setup .fields-grid th .k-icon {
+  margin: 0 0 0 10px;
+  height: 100%;
+  line-height: 100%;
+}
+
+#setup .fields-grid th .k-i-arrow-n:before {
+  font-size: 1.4em;
+  content: "\f106";
+}
+
+#setup .fields-grid th .k-i-arrow-s:before {
+  font-size: 1.4em;
+  content: "\f107";
+}
+
+#setup .fields-grid tr:nth-child(odd) {
+  background: #fff;
+}
+
+#setup .fields-grid tr:nth-child(even) {
+  background: #f3f7fb;
+}
+
+#setup .fields-grid table td {
+  border-width: 0;
+  border-style: none;
+  padding: 0.6em 0.4em;
+  font-size: 12px;
+}
+
+#setup .fields-grid table td *{
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+  white-space: nowrap;
+}
+
+#setup .fields-grid table input[type="text"] {
+  margin: 0;
+  padding: 4px;
+  width: 92%;
+  height: 1.8em;
+  font-size: 12px;
   text-indent: 0;
+}
+
+#setup .fields-grid table select {
+  margin: 0;
+  padding: 4px;
+  width: 88%;
+  height: 1.8em;
+  font-size: 12px;
+  text-indent: 0;
+}
+
+#setup .fields-grid table .k-dirty {
+  margin: 0;
+  border-color: #f35321 transparent transparent #f35321;
+}
+
+#setup .fields-grid.edit table td {
+  padding: 0.4em 0.4em;
+}
+
+#setup .fields-grid table span.edit {
+  padding: 4px;
+  height: 1.8em;
+  line-height: 1.8em;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  display: block;
+}
+
+#setup .fields-grid table span.warning {
+  display: inline-block;
+  width: 20px;
+  height: 16px;
+  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat;
+  background-position: 2px 0;
+  vertical-align: middle;
+}
+
+#setup .fields-grid.edit table span.warning {
+  display: block;
+  width: 22px;
+  height: 15px;
+  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat;
+  background-position: 5px 0;
+}
+
+#setup .fields-grid table input[type="text"].warning,
+#setup .fields-grid table select.warning {
+  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat;
+  background-position: 4px 7px;
+  background-color: white;
+}
+
+#setup .fields-grid .k-grid-pager {
+  background: white;
+  border: none;
+  margin: 8px 0 0 0;
+  padding: 0;
+}
+
+#setup .fields-grid .k-grid-pager * {
   -webkit-transition: none !important;
   -moz-transition: none !important;
   -o-transition: none !important;
@@ -107,30 +239,46 @@
   transition: none !important;
 }
 
-#setup .setup-main-panel table .k-dropdown .k-input {
-  height: 1.7em;
-  line-height: 1.7em;
-  text-indent: .6em;
+#setup .fields-grid .k-grid-pager a.k-state-disabled {
+  opacity: 1;
 }
 
-#setup .setup-main-panel .warning:after {
-   content: "\f071";
+#setup .fields-grid .k-grid-pager.k-state-disabled .k-icon {
+  opacity: 0.5;
 }
 
-#setup .setup-main-panel .k-icon {
-  -webkit-transition: none !important;
-  -moz-transition: none !important;
-  -o-transition: none !important;
-  -ms-transition: none !important;
-  transition: none !important;
+#setup .fields-grid .k-grid-pager .k-i-seek-w:before {
+  font-size: .9em;
+  content: "\f048";
 }
 
-.k-animation-container, .k-list-container > *, .k-list-container ul, .k-list-container li {
-  -webkit-transition: none !important;
-  -moz-transition: none !important;
-  -o-transition: none !important;
-  -ms-transition: none !important;
-  transition: none !important;
+#setup .fields-grid .k-grid-pager .k-i-arrow-w:before {
+  position: relative;
+  top: -1px;
+  font-size: 1.3em;
+  content: "\f0d9";
+}
+
+#setup .fields-grid .k-grid-pager .k-i-arrow-e:before {
+  position: relative;
+  top: -1px;
+  font-size: 1.3em;
+  content: "\f0da";
+}
+
+#setup .fields-grid .k-grid-pager .k-i-seek-e:before {
+  font-size: .9em;
+  content: "\f051";
+}
+
+#setup .fields-grid .k-grid-pager .k-current-page {
+  -webkit-transform: none;
+  transform: none;
+}
+
+#setup .fields-grid .k-grid-pager .k-pager-numbers {
+  margin: 0;
+  
 }
 
 #setup .field-details {
@@ -139,7 +287,8 @@
   right: 0;
   bottom: 0;
   left: 0;
-  background-color: white;
+  background: white;
+  min-width: 800px;
 }
 
 #setup .field-details .data-table {

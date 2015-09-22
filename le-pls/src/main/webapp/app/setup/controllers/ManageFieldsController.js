@@ -36,15 +36,6 @@ angular.module('mainApp.setup.controllers.ManageFieldsController', [
         parentData:   null
     });
 
-    $scope.topNavClicked = function ($event, nodeName) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-
-        $timeout(function () {
-            $("#setup .setup-sidebar li[node-name='" + nodeName + "']").trigger('click');
-        });
-    };
 })
 
 .directive('manageFields', function () {

@@ -4,12 +4,28 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public interface MetadataConstants {
+public final class VdbMetadataConstants {
 
-    static final String SOURCE_MARKETO = "Marketo";
-    static final String SOURCE_ELOQUA = "Eloqua";
-    static final String SOURCE_SALESFORCE = "Salesforce";
-    static final String SOURCE_LATTICE_DATA_CLOUD = "Lattice Data Cloud";
+    public static final String MODELING_QUERY_NAME = "Q_PLS_Modeling";
+    public static final String CUSTOM_QUERY_NAME = "Q_Metadata_Custom";
+
+    public static final String SOURCE_MARKETO = "Marketo";
+    public static final String SOURCE_ELOQUA = "Eloqua";
+    public static final String SOURCE_SALESFORCE = "Salesforce";
+    public static final String SOURCE_LATTICE_DATA_CLOUD = "Lattice Data Cloud";
+
+    public static final String ATTRIBUTE_SOURCE = "DataSource";
+    public static final String ATTRIBUTE_CATEGORY = "Category";
+    public static final String ATTRIBUTE_DISPLAYNAME = "DisplayName";
+    public static final String ATTRIBUTE_DESCRIPTION = "Description";
+    public static final String ATTRIBUTE_APPROVED_USAGE = "ApprovedUsage";
+    public static final String ATTRIBUTE_TAGS = "Tags";
+    public static final String ATTRIBUTE_FUNDAMENTAL_TYPE = "FundamentalType";
+    public static final String ATTRIBUTE_DISPLAY_DISCRETIZATION = "DisplayDiscretizationStrategy";
+    public static final String ATTRIBUTE_STATISTICAL_TYPE = "StatisticalType";
+
+    public static final String ATTRIBUTE_NULL_VALUE = "<NULL>";
+    public static final String ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE = "Unknown";
 
     @SuppressWarnings("serial")
     public static final Map<String, String> SOURCE_MAPPING = Collections.unmodifiableMap(

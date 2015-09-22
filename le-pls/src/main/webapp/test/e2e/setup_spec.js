@@ -22,28 +22,6 @@ describe('setup tests', function () {
         userDropdown.SetupLink.click();
         browser.waitForAngular();
         expect(element(by.id('setup')).getWebElement().isDisplayed()).toBe(true);
-
-        //==================================================
-        // Toggle Nav Link
-        //==================================================
-        /*
-        expect(element(by.css('.setup-main-panel data-setup-home')).getWebElement().isDisplayed()).toBe(false);
-        setup.getNavLinkByNodeName('home').click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-        expect(element(by.css('.setup-main-panel data-setup-home')).getWebElement().isDisplayed()).toBe(true);
-
-        expect(element(by.css('.setup-main-panel data-setup-data')).getWebElement().isDisplayed()).toBe(false);
-        setup.getNavLinkByNodeName('data').click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-        expect(element(by.css('.setup-main-panel data-setup-data')).getWebElement().isDisplayed()).toBe(true);
-        */
-
-        expect(element(by.css('.setup-main-panel data-manage-fields')).getWebElement().isDisplayed()).toBe(false);
-        setup.getNavLinkByNodeName('manageFields').click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
         expect(element(by.css('.setup-main-panel data-manage-fields')).getWebElement().isDisplayed()).toBe(true);
 
         //==================================================
