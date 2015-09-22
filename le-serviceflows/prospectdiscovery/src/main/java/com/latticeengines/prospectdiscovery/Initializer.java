@@ -1,4 +1,4 @@
-package com.latticeengines.prospectdiscovery.dataflow;
+package com.latticeengines.prospectdiscovery;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
