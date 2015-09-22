@@ -28,6 +28,12 @@ public abstract class DataFlowBuilder {
     private DataFlowContext dataFlowCtx;
 
     public abstract String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources);
+    
+    public String constructFlowDefinition(DataFlowContext dataFlowCtx, //
+            Map<String, String> sources, //
+            Map<String, Table> sourceTables) { 
+        return null;
+    }
 
     public abstract Schema getSchema(String flowName, String operatorName, DataFlowContext dataFlowCtx);
 

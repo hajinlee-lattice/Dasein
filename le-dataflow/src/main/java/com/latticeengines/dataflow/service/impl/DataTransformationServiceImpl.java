@@ -23,7 +23,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     @Override
     public void executeNamedTransformation(DataFlowContext dataFlowCtx, String dataFlowBldrBeanName) {
         validateParameters(dataFlowCtx, //
-                "SOURCES", //
                 "QUEUE", //
                 "TARGETPATH", //
                 "CUSTOMER", //
@@ -54,6 +53,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         if (missingProps.size() > 0) {
             throw new LedpException(LedpCode.LEDP_26001, new String[] { StringUtils.join(missingProps, ", ") });
         }
+        
     }
 
 }
