@@ -127,6 +127,8 @@ public enum LedpCode {
     LEDP_18047("Failed to update metadata field: {0}."), //
     LEDP_18048("Failed to update metadata fields: {0}."), //
     LEDP_18049("Failed to retrieve feature flags from ZK for the tenant {0}."), //
+    LEDP_18050("Query with name {0} not found."), //
+    LEDP_18051("Column with name {0} not found."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
