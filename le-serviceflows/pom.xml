@@ -18,7 +18,9 @@
         <relativePath>../le-parent</relativePath>
     </parent>
     
+
     <modules>
+        <module>core</module>
         <module>prospectdiscovery</module>
     </modules>
 
