@@ -1,8 +1,10 @@
 package com.latticeengines.propdata.api.service.impl;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -46,6 +48,8 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         Commands command = matchCommandService.createMatchCommand(request);
 
         verifier.verify(command.getPid(), request);
+
+        verifier.cleanupResultTales(command.getPid(), request);
     }
 
     @DataProvider(name = "matchDataProvider", parallel = true)
@@ -65,13 +69,32 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
     // ==================================================
     // Verifiers
     // ==================================================
-    private interface MatchVerifier { void verify(Long commandId, CreateCommandRequest request); }
+    private interface MatchVerifier {
+        void verify(Long commandId, CreateCommandRequest request);
+        void cleanupResultTales(Long commandId, CreateCommandRequest request);
+    }
 
     private abstract class AbstractMatchVerifier implements MatchVerifier {
         @Override
         public void verify(Long commandId, CreateCommandRequest request) {
             verifyCreateCommandRequest(commandId, request);
             verifyResults(commandId, request);
+        }
+
+        @Override
+        public void cleanupResultTales(Long commandId, CreateCommandRequest request) {
+            String[] destTables = request.getDestTables().split("\\|");
+            String commandName = request.getCommandType().getCommandName();
+            Set<String> resultTables = new HashSet<>();
+            for (String destTable: destTables) {
+                String mangledTableName = String.format("%s_%s_%s",
+                        commandName, String.valueOf(commandId), destTable);
+                resultTables.add(mangledTableName);
+            }
+            for (String resultTable: resultTables) {
+                tryDropTable(resultTable);
+                tryDropTable(resultTable + "_MetaData");
+            }
         }
 
         abstract void verifyResults(Long commandId, CreateCommandRequest request);
@@ -179,6 +202,12 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         List<Map<String, Object>> result =
                 jdbcTemplate.queryForList("SELECT * FROM [PropDataMatchDB].[dbo].[" + tableName + "]");
         Assert.assertTrue(result.size() >= minAccounts, tableName + " should have at least " + minAccounts + " rows.");
+    }
+
+
+    private void tryDropTable(String tableName) {
+        jdbcTemplate.execute("IF OBJECT_ID('[PropDataMatchDB].[dbo].[" + tableName + "]', 'U') IS NOT NULL " +
+                "DROP [PropDataMatchDB].[dbo].[" + tableName + "]");
     }
 
 }
