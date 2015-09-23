@@ -63,14 +63,11 @@ var JsLoader = function(){
             if (!done) {
                 done = true;
                 console.log("Failed to load resource at " + path);
-                js = document.createElement('script');
-                js.onload = handleLoad;
-                js.onreadystatechange = handleReadyStateChange;
-                js.src = fallback;
-                js.async = async;
-                js.type = 'text/javascript';
-                s = document.getElementsByTagName('script')[0];
-                s.parentNode.insertBefore(js, s);
+                if (fallback !== null) {
+                    loadScript(fallback, null, callback, async);
+                } else {
+                    callback();
+                }
             }
         }
     }

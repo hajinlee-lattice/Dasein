@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.css"/>
+
     <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.min.css">
@@ -219,7 +220,7 @@ Use DOMUtil.isIE() to detect internet explorer.
     var jslist = [
         {path:cdnroot + "jquery/<%= version.jquery %>/jquery.min.js", fallback:"lib/js/jquery.js"},
 
-        {path:cdnroot + "angular.js/<%= version.angular %>/angular.js", fallback:"lib/js/angular/angular.js"},
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular.min.js", fallback:"lib/js/angular/angular.js"},
         {path:cdnroot + "angular.js/<%= version.angular %>/angular-sanitize.min.js", fallback:"lib/js/angular/angular-sanitize.js"},
         {path:cdnroot + "angular.js/<%= version.angular %>/angular-resource.min.js", fallback:"lib/js/angular/angular-resource.js"},
         {path:cdnroot + "angular.js/<%= version.angular %>/angular-route.min.js", fallback:"lib/js/angular/angular-route.js"},
@@ -236,7 +237,7 @@ Use DOMUtil.isIE() to detect internet explorer.
         {path:cdnroot + "jStorage/<%= version.jStorage %>/jstorage.min.js", fallback:"lib/js/jstorage.js"},
         {path:cdnroot + "alasql/<%= version.alasql %>/alasql.min.js", fallback:"lib/js/alasql.min.js"},
         {path:cdnroot + "FileSaver.js/<%= version.FileSaver %>/FileSaver.min.js", fallback:"lib/js/FileSaver.js"},
-        {path:"lib/js/kendo.all.min.js", fallback:"lib/js/kendo.all.min.js"},
+        {path:"//cdn.kendostatic.com/<%= version.kendo %>/js/kendo.all.min.js", fallback:"lib/js/kendo.all.min.js"},
 
         {path:cdnroot + "webfont/<%= version.webfont %>/webfontloader.js", fallback:"lib/js/webfontloader.js"},
 
