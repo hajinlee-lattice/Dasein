@@ -65,6 +65,7 @@ public class DefaultConfigOverwritter {
             patch.setDefaultOption(dlUrl);
             patch.setOptions(Arrays.asList(dlUrlOptions.split(listDelimiter)));
             serviceService.patchDefaultConfigWithOptions(LatticeComponent.spaceConfigNode, patch);
+            dynamicOptionsService.updateMutableOptionsProviderSource(LatticeComponent.spaceConfigNode, patch);
         }
     }
 
@@ -126,6 +127,7 @@ public class DefaultConfigOverwritter {
         patch.setDefaultOption(vdbPermstore);
         patch.setOptions(Arrays.asList(vdbPermstoreOptions.split(listDelimiter)));
         serviceService.patchDefaultConfigWithOptions(VisiDBDLComponent.componentName, patch);
+        dynamicOptionsService.updateMutableOptionsProviderSource(VisiDBDLComponent.componentName, patch);
     }
 
     private void overwriteVdbServernameConfig() {
