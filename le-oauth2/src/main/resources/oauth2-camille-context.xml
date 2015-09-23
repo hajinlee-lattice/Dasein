@@ -33,7 +33,7 @@
                 <value>BOOTSTRAP</value>
                 <bean
                     class="com.latticeengines.camille.exposed.CamilleConfiguration">
-                    <constructor-arg value="${oath2.zk.pod.id:Default}" />
+                    <constructor-arg value="${oauth2.zk.pod.id:Default}" />
                     <constructor-arg
                         value="${oauth2.zk.connectionString:localhost:2181}" />
                 </bean>
