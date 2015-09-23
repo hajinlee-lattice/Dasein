@@ -7,9 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
-import com.latticeengines.admin.dynamicopts.MutableOptionsProvider;
-import com.latticeengines.admin.dynamicopts.OptionsProvider;
 import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -32,9 +29,6 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Autowired
     private ServiceEntityMgr serviceEntityMgr;
-
-    @Autowired
-    private DynamicOptionsService dynamicOptionsService;
 
     private static BatonService batonService = new BatonServiceImpl();
 
@@ -112,8 +106,6 @@ public class ServiceServiceImpl implements ServiceService {
             doc.setData(mapper.writeValueAsString(metadata));
             camille.set(schemaPath, doc);
 
-            updateMutableOptionsProviderSource(serviceName, field);
-
             return true;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_19101, String.format(
@@ -175,14 +167,6 @@ public class ServiceServiceImpl implements ServiceService {
         node.setData(data);
         DocumentDirectory metaDir = getConfigurationSchema(serviceName);
         conf.applyMetadata(metaDir);
-    }
-
-    private void updateMutableOptionsProviderSource(String serviceName, SelectableConfigurationField field) {
-        OptionsProvider provider = dynamicOptionsService.getProvider(new Path("/" + serviceName + field.getNode()));
-        if (provider instanceof MutableOptionsProvider) {
-            MutableOptionsProvider mutableOptionsProvider = (MutableOptionsProvider) provider;
-            mutableOptionsProvider.setOptions(field.getOptions());
-        }
     }
 }
 

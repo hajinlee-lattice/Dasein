@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
@@ -53,6 +54,9 @@ public class DefaultConfigOverwritter {
 
     @Autowired
     private ServiceService serviceService;
+
+    @Autowired
+    private DynamicOptionsService dynamicOptionsService;
 
     public void overwriteDefaultSpaceConfig() {
         if (isToBeOverwritten(dlUrl) && isToBeOverwritten(dlUrlOptions)) {
@@ -132,6 +136,7 @@ public class DefaultConfigOverwritter {
         System.out.println("serviceService is not null: " + (serviceService != null));
         System.out.println("VisiDBDLComponent.component is not null: " + (VisiDBDLComponent.componentName != null));
         serviceService.patchDefaultConfigWithOptions(VisiDBDLComponent.componentName, patch);
+        dynamicOptionsService.updateMutableOptionsProviderSource(VisiDBDLComponent.componentName, patch);
     }
 
     private boolean isToBeOverwritten(String value) {

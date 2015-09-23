@@ -1,6 +1,7 @@
 package com.latticeengines.admin.dynamicopts;
 
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
+import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -11,5 +12,7 @@ public interface DynamicOptionsService {
     SelectableConfigurationDocument bind(SelectableConfigurationDocument doc);
 
     OptionsProvider getProvider(Path node);
+
+    void updateMutableOptionsProviderSource(String serviceName, SelectableConfigurationField field);
 
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
+import com.latticeengines.admin.dynamicopts.MutableOptionsProvider;
 import com.latticeengines.admin.dynamicopts.OptionsProvider;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
@@ -100,6 +101,15 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
             return optionMap.get(node);
         } else {
             return new OptionsProvider.NullProvider();
+        }
+    }
+
+    @Override
+    public void updateMutableOptionsProviderSource(String serviceName, SelectableConfigurationField field) {
+        OptionsProvider provider = getProvider(new Path("/" + serviceName + field.getNode()));
+        if (provider instanceof MutableOptionsProvider) {
+            MutableOptionsProvider mutableOptionsProvider = (MutableOptionsProvider) provider;
+            mutableOptionsProvider.setOptions(field.getOptions());
         }
     }
 
