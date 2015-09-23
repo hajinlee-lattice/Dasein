@@ -149,7 +149,7 @@ class LearningExecutor(Executor):
     def getModelDirPath(self, schema):
         if "CONTAINER_ID" in os.environ:
             tokens = os.environ['CONTAINER_ID'].split("_")
-            if(tokens[1].startswith("e07")):
+            if(tokens[1].startswith("e")):
                 appIdList = tokens[2:4]
             else:
                 appIdList = tokens[1:3]
