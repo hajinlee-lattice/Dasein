@@ -47,9 +47,11 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         request.setSourceTable(sourceTable);
         Commands command = matchCommandService.createMatchCommand(request);
 
-        verifier.verify(command.getPid(), request);
-
-        verifier.cleanupResultTales(command.getPid(), request);
+        try {
+            verifier.verify(command.getPid(), request);
+        } finally {
+            verifier.cleanupResultTales(command.getPid(), request);
+        }
     }
 
     @DataProvider(name = "matchDataProvider", parallel = true)
@@ -209,10 +211,15 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         Assert.assertTrue(result.size() >= minAccounts, tableName + " should have at least " + minAccounts + " rows.");
     }
 
+    private boolean tableExists(String tableName) {
+        String sql = String.format("IF OBJECT_ID (N'dbo.%s', N'U') IS NOT NULL SELECT 1 ELSE SELECT 0", tableName);
+        return jdbcTemplate.queryForObject(sql, Boolean.class);
+    }
 
     private void tryDropTable(String tableName) {
-        jdbcTemplate.execute("IF OBJECT_ID('[PropDataMatchDB].[dbo].[" + tableName + "]', 'U') IS NOT NULL " +
-                "DROP [PropDataMatchDB].[dbo].[" + tableName + "]");
+        if (tableExists(tableName)) {
+            jdbcTemplate.execute("DROP TABLE [PropDataMatchDB].[dbo].[" + tableName + "]");
+        }
     }
 
 }
