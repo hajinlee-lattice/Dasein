@@ -238,7 +238,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
 
         if (in1_4) {
             originalUuids.add(uuid);
-            //System.out.print("Copying the whole model folder ...");
+            System.out.print("This is a 1.4 customer");
             //yarnManager.moveModelFolderFromSingularToTupleId(customer, uuid);
             //System.out.println("OK");
         }
@@ -365,13 +365,14 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
     public boolean execute(String command, Map<String, Object> parameters) {
         String customer = (String) parameters.get("customer");
         Boolean all = (Boolean) parameters.get("all");
-
-        try {
-            List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDBInfos(customer);
-            setInfos(bardInfos);
-            bardJdbcManager.init(bardDB, instance);
-        } catch (Exception e2) {
-            throw new LedpException(LedpCode.LEDP_24000, e2);
+        if(!all){
+            try {
+                List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDBInfos(customer);
+                setInfos(bardInfos);
+                bardJdbcManager.init(bardDB, instance);
+            } catch (Exception e2) {
+                throw new LedpException(LedpCode.LEDP_24000, e2);
+            }
         }
 
         switch (command) {
