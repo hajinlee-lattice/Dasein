@@ -12,6 +12,7 @@ public final class PathConstants {
 
     public static final String DEFAULTCONFIG_NODE = "Default";
     public static final String CONFIGSCHEMA_NODE = "Metadata";
+    public static final String SPACECONFIGURATION_NODE = "SpaceConfiguration";
 
     public static final String PROPERTIES_FILE = "properties.json";
     @Deprecated

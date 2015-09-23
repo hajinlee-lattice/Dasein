@@ -26,6 +26,7 @@ import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -73,6 +74,17 @@ public class BatonServiceImpl implements BatonService {
             tenantInfo.properties.lastModified = new DateTime().getMillis();
 
             TenantLifecycleManager.create(contractId, tenantId, tenantInfo, defaultSpaceId, spaceInfo);
+
+            // Setup a dummy space configuration.
+            // True space configuration will be handled in le-admin
+            String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
+            Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                    contractId, tenantId, spaceId)
+                    .append(new Path("/" + PathConstants.SPACECONFIGURATION_NODE));
+            if (!camille.exists(spaceConfigPath)) {
+                setupSpaceConfiguration(contractId, tenantId,
+                        CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, new SpaceConfiguration());
+            }
         } catch (Exception e) {
             log.error("Error creating tenant", e);
             return false;
@@ -371,6 +383,20 @@ public class BatonServiceImpl implements BatonService {
         }
 
         return docs;
+    }
+
+    @Override
+    public boolean setupSpaceConfiguration(String contractId, String tenantId, String spaceId,
+                                           SpaceConfiguration spaceConfig) {
+        return setupSpaceConfiguration(contractId, tenantId, spaceId, spaceConfig.toDocumentDirectory());
+    }
+
+    private boolean setupSpaceConfiguration(String contractId, String tenantId, String spaceId,
+                                            DocumentDirectory spaceConfig) {
+        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                contractId, tenantId, spaceId)
+                .append(new Path("/" + PathConstants.SPACECONFIGURATION_NODE));
+        return loadDirectory(spaceConfig, spaceConfigPath);
     }
 
 }

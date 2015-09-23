@@ -204,16 +204,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean setupSpaceConfiguration(String contractId, String tenantId, SpaceConfiguration spaceConfig) {
-        return setupSpaceConfiguration(contractId, tenantId, spaceConfig.toDocumentDirectory());
+        return batonService.setupSpaceConfiguration(contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, spaceConfig);
     }
-
-    private boolean setupSpaceConfiguration(String contractId, String tenantId, DocumentDirectory spaceConfig) {
-        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID)
-                .append(new Path("/" + spaceConfigNode));
-        return batonService.loadDirectory(spaceConfig, spaceConfigPath);
-    }
-
 
     @Override
     public boolean danteIsEnabled(String contractId, String tenantId) {

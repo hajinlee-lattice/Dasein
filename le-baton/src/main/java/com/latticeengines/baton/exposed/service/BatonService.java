@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -43,4 +44,7 @@ public interface BatonService {
     DocumentDirectory getDefaultConfiguration(String serviceName);
 
     DocumentDirectory getConfigurationSchema(String serviceName);
+
+    boolean setupSpaceConfiguration(String contractId, String tenantId, String spaceId,
+                                    SpaceConfiguration spaceConfig);
 }

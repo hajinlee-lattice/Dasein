@@ -19,6 +19,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -37,7 +38,7 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     protected static BatonService batonService = new BatonServiceImpl();
 
-    public static final String spaceConfigNode = "SpaceConfiguration";
+    public static final String spaceConfigNode = PathConstants.SPACECONFIGURATION_NODE;
 
     public abstract boolean doRegistration();
 
