@@ -37,8 +37,8 @@ public class RunJenkinsDeploymentJobActivity extends RunJenkinsJobActivity {
     private JenkinsJobParameters constructReleaseProcessParameters() {
         JenkinsJobParameters jenkinsParameters = new JenkinsJobParameters();
         NameValuePair branchName = new NameValuePair("SVN_BRANCH_NAME", "release_" + processContext.getReleaseVersion());
-
-        List<NameValuePair> nameValuePairs = Arrays.asList(new NameValuePair[] { branchName });
+        NameValuePair branchDir = new NameValuePair("SVN_DIR", "tags");
+        List<NameValuePair> nameValuePairs = Arrays.asList(new NameValuePair[] { branchName, branchDir });
         jenkinsParameters.setNameValuePairs(nameValuePairs);
         return jenkinsParameters;
     }
