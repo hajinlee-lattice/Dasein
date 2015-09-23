@@ -10,6 +10,7 @@
     <properties>
         <component-name>job</component-name>
         <le.dataplatform.version>2.0.9-SNAPSHOT</le.dataplatform.version>
+        <le.dataflow.version>2.0.9-SNAPSHOT</le.dataflow.version>
         <le.db.version>2.0.9-SNAPSHOT</le.db.version>
         <le.camille.version>2.0.9-SNAPSHOT</le.camille.version>
         <le.propdata.version>2.0.9-SNAPSHOT</le.propdata.version>
@@ -196,6 +197,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dellebi</artifactId>
             <version>${le.dellebi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataflow</artifactId>
+            <version>${le.dataflow.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
