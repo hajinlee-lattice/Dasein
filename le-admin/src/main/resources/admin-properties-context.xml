@@ -19,17 +19,18 @@
       http://www.springframework.org/schema/security/spring-security-4.0.xsd
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
- 
+
 
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
                 <value>file:${ADMIN_PROPDIR}/admin.properties</value>
+                <value>file:${DB_PROPDIR}/db.properties</value>
                 <value>file:${SECURITY_PROPDIR}/security.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
         <property name="ignoreResourceNotFound" value="false" />
     </bean>
-        
-</beans>    
+
+</beans>

@@ -29,6 +29,7 @@
             </activation>
             <properties>
                 <admin.properties.path>conf/env/buildmachine</admin.properties.path>
+                <db.properties.path>../le-db/conf/env/buildmachine</db.properties.path>
                 <security.properties.path>../le-security/conf/env/buildmachine</security.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
@@ -45,6 +46,7 @@
             </activation>
             <properties>
                 <admin.properties.path>conf/env/devcluster</admin.properties.path>
+                <db.properties.path>../le-db/conf/env/devcluster</db.properties.path>
                 <security.properties.path>../le-security/conf/env/devcluster</security.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
@@ -60,6 +62,7 @@
             </activation>
             <properties>
                 <admin.properties.path>conf/env/qacluster</admin.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
                 <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
@@ -75,6 +78,7 @@
             </activation>
             <properties>
                 <admin.properties.path>conf/env/prodcluster</admin.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
                 <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
@@ -116,6 +120,9 @@
                             <sources>
                                 <source>
                                     <location>${admin.properties.path}/admin.properties</location>
+                                </source>
+                                <source>
+                                    <location>${db.properties.path}/db.properties</location>
                                 </source>
                                 <source>
                                     <location>${security.properties.path}/security.properties</location>
