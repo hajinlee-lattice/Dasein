@@ -135,8 +135,6 @@ public class DefaultConfigOverwritter {
         patch.setNode("/VisiDB/ServerName");
         patch.setDefaultOption(vdbServername);
         patch.setOptions(Arrays.asList(vdbServernameOptions.split(listDelimiter)));
-        System.out.println("serviceService is not null: " + (serviceService != null));
-        System.out.println("VisiDBDLComponent.component is not null: " + (VisiDBDLComponent.componentName != null));
         serviceService.patchDefaultConfigWithOptions(VisiDBDLComponent.componentName, patch);
         dynamicOptionsService.updateMutableOptionsProviderSource(VisiDBDLComponent.componentName, patch);
     }
