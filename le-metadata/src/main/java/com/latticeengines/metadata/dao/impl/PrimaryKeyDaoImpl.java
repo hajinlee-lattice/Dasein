@@ -4,6 +4,7 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
 
+@Component("primaryKeyDao")
 public class PrimaryKeyDaoImpl extends BaseDaoImpl<PrimaryKey> implements PrimaryKeyDao {
 
     @Override

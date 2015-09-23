@@ -10,7 +10,7 @@
 
 	<context:component-scan base-package="com.latticeengines.propdata.matching" />
 
-	<import resource="classpath:db-context.xml" />
+	<import resource="classpath:cassandra-context.xml" />
 
 	<task:executor id="executorPool" pool-size="5"
 				   queue-capacity="5" rejection-policy="CALLER_RUNS" />

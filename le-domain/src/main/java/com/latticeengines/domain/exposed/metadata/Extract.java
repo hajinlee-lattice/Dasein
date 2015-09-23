@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "EXTRACT")
+@javax.persistence.Table(name = "METADATA_EXTRACT")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
 
@@ -43,7 +43,7 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
     private Table table;
     private Tenant tenant;
     private Long tenantId;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -70,13 +70,13 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     @Column(name = "PATH", unique = false, nullable = false)
     @JsonProperty("path")
     public String getPath() {
         return path;
     }
-    
+
     @JsonProperty("path")
     public void setPath(String path) {
         this.path = path;

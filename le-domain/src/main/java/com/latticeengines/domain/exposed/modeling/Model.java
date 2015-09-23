@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -91,7 +92,8 @@ public class Model implements HasName, HasPid, HasId<String> {
         }
     }
 
-    @Column(name = "FEATURES", length = 65535)
+    @Column(name = "FEATURES")
+    @Lob
     @JsonIgnore
     public String getFeatures() {
         return StringTokenUtils.listToString(this.features);
@@ -308,7 +310,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     /**
      * http://docs.jboss.org/hibernate/core/4.0/manual/en-US/html/persistent-
      * classes.html#persistent-classes-equalshashcode
-     * 
+     *
      * right now, it only perform a partially shallow comparison due to
      * efficiency reason. Collection object is compared, but composite domain
      * object is not compared. If composite domain object needs to be compared,

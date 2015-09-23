@@ -10,6 +10,6 @@
 
 	<context:component-scan base-package="com.latticeengines.db" />
 
-	<import resource="classpath:db-cassandra-context.xml" />
+    <import resource="classpath:db-persistence-context.xml" />
 
 </beans>

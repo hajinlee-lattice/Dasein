@@ -30,6 +30,7 @@
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
     <import resource="classpath:dataplatform-yarn-client-context.xml"/>
     <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />
+    <import resource="classpath:db-context.xml" />
     <import resource="classpath:dataplatform-persistence-context.xml" />
     <import resource="classpath:dataplatform-validation-context.xml" />
     <import resource="classpath:monitor-alerts-context.xml" />

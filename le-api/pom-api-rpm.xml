@@ -33,6 +33,7 @@
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/buildmachine
                 </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/buildmachine</db.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -50,6 +51,7 @@
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/devcluster
                 </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/devcluster</db.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -67,6 +69,7 @@
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/intcluster
                 </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/intcluster</db.properties.path>
                 <bin.env.path>bin/env/intcluster</bin.env.path>
             </properties>
         </profile>
@@ -83,6 +86,7 @@
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/qacluster
                 </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -99,6 +103,7 @@
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/prodcluster
                 </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -141,6 +146,9 @@
                                 </source>
                                 <source>
                                     <location>${dataplatform.properties.path}/dataplatform.properties</location>
+                                </source>
+                                <source>
+                                    <location>${db.properties.path}/db.properties</location>
                                 </source>
                             </sources>
                         </mapping>

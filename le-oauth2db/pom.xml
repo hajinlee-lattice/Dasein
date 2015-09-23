@@ -134,6 +134,7 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
+            <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

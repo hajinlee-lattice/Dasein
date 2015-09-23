@@ -4,7 +4,6 @@ import static org.testng.Assert.assertTrue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -20,13 +19,13 @@ public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Value("${dataplatform.dlorchestration.datasource.type}")
     private String dataSourceType;
 
-    @Value("${dataplatform.dao.datasource.url}")
+    @Value("${db.datasource.url}")
     private String daoURL;
 
-    @Value("${dataplatform.dao.datasource.user}")
+    @Value("${db.datasource.user}")
     private String daoUser;
 
-    @Value("${dataplatform.dao.datasource.type}")
+    @Value("${db.datasource.type}")
     private String daoType;
 
     @Autowired

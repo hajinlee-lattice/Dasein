@@ -1,6 +1,0 @@
-#!/bin/bash
-echo running java SchemaGenerator
-
-java -cp ".:/tmp/dataplatform/database/lib/le-dataplatform-*.jar:/tmp/dataplatform/database/lib/le-domain-*.jar:/tmp/dataplatform/database/lib/*" -Dlog4j.configuration=file:/tmp/dataplatform/database/lib/log4j.xml  com.latticeengines.dataplatform.dao.impl.SchemaGenerator false /tmp/dataplatform/database
-
-java -cp ".:/tmp/dataplatform/database/lib/le-dataplatform-*.jar:/tmp/dataplatform/database/lib/le-domain-*.jar:/tmp/dataplatform/database/lib/*" -Dlog4j.configuration=file:/tmp/dataplatform/database/lib/log4j.xml com.latticeengines.dataplatform.dao.impl.EnableSQLServerSnapshotIsolation /tmp/dataplatform/database

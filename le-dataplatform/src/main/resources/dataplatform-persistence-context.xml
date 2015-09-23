@@ -19,36 +19,6 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${dataplatform.dao.datasource.driver}" />
-        <property name="url"      value="${dataplatform.dao.datasource.url}" />
-        <property name="username" value="${dataplatform.dao.datasource.user}" />
-        <property name="password" value="${dataplatform.dao.datasource.password.encrypted}" />
-    </bean>
-
-    <bean id="ledpJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="dataSource" />
-
-    <!-- Hibernate session factory -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="dataSource" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dataplatform, 
-            com.latticeengines.domain.exposed.modeling, com.latticeengines.domain.exposed.eai" />
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">${dataplatform.dao.datasource.dialect}</prop>
-                <prop key="hibernate.show_sql">false</prop>
-                <prop key="hibernate.globally_quoted_identifiers">true</prop>
-                <!--   <prop key="hibernate.current_session_context_class">thread</prop> -->
-                <!--   <prop key="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</prop>  -->
-            </props>
-        </property>
-    </bean>
-
-    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-        p:sessionFactory-ref="sessionFactory" />
-
-    <tx:annotation-driven transaction-manager="transactionManager" />
-
     <bean id="dataSourceDlOrchestration" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${dataplatform.dlorchestration.datasource.driver}" />
         <property name="url"      value="${dataplatform.dlorchestration.datasource.url}" />
@@ -77,28 +47,7 @@
     <bean id="dlOrchestrationJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="dataSourceDlOrchestration" />
 
     <!--   All DAOs' EntityMgrs should be added to com.latticeengines.dataplatform.functionalframework.OrderedEntityMgrListForDbClean -->
-    <!--   DAOs for ledp database  -->
-    <bean id="jobDao" class="com.latticeengines.dataplatform.dao.impl.JobDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
-
-    <bean id="modelDao" class="com.latticeengines.dataplatform.dao.impl.modeling.ModelDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
-
-    <bean id="modelDefinitionDao" class="com.latticeengines.dataplatform.dao.impl.modeling.ModelDefinitionDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
-
-    <bean id="algorithmDao" class="com.latticeengines.dataplatform.dao.impl.modeling.AlgorithmDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
-
-    <bean id="throttleConfigurationDao" class="com.latticeengines.dataplatform.dao.impl.modeling.ThrottleConfigurationDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
-
-    <!--  DAOs for LeadScoring database  -->
+    <!--  DAOs for LeadScoring(DLOrchestration) database  -->
     <bean id="modelCommandDao" class="com.latticeengines.dataplatform.dao.impl.ModelCommandDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryDlOrchestration" />
     </bean>

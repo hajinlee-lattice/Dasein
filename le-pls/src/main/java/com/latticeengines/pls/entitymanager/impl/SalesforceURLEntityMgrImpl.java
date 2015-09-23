@@ -6,13 +6,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.SalesforceURL;
 import com.latticeengines.pls.dao.SalesforceURLDao;
 import com.latticeengines.pls.entitymanager.SalesforceURLEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.impl.BasePLSEntityMgrImpl;
 
 @Component("salesforceURLEntityMgr")
-public class SalesforceURLEntityMgrImpl extends BasePLSEntityMgrImpl<SalesforceURL> implements SalesforceURLEntityMgr {
+public class SalesforceURLEntityMgrImpl extends BaseEntityMgrImpl<SalesforceURL> implements SalesforceURLEntityMgr {
 
     @Autowired
     private SalesforceURLDao salesforceURLDao;
@@ -23,7 +23,7 @@ public class SalesforceURLEntityMgrImpl extends BasePLSEntityMgrImpl<SalesforceU
     }
 
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public SalesforceURL findByURLName(String urlName) {
         return salesforceURLDao.findByURLName(urlName);
     }

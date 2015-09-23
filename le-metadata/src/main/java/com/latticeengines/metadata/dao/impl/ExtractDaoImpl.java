@@ -4,6 +4,7 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.metadata.dao.ExtractDao;
 
+@Component("extractDao")
 public class ExtractDaoImpl extends BaseDaoImpl<Extract> implements ExtractDao {
 
     @Override

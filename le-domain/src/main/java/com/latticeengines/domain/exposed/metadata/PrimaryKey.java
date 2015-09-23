@@ -8,7 +8,7 @@ import org.hibernate.annotations.Filter;
 
 
 @Entity
-@Table(name = "PRIMARY_KEY")
+@Table(name = "METADATA_PRIMARY_KEY")
 @PrimaryKeyJoinColumn(name = "PID")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class PrimaryKey extends AttributeOwner {

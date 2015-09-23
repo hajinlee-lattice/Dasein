@@ -7,7 +7,7 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <import resource="classpath:pls-persistence-context.xml"/>
+    <import resource="classpath:db-context.xml"/>
     <import resource="classpath:pls-yarn-config-context.xml"/>
     <import resource="classpath:pls-properties-context.xml"/>
     <import resource="classpath:pls-camille-context.xml"/>

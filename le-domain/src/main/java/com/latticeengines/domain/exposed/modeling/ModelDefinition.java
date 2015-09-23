@@ -73,7 +73,7 @@ public class ModelDefinition implements HasName, HasPid {
 
     /**
      * add algorithm(s) to the model definition - not intended to be used by ORM
-     * 
+     *
      * @param algos
      */
     @JsonProperty("algorithms")
@@ -83,13 +83,13 @@ public class ModelDefinition implements HasName, HasPid {
             this.algorithms.addAll(algos);
             for (Algorithm a : algos) {
                 a.setModelDefinition(this);
-            } 
+            }
         }
     }
 
     /**
-     * add algorithm to the model definition 
-     * 
+     * add algorithm to the model definition
+     *
      * @param algos
      */
     public void addAlgorithm(Algorithm algo) {

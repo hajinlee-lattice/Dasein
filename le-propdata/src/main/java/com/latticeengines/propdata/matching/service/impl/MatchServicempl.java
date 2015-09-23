@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
-import com.latticeengines.db.dao.cassandra.CassandraGenericDao;
-import com.latticeengines.db.dao.cassandra.data.Column;
-import com.latticeengines.db.dao.cassandra.data.ColumnType;
-import com.latticeengines.db.dao.cassandra.data.ColumnTypeMapper;
-import com.latticeengines.db.dao.cassandra.data.Table;
+import com.latticeengines.cassandra.exposed.dao.CassandraGenericDao;
+import com.latticeengines.cassandra.exposed.dao.data.Column;
+import com.latticeengines.cassandra.exposed.dao.data.ColumnType;
+import com.latticeengines.cassandra.exposed.dao.data.ColumnTypeMapper;
+import com.latticeengines.cassandra.exposed.dao.data.Table;
 import com.latticeengines.propdata.matching.service.MatchService;
 import com.latticeengines.propdata.matching.service.SourceSpec;
 

@@ -8,18 +8,18 @@ public class EnableSQLServerSnapshotIsolation {
 
     public static void main(String[] args) throws Exception {
         String dbPropertiesFilepath = args[0];
-        System.setProperty("DATAPLATFORM_PROPDIR", dbPropertiesFilepath);
+        System.setProperty("DB_PROPDIR", dbPropertiesFilepath);
 
         @SuppressWarnings("resource")
-        ApplicationContext context = new ClassPathXmlApplicationContext("test-dataplatform-context.xml");
+        ApplicationContext context = new ClassPathXmlApplicationContext("db-context.xml");
 
-        JdbcTemplate ledpJdbcTemplate = (JdbcTemplate) context.getBean("ledpJdbcTemplate");
-        String catalog = ledpJdbcTemplate.getDataSource().getConnection().getCatalog();
+        JdbcTemplate jdbcTemplate = (JdbcTemplate) context.getBean("jdbcTemplate");
+        String catalog = jdbcTemplate.getDataSource().getConnection().getCatalog();
 
-        ledpJdbcTemplate.execute(String.format("ALTER DATABASE %s SET allow_snapshot_isolation ON", catalog));
-        ledpJdbcTemplate.execute(String.format("ALTER DATABASE %s SET SINGLE_USER WITH ROLLBACK IMMEDIATE", catalog));
-        ledpJdbcTemplate.execute(String.format("ALTER DATABASE %s SET read_committed_snapshot ON", catalog));
-        ledpJdbcTemplate.execute(String.format("ALTER DATABASE %s SET MULTI_USER", catalog));
+        jdbcTemplate.execute(String.format("ALTER DATABASE %s SET allow_snapshot_isolation ON", catalog));
+        jdbcTemplate.execute(String.format("ALTER DATABASE %s SET SINGLE_USER WITH ROLLBACK IMMEDIATE", catalog));
+        jdbcTemplate.execute(String.format("ALTER DATABASE %s SET read_committed_snapshot ON", catalog));
+        jdbcTemplate.execute(String.format("ALTER DATABASE %s SET MULTI_USER", catalog));
     }
 
 }

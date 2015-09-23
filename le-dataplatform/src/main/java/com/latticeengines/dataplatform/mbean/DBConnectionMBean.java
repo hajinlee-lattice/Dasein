@@ -25,16 +25,16 @@ public class DBConnectionMBean {
     @Value("${dataplatform.dlorchestration.datasource.type}")
     private String dataSourceType;
 
-    @Value("${dataplatform.dao.datasource.url}")
+    @Value("${db.datasource.url}")
     private String daoURL;
 
-    @Value("${dataplatform.dao.datasource.user}")
+    @Value("${db.datasource.user}")
     private String daoUser;
 
-    @Value("${dataplatform.dao.datasource.password.encrypted}")
+    @Value("${db.datasource.password.encrypted}")
     private String daoPasswd;
 
-    @Value("${dataplatform.dao.datasource.type}")
+    @Value("${db.datasource.type}")
     private String daoType;
 
     @ManagedOperation(description = "Check ledp Connection ")

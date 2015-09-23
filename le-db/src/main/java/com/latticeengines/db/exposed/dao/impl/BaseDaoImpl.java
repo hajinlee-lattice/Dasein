@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.stereotype.Repository;
 
@@ -16,12 +17,20 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Repository
 public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
+    @Autowired
     protected SessionFactory sessionFactory;
 
     protected SessionFactory getSessionFactory() {
         return this.sessionFactory;
     }
 
+    /**
+     * By default, all dao's are autowired with le-db's sessionFactory. However,
+     * this setter is available for custom data sources to inject their own
+     * custom sessionFactory from Spring XML.
+     *
+     * @param factory
+     */
     public void setSessionFactory(SessionFactory factory) {
         this.sessionFactory = factory;
     }
@@ -38,7 +47,7 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
     /**
      * This is a generic create for the ORM layer. This should work for all
      * entity types.
-     * 
+     *
      */
     @Override
     public void create(T entity) {
@@ -58,12 +67,12 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
      * discussion of unsaved-value checking). This operation cascades to
      * associated instances if the association is mapped with
      * cascade="save-update"
-     * 
-     * 
+     *
+     *
      * @param entity
      *            - Parameters: object - a transient or detached instance
      *            containing new or updated state
-     * 
+     *
      */
     @Override
     public void createOrUpdate(T entity) {
@@ -72,7 +81,7 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
     /**
      * Find an entity by key
-     * 
+     *
      * @param entity
      *            - entity.pid must NOT be null.
      * @return

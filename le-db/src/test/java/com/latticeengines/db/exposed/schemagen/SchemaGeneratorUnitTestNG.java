@@ -10,10 +10,8 @@ public class SchemaGeneratorUnitTestNG {
 
     @Test(groups = "unit")
     public void main() throws Exception {
-        SchemaGenerator.main(new String[] { "pls", //
-                "com.latticeengines.domain.exposed.pls", //
-                "com.latticeengines.domain.exposed.security" });
-        assertTrue(new File("./ddl_pls_mysql5innodb.sql").exists());
-        assertTrue(new File("./ddl_pls_sqlserver.sql").exists());
+        SchemaGenerator.main(new String[] { "PLS_MultiTenant", "com.latticeengines.domain.exposed.dataplatform" });
+        assertTrue(new File("./ddl_PLS_MultiTenant_mysql5innodb.sql").exists());
+        assertTrue(new File("./ddl_PLS_MultiTenant_sqlserver.sql").exists());
     }
 }

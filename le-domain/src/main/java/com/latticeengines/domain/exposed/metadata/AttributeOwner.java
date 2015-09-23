@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "ATTRIBUTE_OWNER")
+@Table(name = "METADATA_ATTRIBUTE_OWNER")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
@@ -91,17 +91,17 @@ public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
-    
+
     public void addAttribute(Attribute attribute) {
         attributes.add(attribute);
     }
-    
+
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "attributeOwner")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<Attribute> getAttributes() {
         return attributes;
     }
-    
+
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
     }

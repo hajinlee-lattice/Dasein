@@ -4,13 +4,14 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.pls.dao.ModelSummaryDao;
 
-
+@Component("modelSummaryDao")
 public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements ModelSummaryDao {
 
     @Override
@@ -48,7 +49,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         }
         return (ModelSummary) list.get(0);
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public List<ModelSummary> findAllValid() {

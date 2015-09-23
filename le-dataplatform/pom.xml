@@ -236,6 +236,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.3.2</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
+                            <arguments>
+                                <argument>LeadScoringDB</argument>
+                                <argument>com.latticeengines.domain.exposed.dataplatform.dlorchestration</argument>
+                                <argument>com.latticeengines.domain.exposed.dataplatform.hibernate</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -372,6 +393,12 @@
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${le.db.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

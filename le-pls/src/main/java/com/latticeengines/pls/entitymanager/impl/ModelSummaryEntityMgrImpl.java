@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -30,13 +31,12 @@ import com.latticeengines.pls.dao.PredictorElementDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.dao.TenantDao;
-import com.latticeengines.security.exposed.entitymanager.impl.BasePLSEntityMgrImpl;
 
 @Component("modelSummaryEntityMgr")
-public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
+public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
 
     private static final Log log = LogFactory.getLog(ModelSummaryEntityMgrImpl.class);
-    
+
     @Autowired
     private KeyValueDao keyValueDao;
 
@@ -45,7 +45,7 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
 
     @Autowired
     private PredictorElementDao predictorElementDao;
-    
+
     @Autowired
     private ModelSummaryDao modelSummaryDao;
 
@@ -61,12 +61,12 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
     }
 
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void create(ModelSummary summary) {
         Tenant tenant = summary.getTenant();
         tenantDao.createOrUpdate(tenant);
         KeyValue details = summary.getDetails();
-        
+
         if (details != null) {
             if (details.getTenantId() == null) {
                 details.setTenantId(tenant.getPid());
@@ -84,25 +84,25 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
             }
         }
     }
-    
+
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> getAll() {
         return super.findAll();
     }
-    
+
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> findAll() {
         return super.findAll();
     }
 
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> findAllValid() {
         return modelSummaryDao.findAllValid();
     }
-    
+
     private void inflateDetails(ModelSummary summary) {
         KeyValue kv = summary.getDetails();
         Hibernate.initialize(kv);
@@ -112,7 +112,7 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
         }
         kv.setTenantId(summary.getTenantId());
     }
-    
+
     private void inflatePredictors(ModelSummary summary) {
         List<Predictor> predictors = summary.getPredictors();
         Hibernate.initialize(predictors);
@@ -120,10 +120,10 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
             for (Predictor predictor : predictors) {
                 Hibernate.initialize(predictor.getPredictorElements());
             }
-            
+
         }
     }
-    
+
     private Long getTenantId()  {
         // By the time this method is invoked, the aspect joinpoint in MultiTenantEntityMgrAspect would
         // have been invoked, and any exceptions with respect to nulls would already
@@ -133,10 +133,10 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
     }
 
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByModelId(String modelId) {
         ModelSummary summary = findValidByModelId(modelId);
-        
+
         if (summary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
@@ -149,11 +149,11 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
         // Instead a delete of a model summary needs to reach into the KEY_VALUE
         // table, and delete the associated KeyValue instance
         Long detailsPid = summary.getDetails().getPid();
-        
+
         if (detailsPid == null) {
             log.warn("No details related to the model summary with model id = " + modelId);
         }
- 
+
         KeyValue kv = keyValueDao.findByKey(KeyValue.class, detailsPid);
         if (!kv.getTenantId().equals(summary.getTenantId())) {
             log.error("Model and detail tenants are different!");
@@ -162,39 +162,39 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
     }
 
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap) {
         String modelId = modelSummary.getId();
-        
+
         if (modelId == null) {
             throw new LedpException(LedpCode.LEDP_18008, new String[] { "Id" });
         }
-        
+
         // If it's a status update, then allow for getting deleted models
         boolean statusUpdate = attrMap.containsKey("Status");
-        
+
         ModelSummary summary = findByModelId(modelId, false, true, !statusUpdate);
-        
+
         if (summary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
-        
+
         // Update status
         updateStatus(summary, attrMap);
-        
+
         // Update name
         updateName(summary, attrMap);
     }
-    
+
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
         ModelSummary summary = findByModelId(modelId, false, true, false);
-        
+
         if (summary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
-        
+
         if (status == ModelSummaryStatus.DELETED && summary.getStatus() == ModelSummaryStatus.ACTIVE) {
             throw new LedpException(LedpCode.LEDP_18021);
         }
@@ -212,7 +212,7 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
         }
         updateStatusByModelId(summary.getId(), ModelSummaryStatus.getByStatusCode(status));
     }
-    
+
     private void updateName(ModelSummary summary, AttributeMap attrMap) {
         String name = attrMap.get("Name");
         if (name != null) {
@@ -229,8 +229,8 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
             throw new LedpException(LedpCode.LEDP_18008, new String[] { "Name" });
         }
         String oldName = summary.getName();
-        if (name.equals(oldName)) { 
-            return true; 
+        if (name.equals(oldName)) {
+            return true;
         }
 
         if (modelSummaryDao.findByModelName(name) != null) {
@@ -238,9 +238,9 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
         }
         return true;
     }
-    
+
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly) {
         ModelSummary summary = null;
         if (validOnly) {
@@ -254,7 +254,7 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
         }
         Long summaryTenantId = summary.getTenantId();
         Long secCtxTenantId = getTenantId();
-        if (summaryTenantId == null // 
+        if (summaryTenantId == null //
                 || secCtxTenantId == null //
                 || summaryTenantId.longValue() != secCtxTenantId.longValue()) {
             log.warn(String.format("Summary tenant id = %d, Security context tenant id = %d", summaryTenantId, secCtxTenantId));
@@ -271,7 +271,7 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
     }
 
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public ModelSummary retrieveByModelIdForInternalOperations(String modelId) {
         ModelSummary summary = modelSummaryDao.findByModelId(modelId);
         if (summary != null) inflateDetails(summary);
@@ -280,17 +280,17 @@ public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary
     }
 
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findValidByModelId(String modelId) {
         return findByModelId(modelId, false, true, true);
     }
 
     @Override
-    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary getByModelId(String modelId) {
         return modelSummaryDao.findByModelId(modelId);
     }
-    
+
     public void manufactureSecurityContextForInternalAccess(Tenant tenant) {
         TicketAuthenticationToken auth = new TicketAuthenticationToken(null, "x.y");
         Session session = new Session();

@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.security.exposed.entitymanager.impl;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,12 +21,12 @@ public class MultiTenantEntityMgrAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    
+
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.find*(..))")
     public void findModelSummary(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint);
     }
-    
+
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.find*(..))")
     public void findSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint);
@@ -60,7 +60,7 @@ public class MultiTenantEntityMgrAspect {
         TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
         Tenant tenant = token.getSession().getTenant();
         Tenant tenantWithPid = tenantEntityMgr.findByTenantId(tenant.getId());
-        
+
         if (tenantWithPid == null) {
             throw new RuntimeException("No tenant found with id " + tenant.getId());
         }

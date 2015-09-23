@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -35,7 +36,7 @@ public class AlgorithmBase implements Algorithm {
     private String script;
     private String containerProperties;
     private String algorithmProperties;
-    private int priority; 
+    private int priority;
     private String sampleName;
     private ModelDefinition modelDefinition;
     private String pipelineScript;
@@ -45,7 +46,7 @@ public class AlgorithmBase implements Algorithm {
     @Id
     @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)    
+    @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     public Long getPid() {
         return this.pid;
@@ -78,7 +79,7 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @JsonIgnore
-    @Override 
+    @Override
     public void setModelDefinition(ModelDefinition modelDefinition) {
         this.modelDefinition = modelDefinition;
     }
@@ -97,7 +98,8 @@ public class AlgorithmBase implements Algorithm {
 
     @Override
     @JsonProperty("container_properties")
-    @Column(name = "CONTAINER_PROPERTIES", length = 65535)
+    @Column(name = "CONTAINER_PROPERTIES")
+    @Lob
     public String getContainerProperties() {
         return containerProperties;
     }
@@ -110,7 +112,8 @@ public class AlgorithmBase implements Algorithm {
 
     @Override
     @JsonProperty("algorithm_properties")
-    @Column(name = "ALGORITHM_PROPERTIES", length = 65535)
+    @Column(name = "ALGORITHM_PROPERTIES")
+    @Lob
     public String getAlgorithmProperties() {
         return algorithmProperties;
     }

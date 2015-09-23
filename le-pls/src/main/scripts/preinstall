@@ -1,6 +1,8 @@
 #!/bin/bash
 rm -rf /opt/jetty/webapps/le-pls-*.war
+rm -rf /etc/ledp/db.properties
 rm -rf /etc/ledp/pls.properties
+rm -rf /etc/ledp/security.properties
 rm -rf /opt/jetty/bin/jetty.sh
 rm -rf /opt/jetty/start.ini
 rm -rf /opt/jetty/etc/jetty.xml

@@ -36,6 +36,7 @@
                 <dataflow.properties.path>
                     ../le-dataflow/conf/env/buildmachine
                 </dataflow.properties.path>
+                <db.properties.path>../le-db/conf/env/buildmachine</db.properties.path>
                 <propdata.properties.path>
                     ../le-propdata/conf/env/buildmachine
                 </propdata.properties.path>
@@ -48,6 +49,9 @@
                 <pls.properties.path>
                     ../le-pls/conf/env/buildmachine
                 </pls.properties.path>
+                <security.properties.path>
+                    ../le-security/conf/env/buildmachine
+                </security.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -68,6 +72,7 @@
                 <dataflow.properties.path>
                     ../le-dataflow/conf/env/devcluster
                 </dataflow.properties.path>
+                <db.properties.path>../le-db/conf/env/devcluster</db.properties.path>
                 <propdata.properties.path>
                     ../le-propdata/conf/env/devcluster
                 </propdata.properties.path>
@@ -80,6 +85,9 @@
                 <pls.properties.path>
                     ../le-pls/conf/env/devcluster
                 </pls.properties.path>
+                <security.properties.path>
+                    ../le-security/conf/env/devcluster
+                </security.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -100,6 +108,7 @@
                 <dataflow.properties.path>
                     ../le-dataflow/conf/env/intcluster
                 </dataflow.properties.path>
+                <db.properties.path>../le-db/conf/env/intcluster</db.properties.path>
                 <propdata.properties.path>
                     ../le-propdata/conf/env/intcluster
                 </propdata.properties.path>
@@ -112,6 +121,9 @@
                 <pls.properties.path>
                     ../le-pls/conf/env/intcluster
                 </pls.properties.path>
+                <security.properties.path>
+                    ../le-security/conf/env/intcluster
+                </security.properties.path>
                 <bin.env.path>bin/env/intcluster</bin.env.path>
             </properties>
         </profile>
@@ -131,6 +143,7 @@
                 <dataflow.properties.path>
                     ../le-dataflow/conf/env/qacluster
                 </dataflow.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
                 <propdata.properties.path>
                     ../le-propdata/conf/env/qacluster
                 </propdata.properties.path>
@@ -143,6 +156,9 @@
                 <pls.properties.path>
                     ../le-pls/conf/env/qacluster
                 </pls.properties.path>
+                <security.properties.path>
+                    ../le-security/conf/env/qacluster
+                </security.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -162,6 +178,7 @@
                 <dataflow.properties.path>
                     ../le-dataflow/conf/env/prodcluster
                 </dataflow.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
                 <propdata.properties.path>
                     ../le-propdata/conf/env/prodcluster
                 </propdata.properties.path>
@@ -174,6 +191,9 @@
                 <pls.properties.path>
                     ../le-pls/conf/env/prodcluster
                 </pls.properties.path>
+                <security.properties.path>
+                    ../le-security/conf/env/prodcluster
+                </security.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -221,6 +241,9 @@
                                     <location>${dataflow.properties.path}/dataflow.properties</location>
                                 </source>
                                 <source>
+                                    <location>${db.properties.path}/db.properties</location>
+                                </source>
+                                <source>
                                     <location>${propdata.properties.path}/propdata.properties</location>
                                 </source>
                                 <source>
@@ -231,6 +254,9 @@
                                 </source>
                                 <source>
                                     <location>${pls.properties.path}/pls.properties</location>
+                                </source>
+                                <source>
+                                    <location>${security.properties.path}/security.properties</location>
                                 </source>
                             </sources>
                         </mapping>

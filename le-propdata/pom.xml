@@ -17,6 +17,7 @@
 
     <properties>
         <component-name>propdata</component-name>
+        <le.cassandra.version>2.0.9-SNAPSHOT</le.cassandra.version>
         <le.db.version>2.0.9-SNAPSHOT</le.db.version>
         <le.dataflow.version>2.0.9-SNAPSHOT</le.dataflow.version>
         <le.dataplatform.version>2.0.9-SNAPSHOT</le.dataplatform.version>
@@ -98,8 +99,21 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-cassandra</artifactId>
+            <version>${le.cassandra.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-cassandra</artifactId>
+            <version>${le.cassandra.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
+            <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

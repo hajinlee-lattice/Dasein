@@ -11,7 +11,6 @@
         <component-name>job</component-name>
         <le.dataplatform.version>2.0.9-SNAPSHOT</le.dataplatform.version>
         <le.dataflow.version>2.0.9-SNAPSHOT</le.dataflow.version>
-        <le.db.version>2.0.9-SNAPSHOT</le.db.version>
         <le.camille.version>2.0.9-SNAPSHOT</le.camille.version>
         <le.propdata.version>2.0.9-SNAPSHOT</le.propdata.version>
         <le.pls.version>2.0.9-SNAPSHOT</le.pls.version>
@@ -216,7 +215,7 @@
             <version>${le.liaison.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId> 1.0 due to a problem with "NoSuchMethodError: 
+        <!-- use this instead of <artifactId>persistence-api</artifactId> 1.0 due to a problem with "NoSuchMethodError:
             javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>

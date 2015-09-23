@@ -174,27 +174,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.3.2</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
-                            <arguments>
-                                <argument>pls</argument>
-                                <argument>com.latticeengines.domain.exposed.pls</argument>
-                                <argument>com.latticeengines.domain.exposed.security</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>
@@ -331,7 +310,7 @@
             <version>${le.camille.version}</version>
             <classifier>intf</classifier>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId> 
+        <!-- use this instead of <artifactId>persistence-api</artifactId>
             1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>

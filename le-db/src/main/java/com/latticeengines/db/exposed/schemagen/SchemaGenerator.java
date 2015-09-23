@@ -114,9 +114,9 @@ public class SchemaGenerator {
     public static void main(String[] args) throws Exception {
         int length = args.length;
         String dbName = args[0];
-        
+
         String[] packages = new String[length - 1];
-        
+
         int j = 0;
         for (int i = 1; i < length; i++) {
             packages[j++] = args[i];

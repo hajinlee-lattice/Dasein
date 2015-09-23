@@ -14,8 +14,8 @@ import org.testng.annotations.Test;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
-import com.latticeengines.db.dao.cassandra.CassandraGenericDao;
-import com.latticeengines.db.dao.cassandra.data.ColumnTypeMapper;
+import com.latticeengines.cassandra.exposed.dao.CassandraGenericDao;
+import com.latticeengines.cassandra.exposed.dao.data.ColumnTypeMapper;
 import com.latticeengines.propdata.matching.service.MatchService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })

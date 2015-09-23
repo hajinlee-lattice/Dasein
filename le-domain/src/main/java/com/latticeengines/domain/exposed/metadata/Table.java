@@ -25,7 +25,7 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 @Entity
-@javax.persistence.Table(name = "DATA_TABLE")
+@javax.persistence.Table(name = "METADATA_TABLE")
 @PrimaryKeyJoinColumn(name = "PID")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Table extends AttributeOwner {

@@ -1,9 +1,0 @@
-#!/bin/bash
-rm -rf /tmp/dataplatform/database/*
-mkdir -p /tmp/dataplatform/database
-chmod -R 755 /tmp/dataplatform/database
-
-mkdir -p /tmp/dataplatform/database/lib
-chmod -R 755 /tmp/dataplatform/database/lib
-
-

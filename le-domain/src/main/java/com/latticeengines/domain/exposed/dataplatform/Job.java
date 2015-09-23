@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -83,7 +84,8 @@ public class Job implements HasPid, HasId<String> {
 
     @JsonIgnore
     /** string representation is ignored; json uses getAppMasterPropertiesObject() **/
-    @Column(name = "APPMASTER_PROPERTIES", length = 65535)
+    @Column(name = "APPMASTER_PROPERTIES")
+    @Lob
     public String getAppMasterProperties() {
         String propstr = "";
         try {
@@ -123,7 +125,8 @@ public class Job implements HasPid, HasId<String> {
 
     @JsonIgnore
     /** string representation is ignored; json uses getContainerPropertiesObject() **/
-    @Column(name = "CONTAINER_PROPERTIES", length = 65535)
+    @Column(name = "CONTAINER_PROPERTIES")
+    @Lob
     public String getContainerProperties() {
         String propstr = "";
         try {
@@ -191,7 +194,7 @@ public class Job implements HasPid, HasId<String> {
     /**
      * http://docs.jboss.org/hibernate/core/4.0/manual/en-US/html/persistent-
      * classes.html#persistent-classes-equalshashcode
-     * 
+     *
      * right now, it only perform a partially shallow comparison due to
      * efficiency reason. Collection object is compared, but composite domain
      * object is not compared. If composite domain object needs to be compared,

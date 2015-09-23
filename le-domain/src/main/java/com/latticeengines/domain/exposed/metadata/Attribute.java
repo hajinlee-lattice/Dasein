@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "ATTRIBUTE")
+@Table(name = "METADATA_ATTRIBUTE")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
 
@@ -186,12 +186,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setCleanedUpEnumValues(List<String> cleanedUpEnumValues) {
         this.cleanedUpEnumValues = cleanedUpEnumValues;
     }
-    
+
     @Column(name = "ENUM_VALUES", nullable = true)
     public String getCleanedUpEnumValuesAsString() {
         return StringUtils.join(cleanedUpEnumValues, ",");
     }
-    
+
     public void setCleanedUpEnumValuesAsString(String enumValues) {
         if (enumValues != null) {
             setCleanedUpEnumValues(Arrays.<String>asList(enumValues.split(",")));
