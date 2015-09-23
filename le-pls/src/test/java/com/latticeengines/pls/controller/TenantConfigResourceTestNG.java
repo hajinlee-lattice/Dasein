@@ -58,9 +58,12 @@ public class TenantConfigResourceTestNG extends PlsFunctionalTestNGBase {
         path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
 
         path = path.append(new Path("/SpaceConfiguration"));
-        camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        if (!camille.exists(path)) {
+            camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        }
 
         path = path.append(new Path("/Topology"));
+        if (camille.exists(path)) { camille.delete(path); }
         camille.create(path, new Document(CRMTopology.SFDC.name()), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
     }
