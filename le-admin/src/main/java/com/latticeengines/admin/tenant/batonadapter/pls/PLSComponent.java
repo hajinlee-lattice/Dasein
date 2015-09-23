@@ -54,10 +54,10 @@ public class PLSComponent extends LatticeComponent {
     
     @Override
     public boolean doRegistration() {
-        String defaultJson = "pls_default.json";
-        String metadataJson = "pls_metadata.json";
-        uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-        overwritter.overwriteDefaultConfigInPLS();
+//        String defaultJson = "pls_default.json";
+//        String metadataJson = "pls_metadata.json";
+//        uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+//        overwritter.overwriteDefaultConfigInPLS();
         // register dummy installer if is in dryrun mode
         return dryrun;
     }

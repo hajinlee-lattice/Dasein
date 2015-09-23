@@ -37,10 +37,10 @@ public class VisiDBDLComponent extends LatticeComponent {
 
     @Override
     public boolean doRegistration() {
-        String defaultJson = "vdbdl_default.json";
-        String metadataJson = "vdbdl_metadata.json";
-        uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-        overwritter.overwriteDefaultConfigInVisiDBDL();
+//        String defaultJson = "vdbdl_default.json";
+//        String metadataJson = "vdbdl_metadata.json";
+//        uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+//        overwritter.overwriteDefaultConfigInVisiDBDL();
         return true;
     }
 
