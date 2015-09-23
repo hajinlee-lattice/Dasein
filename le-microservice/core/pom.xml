@@ -9,9 +9,9 @@
 
     <properties>
         <component-name>microservice</component-name>
-        <le.dataplatform.version>2.0.9-SNAPSHOT</le.dataplatform.version>
-        <le.domain.version>2.0.9-SNAPSHOT</le.domain.version>
-        <le.monitor.version>2.0.9-SNAPSHOT</le.monitor.version>
+        <le.dataplatform.version>2.0.10-SNAPSHOT</le.dataplatform.version>
+        <le.domain.version>2.0.10-SNAPSHOT</le.domain.version>
+        <le.monitor.version>2.0.10-SNAPSHOT</le.monitor.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
     </properties>
@@ -19,7 +19,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>2.0.9-SNAPSHOT</version>
+        <version>2.0.10-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 
