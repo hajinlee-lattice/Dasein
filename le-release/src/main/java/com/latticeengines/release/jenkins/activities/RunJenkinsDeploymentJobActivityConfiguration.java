@@ -23,4 +23,11 @@ public class RunJenkinsDeploymentJobActivityConfiguration {
             @Qualifier("defaultErrorHandler") ErrorHandler errorHandler) {
         return new RunJenkinsDeploymentJobActivity(url, errorHandler);
     }
+
+    @Bean(name = "adminDeploymentJobActivity")
+    public RunJenkinsDeploymentJobActivity runAdminDeploymentJobActivity(
+            @Value("${release.jenkins.deployment.admin}") String url,
+            @Qualifier("defaultErrorHandler") ErrorHandler errorHandler) {
+        return new RunJenkinsDeploymentJobActivity(url, errorHandler);
+    }
 }

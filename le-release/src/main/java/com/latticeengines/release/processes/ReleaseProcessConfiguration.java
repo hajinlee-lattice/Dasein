@@ -44,6 +44,9 @@ public class ReleaseProcessConfiguration {
 
     @Autowired
     private Activity plsProtractorTestActivity;
+    
+    @Autowired
+    private Activity adminDeploymentJobActivity;
 
     @Autowired
     private Activity createChangeManagementJiraActivity;
@@ -84,7 +87,7 @@ public class ReleaseProcessConfiguration {
         releaseAllActivities.addAll(preReleaseActivities);
         releaseAllActivities.addAll(Arrays.asList(new Activity[] { dpDeploymentJobActivity, plsDeploymentJobActivity,
                 dpDeploymentTestActivity, orcDeploymentTestActivity, scoringDeploymentTestActivity, jmxCheckActivity, plsProtractorTestActivity,
-                plsDeploymentTestActivity }));
+                plsDeploymentTestActivity, adminDeploymentJobActivity }));
         releaseAllActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseAllActivities);
     }
