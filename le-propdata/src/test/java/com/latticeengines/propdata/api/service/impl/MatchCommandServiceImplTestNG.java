@@ -140,7 +140,10 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         MatchCommandStatus status = waitCommandComplete(timoutInMin, commandId);
         Assert.assertEquals(status, MatchCommandStatus.COMPLETE);
 
-        Assert.assertTrue(matchCommandService.resultTablesAreReady(commandId));
+        Commands commands = matchCommandService.findMatchCommandById(commandId);
+        Assert.assertTrue(matchCommandService.resultTablesAreReady(commandId),
+                "Matching against " + commands.getDestTables() + " failed to generate all the result tables. "
+                        + " CommandId=" + commandId );
     }
 
     private String verifyDerivedColumnsResultNonEmpty(Long commandId) {
