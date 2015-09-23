@@ -74,10 +74,12 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         }
 
         Path topologyPath = path.append(new Path("/Topology"));
-        camille.upsert(topologyPath, new Document("SFDC"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        if (camille.exists(topologyPath)) { camille.delete(topologyPath); }
+        camille.create(topologyPath, new Document("SFDC"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         Path dlAddressPath = path.append(new Path("/DL_Address"));
-        camille.upsert(dlAddressPath, new Document(defaultDataLoaderUrl), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        if (camille.exists(dlAddressPath)) { camille.delete(dlAddressPath); }
+        camille.create(dlAddressPath, new Document(defaultDataLoaderUrl), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         PLSTenantId = String.format("%s.%s.%s", contractId, tenantId, spaceId);
     }
