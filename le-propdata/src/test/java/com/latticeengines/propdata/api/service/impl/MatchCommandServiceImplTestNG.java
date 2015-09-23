@@ -62,7 +62,7 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
                 { "PayPal_Empty", "Alexa_Source|DerivedColumns", "PD_Test", new EmptyMatchVerifier() },
                 { "DomainIdEmpty_Test", "Alexa_Source|DerivedColumns", "PD_Test", new EmptyMatchVerifier() },
                 { "LocationIdEmpty_Test", "Alexa_Source|DerivedColumns", "PD_Test", new EmptyMatchVerifier() },
-                { "Duns_Test", "SWDuns_Source", "PD_Test", new NonEmptyMatchVerifier() }
+                { "DunsTest", "SWDuns_Source", "PD_Test", new DunsMatchVerifier() }
         };
     }
 
@@ -121,6 +121,13 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         }
     }
 
+    private class DunsMatchVerifier extends AbstractMatchVerifier {
+        @Override
+        public void verifyResults(Long commandId, CreateCommandRequest request) {
+            verifyResultTablesAreGenerated(commandId, 30);
+        }
+    }
+
     private class Fortune1000Verifier extends NonEmptyMatchVerifier {
         @Override
         public void verifyResults(Long commandId, CreateCommandRequest request) {
@@ -158,8 +165,6 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
     }
 
     private void verifyResultTablesAreGenerated(Long commandId, int timoutInMin) {
-        Assert.assertFalse(matchCommandService.resultTablesAreReady(commandId));
-
         MatchCommandStatus status = waitCommandComplete(timoutInMin, commandId);
         Assert.assertEquals(status, MatchCommandStatus.COMPLETE);
 
