@@ -161,7 +161,7 @@ module.exports = function (grunt) {
 
             kendojs: {
                 options: {
-                    baseUrl: 'http://cdn.kendostatic.com/<%= pls.version.kendo %>/js/'
+                    baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/js/'
                 },
                 src: ['kendo.all.min.js', 'kendo.all.min.js'],
                 dest: '<%= pls.app %>/lib/js'
@@ -169,7 +169,7 @@ module.exports = function (grunt) {
 
             kendocss: {
                 options: {
-                    baseUrl: 'http://cdn.kendostatic.com/<%= pls.version.kendo %>/styles/'
+                    baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/styles/'
                 },
                 src: [
                     'kendo.common-bootstrap.min.css',
@@ -183,7 +183,7 @@ module.exports = function (grunt) {
 
             kendofonts: {
                 options: {
-                    baseUrl: 'http://cdn.kendostatic.com/<%= pls.version.kendo %>/styles/images/'
+                    baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/styles/images/'
                 },
                 src: ['kendoui.woff', 'kendoui.woff'],
                 dest: '<%= pls.app %>/lib/css/images'
@@ -191,7 +191,7 @@ module.exports = function (grunt) {
 
             kendoimages: {
                 options: {
-                    baseUrl: 'http://cdn.kendostatic.com/<%= pls.version.kendo %>/styles/'
+                    baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/styles/'
                 },
                 src: ['Bootstrap/sprite.png', 'Bootstrap/loading-image.gif'],
                 dest: '<%= pls.app %>/lib/css/Bootstrap'
