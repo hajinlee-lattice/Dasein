@@ -15,6 +15,7 @@ public abstract class BaseDaoImpl<T extends HasPid>
     @Autowired
     protected SessionFactory sessionFactory;
 
+    @Override
     protected SessionFactory getSessionFactory() {
         return this.sessionFactory;
     }
