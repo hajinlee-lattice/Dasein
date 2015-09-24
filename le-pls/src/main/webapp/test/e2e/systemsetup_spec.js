@@ -214,6 +214,7 @@ describe('system setup tests', function () {
         //==================================================
         navigateToSystemSetup();
         systemSetup.waitForMarketoCredentials();
+        browser.driver.sleep(5000);
 
         //==================================================
         // Verify Eloqua Credentials

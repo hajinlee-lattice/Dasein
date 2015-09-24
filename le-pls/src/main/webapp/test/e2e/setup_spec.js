@@ -21,8 +21,9 @@ describe('setup tests', function () {
         expect(userDropdown.SetupLink.isPresent()).toBe(true);
         userDropdown.SetupLink.click();
         browser.waitForAngular();
-        expect(element(by.id('setup')).getWebElement().isDisplayed()).toBe(true);
-        expect(element(by.css('.setup-main-panel data-manage-fields')).getWebElement().isDisplayed()).toBe(true);
+        browser.driver.sleep(5000);
+        helper.elementExists(element(by.id('setup')), true);
+        helper.elementExists(element(by.css('.setup-main-panel data-manage-fields')), true);
 
         //==================================================
         // Logout
