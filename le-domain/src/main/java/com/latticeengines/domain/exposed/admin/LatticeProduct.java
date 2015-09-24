@@ -8,7 +8,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum LatticeProduct {
-    LPA("Lead Prioritization");
+    LPA("Lead Prioritization"),
+    PD("Prospect Discovery"),
+    BIS("Buyer Insights");
 
     private String name;
     private static Map<String, LatticeProduct> lookup = new HashMap<>();
