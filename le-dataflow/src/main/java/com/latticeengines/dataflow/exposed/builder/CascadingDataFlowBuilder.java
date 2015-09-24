@@ -789,7 +789,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 flowDef.addToClassPath(file);
             }
         } catch (Exception e) {
-            log.warn("Exception writing jars to hdfs for this flow's classpath.", e);
+            log.warn("Exception retrieving library jars for this flow.", e);
         }
 
         Flow<?> flow = flowConnector.connect(flowDef);
@@ -840,5 +840,5 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         out += '$';
         return out;
     }
-    
+
 }
