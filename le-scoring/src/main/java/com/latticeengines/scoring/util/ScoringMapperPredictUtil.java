@@ -10,18 +10,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
-import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -213,8 +214,8 @@ public class ScoringMapperPredictUtil {
             boolean foundbottomPercentileMinScore = false;
             for (int i = 0; i < percentileRanges.size(); i++) {
                 JSONObject range = (JSONObject) percentileRanges.get(i);
-                Double min = (Double) range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
-                Double max = (Double) range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
+                Double min = Double.parseDouble(range.get(PERCENTILE_BUCKETS_MINIMUMSCORE).toString());
+                Double max = Double.parseDouble(range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE).toString());
                 Integer percent = ((Long) range.get(PERCENTILE_BUCKETS_PERCENTILE)).intValue();
                 if (max > topPercentileMaxScore) {
                     topPercentileMaxScore = max;
@@ -235,8 +236,8 @@ public class ScoringMapperPredictUtil {
             } else {
                 for (int i = 0; i < percentileRanges.size(); i++) {
                     JSONObject range = (JSONObject) percentileRanges.get(i);
-                    Double min = (Double) range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
-                    Double max = (Double) range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
+                    Double min = Double.parseDouble(range.get(PERCENTILE_BUCKETS_MINIMUMSCORE).toString());
+                    Double max = Double.parseDouble(range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE).toString());
                     Integer percent = ((Long) range.get(PERCENTILE_BUCKETS_PERCENTILE)).intValue();
                     if (betweenBounds(score, min, max)) {
                         percentile = percent;
@@ -260,62 +261,12 @@ public class ScoringMapperPredictUtil {
                 && (upperExclusive == null || value < upperExclusive);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IllegalArgumentException, Exception {
 
-        // String hdfs =
-        // "/user/s-analytics/customers/Nutanix/scoring/ScoringCommandProcessorTestNG_LeadsTable/scores/15e01328-9e73-4977-9298-259e68632bce.avro";
-        // List<GenericRecord> list = AvroUtils.getData(new Configuration(), new
-        // Path(hdfs));
-        // for (GenericRecord ele : list) {
-        // System.out.println(ele.toString());
-        // }
-
-        ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
-                4.88519256666, "modelID", 100, 0.05822784810126582, 0.0777755757027, 6);
-        ArrayList<ScoreOutput> resultList = new ArrayList<>();
-        resultList.add(result1);
-        String fileName = "/Users/ygao/test/test.avro";
-        File outputFile = new File(fileName);
-        DatumWriter<ScoreOutput> userDatumWriter = new SpecificDatumWriter<>();
-        DataFileWriter<ScoreOutput> dataFileWriter = new DataFileWriter<>(
-                userDatumWriter);
-
-        for (int i = 0; i < resultList.size(); i++) {
-            ScoreOutput result = resultList.get(i);
-            try {
-                if (i == 0) {
-                    dataFileWriter.create(result.getSchema(), outputFile);
-                }
-                dataFileWriter.append(result);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            dataFileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        SpecificDatumReader<ScoreOutput> reader = new SpecificDatumReader<ScoreOutput>(
-                ScoreOutput.class);
-        DataFileReader<ScoreOutput> dataFileReader = null;
-        try {
-            dataFileReader = new DataFileReader<ScoreOutput>(outputFile, reader);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ScoreOutput result = null;
-        while (dataFileReader.hasNext()) {
-            result = dataFileReader.next();
-            System.out.println(result);
-        }
-
-        // delete the temp folder and the temp file
-        try {
-            dataFileReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        String hdfs = "/user/s-analytics/customers/Nutanix/scoring/data/part-m-00000.avro";
+        List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(hdfs));
+        for (GenericRecord ele : list) {
+            System.out.println(ele.toString());
         }
     }
 }
