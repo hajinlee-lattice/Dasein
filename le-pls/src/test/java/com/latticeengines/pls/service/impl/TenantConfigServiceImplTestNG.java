@@ -147,8 +147,8 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         camille.delete(topologyPath);
 
         flags = configService.getFeatureFlags(PLSTenantId);
-        verifyFlagFalseOrNull(flags, PlsFeatureFlag.ACTIVATE_MODEL_PAGE.getName());
-        verifyFlagFalseOrNull(flags, PlsFeatureFlag.SYSTEM_SETUP_PAGE.getName());
+        verifyFlagFalse(flags, PlsFeatureFlag.ACTIVATE_MODEL_PAGE.getName());
+        verifyFlagFalse(flags, PlsFeatureFlag.SYSTEM_SETUP_PAGE.getName());
 
         camille.create(topologyPath, new Document("SFDC"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
@@ -177,6 +177,11 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         } else {
             Assert.assertNull(flags.get(flagId));
         }
+    }
+
+    private void verifyFlagFalse(FeatureFlagValueMap flags, String flagId) {
+        Assert.assertTrue(flags.containsKey(flagId));
+        Assert.assertFalse(flags.get(flagId));
     }
 
     private void verifyFlagBooleanAndDefault(FeatureFlagValueMap flags, String flagId, Boolean value) {

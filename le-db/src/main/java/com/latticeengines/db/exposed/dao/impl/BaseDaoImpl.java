@@ -9,8 +9,16 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Repository
 public abstract class BaseDaoImpl<T extends HasPid>
-        extends BaseDaoWithAssignedSessionFactoryImpl<T> implements BaseDao<T> {
+        extends BaseDaoWithAssignedSessionFactoryImpl<T>
+        implements BaseDao<T> {
 
     @Autowired
     protected SessionFactory sessionFactory;
+
+    protected SessionFactory getSessionFactory() {
+        return this.sessionFactory;
+    }
+
+    protected BaseDaoImpl() {}
+
 }

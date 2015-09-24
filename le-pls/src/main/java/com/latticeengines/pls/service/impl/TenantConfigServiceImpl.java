@@ -120,16 +120,23 @@ public class TenantConfigServiceImpl implements TenantConfigService {
 
     private FeatureFlagValueMap overwriteDataloaderFlags(FeatureFlagValueMap flags, String tenantId) {
         Boolean hasDlTenant = hasDataloaderFunctionalities(tenantId);
-        overwriteFlag(flags, PlsFeatureFlag.SYSTEM_SETUP_PAGE.getName(), hasDlTenant);
-        overwriteFlag(flags, PlsFeatureFlag.ACTIVATE_MODEL_PAGE.getName(), hasDlTenant);
+        updateFlag(flags, PlsFeatureFlag.SYSTEM_SETUP_PAGE.getName(), hasDlTenant);
+        updateFlag(flags, PlsFeatureFlag.ACTIVATE_MODEL_PAGE.getName(), hasDlTenant);
         return new FeatureFlagValueMap(flags);
     }
 
-    private static void overwriteFlag(FeatureFlagValueMap flags, String flagId, Boolean value) {
+    /**
+     * If flag already has a value, using oldValue & newValue.
+     * Otherwise, use newValue
+     * @param flags
+     * @param flagId
+     * @param value
+     */
+    private static void updateFlag(FeatureFlagValueMap flags, String flagId, Boolean value) {
         if (flags.containsKey(flagId)) {
             flags.put(flagId, value && flags.get(flagId));
-        } else if (value) {
-            flags.put(flagId, true);
+        } else {
+            flags.put(flagId, value);
         }
     }
 
