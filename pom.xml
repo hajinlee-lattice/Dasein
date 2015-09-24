@@ -21,6 +21,7 @@
         <module>le-scheduler</module>
         <module>le-parent</module>
         <module>le-db</module>
+        <module>le-swlib</module>
         <module>le-dataplatform</module>
         <module>le-scoring</module>
         <module>le-eai</module>
