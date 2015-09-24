@@ -1,16 +1,5 @@
 package com.latticeengines.camille.util;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import com.google.common.base.Function;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
@@ -18,6 +7,16 @@ import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.camille.exposed.util.SafeUpserter;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class SafeUpserterUnitTestNG {
 
@@ -103,6 +102,7 @@ public class SafeUpserterUnitTestNG {
         } catch (Exception e) {
             throw e;
         } finally {
+            pool.shutdown();
             pool.awaitTermination(1, TimeUnit.MINUTES);
         }
 
