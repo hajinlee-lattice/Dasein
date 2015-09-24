@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.admin;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.camille.Path;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SpaceConfiguration {
 
-    private LatticeProduct product = LatticeProduct.LPA;
-    private List<LatticeProduct> products = Arrays.asList(LatticeProduct.LPA, LatticeProduct.BIS);
-    private CRMTopology topology = CRMTopology.MARKETO;
+    private LatticeProduct product;
+    private List<LatticeProduct> products = Collections.emptyList();
+    private CRMTopology topology;
     private String dlAddress;
 
     private static ObjectMapper mapper = new ObjectMapper();
@@ -59,9 +59,13 @@ public class SpaceConfiguration {
         try {
             DocumentDirectory dir = new DocumentDirectory(new Path("/"));
             dir.add("/DL_Address", this.dlAddress);
-            dir.add("/Product", this.product.getName());
+            if (this.product != null) {
+                dir.add("/Product", this.product.getName());
+            }
             dir.add("/Products", mapper.writeValueAsString(this.products));
-            dir.add("/Topology", this.topology.getName());
+            if (this.topology != null) {
+                dir.add("/Topology", this.topology.getName());
+            }
             return dir;
         } catch (IOException e) {
             throw new RuntimeException(e);
