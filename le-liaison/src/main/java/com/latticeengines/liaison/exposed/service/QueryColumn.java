@@ -14,8 +14,9 @@ public abstract class QueryColumn {
 	private String expression;
 	private Map<String,String> metadata;
 	
-	private static final int maxDisplayNameLength = 64;
-	private static final int maxCategoryLength = 22;
+	//private static final int maxDisplayNameLength = 64;
+	private static final int maxDisplayNameLength = 256;
+    private static final int maxCategoryLength = 22;
 	private static final int maxDescriptionLength = 150;
 	private static final Set<String> approvedUsageValues = new HashSet<String>( Arrays.asList("None","Model","ModelAndModelInsights","ModelAndAllInsights") );
 	private static final Set<String> statisticalTypeValues = new HashSet<String>( Arrays.asList("nominal","ratio","ordinal","interval") );

@@ -95,11 +95,11 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
                 metadata.put("DataType", "<NULL>");
             }
 
-
-            if (colData.getDataSource() != null && colData.getDataSource().size() > 0) {
-                metadata.put("DataSource", colData.getDataSource().get(colData.getDataSource().size() - 1));
+            // Map multiple values or no value to "Lattice Data Cloud"
+            if (colData.getDataSource() != null && colData.getDataSource().size() == 1 && !colData.getDataSource().get(0).equals("")) {
+                metadata.put("DataSource", colData.getDataSource().get(0));
             } else {
-                metadata.put("DataSource", "<NULL>");
+                metadata.put("DataSource", "Lattice Data Cloud");
             }
 
             if (colData.getApprovedUsage() != null && colData.getApprovedUsage().size() > 0) {
