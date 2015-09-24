@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.admin;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -25,6 +27,22 @@ public class SpaceConfigurationUnitTestNG {
 
         SpaceConfiguration newConfig = objectMapper.readValue(serialized, SpaceConfiguration.class);
         Assert.assertEquals(newConfig.getTopology(), CRMTopology.MARKETO);
+    }
+
+    @Test(groups = "unit")
+    public void testProductList() throws IOException {
+        List<LatticeProduct> products = Arrays.asList(LatticeProduct.BIS, LatticeProduct.LPA, LatticeProduct.PD);
+        SpaceConfiguration configuration = new SpaceConfiguration();
+        configuration.setProducts(products);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(configuration);
+        SpaceConfiguration deserialized = mapper.readValue(json, SpaceConfiguration.class);
+        Assert.assertEquals(deserialized.getProducts().size(), products.size());
+
+        SerializableDocumentDirectory sDir = configuration.toSerializableDocumentDirectory();
+        SpaceConfiguration constructed = new SpaceConfiguration(sDir.getDocumentDirectory());
+        Assert.assertEquals(constructed.getProducts().size(), products.size());
     }
 
     @Test(groups = "unit")

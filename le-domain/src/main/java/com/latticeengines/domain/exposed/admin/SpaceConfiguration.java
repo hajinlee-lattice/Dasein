@@ -1,10 +1,13 @@
 package com.latticeengines.domain.exposed.admin;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -13,11 +16,15 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class SpaceConfiguration {
 
     private LatticeProduct product = LatticeProduct.LPA;
+    private List<LatticeProduct> products = Arrays.asList(LatticeProduct.LPA, LatticeProduct.BIS);
     private CRMTopology topology = CRMTopology.MARKETO;
     private String dlAddress;
 
+    private static ObjectMapper mapper = new ObjectMapper();
+
     public SpaceConfiguration() {}
 
+    @SuppressWarnings("unchecked")
     public SpaceConfiguration(DocumentDirectory dir) {
         List<DocumentDirectory.Node> nodes = dir.getChildren();
         if (nodes == null || nodes.isEmpty())
@@ -33,6 +40,14 @@ public class SpaceConfiguration {
             if (node.getPath().toString().equals("/Product")) {
                 this.product = LatticeProduct.fromName(node.getDocument().getData());
             }
+            if (node.getPath().toString().equals("/Products")) {
+                try {
+                    List<LatticeProduct> products = mapper.readValue(node.getDocument().getData(), List.class);
+                    this.products = products;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             if (node.getPath().toString().equals("/Topology")) {
                 this.topology = CRMTopology.fromName(node.getDocument().getData());
             }
@@ -41,11 +56,16 @@ public class SpaceConfiguration {
     }
 
     public DocumentDirectory toDocumentDirectory() {
-        DocumentDirectory dir = new DocumentDirectory(new Path("/"));
-        dir.add("/DL_Address", this.dlAddress);
-        dir.add("/Product", this.product.getName());
-        dir.add("/Topology", this.topology.getName());
-        return dir;
+        try {
+            DocumentDirectory dir = new DocumentDirectory(new Path("/"));
+            dir.add("/DL_Address", this.dlAddress);
+            dir.add("/Product", this.product.getName());
+            dir.add("/Products", mapper.writeValueAsString(this.products));
+            dir.add("/Topology", this.topology.getName());
+            return dir;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public SerializableDocumentDirectory toSerializableDocumentDirectory() {
@@ -64,6 +84,12 @@ public class SpaceConfiguration {
 
     @JsonProperty("Product")
     public void setProduct(LatticeProduct product) { this.product = product; }
+
+    @JsonProperty("Products")
+    public List<LatticeProduct> getProducts() { return products; }
+
+    @JsonProperty("Products")
+    public void setProducts(List<LatticeProduct> products) { this.products = products; }
 
     @JsonProperty("Topology")
     public CRMTopology getTopology() { return topology; }
