@@ -26,5 +26,6 @@
         <module>le-scheduler</module>
         <module>le-monitor</module>
         <module>le-camille</module>
+        <module>le-cassandra</module>
     </modules>
 </project>
