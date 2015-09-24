@@ -39,11 +39,11 @@ var Config = function() {
                 downloadRoot:           chromeDownloadPath
             },
 
-            allScriptsTimeout: 110000,
+            allScriptsTimeout: 200000,
 
             jasmineNodeOpts: {
                 showColors: true,
-                defaultTimeoutInterval: 120000
+                defaultTimeoutInterval: 300000
             },
 
             framework: "jasmine2",

@@ -25,7 +25,7 @@ var Login = function() {
         });
         browser.wait(function(){
             return element(by.css('div.page-title')).isPresent();
-        }, 20000, 'page title should appear with in 30 sec.');
+        }, 100000, 'page title should appear with in 100 sec.');
     };
 
     function getWebApp() {
