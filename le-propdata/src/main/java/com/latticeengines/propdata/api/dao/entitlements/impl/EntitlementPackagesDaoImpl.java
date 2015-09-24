@@ -7,12 +7,14 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.EntitlementPackages;
 import com.latticeengines.propdata.api.dao.entitlements.EntitlementPackagesDao;
 
 @Component("entitlementPackagesDao")
-public class EntitlementPackagesDaoImpl extends BaseDaoImpl<EntitlementPackages> implements EntitlementPackagesDao {
+public class EntitlementPackagesDaoImpl
+        extends BaseDaoWithAssignedSessionFactoryImpl<EntitlementPackages>
+        implements EntitlementPackagesDao {
 
     @Override
     protected Class<EntitlementPackages> getEntityClass() {

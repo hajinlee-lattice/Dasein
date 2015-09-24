@@ -7,12 +7,12 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.DataColumnMap;
 import com.latticeengines.propdata.api.dao.DataColumnMapDao;
 
 @Component("dataColumnMapDao")
-public class DataColumnMapDaoImpl extends BaseDaoImpl<DataColumnMap> implements DataColumnMapDao {
+public class DataColumnMapDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<DataColumnMap> implements DataColumnMapDao {
 
     @Override
     protected Class<DataColumnMap> getEntityClass() {

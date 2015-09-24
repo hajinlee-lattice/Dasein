@@ -5,11 +5,11 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.DomainFeatureTable;
 import com.latticeengines.propdata.api.dao.DomainFeatureTableDao;
 
-public class DomainFeatureTableDaoImpl extends BaseDaoImpl<DomainFeatureTable>
+public class DomainFeatureTableDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<DomainFeatureTable>
         implements DomainFeatureTableDao {
 
     @SuppressWarnings("rawtypes")

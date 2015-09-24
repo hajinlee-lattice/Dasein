@@ -6,12 +6,12 @@ import java.sql.SQLException;
 
 import org.hibernate.internal.SessionImpl;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.api.dao.CommandDao;
 
-public class CommandDaoImpl extends BaseDaoImpl<Commands> implements CommandDao {
+public class CommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Commands> implements CommandDao {
 
     public CommandDaoImpl() { super(); }
 

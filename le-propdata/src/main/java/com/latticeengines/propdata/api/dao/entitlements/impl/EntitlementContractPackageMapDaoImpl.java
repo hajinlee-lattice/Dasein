@@ -6,12 +6,13 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.EntitlementContractPackageMap;
 import com.latticeengines.propdata.api.dao.entitlements.EntitlementContractPackageMapDao;
 
 @Component("entitlementContractPackageMapDao")
-public class EntitlementContractPackageMapDaoImpl extends BaseDaoImpl<EntitlementContractPackageMap>
+public class EntitlementContractPackageMapDaoImpl
+        extends BaseDaoWithAssignedSessionFactoryImpl<EntitlementContractPackageMap>
         implements EntitlementContractPackageMapDao {
 
     public EntitlementContractPackageMapDaoImpl(){
