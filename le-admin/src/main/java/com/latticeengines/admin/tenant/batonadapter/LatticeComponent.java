@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
@@ -37,6 +38,9 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     protected Collection<? extends LatticeComponent> dependencies = new HashSet<>();
 
     protected static BatonService batonService = new BatonServiceImpl();
+
+    @Value("${admin.upload.schema}")
+    protected boolean uploadSchema;
 
     public static final String spaceConfigNode = PathConstants.SPACECONFIGURATION_NODE;
 

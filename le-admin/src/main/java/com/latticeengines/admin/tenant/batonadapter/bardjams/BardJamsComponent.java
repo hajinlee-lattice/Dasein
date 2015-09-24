@@ -46,10 +46,13 @@ public class BardJamsComponent extends LatticeComponent {
 
     @Override
     public boolean doRegistration() {
-//        String defaultJson = "bardjams_default.json";
-//        String metadataJson = "bardjams_metadata.json";
-//        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-        return true;
+        if (uploadSchema) {
+            String defaultJson = "bardjams_default.json";
+            String metadataJson = "bardjams_metadata.json";
+            return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        } else {
+            return true;
+        }
     }
 
     @Override
