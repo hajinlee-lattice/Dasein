@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.admin;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,8 +43,11 @@ public class SpaceConfiguration {
             }
             if (node.getPath().toString().equals("/Products")) {
                 try {
-                    List<LatticeProduct> products = mapper.readValue(node.getDocument().getData(), List.class);
-                    this.products = products;
+                    List<String> products = mapper.readValue(node.getDocument().getData(), List.class);
+                    this.products = new ArrayList<>();
+                    for (String product: products) {
+                        this.products.add(LatticeProduct.fromName(product));
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

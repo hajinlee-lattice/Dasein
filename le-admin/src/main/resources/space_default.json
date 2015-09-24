@@ -3,6 +3,7 @@
   "Nodes": [
 	{ "Node": "DL_Address", "Data": "http://bodcdevvint187.dev.lattice.local:8081" },
 	{ "Node": "Product", "Data": "Lead Prioritization" },
+    { "Node": "Products", "Data": "[\"Lead Prioritization\",\"Buyer Insights\"]" },
 	{ "Node": "Topology", "Data": "Marketo" }
   ]
 }

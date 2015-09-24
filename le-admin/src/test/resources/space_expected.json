@@ -24,6 +24,13 @@
       }
     },
     {
+      "Node": "Product",
+      "Data": "[\"Lead Prioritization\",\"Buyer Insights\"]",
+      "Metadata": {
+        "Type": "array"
+      }
+    },
+    {
       "Node": "Topology",
       "Data": "Marketo",
       "Metadata": {

@@ -10,7 +10,9 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
 
 public class SpaceConfigurationUnitTestNG {
 
@@ -43,6 +45,19 @@ public class SpaceConfigurationUnitTestNG {
         SerializableDocumentDirectory sDir = configuration.toSerializableDocumentDirectory();
         SpaceConfiguration constructed = new SpaceConfiguration(sDir.getDocumentDirectory());
         Assert.assertEquals(constructed.getProducts().size(), products.size());
+        for (LatticeProduct product: products) {
+            Assert.assertTrue(constructed.getProducts().contains(product));
+        }
+
+        DocumentDirectory dir = sDir.getDocumentDirectory();
+        dir.delete(new Path("/Products"));
+        constructed = new SpaceConfiguration(sDir.getDocumentDirectory());
+        Assert.assertTrue(constructed.getProducts().isEmpty());
+
+        dir.add(new Path("/Products"), new Document("[\"" + LatticeProduct.LPA.getName() + "\",\""
+                + LatticeProduct.BIS.getName() + "\"]"));
+        constructed = new SpaceConfiguration(sDir.getDocumentDirectory());
+        Assert.assertEquals(constructed.getProducts().size(), 2);
     }
 
     @Test(groups = "unit")

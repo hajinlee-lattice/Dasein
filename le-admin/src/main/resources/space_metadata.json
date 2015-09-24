@@ -4,6 +4,6 @@
     { "Node": "DL_Address", "Data": {"Type": "options", "Options": [
       "http://bodcdevvint207.dev.lattice.local:8081", "http://bodcdevvint187.dev.lattice.local:8081"] } },
 	{ "Node": "Product", "Data": {"Type": "options", "Options": ["Lead Prioritization"], "DynamicOptions": true } },
-	{ "Node": "Topology", "Data": {"Type": "options", "Options": ["Marketo"], "DynamicOptions": true } }
+    { "Node": "Topology", "Data": {"Type": "options", "Options": ["Marketo"], "DynamicOptions": true } }
   ]
 }
