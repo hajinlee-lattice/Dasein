@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.swlib;
 
+import org.springframework.context.ApplicationContext;
+
 public interface SoftwarePackageInitializer {
 
-    void initialize();
+    ApplicationContext initialize(ApplicationContext applicationContext);
 }

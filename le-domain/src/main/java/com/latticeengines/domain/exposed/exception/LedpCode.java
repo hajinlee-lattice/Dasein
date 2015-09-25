@@ -218,7 +218,8 @@ public enum LedpCode {
     LEDP_27001("Cannot copy local file {0} to hdfs path {1}."), //
     LEDP_27002("Software package {0} already exists."), //
     LEDP_27003("JSON file {0} not a software package."), //
-    LEDP_27004("Cannot instantiate class {0} for software library initialization.");
+    LEDP_27004("Cannot instantiate class {0} for software library initialization."), //
+    LEDP_27005("Cannot execute a data flow with both path and table sources.");
     
     private String message;
 

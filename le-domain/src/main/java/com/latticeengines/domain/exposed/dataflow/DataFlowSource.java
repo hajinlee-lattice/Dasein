@@ -2,11 +2,12 @@ package com.latticeengines.domain.exposed.dataflow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class DataFlowSource implements HasName {
 
     private String name;
-    private String table;
+    private Table table;
     private String rawData;
     
     @Override
@@ -23,12 +24,12 @@ public class DataFlowSource implements HasName {
 
     
     @JsonProperty("table")
-    public String getTable() {
+    public Table getTable() {
         return table;
     }
     
     @JsonProperty("table")
-    public void setTable(String table) {
+    public void setTable(Table table) {
         this.table = table;
     }
 
