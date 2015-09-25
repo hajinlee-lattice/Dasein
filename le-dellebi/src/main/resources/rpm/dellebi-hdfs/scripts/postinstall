@@ -1,0 +1,4 @@
+#!/bin/bash
+echo 'Running Postinstall'
+hdfs dfs -copyFromLocal /tmp/app/dataflow/le-dellebi*-shaded.jar /app/dataflow/lib
+
