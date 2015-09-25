@@ -9,7 +9,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     'kendo.directives'
 ])
 
-.controller('ManageFieldsWidgetController', function ($scope, $rootScope, StringUtility, ResourceUtility, SetupUtility, MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel) {
+.controller('ManageFieldsWidgetController', function ($scope, $rootScope, $timeout, StringUtility, ResourceUtility, SetupUtility, MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel) {
     $scope.TagsOptions = ["Internal", "External"];
     $scope.CategoryOptions = ["Lead Information", "Marketing Activity"];
     $scope.StatisticalTypeOptions = ["interval", "nominal", "ordinal", "ratio"];
@@ -20,6 +20,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.saveInProgress = false;
     $scope.showFieldDetails = false;
     $scope.fieldAttributes = [];
+    $scope.gridBind = false;
 
     loadFields();
 
@@ -30,7 +31,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                 $scope.fields = result.ResultObj;
                 renderSelects($scope.fields);
                 renderGrid($scope.fields);
-                if ($scope.fields.length > 0) {
+
+                if ($scope.fields != null && $scope.fields.length > 0) {
                     $scope.fieldAttributes = [];
                     for (var attr in $scope.fields[0]) {
                         $scope.fieldAttributes.push(attr);
@@ -39,8 +41,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             } else {
                 $scope.showLoadingError = true;
                 $scope.loadingError = result.ResultErrors;
+                $scope.loading = false;
             }
-            $scope.loading = false;
         });
     }
 
@@ -52,82 +54,110 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     }
 
     function renderGrid(fields) {
-        var pageSize = fields.length;
+        $scope.dirtyRows = {};
 
-        if (fields.length > 10) {
-            pageSize = 10;
-        }
+        var grid = $("#fieldsGrid").data("kendoGrid");
+        if (grid != null && grid.dataSource != null) {
+            var filter = grid.dataSource.filter();
+            var page = grid.dataSource.page();
+            var sortedField, sortedDir;
+            var th = $("#fieldsGrid th[data-dir]");
+            if (th.length > 0) {
+                sortedField = th.attr("data-field");
+                sortedDir = th.attr("data-dir");
+            }
 
-        var dataSource = new kendo.data.DataSource({
-            data: fields,
-            schema: {
-                model: {
-                    fields: {
-                        ColumnName: { type: "string", editable: false },
-                        SourceToDisplay: { type: "string", editable: false },
-                        DisplayName: { type: "string" },
-                        Tags: { type: "string" },
-                        Category: { type: "string" },
-                        ApprovedUsage: { type: "string" },
-                        FundamentalType: { type: "string" }
+            grid.dataSource.data(fields);
+            $scope.gridBind = !$scope.gridBind;
+
+            if (filter != null) {
+                $scope.filterFields(null);
+            }
+            if (sortedField != null && sortedDir != null) {
+                $("#fieldsGrid").data("kendoGrid").dataSource.sort({ field: sortedField, dir: sortedDir });
+            }
+            if (page != null && page > 1) {
+                $("#fieldsGrid").data("kendoGrid").dataSource.page(page);
+            }
+
+            $scope.loading = false;
+        } else {
+            var pageSize = fields.length;
+            if (pageSize > 50) {
+                pageSize = 50;
+            }
+            var dataSource = new kendo.data.DataSource({
+                data: fields,
+                schema: {
+                    model: {
+                        fields: {
+                            ColumnName: { type: "string", editable: false },
+                            SourceToDisplay: { type: "string", editable: false },
+                            DisplayName: { type: "string" },
+                            Tags: { type: "string" },
+                            Category: { type: "string" },
+                            ApprovedUsage: { type: "string" },
+                            FundamentalType: { type: "string" }
+                        }
                     }
-                }
-            },
-            pageSize: pageSize
-        });
+                },
+                pageSize: pageSize
+            });
 
-        $scope.gridOptions = {
-            dataSource: dataSource,
-            sortable: { mode: "single", allowUnsort: false },
-            pageable: {
-                messages: {
-                    first: "",
-                    previous: "",
-                    next: "",
-                    last: "",
-                    display: "{0} - {1} of {2}",
-                    empty: "No data"
-                }
-            },
-            scrollable: false,
-            columns: [
-                {
-                    field: "ColumnName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FIELD'),
-                    template: kendo.template($("#fieldTemplate").html()),
-                    width: 184
+            $scope.gridOptions = {
+                dataSource: dataSource,
+                scrollable: false,
+                sortable: { mode: "single", allowUnsort: false },
+                pageable: {
+                    messages: {
+                        first: "",
+                        previous: "",
+                        next: "",
+                        last: "",
+                        display: "{0} - {1} of {2}",
+                        empty: "No data"
+                    }
                 },
-                {
-                    field: "SourceToDisplay", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_SOURCE'),
-                    template: kendo.template($("#sourceTemplate").html()),
-                    width: 110
-                },
-                {
-                    field: "DisplayName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME'),
-                    template: kendo.template($("#displayNameTemplate").html()),
-                    width: 150
-                },
-                {
-                    field: "Tags", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_TAGS'),
-                    template: kendo.template($("#tagsTemplate").html()),
-                    width: 90
-                },
-                {
-                    field: "Category", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_CATEGORY'),
-                    template: kendo.template($("#categoryTemplate").html()),
-                    width: 120
-                },
-                {
-                    field: "ApprovedUsage", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_APPROVED_USAGE'),
-                    template: kendo.template($("#approvedUsageTemplate").html()),
-                    width: 128
-                },
-                {
-                    field: "FundamentalType", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FUNDAMENTAL_TYPE'),
-                    template: kendo.template($("#fundamentalTypeTemplate").html()),
-                    width: 128
-                }
-            ]
-        };
+                columns: [
+                    {
+                        field: "ColumnName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FIELD'),
+                        template: kendo.template($("#fieldTemplate").html()),
+                        width: 184
+                    },
+                    {
+                        field: "SourceToDisplay", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_SOURCE'),
+                        template: kendo.template($("#sourceTemplate").html()),
+                        width: 108
+                    },
+                    {
+                        field: "DisplayName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME'),
+                        template: kendo.template($("#displayNameTemplate").html()),
+                        width: 150
+                    },
+                    {
+                        field: "Tags", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_TAGS'),
+                        template: kendo.template($("#tagsTemplate").html()),
+                        width: 90
+                    },
+                    {
+                        field: "Category", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_CATEGORY'),
+                        template: kendo.template($("#categoryTemplate").html()),
+                        width: 120
+                    },
+                    {
+                        field: "ApprovedUsage", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_APPROVED_USAGE'),
+                        template: kendo.template($("#approvedUsageTemplate").html()),
+                        width: 128
+                    },
+                    {
+                        field: "FundamentalType", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FUNDAMENTAL_TYPE'),
+                        template: kendo.template($("#fundamentalTypeTemplate").html()),
+                        width: 128
+                    }
+                ]
+            };
+            $scope.loading = false;
+        }
     }
 
     $scope.categoryEditable = function(dataItem) {
@@ -305,6 +335,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         $("#fieldsGrid").data("kendoGrid").cancelChanges();
         $scope.showEditFieldsError = false;
         $scope.batchEdit = false;
+        $scope.dirtyRows = {};
     };
 
     $scope.textboxClicked = function ($event) {
@@ -314,45 +345,40 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         }
     };
 
-    $scope.valueChanged = function ($event, dataItem, field, newValue, originalValue) {
+    $scope.valueChanged = function ($event, dataItem, field, originalValue) {
         if ($event != null) {
             $event.preventDefault();
         }
 
-        dataItem.dirty = true;
-        dataItem.dirtyFields = dataItem.dirtyFields || {};
-        dataItem.dirtyFields[field] = (newValue !== originalValue);
+        var dirtyRow = $scope.dirtyRows[dataItem.uid] || {};
+        if (dirtyRow[field] == null) {
+            dirtyRow[field] = { dirty: true, ov: originalValue };
+        } else {
+            var newValue = dataItem[field];
+            dirtyRow[field].dirty = (newValue != dirtyRow[field].ov);
+        }
+        $scope.dirtyRows[dataItem.uid] = dirtyRow;
+
+        dataItem.dirty = false;
+        for (var f in dirtyRow) {
+            if (dirtyRow[f].dirty) {
+                dataItem.dirty = true;
+                break;
+            }
+        }
     };
 
     function getEditedData() {
         var grid = $("#fieldsGrid").data("kendoGrid");
-        var editDataItems = $.grep(grid.dataSource.data(), function(item) {
-            if (item.dirty && item.dirtyFields != null) {
-                for (var dirtyField in item.dirtyFields) {
-                    if (dirtyField) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+        return $.grep(grid.dataSource.data(), function(item) {
+            return item.dirty;
         });
-
-        var editedData = [];
-        if (editDataItems != null && editDataItems.length > 0) {
-            for (var i = 0; i < editDataItems.length; i++) {
-                var data = {};
-                var dataItem = editDataItems[i];
-                for (var field in dataItem) {
-                    if ($scope.fieldAttributes.indexOf(field) > -1) {
-                        data[field] = dataItem[field];
-                    }
-                }
-                editedData.push(data);
-            }
-        }
-
-        return editedData;
     }
+
+    $scope.isChanged = function (uid, field) {
+        var row = $scope.dirtyRows[uid];
+        return row && row[field] && row[field].dirty;
+    };
 
     $scope.fieldLinkClicked = function($event, field) {
         if ($event != null) {

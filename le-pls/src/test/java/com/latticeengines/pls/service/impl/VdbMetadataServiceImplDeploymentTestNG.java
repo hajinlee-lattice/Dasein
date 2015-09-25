@@ -16,14 +16,13 @@ import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
-import com.latticeengines.pls.functionalframework.VdbMetadataFieldFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.service.VdbMetadataService;
 
-public class VdbMetadataServiceImplTestNG extends VdbMetadataFieldFunctionalTestNGBase {
+public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    // TODO: need to implement mock up API
     @Autowired
     private TenantConfigService tenantConfigService;
 
@@ -39,34 +38,34 @@ public class VdbMetadataServiceImplTestNG extends VdbMetadataFieldFunctionalTest
     private static final String fundamentalTypes[] = { "boolean", "currency", "numeric", "percentage", "year" };
     private static final String statisticalTypes[] = { "interval", "nominal", "ordinal", "ratio" };
 
-    private static final Integer maxUpdatesCount = 10;
+    private static final Integer maxUpdatesCount = 5;
 
     private Tenant tenant;
     private List<VdbMetadataField> originalFields;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        setupUsers();
+        switchToSuperAdmin();
 
         tenant = testingTenants.get(0);
         originalFields = vdbMetadataService.getFields(tenant);
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
         if (originalFields != null && originalFields.size() > 0) {
             vdbMetadataService.UpdateFields(tenant, originalFields);
         }
     }
 
-    @Test(groups = "functional" , enabled = false)
+    @Test(groups = "deployment" , enabled = false)
     public void getSourceToDisplay() {
         for (Map.Entry<String, String> entry : VdbMetadataConstants.SOURCE_MAPPING.entrySet()) {
             Assert.assertEquals(entry.getValue(), vdbMetadataService.getSourceToDisplay(entry.getKey()));
         }
     }
 
-    @Test(groups = "functional" , enabled = false)
+    @Test(groups = "deployment" , enabled = false)
     public void testGetFields() throws Exception {
         List<VdbMetadataField> fields = vdbMetadataService.getFields(tenant);
 
@@ -79,7 +78,7 @@ public class VdbMetadataServiceImplTestNG extends VdbMetadataFieldFunctionalTest
         }
     }
 
-    @Test(groups = "functional", dataProvider = "noAttributeChangedDataProviderArgs", enabled = false)
+    @Test(groups = "deployment", dataProvider = "noAttributeChangedDataProviderArgs", enabled = false)
     public void testUpdateFieldWithNoAttributeChanged(VdbMetadataField field) {
         VdbMetadataField originalField = originalFields.get(0);
         vdbMetadataService.UpdateField(tenant, field);
@@ -88,7 +87,7 @@ public class VdbMetadataServiceImplTestNG extends VdbMetadataFieldFunctionalTest
         Assert.assertTrue(originalField.equals(fieldUpdated));
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "deployment", enabled = false)
     public void testUpdateFieldWithAllAttributesChanged() throws Exception {
         VdbMetadataField field = (VdbMetadataField)originalFields.get(0).clone();
         if ("DisplayName_FunTest".equals(field.getDisplayName()))
@@ -136,7 +135,7 @@ public class VdbMetadataServiceImplTestNG extends VdbMetadataFieldFunctionalTest
         assertFieldExists(colsMetadataInCustomQuery, field);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "deployment", enabled = false)
     public void testUpdateFieldWithAllAttributeEnums() {
         List<VdbMetadataField> fieldsUpdated;
         VdbMetadataField fieldUpdated;
@@ -188,7 +187,7 @@ public class VdbMetadataServiceImplTestNG extends VdbMetadataFieldFunctionalTest
         }
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "deployment", enabled = false)
     public void testUpdateFields() throws Exception {
         List<VdbMetadataField> fieldsToUpdate = new ArrayList<VdbMetadataField>();
         Integer maxCount = originalFields.size() > maxUpdatesCount ? maxUpdatesCount : originalFields.size();
@@ -242,6 +241,46 @@ public class VdbMetadataServiceImplTestNG extends VdbMetadataFieldFunctionalTest
         return new Object[][] { { field1 }, //
                 { field2 }, //
                 { field3 } };
+    }
+
+    private VdbMetadataField getField(List<VdbMetadataField> fields, String columnName) {
+        for (VdbMetadataField field : fields) {
+            if (columnName.equals(field.getColumnName())) {
+                return field;
+            }
+        }
+
+        return null;
+    }
+
+    private void assertFieldExists(Map<String, Map<String, String>> colsMetadata, VdbMetadataField field) {
+        Assert.assertTrue(colsMetadata.containsKey(field.getColumnName()));
+        Map<String, String> map = colsMetadata.get(field.getColumnName());
+        Assert.assertEquals(field.getSource(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_SOURCE));
+        Assert.assertEquals(field.getCategory(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_CATEGORY));
+        Assert.assertEquals(field.getDisplayName(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_DISPLAYNAME));
+        Assert.assertEquals(field.getDescription(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_DESCRIPTION));
+        Assert.assertEquals(field.getApprovedUsage(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_APPROVED_USAGE));
+        Assert.assertEquals(field.getTags(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_TAGS));
+        Assert.assertEquals(field.getFundamentalType(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE));
+        Assert.assertEquals(field.getDisplayDiscretization(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_DISPLAY_DISCRETIZATION));
+        Assert.assertEquals(field.getStatisticalType(), getFieldValue(map, VdbMetadataConstants.ATTRIBUTE_STATISTICAL_TYPE));
+    }
+
+    private String getFieldValue(Map<String, String> map, String key) {
+        if (map.containsKey(key)) {
+            String value = map.get(key);
+            if (VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE.equals(key) &&
+                    VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE.equalsIgnoreCase(value)) {
+                return null;
+            } else if (VdbMetadataConstants.ATTRIBUTE_NULL_VALUE.equalsIgnoreCase(value)) {
+                return null;
+            } else {
+                return value;
+            }
+        } else {
+            return null;
+        }
     }
 
 }

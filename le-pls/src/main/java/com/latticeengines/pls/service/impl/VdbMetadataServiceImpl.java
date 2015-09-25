@@ -87,14 +87,14 @@ public class VdbMetadataServiceImpl implements VdbMetadataService {
     @Override
     public String getSourceToDisplay(String source) {
         if (source == null) {
-            return "";
+            return VdbMetadataConstants.SOURCE_LATTICE_DATA_SCIENCE;
         }
 
         boolean exist = VdbMetadataConstants.SOURCE_MAPPING.containsKey(source);
         if (exist) {
             return VdbMetadataConstants.SOURCE_MAPPING.get(source);
         } else {
-            return source;
+            return VdbMetadataConstants.SOURCE_LATTICE_DATA_SCIENCE;
         }
     }
 

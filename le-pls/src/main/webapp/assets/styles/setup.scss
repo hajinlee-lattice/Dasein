@@ -74,6 +74,15 @@
   margin-left: 20px;
 }
 
+#setup .manage-fields .form-group .warning {
+  display: inline-block;
+  margin-left: 6px;
+  width: 18px;
+  height: 16px;
+  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat;
+  vertical-align: middle;
+}
+
 #setup .manage-fields .k-icon {
   /* Kendo icon not shown in Chrome of ios, so replace it */
   background-image: none;
@@ -98,7 +107,7 @@
 
 #setup .fields-grid table {
   table-layout: fixed;
-  min-width: 1024px;
+  min-width: 1020px;
   border-collapse: collapse;
   border-spacing: 0;
 }
@@ -167,7 +176,7 @@
 #setup .fields-grid table input[type="text"] {
   margin: 0;
   padding: 4px;
-  width: 92%;
+  width: 91%;
   height: 1.8em;
   font-size: 12px;
   text-indent: 0;
@@ -180,6 +189,10 @@
   height: 1.8em;
   font-size: 12px;
   text-indent: 0;
+}
+
+#setup .fields-grid table select.tags {
+  width: 84%;
 }
 
 #setup .fields-grid table .k-dirty {
@@ -204,23 +217,20 @@
   display: inline-block;
   width: 20px;
   height: 16px;
-  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat;
-  background-position: 2px 0;
+  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat 2px 0;
   vertical-align: middle;
 }
 
 #setup .fields-grid.edit table span.warning {
   display: block;
   width: 22px;
-  height: 15px;
-  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat;
-  background-position: 5px 0;
+  height: 16px;
+  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat 5px 1px;
 }
 
 #setup .fields-grid table input[type="text"].warning,
 #setup .fields-grid table select.warning {
-  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat;
-  background-position: 4px 7px;
+  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat 4px 50%;
   background-color: white;
 }
 
@@ -243,7 +253,7 @@
   opacity: 1;
 }
 
-#setup .fields-grid .k-grid-pager.k-state-disabled .k-icon {
+#setup .fields-grid .k-grid-pager .k-state-disabled .k-icon {
   opacity: 0.5;
 }
 

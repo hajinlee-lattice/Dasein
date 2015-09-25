@@ -13,6 +13,7 @@ public final class VdbMetadataConstants {
     public static final String SOURCE_ELOQUA = "Eloqua";
     public static final String SOURCE_SALESFORCE = "Salesforce";
     public static final String SOURCE_LATTICE_DATA_CLOUD = "Lattice Data Cloud";
+    public static final String SOURCE_LATTICE_DATA_SCIENCE = "Lattice Data Science";
 
     public static final String ATTRIBUTE_SOURCE = "DataSource";
     public static final String ATTRIBUTE_CATEGORY = "Category";
@@ -70,6 +71,12 @@ public final class VdbMetadataConstants {
                 put("HPA_New_Source", SOURCE_LATTICE_DATA_CLOUD);
                 put("PD_HPA_Plus_Source_Import", SOURCE_LATTICE_DATA_CLOUD);
                 put("HPA_Plus_Source", SOURCE_LATTICE_DATA_CLOUD);
+                put("Info_PublicDomain", SOURCE_LATTICE_DATA_CLOUD);
+                put("Info_PublicDomain_Import", SOURCE_LATTICE_DATA_CLOUD);
+                put("Sys_LatticeSystemID", SOURCE_LATTICE_DATA_CLOUD);
+                put("Sys_LatticeSystemID_Import", SOURCE_LATTICE_DATA_CLOUD);
+                put("RptDB_Scorehistory", SOURCE_LATTICE_DATA_CLOUD);
+                put("RptDB_Scorehistory_Import", SOURCE_LATTICE_DATA_CLOUD);
 
             }
         }
