@@ -84,8 +84,7 @@
                                 <argument>com.latticeengines.domain.exposed.dataflow</argument>
                                 <argument>com.latticeengines.domain.exposed.dataplatform</argument>
                                 <argument>com.latticeengines.domain.exposed.eai</argument>
-                                <!-- Uncomment after metadata domain objects
-                                    are fixed <argument>com.latticeengines.domain.exposed.metadata</argument> -->
+                                <argument>com.latticeengines.domain.exposed.metadata</argument>
                                 <argument>com.latticeengines.domain.exposed.modeling</argument>
                                 <argument>com.latticeengines.domain.exposed.modeling.algorithm</argument>
                                 <argument>com.latticeengines.domain.exposed.pls</argument>
