@@ -10,6 +10,7 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.LineMapper;
+import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -31,7 +32,7 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
         this.type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
     
-    public void loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService) {
+    public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService, ApplicationContext context) {
         List<SoftwarePackage> packages = softwareLibraryService.getLatestInstalledPackages(module);
         log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
         log.info(String.format("Found %d of software packages from the software library for this module.",
@@ -43,12 +44,12 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
             try {
                 Class<?> c = Class.forName(initializerClassName);
                 initializer = (SoftwarePackageInitializer) c.newInstance();
-                initializer.initialize();
+                context = initializer.initialize(context);
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 log.error(LedpException.buildMessage(LedpCode.LEDP_27004, new String[] { initializerClassName }), e);
             }
         }
-
+        return context;
     }
 
     public LineMapper<T> getLineMapper() {
