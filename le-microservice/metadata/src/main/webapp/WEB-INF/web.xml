@@ -4,7 +4,7 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
 
-    <display-name>METADATA SERVICE API</display-name>
+    <display-name>MODELING SERVICE API</display-name>
     <description>Lattice Engines Modeling Service REST API</description>
 
     <servlet>
@@ -14,8 +14,8 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>metadata</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <servlet-name>modeling</servlet-name>
+        <url-pattern>/modeling/*</url-pattern>
     </servlet-mapping>
 
 </web-app>
