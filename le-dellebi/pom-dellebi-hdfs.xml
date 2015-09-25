@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-dataflow-hdfs</artifactId>
+    <artifactId>le-dellebi-hdfs</artifactId>
     <packaging>rpm</packaging>
     <description>LE DELLEBI NO DEPENDENCY RPM</description>
 
