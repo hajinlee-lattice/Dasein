@@ -31,6 +31,8 @@
         <module>le-db</module>
         <module>le-oauth2db</module>
         <module>le-oauth2</module>
+        <module>le-baton</module>
+        <module>le-camille</module>
         <module>le-playmaker</module>
     </modules>
 
