@@ -20,7 +20,7 @@
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
         <version>2.0.10-SNAPSHOT</version>
-        <relativePath>../le-microservice</relativePath>
+        <relativePath>..</relativePath>
     </parent>
 
     <build>
