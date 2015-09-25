@@ -99,7 +99,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
             if (colData.getDataSource() != null && colData.getDataSource().size() == 1 && !colData.getDataSource().get(0).equals("")) {
                 metadata.put("DataSource", colData.getDataSource().get(0));
             } else {
-                metadata.put("DataSource", "Lattice Data Cloud");
+                metadata.put("DataSource", "Lattice Data Science");
             }
 
             if (colData.getApprovedUsage() != null && colData.getApprovedUsage().size() > 0) {
