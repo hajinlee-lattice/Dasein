@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.file.FileReader;
@@ -14,6 +15,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,9 +24,17 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.yarn.client.YarnClient;
+import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataflow-context.xml" })
@@ -32,6 +42,21 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFlowFunctionalTestNGBase.class);
+    
+    @Autowired
+    private Configuration yarnConfiguration;
+    
+    @Autowired
+    private YarnClient defaultYarnClient;
+    
+    protected DataPlatformFunctionalTestNGBase platformTestBase;
+
+    @BeforeClass(groups = { "functional", "deployment" })
+    public void setupRunEnvironment() throws Exception {
+        platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
+        platformTestBase.setYarnClient(defaultYarnClient);
+    }
+
 
     public void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
@@ -68,4 +93,23 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         assertEquals(numRows, expectedNumRows);
     }
 
+    protected Table createTableFromDir(String tableName, String path, String lastModifiedColName) {
+        Table table = new Table();
+        table.setName(tableName);
+        Extract extract = new Extract();
+        extract.setName("e1");
+        extract.setPath(path);
+        table.addExtract(extract);
+        PrimaryKey pk = new PrimaryKey();
+        Attribute pkAttr = new Attribute();
+        pkAttr.setName("Id");
+        pk.setAttributes(Arrays.<Attribute>asList(new Attribute[] { pkAttr }));
+        LastModifiedKey lmk = new LastModifiedKey();
+        Attribute lastModifiedColumn = new Attribute();
+        lastModifiedColumn.setName(lastModifiedColName);
+        lmk.setAttributes(Arrays.<Attribute>asList(new Attribute[] { lastModifiedColumn }));
+        table.setPrimaryKey(pk);
+        table.setLastModifiedKey(lmk);
+        return table;
+    }
 }

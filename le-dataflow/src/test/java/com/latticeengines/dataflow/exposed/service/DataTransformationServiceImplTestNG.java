@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -121,7 +122,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     
     @Test(groups = "functional", dataProvider = "engineProvider", enabled = true)
     public void executeNamedTransformationForTableSource(String engine) throws Exception {
-        Map<String, String> sources = new HashMap<>();
+        Map<String, Table> sources = new HashMap<>();
         Table table = new Table();
         table.setName("source");
         Extract e1 = new Extract();
@@ -140,12 +141,19 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         Attribute pkAttr = new Attribute();
         pkAttr.setName("ID");
         pk.addAttribute(pkAttr);
+        LastModifiedKey lk = new LastModifiedKey();
+        Attribute lkAttr = new Attribute();
+        lkAttr.setName("LastUpdatedDate");
+        lk.addAttribute(lkAttr);
         table.setPrimaryKey(pk);
+        table.setLastModifiedKey(lk);
+        table.addAttribute(pkAttr);
+        table.addAttribute(lkAttr);
 
-        sources.put("Source", table.toString());
+        sources.put("Source", table);
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("SOURCES", sources);
+        ctx.setProperty("SOURCETABLES", sources);
         ctx.setProperty("CUSTOMER", "customer2");
         ctx.setProperty("TARGETPATH", "/tmp/CombinedImportTable");
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
@@ -160,11 +168,11 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     @Test(groups = "functional", dataProvider = "errorUseCaseProvider", //
             dependsOnMethods = { "executeNamedTransformationForTableSource" })
     public void executeNamedTransformationForErrors(Table table, String message) throws Exception {
-        Map<String, String> sources = new HashMap<>();
-        sources.put("Source", table.toString());
+        Map<String, Table> sourceTables = new HashMap<>();
+        sourceTables.put("Source", table);
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("SOURCES", sources);
+        ctx.setProperty("SOURCETABLES", sourceTables);
         ctx.setProperty("CUSTOMER", "customer2");
         ctx.setProperty("TARGETPATH", "/tmp/CombinedImportTable");
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());

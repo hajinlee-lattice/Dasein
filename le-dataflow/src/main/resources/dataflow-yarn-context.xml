@@ -5,6 +5,7 @@
         xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
         xmlns:security="http://www.springframework.org/schema/security"
         xmlns:util="http://www.springframework.org/schema/util"
+        xmlns:camel="http://camel.apache.org/schema/spring"
         xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
       http://www.springframework.org/schema/aop
@@ -18,19 +19,10 @@
       http://www.springframework.org/schema/security
       http://www.springframework.org/schema/security/spring-security-4.0.xsd
       http://www.springframework.org/schema/util
-      http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+      http://www.springframework.org/schema/util/spring-util-4.0.xsd
+      http://camel.apache.org/schema/spring
+      http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-
-    <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
-        <property name="locations">
-            <list>
-                <value>file:${DATAFLOW_PROPDIR}/dataflow.properties</value>
-                <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
-                <value>file:${DB_PROPDIR}/db.properties</value>
-            </list>
-        </property>
-        <property name="ignoreUnresolvablePlaceholders" value="false" />
-        <property name="ignoreResourceNotFound" value="false" />
-    </bean>
+    <context:component-scan base-package="com.latticeengines.dataflow"/>
 
 </beans>

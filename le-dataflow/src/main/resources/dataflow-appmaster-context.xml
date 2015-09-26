@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
+    xmlns:yarn-int="http://www.springframework.org/schema/yarn/integration"
+    xmlns:yarn-batch="http://www.springframework.org/schema/yarn/batch"
+    xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+    xmlns:batch="http://www.springframework.org/schema/batch"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn-2.0.xsd
+        http://www.springframework.org/schema/yarn/integration http://www.springframework.org/schema/yarn/integration/spring-yarn-integration-2.0.xsd
+        http://www.springframework.org/schema/yarn/batch http://www.springframework.org/schema/yarn/batch/spring-yarn-batch-2.0.xsd
+        http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+        http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
+        <property name="locations">
+            <list>
+                <value>file:dataflow.properties</value>
+                <value>file:dataplatform.properties</value>
+                <value>file:db.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="false" />
+        <property name="ignoreResourceNotFound" value="false" />
+    </bean>
+
+    <bean id="itemProcessor" class="com.latticeengines.dataflow.yarn.runtime.DataFlowProcessor" />
+
+    <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
+    <import resource="classpath:dataplatform-context.xml" />
+    <import resource="classpath:dataflow-yarn-context.xml" />
+</beans>
