@@ -26,4 +26,10 @@ public class AuthoritativeDBJdbcManager {
         return infosList;
     }
 
+    public List<BardInfo> getBardDB(String customer) {
+        List<BardInfo> infosList = authoritativeDBJdbcTemlate
+                .query("select Display_Name, Instance, Name, Settings from LEComponent where " //
+                        + "External_ID = '" + customer + "_DB_BARD'", new BeanPropertyRowMapper<BardInfo>(BardInfo.class));
+        return infosList;
+    }
 }

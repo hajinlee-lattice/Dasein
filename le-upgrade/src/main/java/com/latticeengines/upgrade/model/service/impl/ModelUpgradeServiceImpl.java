@@ -367,7 +367,7 @@ public class ModelUpgradeServiceImpl implements ModelUpgradeService {
         Boolean all = (Boolean) parameters.get("all");
         if(!all){
             try {
-                List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDBInfos(customer);
+                List<BardInfo> bardInfos = authoritativeDBJdbcManager.getBardDB(customer);
                 setInfos(bardInfos);
                 bardJdbcManager.init(bardDB, instance);
             } catch (Exception e2) {
