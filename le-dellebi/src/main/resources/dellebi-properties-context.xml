@@ -25,6 +25,7 @@
             <list>
                 <value>file:${DELLEBI_PROPDIR}/dellebi.properties</value>
                 <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
+                <value>file:${DB_PROPDIR}/db.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

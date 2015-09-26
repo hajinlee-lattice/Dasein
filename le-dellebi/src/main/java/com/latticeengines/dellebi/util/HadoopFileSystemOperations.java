@@ -1,6 +1,7 @@
 package com.latticeengines.dellebi.util;
 
 import java.net.URI;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,6 +10,8 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Value;
+
+import cascading.flow.FlowDef;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
@@ -81,4 +84,16 @@ public class HadoopFileSystemOperations {
         return false;
     }
 
+    public static void addClasspath(FlowDef flow) {
+
+        try {
+            Configuration config = new Configuration();
+            List<String> files = HdfsUtils.getFilesForDir(config, "/app/dataflow/lib/");
+            for (String file : files) {
+                flow.addToClassPath(file);
+            }
+        } catch (Exception e) {
+            log.warn("Exception retrieving library jars for this flow.", e);
+        }
+    }
 }
