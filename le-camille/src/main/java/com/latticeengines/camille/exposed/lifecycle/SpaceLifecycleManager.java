@@ -113,9 +113,14 @@ public class SpaceLifecycleManager {
                 CamilleEnvironment.getPodId(), contractId, tenantId));
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
-            String spaceId = childPair.getValue().getSuffix();
-            toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId, getInfo(contractId, tenantId,
-                    spaceId)));
+            String spaceId = "";
+            try {
+                spaceId = childPair.getValue().getSuffix();
+                toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId, getInfo(contractId,
+                        tenantId, spaceId)));
+            } catch (Exception ex) {
+                log.warn("Can not add spaceId=" + spaceId, ex);
+            }
         }
 
         return toReturn;
@@ -137,9 +142,14 @@ public class SpaceLifecycleManager {
                         .buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId));
 
                 for (AbstractMap.SimpleEntry<Document, Path> space : spaces) {
-                    String spaceId = space.getValue().getSuffix();
-                    toReturn.add(new AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(
-                            contractId, tenantId, spaceId), getInfo(contractId, tenantId, spaceId)));
+                    String spaceId = "";
+                    try {
+                        spaceId = space.getValue().getSuffix();
+                        toReturn.add(new AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(
+                                contractId, tenantId, spaceId), getInfo(contractId, tenantId, spaceId)));
+                    } catch (Exception ex) {
+                        log.warn("Can not add spaceId=" + spaceId, ex);
+                    }
                 }
             }
         }
