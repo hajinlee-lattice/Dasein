@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -28,6 +29,11 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         Tenant t = tenantEntityMgr.findByTenantId("tenant1");
+        List<Table> tables = tableEntityMgr.findAll();
+        
+        for (Table table : tables) {
+            tableEntityMgr.delete(table);
+        }
         if (t != null) {
             tenantEntityMgr.delete(t);
         }
@@ -41,30 +47,64 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         table.setTenant(tenant);
         table.setName("source");
         table.setDisplayName("Source table");
-        Extract e1 = new Extract();
-        e1.setName("e1");
-        e1.setPath("/e1");
-        Extract e2 = new Extract();
-        e2.setName("e2");
-        e2.setPath("/e2");
-        Extract e3 = new Extract();
-        e3.setName("e3");
-        e3.setPath("/e3");
+        Extract e1 = createExtract("e1");
+        Extract e2 = createExtract("e2");
+        Extract e3 = createExtract("e3");
         table.addExtract(e1);
         table.addExtract(e2);
         table.addExtract(e3);
+        PrimaryKey pk = createPrimaryKey(tenant);
+        LastModifiedKey lk = createLastModifiedKey(tenant);
+        table.setPrimaryKey(pk);
+        table.setLastModifiedKey(lk);
+        table.addAttribute(pk.getAttributes().get(0));
+        table.addAttribute(lk.getAttributes().get(0));
+        
+        tableEntityMgr.create(table);
+    }
+    
+    private LastModifiedKey createLastModifiedKey(Tenant tenant) {
+        LastModifiedKey lk = new LastModifiedKey();
+        lk.setTenant(tenant);
+        Attribute lkAttr = new Attribute();
+        lkAttr.setName("LID");
+        lkAttr.setDisplayName("LastUpdatedDate");
+        lkAttr.setLength(10);
+        lkAttr.setPrecision(10);
+        lkAttr.setScale(10);
+        lkAttr.setPhysicalDataType("XYZ");
+        lkAttr.setLogicalDataType("Date");
+        lk.setName("LK_LUD");
+        lk.setDisplayName("Last Modified Key for LastUpdatedDate column");
+        lk.addAttribute(lkAttr);
+        
+        return lk;
+    }
+    
+    private PrimaryKey createPrimaryKey(Tenant tenant) {
         PrimaryKey pk = new PrimaryKey();
+        pk.setTenant(tenant);
         Attribute pkAttr = new Attribute();
-        table.addAttribute(pkAttr);
         pkAttr.setName("ID");
         pkAttr.setDisplayName("Id");
+        pkAttr.setLength(10);
+        pkAttr.setPrecision(10);
+        pkAttr.setScale(10);
+        pkAttr.setPhysicalDataType("XYZ");
+        pkAttr.setLogicalDataType("Identity");
         pk.setName("PK_ID");
         pk.setDisplayName("Primary Key for ID column");
         pk.addAttribute(pkAttr);
-        pk.setTenant(tenant);
-        table.setPrimaryKey(pk);
-        
-        tableEntityMgr.create(table);
+
+        return pk;
+    }
+
+    private Extract createExtract(String name) {
+        Extract e = new Extract();
+        e.setName(name);
+        e.setPath("/" + name);
+        e.setExtractionTimestamp(System.currentTimeMillis());
+        return e;
     }
 
     @Test(groups = "functional")

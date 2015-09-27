@@ -13,4 +13,5 @@
     </context:component-scan>
 
     <import resource="classpath:security-context.xml"/>
+    <import resource="classpath:db-context.xml"/>
 </beans>
