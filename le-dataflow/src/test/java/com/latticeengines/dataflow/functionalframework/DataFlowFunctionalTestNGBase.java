@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataflow-context.xml" })
@@ -94,17 +95,23 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     }
 
     protected Table createTableFromDir(String tableName, String path, String lastModifiedColName) {
+        Tenant tenant = new Tenant();
+        tenant.setId("T1");
+        tenant.setName("T1");
         Table table = new Table();
+        table.setTenant(tenant);
         table.setName(tableName);
         Extract extract = new Extract();
         extract.setName("e1");
         extract.setPath(path);
         table.addExtract(extract);
         PrimaryKey pk = new PrimaryKey();
+        pk.setTenant(tenant);
         Attribute pkAttr = new Attribute();
         pkAttr.setName("Id");
         pk.setAttributes(Arrays.<Attribute>asList(new Attribute[] { pkAttr }));
         LastModifiedKey lmk = new LastModifiedKey();
+        lmk.setTenant(tenant);
         Attribute lastModifiedColumn = new Attribute();
         lastModifiedColumn.setName(lastModifiedColName);
         lmk.setAttributes(Arrays.<Attribute>asList(new Attribute[] { lastModifiedColumn }));
