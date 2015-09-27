@@ -23,6 +23,7 @@
             <list>
                 <value>file:eai.properties</value>
                 <value>file:dataplatform.properties</value>
+                <value>file:db.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

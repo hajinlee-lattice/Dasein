@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.camel.CamelContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -47,6 +46,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath("Production", customer).toString());
+        crmCredentialZKService.removeCredentials(customer, customer, true);
         targetPath = dataExtractionService.createTargetPath(customer);
         BatonService baton = new BatonServiceImpl();
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
@@ -60,12 +61,6 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("Happy2010oIogZVEFGbL3n0qiAp6F66TC");
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
-    }
-
-    @AfterClass(groups = "functional")
-    private void cleanUp() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath("Production", customer).toString());
-        crmCredentialZKService.removeCredentials(customer, customer, true);
     }
 
     @Test(groups = "functional")

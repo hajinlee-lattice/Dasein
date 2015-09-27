@@ -1,6 +1,8 @@
 package com.latticeengines.eai.functionalframework;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class MarketoExtractAndImportUtil {
@@ -28,6 +30,16 @@ public class MarketoExtractAndImportUtil {
         table.addAttribute(leadId);
         table.addAttribute(activityDate);
         table.addAttribute(activityTypeId);
+        
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id);
+        table.setPrimaryKey(pk);
+        
+        LastModifiedKey lk = new LastModifiedKey();
+        lk.setName("LK_ActivityDate");
+        lk.addAttribute(activityDate);
+        table.setLastModifiedKey(lk);
         return table;
     }
 
@@ -58,6 +70,12 @@ public class MarketoExtractAndImportUtil {
         table.addAttribute(name);
         table.addAttribute(description);
         table.addAttribute(attributes);
+
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id);
+        table.setPrimaryKey(pk);
+        
         return table;
     }
 
@@ -136,6 +154,11 @@ public class MarketoExtractAndImportUtil {
         table.addAttribute(facebookReferredEnrollments);
         table.addAttribute(facebookReferredVisits);
 
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id);
+        table.setPrimaryKey(pk);
+        
         return table;
     }
 

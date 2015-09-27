@@ -1,6 +1,8 @@
 package com.latticeengines.eai.functionalframework;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class SalesforceExtractAndImportUtil {
@@ -80,6 +82,15 @@ public class SalesforceExtractAndImportUtil {
         table.addAttribute(convertedOpportunityId);
         table.addAttribute(ownerId);
 
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id);
+        table.setPrimaryKey(pk);
+        
+        LastModifiedKey lk = new LastModifiedKey();
+        lk.setName("LK_LastModifiedDate");
+        lk.addAttribute(lastModifiedDate);
+        table.setLastModifiedKey(lk);
         return table;
     }
 
@@ -165,6 +176,15 @@ public class SalesforceExtractAndImportUtil {
         table.addAttribute(salutation);
         table.addAttribute(rating);
 
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id);
+        table.setPrimaryKey(pk);
+        
+        LastModifiedKey lk = new LastModifiedKey();
+        lk.setName("LK_CreatedDate");
+        lk.addAttribute(createdDate);
+        table.setLastModifiedKey(lk);
         return table;
     }
 
@@ -201,6 +221,15 @@ public class SalesforceExtractAndImportUtil {
         table.addAttribute(lastModifiedDate);
         table.addAttribute(createdDate);
 
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id);
+        table.setPrimaryKey(pk);
+        
+        LastModifiedKey lk = new LastModifiedKey();
+        lk.setName("LK_LastModifiedDate");
+        lk.addAttribute(lastModifiedDate);
+        table.setLastModifiedKey(lk);
         return table;
     }
 
@@ -221,6 +250,16 @@ public class SalesforceExtractAndImportUtil {
         table.addAttribute(accountId);
         table.addAttribute(email);
         table.addAttribute(lastModifiedDate);
+
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id);
+        table.setPrimaryKey(pk);
+        
+        LastModifiedKey lk = new LastModifiedKey();
+        lk.setName("LK_LastModifiedDate");
+        lk.addAttribute(lastModifiedDate);
+        table.setLastModifiedKey(lk);
 
         return table;
     }
@@ -251,6 +290,16 @@ public class SalesforceExtractAndImportUtil {
         table.addAttribute(opportunityId);
         table.addAttribute(lastModifiedDate);
         table.addAttribute(createdDate);
+
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id);
+        table.setPrimaryKey(pk);
+        
+        LastModifiedKey lk = new LastModifiedKey();
+        lk.setName("LK_LastModifiedDate");
+        lk.addAttribute(lastModifiedDate);
+        table.setLastModifiedKey(lk);
 
         return table;
     }
