@@ -44,6 +44,8 @@ public class Table extends AttributeOwner {
     @JsonIgnore
     public void addExtract(Extract extract) {
         extracts.add(extract);
+        extract.setTable(this);
+        extract.setTenant(getTenant());
     }
 
     public void setExtracts(List<Extract> extracts) {
@@ -61,6 +63,7 @@ public class Table extends AttributeOwner {
     @JsonProperty("primary_key")
     public void setPrimaryKey(PrimaryKey primaryKey) {
         this.primaryKey = primaryKey;
+        primaryKey.setTenant(getTenant());
     }
 
     @Override
@@ -84,11 +87,6 @@ public class Table extends AttributeOwner {
         return map;
     }
 
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_LASTMODIFIED_KEY", nullable = false)
@@ -100,6 +98,15 @@ public class Table extends AttributeOwner {
     @JsonProperty("last_modified_key")
     public void setLastModifiedKey(LastModifiedKey lastModifiedKey) {
         this.lastModifiedKey = lastModifiedKey;
+        
+        if (lastModifiedKey != null) {
+            lastModifiedKey.setTenant(getTenant());
+        }
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

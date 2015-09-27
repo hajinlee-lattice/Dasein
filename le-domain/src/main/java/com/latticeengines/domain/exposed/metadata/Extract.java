@@ -112,12 +112,14 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
         return new HashMap<>();
     }
 
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     public Table getTable() {
         return table;
     }
 
+    @JsonIgnore
     public void setTable(Table table) {
         this.table = table;
     }
@@ -138,7 +140,11 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
     @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-        setTenantId(tenant.getPid());
+        
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
+        
     }
 
     @JsonIgnore

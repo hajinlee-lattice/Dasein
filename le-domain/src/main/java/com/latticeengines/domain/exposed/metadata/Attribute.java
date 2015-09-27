@@ -237,12 +237,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return new HashMap<>();
     }
 
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
     @JoinColumn(name = "FK_ATTRIBUTE_OWNER_ID", nullable = false)
     public AttributeOwner getAttributeOwner() {
         return attributeOwner;
     }
 
+    @JsonIgnore
     public void setAttributeOwner(AttributeOwner attributeOwner) {
         this.attributeOwner = attributeOwner;
     }
@@ -263,7 +265,11 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-        setTenantId(tenant.getPid());
+        
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
+        
     }
 
     @JsonIgnore

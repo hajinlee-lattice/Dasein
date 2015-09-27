@@ -94,6 +94,8 @@ public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
 
     public void addAttribute(Attribute attribute) {
         attributes.add(attribute);
+        attribute.setAttributeOwner(this);
+        attribute.setTenant(getTenant());
     }
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "attributeOwner")
@@ -176,7 +178,11 @@ public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-        setTenantId(tenant.getPid());
+        
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
+        
     }
 
     @JsonIgnore
