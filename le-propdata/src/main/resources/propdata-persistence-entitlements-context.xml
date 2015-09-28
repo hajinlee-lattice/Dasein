@@ -1,72 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-	<!-- DAOs for PropData -->
-	<bean id="propDataEntitlements"
-		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-		<property name="url" value="${propdata.entitlements.url}" />
-		<property name="username" value="${propdata.entitlements.user}" />
-		<property name="password" value="${propdata.entitlements.password.encrypted}" />
-	</bean>
+    <!-- DAOs for PropData -->
+    <bean id="propDataEntitlements" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <property name="url" value="${propdata.entitlements.url}" />
+        <property name="username" value="${propdata.entitlements.user}" />
+        <property name="password" value="${propdata.entitlements.password.encrypted}" />
+    </bean>
 
-	<bean id="sessionFactoryPropDataEntitlements"
-		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-		<property name="dataSource" ref="propDataEntitlements" />
-		<property name="packagesToScan" value="com.latticeengines.domain.exposed" />
-		<property name="hibernateProperties">
-			<props>
-				<prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
-				<prop key="hibernate.show_sql">false</prop>
-				<prop key="hibernate.globally_quoted_identifiers">true</prop>
-			</props>
-		</property>
-	</bean>
-	<bean id="transactionManagerPropDataEntitlements"
-		class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-		p:sessionFactory-ref="sessionFactoryPropDataEntitlements">
-		<qualifier value="propdataEntitlements" />
-	</bean>
-	<tx:annotation-driven transaction-manager="transactionManagerPropDataEntitlements" />
+    <bean id="sessionFactoryPropDataEntitlements" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="propDataEntitlements" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="transactionManagerPropDataEntitlements" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+        p:sessionFactory-ref="sessionFactoryPropDataEntitlements">
+        <qualifier value="propdataEntitlements" />
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManagerPropDataEntitlements" />
 
-	<bean id="dataColumnMapDao" class="com.latticeengines.propdata.api.dao.impl.DataColumnMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="domainFeatureTableDao" class="com.latticeengines.propdata.api.dao.impl.DomainFeatureTableDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementColumnMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementColumnMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementContractPackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementContractPackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementPackagesDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementPackagesDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourceColumnsContractPackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsContractPackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourceColumnsPackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsPackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourceColumnsPackagesDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsPackagesDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourceContractPackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceContractPackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourcePackageMapDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourcePackageMapDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
-	<bean id="entitlementSourcePackagesDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourcePackagesDaoImpl">
-		<property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
-	</bean>
+    <bean id="dataColumnMapDao" class="com.latticeengines.propdata.api.dao.impl.DataColumnMapDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="domainFeatureTableDao" class="com.latticeengines.propdata.api.dao.impl.DomainFeatureTableDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementColumnMapDao"
+        class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementColumnMapDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementContractPackageMapDao"
+        class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementContractPackageMapDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementPackagesDao" class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementPackagesDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementSourceColumnsContractPackageMapDao"
+        class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsContractPackageMapDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementSourceColumnsPackageMapDao"
+        class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsPackageMapDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementSourceColumnsPackagesDao"
+        class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceColumnsPackagesDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementSourceContractPackageMapDao"
+        class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourceContractPackageMapDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementSourcePackageMapDao"
+        class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourcePackageMapDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
+    <bean id="entitlementSourcePackagesDao"
+        class="com.latticeengines.propdata.api.dao.entitlements.impl.EntitlementSourcePackagesDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />
+    </bean>
 
 </beans>
