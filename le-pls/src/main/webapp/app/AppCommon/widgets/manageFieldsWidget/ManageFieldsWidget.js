@@ -20,7 +20,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.saveInProgress = false;
     $scope.showFieldDetails = false;
     $scope.fieldAttributes = [];
-    $scope.gridBind = false;
 
     loadFields();
 
@@ -58,26 +57,18 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         var grid = $("#fieldsGrid").data("kendoGrid");
         if (grid != null && grid.dataSource != null) {
-            var filter = grid.dataSource.filter();
-            var page = grid.dataSource.page();
-            var sortedField, sortedDir;
-            var th = $("#fieldsGrid th[data-dir]");
-            if (th.length > 0) {
-                sortedField = th.attr("data-field");
-                sortedDir = th.attr("data-dir");
-            }
+            var state = kendo.stringify({
+                page: grid.dataSource.page(),
+                pageSize: grid.dataSource.pageSize(),
+                sort: grid.dataSource.sort(),
+                filter: grid.dataSource.filter()
+            });
 
             grid.dataSource.data(fields);
-            $scope.gridBind = !$scope.gridBind;
 
-            if (filter != null) {
-                $scope.filterFields(null);
-            }
-            if (sortedField != null && sortedDir != null) {
-                $("#fieldsGrid").data("kendoGrid").dataSource.sort({ field: sortedField, dir: sortedDir });
-            }
-            if (page != null && page > 1) {
-                $("#fieldsGrid").data("kendoGrid").dataSource.page(page);
+            state = JSON.parse(state);
+            if (state.page > 1 || state.sort != null || state.filter != null) {
+                grid.dataSource.query(state);
             }
 
             $scope.loading = false;
