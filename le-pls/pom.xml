@@ -9,15 +9,15 @@
 
     <properties>
         <component-name>pls</component-name>
-        <le.common.version>2.0.10-SNAPSHOT</le.common.version>
-        <le.db.version>2.0.10-SNAPSHOT</le.db.version>
-        <le.domain.version>2.0.10-SNAPSHOT</le.domain.version>
-        <le.remote.version>2.0.10-SNAPSHOT</le.remote.version>
-        <le.camille.version>2.0.10-SNAPSHOT</le.camille.version>
-        <le.security.version>2.0.10-SNAPSHOT</le.security.version>
-        <le.baton.version>2.0.10-SNAPSHOT</le.baton.version>
-        <le.monitor.version>2.0.10-SNAPSHOT</le.monitor.version>
-        <le.liaison.version>2.0.10-SNAPSHOT</le.liaison.version>
+        <le.common.version>2.0.11-SNAPSHOT</le.common.version>
+        <le.db.version>2.0.11-SNAPSHOT</le.db.version>
+        <le.domain.version>2.0.11-SNAPSHOT</le.domain.version>
+        <le.remote.version>2.0.11-SNAPSHOT</le.remote.version>
+        <le.camille.version>2.0.11-SNAPSHOT</le.camille.version>
+        <le.security.version>2.0.11-SNAPSHOT</le.security.version>
+        <le.baton.version>2.0.11-SNAPSHOT</le.baton.version>
+        <le.monitor.version>2.0.11-SNAPSHOT</le.monitor.version>
+        <le.liaison.version>2.0.11-SNAPSHOT</le.liaison.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.10-SNAPSHOT</version>
+        <version>2.0.11-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
