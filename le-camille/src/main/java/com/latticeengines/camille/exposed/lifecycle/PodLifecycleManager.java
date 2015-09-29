@@ -86,8 +86,12 @@ public class PodLifecycleManager {
         List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildPodsPath());
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
-            toReturn.add(new AbstractMap.SimpleEntry<String, PodInfo>(childPair.getValue().getSuffix(), getInfo(childPair
-                    .getValue().getSuffix())));
+            try {
+                toReturn.add(new AbstractMap.SimpleEntry<String, PodInfo>(childPair.getValue().getSuffix(),
+                        getInfo(childPair.getValue().getSuffix())));
+            } catch (Exception ex) {
+                log.warn("Failed to get Pod Info.", ex);
+            }
         }
 
         return toReturn;

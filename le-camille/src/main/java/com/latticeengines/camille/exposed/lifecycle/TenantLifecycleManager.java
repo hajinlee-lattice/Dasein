@@ -129,13 +129,13 @@ public class TenantLifecycleManager {
             try {
                 Document tenantPropertiesDocument = c.get(childPair.getValue().append(PathConstants.PROPERTIES_FILE));
                 properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
-            } catch (KeeperException.NoNodeException e ) {
-                log.warn("Failed to retrieve the properties.json at path {}", childPair.getValue().toString());
-            }
-
-            if (properties != null) {
-                TenantInfo tenantInfo = new TenantInfo(properties);
-                toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), tenantInfo));
+                if (properties != null) {
+                    TenantInfo tenantInfo = new TenantInfo(properties);
+                    toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), tenantInfo));
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to retrieve the properties.json at path="
+                        + (childPair.getValue() != null ? childPair.getValue().toString() : ""), ex);
             }
         }
 
@@ -149,8 +149,8 @@ public class TenantLifecycleManager {
 
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
         Document tenantPropertiesDocument = c.get(tenantPath.append(PathConstants.PROPERTIES_FILE));
-        TenantProperties properties =
-                DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
+        TenantProperties properties = DocumentUtils
+                .toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
 
         return new TenantInfo(properties);
     }

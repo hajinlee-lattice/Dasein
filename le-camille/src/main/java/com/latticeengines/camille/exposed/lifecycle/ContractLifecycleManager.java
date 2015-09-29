@@ -76,35 +76,29 @@ public class ContractLifecycleManager {
 
         Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
         ContractProperties properties = null;
-        try {
-            Document contractPropertiesDocument = c.get(contractPath.append(PathConstants.PROPERTIES_FILE));
-            properties = DocumentUtils.toTypesafeDocument(contractPropertiesDocument, ContractProperties.class);
-        } catch (KeeperException.NoNodeException e) {
-            log.info("Failed to get properties.json for contract {}", contractId);
-        }
-
-        if (properties != null) {
-            return new ContractInfo(properties);
-        } else {
-            return null;
-        }
+        Document contractPropertiesDocument = c.get(contractPath.append(PathConstants.PROPERTIES_FILE));
+        properties = DocumentUtils.toTypesafeDocument(contractPropertiesDocument, ContractProperties.class);
+        return new ContractInfo(properties);
     }
 
     public static List<AbstractMap.SimpleEntry<String, ContractInfo>> getAll() throws Exception {
         List<AbstractMap.SimpleEntry<String, ContractInfo>> toReturn = new ArrayList<>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
-                .getPodId()));
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder
+                .buildContractsPath(CamilleEnvironment.getPodId()));
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
-            ContractInfo contractInfo = getInfo(childPair.getValue().getSuffix());
-            if (contractInfo != null) {
-                toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), contractInfo));
+            try {
+                ContractInfo contractInfo = getInfo(childPair.getValue().getSuffix());
+                if (contractInfo != null) {
+                    toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), contractInfo));
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to get Contract Info.", ex);
             }
         }
 
         return toReturn;
     }
-
 }

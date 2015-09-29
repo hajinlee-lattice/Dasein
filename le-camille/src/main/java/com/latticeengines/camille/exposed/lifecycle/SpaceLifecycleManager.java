@@ -97,7 +97,7 @@ public class SpaceLifecycleManager {
 
         Document spaceFlagsDocument = c.get(spacePath.append(PathConstants.FEATURE_FLAGS_FILE));
         String flags = spaceFlagsDocument.getData();
-
+        
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, flags);
         return spaceInfo;
     }
@@ -119,7 +119,7 @@ public class SpaceLifecycleManager {
                 toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId, getInfo(contractId,
                         tenantId, spaceId)));
             } catch (Exception ex) {
-                log.warn("Can not add spaceId=" + spaceId, ex);
+                log.warn("Failed to add spaceId=" + spaceId, ex);
             }
         }
 
@@ -148,7 +148,7 @@ public class SpaceLifecycleManager {
                         toReturn.add(new AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(
                                 contractId, tenantId, spaceId), getInfo(contractId, tenantId, spaceId)));
                     } catch (Exception ex) {
-                        log.warn("Can not add spaceId=" + spaceId, ex);
+                        log.warn("Failed to add spaceId=" + spaceId, ex);
                     }
                 }
             }
