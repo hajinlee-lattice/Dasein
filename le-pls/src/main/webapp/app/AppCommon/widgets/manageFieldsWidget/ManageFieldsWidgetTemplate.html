@@ -17,14 +17,14 @@
     <div data-ng-hide="loading || showFieldDetails || saveInProgress || showLoadingError">
         <div class="title">
             <h2>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</h2>
-            <button data-ng-click="editClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">Edit</button>
-            <button data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">Save</button>
-            <button data-ng-click="cancelClicked($event)" data-ng-show="batchEdit" class="btn btn-secondary">Cancel</button>
+            <button id="manage-fields-edit" data-ng-click="editClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">Edit</button>
+            <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">Save</button>
+            <button id="manage-fields-cancel" data-ng-click="cancelClicked($event)" data-ng-show="batchEdit" class="btn btn-secondary">Cancel</button>
         </div>
         <div data-ng-hide="batchEdit">
             <div class="form-group">
                 <input data-ng-model="field" data-ng-keypress="keyEnterFilter($event)" class="form-control" placeholder="{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SEARCH_FEILD_PLACEHOLDER')}}"/>
-                <button data-ng-click="filterFields($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SEARCH_LABEL')}}</button>
+                <button id="manage-fields-search" data-ng-click="filterFields($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SEARCH_LABEL')}}</button>
             </div>
             <div class="form-group">
                 <select data-ng-options="s as s for s in sourcesToSelect" data-ng-model="source" data-ng-change="selectChanged($event, 'source')" class="form-control">

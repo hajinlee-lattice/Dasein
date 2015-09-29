@@ -41,7 +41,7 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
             switchToSuperAdmin();
             String url = getRestAPIHostPort() + "/pls/vdbmetadata/fields";
             if (originalFields.size() > maxUpdatesCount) {
-                restTemplate.put(url, originalFields.subList(0, maxUpdatesCount - 1), SimpleBooleanResponse.class);
+                restTemplate.put(url, originalFields.subList(0, maxUpdatesCount), SimpleBooleanResponse.class);
             } else {
                 restTemplate.put(url, originalFields, SimpleBooleanResponse.class);
             }

@@ -15,7 +15,7 @@ var SuperAdmin = function() {
                 userManagement.canSeeSystemSetupLink(true);
                 userManagement.canSeeActivateModelLink(true);
                 userManagement.canSeeModelCreationHistoryLink(true);
-                userManagement.canSeeSetupLink(true);
+                //userManagement.canSeeSetupLink(true); //TODO: this is feature flag related
                 userDropdown.toggleDropdown();
 
                 userManagement.canSeeHiddenAdminLink(true);

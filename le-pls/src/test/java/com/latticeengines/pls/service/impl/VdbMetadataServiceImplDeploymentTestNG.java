@@ -54,7 +54,11 @@ public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
         if (originalFields != null && originalFields.size() > 0) {
-            vdbMetadataService.UpdateFields(tenant, originalFields);
+            if (originalFields.size() > maxUpdatesCount) {
+                vdbMetadataService.UpdateFields(tenant, originalFields.subList(0, maxUpdatesCount));
+            } else {
+                vdbMetadataService.UpdateFields(tenant, originalFields);
+            }
         }
     }
 
