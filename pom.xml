@@ -32,6 +32,7 @@
         <module>le-perf</module>
         <module>le-web</module>
         <module>le-dataflow</module>
+        <module>le-cassandra</module>
         <module>le-propdata</module>
         <module>le-security</module>
         <module>le-pls</module>
