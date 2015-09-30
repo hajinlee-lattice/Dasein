@@ -15,7 +15,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,12 +23,9 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.yarn.client.YarnClient;
-import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -44,21 +40,6 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFlowFunctionalTestNGBase.class);
     
-    @Autowired
-    private Configuration yarnConfiguration;
-    
-    @Autowired
-    private YarnClient defaultYarnClient;
-    
-    protected DataPlatformFunctionalTestNGBase platformTestBase;
-
-    @BeforeClass(groups = { "functional", "deployment" })
-    public void setupRunEnvironment() throws Exception {
-        platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
-        platformTestBase.setYarnClient(defaultYarnClient);
-    }
-
-
     public void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
