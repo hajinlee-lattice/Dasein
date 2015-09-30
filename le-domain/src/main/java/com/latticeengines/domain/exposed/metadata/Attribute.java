@@ -144,23 +144,19 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     }
 
     @Column(name = "PRECISION", nullable = false)
-    @JsonIgnore
     public Integer getPrecision() {
         return precision;
     }
 
-    @JsonIgnore
     public void setPrecision(Integer precision) {
         this.precision = precision;
     }
 
     @Column(name = "SCALE", nullable = false)
-    @JsonIgnore
     public Integer getScale() {
         return scale;
     }
 
-    @JsonIgnore
     public void setScale(Integer scale) {
         this.scale = scale;
     }
@@ -188,10 +184,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     }
 
     @Column(name = "ENUM_VALUES", nullable = true)
+    @JsonProperty("enum_values")
     public String getCleanedUpEnumValuesAsString() {
         return StringUtils.join(cleanedUpEnumValues, ",");
     }
 
+    @JsonProperty("enum_values")
     public void setCleanedUpEnumValuesAsString(String enumValues) {
         if (enumValues != null) {
             setCleanedUpEnumValues(Arrays.<String>asList(enumValues.split(",")));
