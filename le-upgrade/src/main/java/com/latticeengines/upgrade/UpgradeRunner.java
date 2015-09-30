@@ -2,10 +2,8 @@ package com.latticeengines.upgrade;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import com.latticeengines.upgrade.service.UpgradeService;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -130,7 +128,6 @@ public class UpgradeRunner {
     }
 
     private void run(String[] args) throws Exception {
-        //modelUgprade.upgrade();
         try {
 
             Namespace ns = parser.parseArgs(args);
