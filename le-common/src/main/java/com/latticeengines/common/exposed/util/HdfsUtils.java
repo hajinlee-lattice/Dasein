@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileChecksum;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -221,6 +222,11 @@ public class HdfsUtils {
             throws IllegalArgumentException, IOException {
         return FileUtil.copy(FileSystem.get(configuration), new Path(src), FileSystem.get(configuration),
                 new Path(dst), false, false, configuration);
+    }
+    
+    public static FileChecksum getCheckSum(Configuration configuration, String path) throws IOException{
+        FileSystem fs = FileSystem.get(configuration);
+        return fs.getFileChecksum(new Path(path));
     }
 
 }

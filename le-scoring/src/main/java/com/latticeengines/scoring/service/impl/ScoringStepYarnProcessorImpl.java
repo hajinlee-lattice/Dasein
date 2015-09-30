@@ -1,6 +1,8 @@
 package com.latticeengines.scoring.service.impl;
 
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -208,7 +210,16 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         if (CollectionUtils.isEmpty(modelFilePaths)) {
             throw new LedpException(LedpCode.LEDP_20008, new String[] { tenant });
         }
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelFilePaths));
+        List<String> localizedModelFilePaths = new ArrayList<>();
+        for(String path : modelFilePaths){
+            try {
+                HdfsUtils.getCheckSum(yarnConfiguration, path);
+                localizedModelFilePaths.add(path);
+            } catch (IOException e) {
+                log.warn(String.format("Model %s could not be localized for tenant %s due to data loss.", path, tenant));
+            }
+        }
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(localizedModelFilePaths));
         return properties;
     }
 }
