@@ -6,7 +6,6 @@ import com.latticeengines.domain.exposed.propdata.DomainFeatureTable;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsContractPackageMap;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackageMap;
 import com.latticeengines.domain.exposed.propdata.EntitlementSourceColumnsPackages;
-import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackageMap;
 
 public interface EntitlementSourceColumnEntityMgr extends EntitlementEntityMgr<EntitlementSourceColumnsPackages,
         EntitlementSourceColumnsPackageMap, EntitlementSourceColumnsContractPackageMap> {

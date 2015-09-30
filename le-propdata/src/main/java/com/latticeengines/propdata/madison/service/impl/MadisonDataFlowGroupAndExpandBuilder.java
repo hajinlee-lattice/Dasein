@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Component("madisonDataFlowGroupAndExpandBuilder")
 @Scope("prototype")
