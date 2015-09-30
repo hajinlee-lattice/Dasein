@@ -90,7 +90,8 @@ public class PodLifecycleManager {
                 toReturn.add(new AbstractMap.SimpleEntry<String, PodInfo>(childPair.getValue().getSuffix(),
                         getInfo(childPair.getValue().getSuffix())));
             } catch (Exception ex) {
-                log.warn("Failed to get Pod Info.", ex);
+                log.warn("Failed to get Pod Info for "
+                        + (childPair.getValue() != null ? childPair.getValue().getSuffix() : ""), ex);
             }
         }
 
