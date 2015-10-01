@@ -153,7 +153,7 @@ public enum LedpCode {
     LEDP_20004("Lead does not have 'Model_GUID' column."), //
     LEDP_20005("There are duplicate leads for 'LeadID': {0} and 'Model_GUID': {1} in one request."), //
     LEDP_20006("Datatype file for scoring is not provided."), //
-    LEDP_20007("The following model(s) is(are) not provided: {0}"), //
+    LEDP_20007("The following model is not provided: {0}"), //
     LEDP_20008("Cannot find any model for tenant: {0}"), //
     LEDP_20009("Not all the leads are not scored. {0} leads are transformed, but only {1} got scored."), //
     LEDP_20010("Not all the leads are transformed and stored. {0} leads are passed in, but only {1} got transformed."), //
@@ -164,6 +164,9 @@ public enum LedpCode {
     LEDP_20015("The scoring mapper should not get 0 lead"), //
     LEDP_20016("The total number scoring leads is incorrect"), //
     LEDP_20017("Cannot process scoring request with 0 lead"), //
+    LEDP_20018("Cannot find any lead avro files"), //
+    LEDP_20019("Average avro file size cannot be 0 byte."), //
+    LEDP_20020("No model has been localized for scoring."), //
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"), //
@@ -193,11 +196,10 @@ public enum LedpCode {
     LEDP_24004("ZK operation exception: {0}"), //
 
     // le-propdata
-    LEDP_25000("Can not create new derived entitlement package {0}."),
-    LEDP_25001("Derived entitlement resource error."), //
+    LEDP_25000("Can not create new derived entitlement package {0}."), LEDP_25001("Derived entitlement resource error."), //
     LEDP_25002("Source entitlement resource error."), //
     LEDP_25003("Source column entitlement resource error."), //
-    
+
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
     LEDP_26001("Data flow context does not have values for required properties: {0}"), //
@@ -212,7 +214,7 @@ public enum LedpCode {
     LEDP_26010("Extract for table {0} has no name."), //
     LEDP_26011("Extract {0} for table {1} has no path."), //
     LEDP_26012("Table {0} has no extracts."), //
-    
+
     // le-swlib
     LEDP_27000("Software library cannot be initialized."), //
     LEDP_27001("Cannot copy local file {0} to hdfs path {1}."), //
@@ -220,7 +222,7 @@ public enum LedpCode {
     LEDP_27003("JSON file {0} not a software package."), //
     LEDP_27004("Cannot instantiate class {0} for software library initialization."), //
     LEDP_27005("Cannot execute a data flow with both path and table sources.");
-    
+
     private String message;
 
     LedpCode(String message) {
