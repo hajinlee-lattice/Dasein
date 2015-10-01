@@ -87,6 +87,8 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         jobProperties.put("mapred.compress.map.output", "true");
         jobProperties.put("mapred.output.compression.type", "BLOCK");
         jobProperties.put("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.BZip2Codec");
+        jobProperties.put("mapred.max.split.size", "993211188");
+        jobProperties.put("mapred.min.split.size", "993211187");
 
         return jobProperties;
     }
