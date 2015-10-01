@@ -52,10 +52,10 @@ public abstract class DataFlowBuilder {
     protected abstract String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields,
             JoinType joinType);
 
-    protected abstract String addGroupBy(String prior, FieldList groupByFields, List<GroupByCriteria> groupByCriteria);
+    protected abstract String addGroupBy(String prior, FieldList groupByFields, List<Aggregation> aggregation);
 
     protected abstract String addGroupBy(String prior, FieldList groupByFieldList, FieldList sortFieldList,
-            List<GroupByCriteria> groupByCriteria);
+            List<Aggregation> aggregation);
     
     protected abstract String addGroupByAndExpand(String prior, FieldList groupByFieldList, String expandField,
             List<String> expandFormats, FieldList argumentsFieldList, FieldList declaredFieldList);
@@ -189,7 +189,7 @@ public abstract class DataFlowBuilder {
         OUTER
     }
 
-    public static class GroupByCriteria {
+    public static class Aggregation {
         public static enum AggregationType {
             MAX, //
             MIN, //
@@ -219,16 +219,16 @@ public abstract class DataFlowBuilder {
         private final AggregationType aggregationType;
         private final FieldList outputFieldStrategy;
 
-        public GroupByCriteria(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType) {
+        public Aggregation(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType) {
             this(aggregatedFieldName, targetFieldName, aggregationType, null);
         }
 
-        public GroupByCriteria(AggregationType aggregationType, FieldList outputFieldStrategy) {
+        public Aggregation(AggregationType aggregationType, FieldList outputFieldStrategy) {
             this(null, null, aggregationType, outputFieldStrategy);
         }
 
-        public GroupByCriteria(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType,
-                FieldList outputFieldStrategy) {
+        public Aggregation(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType,
+                           FieldList outputFieldStrategy) {
             this.aggregatedFieldName = aggregatedFieldName;
             this.targetFieldName = targetFieldName;
             this.aggregationType = aggregationType;

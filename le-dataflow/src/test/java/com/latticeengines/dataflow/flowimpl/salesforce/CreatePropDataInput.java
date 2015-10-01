@@ -17,11 +17,11 @@ public class CreatePropDataInput extends CascadingDataFlowBuilder {
         setDataFlowCtx(dataFlowCtx);
         addSource("EventTable", sources.get("EventTable"));
 
-        List<GroupByCriteria> groupByCriteria = new ArrayList<>();
-        groupByCriteria.add(new GroupByCriteria(GroupByCriteria.AggregationType.FIRST, FieldList.GROUP));
+        List<Aggregation> aggregation = new ArrayList<>();
+        aggregation.add(new Aggregation(Aggregation.AggregationType.FIRST, FieldList.GROUP));
 
         String groupby = addGroupBy("EventTable", //
-                new FieldList("Domain", "Company", "City", "State", "Country", "PropDataHash"), groupByCriteria);
+                new FieldList("Domain", "Company", "City", "State", "Country", "PropDataHash"), aggregation);
         String withRowId = addRowId(groupby, "RowId", groupby);
         return withRowId;
     }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
@@ -61,7 +62,7 @@ import cascading.tuple.Fields;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.GroupByCriteria.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
@@ -85,8 +86,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private Map<String, Tap> taps = new HashMap<>();
 
-    private Map<String, Schema> schemas = new HashMap<>();
-
     private Map<String, AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>>> pipesAndOutputSchemas = new HashMap<>();
 
     private Map<String, AbstractMap.SimpleEntry<Checkpoint, Tap>> checkpoints = new HashMap<>();
@@ -102,7 +101,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     public void reset() {
         counter = 1;
         taps = new HashMap<>();
-        schemas = new HashMap<>();
         pipesAndOutputSchemas = new HashMap<>();
         checkpoints = new HashMap<>();
     }
@@ -130,9 +128,18 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return fields;
     }
 
-    private Pipe doCheckpoint(Pipe pipe) {
+    private String register(Pipe pipe, List<FieldMetadata> fields) {
+        return register(pipe, fields, true, null);
+    }
+
+    private String register(Pipe pipe, List<FieldMetadata> fields, boolean allowCheckpoint, String name) {
+        if (name == null) {
+            name = "node-" + counter++;
+        }
+        pipesAndOutputSchemas.put(name, new AbstractMap.SimpleEntry<>(new Pipe(name, pipe), fields));
+
         if (isLocal()) {
-            return pipe;
+            return name;
         }
         if (isCheckpoint()) {
             DataFlowContext ctx = getDataFlowCtx();
@@ -147,9 +154,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas
                     .get(pipe.getName());
             pipesAndOutputSchemas.put(ckptName, new AbstractMap.SimpleEntry<>((Pipe) ckpt, pipeAndFields.getValue()));
-            return ckpt;
+            return ckptName;
         }
-        return pipe;
+        return name;
     }
     
     @Override
@@ -214,8 +221,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         
         Pipe groupby = new GroupBy(merge, new Fields(sourceTable.getPrimaryKey().getAttributeNames()), sortFields);
         Pipe first = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
-        pipesAndOutputSchemas.put(first.getName(), new AbstractMap.SimpleEntry<>(first, getFieldMetadata(allColumns)));
-        return doCheckpoint(first).getName();
+        return register(first, getFieldMetadata(allColumns), false, sourceTable.getName());
     }
     
     private void validateTableForSource(Table sourceTable) {
@@ -282,9 +288,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
             fields.add(fm);
         }
-        pipesAndOutputSchemas.put(sourceName, new AbstractMap.SimpleEntry<>(new Pipe(sourceName), fields));
-        schemas.put(sourceName, sourceSchema);
-        return sourceName;
+
+        return register(new Pipe(sourceName), fields, false, sourceName);
     }
 
     private Configuration getConfig() {
@@ -376,8 +381,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 convertToFields(rhsJoinFields.getFields()), //
                 convertToFields(getFieldNames(declaredFields)), //
                 joiner);
-        pipesAndOutputSchemas.put(join.getName(), new AbstractMap.SimpleEntry<>(join, declaredFields));
-        return doCheckpoint(join).getName();
+        return register(join, declaredFields);
     }
 
     private static Class<?>[] getTypes(List<String> fieldNames, List<FieldMetadata> full) {
@@ -489,13 +493,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     @Override
-    protected String addGroupBy(String prior, FieldList groupByFieldList, List<GroupByCriteria> groupByCriteria) {
-        return addGroupBy(prior, groupByFieldList, null, groupByCriteria);
+    protected String addGroupBy(String prior, FieldList groupByFieldList, List<Aggregation> aggregation) {
+        return addGroupBy(prior, groupByFieldList, null, aggregation);
     }
 
     @Override
     protected String addGroupBy(String prior, FieldList groupByFieldList, FieldList sortFieldList,
-            List<GroupByCriteria> groupByCriteria) {
+            List<Aggregation> aggregations) {
         List<String> groupByFields = groupByFieldList.getFieldsAsList();
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
@@ -514,24 +518,26 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         List<FieldMetadata> declaredFields = getIntersection(groupByFields, pipesAndOutputSchemas.get(prior).getValue());
 
-        for (GroupByCriteria groupByCriterion : groupByCriteria) {
-            String aggFieldName = groupByCriterion.getAggregatedFieldName();
+        for (Aggregation aggregation : aggregations) {
+            String aggFieldName = aggregation.getAggregatedFieldName();
             Fields outputStrategy = Fields.ALL;
 
-            if (groupByCriterion.getOutputFieldStrategy() != null) {
-                switch (groupByCriterion.getOutputFieldStrategy().getKind()) {
+            if (aggregation.getOutputFieldStrategy() != null) {
+                switch (aggregation.getOutputFieldStrategy().getKind()) {
                 case GROUP:
                     outputStrategy = Fields.GROUP;
+                    break;
                 case RESULTS:
                     outputStrategy = Fields.RESULTS;
+                    break;
                 default:
                     break;
                 }
             }
             groupby = new Every(groupby, aggFieldName == null ? Fields.ALL : convertToFields(aggFieldName), //
-                    getAggregator(groupByCriterion.getTargetFieldName(), groupByCriterion.getAggregationType()), //
+                    getAggregator(aggregation.getTargetFieldName(), aggregation.getAggregationType()), //
                     outputStrategy);
-            FieldMetadata fm = groupByCriterion.getAggregationType().getFieldMetadata();
+            FieldMetadata fm = aggregation.getAggregationType().getFieldMetadata();
 
             if (aggFieldName != null) {
                 if (fm == null) {
@@ -541,15 +547,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     }
                 }
                 FieldMetadata newfm = new FieldMetadata(fm);
-                newfm.setFieldName(groupByCriterion.getTargetFieldName());
+                newfm.setFieldName(aggregation.getTargetFieldName());
                 declaredFields.add(newfm);
 
             }
         }
-
-        pipesAndOutputSchemas.put(groupby.getName(), new AbstractMap.SimpleEntry<>(groupby, declaredFields));
-
-        return doCheckpoint(groupby).getName();
+        return register(groupby, declaredFields);
     }
 
     /* This method will use .avro file as schema for the sink */
@@ -569,9 +572,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                         convertToFields(declaredFieldList.getFieldsAsList())), Fields.RESULTS);
 
         List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
-        pipesAndOutputSchemas.put(groupby.getName(), new AbstractMap.SimpleEntry<>(groupby, fieldMetadata));
-
-        return doCheckpoint(groupby).getName();
+        return register(groupby, fieldMetadata);
     }
 
     @Override
@@ -583,8 +584,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Not filter = new Not(new ExpressionFilter(expression, filterFieldsArray, getTypes(filterFields, pm.getValue())));
         Pipe each = new Each(pm.getKey(), convertToFields(filterFields), filter);
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
-        pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, fm));
-        return doCheckpoint(each).getName();
+        return register(each, fm);
     }
 
     @Override
@@ -652,8 +652,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             }
         }
 
-        pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, fm));
-        return doCheckpoint(each).getName();
+        return register(each, fm);
     }
 
     protected String addRetainFunction(String prior, FieldList outputFields) {
@@ -666,9 +665,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
         fm = retainOutputFields(outputFields, fm);
-        pipesAndOutputSchemas.put(retain.getName(), new AbstractMap.SimpleEntry<>(retain, fm));
-
-        return doCheckpoint(retain).getName();
+        return register(retain, fm);
     }
 
     private List<FieldMetadata> retainOutputFields(FieldList outputFields, List<FieldMetadata> fm) {
@@ -702,8 +699,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pdHashFm.setPropertyValue("scale", "0");
         pdHashFm.setPropertyValue("displayName", "Prop Data Hash");
         newFm.add(pdHashFm);
-        pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, newFm));
-        return doCheckpoint(each).getName();
+
+        return register(each, newFm);
     }
 
     @Override
@@ -721,8 +718,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         rowIdFm.setPropertyValue("scale", "0");
         rowIdFm.setPropertyValue("displayName", "Row ID");
         newFm.add(rowIdFm);
-        pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, newFm));
-        return doCheckpoint(each).getName();
+
+        return register(each, newFm);
     }
 
     @Override

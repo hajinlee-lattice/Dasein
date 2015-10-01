@@ -39,19 +39,19 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
 
     private String aggregateTodayData() {
         String lastAggregatedOperatorName;
-        List<GroupByCriteria> groupByCriteria = new ArrayList<>();
+        List<Aggregation> aggregation = new ArrayList<>();
 
-        groupByCriteria.add(new GroupByCriteria("Topic", "Topic_Total", GroupByCriteria.AggregationType.COUNT));
+        aggregation.add(new Aggregation("Topic", "Topic_Total", Aggregation.AggregationType.COUNT));
         lastAggregatedOperatorName = addGroupBy("MadisonLogicForToday", new FieldList("DomainID", "Category",
-                "HashedEmailID"), groupByCriteria);
+                "HashedEmailID"), aggregation);
 
-        groupByCriteria = new ArrayList<>();
-        groupByCriteria.add(new GroupByCriteria("Topic_Total", "ML_30Day_Category_Total",
-                GroupByCriteria.AggregationType.SUM));
-        groupByCriteria.add(new GroupByCriteria("HashedEmailID", "ML_30Day_Category_UniqueUsers",
-                GroupByCriteria.AggregationType.COUNT));
+        aggregation = new ArrayList<>();
+        aggregation.add(new Aggregation("Topic_Total", "ML_30Day_Category_Total",
+                Aggregation.AggregationType.SUM));
+        aggregation.add(new Aggregation("HashedEmailID", "ML_30Day_Category_UniqueUsers",
+                Aggregation.AggregationType.COUNT));
         lastAggregatedOperatorName = addGroupBy(lastAggregatedOperatorName, new FieldList("DomainID", "Category"),
-                groupByCriteria);
+                aggregation);
 
         FieldMetadata fieldMetaData = new FieldMetadata(Type.INT, Integer.class, "ML_30Day_Category_Total", null);
         lastAggregatedOperatorName = addFunction(

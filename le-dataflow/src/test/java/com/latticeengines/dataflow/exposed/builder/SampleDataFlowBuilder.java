@@ -39,11 +39,11 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
 
         // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees 
         // FROM T GROUP BY Domain
-        List<GroupByCriteria> groupByCriteria = new ArrayList<>();
-        groupByCriteria.add(new GroupByCriteria("AnnualRevenue", "MaxRevenue", GroupByCriteria.AggregationType.MAX));
-        groupByCriteria.add(new GroupByCriteria("NumberOfEmployees", "TotalEmployees",
-                GroupByCriteria.AggregationType.SUM));
-        String lastAggregatedOperatorName = addGroupBy(createDomain, new FieldList("Domain"), groupByCriteria);
+        List<Aggregation> aggregation = new ArrayList<>();
+        aggregation.add(new Aggregation("AnnualRevenue", "MaxRevenue", Aggregation.AggregationType.MAX));
+        aggregation.add(new Aggregation("NumberOfEmployees", "TotalEmployees",
+                Aggregation.AggregationType.SUM));
+        String lastAggregatedOperatorName = addGroupBy(createDomain, new FieldList("Domain"), aggregation);
 
         // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees, HashCode(Domain) DomainHashCode 
         // FROM T GROUP BY Domain
