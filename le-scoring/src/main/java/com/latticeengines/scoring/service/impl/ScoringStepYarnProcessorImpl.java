@@ -30,9 +30,9 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -164,7 +164,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         return newTable;
     }
 
-    private void saveStateBeforeFinishStep(ScoringCommand scoringCommand, String targetTable){
+    private void saveStateBeforeFinishStep(ScoringCommand scoringCommand, String targetTable) {
         DateTime dt = new DateTime(DateTimeZone.UTC);
         ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
                 targetTable, 0, new Timestamp(dt.getMillis()));
@@ -175,15 +175,17 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         scoringCommandStateEntityMgr.createOrUpdate(state);
     }
 
-    private Properties generateCustomizedProperties(ScoringCommand scoringCommand){
+    private Properties generateCustomizedProperties(ScoringCommand scoringCommand) {
         String table = scoringCommand.getTableName();
         String tenant = getTenant(scoringCommand);
 
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), tenant);
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getScoringQueueNameForSubmission());
-        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table + "/data");
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table + "/scores");
+        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
+                + "/data");
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
+                + "/scores");
         properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), maxInputSplitSize);
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
@@ -193,7 +195,8 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String customerModelPath = customerBaseDir + "/" + tenant + "/models";
         List<String> modelFilePaths = Collections.emptyList();
         try {
-            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelPath, new HdfsFileFilter() {
+            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelPath,
+                    new HdfsFileFilter() {
                         @Override
                         public boolean accept(FileStatus fileStatus) {
                             if (fileStatus == null) {

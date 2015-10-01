@@ -1,9 +1,9 @@
 package com.latticeengines.scoring.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -14,64 +14,42 @@ import org.json.simple.JSONObject;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
+import com.latticeengines.scoring.util.ModelAndLeadInfo.ModelInfo;
 
 public class ScoringMapperValidateUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
-    
+
     private static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
     private static final String INPUT_COLUMN_METADATA_NAME = "Name";
     private static final String INPUT_COLUMN_METADATA_PURPOSE = "Purpose";
     private static final String INPUT_COLUMN_METADATA_VALUETYPE = "ValueType";
 
-    @SuppressWarnings("unchecked")
-    public static void validateDatatype(JSONObject datatype, HashMap<String, JSONObject> models) {
+    static public enum MetadataPurpose {
+        FEATURE(3), TARGET(4);
+        private int value;
 
-        ArrayList<String> datatypeFailures = new ArrayList<String>();
-
-        Hashtable<String, ArrayList<String>> modelFailures = new Hashtable<String, ArrayList<String>>();
-
-        DatatypeValidationResult vf = new DatatypeValidationResult(datatypeFailures, modelFailures);
-
-        // datatype validation
-        if (datatype == null) {
-            datatypeFailures.add("Datatype file is not provided. ");
-            log.error("ValidationResult is: " + vf);
-            throw new LedpException(LedpCode.LEDP_20001, new String[] { vf.toString() });
-        }
-
-        if (models == null) {
-            datatypeFailures.add("Models are not provided. ");
-            log.error("ValidationResult is: " + vf);
-            throw new LedpException(LedpCode.LEDP_20001, new String[] { vf.toString() });
-        }
-
-        Set<String> keySet = datatype.keySet();
-        for (String key : keySet) {
-            Long datatypeVal = (Long) datatype.get(key);
-            if (datatypeVal != 0 && datatypeVal != 1) {
-                String msg = String.format("Column %s contains unknown datatype: %d ", key, datatypeVal);
-                datatypeFailures.add(msg);
-            }
-        }
-
-        // validate the datatype file with the model.json
-        Set<String> modelIDs = models.keySet();
-        for (String modelID : modelIDs) {
-            JSONArray metadata = (JSONArray) models.get(modelID).get(INPUT_COLUMN_METADATA);
-            ArrayList<String> msgs = validate(datatype, modelID, metadata);
-            if (msgs.size() != 0) {
-                modelFailures.put(modelID, msgs);
-            }
-        }
-
-        if (!vf.passDatatypeValidation()) {
-            log.error("ValidationResult is: " + vf);
-            throw new LedpException(LedpCode.LEDP_20001, new String[] { vf.toString() });
+        private MetadataPurpose(int value) {
+            this.value = value;
         }
     }
 
-    public static void validateLocalizedFiles(boolean scoringScriptProvided, boolean datatypeFileProvided, HashSet<String> modelIDs) {
+    public static void validateTransformation(ModelAndLeadInfo modelAndLeadInfo) {
+        long totalLeadsPasssed = modelAndLeadInfo.getTotalleadNumber();
+        long totalLeadsTransformed = 0;
+        Map<String, ModelInfo> modelInfoMap = modelAndLeadInfo.getModelInfoMap();
+        Set<String> modelGuidSet = modelInfoMap.keySet();
+        for (String modelGuid : modelGuidSet) {
+            totalLeadsTransformed += modelInfoMap.get(modelGuid).getLeadNumber();
+        }
+        if (totalLeadsPasssed != totalLeadsTransformed) {
+            throw new LedpException(LedpCode.LEDP_20010, new String[] { String.valueOf(totalLeadsPasssed),
+                    String.valueOf(totalLeadsTransformed) });
+        }
+    }
+
+    public static void validateLocalizedFiles(boolean scoringScriptProvided, boolean datatypeFileProvided,
+            Map<String, JSONObject> models) {
 
         if (!scoringScriptProvided) {
             throw new LedpException(LedpCode.LEDP_20002);
@@ -80,28 +58,51 @@ public class ScoringMapperValidateUtil {
         if (!datatypeFileProvided) {
             throw new LedpException(LedpCode.LEDP_20006);
         }
-        
-        // check whether if there is any required model that is not localized
-        if (!modelIDs.isEmpty()) {
-            ArrayList<String> missingModelsNames = new ArrayList<String>();
-            for (String modelId : modelIDs) {
-                missingModelsNames.add(modelId + " ");
-            }
-            throw new LedpException(LedpCode.LEDP_20007, missingModelsNames.toArray(new String[missingModelsNames
-                    .size()]));
+
+        // check whether if model(s) is(are) localized
+        if (models.isEmpty()) {
+            throw new LedpException(LedpCode.LEDP_20020);
         }
     }
-    
-    private static ArrayList<String> validate(JSONObject datatype, String modelID, JSONArray metadata) {
-        ArrayList<String> toReturn = new ArrayList<String>();
+
+    @SuppressWarnings("unchecked")
+    public static void validateDatatype(JSONObject datatype, JSONObject model, String modelId) {
+
+        List<String> datatypeFailures = new ArrayList<String>();
+        Map<String, List<String>> modelFailures = new Hashtable<String, List<String>>();
+        DatatypeValidationResult vf = new DatatypeValidationResult(datatypeFailures, modelFailures);
+
+        Set<String> keySet = datatype.keySet();
+        for (String key : keySet) {
+            long datatypeVal = Long.parseLong(datatype.get(key).toString());
+            if (datatypeVal != 0 && datatypeVal != 1) {
+                String msg = String.format("Column %s contains unknown datatype: %d ", key, datatypeVal);
+                datatypeFailures.add(msg);
+            }
+        }
+
+        // validate the datatype file with the model.json
+        JSONArray metadata = (JSONArray) model.get(INPUT_COLUMN_METADATA);
+        List<String> msgs = validate(datatype, modelId, metadata);
+        if (msgs.size() != 0) {
+            modelFailures.put(modelId, msgs);
+        }
+
+        if (!vf.passDatatypeValidation()) {
+            log.error("ValidationResult is: " + vf);
+            throw new LedpException(LedpCode.LEDP_20001, new String[] { vf.toString() });
+        }
+    }
+
+    private static List<String> validate(JSONObject datatype, String modelID, JSONArray metadata) {
+        List<String> toReturn = new ArrayList<String>();
         if (metadata != null) {
             for (int i = 0; i < metadata.size(); i++) {
                 JSONObject obj = (JSONObject) metadata.get(i);
-                String name = (String) obj.get(INPUT_COLUMN_METADATA_NAME);
-                Long purpose = (Long) obj.get(INPUT_COLUMN_METADATA_PURPOSE);
-                Long type = (Long) obj.get(INPUT_COLUMN_METADATA_VALUETYPE);
-                // need to verify with Ron
-                if (purpose != 3) {
+                String name = String.valueOf(obj.get(INPUT_COLUMN_METADATA_NAME));
+                Long purpose = Long.parseLong(obj.get(INPUT_COLUMN_METADATA_PURPOSE).toString());
+                Long type = Long.parseLong(obj.get(INPUT_COLUMN_METADATA_VALUETYPE).toString());
+                if (purpose.intValue() != MetadataPurpose.FEATURE.value) {
                     continue;
                 }
                 if (!datatype.containsKey(name)) {
@@ -109,7 +110,7 @@ public class ScoringMapperValidateUtil {
                     toReturn.add(msg);
                     continue;
                 }
-                if (datatype.get(name) != type) {
+                if (!datatype.get(name).equals(type)) {
                     String msg = String.format("%d does not match with %d ", type, datatype.get(name));
                     toReturn.add(msg);
                 }

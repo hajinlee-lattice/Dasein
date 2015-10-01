@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.specific.SpecificDatumReader;
@@ -27,7 +28,7 @@ import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 
 public class ScoringMapperPredictUtilTestNG {
 
-    private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
+    private static final String MODEL_ID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 
     @Test(groups = "unit")
     public void testProcessScoreFiles() throws IOException, ParseException {
@@ -43,51 +44,48 @@ public class ScoringMapperPredictUtilTestNG {
             e.printStackTrace();
         }
 
-        // make up a leadInputRecordMap
-        HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
-        ArrayList<String> list = new ArrayList<String>();
-        for (int i = 0; i < 10; i++) {
-            list.add(i + "");
-        }
-
-        leadInputRecordMap.put(modelID, list);
-
         // parseModelFile
         URL url = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
         String fileName = url.getFile();
         Path path = new Path(fileName);
         HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
-        ScoringMapperTransformUtil.parseModelFiles(models, path);
+        JSONObject modelObj = ScoringMapperTransformUtil.parseModelFiles(path);
+        models.put(path.getName(), modelObj);
 
-        // make up a modelIdMap
-        HashMap<String, String> modelIdMap = new HashMap<String, String>();
-        modelIdMap.put(modelID, modelID);
+        // make up modelInfoMap
+        Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
+        ModelAndLeadInfo.ModelInfo modelInfo = new ModelAndLeadInfo.ModelInfo(MODEL_ID, 10);
+        modelInfoMap.put(MODEL_ID, modelInfo);
+        // make up modelAndLeadInfo
+        ModelAndLeadInfo modelAndLeadInfo = new ModelAndLeadInfo();
+        modelAndLeadInfo.setModelInfoMap(modelInfoMap);
+        modelAndLeadInfo.setTotalleadNumber(10);
 
-        ArrayList<ScoreOutput> resultList = null;
-        resultList = ScoringMapperPredictUtil.processScoreFiles(leadInputRecordMap, models, modelIdMap, 1000);
+        List<ScoreOutput> resultList = null;
+        resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndLeadInfo, models, 1000);
 
-        ArrayList<ScoreOutput> expectedResultList = new ArrayList<>();
-        ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
-                4.88519256666, modelID, 100, 0.05822784810126582, 0.0777755757027, 6);
-        ScoreOutput result2 = new ScoreOutput("47358ca2-a549-4765-a7f7-a7637a565343", "Highest",
-                4.88519256666, modelID, 100, 0.05822784810126582, 0.0394015516631, 6);
-        ScoreOutput result3 = new ScoreOutput("4821a01c-5a4c-4633-9122-5d050c064d43", "Highest",
-                2.65499596014, modelID, 98, 0.03164556962025317, 0.0267911548364, 3);
-        ScoreOutput result4 = new ScoreOutput("50d2fcf4-3dbb-46cf-80a3-c1ac96106b07", "Highest",
-                2.12399676811, modelID, 95, 0.02531645569620253, 0.0242481348343, 3);
-        ScoreOutput result5 = new ScoreOutput("510c48cd-4672-4b91-ad3b-3f904b100913", "High",
-                1.76999730676, modelID, 91, 0.02109704641350211, 0.022526096794, 2);
-        ScoreOutput result6 = new ScoreOutput("936a6661-c745-4922-a32b-bde68ada894d", "High",
-                1.69919741449, modelID, 84, 0.020253164556962026, 0.0189333568863, 2);
-        ScoreOutput result7 = new ScoreOutput("93d16654-72db-4ca5-adb5-64e12ef54215", "High",
-                1.5778261706, modelID, 81, 0.018806509945750453, 0.0175358841357, 2);
-        ScoreOutput result8 = new ScoreOutput("baf39fe9-a184-4a83-9399-45208560dbe4", "High",
-                1.48679773768, modelID, 75, 0.017721518987341773, 0.0148266449465, 2);
-        ScoreOutput result9 = new ScoreOutput("cd7de65c-b2af-42a5-85af-491cf8503747", "Medium",
-                1.15302681698, modelID, 65, 0.013743218806509945, 0.01244724204371, 1);
-        ScoreOutput result10 = new ScoreOutput("fd6be1aa-95aa-45b2-adbb-3125a01acf84", "Medium",
-                1.06199838406, modelID, 62, 0.012658227848101266, 0.01185827291902, 1);
+        List<ScoreOutput> expectedResultList = new ArrayList<>();
+        ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest", 4.88519256666,
+                MODEL_ID, 100, 0.05822784810126582, 0.0777755757027, 6);
+        ScoreOutput result2 = new ScoreOutput("47358ca2-a549-4765-a7f7-a7637a565343", "Highest", 4.88519256666,
+                MODEL_ID, 100, 0.05822784810126582, 0.0394015516631, 6);
+        ScoreOutput result3 = new ScoreOutput("4821a01c-5a4c-4633-9122-5d050c064d43", "Highest", 2.65499596014,
+                MODEL_ID, 98, 0.03164556962025317, 0.0267911548364, 3);
+        ScoreOutput result4 = new ScoreOutput("50d2fcf4-3dbb-46cf-80a3-c1ac96106b07", "Highest", 2.12399676811,
+                MODEL_ID, 95, 0.02531645569620253, 0.0242481348343, 3);
+        ScoreOutput result5 = new ScoreOutput("510c48cd-4672-4b91-ad3b-3f904b100913", "High", 1.76999730676, MODEL_ID,
+                91, 0.02109704641350211, 0.022526096794, 2);
+        ScoreOutput result6 = new ScoreOutput("936a6661-c745-4922-a32b-bde68ada894d", "High", 1.69919741449, MODEL_ID,
+                84, 0.020253164556962026, 0.0189333568863, 2);
+        ScoreOutput result7 = new ScoreOutput("93d16654-72db-4ca5-adb5-64e12ef54215", "High", 1.5778261706, MODEL_ID,
+                81, 0.018806509945750453, 0.0175358841357, 2);
+        ScoreOutput result8 = new ScoreOutput("baf39fe9-a184-4a83-9399-45208560dbe4", "High", 1.48679773768, MODEL_ID,
+                75, 0.017721518987341773, 0.0148266449465, 2);
+        ScoreOutput result9 = new ScoreOutput("cd7de65c-b2af-42a5-85af-491cf8503747", "Medium", 1.15302681698,
+                MODEL_ID, 65, 0.013743218806509945, 0.01244724204371, 1);
+        ScoreOutput result10 = new ScoreOutput("fd6be1aa-95aa-45b2-adbb-3125a01acf84", "Medium", 1.06199838406,
+                MODEL_ID, 62, 0.012658227848101266, 0.01185827291902, 1);
         expectedResultList.add(result1);
         expectedResultList.add(result2);
         expectedResultList.add(result3);
@@ -104,7 +102,7 @@ public class ScoringMapperPredictUtilTestNG {
         dest.delete();
     }
 
-    private boolean resultListsAreSame(ArrayList<ScoreOutput> list1, ArrayList<ScoreOutput> list2) {
+    private boolean resultListsAreSame(List<ScoreOutput> list1, List<ScoreOutput> list2) {
         boolean isSame = true;
         for (int i = 0; i < list1.size(); i++) {
             ScoreOutput result1 = list1.get(i);
@@ -128,16 +126,16 @@ public class ScoringMapperPredictUtilTestNG {
     @Test(groups = "unit")
     public void testWriteToOutputFile() throws IllegalArgumentException, Exception {
         ArrayList<ScoreOutput> expectedResultList = new ArrayList<ScoreOutput>();
-        ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest",
-                4.88519256666, modelID, 100, 0.05822784810126582, 0.0777755757027, 6);
-        ScoreOutput result2 = new ScoreOutput("47358ca2-a549-4765-a7f7-a7637a565343", "Highest",
-                4.88519256666, modelID, 100, 0.05822784810126582, 0.0394015516631, 6);
-        ScoreOutput result3 = new ScoreOutput("4821a01c-5a4c-4633-9122-5d050c064d43", "Highest",
-                2.65499596014, modelID, 98, 0.03164556962025317, 0.0267911548364, 3);
-        ScoreOutput result4 = new ScoreOutput("50d2fcf4-3dbb-46cf-80a3-c1ac96106b07", "Highest",
-                2.12399676811, modelID, 95, 0.02531645569620253, 0.0242481348343, 3);
-        ScoreOutput result5 = new ScoreOutput("510c48cd-4672-4b91-ad3b-3f904b100913", "High",
-                1.76999730676, modelID, 91, 0.02109704641350211, 0.022526096794, 2);
+        ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest", 4.88519256666,
+                MODEL_ID, 100, 0.05822784810126582, 0.0777755757027, 6);
+        ScoreOutput result2 = new ScoreOutput("47358ca2-a549-4765-a7f7-a7637a565343", "Highest", 4.88519256666,
+                MODEL_ID, 100, 0.05822784810126582, 0.0394015516631, 6);
+        ScoreOutput result3 = new ScoreOutput("4821a01c-5a4c-4633-9122-5d050c064d43", "Highest", 2.65499596014,
+                MODEL_ID, 98, 0.03164556962025317, 0.0267911548364, 3);
+        ScoreOutput result4 = new ScoreOutput("50d2fcf4-3dbb-46cf-80a3-c1ac96106b07", "Highest", 2.12399676811,
+                MODEL_ID, 95, 0.02531645569620253, 0.0242481348343, 3);
+        ScoreOutput result5 = new ScoreOutput("510c48cd-4672-4b91-ad3b-3f904b100913", "High", 1.76999730676, MODEL_ID,
+                91, 0.02109704641350211, 0.022526096794, 2);
         expectedResultList.add(result1);
         expectedResultList.add(result2);
         expectedResultList.add(result3);
@@ -170,8 +168,7 @@ public class ScoringMapperPredictUtilTestNG {
         File file = new File("temp.avro");
         FileUtils.copyInputStreamToFile(is, file);
 
-        SpecificDatumReader<ScoreOutput> reader = new SpecificDatumReader<ScoreOutput>(
-                ScoreOutput.class);
+        SpecificDatumReader<ScoreOutput> reader = new SpecificDatumReader<ScoreOutput>(ScoreOutput.class);
         DataFileReader<ScoreOutput> dataFileReader = new DataFileReader<ScoreOutput>(file, reader);
         ArrayList<ScoreOutput> generatedResultList = new ArrayList<ScoreOutput>();
         ScoreOutput result = null;
@@ -258,11 +255,11 @@ public class ScoringMapperPredictUtilTestNG {
         models.put("model2", null);
         String returnedStr = "";
         try {
-            returnedStr = ScoringMapperPredictUtil.evaluate(models);
+            returnedStr = ScoringMapperPredictUtil.evaluate(models.keySet());
         } catch (LedpException e) {
             assertTrue(e.getCode() == LedpCode.LEDP_20011);
         }
-        System.out.println("returnedStr is " + returnedStr) ;
+        System.out.println("returnedStr is " + returnedStr);
 
         // delete the score.txt file to the current directory
         dest.delete();

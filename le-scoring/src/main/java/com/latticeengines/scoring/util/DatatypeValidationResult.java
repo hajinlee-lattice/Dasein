@@ -1,20 +1,21 @@
 package com.latticeengines.scoring.util;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class DatatypeValidationResult {
 
-    private ArrayList<String> datatypeFailures;
+    private List<String> datatypeFailures;
 
-    private Hashtable<String, ArrayList<String>> modelFailures;
+    private Map<String, List<String>> modelFailures;
 
-    DatatypeValidationResult(ArrayList<String> df, Hashtable<String, ArrayList<String>> mf) {
+    DatatypeValidationResult(List<String> df, Map<String, List<String>> mf) {
         datatypeFailures = df;
         modelFailures = mf;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("datatypeFailures:\n");
@@ -34,7 +35,7 @@ public class DatatypeValidationResult {
             for (String model : keys) {
                 sb.append(model);
                 sb.append(": ");
-                ArrayList<String> msgs = modelFailures.get(model);
+                List<String> msgs = modelFailures.get(model);
                 for (String msg : msgs)
                     sb.append(msg);
                 sb.append("\t");
@@ -43,17 +44,17 @@ public class DatatypeValidationResult {
         return sb.toString();
     }
 
-    public ArrayList<String> getDatatypeFailures() {
+    public List<String> getDatatypeFailures() {
         return datatypeFailures;
     }
 
-    public Hashtable<String, ArrayList<String>> getModelFailures() {
+    public Map<String, List<String>> getModelFailures() {
         return modelFailures;
     }
 
     public boolean passDatatypeValidation() {
-        ArrayList<String> df = getDatatypeFailures();
-        Hashtable<String, ArrayList<String>> mf = getModelFailures();
+        List<String> df = getDatatypeFailures();
+        Map<String, List<String>> mf = getModelFailures();
         if (df == null && mf == null) {
             return true;
         } else if (df == null && mf != null) {

@@ -2,6 +2,7 @@ package com.latticeengines.scoring.util;
 
 import static org.testng.Assert.assertTrue;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -9,7 +10,8 @@ import java.io.LineNumberReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
@@ -17,6 +19,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -24,56 +28,52 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ScoringMapperTransformUtilUnitTestNG {
 
+    private static final String SUMMARY = "Summary";
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private final static String DATA_PATH = "com/latticeengines/scoring/data/";
+    private final static String MODEL_PATH = "com/latticeengines/scoring/models/";
+    private final static String PYTHON_PATH = "com/latticeengines/scoring/python/scoring.py";
     private final static String MODEL_SUPPORTED_FILE_PATH = "com/latticeengines/scoring/models/supportedFiles/";
     private final static String MODEL_ID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
-    private final static String TEST_RECORD = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
+    private final static String MODEL_NAME = "2Checkout_relaunch_PLSModel_2015-03-19_15-37";
+    private final static String PROPER_TEST_RECORD = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
-            + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
+            + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
+
+    private final static String IMPROPER_TEST_RECORD = "{\"LeadID\": \"837395\", \"ModelingID\": 113881, \"PercentileModel\": null, "
+            + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 36, \"C_Job_Role1\": \"\", "
+            + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_SOME_RANDOM_MODEL_ID\"}";
+
+    private Path datatypePath;
+    private Path modelPath;
+    private Path pythonPath;
+    private List<Path> localFilePaths;
+
+    @BeforeClass(groups = "unit")
+    public void setup() {
+        datatypePath = new Path(ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc").getFile());
+        modelPath = new Path(ClassLoader.getSystemResource(MODEL_PATH + MODEL_ID).getFile());
+        pythonPath = new Path(ClassLoader.getSystemResource(PYTHON_PATH).getFile());
+        localFilePaths = new ArrayList<Path>();
+        localFilePaths.add(datatypePath);
+        localFilePaths.add(modelPath);
+        localFilePaths.add(pythonPath);
+    }
 
     @Test(groups = "unit")
-    public void testPreprocessLeads() throws IOException, ParseException, InterruptedException {
-        String record1 = "{\"LeadID\": \"1\", \"ModelingID\": 113880, \"Model_GUID\": \"model1\"}";
-        String record2 = "{\"LeadID\": \"2\", \"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
-        String record3 = "{\"LeadID\": \"1\", \"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
-        ArrayList<String> leadList = new ArrayList<String>();
-        leadList.add(record1);
-        leadList.add(record2);
-        leadList.add(record3);
-        HashSet<String> modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
-        assertTrue(modelIDs.size() == 2, "modelIDs should have 2 models");
+    public void testProcessLocalizedFiles() throws IOException, ParseException {
 
-        String recordWithoutLeadID = "{\"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
-        leadList.add(recordWithoutLeadID);
-        try {
-            modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
-        } catch (LedpException e1) {
-            assertTrue(e1.getCode() == LedpCode.LEDP_20003);
-        }
-        leadList.remove(3);
-
-        String recordWithoutModelGuid = "{\"ModelingID\": 113880, \"LeadID\": \"1\"}";
-        leadList.add(recordWithoutModelGuid);
-        try {
-            modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
-        } catch (LedpException e1) {
-            assertTrue(e1.getCode() == LedpCode.LEDP_20004);
-        }
-        leadList.remove(3);
-
-        String recordWithDuplication = "{\"LeadID\": \"1\", \"ModelingID\": 113880, \"Model_GUID\": \"model2\"}";
-        leadList.add(recordWithDuplication);
-        try {
-            modelIDs = ScoringMapperTransformUtil.preprocessLeads(leadList);
-        } catch (LedpException e1) {
-            assertTrue(e1.getCode() == LedpCode.LEDP_20005);
-        }
+        LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+                .toArray(new Path[localFilePaths.size()]));
+        Assert.assertNotNull(localizedFiles);
+        Assert.assertNotNull(localizedFiles.getDatatype());
+        Assert.assertEquals(localizedFiles.getModels().size(), 1);
+        Assert.assertNotNull(localizedFiles.getModels().get(MODEL_ID));
     }
 
     @Test(groups = "unit")
     public void testParseDatatypeFile() throws IOException, ParseException {
-        URL url = ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc");
+        URL url = ClassLoader.getSystemResource(DATA_PATH + "mock_datatype.avsc");
         String fileName = url.getFile();
         Path path = new Path(fileName);
         JSONObject datatypeObj = ScoringMapperTransformUtil.parseDatatypeFile(path);
@@ -85,16 +85,17 @@ public class ScoringMapperTransformUtilUnitTestNG {
     public void testParseModelFiles() throws IOException, ParseException {
         String[] targetFiles = { "encoder.py", "pipeline.py", "pipelinefwk.py", "pipelinesteps.py", "scoringengine.py",
                 "STPipelineBinary.p" };
-        URL url = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
-        String fileName = url.getFile();
-        Path path = new Path(fileName);
 
-        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
-        ScoringMapperTransformUtil.parseModelFiles(models, path);
-        assertTrue(models.size() == 1, "models should have 1 model");
-        // assertTrue(models.containsRightContents("2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json"));
-
+        JSONObject modelJson = ScoringMapperTransformUtil.parseModelFiles(modelPath);
+        Assert.assertNotNull(modelJson);
+        Assert.assertEquals(modelJson.get(ScoringMapperPredictUtil.AVERAGE_PROBABILITY), 0.011919253398255223);
+        Assert.assertNotNull(modelJson.get(ScoringMapperPredictUtil.BUCKETS));
+        Assert.assertNotNull(modelJson.get(ScoringMapperPredictUtil.CALIBRATION));
+        Assert.assertNotNull(modelJson.get(ScoringMapperTransformUtil.INPUT_COLUMN_METADATA));
+        Assert.assertNotNull(modelJson.get(ScoringMapperTransformUtil.MODEL));
+        Assert.assertNotNull(modelJson.get(SUMMARY));
+        Assert.assertEquals(modelJson.get(ScoringMapperPredictUtil.BUCKETS_NAME), MODEL_NAME);
+        Assert.assertNotNull(modelJson.get(ScoringMapperPredictUtil.PERCENTILE_BUCKETS));
         for (int i = 0; i < targetFiles.length; i++) {
             System.out.println("Current target file is " + targetFiles[i]);
             assertTrue(compareFiles(targetFiles[i]), "parseModelFiles should be successful");
@@ -136,35 +137,50 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testManipulateLeadFile() throws IOException, ParseException {
+    public void testTransformAndWriteLead() throws IOException, ParseException {
 
-        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
-        HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
-        HashMap<String, String> modelIdMap = new HashMap<String, String>();
-        String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
-        modelIdMap.put(modelID, modelID);
-
-        URL url = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
-        String fileName = url.getFile();
-        Path path = new Path(fileName);
-        ScoringMapperTransformUtil.parseModelFiles(models, path);
-        ScoringMapperTransformUtil.manipulateLeadFile(leadInputRecordMap, models, modelIdMap, TEST_RECORD);
-
-        ArrayList<String> recordList = leadInputRecordMap.get(modelID);
-        assertTrue(leadInputRecordMap.size() == 1);
-        assertTrue(recordList.size() == 1);
-        String record = recordList.get(0);
-        JSONParser parser = new JSONParser();
-        try {
-            JSONObject j = (JSONObject) parser.parse(record);
-            assertTrue(j.get("key").equals("837394"));
-            JSONArray arr = (JSONArray) j.get("value");
-            assertTrue(arr.size() == 194, "model.json file should have 194 columns for metadata.");
-            assertTrue(containsRightContents(arr), "leadInputFile should contain the right contents.");
-        } catch (ParseException e) {
-            e.printStackTrace();
+        String expectedFileName = MODEL_ID + "-0";
+        File expectedFile = new File(expectedFileName);
+        if (expectedFile.exists()) {
+            expectedFile.delete();
+            System.out.println("leadInputFile has been deleted.");
         }
+        Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
+        Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
+
+        LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+                .toArray(new Path[localFilePaths.size()]));
+        ScoringMapperTransformUtil.transformAndWriteLead(PROPER_TEST_RECORD, modelInfoMap, leadFileBufferMap,
+                localizedFiles, 10000);
+
+        Assert.assertNotNull(modelInfoMap);
+        Assert.assertEquals(modelInfoMap.size(), 1);
+        Assert.assertEquals(modelInfoMap.get(MODEL_ID).getModelId(),
+                "FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
+        Assert.assertEquals(modelInfoMap.get(MODEL_ID).getLeadNumber(), 1);
+        Assert.assertNotNull(leadFileBufferMap);
+        Assert.assertEquals(leadFileBufferMap.size(), 1);
+        Assert.assertNotNull(leadFileBufferMap.get(expectedFileName));
+
+        Assert.assertTrue(expectedFile.exists());
+        System.out.println("The test full path is " + expectedFile.getAbsolutePath());
+        leadFileBufferMap.get(expectedFileName).close();
+
+        String leadInputFileContents = FileUtils.readFileToString(expectedFile);
+        Assert.assertTrue(transformedLeadIsCorrect(leadInputFileContents),
+                "The lead input file does not contain the right contents.");
+
+        Assert.assertTrue(expectedFile.delete());
+    }
+
+    @Test(groups = "unit")
+    private boolean transformedLeadIsCorrect(String transformedString) throws ParseException {
+
+        JSONParser parser = new JSONParser();
+        JSONObject j = (JSONObject) parser.parse(transformedString);
+        assertTrue(j.get("key").equals("837394"));
+        JSONArray arr = (JSONArray) j.get("value");
+        return (arr.size() == 194 && containsRightContents(arr));
     }
 
     private boolean containsRightContents(JSONArray arr) {
@@ -217,46 +233,18 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testWriteToLeadInputFiles() throws IOException {
-        HashMap<String, ArrayList<String>> leadInputRecordMap = new HashMap<String, ArrayList<String>>();
-        ArrayList<String> records1 = new ArrayList<String>();
-        records1.add("value11\n");
-        records1.add("value12\n");
-        records1.add("value13\n");
-        leadInputRecordMap.put("model1", records1);
-        ArrayList<String> records2 = new ArrayList<String>();
-        records2.add("value21\n");
-        records2.add("value22\n");
-        records2.add("value23\n");
-        leadInputRecordMap.put("model2", records2);
-        ScoringMapperTransformUtil.writeToLeadInputFiles(leadInputRecordMap, 2);
-        // check the files
-        File f1 = new File("model1-0");
-        File f2 = new File("model1-1");
-        File f3 = new File("model2-0");
-        File f4 = new File("model2-1");
-        assertTrue(f1.exists(), "f1 should be existed");
-        assertTrue(f2.exists(), "f2 should be existed");
-        assertTrue(f3.exists(), "f3 should be existed");
-        assertTrue(f4.exists(), "f4 should be existed");
-        try {
-            String f1Contents = FileUtils.readFileToString(f1);
-            String f2Contents = FileUtils.readFileToString(f2);
-            String f3Contents = FileUtils.readFileToString(f3);
-            String f4Contents = FileUtils.readFileToString(f4);
-            assertTrue(f1Contents.equals("value11\nvalue12\n"), "f1 should have the right contents");
-            assertTrue(f2Contents.equals("value13\n"), "f2 should have the right contents");
-            assertTrue(f3Contents.equals("value21\nvalue22\n"), "f3 should have the right contents");
-            assertTrue(f4Contents.equals("value23\n"), "f4 should have the right contents");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        // delete the files
-        f1.delete();
-        f2.delete();
-        f3.delete();
-        f4.delete();
-    }
+    public void testTransformAndWriteLeadWithUnmatchedModel() throws IOException, ParseException {
+        Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
+        Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
+        LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+                .toArray(new Path[localFilePaths.size()]));
+        try {
+            ScoringMapperTransformUtil.transformAndWriteLead(IMPROPER_TEST_RECORD, modelInfoMap, leadFileBufferMap,
+                    localizedFiles, 10000);
+            Assert.fail("Should have thrown expcetion.");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_20007);
+        }
+    }
 }

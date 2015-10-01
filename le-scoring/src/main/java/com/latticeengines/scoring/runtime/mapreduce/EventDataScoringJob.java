@@ -47,11 +47,11 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
     private static final String scoringPythonPath = "/app/scoring/scripts/scoring.py";
 
     private static final Log log = LogFactory.getLog(EventDataScoringJob.class);
- 
+
     public EventDataScoringJob(Configuration config) {
         setConf(config);
     }
-    
+
     public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
@@ -67,17 +67,18 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
     public void customize(Job mrJob, Properties properties) {
         try {
             Configuration config = mrJob.getConfiguration();
-            config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
+            config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(),
+                    properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
             config.set(ScoringProperty.TENANT_ID.name(), properties.getProperty(ScoringProperty.TENANT_ID.name()));
             config.set(ScoringProperty.LOG_DIR.name(), properties.getProperty(ScoringProperty.LOG_DIR.name()));
 
             String queueName = properties.getProperty(MapReduceProperty.QUEUE.name());
             config.set("mapreduce.job.queuename", queueName);
-
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());
             AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
-            AvroKeyInputFormat.setMaxInputSplitSize(mrJob, Long.valueOf(properties.getProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name())));
+            AvroKeyInputFormat.setMaxInputSplitSize(mrJob,
+                    Long.valueOf(properties.getProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name())));
 
             List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, new HdfsFilenameFilter() {
 
@@ -142,7 +143,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
     void generateDataTypeSchema(Schema schema, String dataTypeFilePath, Configuration config) {
         List<Field> fields = schema.getFields();
         JSONObject jsonObj = new JSONObject();
-        for(Field field : fields){
+        for (Field field : fields) {
             String type = field.schema().getTypes().get(0).getName();
             if (type.equals("string") || type.equals("bytes"))
                 jsonObj.put(field.name(), 1);
@@ -160,15 +161,20 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
     public int run(String[] args) throws Exception {
         JobConf jobConf = new JobConf(getConf(), getClass());
         @SuppressWarnings("deprecation")
-        Job job = new Job(jobConf);
+        Job job = new Job(jobConf, "scoringJob");
 
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), args[0]);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), "Scoring");
         properties.setProperty(MapReduceProperty.INPUT.name(), args[1]);
         properties.setProperty(MapReduceProperty.OUTPUT.name(), args[2]);
-        properties.setProperty(MapReduceProperty.QUEUE.name(), args[3]);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[4]);
-        
+        properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), args[5]);
+        properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), args[6]);
+        properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), args[7]);
+        properties.setProperty(ScoringProperty.TENANT_ID.name(), args[8]);
+        properties.setProperty(ScoringProperty.LOG_DIR.name(), args[9]);
+
         customize(job, properties);
         if (job.waitForCompletion(true)) {
             return 0;

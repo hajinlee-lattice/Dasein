@@ -14,6 +14,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.AfterClass;
+
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.scoring.exposed.domain.ScoringRequest;
@@ -57,6 +58,5 @@ public class ScoringFunctionalTestNGBase extends DataPlatformFunctionalTestNGBas
         }
         return requests;
     }
-
 
 }
