@@ -204,6 +204,8 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         File scoringLeadFile = addColumnsToTestDataFile(modelId);
         scoringDataPath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data/1.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoringLeadFile.getAbsolutePath(), scoringDataPath);
+        // deletet he temp file
+        scoringLeadFile.delete();
     }
 
     private String getModelGuid() throws Exception {
@@ -212,7 +214,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         String dir = dirList.get(0);
         return dir.substring(dirList.get(0).lastIndexOf('/') + 1);
     }
-    
+
     private String getContainerId() throws Exception {
         List<String> topDirs;
         topDirs = HdfsUtils.getFilesForDir(yarnConfiguration, modelingModelPath + modelGuid);
@@ -298,7 +300,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         log.info(step + ": appId succeeded: " + appId.toString());
     }
-    
+
     private boolean compareEvaluationResults() throws Exception {
         boolean resultsAreSame = false;
         // locate the scored.txt after modeling is done
@@ -311,11 +313,6 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     }
 
     private Map<String, Double> getModelingResults() throws Exception {
-        
-//        /// for debug purpose only
-//        modelGuid = "afdb76d3-cfbb-4a86-8920-d81a60d5a708";
-//        containerId = "1434414458763_0077";
-//        ///
 
         String modelingResultsPath = modelingModelPath + modelGuid + "/" + containerId;
         System.out.println("modelingResultsPath is " + modelingResultsPath);
@@ -408,8 +405,8 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
             } else {
                 Double scoringResult = scoringResults.get(leadIdWithoutZeros);
                 if (modelingResult.compareTo(scoringResult) != 0) {
-                    System.err.println("For " + leadIdWithoutZeros + ", the scoringResult: " + scoringResult + " does not match with that of "
-                            + modelingResult + " in modeling");
+                    System.err.println("For " + leadIdWithoutZeros + ", the scoringResult: " + scoringResult
+                            + " does not match with that of " + modelingResult + " in modeling");
                     return false;
                 }
             }
