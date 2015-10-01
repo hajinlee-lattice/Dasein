@@ -152,7 +152,6 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
                 if (message.getReceivedDate().after(registrationTimestamp)) {
                     String url = getHrefUrlFromMultiPart((Multipart) m.getContent());
-                    System.out.println("the message url is: " + url);
 
                     if (appUrl.equalsIgnoreCase(url)) {
                         // delete the message
