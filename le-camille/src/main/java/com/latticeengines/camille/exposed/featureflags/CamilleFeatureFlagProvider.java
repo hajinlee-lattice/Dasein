@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.featureflags;
 
+import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,7 +175,14 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
      */
     @Override
     public FeatureFlagDefinitionMap getDefinitions() {
-        Document doc = definitionCache.get();
+        Document doc;
+        try {
+            doc = definitionCache.get();
+        } catch (Exception e) {
+            log.warn("Exception occurred attempting to retrieve feature flag definitions", e);
+            doc = null;
+        }
+
         if (doc != null) {
             return DocumentUtils.toTypesafeDocument(doc, FeatureFlagDefinitionMap.class);
         } else {
@@ -188,8 +196,14 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
      */
     @Override
     public FeatureFlagValueMap getFlags(CustomerSpace space) {
-        FeatureFlagValueMap toReturn = valueCache.get(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE),
-                FeatureFlagValueMap.class);
+        FeatureFlagValueMap toReturn;
+        try {
+            toReturn = valueCache.get(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE),
+                    FeatureFlagValueMap.class);
+        } catch (Exception e) {
+            log.warn("Exception occurred attempting to retrieve feature flags", e);
+            toReturn = null;
+        }
         if (toReturn == null) { toReturn = new FeatureFlagValueMap(); }
         return toReturn;
     }

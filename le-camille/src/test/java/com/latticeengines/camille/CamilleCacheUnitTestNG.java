@@ -52,4 +52,20 @@ public class CamilleCacheUnitTestNG {
         cached = cache.get();
         Assert.assertEquals(cached, document);
     }
+
+    @Test(groups = "unit")
+    public void testCacheThrowsIfParentPathDoesntExist() throws Exception {
+        Path path = new Path("/foo");
+        CamilleCache cache = new CamilleCache(path);
+        Document cached = cache.get();
+        Assert.assertNull(cached);
+        path = new Path("/foo/bar");
+        boolean threw = false;
+        try {
+            cache = new CamilleCache(path); // throws
+        } catch (Exception e) {
+            threw = true;
+        }
+        Assert.assertTrue(threw);
+    }
 }

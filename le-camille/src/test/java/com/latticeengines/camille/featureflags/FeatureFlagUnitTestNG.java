@@ -1,5 +1,10 @@
 package com.latticeengines.camille.featureflags;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -34,5 +39,11 @@ public class FeatureFlagUnitTestNG {
         FeatureFlagClient.setDefinition(id, new FeatureFlagDefinition());
         FeatureFlagClient.setEnabled(CamilleTestEnvironment.getCustomerSpace(), id, true);
         Assert.assertTrue(FeatureFlagClient.isEnabled(CamilleTestEnvironment.getCustomerSpace(), id));
+    }
+
+    @Test(groups = "unit")
+    public void testFeatureFlagClientHandlesInvalidPath() throws Exception {
+        final String id = "TestFlag";
+        Assert.assertFalse(FeatureFlagClient.isEnabled(CustomerSpace.parse("foo"), id));
     }
 }

@@ -12,7 +12,11 @@ public class CamilleCache {
     private NodeCache cache;
 
     public CamilleCache(Path path) throws Exception {
-        cache = new NodeCache(CamilleEnvironment.getCamille().getCuratorClient(), path.toString());
+        Camille c = CamilleEnvironment.getCamille();
+        if (!c.exists(path.parent())) {
+            throw new RuntimeException(String.format("Parent path %s must exist in order to create a cache against path %s", path.parent(), path));
+        }
+        cache = new NodeCache(c.getCuratorClient(), path.toString());
         cache.start(true);
     }
 
