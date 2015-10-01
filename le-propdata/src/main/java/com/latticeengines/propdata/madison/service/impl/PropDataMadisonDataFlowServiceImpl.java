@@ -82,8 +82,8 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
             return jobProperties;
         }
         jobProperties.put("mapred.reduce.tasks", "36");
-        jobProperties.put("mapred.tasktracker.map.tasks.maximum", "4");
-        jobProperties.put("mapred.tasktracker.reduce.tasks.maximum", "4");
+        jobProperties.put("mapred.tasktracker.map.tasks.maximum", "8");
+        jobProperties.put("mapred.tasktracker.reduce.tasks.maximum", "8");
         jobProperties.put("mapred.compress.map.output", "true");
         jobProperties.put("mapred.output.compression.type", "BLOCK");
         jobProperties.put("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.BZip2Codec");
