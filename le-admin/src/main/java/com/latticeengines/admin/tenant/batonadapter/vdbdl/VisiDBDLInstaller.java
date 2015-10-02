@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
 import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider.DLFolder;
 import com.latticeengines.admin.service.TenantService;
@@ -111,15 +112,19 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                 createDataStoreFolder(dataStoreFolder, dmDeployment);
                 CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, dmDeployment,
                         contractExternalID);
-                builder.tenantAlias(tenantAlias).ownerEmail(ownerEmail).visiDBName(visiDBName)
-                        .visiDBLocation("ServerName=" + visiDBServerName).visiDBFileDirectory(visiDBFileDirectory)
-                        .createNewVisiDB(Boolean.parseBoolean(createNewVisiDB))
-                        .caseSensitive(Boolean.parseBoolean(caseSensitive)).cacheLimit(Integer.parseInt(cacheLimit))
-                        .diskspaceLimit(Integer.parseInt(diskspaceLimit))
-                        .backupFolder(dataStoreBackup)
-                        .launchFolder(dataStoreLaunch)
-                        .launchStatusFolder(dataStoreStatus)
-                        .permanentStoreOption(permStoreOpt)
+                builder.tenantAlias(tenantAlias) //
+                        .ownerEmail(ownerEmail) //
+                        .visiDBName(visiDBName) //
+                        .visiDBLocation("ServerName=" + visiDBServerName) //
+                        .visiDBFileDirectory(visiDBFileDirectory) //
+                        .createNewVisiDB(Boolean.parseBoolean(createNewVisiDB)) //
+                        .caseSensitive(Boolean.parseBoolean(caseSensitive)) //
+                        .cacheLimit(Integer.parseInt(cacheLimit)) //
+                        .diskspaceLimit(Integer.parseInt(diskspaceLimit)) //
+                        .backupFolder(dataStoreBackup) //
+                        .launchFolder(dataStoreLaunch) //
+                        .launchStatusFolder(dataStoreStatus) //
+                        .permanentStoreOption(permStoreOpt) //
                         .permanentStorePath(permanentStorePath);
                 CreateVisiDBDLRequest postRequest = builder.build();
                 response = dataLoaderService.createDLTenant(postRequest, dlUrl);
