@@ -15,7 +15,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -27,12 +26,15 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @Entity
 @javax.persistence.Table(name = "METADATA_TABLE")
 @PrimaryKeyJoinColumn(name = "PID")
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Table extends AttributeOwner {
 
     private List<Extract> extracts = new ArrayList<>();
     private PrimaryKey primaryKey;
     private LastModifiedKey lastModifiedKey;
+    
+    public Table() {
+        setType(AttributeOwnerType.TABLE.getValue());
+    }
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)

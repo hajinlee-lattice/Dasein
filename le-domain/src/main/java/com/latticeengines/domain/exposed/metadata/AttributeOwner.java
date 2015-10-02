@@ -21,6 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.avro.Schema;
 import org.hibernate.annotations.Filter;
@@ -38,7 +39,8 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "METADATA_ATTRIBUTE_OWNER")
+@Table(name = "METADATA_ATTRIBUTE_OWNER", //
+       uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
 @Inheritance(strategy = InheritanceType.JOINED)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @OnDelete(action = OnDeleteAction.CASCADE)
@@ -51,6 +53,7 @@ public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
     private Schema schema;
     private Tenant tenant;
     private Long tenantId;
+    private byte type;
 
 
     @Id
@@ -69,7 +72,7 @@ public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
         this.pid = pid;
     }
 
-    @Column(name = "NAME", unique = true, nullable = false)
+    @Column(name = "NAME", unique = false, nullable = false)
     @Override
     @JsonProperty("name")
     public String getName() {
@@ -192,6 +195,17 @@ public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
         return tenant;
+    }
+
+    @JsonIgnore
+    @Column(name = "TYPE", nullable = false)
+    public byte getType() {
+        return type;
+    }
+
+    @JsonIgnore
+    public void setType(byte type) {
+        this.type = type;
     }
 
 }

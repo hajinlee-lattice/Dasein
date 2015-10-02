@@ -77,7 +77,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.pid = pid;
     }
 
-    @Column(name = "NAME", unique = true, nullable = false)
+    @Column(name = "NAME", nullable = false)
     @Override
     public String getName() {
         return name;
