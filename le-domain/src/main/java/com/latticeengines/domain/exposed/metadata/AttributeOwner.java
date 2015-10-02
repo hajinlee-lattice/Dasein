@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "METADATA_ATTRIBUTE_OWNER")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@OnDelete(action = OnDeleteAction.CASCADE)
 public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
 
     private Long pid;
