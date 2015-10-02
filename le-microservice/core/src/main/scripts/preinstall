@@ -2,5 +2,16 @@
 rm -rf /opt/jetty/webapps/le-*-microservice-*.war
 rm -rf /opt/jetty/bin/jetty.sh
 rm -rf /home/yarn/.bashrc
-adduser yarn
-groupadd yarn
+
+ret=false
+getent passwd yarn >/dev/null 2>&1 && ret=true
+
+if ! $ret; then
+    adduser yarn
+fi
+
+ret=false
+getent group yarn >/dev/null 2>&1 && ret=true
+if ! $ret; then
+    groupadd yarn
+fi
