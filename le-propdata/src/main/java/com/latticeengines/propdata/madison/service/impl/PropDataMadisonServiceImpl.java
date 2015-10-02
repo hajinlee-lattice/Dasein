@@ -151,8 +151,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             log.info("Finished job id=" + dailyProgress.getPid());
 
         } catch (Exception ex) {
-            setFailed(dailyProgress, ex);
-            log.info("Import failed!", ex);
+            // setFailed(dailyProgress, ex);
+            log.info("Import failed! re-try later.", ex);
             throw new LedpException(LedpCode.LEDP_00002, ex);
         }
 
