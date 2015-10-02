@@ -6,18 +6,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.TenantToken;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class MultiTenantEntityMgrAspect {
 
-    public void enableMultiTenantFilter(JoinPoint joinPoint, SessionFactory sessionFactory, TenantEntityMgr tenantEntityMgr) {
+    public void enableMultiTenantFilter(JoinPoint joinPoint, SessionFactory sessionFactory,
+            TenantEntityMgr tenantEntityMgr) {
+        Tenant tenant = null;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!(auth instanceof TicketAuthenticationToken)) {
+        if (auth instanceof TicketAuthenticationToken) {
+            TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
+            tenant = token.getSession().getTenant();
+        } else if (auth instanceof TenantToken) {
+            tenant = ((TenantToken) auth).getTenant();
+        } else {
             throw new RuntimeException("Problem with multi-tenancy framework.");
         }
-        TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
-        Tenant tenant = token.getSession().getTenant();
         Tenant tenantWithPid = tenantEntityMgr.findByTenantId(tenant.getId());
 
         if (tenantWithPid == null) {
