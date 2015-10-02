@@ -12,6 +12,7 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.metadata.controller.*" />
     </context:component-scan>
 
+    <import resource="classpath:metadata-aspects-context.xml"/>
     <import resource="classpath:security-context.xml"/>
     <import resource="classpath:db-context.xml"/>
 </beans>

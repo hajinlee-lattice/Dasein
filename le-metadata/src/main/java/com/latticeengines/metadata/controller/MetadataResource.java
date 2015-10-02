@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.service.MetadataService;
 import com.wordnik.swagger.annotations.Api;
@@ -15,7 +16,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "metadata", description = "REST resource for metadata")
 @RestController
-@RequestMapping("/pods/{podId}/contracts/{contractId}/spaces/{spaceId}")
+@RequestMapping("/customerspaces/{customerSpace}")
 public class MetadataResource {
     
     @Autowired
@@ -24,19 +25,15 @@ public class MetadataResource {
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
-    public Table getTable(@PathVariable String podId, //
-            @PathVariable String contractId, //
-            @PathVariable String spaceId, //
-            @PathVariable String tableName) {
-        return null;
+    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.getTable(space, tableName);
     }
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create table")
-    public void createTable(@PathVariable String podId, //
-            @PathVariable String contractId, //
-            @PathVariable String spaceId, //
+    public void createTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
             @RequestBody Table table) {
     }
@@ -44,9 +41,7 @@ public class MetadataResource {
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update table")
-    public void updateTable(@PathVariable String podId, //
-            @PathVariable String contractId, //
-            @PathVariable String spaceId, //
+    public void updateTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
             @RequestBody Table table) {
     }

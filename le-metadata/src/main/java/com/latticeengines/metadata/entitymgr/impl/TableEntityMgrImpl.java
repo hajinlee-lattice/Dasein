@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -63,5 +65,24 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
         primaryKeyDao.delete(table.getPrimaryKey());
         lastModifiedKeyDao.delete(table.getLastModifiedKey());
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Table> getAll() {
+        return super.findAll();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Table> findAll() {
+        return super.findAll();
+    }
     
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Table findByName(String name) {
+        return tableDao.findByName(name);
+    }
+
+
 }
