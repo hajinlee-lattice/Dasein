@@ -224,7 +224,7 @@ public class YarnManager {
     }
 
     private JsonNode readModelAsJson(String customer, String uuid) {
-        String srcModelJsonFullPath = findModelPathInSingular(customer, uuid);
+        String srcModelJsonFullPath = findModelPathInTuple(customer, uuid);
         try {
             String jsonContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, srcModelJsonFullPath);
             return objectMapper.readTree(jsonContent);
