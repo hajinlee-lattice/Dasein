@@ -152,7 +152,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
         } catch (Exception ex) {
             // setFailed(dailyProgress, ex);
-            log.info("Import failed! re-try later.", ex);
+            log.warn("Import failed! re-try later.", ex);
             throw new LedpException(LedpCode.LEDP_00002, ex);
         }
 
