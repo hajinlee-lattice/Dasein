@@ -52,9 +52,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Autowired
     private TenantDao tenantDao;
 
-//    @Autowired
-//    private SessionFactory sessionFactory;
-
     @Override
     public BaseDao<ModelSummary> getDao() {
         return modelSummaryDao;

@@ -14,6 +14,6 @@
 
     <aop:aspectj-autoproxy/>
 
-    <bean id="multiTenancyAspect" class="com.latticeengines.security.exposed.entitymanager.impl.MultiTenantEntityMgrAspect" />
+    <bean id="multiTenancyAspect" class="com.latticeengines.pls.entitymanager.impl.PlsMultiTenantEntityMgrAspect" />
 
 </beans>
