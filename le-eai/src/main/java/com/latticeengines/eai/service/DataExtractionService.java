@@ -12,4 +12,6 @@ public interface DataExtractionService {
     ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig);
 
     String createTargetPath(String customer);
+
+    void cleanUpTargetPathData(ImportContext context) throws Exception;
 }

@@ -1,8 +1,10 @@
 package com.latticeengines.eai.service.impl.marketo;
 
 import static org.testng.Assert.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
@@ -54,6 +56,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         importContext.setProperty(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         importContext.setProperty(ImportProperty.TARGETPATH, "/tmp");
+        importContext.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
 
         List<Table> tables = new ArrayList<>();
         Table activityType = MarketoExtractAndImportUtil.createMarketoActivityType();
@@ -82,7 +85,6 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     public void importDataAndWriteToHdfs() throws Exception {
         marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, importContext);
         Thread.sleep(10000L);
-        checkDataExists("/tmp", Arrays.<String>asList(new String[]{"Activity", "ActivityType"}));
+        checkDataExists("/tmp", Arrays.<String>asList(new String[]{"Activity", "ActivityType"}), 1);
     }
-
 }

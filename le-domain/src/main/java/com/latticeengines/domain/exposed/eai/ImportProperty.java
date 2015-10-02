@@ -11,4 +11,5 @@ public class ImportProperty extends BaseProperty {
     public static final String DATAFILEDIR = "dataFile";
     public static final String PRODUCERTEMPLATE = "producerTemplate";
     public static final String FILEURLPROPERTIES = "fileUrlProperties";
+    public static final String EXTRACT_PATH = "extractPaths";
 }

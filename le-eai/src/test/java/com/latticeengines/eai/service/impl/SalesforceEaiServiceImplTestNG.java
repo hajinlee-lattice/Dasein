@@ -3,7 +3,6 @@ package com.latticeengines.eai.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,16 +25,11 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
-import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
-import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.appmaster.service.AppMasterServiceResponse;
 import com.latticeengines.eai.appmaster.service.AppmasterServiceRequest;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
-import com.latticeengines.eai.functionalframework.SalesforceExtractAndImportUtil;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
@@ -59,7 +53,7 @@ public class SalesforceEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private AppmasterServiceClient appmasterServiceClient;
 
-    private List<String> tableNameList = Arrays. <String>asList(new String[]{"Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole"});
+    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole" });
 
     private String customer = "Salesforce-Eai";
 
@@ -92,25 +86,7 @@ public class SalesforceEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void extractAndImport() throws Exception {
-        List<Table> tables = new ArrayList<>();
-        Table lead = SalesforceExtractAndImportUtil.createLead();
-        Table account = SalesforceExtractAndImportUtil.createAccount();
-        Table opportunity = SalesforceExtractAndImportUtil.createOpportunity();
-        Table contact = SalesforceExtractAndImportUtil.createContact();
-        Table contactRole = SalesforceExtractAndImportUtil.createOpportunityContactRole();
-        tables.add(lead);
-        tables.add(account);
-        tables.add(opportunity);
-        tables.add(contact);
-        tables.add(contactRole);
-
-        ImportConfiguration importConfig = new ImportConfiguration();
-        importConfig.setCustomer(customer);
-        SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
-        salesforceConfig.setSourceType(SourceType.SALESFORCE);
-        salesforceConfig.setTables(tables);
-        importConfig.addSourceConfiguration(salesforceConfig);
-
+        setupSalesforceImportConfig(customer);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         BaseObject request = new AppmasterServiceRequest();
         Thread.sleep(20000);
@@ -121,7 +97,6 @@ public class SalesforceEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-        checkDataExists(targetPath, tableNameList);
+        checkDataExists(targetPath, tableNameList, 1);
     }
-
 }

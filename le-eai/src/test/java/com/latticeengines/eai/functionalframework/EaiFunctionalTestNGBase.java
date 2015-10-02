@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -14,24 +15,27 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
+import org.apache.camel.testng.AbstractCamelTestNGSpringContextTests;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
+import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
@@ -43,9 +47,9 @@ import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+@DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
-public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTests {
 
     protected static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
 
@@ -71,6 +75,8 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private SalesforceRouteConfig salesforceRouteConfig;
+
+    protected ImportConfiguration importConfig;
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
@@ -131,11 +137,18 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         });
     }
 
-    protected void checkDataExists(String targetPath, List<String> tables) throws Exception {
+    protected void checkDataExists(String targetPath, List<String> tables, int number) throws Exception {
         for (String table : tables) {
-            assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath + "/" + table));
             List<String> filesForTable = getFilesFromHdfs(targetPath, table);
-            assertEquals(filesForTable.size(), 1);
+            assertEquals(filesForTable.size(), number);
+        }
+    }
+
+    protected void checkExtractsDirectoryExists(String customer, List<String> tables) throws Exception{
+        Path customerSpacePath = PathBuilder.buildCustomerSpacePath("Production", customer, customer, "Production");
+        for (String table : tables) {
+            String path = (customerSpacePath + "/Data/Tables/" + table + "/Extracts").toString();
+            assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
         }
     }
 
@@ -151,5 +164,27 @@ public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         camelContext.addRoutes(salesforceRouteConfig);
         camelContext.addRoutes(marketoRouteConfig);
         return camelContext;
+    }
+
+    protected void setupSalesforceImportConfig(String customer) {
+        List<Table> tables = new ArrayList<>();
+        Table lead = SalesforceExtractAndImportUtil.createLead();
+        Table account = SalesforceExtractAndImportUtil.createAccount();
+        Table opportunity = SalesforceExtractAndImportUtil.createOpportunity();
+        Table contact = SalesforceExtractAndImportUtil.createContact();
+        Table contactRole = SalesforceExtractAndImportUtil.createOpportunityContactRole();
+        tables.add(lead);
+        tables.add(account);
+        tables.add(opportunity);
+        tables.add(contact);
+        tables.add(contactRole);
+
+        importConfig = new ImportConfiguration();
+        SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
+        salesforceConfig.setSourceType(SourceType.SALESFORCE);
+        salesforceConfig.setTables(tables);
+
+        importConfig.addSourceConfiguration(salesforceConfig);
+        importConfig.setCustomer(customer);
     }
 }

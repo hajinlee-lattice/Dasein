@@ -10,8 +10,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
-
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -26,7 +24,6 @@ import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
-@Component
 public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
         ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
 
@@ -72,6 +69,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
             log.info("Finished extract and import.");
         }catch(Exception e){
             Thread.sleep(20000);
+            dataExtractionService.cleanUpTargetPathData(importContext);
             eaiAppmasterService.handleException(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
@@ -96,5 +94,4 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
-
 }

@@ -17,6 +17,7 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
     @Value("${eai.backoff.multiplier}")
     private int backoffMultiplier;
 
+    @SuppressWarnings("deprecation")
     @Override
     public void configure() throws Exception {
         Processor baseUrlProcessor = new GenerateBaseUrlProcessor();

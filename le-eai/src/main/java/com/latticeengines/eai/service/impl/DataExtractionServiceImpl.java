@@ -1,16 +1,19 @@
 package com.latticeengines.eai.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
@@ -41,13 +44,16 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @Autowired
     private ImportContext importContext;
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
     @Override
     public void extractAndImport(ImportConfiguration importConfig, ImportContext context) {
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
         context.setProperty(ImportProperty.CUSTOMER, importConfig.getCustomer());
         String targetPath = createTargetPath(importConfig.getCustomer());
         context.setProperty(ImportProperty.TARGETPATH, targetPath);
-
+        context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
             Map<String, String> props = sourceImportConfig.getProperties();
@@ -119,9 +125,18 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         return eaiJob;
     }
 
-    public String createTargetPath(String customer){
+    public String createTargetPath(String customer) {
         Path customerSpacePath = PathBuilder.buildCustomerSpacePath("Production", customer, customer, "Production");
         return (customerSpacePath + "/Data/Tables").toString();
+    }
+
+    public void cleanUpTargetPathData(ImportContext context) throws Exception {
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = context.getProperty(ImportProperty.EXTRACT_PATH, HashMap.class);
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            log.info("Table is： " + entry.getKey() + "  Path is: " + entry.getValue());
+            HdfsUtils.rmdir(yarnConfiguration, entry.getValue());
+        }
     }
 
 }

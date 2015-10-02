@@ -115,7 +115,7 @@ public class MarketoEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        checkDataExists(targetPath, tableNameList);
+        checkDataExists(targetPath, tableNameList, 1);
     }
 
     @Test(groups = { "functional" }, dataProvider = "fileProvider", enabled = false)
