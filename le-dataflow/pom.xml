@@ -23,9 +23,9 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-parent</artifactId>
+        <artifactId>le-microservice-parent</artifactId>
         <version>2.0.11-SNAPSHOT</version>
-        <relativePath>../le-parent</relativePath>
+        <relativePath>../le-microservice</relativePath>
     </parent>
 
     <dependencies>
@@ -188,11 +188,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scheduler</artifactId>
             <version>${le.scheduler.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mangofactory</groupId>
-            <artifactId>swagger-springmvc</artifactId>
-            <version>0.9.4</version>
         </dependency>
     </dependencies>
 

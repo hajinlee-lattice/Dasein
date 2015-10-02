@@ -2,13 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-microservice-toplevel</artifactId>
+    <artifactId>le-microservice-parent</artifactId>
     <packaging>pom</packaging>
     <name>le-${component-name}</name>
 
     <properties>
-        <component-name>microservice-toplevel</component-name>
-        <le.dataflow.version>2.0.11-SNAPSHOT</le.dataflow.version>
+        <component-name>microservice-parent</component-name>
     </properties>
 
     <parent>
@@ -18,6 +17,113 @@
         <relativePath>../le-parent</relativePath>
     </parent>
     
+    <profiles>
+        <profile>
+            <id>functional</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>functional-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${functional.classes.include}</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>${functional.classes.exclude}</exclude>
+                                        <exclude>${deployment.classes.include}</exclude>
+                                        <exclude>${infrastructure.classes.include}</exclude>
+                                    </excludes>
+                                    <groups>${functional.groups}</groups>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <useTestClasspath>true</useTestClasspath>
+                            <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
+                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
+                            <webAppConfig>
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
+                            </webAppConfig>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm-commons</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mangofactory</groupId>
+            <artifactId>swagger-springmvc</artifactId>
+            <version>0.9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ajar</groupId>
+            <artifactId>swagger-spring-mvc-ui</artifactId>
+            <version>0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+    </dependencies>
+
     <modules>
         <module>core</module>
     <!-- 
