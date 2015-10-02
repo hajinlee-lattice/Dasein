@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.latticeengines.camille.exposed.CamilleConfiguration;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -35,36 +33,88 @@ public class SpaceLifecycleManagerUnitTestNG {
 
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
-        CamilleEnvironment.start(CamilleEnvironment.Mode.RUNTIME, new CamilleConfiguration("Production", "10.51.1.217:2181,10.51.1.218:2181,10.51.1.219:2181"));
+        CamilleTestEnvironment.start();
     }
 
     @AfterMethod(groups = "unit")
     public void tearDown() throws Exception {
-        CamilleEnvironment.stop();
+        CamilleTestEnvironment.stop();
+    }
+
+    @Test(groups = "unit")
+    public void testCreate() throws Exception {
+        String spaceId = "testSpace";
+        SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
+        Assert.assertTrue(CamilleEnvironment.getCamille().exists(
+                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)));
+        SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
+    }
+
+    @Test(groups = "unit")
+    public void testDelete() throws Exception {
+        String spaceId = "testSpace";
+        SpaceLifecycleManager.delete(contractId, tenantId, spaceId);
+        SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
+        Assert.assertTrue(CamilleEnvironment.getCamille().exists(
+                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)));
+        SpaceLifecycleManager.delete(contractId, tenantId, spaceId);
+        Assert.assertFalse(CamilleEnvironment.getCamille().exists(
+                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)));
+    }
+
+    @Test(groups = "unit")
+    public void testExists() throws Exception {
+        String spaceId = "testSpace";
+        Assert.assertFalse(SpaceLifecycleManager.exists(contractId, tenantId, spaceId));
+        SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
+        Assert.assertTrue(SpaceLifecycleManager.exists(contractId, tenantId, spaceId));
+        SpaceLifecycleManager.delete(contractId, tenantId, spaceId);
+        Assert.assertFalse(SpaceLifecycleManager.exists(contractId, tenantId, spaceId));
     }
 
     @Test(groups = "unit")
     public void testGetAll() throws Exception {
-/*
-        List<String> lst = new ArrayList<String>();
-        lst.add("VeracodePOC");
-        fixit(lst);
-*/
-//        SpaceLifecycleManager.getInfo("VeracodePOC", "VeracodePOC", "Production");
-        SpaceLifecycleManager.getAll();
-    }
-
-    private void fixit(List<String> toFix) {
-        for (String space : toFix) {
-            try {
-                SpaceLifecycleManager.create(space, space, "Production", new CustomerSpaceInfo(new CustomerSpaceProperties(space, space, null, null), ""));
-            }
-            catch (Exception e) {
-                log.error("Failed", e);
-            }
-
+        Set<String> in = new HashSet<String>();
+        for (int i = 0; i < 10; ++i) {
+            String spaceId = Integer.toString(i);
+            in.add(spaceId);
+            SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
         }
+
+        List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> all = SpaceLifecycleManager.getAll(contractId, tenantId);
+        List<String> allSpaces = new ArrayList<String>();
+        for (AbstractMap.SimpleEntry<String, CustomerSpaceInfo> pair : all) {
+            allSpaces.add(pair.getKey());
+        }
+        Assert.assertTrue(allSpaces.containsAll(in));
     }
 
+    @Test(groups = "unit")
+    public void testGetAllRecursive() throws Exception {
+        Set<String> in = new HashSet<String>();
+
+        String secondTenantId = tenantId + "2";
+        TenantLifecycleManager.create(contractId, secondTenantId, CamilleTestEnvironment.getTenantInfo(),
+                CamilleTestEnvironment.getSpaceId(), CamilleTestEnvironment.getCustomerSpaceInfo());
+
+        for (int i = 0; i < 10; ++i) {
+            String spaceId = Integer.toString(i);
+            in.add(spaceId);
+            SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
+        }
+
+        for (int i = 10; i < 20; ++i) {
+            String spaceId = Integer.toString(i);
+            in.add(spaceId);
+            SpaceLifecycleManager.create(contractId, secondTenantId, spaceId, customerSpaceInfo);
+        }
+
+        List<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>> all = SpaceLifecycleManager.getAll();
+        List<String> allSpaces = new ArrayList<String>();
+        for (AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo> pair : all) {
+            allSpaces.add(pair.getKey().getSpaceId());
+        }
+        Assert.assertTrue(allSpaces.containsAll(in));
+    }
 
 }
