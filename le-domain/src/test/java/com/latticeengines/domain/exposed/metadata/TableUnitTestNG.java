@@ -27,7 +27,8 @@ public class TableUnitTestNG {
         PrimaryKey pk = new PrimaryKey();
         Attribute pkAttr = new Attribute();
         pkAttr.setName("ID");
-        pk.addAttribute(pkAttr);
+        pk.addAttribute("ID");
+        table.addAttribute(pkAttr);
         table.setPrimaryKey(pk);
 
         String serializedStr = JsonUtils.serialize(table);

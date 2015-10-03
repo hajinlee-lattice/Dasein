@@ -19,7 +19,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
@@ -39,7 +38,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "METADATA_ATTRIBUTE")
+@javax.persistence.Table(name = "METADATA_ATTRIBUTE")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
 
@@ -57,7 +56,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     private List<String> cleanedUpEnumValues = new ArrayList<String>();
     private List<String> enumValues = new ArrayList<String>();
     private Map<String, Object> properties = new HashMap<>();
-    private AttributeOwner attributeOwner;
+    private Table table;
     private Tenant tenant;
     private Long tenantId;
 
@@ -237,14 +236,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
-    @JoinColumn(name = "FK_ATTRIBUTE_OWNER_ID", nullable = false)
-    public AttributeOwner getAttributeOwner() {
-        return attributeOwner;
+    @JoinColumn(name = "FK_TABLE_ID", nullable = false)
+    public Table getTable() {
+        return table;
     }
 
     @JsonIgnore
-    public void setAttributeOwner(AttributeOwner attributeOwner) {
-        this.attributeOwner = attributeOwner;
+    public void setTable(Table table) {
+        this.table = table;
     }
 
     @Override

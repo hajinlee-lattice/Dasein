@@ -2,9 +2,8 @@ package com.latticeengines.domain.exposed.metadata;
 
 public enum AttributeOwnerType {
 
-    TABLE((byte) 0),
-    PRIMARYKEY((byte) 1),
-    LASTMODIFIEDKEY((byte) 2);
+    PRIMARYKEY((byte) 0),
+    LASTMODIFIEDKEY((byte) 1);
     
     byte value;
     

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -18,12 +19,11 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -43,14 +43,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
 @Inheritance(strategy = InheritanceType.JOINED)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-@OnDelete(action = OnDeleteAction.CASCADE)
 public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
 
     private Long pid;
     private String name;
     private String displayName;
-    private List<Attribute> attributes = new ArrayList<>();
-    private Schema schema;
+    private List<String> attributes = new ArrayList<>();
     private Tenant tenant;
     private Long tenantId;
     private byte type;
@@ -96,43 +94,32 @@ public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
         this.displayName = displayName;
     }
 
-    public void addAttribute(Attribute attribute) {
+    public void addAttribute(String attribute) {
         attributes.add(attribute);
-        attribute.setAttributeOwner(this);
-        attribute.setTenant(getTenant());
     }
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "attributeOwner")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public List<Attribute> getAttributes() {
+    @Column(name = "ATTRIBUTE_NAMES", nullable = true)
+    @JsonIgnore
+    public String getAttributeNamesAsString() {
+        return StringUtils.join(attributes, ",");
+    }
+
+    @JsonIgnore
+    public void setAttributeNamesAsString(String attributeStr) {
+        if (attributeStr != null) {
+            setAttributes(Arrays.<String>asList(attributeStr.split(",")));
+        }
+    }
+    
+    @JsonProperty("attributes")
+    @Transient
+    public List<String> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List<Attribute> attributes) {
+    @JsonProperty("attributes")
+    public void setAttributes(List<String> attributes) {
         this.attributes = attributes;
-    }
-
-    @JsonIgnore
-    @Transient
-    public Map<String, Attribute> getNameAttributeMap() {
-        Map<String, Attribute> map = new HashMap<String, Attribute>();
-
-        for (Attribute attribute : attributes) {
-            map.put(attribute.getName(), attribute);
-        }
-        return map;
-    }
-
-    @JsonIgnore
-    @Transient
-    public Schema getSchema() {
-        return schema;
-    }
-
-    @JsonIgnore
-    @Transient
-    public void setSchema(Schema schema) {
-        this.schema = schema;
     }
 
     @Override
@@ -144,25 +131,21 @@ public class AttributeOwner implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     @Transient
     public Collection<? extends GraphNode> getChildren() {
-        return attributes;
+        return new ArrayList<>();
     }
 
     @Override
     @JsonIgnore
     @Transient
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
-        Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
-        map.put("attributes", attributes);
-        return map;
+        return new HashMap<>();
     }
 
     @JsonIgnore
     @Transient
     public String[] getAttributeNames() {
         String[] attrs = new String[attributes.size()];
-        for (int i = 0; i < attributes.size(); i++) {
-            attrs[i] = attributes.get(i).getName();
-        }
+        attributes.toArray(attrs);
         return attrs;
     }
 

@@ -64,7 +64,7 @@ public class ImportConfigurationUnitTestNG {
         table.addAttribute(activityTypeId);
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
-        pk.addAttribute(id);
+        pk.addAttribute("ID");
         table.setPrimaryKey(pk);
         return table;
     }
