@@ -14,18 +14,18 @@ import org.apache.avro.SchemaBuilder.RecordBuilder;
 import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.AttributeOwner;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class AvroSchemaBuilder {
     
     @SuppressWarnings("deprecation")
-    public static Schema mergeSchemas(Schema schema, AttributeOwner attributeOwner) {
-        if (attributeOwner.getAttributes().size() == 0) {
+    public static Schema mergeSchemas(Schema schema, Table table) {
+        if (table.getAttributes().size() == 0) {
             return schema;
         }
         Map<String, Attribute> attributes = new HashMap<String, Attribute>();
         
-        for (Attribute attr : attributeOwner.getAttributes()) {
+        for (Attribute attr : table.getAttributes()) {
             attributes.put(attr.getName(), attr);
         }
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(schema.getName());
@@ -110,13 +110,13 @@ public class AvroSchemaBuilder {
         return fieldAssembler.endRecord();
     }
 
-    public static Schema createSchema(String name, AttributeOwner attributeOwner) {
+    public static Schema createSchema(String name, Table table) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(name);
         recordBuilder.prop("uuid", UUID.randomUUID().toString());
         FieldAssembler<Schema> fieldAssembler = recordBuilder.doc("").fields();
         FieldBuilder<Schema> fieldBuilder;
 
-        for (Attribute attr : attributeOwner.getAttributes()) {
+        for (Attribute attr : table.getAttributes()) {
             fieldBuilder = fieldAssembler.name(attr.getName());
 
             fieldBuilder = fieldBuilder.prop("displayName", attr.getDisplayName());

@@ -84,12 +84,12 @@ public class SalesforceExtractAndImportUtil {
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
-        pk.addAttribute(id);
+        pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
         
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
-        lk.addAttribute(lastModifiedDate);
+        lk.addAttribute(lastModifiedDate.getName());
         table.setLastModifiedKey(lk);
         return table;
     }
@@ -178,12 +178,12 @@ public class SalesforceExtractAndImportUtil {
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
-        pk.addAttribute(id);
+        pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
         
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_CreatedDate");
-        lk.addAttribute(createdDate);
+        lk.addAttribute(createdDate.getName());
         table.setLastModifiedKey(lk);
         return table;
     }
@@ -223,12 +223,12 @@ public class SalesforceExtractAndImportUtil {
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
-        pk.addAttribute(id);
+        pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
         
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
-        lk.addAttribute(lastModifiedDate);
+        lk.addAttribute(lastModifiedDate.getName());
         table.setLastModifiedKey(lk);
         return table;
     }
@@ -253,12 +253,12 @@ public class SalesforceExtractAndImportUtil {
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
-        pk.addAttribute(id);
+        pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
         
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
-        lk.addAttribute(lastModifiedDate);
+        lk.addAttribute(lastModifiedDate.getName());
         table.setLastModifiedKey(lk);
 
         return table;
@@ -293,12 +293,12 @@ public class SalesforceExtractAndImportUtil {
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
-        pk.addAttribute(id);
+        pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
         
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
-        lk.addAttribute(lastModifiedDate);
+        lk.addAttribute(lastModifiedDate.getName());
         table.setLastModifiedKey(lk);
 
         return table;
