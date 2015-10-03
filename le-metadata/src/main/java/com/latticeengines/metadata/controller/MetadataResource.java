@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +23,14 @@ public class MetadataResource {
     
     @Autowired
     private MetadataService mdService;
+
+    @RequestMapping(value = "/tables", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get table by name")
+    public List<Table> getTables(@PathVariable String customerSpace) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.getTables(space);
+    }
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -44,5 +54,6 @@ public class MetadataResource {
     public void updateTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
             @RequestBody Table table) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
     }
 }

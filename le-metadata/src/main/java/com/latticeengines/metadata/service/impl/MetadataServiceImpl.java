@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,4 +22,8 @@ public class MetadataServiceImpl implements MetadataService {
         return tableEntityMgr.findByName(name);
     }
     
+    @Override
+    public List<Table> getTables(CustomerSpace customerSpace) {
+        return tableEntityMgr.findAll();
+    }
 }

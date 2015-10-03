@@ -9,7 +9,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.AttributeOwnerType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
@@ -29,7 +28,6 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         Table table = mdService.getTable(CustomerSpace.parse(customerSpace), tableName);
         assertNotNull(table);
         assertEquals(table.getName(), tableName);
-        assertEquals(table.getType(), AttributeOwnerType.TABLE.getValue());
         assertNotNull(table.getLastModifiedKey());
         assertNotNull(table.getPrimaryKey());
     }

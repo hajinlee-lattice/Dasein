@@ -2,6 +2,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -75,13 +76,33 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Table> findAll() {
-        return super.findAll();
+        List<Table> tables = super.findAll();
+        inflateTables(tables);
+        return tables;
     }
     
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table findByName(String name) {
-        return tableDao.findByName(name);
+        Table table = tableDao.findByName(name);
+        inflateTable(table);
+        return table;
+    }
+    
+    private void inflateTables(List<Table> tables) {
+        for (Table table : tables) {
+            inflateTable(table);
+        }
+    
+    }
+
+    private void inflateTable(Table table) {
+        if (table != null) {
+            Hibernate.initialize(table.getAttributes());
+            Hibernate.initialize(table.getExtracts());
+            Hibernate.initialize(table.getPrimaryKey());
+            Hibernate.initialize(table.getLastModifiedKey());
+        }
     }
 
 

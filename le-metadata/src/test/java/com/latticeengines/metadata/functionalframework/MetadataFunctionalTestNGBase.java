@@ -69,15 +69,7 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         LastModifiedKey lk = createLastModifiedKey(tenant);
         table.setPrimaryKey(pk);
         table.setLastModifiedKey(lk);
-        table.addAttribute(pk.getAttributes().get(0));
-        table.addAttribute(lk.getAttributes().get(0));
-        
-        return table;
-    }
 
-    private PrimaryKey createPrimaryKey(Tenant tenant) {
-        PrimaryKey pk = new PrimaryKey();
-        pk.setTenant(tenant);
         Attribute pkAttr = new Attribute();
         pkAttr.setName("ID");
         pkAttr.setDisplayName("Id");
@@ -86,9 +78,28 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         pkAttr.setScale(10);
         pkAttr.setPhysicalDataType("XYZ");
         pkAttr.setLogicalDataType("Identity");
+
+        Attribute lkAttr = new Attribute();
+        lkAttr.setName("LID");
+        lkAttr.setDisplayName("LastUpdatedDate");
+        lkAttr.setLength(10);
+        lkAttr.setPrecision(10);
+        lkAttr.setScale(10);
+        lkAttr.setPhysicalDataType("XYZ");
+        lkAttr.setLogicalDataType("Date");
+        
+        table.addAttribute(pkAttr);
+        table.addAttribute(lkAttr);
+        
+        return table;
+    }
+
+    private PrimaryKey createPrimaryKey(Tenant tenant) {
+        PrimaryKey pk = new PrimaryKey();
+        pk.setTenant(tenant);
         pk.setName("PK_ID");
         pk.setDisplayName("Primary Key for ID column");
-        pk.addAttribute(pkAttr);
+        pk.addAttribute("ID");
 
         return pk;
     }
@@ -104,17 +115,9 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
     private LastModifiedKey createLastModifiedKey(Tenant tenant) {
         LastModifiedKey lk = new LastModifiedKey();
         lk.setTenant(tenant);
-        Attribute lkAttr = new Attribute();
-        lkAttr.setName("LID");
-        lkAttr.setDisplayName("LastUpdatedDate");
-        lkAttr.setLength(10);
-        lkAttr.setPrecision(10);
-        lkAttr.setScale(10);
-        lkAttr.setPhysicalDataType("XYZ");
-        lkAttr.setLogicalDataType("Date");
         lk.setName("LK_LUD");
         lk.setDisplayName("Last Modified Key for LastUpdatedDate column");
-        lk.addAttribute(lkAttr);
+        lk.addAttribute("LID");
         
         return lk;
     }
