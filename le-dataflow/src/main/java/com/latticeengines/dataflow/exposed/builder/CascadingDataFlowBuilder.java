@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
@@ -151,8 +150,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     ckptName);
             Tap ckptTap = new Hfs(new SequenceFile(Fields.UNKNOWN), targetPath, SinkMode.REPLACE);
             checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptTap));
-            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas
-                    .get(pipe.getName());
+            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas.get(name);
             pipesAndOutputSchemas.put(ckptName, new AbstractMap.SimpleEntry<>((Pipe) ckpt, pipeAndFields.getValue()));
             return ckptName;
         }
@@ -215,7 +213,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             i++;
         }
         Pipe merge = new Merge(pipes);
-        String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0).getName(); 
+        String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0); 
         Fields sortFields = new Fields(lastModifiedKeyColName);
         sortFields.setComparator(lastModifiedKeyColName, Collections.reverseOrder());
         

@@ -140,11 +140,11 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         PrimaryKey pk = new PrimaryKey();
         Attribute pkAttr = new Attribute();
         pkAttr.setName("ID");
-        pk.addAttribute(pkAttr);
+        pk.addAttribute(pkAttr.getName());
         LastModifiedKey lk = new LastModifiedKey();
         Attribute lkAttr = new Attribute();
         lkAttr.setName("LastUpdatedDate");
-        lk.addAttribute(lkAttr);
+        lk.addAttribute(lkAttr.getName());
         table.setPrimaryKey(pk);
         table.setLastModifiedKey(lk);
         table.addAttribute(pkAttr);

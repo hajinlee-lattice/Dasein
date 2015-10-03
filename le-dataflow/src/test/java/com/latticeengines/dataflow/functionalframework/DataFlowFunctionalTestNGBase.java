@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.file.FileReader;
@@ -90,12 +89,12 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         pk.setTenant(tenant);
         Attribute pkAttr = new Attribute();
         pkAttr.setName("Id");
-        pk.setAttributes(Arrays.<Attribute>asList(new Attribute[] { pkAttr }));
+        pk.addAttribute("Id");
         LastModifiedKey lmk = new LastModifiedKey();
         lmk.setTenant(tenant);
         Attribute lastModifiedColumn = new Attribute();
         lastModifiedColumn.setName(lastModifiedColName);
-        lmk.setAttributes(Arrays.<Attribute>asList(new Attribute[] { lastModifiedColumn }));
+        lmk.addAttribute(lastModifiedColName);
         table.setPrimaryKey(pk);
         table.setLastModifiedKey(lmk);
         return table;
