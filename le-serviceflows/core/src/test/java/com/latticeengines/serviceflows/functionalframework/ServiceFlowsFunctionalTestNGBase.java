@@ -1,7 +1,5 @@
 package com.latticeengines.serviceflows.functionalframework;
 
-import java.util.Arrays;
-
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -58,11 +56,11 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
         PrimaryKey pk = new PrimaryKey();
         Attribute pkAttr = new Attribute();
         pkAttr.setName("Id");
-        pk.setAttributes(Arrays.<Attribute>asList(new Attribute[] { pkAttr }));
+        pk.addAttribute("Id");
         LastModifiedKey lmk = new LastModifiedKey();
         Attribute lastModifiedColumn = new Attribute();
         lastModifiedColumn.setName(lastModifiedColName);
-        lmk.setAttributes(Arrays.<Attribute>asList(new Attribute[] { lastModifiedColumn }));
+        lmk.addAttribute(lastModifiedColName);
         table.setPrimaryKey(pk);
         table.setLastModifiedKey(lmk);
         return table;
