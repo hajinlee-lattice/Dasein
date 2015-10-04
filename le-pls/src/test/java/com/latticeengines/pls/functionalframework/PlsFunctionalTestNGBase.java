@@ -1,7 +1,13 @@
 package com.latticeengines.pls.functionalframework;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import junit.framework.Assert;
 
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
@@ -12,8 +18,16 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.pls.*;
-import com.latticeengines.domain.exposed.security.*;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.Segment;
+import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserRegistration;
+import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
@@ -24,8 +38,6 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-
-import junit.framework.Assert;
 
 public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
@@ -65,6 +77,10 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     protected void createUser(String username, String email, String firstName, String lastName) {
         internalTestUserService.createUser(username, email, firstName, lastName);
+    }
+
+    protected void createUser(String username, String email, String firstName, String lastName, String password) {
+        internalTestUserService.createUser(username, email, firstName, lastName, password);
     }
 
     protected void deleteUserWithUsername(String username) {
@@ -122,8 +138,9 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     }
 
     protected void setUpMarketoEloquaTestEnvironment() throws Exception {
-        setupUsers();
+        setTestingTenants();
         setupDbUsingDefaultTenantIds();
+        setupUsers();
     }
 
     protected void setupDbUsingDefaultTenantIds() throws Exception {
@@ -269,12 +286,15 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         }
     }
 
-    protected void setupUsers() {
+    protected void setupUsers() throws Exception {
         if (usersInitialized) {
             return;
         }
 
         setTestingTenants();
+        
+        createUser(adminUsername, adminUsername, "Super", "User", adminPasswordHash);
+        createUser(generalUsername, generalUsername, "General", "User");
 
         for (Tenant tenant : testingTenants) {
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
