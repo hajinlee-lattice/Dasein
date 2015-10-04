@@ -54,7 +54,8 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
         createUser(username, email, firstName, lastName, GENERAL_PASSWORD_HASH);
     }
 
-    private void createUser(String username, String email, String firstName, String lastName, String password) {
+    @Override
+    public void createUser(String username, String email, String firstName, String lastName, String password) {
         try {
             User user1 = new User();
             user1.setFirstName(firstName);
