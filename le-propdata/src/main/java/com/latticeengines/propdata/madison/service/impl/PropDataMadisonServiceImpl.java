@@ -120,11 +120,12 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             String targetDir = getHdfsDataflowIncrementalRawPathWithDate(dailyProgress.getFileDate());
             if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
                 if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(targetDir))) {
+                    
+                    uploadTodayRawData(targetDir);
                     dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
                     propDataMadisonEntityMgr.executeUpdate(dailyProgress);
                     log.info("Data is already processed for record=" + dailyProgress);
 
-                    uploadTodayRawData(targetDir);
                     return response;
 
                 } else {
