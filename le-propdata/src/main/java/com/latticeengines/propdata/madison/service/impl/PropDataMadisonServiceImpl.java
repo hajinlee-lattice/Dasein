@@ -123,6 +123,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                     dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
                     propDataMadisonEntityMgr.executeUpdate(dailyProgress);
                     log.info("Data is already processed for record=" + dailyProgress);
+
+                    uploadTodayRawData(targetDir);
                     return response;
 
                 } else {
@@ -144,6 +146,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
             HdfsUtils.writeToFile(yarnConfiguration, getTableNameFromFile(targetDir),
                     dailyProgress.getDestinationTable());
+
+            uploadTodayRawData(targetDir);
 
             response.setProperty(RESULT_KEY, dailyProgress);
             response.setProperty(STATUS_KEY, STATUS_OK);
@@ -318,11 +322,9 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 return response;
             }
             if (HdfsUtils.fileExists(yarnConfiguration, getExportSuccessFile(getOutputDir(sourceDir)))) {
-                log.warn("Data has already be exported for today.");
+                log.warn("Aggregation Data has already been exported for today.");
                 return response;
             }
-
-            uploadTodayRawData(today);
 
             uploadAggregateData(sourceDir);
 
@@ -367,15 +369,19 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         return targetTable + "_new";
     }
 
-    private void uploadTodayRawData(Date today) throws Exception {
+    private void uploadTodayRawData(String todayIncrementalPath) throws Exception {
 
-        String todayIncrementalPath = getHdfsDataflowIncrementalRawPathWithDate(today);
         if (!HdfsUtils.fileExists(yarnConfiguration, getTableNameFromFile(todayIncrementalPath))) {
             log.error("There's no incremental data for today.");
             return;
         }
         if (StringUtils.isEmpty(targetRawTable)) {
             log.info("targetRawTable was not set, it won't be loaded");
+            return;
+        }
+
+        if (HdfsUtils.fileExists(yarnConfiguration, getExportSuccessFile(todayIncrementalPath))) {
+            log.warn("Raw data has already been exported for today.");
             return;
         }
 
@@ -401,6 +407,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 + "-uploadRawDataExportData", numMappers, null);
         propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
                 + "-uploadRawDataMergeTable", connectionString);
+
+        HdfsUtils.writeToFile(yarnConfiguration, getExportSuccessFile(todayIncrementalPath), "EXPORT_SUCCESS");
         log.info("Finished uploading today's raw data=" + todayIncrementalPath);
 
     }
