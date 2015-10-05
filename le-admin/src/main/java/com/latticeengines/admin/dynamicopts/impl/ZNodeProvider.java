@@ -36,7 +36,11 @@ public class ZNodeProvider implements OptionsProvider, MutableOptionsProvider {
             String zNodeValue = this.camille.get(this.zNodePath).getData();
             JsonNode arrayNode = MAPPER.readTree(zNodeValue);
             List<String> options = new ArrayList<>();
-            for (JsonNode node: arrayNode) { options.add(node.asText()); }
+            if (arrayNode.isArray()) {
+                for (JsonNode node : arrayNode) {
+                    options.add(node.asText());
+                }
+            }
             return options;
         } catch (Exception e) {
             log.error(String.format("Failed to convert ZNode %s to a String list.", this.zNodePath), e);

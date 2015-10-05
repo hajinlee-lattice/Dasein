@@ -15,7 +15,6 @@ import com.latticeengines.admin.dynamicopts.MutableOptionsProvider;
 import com.latticeengines.admin.dynamicopts.OptionsProvider;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
@@ -46,10 +45,6 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
         // Lattice Products
         OptionsProvider productProvider = new EnumOptionsProvider(LatticeProduct.class);
 
-        // VisiDB servers
-        String podId = CamilleEnvironment.getPodId();
-        ZNodeProvider vdbServerProvider = new ZNodeProvider(new Path("/Pods/" + podId + VDB_SERVER_PATH));
-
         // register providers
         Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStore");
         register(zkPath, dataStoreProvider);
@@ -62,9 +57,6 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
         zkPath = new Path(LatticeComponent.spaceConfigNode, "Product");
         register(zkPath, productProvider);
-
-        zkPath = new Path(VisiDBDLComponent.componentName, "VisiDB", "ServerName");
-        register(zkPath, vdbServerProvider);
     }
 
     private void register(Path path, OptionsProvider provider) { optionMap.put(path, provider); }
