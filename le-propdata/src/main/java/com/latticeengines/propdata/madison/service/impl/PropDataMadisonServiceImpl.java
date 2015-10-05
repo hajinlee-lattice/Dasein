@@ -120,7 +120,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             String targetDir = getHdfsDataflowIncrementalRawPathWithDate(dailyProgress.getFileDate());
             if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
                 if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(targetDir))) {
-                    
+
                     uploadTodayRawData(targetDir);
                     dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
                     propDataMadisonEntityMgr.executeUpdate(dailyProgress);
@@ -327,9 +327,18 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 return response;
             }
 
-            uploadAggregateData(sourceDir);
-
-            HdfsUtils.writeToFile(yarnConfiguration, getExportSuccessFile(getOutputDir(sourceDir)), "EXPORT_SUCCESS");
+            Date pastday = DateUtils.addDays(today, -1 * numOfPastDays);
+            String pastDayAggregation = getHdfsWorkflowTotalRawPath(pastday);
+            if (pastday.before(today)
+                    && HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(getOutputDir(pastDayAggregation)))) {
+                uploadAggregateData(sourceDir);
+                HdfsUtils.writeToFile(yarnConfiguration, getExportSuccessFile(getOutputDir(sourceDir)),
+                        "EXPORT_SUCCESS");
+            } else {
+                log.warn("There's no data for past date=" + pastday);
+                HdfsUtils.writeToFile(yarnConfiguration, getExportSuccessFile(getOutputDir(sourceDir)),
+                        "EXPORT_SKIPPED");
+            }
 
             response.setProperty(TODAY_KEY, today);
             response.setProperty(STATUS_KEY, STATUS_OK);
