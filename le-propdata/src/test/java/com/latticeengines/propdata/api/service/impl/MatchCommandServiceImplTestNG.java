@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
@@ -24,6 +26,8 @@ import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNG
 
 public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(MatchCommandServiceImplTestNG.class);
+
     @Autowired
     private MatchCommandService matchCommandService;
 
@@ -41,7 +45,7 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
     public void testMatch(String sourceTable, String destTables, String contractId, MatchVerifier verifier) {
         MatchClientContextHolder.setMatchClient(getMatchClient()); // set match client for current thread.
 
-        System.out.println("Match test with SourceTable=" + sourceTable + " DestTables="
+        log.info("Match test with SourceTable=" + sourceTable + " DestTables="
                 + destTables + " ContractID=" + contractId);
 
         CreateCommandRequest request = new CreateCommandRequest();

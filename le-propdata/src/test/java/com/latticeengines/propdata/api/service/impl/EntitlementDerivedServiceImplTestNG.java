@@ -3,6 +3,8 @@ package com.latticeengines.propdata.api.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 
@@ -21,6 +23,11 @@ public class EntitlementDerivedServiceImplTestNG extends EntitlementServiceImplT
 
     @Autowired
     private EntitlementDerivedService entitlementService;
+
+    @Override
+    protected Logger getLogger() {
+        return LoggerFactory.getLogger(this.getClass());
+    }
 
     @Override
     protected EntitlementService<EntitlementPackages, EntitlementColumnMap,

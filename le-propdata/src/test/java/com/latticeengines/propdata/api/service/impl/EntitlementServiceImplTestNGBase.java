@@ -3,6 +3,7 @@ package com.latticeengines.propdata.api.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,12 +17,13 @@ import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNG
 
 abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & HasPackageName,
         PackageContentMap, PackageContractMap> extends PropDataApiFunctionalTestNGBase {
-
     protected String packageName = "Test";
     protected String packageDescription = "A testing package";
     protected String contractId = "PropDataTest";
 
     private EntitlementService<Package, PackageContentMap, PackageContractMap> entitlementService;
+
+    abstract protected Logger getLogger();
 
     @BeforeClass(groups = "api.functional")
     public void setup() {
@@ -40,7 +42,7 @@ abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     @Test(groups = "api.functional", enabled = false)
     public void testCreatePackage() {
-        System.out.println("Testing package creation ... ");
+        getLogger().info("Testing package creation ... ");
         Assert.assertNull(entitlementService.findEntitilementPackageByName(packageName),
                 "Test package should not exist before creation.");
 
@@ -52,7 +54,8 @@ abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     @Test(groups = "api.functional")
     public void testGrantPackageToCustomer() {
-        System.out.println("Testing grant package to customer ... ");
+        getLogger().info("Testing grant package to customer ... ");
+
         Long packageId = entitlementService.createDerivedPackage(packageName, packageDescription, false).getPid();
         Assert.assertFalse(customerHasPackage(contractId, packageName));
 
@@ -65,7 +68,7 @@ abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     @Test(groups = "api.functional")
     public void testAddContentToPackage() {
-        System.out.println("Testing add content to customer ... ");
+        getLogger().info("Testing add content to customer ... ");
 
         Long packageId = entitlementService.createDerivedPackage(packageName, packageDescription, false).getPid();
         Assert.assertFalse(packageHasContent(packageId));
@@ -79,7 +82,7 @@ abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     @Test(groups = "api.functional")
     public void testDeletionCascade() {
-        System.out.println("Testing cascading on deletion ... ");
+        getLogger().info("Testing cascading on deletion ... ");
 
         Assert.assertNull(entitlementService.findEntitilementPackageByName(packageName));
         Assert.assertFalse(customerHasPackage(contractId, packageName));
