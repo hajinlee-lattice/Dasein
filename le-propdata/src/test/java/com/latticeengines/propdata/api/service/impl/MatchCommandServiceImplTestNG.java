@@ -161,7 +161,7 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
                     !status.equals(MatchCommandStatus.FAILED) && numRetries-- > 0);
             return status;
         } catch (InterruptedException e) {
-            Assert.fail("Failed to wait for command being complete.", e);
+            Assert.fail("Failed to wait for command being complete. CommandID=" + commandId, e);
             return MatchCommandStatus.UNKNOWN;
         }
     }
@@ -171,9 +171,24 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
         Assert.assertEquals(status, MatchCommandStatus.COMPLETE);
 
         Commands commands = matchCommandService.findMatchCommandById(commandId);
-        Assert.assertTrue(matchCommandService.resultTablesAreReady(commandId),
+        Assert.assertTrue(waitResultTablesGenerated(commandId),
                 "Matching against " + commands.getDestTables() + " failed to generate all the result tables. "
                         + " CommandId=" + commandId );
+    }
+
+    private boolean waitResultTablesGenerated(Long commandId) {
+        Integer numRetries = 10;
+        boolean ready;
+        try {
+            do {
+                ready = matchCommandService.resultTablesAreReady(commandId);
+                Thread.sleep(3000L);
+            } while (!ready && numRetries-- > 0);
+            return ready;
+        } catch (InterruptedException e) {
+            Assert.fail("Failed to wait for result tables being generate for CommandID=" + commandId, e);
+            return false;
+        }
     }
 
     private String verifyDerivedColumnsResultNonEmpty(Long commandId) {
