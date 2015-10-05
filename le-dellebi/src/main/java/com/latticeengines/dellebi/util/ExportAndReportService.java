@@ -94,7 +94,7 @@ public class ExportAndReportService {
         String errorMsg = null;
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         try {
-            sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 4, null,  columns);
+            sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 8, null,  columns);
 
         } catch (Exception e) {
             errorMsg = "Export files " + sourceDir + " to SQL server failed! errorMsg=" + e.getMessage();
