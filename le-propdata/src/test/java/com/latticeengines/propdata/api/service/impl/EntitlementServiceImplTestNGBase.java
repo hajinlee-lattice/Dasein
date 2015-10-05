@@ -40,6 +40,7 @@ abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     @Test(groups = "api.functional", enabled = false)
     public void testCreatePackage() {
+        System.out.println("Testing package creation ... ");
         Assert.assertNull(entitlementService.findEntitilementPackageByName(packageName),
                 "Test package should not exist before creation.");
 
@@ -51,6 +52,7 @@ abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     @Test(groups = "api.functional")
     public void testGrantPackageToCustomer() {
+        System.out.println("Testing grant package to customer ... ");
         Long packageId = entitlementService.createDerivedPackage(packageName, packageDescription, false).getPid();
         Assert.assertFalse(customerHasPackage(contractId, packageName));
 
@@ -63,6 +65,8 @@ abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     @Test(groups = "api.functional")
     public void testAddContentToPackage() {
+        System.out.println("Testing add content to customer ... ");
+
         Long packageId = entitlementService.createDerivedPackage(packageName, packageDescription, false).getPid();
         Assert.assertFalse(packageHasContent(packageId));
 
@@ -75,6 +79,8 @@ abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     @Test(groups = "api.functional")
     public void testDeletionCascade() {
+        System.out.println("Testing cascading on deletion ... ");
+
         Assert.assertNull(entitlementService.findEntitilementPackageByName(packageName));
         Assert.assertFalse(customerHasPackage(contractId, packageName));
 
