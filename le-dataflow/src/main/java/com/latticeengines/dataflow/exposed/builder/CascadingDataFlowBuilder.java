@@ -135,12 +135,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (name == null) {
             name = "node-" + counter++;
         }
-        pipesAndOutputSchemas.put(name, new AbstractMap.SimpleEntry<>(new Pipe(name, pipe), fields));
+        pipe = new Pipe(name, pipe);
+        pipesAndOutputSchemas.put(name, new AbstractMap.SimpleEntry<>(pipe, fields));
 
         if (isLocal()) {
             return name;
         }
-        if (isCheckpoint()) {
+        if (isCheckpoint() && allowCheckpoint) {
             DataFlowContext ctx = getDataFlowCtx();
             String ckptName = "ckpt-" + counter++;
             Checkpoint ckpt = new Checkpoint(ckptName, pipe);
@@ -156,7 +157,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         return name;
     }
-    
+
     @Override
     protected String addSource(Table sourceTable) {
         validateTableForSource(sourceTable);
@@ -288,6 +289,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         return register(new Pipe(sourceName), fields, false, sourceName);
+
     }
 
     private Configuration getConfig() {
