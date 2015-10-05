@@ -84,7 +84,8 @@ public class ScoringMapperPredictUtil {
             log.error(line);
         }
         err.close();
-        p.waitFor();
+        int exitCode = p.waitFor();
+        log.info("The exit code for python is " + exitCode);
 
         if (errors.length() != 0) {
             throw new LedpException(LedpCode.LEDP_20011, new String[] { errors.toString() });
