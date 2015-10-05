@@ -41,6 +41,9 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
     public void testMatch(String sourceTable, String destTables, String contractId, MatchVerifier verifier) {
         MatchClientContextHolder.setMatchClient(getMatchClient()); // set match client for current thread.
 
+        System.out.println("Match test with SourceTable=" + sourceTable + " DestTables="
+                + destTables + " ContractID=" + contractId);
+
         CreateCommandRequest request = new CreateCommandRequest();
         request.setContractExternalID(contractId);
         request.setDestTables(destTables);
