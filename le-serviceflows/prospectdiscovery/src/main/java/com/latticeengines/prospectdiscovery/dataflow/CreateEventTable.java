@@ -63,9 +63,16 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
                 retrieveMaxDomainBucketSize, //
                 new FieldList("AccountId", "MaxBucketSize"));
 
+        aggregations = new ArrayList<>();
+        aggregations.add(new Aggregation("ContactDomain", "ContactDomain", Aggregation.AggregationType.MAX));
+        String resolveTies = addGroupBy(retrieveBestDomain,
+                new FieldList("AccountId"), //
+                aggregations);
+
+
         String joinedWithAccounts = addLeftOuterJoin(account, //
                 new FieldList("Id"), //
-                retrieveBestDomain, //
+                resolveTies, //
                 new FieldList("AccountId"));
 
         // These domains may be null
@@ -84,7 +91,7 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
         // XXX Remove "NULL"s
         
         // XXX Handle multiple different events/filters
-        
+
     	// Get count of IsWon for each account
         aggregations = new ArrayList<>();
         aggregations.add(new Aggregation("IsWon", "WinCount", Aggregation.AggregationType.COUNT));
@@ -107,12 +114,13 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
         		"WinCount != null && WinCount > 0 ? true : false",
         		new FieldList("WinCount"),
         		event);
+
 /*
         String completed = addRetainFunction(
         		retrieveEventColumn, 
         		null);
-*/      
-        return retrieveEventColumn;      
+*/
+        return retrieveEventColumn;
     }
 
     public String constructFlowDefinition(DataFlowContext dataFlowContext, Map<String, String> sources) {

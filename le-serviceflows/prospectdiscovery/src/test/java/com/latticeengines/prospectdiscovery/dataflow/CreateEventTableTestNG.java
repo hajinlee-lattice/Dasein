@@ -1,9 +1,13 @@
 package com.latticeengines.prospectdiscovery.dataflow;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -42,5 +46,10 @@ public class CreateEventTableTestNG extends ServiceFlowsFunctionalTestNGBase {
         ctx.setProperty("FLOWNAME", "CreateEventTable");
         
         super.executeDataFlow(ctx, "createEventTable");
+
+        List<GenericRecord> outputTable = readTable("/tmp/TmpEventTable/*.avro");
+        List<GenericRecord> accountTable = readTable(account);
+
+        Assert.assertTrue(identicalSets(outputTable, "Id", accountTable, "Id"));
     }
 }

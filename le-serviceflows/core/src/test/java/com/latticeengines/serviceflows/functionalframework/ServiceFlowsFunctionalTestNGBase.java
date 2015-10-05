@@ -1,6 +1,19 @@
 package com.latticeengines.serviceflows.functionalframework;
 
+import java.nio.file.PathMatcher;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import org.apache.avro.file.FileReader;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,9 +44,6 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
     protected Configuration yarnConfiguration = new Configuration();
     
     protected void executeDataFlow(DataFlowContext dataFlowContext, String beanName) throws Exception {
-        CascadingDataFlowBuilder dataFlowBuilder = appContext.getBean(beanName, //
-                CascadingDataFlowBuilder.class);
-        dataFlowBuilder.setLocal(true);
         dataTransformationService.executeNamedTransformation(dataFlowContext, beanName);
     }
     
@@ -64,5 +74,48 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
         table.setPrimaryKey(pk);
         table.setLastModifiedKey(lmk);
         return table;
+    }
+
+    protected List<GenericRecord> readTable(String path) {
+        try {
+            List<String> matches = HdfsUtils.getFilesByGlob(yarnConfiguration, path);
+            List<GenericRecord> output = new ArrayList<>();
+            for (String match : matches) {
+                output.addAll(AvroUtils.getData(yarnConfiguration, new Path(match)));
+            }
+            return output;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns whether everything in test with testId exists in master using masterId.
+     * Duplicates are ignored.
+     * Can't we just upgrade to Java 8 already?
+     */
+    protected boolean allEntriesExist(List<GenericRecord> test, String testId, List<GenericRecord> master, String masterId) {
+
+        for (GenericRecord record : test) {
+            Object value = record.get(testId);
+            boolean found = false;
+            for (GenericRecord inner : master) {
+                Object innerValue = inner.get(masterId);
+                if (value.equals(innerValue)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found == false) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected boolean identicalSets(List<GenericRecord> left, String leftId, List<GenericRecord> right, String rightId) {
+        return allEntriesExist(left, leftId, right, rightId) && allEntriesExist(right, rightId, left, leftId);
     }
 }
