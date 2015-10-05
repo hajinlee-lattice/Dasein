@@ -29,26 +29,6 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-core</artifactId>
-            <version>${le.serviceflows.core.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-core</artifactId>
-            <version>${le.serviceflows.core.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-core</artifactId>
-            <version>${le.serviceflows.core.version}</version>
-            <classifier>tests</classifier>
-        </dependency>
     </dependencies>
 </project>
 
