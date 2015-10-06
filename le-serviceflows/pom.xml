@@ -26,10 +26,6 @@
         <module>core</module>
         <module>prospectdiscovery</module>
     </modules>
-
-    <dependencies>
-
-    </dependencies>
 </project>
 
 

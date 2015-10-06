@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,9 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         DataFlowBuilder dataFlow = (DataFlowBuilder) dataFlowBldrBean;
 
         boolean doCheckpoint = dataFlowCtx.getProperty("CHECKPOINT", Boolean.class);
+
+        Configuration hadoopConfig = dataFlowCtx.getProperty("HADOOPCONF", Configuration.class);
+        dataFlow.setLocal(hadoopConfig == null || hadoopConfig.get("fs.defaultFS").equals("file:///"));
         dataFlow.setCheckpoint(doCheckpoint);
         dataFlow.runFlow(dataFlowCtx);
     }

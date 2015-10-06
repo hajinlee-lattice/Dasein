@@ -30,11 +30,16 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import org.testng.annotations.BeforeClass;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceflows-context.xml" })
 public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
-    
+
+    protected ServiceFlowsFunctionalTestNGBase() {
+        yarnConfiguration.set("fs.defaultFS", "file:///");
+    }
+
     @Autowired
     private DataTransformationService dataTransformationService;
     
@@ -42,7 +47,7 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
     private ApplicationContext appContext;
     
     protected Configuration yarnConfiguration = new Configuration();
-    
+
     protected void executeDataFlow(DataFlowContext dataFlowContext, String beanName) throws Exception {
         dataTransformationService.executeNamedTransformation(dataFlowContext, beanName);
     }

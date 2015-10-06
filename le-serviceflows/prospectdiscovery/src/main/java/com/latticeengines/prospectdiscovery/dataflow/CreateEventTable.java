@@ -27,6 +27,8 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
                 "AccountId != null && !AccountId.trim().isEmpty()",
                 new FieldList("AccountId"));
 
+        // XXX Remove duplicate Account Ids (otherwise counts will be off)
+
         FieldMetadata contactDomain = new FieldMetadata("ContactDomain", String.class);
         contactDomain.setPropertyValue("length", "255");
         contactDomain.setPropertyValue("precision", "0");
@@ -40,7 +42,6 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
                 contactDomain);
 
         // XXX Filter out public email address domains
-
 
         // Select domains with the largest number of entries for each account
 

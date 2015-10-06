@@ -138,9 +138,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipe = new Pipe(name, pipe);
         pipesAndOutputSchemas.put(name, new AbstractMap.SimpleEntry<>(pipe, fields));
 
-        if (isLocal()) {
-            return name;
-        }
         if (isCheckpoint() && allowCheckpoint) {
             DataFlowContext ctx = getDataFlowCtx();
             String ckptName = "ckpt-" + counter++;
@@ -161,18 +158,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     @Override
     protected String addSource(Table sourceTable) {
         validateTableForSource(sourceTable);
-        
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+
         List<Extract> extracts = sourceTable.getExtracts();
-        
+
         Map<String, Field> allColumns = new HashMap<>();
         Schema[] allSchemas = new Schema[extracts.size()];
         int i = 0;
         for (Extract extract : extracts) {
             String path = null;
             try {
-                path = HdfsUtils.getFilesByGlob(config, extract.getPath()).get(0);
+                List<String> matches = HdfsUtils.getFilesByGlob(config, extract.getPath());
+                if (matches.size() == 0) {
+                    throw new IllegalStateException(String.format("Could not find extract with path %s in HDFS", extract.getPath()));
+                }
+                path = matches.get(0);
                 allSchemas[i] = AvroUtils.getSchema(config, new Path(path));
                 for (Field field : allSchemas[i].getFields()) {
                     allColumns.put(field.name(), field);
@@ -289,7 +290,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         return register(new Pipe(sourceName), fields, false, sourceName);
-
     }
 
     private Configuration getConfig() {
@@ -572,6 +572,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                         convertToFields(declaredFieldList.getFieldsAsList())), Fields.RESULTS);
 
         List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
+
         return register(groupby, fieldMetadata);
     }
 
@@ -764,7 +765,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
-        System.out.println(schema);
         Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
         if (!isLocal()) {
             sink = new Hfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
@@ -787,7 +787,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
-
+        log.info("Using hadoop fs.defaultFS = " + config.get("fs.defaultFS"));
         try {
             List<String> files = HdfsUtils.getFilesForDir(config, "/app/dataflow/lib/");
             for (String file : files) {
