@@ -1,6 +1,10 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,7 +26,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
-import com.latticeengines.domain.exposed.security.*;
+import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserRegistration;
+import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -30,6 +38,7 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
 public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -75,7 +84,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     public void addTenantWithoutProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue("xyz");
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        restTemplate.setErrorHandler(new SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler());
 
         boolean exception = false;
         try {
@@ -119,7 +128,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     public void getTenantsWithoutProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue("xyz");
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        restTemplate.setErrorHandler(statusErrorHandler);
 
         boolean exception = false;
         try {

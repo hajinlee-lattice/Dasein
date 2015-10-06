@@ -12,6 +12,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
 
 public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "deployment" }, enabled = false)
@@ -38,7 +39,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "deployment" }, enabled = false)
     public void verifySfdcCredential() {
         switchToSuperAdmin();
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        restTemplate.setErrorHandler(statusErrorHandler);
 
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");

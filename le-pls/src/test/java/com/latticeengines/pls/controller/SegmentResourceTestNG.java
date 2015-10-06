@@ -27,7 +27,7 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
     public void beforeMethod() {
         // using admin session by default
         switchToSuperAdmin();
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        restTemplate.setErrorHandler(statusErrorHandler);
     }
     
     @Test(groups = { "functional", "deployment" })

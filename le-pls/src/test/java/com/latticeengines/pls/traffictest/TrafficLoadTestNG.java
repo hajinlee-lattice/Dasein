@@ -1,11 +1,22 @@
 package com.latticeengines.pls.traffictest;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -206,8 +217,6 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
                     Future<List<Long>> future = executor.submit(new Callable<List<Long>>() {
 
                         private RestTemplate restTemplate = new RestTemplate();
-                        private AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
-                                "");
                         private TimeStamp startTime;
                         private TimeStamp finishTime;
                         private UserDocument userDoc;

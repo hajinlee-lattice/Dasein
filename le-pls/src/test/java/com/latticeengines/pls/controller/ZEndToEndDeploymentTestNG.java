@@ -135,7 +135,7 @@ public class ZEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void checkModels() throws InterruptedException {
         UserDocument doc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
         useSessionDoc(doc);
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        restTemplate.setErrorHandler(statusErrorHandler);
         int numOfRetries = 50;
         List response;
         do {

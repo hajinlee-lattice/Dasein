@@ -1,6 +1,5 @@
 package com.latticeengines.pls.functionalframework;
 
-import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -20,18 +19,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -41,8 +34,11 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.AuthorizationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
@@ -61,77 +57,18 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
 
     @Autowired
     private InternalTestUserService internalTestUserService;
+    
+    protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
 
     @Value("${pls.test.contract}")
     protected String contractId;
 
     protected RestTemplate restTemplate = new RestTemplate();
     protected RestTemplate magicRestTemplate = new RestTemplate();
-    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
-            "");
-    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
-            "");
-
-
-    public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-
-        private String headerValue;
-
-        public AuthorizationHeaderHttpRequestInterceptor(String headerValue) {
-            this.headerValue = headerValue;
-        }
-
-        @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-                throws IOException {
-            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add(Constants.AUTHORIZATION, headerValue);
-
-            return execution.execute(requestWrapper, body);
-        }
-
-        public void setAuthValue(String headerValue) {
-            this.headerValue = headerValue;
-        }
-    }
-
-    public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-
-        private String headerValue;
-
-        public MagicAuthenticationHeaderHttpRequestInterceptor(String headerValue) {
-            this.headerValue = headerValue;
-        }
-
-        @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-                throws IOException {
-            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
-
-            return execution.execute(requestWrapper, body);
-        }
-
-        public void setAuthValue(String headerValue) {
-            this.headerValue = headerValue;
-        }
-    }
-
-    protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
-
-        public GetHttpStatusErrorHandler() {
-        }
-
-        @Override
-        public boolean hasError(ClientHttpResponse response) throws IOException {
-            return response.getStatusCode() != HttpStatus.OK;
-        }
-
-        @Override
-        public void handleError(ClientHttpResponse response) throws IOException {
-            throw new RuntimeException("" + response.getStatusCode());
-        }
-    }
+    
+    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase.getMagicAuthHeaderInterceptor();
+    protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase.getStatusErrorHandler();
 
     protected UserDocument loginAndAttach(AccessLevel level, Tenant tenant) {
         String username = internalTestUserService.getUsernameForAccessLevel(level);
