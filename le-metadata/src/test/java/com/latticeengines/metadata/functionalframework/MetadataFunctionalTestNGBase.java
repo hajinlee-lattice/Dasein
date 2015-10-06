@@ -1,7 +1,5 @@
 package com.latticeengines.metadata.functionalframework;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -55,11 +53,6 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
 
 
     public void setup() {
-        List<Table> tables = tableEntityMgr.getAll();
-        
-        for (Table table : tables) {
-            //tableEntityMgr.delete(table);
-        }
         Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
         if (t1 != null) {
             tenantEntityMgr.delete(t1);
