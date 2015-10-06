@@ -55,25 +55,25 @@ public class ModelAlertServiceImpl implements ModelAlertService {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Value("${pls.modelAlerts.minSuccessEvents}")
+    @Value("${pls.modelalerts.min.success.events}")
     private long minSuccessEvents;
 
-    @Value("${pls.modelAlerts.minConversionPercentage}")
+    @Value("${pls.modelalerts.min.conversion.percentage}")
     private double minConversionPercentage;
 
-    @Value("${pls.modelAlerts.minRocScore}")
+    @Value("${pls.modelalerts.min.rocscore}")
     private double minRocScore;
 
-    @Value("${pls.modelAlerts.maxRocScore}")
+    @Value("${pls.modelalerts.max.rocscore}")
     private double maxRocScore;
 
-    @Value("${pls.modelAlerts.maxNumberOfDiscreteValues}")
+    @Value("${pls.modelalerts.max.discrete.values}")
     private long maxNumberOfDiscreteValues;
 
-    @Value("${pls.modelAlerts.maxFeatureImportance}")
+    @Value("${pls.modelalerts.max.feature.importance}")
     private double maxFeatureImportance;
 
-    @Value("${pls.modelAlerts.maxLiftForNull}")
+    @Value("${pls.modelalerts.max.null.lift}")
     private double maxLiftForNull;
 
     private static class ModelSummaryInfo {
