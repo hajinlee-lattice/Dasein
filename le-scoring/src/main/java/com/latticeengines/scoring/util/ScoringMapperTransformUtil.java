@@ -206,7 +206,7 @@ public class ScoringMapperTransformUtil {
             modelInfoMap.put(modelGuid, modelInfo);
 
             leadFileName = modelGuid + "-0";
-            log.info("the leadFileName is " + leadFileName);
+            // log.info("the leadFileName is " + leadFileName);
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(leadFileName), true), "UTF8"));
             leadFilebufferMap.put(leadFileName, bw);
         } else {
@@ -216,7 +216,7 @@ public class ScoringMapperTransformUtil {
             StringBuilder leadFileBuilder = new StringBuilder();
             leadFileBuilder.append(modelGuid).append('-').append(indexOfFile);
             leadFileName = leadFileBuilder.toString();
-            log.info("the leadFileName is " + leadFileName);
+            // log.info("the leadFileName is " + leadFileName);
             if (!leadFilebufferMap.containsKey(leadFileName)) {
                 // create new stream
                 bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(leadFileName), true),
@@ -226,7 +226,7 @@ public class ScoringMapperTransformUtil {
                 StringBuilder formerLeadFileBuilder = new StringBuilder();
                 formerLeadFileBuilder.append(modelGuid).append('-').append(indexOfFile - 1);
                 String formerLeadFileName = formerLeadFileBuilder.toString();
-                log.info("the formerLeadFileName is " + formerLeadFileName);
+                // log.info("the formerLeadFileName is " + formerLeadFileName);
                 if (leadFilebufferMap.containsKey(formerLeadFileName)) {
                     BufferedWriter formerLeadFileBw = leadFilebufferMap.get(formerLeadFileName);
                     formerLeadFileBw.close();
