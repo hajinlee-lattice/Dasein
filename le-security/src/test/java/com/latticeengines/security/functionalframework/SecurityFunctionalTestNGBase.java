@@ -68,6 +68,10 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
             "");
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
+            "");
+    
+    protected GetHttpStatusErrorHandler statusErrorHandler = new GetHttpStatusErrorHandler();
 
     public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
@@ -89,6 +93,56 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         public void setAuthValue(String headerValue) {
             this.headerValue = headerValue;
         }
+    }
+
+    public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+
+        private String headerValue;
+
+        public MagicAuthenticationHeaderHttpRequestInterceptor(String headerValue) {
+            this.headerValue = headerValue;
+        }
+
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+                throws IOException {
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
+            requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
+
+            return execution.execute(requestWrapper, body);
+        }
+
+        public void setAuthValue(String headerValue) {
+            this.headerValue = headerValue;
+        }
+    }
+
+    public static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
+
+        public GetHttpStatusErrorHandler() {
+        }
+
+        @Override
+        public boolean hasError(ClientHttpResponse response) throws IOException {
+            return response.getStatusCode() != HttpStatus.OK;
+        }
+
+        @Override
+        public void handleError(ClientHttpResponse response) throws IOException {
+            throw new RuntimeException("" + response.getStatusCode());
+        }
+    }
+    
+    public AuthorizationHeaderHttpRequestInterceptor getAuthHeaderInterceptor() {
+        return addAuthHeader;
+    }
+    
+    public MagicAuthenticationHeaderHttpRequestInterceptor getMagicAuthHeaderInterceptor() {
+        return addMagicAuthHeader;
+    }
+    
+    public GetHttpStatusErrorHandler getStatusErrorHandler() {
+        return statusErrorHandler;
     }
 
     protected String getRestAPIHostPort() {
@@ -128,22 +182,6 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         password = DigestUtils.sha256Hex(password);
         Ticket ticket = globalAuthenticationService.authenticateUser(username, password);
         return sessionService.attach(ticket);
-    }
-
-    protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
-
-        public GetHttpStatusErrorHandler() {
-        }
-
-        @Override
-        public boolean hasError(ClientHttpResponse response) throws IOException {
-            return response.getStatusCode() != HttpStatus.OK;
-        }
-
-        @Override
-        public void handleError(ClientHttpResponse response) throws IOException {
-            throw new RuntimeException("" + response.getStatusCode());
-        }
     }
 
     protected void grantRight (String right, String tenantId, String username) {
