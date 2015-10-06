@@ -1,3 +1,3 @@
 yarn rmadmin -addToClusterNodeLabels "reserved"
 yarn cluster --list-node-labels
-yarn rmadmin -replaceLabelsOnNode "bodcprodvhdp125.prod.lattice.local:45454 bodcprodvhdp126.prod.lattice.local:45454 bodcprodvhdp121.prod.lattice.local:45454,reserved bodcprodvhdp123.prod.lattice.local:45454,reserved bodcprodvhdp122.prod.lattice.local:45454 bodcprodvhdp135.prod.lattice.local:45454,reserved bodcprodvhdp136.prod.lattice.local:45454 bodcprodvhdp128.prod.lattice.local:45454"
+yarn rmadmin -replaceLabelsOnNode "bodcprodvhdp125.prod.lattice.local:45454 bodcprodvhdp126.prod.lattice.local:45454 bodcprodvhdp121.prod.lattice.local:45454 bodcprodvhdp123.prod.lattice.local:45454 bodcprodvhdp122.prod.lattice.local:45454 bodcprodvhdp135.prod.lattice.local:45454,reserved bodcprodvhdp136.prod.lattice.local:45454 bodcprodvhdp128.prod.lattice.local:45454"
