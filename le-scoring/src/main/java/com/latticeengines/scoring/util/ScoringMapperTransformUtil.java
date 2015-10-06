@@ -159,7 +159,7 @@ public class ScoringMapperTransformUtil {
 
         Runtime runtime = Runtime.getRuntime();
         long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-        log.info("Before transformation, system has used " + usedMemory);
+        // log.info("Before transformation, system has used " + usedMemory);
 
         int leadNumber = 0;
         while (context.nextKeyValue()) {
@@ -241,7 +241,7 @@ public class ScoringMapperTransformUtil {
 
         Runtime runtime = Runtime.getRuntime();
         long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-        log.info("During the transformation, system has used " + usedMemory);
+        // log.info("During the transformation, system has used " + usedMemory);
         return;
     }
 

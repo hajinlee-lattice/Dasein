@@ -12,14 +12,18 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
+import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.MapContext;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -51,7 +55,8 @@ public class ScoringMapperPredictUtil {
     private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
     private static final String AVRO_FILE_SUFFIX = ".avro";
 
-    public static String evaluate(Set<String> modelGuidSet) throws IOException, InterruptedException {
+    public static String evaluate(MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context,
+            Set<String> modelGuidSet) throws IOException, InterruptedException {
 
         StringBuilder strs = new StringBuilder();
         // spawn python
@@ -75,13 +80,15 @@ public class ScoringMapperPredictUtil {
 
         while ((line = in.readLine()) != null) {
             strs.append(line);
-            log.info(line);
+            log.info("This is python info: " + line);
+            context.progress();
         }
         in.close();
         while ((line = err.readLine()) != null) {
             errors.append(line);
             strs.append(line);
-            log.error(line);
+            log.error("This is python error: " + line);
+            context.progress();
         }
         err.close();
         int exitCode = p.waitFor();

@@ -47,7 +47,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
             Runtime runtime = Runtime.getRuntime();
             long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-            log.info("Before transformation, system has used " + usedMemory);
+            // log.info("Before transformation, system has used " + usedMemory);
             long transformStartTime = System.currentTimeMillis();
 
             ModelAndLeadInfo modelAndLeadInfo = ScoringMapperTransformUtil.prepareLeadsForScoring(context,
@@ -57,7 +57,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             long transformationTotalTime = transformEndTime - transformStartTime;
             log.info("The transformation takes " + (transformationTotalTime * 1.66667e-5) + " mins");
             usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-            log.info("After transformation, system has used " + usedMemory);
+            // log.info("After transformation, system has used " + usedMemory);
 
             long totalLeadNumber = modelAndLeadInfo.getTotalleadNumber();
             if (totalLeadNumber == 0) {
@@ -65,7 +65,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 throw new LedpException(LedpCode.LEDP_20015);
             } else {
                 log.info("The mapper has transformed: " + totalLeadNumber + " leads.");
-                ScoringMapperPredictUtil.evaluate(modelAndLeadInfo.getModelInfoMap().keySet());
+                ScoringMapperPredictUtil.evaluate(context, modelAndLeadInfo.getModelInfoMap().keySet());
                 List<ScoreOutput> resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndLeadInfo,
                         localizedFiles.getModels(), leadFileThreshold);
                 log.info("The mapper has scored: " + resultList.size() + " leads.");
@@ -75,7 +75,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 }
 
                 usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-                log.info("After scoring, system has used " + usedMemory);
+                // log.info("After scoring, system has used " + usedMemory);
 
                 String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
                 log.info("outputDir: " + outputPath);
