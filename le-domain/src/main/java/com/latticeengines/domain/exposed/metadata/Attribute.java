@@ -13,7 +13,6 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,9 +21,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,7 +35,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_ATTRIBUTE")
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
 
     private static final long serialVersionUID = -4779448415471374224L;
@@ -57,7 +52,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     private List<String> enumValues = new ArrayList<String>();
     private Map<String, Object> properties = new HashMap<>();
     private Table table;
-    private Tenant tenant;
     private Long tenantId;
 
     @Id
@@ -261,20 +255,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @JsonIgnore
     public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-        
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-        
-    }
-
-    @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public Tenant getTenant() {
-        return tenant;
     }
 
     @Override

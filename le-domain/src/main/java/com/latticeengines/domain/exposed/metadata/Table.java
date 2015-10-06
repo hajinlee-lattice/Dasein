@@ -202,9 +202,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         this.extracts = extracts;
     }
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "FK_PRIMARY_KEY", nullable = false)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @JsonProperty("primary_key")
     public PrimaryKey getPrimaryKey() {
         return primaryKey;
@@ -213,7 +211,9 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonProperty("primary_key")
     public void setPrimaryKey(PrimaryKey primaryKey) {
         this.primaryKey = primaryKey;
-        primaryKey.setTenant(getTenant());
+        if (primaryKey != null) {
+            primaryKey.setTable(this);
+        }
     }
 
     @Override
@@ -238,9 +238,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         return map;
     }
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "FK_LASTMODIFIED_KEY", nullable = false)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @JsonProperty("last_modified_key")
     public LastModifiedKey getLastModifiedKey() {
         return lastModifiedKey;
@@ -249,9 +247,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonProperty("last_modified_key")
     public void setLastModifiedKey(LastModifiedKey lastModifiedKey) {
         this.lastModifiedKey = lastModifiedKey;
-        
         if (lastModifiedKey != null) {
-            lastModifiedKey.setTenant(getTenant());
+            lastModifiedKey.setTable(this);
         }
     }
 

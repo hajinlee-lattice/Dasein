@@ -9,17 +9,12 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,7 +28,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_EXTRACT")
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
 
     private Long pid;
@@ -41,7 +35,6 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
     private String path;
     private Long extractionTimestamp;
     private Table table;
-    private Tenant tenant;
     private Long tenantId;
 
     @Id
@@ -139,19 +132,10 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
 
     @JsonIgnore
     public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-        
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
         
     }
 
-    @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public Tenant getTenant() {
-        return tenant;
-    }
 }
