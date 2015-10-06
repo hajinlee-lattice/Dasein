@@ -105,12 +105,10 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
         extract.setPath(path);
         table.addExtract(extract);
         PrimaryKey pk = new PrimaryKey();
-        pk.setTenant(tenant);
         Attribute pkAttr = new Attribute();
         pkAttr.setName("Id");
         pk.addAttribute("Id");
         LastModifiedKey lmk = new LastModifiedKey();
-        lmk.setTenant(tenant);
         Attribute lastModifiedColumn = new Attribute();
         lastModifiedColumn.setName(lastModifiedColName);
         lmk.addAttribute(lastModifiedColName);
