@@ -45,9 +45,10 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void create(Table entity) {
+        getDao().create(entity);
         primaryKeyDao.create(entity.getPrimaryKey());
         lastModifiedKeyDao.create(entity.getLastModifiedKey());
-        getDao().create(entity);
+        
         for (Extract extract : entity.getExtracts()) {
             extractDao.create(extract);
         }
@@ -59,14 +60,6 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
         getDao().create(entity);
     }
     
-    @Transactional(propagation = Propagation.REQUIRED)
-    @Override
-    public void delete(Table table) {
-        getDao().delete(table);
-        primaryKeyDao.delete(table.getPrimaryKey());
-        lastModifiedKeyDao.delete(table.getLastModifiedKey());
-    }
-
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Table> getAll() {

@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.functionalframework;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -53,15 +55,21 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
 
 
     public void setup() {
+        List<Table> tables = tableEntityMgr.getAll();
+        
+        for (Table table : tables) {
+            //tableEntityMgr.delete(table);
+        }
         Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
         if (t1 != null) {
             tenantEntityMgr.delete(t1);
+            
         }
         Tenant t2 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE2);
         if (t2 != null) {
             tenantEntityMgr.delete(t2);
         }
-        
+
         Tenant tenant1 = new Tenant();
         tenant1.setId(CUSTOMERSPACE1);
         tenant1.setName(CUSTOMERSPACE1);
@@ -86,8 +94,8 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         table.addExtract(e1);
         table.addExtract(e2);
         table.addExtract(e3);
-        PrimaryKey pk = createPrimaryKey(tenant);
-        LastModifiedKey lk = createLastModifiedKey(tenant);
+        PrimaryKey pk = createPrimaryKey();
+        LastModifiedKey lk = createLastModifiedKey();
         table.setPrimaryKey(pk);
         table.setLastModifiedKey(lk);
 
@@ -99,6 +107,7 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         pkAttr.setScale(10);
         pkAttr.setPhysicalDataType("XYZ");
         pkAttr.setLogicalDataType("Identity");
+        pkAttr.setPropertyValue("ApprovedUsage", "Model");
 
         Attribute lkAttr = new Attribute();
         lkAttr.setName("LID");
@@ -108,6 +117,7 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         lkAttr.setScale(10);
         lkAttr.setPhysicalDataType("XYZ");
         lkAttr.setLogicalDataType("Date");
+        lkAttr.setPropertyValue("ApprovedUsage", "Model");
         
         table.addAttribute(pkAttr);
         table.addAttribute(lkAttr);
@@ -115,9 +125,8 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         return table;
     }
 
-    private PrimaryKey createPrimaryKey(Tenant tenant) {
+    private PrimaryKey createPrimaryKey() {
         PrimaryKey pk = new PrimaryKey();
-        pk.setTenant(tenant);
         pk.setName("PK_ID");
         pk.setDisplayName("Primary Key for ID column");
         pk.addAttribute("ID");
@@ -133,9 +142,8 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         return e;
     }
     
-    private LastModifiedKey createLastModifiedKey(Tenant tenant) {
+    private LastModifiedKey createLastModifiedKey() {
         LastModifiedKey lk = new LastModifiedKey();
-        lk.setTenant(tenant);
         lk.setName("LK_LUD");
         lk.setDisplayName("Last Modified Key for LastUpdatedDate column");
         lk.addAttribute("LID");
