@@ -27,7 +27,6 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         
         assertEquals(tables.size(), 1);
         assertEquals(tables.get(0).getName(), tableName);
-        assertEquals(tables.get(0).getAttributes().size(), 2);
     }
     
     @DataProvider(name = "tableProvider")

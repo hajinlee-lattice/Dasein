@@ -1,10 +1,12 @@
 package com.latticeengines.metadata.functionalframework;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -14,6 +16,10 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.AuthorizationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
+import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-metadata-context.xml" })
@@ -24,13 +30,28 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
     protected static final String TABLE1 = "AccountForCustomerSpace1";
     protected static final String TABLE2 = "AccountForCustomerSpace2";
     
+    protected RestTemplate restTemplate = new RestTemplate();
+    
+    @Value("${metadata.test.functional.api:http://localhost:8080/}")
+    private String hostPort;
     
     @Autowired
     protected TableEntityMgr tableEntityMgr;
 
     @Autowired
     protected TenantEntityMgr tenantEntityMgr;
-    
+
+    protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
+
+    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase.getMagicAuthHeaderInterceptor();
+    protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase.getStatusErrorHandler();
+
+    protected String getRestAPIHostPort() {
+        return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
+    }
+
+
     public void setup() {
         Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
         if (t1 != null) {

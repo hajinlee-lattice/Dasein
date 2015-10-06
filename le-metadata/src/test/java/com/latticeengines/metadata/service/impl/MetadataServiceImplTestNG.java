@@ -3,6 +3,8 @@ package com.latticeengines.metadata.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -30,6 +32,12 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(table.getName(), tableName);
         assertNotNull(table.getLastModifiedKey());
         assertNotNull(table.getPrimaryKey());
+    }
+
+    @Test(groups = "functional")
+    public void getTables() {
+        List<Table> tables = mdService.getTables(CustomerSpace.parse(CUSTOMERSPACE1));
+        assertEquals(tables.size(), 1);
     }
 
     @DataProvider(name = "tableProvider")

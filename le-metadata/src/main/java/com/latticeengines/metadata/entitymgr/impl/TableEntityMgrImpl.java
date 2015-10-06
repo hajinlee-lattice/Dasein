@@ -77,7 +77,6 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Table> findAll() {
         List<Table> tables = super.findAll();
-        inflateTables(tables);
         return tables;
     }
     
@@ -89,13 +88,6 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
         return table;
     }
     
-    private void inflateTables(List<Table> tables) {
-        for (Table table : tables) {
-            inflateTable(table);
-        }
-    
-    }
-
     private void inflateTable(Table table) {
         if (table != null) {
             Hibernate.initialize(table.getAttributes());

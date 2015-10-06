@@ -27,12 +27,6 @@
             <artifactId>le-common</artifactId>
             <version>${le.common.version}</version>
             <classifier>intf</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -75,6 +69,12 @@
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <classifier>tests</classifier>
         </dependency>
     </dependencies>
 
