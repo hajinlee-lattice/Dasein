@@ -102,8 +102,9 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         for (ScoringCommand scoringCommand : consumedCommands) {
             if (scoringCommand.getPopulated().getTime() + cleanUpInterval * 3600 * 1000 < dt.getMillis()) {
                 metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
-                if (enableCleanHdfs && scoringCommand.getConsumed() != null)
+                if (enableCleanHdfs && scoringCommand.getConsumed() != null){
                     cleanHdfs(scoringCommand);
+                }
                 scoringCommandEntityMgr.delete(scoringCommand);
             }
         }
