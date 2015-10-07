@@ -45,9 +45,6 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             // Store localized files
             LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(paths);
 
-            Runtime runtime = Runtime.getRuntime();
-            long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-            // log.info("Before transformation, system has used " + usedMemory);
             long transformStartTime = System.currentTimeMillis();
 
             ModelAndLeadInfo modelAndLeadInfo = ScoringMapperTransformUtil.prepareLeadsForScoring(context,
@@ -56,9 +53,6 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             long transformEndTime = System.currentTimeMillis();
             long transformationTotalTime = transformEndTime - transformStartTime;
             log.info("The transformation takes " + (transformationTotalTime * 1.66667e-5) + " mins");
-            usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-            // log.info("After transformation, system has used " + usedMemory);
-
             long totalLeadNumber = modelAndLeadInfo.getTotalleadNumber();
             if (totalLeadNumber == 0) {
                 log.error("The mapper gets zero leads.");
@@ -73,9 +67,6 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                     throw new LedpException(LedpCode.LEDP_20009, new String[] { String.valueOf(totalLeadNumber),
                             String.valueOf(resultList.size()) });
                 }
-
-                usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-                // log.info("After scoring, system has used " + usedMemory);
 
                 String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
                 log.info("outputDir: " + outputPath);

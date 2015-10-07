@@ -157,10 +157,6 @@ public class ScoringMapperTransformUtil {
         // key: leadFileName, value: the bufferwriter the file connecting
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
-        Runtime runtime = Runtime.getRuntime();
-        long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-        // log.info("Before transformation, system has used " + usedMemory);
-
         int leadNumber = 0;
         while (context.nextKeyValue()) {
             leadNumber++;
@@ -206,7 +202,6 @@ public class ScoringMapperTransformUtil {
             modelInfoMap.put(modelGuid, modelInfo);
 
             leadFileName = modelGuid + "-0";
-            // log.info("the leadFileName is " + leadFileName);
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(leadFileName), true), "UTF8"));
             leadFilebufferMap.put(leadFileName, bw);
         } else {
@@ -216,7 +211,6 @@ public class ScoringMapperTransformUtil {
             StringBuilder leadFileBuilder = new StringBuilder();
             leadFileBuilder.append(modelGuid).append('-').append(indexOfFile);
             leadFileName = leadFileBuilder.toString();
-            // log.info("the leadFileName is " + leadFileName);
             if (!leadFilebufferMap.containsKey(leadFileName)) {
                 // create new stream
                 bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(leadFileName), true),
@@ -226,7 +220,6 @@ public class ScoringMapperTransformUtil {
                 StringBuilder formerLeadFileBuilder = new StringBuilder();
                 formerLeadFileBuilder.append(modelGuid).append('-').append(indexOfFile - 1);
                 String formerLeadFileName = formerLeadFileBuilder.toString();
-                // log.info("the formerLeadFileName is " + formerLeadFileName);
                 if (leadFilebufferMap.containsKey(formerLeadFileName)) {
                     BufferedWriter formerLeadFileBw = leadFilebufferMap.get(formerLeadFileName);
                     formerLeadFileBw.close();
@@ -239,9 +232,6 @@ public class ScoringMapperTransformUtil {
         String transformedLead = transformLead(leadJsonObject, modelContents);
         writeLeadToFile(transformedLead, bw);
 
-        Runtime runtime = Runtime.getRuntime();
-        long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
-        // log.info("During the transformation, system has used " + usedMemory);
         return;
     }
 
@@ -256,6 +246,7 @@ public class ScoringMapperTransformUtil {
         return guid;
     }
 
+    @SuppressWarnings("unchecked")
     public static String transformLead(JSONObject leadJsonObject, JSONObject modelJsonObject) {
         JSONArray metadata = (JSONArray) modelJsonObject.get(INPUT_COLUMN_METADATA);
 
