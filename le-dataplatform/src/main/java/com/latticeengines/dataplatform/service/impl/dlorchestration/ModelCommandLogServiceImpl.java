@@ -44,15 +44,26 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
     @Override
     public void logBeginStep(ModelCommand modelCommand, ModelCommandStep step) {
         StringBuilder sb = new StringBuilder();
-        sb.append(step.getDescription()).append(" submitted at ").append(dateTimeFormatter.print(new DateTime()));
+        if (step == null) {
+            sb.append("Step is null");
+        } else {
+            sb.append(step.getDescription()).append(" submitted at ").append(dateTimeFormatter.print(new DateTime()));
+        }
+        
         log(modelCommand, sb.toString());
     }
 
     @Override
     public void logCompleteStep(ModelCommand modelCommand, ModelCommandStep step, ModelCommandStatus status) {
         StringBuilder sb = new StringBuilder();
-        sb.append(step.getDescription()).append(" [").append(status).append("] ").append("completed at ")
-                .append(dateTimeFormatter.print(new DateTime()));
+        if (step == null) {
+            sb.append("Step is null");
+        } else {
+            sb.append(step.getDescription()) //
+              .append(" [").append(status) //
+              .append("] ").append("completed at ") //
+              .append(dateTimeFormatter.print(new DateTime()));
+        }
         log(modelCommand, sb.toString());
     }
 
