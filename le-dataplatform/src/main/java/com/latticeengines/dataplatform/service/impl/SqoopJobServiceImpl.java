@@ -22,7 +22,7 @@ import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopJobServiceImpl {
-    
+
     private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
 
     protected ApplicationId exportData(String table, //
@@ -59,7 +59,6 @@ public class SqoopJobServiceImpl {
         }
         return runTool(cmds, yarnConfiguration, sync);
     }
-
 
     protected ApplicationId importData(String table, //
             String targetDir, //
@@ -116,20 +115,21 @@ public class SqoopJobServiceImpl {
                 log.error(e);
             }
             String hdfsClassPath = props.getProperty("yarn.mr.hdfs.class.path");
-            
+
             if (hdfsClassPath != null) {
                 yarnConfiguration.set("yarn.mr.hdfs.class.path", hdfsClassPath);
             }
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
-        //yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS, "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
-                
+        // yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS,
+        // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
+
         try {
             return runTool(cmds, yarnConfiguration, sync);
         } finally {
             FileUtils.deleteQuietly(new File(table + ".avsc"));
             FileUtils.deleteQuietly(new File(table + ".java"));
-            
+
             if (propsFileName != null) {
                 FileUtils.deleteQuietly(new File(propsFileName));
             }
@@ -154,12 +154,11 @@ public class SqoopJobServiceImpl {
 
     private ApplicationId runTool(List<String> cmds, Configuration config, boolean sync) {
         String appIdFileName = String.format("appid-%s.txt", UUID.randomUUID().toString());
-        
+
         config.set("sqoop.sync", Boolean.toString(sync));
         config.set("sqoop.app.id.file.name", appIdFileName);
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(config));
         return getApplicationId(appIdFileName);
     }
-
 
 }

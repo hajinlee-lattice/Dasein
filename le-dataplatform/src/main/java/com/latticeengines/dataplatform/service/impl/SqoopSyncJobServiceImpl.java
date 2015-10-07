@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -13,9 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @Component("sqoopSyncJobService")
@@ -34,6 +38,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
 
     @Autowired
     protected YarnClient defaultYarnClient;
+
+    private static final int MAX_SQOOP_RETRY = 3;
 
     @Override
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
@@ -54,22 +60,35 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         long time1 = System.currentTimeMillis();
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
-        ApplicationId appId = super.importData(table, //
-                targetDir, //
-                creds, //
-                queue, //
-                jobName, //
-                splitCols, //
-                columnsToInclude, //
-                numMappers, //
-                creds.getDriverClass(), //
-                props, //
-                metadataService, //
-                hadoopConfiguration, //
-                false);
-        long time2 = System.currentTimeMillis();
-        log.info(String.format("Time for %s load submission = %d ms.", table, (time2 - time1)));
-        return appId;
+        int retryCount = 0;
+        while (retryCount < MAX_SQOOP_RETRY) {
+            try {
+                ApplicationId appId = super.importData(table, //
+                        targetDir, //
+                        creds, //
+                        queue, //
+                        jobName, //
+                        splitCols, //
+                        columnsToInclude, //
+                        numMappers, //
+                        creds.getDriverClass(), //
+                        props, //
+                        metadataService, //
+                        hadoopConfiguration, //
+                        false);
+                long time2 = System.currentTimeMillis();
+                log.info(String.format("Time for %s load submission = %d ms.", table, (time2 - time1)));
+                return appId;
+            } catch (Exception e) {
+                log.error("Sqoop Import Failed! Retry " + retryCount + "\n", e);
+                try {
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(retryCount++));
+                } catch (InterruptedException e1) {
+                    log.error("Sqoop Import Retry Failed! " + ExceptionUtils.getStackTrace(e1));
+                }
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_12010, new String[] { "import" });
     }
 
     @Override
@@ -82,7 +101,20 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     public ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer,
             int numMappers) {
         final String jobName = jobNameService.createJobName(customer, "sqoop-export");
-        return exportData(table, sourceDir, creds, queue, jobName, numMappers, null);
+        int retryCount = 0;
+        while (retryCount < MAX_SQOOP_RETRY) {
+            try {
+                return exportData(table, sourceDir, creds, queue, jobName, numMappers, null);
+            } catch (Exception e) {
+                log.error("Sqoop Export Failed! Retry " + retryCount + "\n", e);
+                try {
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(retryCount++));
+                } catch (InterruptedException e1) {
+                    log.error("Sqoop Export Retry Failed! " + ExceptionUtils.getStackTrace(e1));
+                }
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_12010, new String[] { "export" });
     }
 
     @Override
