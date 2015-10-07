@@ -36,7 +36,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
-import com.latticeengines.domain.exposed.camille.lifecycle.*;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.security.exposed.Constants;
 
@@ -49,6 +54,7 @@ import com.latticeengines.security.exposed.Constants;
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
 public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContextTests {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AdminAbstractTestNGBase.class);
 
     protected static final String ADTesterUsername = "testuser1";
@@ -255,7 +261,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         undefineFeatureFlagByRestCall(FLAG_ID);
 
         String url = getRestHostPort() + "/admin/featureflags/" + flagId;
-        ResponseDocument response = restTemplate.postForObject(url, definition,
+        ResponseDocument<?> response = restTemplate.postForObject(url, definition,
                 ResponseDocument.class);
         Assert.assertTrue(response.isSuccess(), "should be able to define a new flag.");
     }

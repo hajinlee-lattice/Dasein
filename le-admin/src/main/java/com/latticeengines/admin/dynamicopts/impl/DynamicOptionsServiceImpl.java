@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
     private static final Map<Path, OptionsProvider> optionMap = new ConcurrentHashMap<>();
+    @SuppressWarnings("unused")
     private static final String VDB_SERVER_PATH = "/VisiDBServers";
 
     @Value("${admin.mount.rootpath}")

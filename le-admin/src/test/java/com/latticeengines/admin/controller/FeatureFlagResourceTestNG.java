@@ -26,12 +26,11 @@ public class FeatureFlagResourceTestNG extends AdminFunctionalTestNGBase {
         featureFlagService.undefineFlag(FLAG_ID);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void defineAndRemoveFlag() {
         loginAD();
         String url = getRestHostPort() + "/admin/featureflags/" + FLAG_ID;
-        ResponseDocument response = restTemplate.postForObject(url, FLAG_DEFINITION,
+        ResponseDocument<?> response = restTemplate.postForObject(url, FLAG_DEFINITION,
                 ResponseDocument.class);
         Assert.assertTrue(response.isSuccess(), "should be able to define a new flag.");
 
