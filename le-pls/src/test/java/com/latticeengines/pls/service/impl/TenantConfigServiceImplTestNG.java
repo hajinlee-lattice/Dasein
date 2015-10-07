@@ -170,6 +170,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
+    @SuppressWarnings("unused")
     private void verifyFlagFalseOrNull(FeatureFlagValueMap flags, String flagId) {
         FeatureFlagValueMap defaultFlags = defaultFeatureFlagProvider.getDefaultFlags();
         if (defaultFlags.containsKey(flagId)) {

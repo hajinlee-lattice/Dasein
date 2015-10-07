@@ -14,6 +14,7 @@ import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
 @Component("propertiesFileFeatureFlagProvider")
 public class PropertiesFileFeatureFlagProvider implements DefaultFeatureFlagProvider {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PropertiesFileFeatureFlagProvider.class);
     private FeatureFlagValueMap flags = new FeatureFlagValueMap();
     private FeatureFlagDefinitionMap flagDefinitions = new FeatureFlagDefinitionMap();
