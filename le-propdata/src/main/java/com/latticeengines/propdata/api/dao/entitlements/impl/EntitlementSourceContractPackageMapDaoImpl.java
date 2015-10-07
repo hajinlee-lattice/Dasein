@@ -20,7 +20,7 @@ public class EntitlementSourceContractPackageMapDaoImpl
         return EntitlementSourceContractPackageMap.class;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public List<EntitlementSourceContractPackageMap> findByPackageId(Long packageId) {
         Session session = getSessionFactory().getCurrentSession();
@@ -31,7 +31,7 @@ public class EntitlementSourceContractPackageMapDaoImpl
         return query.list();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public List<EntitlementSourceContractPackageMap> findByContractId(String contractId) {
         Session session = getSessionFactory().getCurrentSession();

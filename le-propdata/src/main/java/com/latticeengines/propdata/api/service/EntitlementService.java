@@ -2,6 +2,7 @@ package com.latticeengines.propdata.api.service;
 
 import java.util.List;
 
+@SuppressWarnings("hiding")
 public interface EntitlementService<Package, PackageContentMap, PackageContractMap> {
 
     Package getEntitlementPackage(Long packageId);

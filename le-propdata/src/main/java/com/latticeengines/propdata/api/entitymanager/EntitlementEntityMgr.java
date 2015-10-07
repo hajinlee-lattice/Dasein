@@ -2,6 +2,7 @@ package com.latticeengines.propdata.api.entitymanager;
 
 import java.util.List;
 
+@SuppressWarnings("hiding")
 public interface EntitlementEntityMgr<Package, PackageContentMap, PackageContractMap> {
 
     Package getEntitlementPackage(Long packageId);

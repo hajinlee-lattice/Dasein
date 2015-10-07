@@ -23,7 +23,7 @@ public class EntitlementColumnMapDaoImpl extends
         return EntitlementColumnMap.class;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public List<EntitlementColumnMap> getByPackageId(Long packageID){
         Session session = getSessionFactory().getCurrentSession();

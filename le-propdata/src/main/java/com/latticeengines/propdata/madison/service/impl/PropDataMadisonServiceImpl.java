@@ -464,6 +464,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         return targetDir + "/_SUCCESS_EXPORT";
     }
 
+    @SuppressWarnings("unused")
     private void setFailed(MadisonLogicDailyProgress dailyProgress, Exception ex) {
         dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FAILED.getStatus());
         dailyProgress.setErrorMessage(ex.getMessage());

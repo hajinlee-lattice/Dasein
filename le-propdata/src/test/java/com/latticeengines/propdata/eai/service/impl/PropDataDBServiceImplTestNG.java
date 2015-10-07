@@ -132,6 +132,7 @@ public class PropDataDBServiceImplTestNG extends PropDataEaiFunctionalTestNGBase
                 { CUSTOMER, PAYPAL_TABLE, "DUNS" }, { CUSTOMER, EVENT_TABLE_TABLE, "RowId" }, };
     }
 
+    @SuppressWarnings("unused")
     private PropDataContext getRequestContextForAddCommand(String customer, String table) {
         PropDataContext requestContext = new PropDataContext();
 

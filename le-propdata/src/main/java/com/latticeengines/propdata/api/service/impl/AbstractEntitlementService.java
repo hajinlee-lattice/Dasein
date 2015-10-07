@@ -7,7 +7,8 @@ import javax.annotation.PostConstruct;
 import com.latticeengines.propdata.api.entitymanager.EntitlementEntityMgr;
 import com.latticeengines.propdata.api.service.EntitlementService;
 
-abstract public class AbstractEntitlementService<Package, PackageContentMap, PackageContractMap>
+@SuppressWarnings("hiding")
+public abstract class AbstractEntitlementService<Package, PackageContentMap, PackageContractMap>
         implements EntitlementService<Package, PackageContentMap, PackageContractMap> {
 
     private EntitlementEntityMgr<Package, PackageContentMap, PackageContractMap> entityMgr;

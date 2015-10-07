@@ -16,6 +16,7 @@ import com.latticeengines.propdata.api.dao.entitlements.PackageContractMapDao;
 import com.latticeengines.propdata.api.dao.entitlements.PackageDao;
 import com.latticeengines.propdata.api.entitymanager.EntitlementEntityMgr;
 
+@SuppressWarnings("hiding")
 abstract class AbstractEntitlementEntityMgr<
         Package extends HasPackageName,
         PackageContentMap extends HasPackageId,

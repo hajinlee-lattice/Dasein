@@ -15,7 +15,8 @@ import com.latticeengines.domain.exposed.propdata.HasPackageName;
 import com.latticeengines.propdata.api.service.EntitlementService;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 
-abstract public class EntitlementServiceImplTestNGBase<Package extends HasPid & HasPackageName,
+@SuppressWarnings("hiding")
+public abstract class EntitlementServiceImplTestNGBase<Package extends HasPid & HasPackageName,
         PackageContentMap, PackageContractMap> extends PropDataApiFunctionalTestNGBase {
     protected String packageName = "Test";
     protected String packageDescription = "A testing package";
