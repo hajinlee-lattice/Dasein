@@ -35,7 +35,6 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 
 public class HttpClientWithOptionalRetryUtils {
-    private static final long INITIAL_WAIT_INTERVAL = 100L;
     private static final long MAX_WAIT_INTERVAL = 60000L;
     private static final int MAX_RETRIES = 12;
     private static HttpClient httpClientIgnoreSsl;
@@ -145,7 +144,7 @@ public class HttpClientWithOptionalRetryUtils {
         IOException exception = null;
 
         do {
-            long waitTime = Math.min(getExponentialWaitTime(retries), MAX_WAIT_INTERVAL);
+            long waitTime = Math.min(RetryUtils.getExponentialWaitTime(retries), MAX_WAIT_INTERVAL);
             try {
                 Thread.sleep(waitTime);
             } catch (InterruptedException e) {
@@ -198,10 +197,6 @@ public class HttpClientWithOptionalRetryUtils {
         ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
 
         return new DefaultHttpClient(cm, params);
-    }
-
-    private static long getExponentialWaitTime(int retryCount) {
-        return retryCount == 0 ? 0 : ((long) Math.pow(2, retryCount) * INITIAL_WAIT_INTERVAL);
     }
 
 }

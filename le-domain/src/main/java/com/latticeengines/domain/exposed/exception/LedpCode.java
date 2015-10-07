@@ -37,6 +37,7 @@ public enum LedpCode {
     LEDP_12007("Parameter CUSTOMER undefined for analytics job."), //
     LEDP_12008("Table {0} does not exist for analytics load job."), //
     LEDP_12009("Failed to submit MapReduce job {0}"), //
+    LEDP_12010("Failed to {0} data by using Sqoop"), //
 
     // Metric system: 13000-13999
     LEDP_13000("Tag {0} does not have a value."), //
@@ -75,6 +76,7 @@ public enum LedpCode {
     LEDP_17000("At least one attribute required."), //
     LEDP_17001("File import can only have one data source."), //
     LEDP_17002("No metadata for attribute {0}."), //
+    LEDP_17003("Could not retrieve metadata of attributes {0} for table {1} from Endpoint."), //
 
     // PLS 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
