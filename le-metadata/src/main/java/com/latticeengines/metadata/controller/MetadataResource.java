@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.service.MetadataService;
@@ -74,5 +75,15 @@ public class MetadataResource extends InternalResourceBase {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.deleteTable(space, tableName);
         mdService.createTable(space, table);
+    }
+
+    @RequestMapping(value = "/tables/{tableName}/validations", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Validate table metadata")
+    public ResponseDocument<?> validateTable(@PathVariable String customerSpace, //
+            @PathVariable String tableName, //
+            @RequestBody Table table) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return null;
     }
 }

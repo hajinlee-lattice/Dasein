@@ -33,5 +33,9 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void deleteTable(CustomerSpace customerSpace, String tableName) { tableEntityMgr.delete(tableName); }
+    public void deleteTable(CustomerSpace customerSpace, String tableName) { 
+        tableEntityMgr.delete(tableName);
+    }
+    
+    
 }

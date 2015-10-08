@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.service.impl;
 
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -11,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.TenantToken;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Aspect
 public class SetTenantAspect {
@@ -23,7 +23,7 @@ public class SetTenantAspect {
         CustomerSpace customerSpace = (CustomerSpace) joinPoint.getArgs()[0];
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
         if (tenant == null) {
-            throw new RuntimeException("No tenant found with id " + tenant.getId());
+            throw new RuntimeException("No tenant found with id " + customerSpace.toString());
         }
         setSecurityContext(tenant);
     }
