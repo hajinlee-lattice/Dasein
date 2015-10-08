@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -106,7 +107,7 @@ public class VisiDBDLComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         bootstrap(constructVisiDBDLInstaller());
         BootstrapState state = waitForSuccess(getServiceName());
 
-        Assert.assertEquals(state.state, BootstrapState.State.OK);
+        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
         verifyTenant(tenant, dlUrl);
         // verify permstore and datastore
@@ -131,10 +132,11 @@ public class VisiDBDLComponentDeploymentTestNG extends BatonAdapterDeploymentTes
 
     public void verifyTenant(String tenant, String dlUrl, boolean expectToExists) {
         GetVisiDBDLRequest getRequest = new GetVisiDBDLRequest(tenant);
+        InstallResult result = dataLoaderService.getDLTenantSettings(getRequest, dlUrl);
         if (expectToExists) {
-            Assert.assertEquals(dataLoaderService.getDLTenantSettings(getRequest, dlUrl).getStatus(), 3);
+            Assert.assertEquals(result.getStatus(), 3, JsonUtils.serialize(result));
         } else {
-            Assert.assertEquals(dataLoaderService.getDLTenantSettings(getRequest, dlUrl).getStatus(), 5);
+            Assert.assertEquals(result.getStatus(), 5, JsonUtils.serialize(result));
         }
     }
 
