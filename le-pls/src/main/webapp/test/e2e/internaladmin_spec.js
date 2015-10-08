@@ -34,7 +34,7 @@ describe('internal admin page', function() {
         modelTabs.getTabByIndex(2).click();
         browser.driver.sleep(1000);
         element(by.linkText('Admin')).click();
-        browser.driver.sleep(2000);
+        browser.driver.sleep(6000);
 
         var headers = element.all(by.css('table.table tbody tr th')).map(function(tableHeader) {
             return tableHeader.getText();
