@@ -56,7 +56,11 @@ public class MetadataResource extends InternalResourceBase {
     @ApiOperation(value = "Create table")
     public void createTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestBody Table table) {
+            @RequestBody Table table, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        mdService.createTable(space, table);
     }
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -64,7 +68,11 @@ public class MetadataResource extends InternalResourceBase {
     @ApiOperation(value = "Update table")
     public void updateTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestBody Table table) {
+            @RequestBody Table table, //
+            HttpServletRequest request) {
+        checkHeader(request);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
+        mdService.deleteTable(space, tableName);
+        mdService.createTable(space, table);
     }
 }

@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -169,11 +170,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-        
+
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-        
+
     }
 
     @JsonIgnore

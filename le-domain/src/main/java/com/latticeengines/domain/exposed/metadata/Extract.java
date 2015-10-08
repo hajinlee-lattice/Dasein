@@ -106,7 +106,7 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
     }
 
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+    @ManyToOne
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     public Table getTable() {
         return table;

@@ -26,4 +26,12 @@ public class MetadataServiceImpl implements MetadataService {
     public List<Table> getTables(CustomerSpace customerSpace) {
         return tableEntityMgr.findAll();
     }
+
+    @Override
+    public void createTable(CustomerSpace customerSpace, Table table) {
+        tableEntityMgr.create(table);
+    }
+
+    @Override
+    public void deleteTable(CustomerSpace customerSpace, String tableName) { tableEntityMgr.delete(tableName); }
 }

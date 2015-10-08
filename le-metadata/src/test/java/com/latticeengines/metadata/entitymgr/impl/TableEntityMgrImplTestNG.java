@@ -22,7 +22,8 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     
     @Test(groups = "functional", dataProvider = "tableProvider")
     public void findAll(String customerSpace, String tableName) {
-        new SetTenantAspect().setSecurityContext(CustomerSpace.parse(customerSpace));
+        new SetTenantAspect().setSecurityContext( //
+                tenantEntityMgr.findByTenantId(customerSpace));
         List<Table> tables = tableEntityMgr.findAll();
         
         assertEquals(tables.size(), 1);
