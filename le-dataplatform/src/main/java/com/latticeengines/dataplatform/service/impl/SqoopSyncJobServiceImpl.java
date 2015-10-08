@@ -82,7 +82,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
             } catch (Exception e) {
                 log.error("Sqoop Import Failed! Retry " + retryCount + "\n", e);
                 try {
-                    Thread.sleep(RetryUtils.getExponentialWaitTime(retryCount++));
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
                 } catch (InterruptedException e1) {
                     log.error("Sqoop Import Retry Failed! " + ExceptionUtils.getStackTrace(e1));
                 }
@@ -108,7 +108,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
             } catch (Exception e) {
                 log.error("Sqoop Export Failed! Retry " + retryCount + "\n", e);
                 try {
-                    Thread.sleep(RetryUtils.getExponentialWaitTime(retryCount++));
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
                 } catch (InterruptedException e1) {
                     log.error("Sqoop Export Retry Failed! " + ExceptionUtils.getStackTrace(e1));
                 }
