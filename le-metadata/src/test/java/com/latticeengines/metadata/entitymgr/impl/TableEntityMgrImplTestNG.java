@@ -8,6 +8,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.impl.SetTenantAspect;
@@ -21,8 +22,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     
     @Test(groups = "functional", dataProvider = "tableProvider")
     public void findAll(String customerSpace, String tableName) {
-        new SetTenantAspect().setSecurityContext( //
-                tenantEntityMgr.findByTenantId(customerSpace));
+        new SetTenantAspect().setSecurityContext(CustomerSpace.parse(customerSpace));
         List<Table> tables = tableEntityMgr.findAll();
         
         assertEquals(tables.size(), 1);

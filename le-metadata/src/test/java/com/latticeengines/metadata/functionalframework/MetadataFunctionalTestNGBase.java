@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.metadata.service.impl.SetTenantAspect;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.AuthorizationHeaderHttpRequestInterceptor;
@@ -30,10 +29,9 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
     protected static final String CUSTOMERSPACE2 = "X.Y2.Z";
     protected static final String TABLE1 = "AccountForCustomerSpace1";
     protected static final String TABLE2 = "AccountForCustomerSpace2";
-    protected static final String TABLE3 = "AccountForCustomerSpace3";
     
     protected RestTemplate restTemplate = new RestTemplate();
-
+    
     @Value("${metadata.test.functional.api:http://localhost:8080/}")
     private String hostPort;
     
@@ -58,33 +56,27 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
         if (t1 != null) {
             tenantEntityMgr.delete(t1);
-
+            
         }
         Tenant t2 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE2);
         if (t2 != null) {
             tenantEntityMgr.delete(t2);
         }
 
-        Tenant tenant1 = createTenant(CUSTOMERSPACE1);
+        Tenant tenant1 = new Tenant();
+        tenant1.setId(CUSTOMERSPACE1);
+        tenant1.setName(CUSTOMERSPACE1);
         tenantEntityMgr.create(tenant1);
-
-        Tenant tenant2 = createTenant(CUSTOMERSPACE2);
+        Tenant tenant2 = new Tenant();
+        tenant2.setId(CUSTOMERSPACE2);
+        tenant2.setName(CUSTOMERSPACE2);
         tenantEntityMgr.create(tenant2);
 
-        new SetTenantAspect().setSecurityContext(tenant1);
         tableEntityMgr.create(createTable(tenant1, TABLE1));
-        new SetTenantAspect().setSecurityContext(tenant2);
         tableEntityMgr.create(createTable(tenant2, TABLE2));
     }
-
-    protected Tenant createTenant(String customerSpace) {
-        Tenant tenant = new Tenant();
-        tenant.setId(customerSpace);
-        tenant.setName(customerSpace);
-        return tenant;
-    }
-
-    protected Table createTable(Tenant tenant, String tableName) {
+    
+    private Table createTable(Tenant tenant, String tableName) {
         Table table = new Table();
         table.setTenant(tenant);
         table.setName(tableName);
@@ -119,14 +111,14 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         lkAttr.setPhysicalDataType("XYZ");
         lkAttr.setLogicalDataType("Date");
         lkAttr.setPropertyValue("ApprovedUsage", "Model");
-
+        
         table.addAttribute(pkAttr);
         table.addAttribute(lkAttr);
-
+        
         return table;
     }
 
-    protected PrimaryKey createPrimaryKey() {
+    private PrimaryKey createPrimaryKey() {
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
         pk.setDisplayName("Primary Key for ID column");
@@ -135,15 +127,15 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         return pk;
     }
 
-    protected Extract createExtract(String name) {
+    private Extract createExtract(String name) {
         Extract e = new Extract();
         e.setName(name);
         e.setPath("/" + name);
         e.setExtractionTimestamp(System.currentTimeMillis());
         return e;
     }
-
-    protected LastModifiedKey createLastModifiedKey() {
+    
+    private LastModifiedKey createLastModifiedKey() {
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LUD");
         lk.setDisplayName("Last Modified Key for LastUpdatedDate column");

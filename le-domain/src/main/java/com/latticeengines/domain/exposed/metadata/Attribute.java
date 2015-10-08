@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -92,28 +93,34 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     }
 
     @Column(name = "LENGTH", nullable = false)
+    @JsonIgnore
     public Integer getLength() {
         return length;
     }
 
+    @JsonIgnore
     public void setLength(Integer length) {
         this.length = length;
     }
 
     @Column(name = "NULLABLE", nullable = false)
+    @JsonIgnore
     public Boolean isNullable() {
         return nullable;
     }
 
+    @JsonIgnore
     public void setNullable(Boolean nullable) {
         this.nullable = nullable;
     }
 
     @Column(name = "DATA_TYPE", nullable = false)
+    @JsonIgnore
     public String getPhysicalDataType() {
         return physicalDataType;
     }
 
+    @JsonIgnore
     public void setPhysicalDataType(String physicalDataType) {
         this.physicalDataType = physicalDataType;
     }
@@ -222,7 +229,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     }
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     public Table getTable() {
         return table;

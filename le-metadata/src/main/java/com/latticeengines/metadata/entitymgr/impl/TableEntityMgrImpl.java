@@ -2,9 +2,6 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.security.HasTenantId;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,10 +45,7 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void create(Table entity) {
-        setTenantId(entity);
         getDao().create(entity);
-        updateReferences(entity);
-
         primaryKeyDao.create(entity.getPrimaryKey());
         lastModifiedKeyDao.create(entity.getLastModifiedKey());
         
@@ -65,17 +59,7 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
 
         getDao().create(entity);
     }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    @Override
-    public void delete(String tableName) {
-        Table found = findByName(tableName);
-        if (found == null) {
-            throw new RuntimeException("No table found with name " + tableName);
-        }
-        tableDao.delete(found);
-    }
-
+    
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Table> getAll() {
@@ -106,40 +90,5 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
         }
     }
 
-    private void setTenantId(Table table) {
-        Tenant tenant = SecurityContextUtils.getTenant();
 
-        // This is because Hibernate is horrible and produces two tenant ids
-        if (tenant != null && tenant.getPid() != null && table.getTenantId() == null) {
-            table.setTenant(tenant);
-        }
-
-        for (Extract extract : table.getExtracts()) {
-            applyTenantIdToEntity(extract);
-        }
-
-        for (Attribute attr : table.getAttributes()) {
-            applyTenantIdToEntity(attr);
-        }
-    }
-
-    private void applyTenantIdToEntity(HasTenantId entity) {
-        Tenant tenant = SecurityContextUtils.getTenant();
-
-        if (tenant != null && tenant.getPid() != null && entity.getTenantId() == null) {
-            entity.setTenantId(SecurityContextUtils.getTenant().getPid());
-        }
-    }
-
-    private void updateReferences(Table table) {
-        table.getPrimaryKey().setTable(table);
-        table.getLastModifiedKey().setTable(table);
-        for (Extract extract : table.getExtracts()) {
-            extract.setTable(table);
-        }
-
-        for (Attribute attr : table.getAttributes()) {
-            attr.setTable(table);
-        }
-    }
 }

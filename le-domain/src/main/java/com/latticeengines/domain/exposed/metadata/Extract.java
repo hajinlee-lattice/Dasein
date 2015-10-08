@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -105,7 +106,7 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
     }
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     public Table getTable() {
         return table;
