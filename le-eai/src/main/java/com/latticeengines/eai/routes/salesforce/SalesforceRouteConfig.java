@@ -54,7 +54,7 @@ public class SalesforceRouteConfig extends SpringRouteBuilder {
                 to("salesforce:getDescription");
 
         from("seda:batchInfo?concurrentConsumers=4").process(new BatchInfoProcessor());
-        
+
     }
 
 }

@@ -22,7 +22,7 @@ public class MarketoImportServiceImpl extends ImportService {
     public MarketoImportServiceImpl() {
         super(SourceType.MARKETO);
     }
-    
+
     private void setupAccessToken(ImportContext ctx) {
         ImportStrategy accessTokenStrategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, "AccessToken");
         if (accessTokenStrategy == null) {
@@ -46,7 +46,8 @@ public class MarketoImportServiceImpl extends ImportService {
             } else {
                 log.info(String.format("Import strategy for table %s is %s.", table, strategy.toString()));
             }
-            tablesWithMetadata.add(strategy.importMetadata(getProducerTemplate(ctx), table, srcImportConfig.getFilter(table.getName()), ctx));
+            tablesWithMetadata.add(strategy.importMetadata(getProducerTemplate(ctx), table,
+                    srcImportConfig.getFilter(table.getName()), ctx));
         }
         return tablesWithMetadata;
     }
@@ -56,7 +57,8 @@ public class MarketoImportServiceImpl extends ImportService {
         setupAccessToken(ctx);
         List<Table> tables = srcImportConfig.getTables();
         for (Table table : tables) {
-            MarketoImportStrategyBase strategy = (MarketoImportStrategyBase) ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
+            MarketoImportStrategyBase strategy = (MarketoImportStrategyBase) ImportStrategy.getImportStrategy(
+                    SourceType.MARKETO, table);
             if (strategy == null) {
                 log.error("No import strategy for Marketo table " + table.getName());
                 continue;

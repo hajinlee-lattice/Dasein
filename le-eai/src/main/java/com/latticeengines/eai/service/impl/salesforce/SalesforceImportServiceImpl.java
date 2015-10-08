@@ -25,7 +25,8 @@ public class SalesforceImportServiceImpl extends ImportService {
         List<Table> tables = srcImportConfig.getTables();
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.SALESFORCE, "AllTables");
         for (Table table : tables) {
-            Table newTable = strategy.importMetadata(getProducerTemplate(ctx), table, srcImportConfig.getFilter(table.getName()), ctx);
+            Table newTable = strategy.importMetadata(getProducerTemplate(ctx), table,
+                    srcImportConfig.getFilter(table.getName()), ctx);
             newTables.add(newTable);
         }
         return newTables;

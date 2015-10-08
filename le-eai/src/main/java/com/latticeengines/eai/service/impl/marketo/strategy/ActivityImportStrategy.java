@@ -30,7 +30,7 @@ public class ActivityImportStrategy extends MarketoImportStrategyBase {
     public ActivityImportStrategy() {
         super("Marketo.Activity");
     }
-    
+
     @SuppressWarnings("unchecked")
     private List<String> getActivityTypeIds(String filter, boolean withColumnName) {
         Map<String, Object> expressions = parse(filter);
@@ -41,20 +41,19 @@ public class ActivityImportStrategy extends MarketoImportStrategyBase {
             } else {
                 activityTypeIds.add(activityTypeId.toString());
             }
-            
+
         }
         return activityTypeIds;
     }
 
-    
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         Map<String, Object> expressions = parse(filter);
         String activityDate = (String) expressions.get(ACTIVITYDATE);
         super.setupPagingToken(template, ctx, activityDate);
-        
+
         List<String> activityTypeIds = getActivityTypeIds(filter, true);
-        
+
         ctx.setProperty(MarketoImportProperty.ACTIVITYTYPES, activityTypeIds);
         Map<String, Object> headers = getHeaders(ctx, table);
         template.sendBodyAndHeaders("direct:getAllLeadActivities", null, headers);
@@ -66,20 +65,21 @@ public class ActivityImportStrategy extends MarketoImportStrategyBase {
         Set<String> activityTypeIds = new HashSet<>(getActivityTypeIds(filter, false));
         ctx.setProperty(MarketoImportProperty.DOIMPORT, false);
         Map<String, Object> headers = getHeaders(ctx);
-        
-        Map<String, Object> activityTypes = template.requestBodyAndHeaders("direct:getActivityTypes", null, headers, Map.class);
-        
+
+        Map<String, Object> activityTypes = template.requestBodyAndHeaders("direct:getActivityTypes", null, headers,
+                Map.class);
+
         List<Map<String, Object>> activityTypesFromResult = (List) activityTypes.get("result");
-        
+
         Set<Attribute> newAttributes = new HashSet<>();
         for (Map<String, Object> m : activityTypesFromResult) {
             String id = (String) m.get("id").toString();
-            
+
             if (!activityTypeIds.contains(id)) {
                 continue;
             }
             List<Map<String, String>> attributes = (List) m.get("attributes");
-            
+
             for (Map<String, String> attribute : attributes) {
                 String name = attribute.get("name");
                 String dataType = attribute.get("dataType");
@@ -90,29 +90,28 @@ public class ActivityImportStrategy extends MarketoImportStrategyBase {
                 newAttributes.add(attr);
             }
         }
-        
+
         for (Attribute newAttribute : newAttributes) {
             table.addAttribute(newAttribute);
         }
-        
+
         return super.importMetadata(template, table, filter, ctx);
     }
-    
+
     @Override
     public ExpressionParserVisitorBase getParser() {
         return new ActivityParserVisitor();
     }
-    
+
     protected static class ActivityParserVisitor extends ExpressionParserVisitorBase {
         @Override
         public Visitable visit(Visitable parseTreeNode) throws StandardException {
-            if (parseTreeNode instanceof BinaryLogicalOperatorNode &&
-                    !(parseTreeNode instanceof AndNode)) {
+            if (parseTreeNode instanceof BinaryLogicalOperatorNode && !(parseTreeNode instanceof AndNode)) {
                 throw new UnsupportedOperationException("Only AND is supported for Marketo activity.");
             }
             return super.visit(parseTreeNode);
         }
-        
+
     }
-    
+
 }

@@ -55,8 +55,8 @@ public class MarketoEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private DataExtractionService dataExtractionService;
-    
-    private List<String> tableNameList = Arrays. <String>asList(new String[]{"Activity","ActivityType"});
+
+    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Activity", "ActivityType" });
 
     private String customer = "Marketo-Eai";
 
@@ -97,10 +97,8 @@ public class MarketoEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         List<Table> tables = new ArrayList<>();
         Table activityType = MarketoExtractAndImportUtil.createMarketoActivityType();
-        Table lead = MarketoExtractAndImportUtil.createMarketoLead();
         Table activity = MarketoExtractAndImportUtil.createMarketoActivity();
         tables.add(activityType);
-        tables.add(lead);
         tables.add(activity);
 
         marketoImportConfig.setSourceType(SourceType.MARKETO);
@@ -140,7 +138,8 @@ public class MarketoEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         if (verifyDataAndRowCount) {
-            verifyAllDataNotNullWithNumRows(yarnConfiguration, targetPath + "/dataFromFile/" + fileName, expectedNumRows);
+            verifyAllDataNotNullWithNumRows(yarnConfiguration, targetPath + "/dataFromFile/" + fileName,
+                    expectedNumRows);
         }
     }
 

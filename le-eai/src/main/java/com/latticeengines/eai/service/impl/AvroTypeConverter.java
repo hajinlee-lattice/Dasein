@@ -17,7 +17,7 @@ public abstract class AvroTypeConverter {
     private static final Log log = LogFactory.getLog(AvroTypeConverter.class);
 
     public Type convertTypeToAvro(String type) {
-        
+
         switch (type) {
         case "Int":
             type = "java.lang.Integer";
@@ -30,7 +30,7 @@ public abstract class AvroTypeConverter {
             break;
         default:
             type = "java.lang." + type;
-            
+
         }
         Class<?> javaType = null;
         try {
@@ -40,7 +40,6 @@ public abstract class AvroTypeConverter {
         }
         return AvroUtils.getAvroType(javaType);
     }
-
 
     public static Object convertIntoJavaValueForAvroType(TypeConverterRegistry typeRegistry, Type avroType,
             Attribute attr, Object value) {

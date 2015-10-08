@@ -24,6 +24,7 @@
                 <value>file:eai.properties</value>
                 <value>file:dataplatform.properties</value>
                 <value>file:db.properties</value>
+                <value>file:security.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
@@ -36,6 +37,7 @@
     <import resource="classpath:eai-yarn-context.xml" />
     <import resource="classpath:eai-import-context.xml"/>
     <import resource="classpath:eai-appmaster-service-context.xml"/>
+    <import resource="classpath:security-context.xml"/>
 
      <context:component-scan base-package="com.latticeengines.eai.appmaster.service" />
     <yarn-int:amservice service-ref="eaiAppmasterService" default-port="1234"/>

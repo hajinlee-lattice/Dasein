@@ -53,7 +53,8 @@ public class SalesforceEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private AppmasterServiceClient appmasterServiceClient;
 
-    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole" });
+    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
+            "Opportunity", "OpportunityContactRole" });
 
     private String customer = "Salesforce-Eai";
 

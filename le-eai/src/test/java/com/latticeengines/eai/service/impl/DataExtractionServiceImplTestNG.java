@@ -1,9 +1,17 @@
 package com.latticeengines.eai.service.impl;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static org.testng.Assert.assertTrue;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.RouteDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -37,7 +45,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private String targetPath;
 
-    private List<String> tableNameList = Arrays. <String>asList(new String[]{"Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole"});
+    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
+            "Opportunity", "OpportunityContactRole" });
 
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
@@ -61,7 +70,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    private void cleanUp() throws Exception{
+    private void cleanUp() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath("Production", customer).toString());
         crmCredentialZKService.removeCredentials(customer, customer, true);
     }
@@ -79,6 +88,38 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         dataExtractionService.cleanUpTargetPathData(importContext);
         checkDataExists(targetPath, tableNameList, 0);
         checkExtractsDirectoryExists(customer, tableNameList);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test(groups = "functional")
+    public void interceptExceptionTest() throws Exception {
+        CamelContext camelContext = constructCamelContext(importConfig);
+        RouteDefinition route = camelContext.getRouteDefinitions().get(0);
+        route.adviceWith(camelContext, new RouteBuilder() {
+            @Override
+            public void configure() throws Exception {
+                interceptSendToEndpoint("salesforce:closeJob").skipSendToOriginalEndpoint().process(new Processor() {
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        throw new Exception("Inject Exception to the exchange");
+                    }
+                });
+            }
+        });
+
+        camelContext.start();
+        importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
+        try {
+            dataExtractionService.extractAndImport(importConfig, importContext);
+        } catch (Exception e) {
+            assertTrue(e.getCause().toString().contains("Inject Exception to the exchange"));
+            @SuppressWarnings("unchecked")
+            Map<String, String> map = importContext.getProperty(ImportProperty.EXTRACT_PATH, HashMap.class);
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                assertTrue(entry.getValue().endsWith(".avro"));
+                assertTrue(HdfsUtils.fileExists(yarnConfiguration, entry.getValue()));
+            }
+        }
     }
 
 }

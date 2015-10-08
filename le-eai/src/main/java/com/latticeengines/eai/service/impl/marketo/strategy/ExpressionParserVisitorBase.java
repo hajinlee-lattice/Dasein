@@ -19,32 +19,34 @@ import com.foundationdb.sql.parser.Visitor;
 public class ExpressionParserVisitorBase implements Visitor {
 
     private Map<String, Object> expressions = new HashMap<>();
-    
+
     public Map<String, Object> getExpressions() {
         return expressions;
     }
-    
+
     @Override
     public Visitable visit(Visitable parseTreeNode) throws StandardException {
         if (parseTreeNode instanceof BinaryRelationalOperatorNode) {
             BinaryRelationalOperatorNode op = (BinaryRelationalOperatorNode) parseTreeNode;
-            
+
             ValueNode left = op.getLeftOperand();
             ValueNode right = op.getRightOperand();
             String colName = null;
             if (left instanceof ColumnReference) {
                 colName = ((ColumnReference) left).getColumnName();
             } else {
-                throw new UnsupportedOperationException("All binary expressions must have a column reference as its left hand side.");
+                throw new UnsupportedOperationException(
+                        "All binary expressions must have a column reference as its left hand side.");
             }
-            
+
             if (right instanceof ConstantNode) {
                 expressions.put(colName, ((ConstantNode) right).getValue());
             } else {
-                throw new UnsupportedOperationException("Non-constants on the right hand side of a binary operator is unsupported.");
+                throw new UnsupportedOperationException(
+                        "Non-constants on the right hand side of a binary operator is unsupported.");
             }
         }
-        
+
         if (parseTreeNode instanceof InListOperatorNode) {
             InListOperatorNode op = (InListOperatorNode) parseTreeNode;
             RowConstructorNode left = op.getLeftOperand();
@@ -53,14 +55,16 @@ public class ExpressionParserVisitorBase implements Visitor {
             if (column instanceof ColumnReference) {
                 colName = ((ColumnReference) column).getColumnName();
             } else {
-                throw new UnsupportedOperationException("IN expressions must have a column reference as its left hand side.");
+                throw new UnsupportedOperationException(
+                        "IN expressions must have a column reference as its left hand side.");
             }
             RowConstructorNode right = op.getRightOperandList();
             ValueNodeList valueList = right.getNodeList();
             List<Object> values = new ArrayList<>();
             for (ValueNode value : valueList) {
                 if (!(value instanceof ConstantNode)) {
-                    throw new UnsupportedOperationException("Non-constants on the right hand side of an IN operator is unsupported.");
+                    throw new UnsupportedOperationException(
+                            "Non-constants on the right hand side of an IN operator is unsupported.");
                 }
                 values.add(((ConstantNode) value).getValue());
             }
@@ -83,6 +87,5 @@ public class ExpressionParserVisitorBase implements Visitor {
     public boolean skipChildren(Visitable node) throws StandardException {
         return false;
     }
-    
 
 }

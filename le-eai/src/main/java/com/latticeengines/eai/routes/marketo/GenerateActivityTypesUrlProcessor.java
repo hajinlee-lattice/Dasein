@@ -9,7 +9,6 @@ public class GenerateActivityTypesUrlProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         String baseUrl = exchange.getProperty(MarketoImportProperty.BASEURL, String.class);
         String accessToken = exchange.getProperty(MarketoImportProperty.ACCESSTOKEN, String.class);
-        exchange.setProperty("activityTypesUrl",
-                new MarketoUrlGenerator().getActivityTypesUrl(baseUrl, accessToken));
+        exchange.setProperty("activityTypesUrl", new MarketoUrlGenerator().getActivityTypesUrl(baseUrl, accessToken));
     }
 }

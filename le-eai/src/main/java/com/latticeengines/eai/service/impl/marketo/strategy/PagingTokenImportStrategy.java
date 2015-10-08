@@ -20,7 +20,8 @@ public class PagingTokenImportStrategy extends MarketoImportStrategyBase {
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         Map<String, Object> headers = getHeaders(ctx);
-        Map<String, String> tokenMap = template.requestBodyAndHeaders("direct:getPagingToken", null, headers, Map.class);
+        Map<String, String> tokenMap = template
+                .requestBodyAndHeaders("direct:getPagingToken", null, headers, Map.class);
         ctx.setProperty(MarketoImportProperty.NEXTPAGETOKEN, tokenMap.get("nextPageToken"));
     }
 

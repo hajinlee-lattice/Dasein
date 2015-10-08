@@ -17,19 +17,19 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class AvroSchemaBuilder {
-    
+
     @SuppressWarnings("deprecation")
     public static Schema mergeSchemas(Schema schema, Table table) {
         if (table.getAttributes().size() == 0) {
             return schema;
         }
         Map<String, Attribute> attributes = new HashMap<String, Attribute>();
-        
+
         for (Attribute attr : table.getAttributes()) {
             attributes.put(attr.getName(), attr);
         }
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(schema.getName());
-        
+
         for (Map.Entry<String, String> entry : schema.getProps().entrySet()) {
             recordBuilder.prop(entry.getKey(), entry.getValue());
         }
@@ -45,12 +45,12 @@ public class AvroSchemaBuilder {
             String uuid = field.getProp("uuid");
             String enumValues = field.getProp("enumValues");
             Type type = field.schema().getTypes().get(0).getType();
-            
+
             if (attr != null) {
                 if (attr.getDisplayName() != null) {
                     displayName = attr.getDisplayName();
                 }
-                
+
                 if (attr.getLength() != null) {
                     length = attr.getLength().toString();
                 }
@@ -60,16 +60,16 @@ public class AvroSchemaBuilder {
                 if (attr.getScale() != null) {
                     scale = attr.getScale().toString();
                 }
-                
+
                 if (attr.getLogicalDataType() != null) {
                     logicalType = attr.getLogicalDataType();
                 }
-                
+
                 if (attr.getEnumValues().size() > 0) {
                     enumValues = StringUtils.join(attr.getEnumValues().toArray(), ",");
                 }
-                
-                assert(attr.getPhysicalDataType() != null);
+
+                assert (attr.getPhysicalDataType() != null);
                 type = Type.valueOf(attr.getPhysicalDataType());
             }
             fieldBuilder = fieldAssembler.name(field.name());
@@ -79,7 +79,7 @@ public class AvroSchemaBuilder {
             fieldBuilder = fieldBuilder.prop("scale", scale);
             fieldBuilder = fieldBuilder.prop("logicalType", logicalType);
             fieldBuilder = fieldBuilder.prop("uuid", uuid);
-            
+
             if (enumValues != null) {
                 fieldBuilder = fieldBuilder.prop("enumValues", enumValues);
             }
@@ -120,7 +120,7 @@ public class AvroSchemaBuilder {
             fieldBuilder = fieldAssembler.name(attr.getName());
 
             fieldBuilder = fieldBuilder.prop("displayName", attr.getDisplayName());
-            
+
             if (attr.getLength() != null) {
                 fieldBuilder = fieldBuilder.prop("length", attr.getLength().toString());
             }
@@ -132,11 +132,11 @@ public class AvroSchemaBuilder {
             }
             fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType());
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
-            
+
             for (Map.Entry<String, Object> entry : attr.getEntries()) {
                 fieldBuilder.prop(entry.getKey(), entry.getValue().toString());
             }
-            
+
             if (attr.getEnumValues().size() > 0) {
                 fieldBuilder = fieldBuilder.prop("enumValues", StringUtils.join(attr.getEnumValues().toArray(), ","));
             }

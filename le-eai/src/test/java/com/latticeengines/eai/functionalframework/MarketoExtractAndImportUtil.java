@@ -30,12 +30,12 @@ public class MarketoExtractAndImportUtil {
         table.addAttribute(leadId);
         table.addAttribute(activityDate);
         table.addAttribute(activityTypeId);
-        
+
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
-        
+
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_ActivityDate");
         lk.addAttribute(activityDate.getName());
@@ -75,7 +75,7 @@ public class MarketoExtractAndImportUtil {
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
-        
+
         return table;
     }
 
@@ -158,7 +158,7 @@ public class MarketoExtractAndImportUtil {
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
-        
+
         return table;
     }
 

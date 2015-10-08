@@ -86,7 +86,7 @@ public class SalesforceExtractAndImportUtil {
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
-        
+
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
         lk.addAttribute(lastModifiedDate.getName());
@@ -150,6 +150,8 @@ public class SalesforceExtractAndImportUtil {
         ownership.setName("Ownership");
         Attribute rating = new Attribute();
         rating.setName("Rating");
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
 
         table.addAttribute(id);
         table.addAttribute(accountSource);
@@ -175,12 +177,13 @@ public class SalesforceExtractAndImportUtil {
         table.addAttribute(ownerId);
         table.addAttribute(salutation);
         table.addAttribute(rating);
+        table.addAttribute(lastModifiedDate);
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
-        
+
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_CreatedDate");
         lk.addAttribute(createdDate.getName());
@@ -225,7 +228,7 @@ public class SalesforceExtractAndImportUtil {
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
-        
+
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
         lk.addAttribute(lastModifiedDate.getName());
@@ -255,7 +258,7 @@ public class SalesforceExtractAndImportUtil {
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
-        
+
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
         lk.addAttribute(lastModifiedDate.getName());
@@ -295,7 +298,7 @@ public class SalesforceExtractAndImportUtil {
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
         table.setPrimaryKey(pk);
-        
+
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
         lk.addAttribute(lastModifiedDate.getName());

@@ -39,7 +39,7 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
             String key = (String) ((Map) lead.get("rest")).get("name");
             metadataMap.put(key, lead);
         }
-        
+
         for (Attribute attribute : table.getAttributes()) {
             Map<String, Object> lead = metadataMap.get(attribute.getName());
             if (lead == null) {
@@ -50,23 +50,24 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
             attribute.setLogicalDataType((String) lead.get("dataType"));
             attribute.setLength((Integer) lead.get("length"));
         }
-        
+
         return super.importMetadata(template, table, filter, ctx);
     }
-    
+
     @Override
     public ExpressionParserVisitorBase getParser() {
         return new LeadParserVisitor();
     }
-    
+
     protected static class LeadParserVisitor extends ExpressionParserVisitorBase {
         @Override
         public Visitable visit(Visitable parseTreeNode) throws StandardException {
             if (parseTreeNode instanceof BinaryLogicalOperatorNode) {
-                throw new UnsupportedOperationException("Compound expressions for Marketo lead import are not supported.");
+                throw new UnsupportedOperationException(
+                        "Compound expressions for Marketo lead import are not supported.");
             }
             return super.visit(parseTreeNode);
         }
-        
+
     }
 }

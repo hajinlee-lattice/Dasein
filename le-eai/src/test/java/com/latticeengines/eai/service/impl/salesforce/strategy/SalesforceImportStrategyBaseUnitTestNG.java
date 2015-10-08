@@ -7,7 +7,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-
 public class SalesforceImportStrategyBaseUnitTestNG {
 
     @Test(groups = "unit")

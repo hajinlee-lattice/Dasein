@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 
 public class EaiProcessorUnitTestNG {
-    
+
     @Test(groups = "unit")
     public void instantiate() {
         EaiProcessor processor = new EaiProcessor();

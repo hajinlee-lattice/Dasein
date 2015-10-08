@@ -16,7 +16,7 @@ public class EloquaImportServiceImpl extends ImportService {
     public EloquaImportServiceImpl() {
         super(SourceType.ELOQUA);
     }
-    
+
     @Override
     public List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context) {
         // TODO Auto-generated method stub

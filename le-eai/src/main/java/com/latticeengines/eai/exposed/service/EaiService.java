@@ -11,4 +11,3 @@ public interface EaiService {
 
     JobStatus getJobStatus(String applicationId);
 }
-

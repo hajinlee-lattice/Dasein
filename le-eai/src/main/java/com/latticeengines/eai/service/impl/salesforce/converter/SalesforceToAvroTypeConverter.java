@@ -33,7 +33,7 @@ public class SalesforceToAvroTypeConverter extends AvroTypeConverter {
     @Override
     public Type convertTypeToAvro(String type) {
         Type avroType = typeMap.get(type);
-        
+
         if (avroType == null) {
             return super.convertTypeToAvro(type);
         }

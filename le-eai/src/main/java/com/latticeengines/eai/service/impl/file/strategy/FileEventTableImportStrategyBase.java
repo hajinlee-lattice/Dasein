@@ -35,7 +35,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
-    
+
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
     }
@@ -51,12 +51,12 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver);
         DbCreds creds = new DbCreds(builder);
-        
+
         List<String> types = new ArrayList<>();
         for (Attribute attr : table.getAttributes()) {
             types.add(attr.getPhysicalDataType());
         }
-        
+
         Properties props = new Properties();
         props.put("columnTypes", StringUtils.join(types, ","));
         props.put("yarn.mr.hdfs.class.path", "/app/eai/lib");
@@ -66,7 +66,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
                 creds, //
                 LedpQueueAssigner.getPropDataQueueNameForSubmission(), //
                 ctx.getProperty(ImportProperty.CUSTOMER, String.class), //
-                Arrays.<String>asList(new String[] { table.getAttributes().get(0).getName() }), //
+                Arrays.<String> asList(new String[] { table.getAttributes().get(0).getName() }), //
                 null, //
                 1, //
                 props);
@@ -83,22 +83,22 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             throw new RuntimeException(e);
         }
         ModelingMetadata metadata = JsonUtils.deserialize(contents, ModelingMetadata.class);
-        
+
         Map<String, ModelingMetadata.AttributeMetadata> attrMap = new HashMap<>();
         for (ModelingMetadata.AttributeMetadata attr : metadata.getAttributeMetadata()) {
             attrMap.put(attr.getColumnName(), attr);
         }
-        
+
         for (Attribute attr : table.getAttributes()) {
             ModelingMetadata.AttributeMetadata attrMetadata = attrMap.get(attr.getName());
-            
+
             if (attrMetadata != null) {
                 attr.setDisplayName(attrMetadata.getDisplayName());
                 attr.setPhysicalDataType(attrMetadata.getDataType());
             } else {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
             }
-            
+
         }
         return table;
     }
@@ -112,15 +112,15 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     protected AvroTypeConverter getAvroTypeConverter() {
         return null;
     }
-    
+
     @SuppressWarnings("unchecked")
     protected String createJdbcUrl(ImportContext ctx) {
         String dataFileDirPath = ctx.getProperty(ImportProperty.DATAFILEDIR, String.class);
         String url = String.format("jdbc:relique:csv:%s", dataFileDirPath);
-        
+
         String serializedMap = ctx.getProperty(ImportProperty.FILEURLPROPERTIES, String.class);
         Map<String, String> fileUrlProperties = JsonUtils.deserialize(serializedMap, HashMap.class);
-        
+
         if (fileUrlProperties != null && fileUrlProperties.size() > 0) {
             List<String> props = new ArrayList<>();
             for (Map.Entry<String, String> entry : fileUrlProperties.entrySet()) {

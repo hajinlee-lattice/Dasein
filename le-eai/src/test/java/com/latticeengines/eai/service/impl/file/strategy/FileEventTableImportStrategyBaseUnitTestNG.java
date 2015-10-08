@@ -21,7 +21,7 @@ public class FileEventTableImportStrategyBaseUnitTestNG {
         urlProperties.put(CsvDriver.TIMESTAMP_FORMAT, CsvDriver.DEFAULT_TIME_FORMAT);
         ImportContext ctx = new ImportContext(null);
         ctx.setProperty(ImportProperty.FILEURLPROPERTIES, JsonUtils.serialize(urlProperties));
-        
+
         String url = new FileEventTableImportStrategyBase().createJdbcUrl(ctx);
         assertEquals(url, "jdbc:relique:csv:null?timestampFormat=HH:mm:ss&dateFormat=MM-DD-YYYY");
     }

@@ -2,10 +2,9 @@ package com.latticeengines.eai.routes;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.camel.Exchange;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -27,8 +26,9 @@ public class HdfsUriGenerator {
         String targetPath = importContext.getProperty(ImportProperty.TARGETPATH, String.class);
         String hdfsUri = String.format("%s%s/%s/Extracts/%s/%s", defaultFS, targetPath, table.getName(),
                 new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()), fileName).toString();
-        //store extract time stamp folder
-        importContext.getProperty(ImportProperty.EXTRACT_PATH, HashMap.class).put(table.getName(), StringUtils.substringBeforeLast(hdfsUri.replace("hdfs2", "hdfs"), "/"));
+        // store extract time stamp folder
+        importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class).put(table.getName(),
+                hdfsUri.replace("hdfs2", "hdfs"));
         return hdfsUri;
     }
 

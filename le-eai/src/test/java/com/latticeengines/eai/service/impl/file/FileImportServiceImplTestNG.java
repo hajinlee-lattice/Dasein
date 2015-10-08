@@ -34,7 +34,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
@@ -45,7 +45,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         ImportContext ctx = new ImportContext(yarnConfiguration);
         ctx.setProperty(ImportProperty.TARGETPATH, "/tmp/dataFromFile/file1");
         ctx.setProperty(ImportProperty.CUSTOMER, "testcustomer");
-        
+
         URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file");
         URL metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1Metadata.json");
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
@@ -59,11 +59,11 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         urlProperties.put(CsvDriver.DATE_FORMAT, "MM-DD-YYYY");
         props.put(ImportProperty.FILEURLPROPERTIES, JsonUtils.serialize(urlProperties));
         fileImportConfig.setProperties(props);
-        
+
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
         fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { tables.get(0) }));
         fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx);
-        
+
         ApplicationId appId = ctx.getProperty(ImportProperty.APPID, ApplicationId.class);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -72,6 +72,5 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
                 ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
                 4);
     }
-
 
 }

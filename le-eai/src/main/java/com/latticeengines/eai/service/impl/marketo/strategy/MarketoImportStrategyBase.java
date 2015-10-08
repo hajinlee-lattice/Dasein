@@ -42,12 +42,12 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
     protected Map<String, Object> getHeaders(ImportContext ctx) {
         return getHeaders(ctx, null);
     }
-    
+
     protected Map<String, Object> getHeaders(ImportContext ctx, Table table) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(MarketoImportProperty.IMPORTCONTEXT, ctx);
         properties.put(Exchange.CONTENT_TYPE, "application/json");
-        
+
         if (table != null) {
             properties.put(MarketoImportProperty.TABLE, table);
         }
@@ -72,7 +72,7 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
 
             if (attribute.getLogicalDataType() != null) {
                 attribute.setPhysicalDataType(converter.convertTypeToAvro(attribute.getLogicalDataType()).name());
-                
+
                 if (attribute.getLogicalDataType().equals("Date") || attribute.getLogicalDataType().equals("date")) {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }

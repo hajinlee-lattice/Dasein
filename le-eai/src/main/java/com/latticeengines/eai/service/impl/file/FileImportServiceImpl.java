@@ -19,7 +19,7 @@ import com.latticeengines.eai.service.impl.ImportStrategy;
 
 @Component("fileImportService")
 public class FileImportServiceImpl extends ImportService {
-    
+
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
 
@@ -57,7 +57,7 @@ public class FileImportServiceImpl extends ImportService {
         }
 
     }
-    
+
     @Override
     public void validate(SourceImportConfiguration extractionConfig, ImportContext context) {
         super.validate(extractionConfig, context);

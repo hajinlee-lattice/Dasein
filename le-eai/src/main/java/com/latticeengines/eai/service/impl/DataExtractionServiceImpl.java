@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.ImportService;
@@ -48,12 +48,13 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     private Configuration yarnConfiguration;
 
     @Override
-    public void extractAndImport(ImportConfiguration importConfig, ImportContext context) {
+    public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
         context.setProperty(ImportProperty.CUSTOMER, importConfig.getCustomer());
         String targetPath = createTargetPath(importConfig.getCustomer());
         context.setProperty(ImportProperty.TARGETPATH, targetPath);
         context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
+        List<Table> tableMetadata = null;
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
             Map<String, String> props = sourceImportConfig.getProperties();
@@ -64,18 +65,14 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             }
 
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
-            List<Table> tableMetadata = importService.importMetadata(sourceImportConfig, context);
-            for (Table table : tableMetadata) {
-                List<Attribute> attributes = table.getAttributes();
+            tableMetadata = importService.importMetadata(sourceImportConfig, context);
 
-                for (Attribute attribute : attributes) {
-                    log.info("Attribute " + attribute.getDisplayName() + " : " + attribute.getPhysicalDataType());
-                }
-            }
             sourceImportConfig.setTables(tableMetadata);
 
             importService.importDataAndWriteToHdfs(sourceImportConfig, context);
+
         }
+        return tableMetadata;
     }
 
     @Override
@@ -132,11 +129,10 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     public void cleanUpTargetPathData(ImportContext context) throws Exception {
         @SuppressWarnings("unchecked")
-        Map<String, String> map = context.getProperty(ImportProperty.EXTRACT_PATH, HashMap.class);
-        for (Map.Entry<String, String> entry : map.entrySet()) {
+        Map<String, String> targetPaths = context.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
+        for (Map.Entry<String, String> entry : targetPaths.entrySet()) {
             log.info("Table is： " + entry.getKey() + "  Path is: " + entry.getValue());
-            HdfsUtils.rmdir(yarnConfiguration, entry.getValue());
+            HdfsUtils.rmdir(yarnConfiguration, StringUtils.substringBeforeLast(entry.getValue(), "/"));
         }
     }
-
 }

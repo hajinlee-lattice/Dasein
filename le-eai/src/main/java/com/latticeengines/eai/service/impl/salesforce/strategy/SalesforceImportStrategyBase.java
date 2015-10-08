@@ -2,6 +2,7 @@ package com.latticeengines.eai.service.impl.salesforce.strategy;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,9 +91,12 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
      * Invoke this method when about to invoke a Camel route to do the import.
      * This method will set the required headers for the framework.
      * 
-     * @param headers map that will hold the headers
-     * @param table table that will be passed into the import route
-     * @param context import context
+     * @param headers
+     *            map that will hold the headers
+     * @param table
+     *            table that will be passed into the import route
+     * @param context
+     *            import context
      */
     private void setHeaders(Map<String, Object> headers, Table table, ImportContext context) {
         if (headers != null) {
@@ -102,7 +106,6 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
             log.warn("headers should not be null. No headers have been set.");
         }
     }
-
 
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
@@ -117,17 +120,21 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
     @Override
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         JobInfo jobInfo = setupJob(template, table);
+
         try {
             SObjectDescription desc = template.requestBodyAndHeader("direct:getDescription", jobInfo,
                     SalesforceEndpointConfig.SOBJECT_NAME, table.getName(), SObjectDescription.class);
             List<SObjectField> descFields = desc.getFields();
-            Map<String, Attribute> map = table.getNameAttributeMap();
+            Map<String, Attribute> nameAttrMap = table.getNameAttributeMap();
+            // validateSalesforceMetadata(table.getName(), nameAttrMap,
+            // descFields);
+
             Table newTable = new Table();
             newTable.setName(table.getName());
             newTable.setDisplayName(desc.getLabel());
 
             for (SObjectField descField : descFields) {
-                if (!map.containsKey(descField.getName())) {
+                if (!nameAttrMap.containsKey(descField.getName())) {
                     continue;
                 }
                 Attribute attr = new Attribute();
@@ -139,7 +146,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 attr.setScale(descField.getScale());
                 attr.setNullable(descField.isNillable());
                 Schema.Type avroType = salesforceToAvroTypeConverter.convertTypeToAvro(type);
-                
+
                 if (avroType == null) {
                     throw new RuntimeException("Could not find avro type for sfdc type " + type);
                 }
@@ -153,8 +160,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                     values.add(emptyValue);
                     List<String> cleanedUpEnumValues = Lists.transform(descField.getPicklistValues(),
                             ToStringFunctionWithCleanup.INSTANCE);
-                    List<String> enumValues = Lists.transform(descField.getPicklistValues(),
-                            ToStringFunction.INSTANCE);
+                    List<String> enumValues = Lists.transform(descField.getPicklistValues(), ToStringFunction.INSTANCE);
                     attr.setCleanedUpEnumValues(cleanedUpEnumValues);
                     attr.setEnumValues(enumValues);
                 } else if (type.equals("date")) {
@@ -162,15 +168,24 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 } else if (type.equals("datetime")) {
                     attr.setPropertyValue("dateFormat", "YYYY-MM-DD'T'HH:mm:ss.sssZ");
                 }
-
                 newTable.addAttribute(attr);
             }
+
             Schema schema = AvroSchemaBuilder.createSchema(newTable.getName(), newTable);
             newTable.setSchema(schema);
             return newTable;
         } finally {
             template.requestBody("salesforce:closeJob", jobInfo, JobInfo.class);
         }
+    }
+
+    protected void validateSalesforceMetadata(String table, Map<String, Attribute> nameAttrMap,
+            List<SObjectField> descFields) {
+        List<String> descFieldNames = new ArrayList<>();
+        for (SObjectField descField : descFields) {
+            descFieldNames.add(descField.getName());
+        }
+        validateMetadata(table, nameAttrMap, descFieldNames);
     }
 
     @Override
@@ -186,7 +201,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
 
     String createQuery(Table table, String filterExpression) {
         String query = "SELECT " + StringUtils.join(table.getAttributes(), ",") + " FROM " + table.getName();
-        
+
         if (filterExpression != null) {
             query += " WHERE " + filterExpression;
         }

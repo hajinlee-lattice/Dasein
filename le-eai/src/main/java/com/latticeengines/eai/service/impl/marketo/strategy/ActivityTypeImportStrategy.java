@@ -11,7 +11,7 @@ import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
 @Component("activityTypeImportStrategy")
 public class ActivityTypeImportStrategy extends MarketoImportStrategyBase {
-    
+
     public ActivityTypeImportStrategy() {
         super("Marketo.ActivityType");
     }
@@ -20,7 +20,7 @@ public class ActivityTypeImportStrategy extends MarketoImportStrategyBase {
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         return super.importMetadata(template, table, filter, ctx);
     }
-    
+
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         ctx.setProperty(MarketoImportProperty.DOIMPORT, true);

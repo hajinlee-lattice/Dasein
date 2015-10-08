@@ -10,7 +10,7 @@ import com.latticeengines.eai.routes.salesforce.ExtractDataXmlHandler;
 
 @Converter
 public class XmlHandlerToInputStreamConverter {
-    
+
     @Converter
     public InputStream convertToInputStream(ExtractDataXmlHandler handler) throws FileNotFoundException {
         return new FileInputStream(handler.getFile());

@@ -19,9 +19,12 @@ public class EaiAppmasterServiceImpl extends EaiAppmasterService {
     protected MindRpcMessageHolder handleMindMessageInternal(MindRpcMessageHolder message) {
         log.info("Send out messages from Appmaster Service !!");
         if (e != null) {
-            return getConversionService().convert(new AppMasterServiceResponse(e.getMessage() + ":  " + ExceptionUtils.getStackTrace(e)), MindRpcMessageHolder.class);
+            return getConversionService().convert(
+                    new AppMasterServiceResponse(e.getMessage() + ":  " + ExceptionUtils.getStackTrace(e)),
+                    MindRpcMessageHolder.class);
         }
-        return getConversionService().convert(new AppMasterServiceResponse("found no error !"), MindRpcMessageHolder.class);
+        return getConversionService().convert(new AppMasterServiceResponse("found no error !"),
+                MindRpcMessageHolder.class);
     }
 
 }

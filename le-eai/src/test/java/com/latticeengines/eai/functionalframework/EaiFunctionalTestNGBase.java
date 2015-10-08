@@ -74,7 +74,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     private MarketoRouteConfig marketoRouteConfig;
 
     @Autowired
-    private SalesforceRouteConfig salesforceRouteConfig;
+    protected SalesforceRouteConfig salesforceRouteConfig;
 
     protected ImportConfiguration importConfig;
 
@@ -144,7 +144,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         }
     }
 
-    protected void checkExtractsDirectoryExists(String customer, List<String> tables) throws Exception{
+    protected void checkExtractsDirectoryExists(String customer, List<String> tables) throws Exception {
         Path customerSpacePath = PathBuilder.buildCustomerSpacePath("Production", customer, customer, "Production");
         for (String table : tables) {
             String path = (customerSpacePath + "/Data/Tables/" + table + "/Extracts").toString();

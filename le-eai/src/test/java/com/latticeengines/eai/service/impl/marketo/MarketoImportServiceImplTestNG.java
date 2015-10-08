@@ -85,6 +85,6 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     public void importDataAndWriteToHdfs() throws Exception {
         marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, importContext);
         Thread.sleep(10000L);
-        checkDataExists("/tmp", Arrays.<String>asList(new String[]{"Activity", "ActivityType"}), 1);
+        checkDataExists("/tmp", Arrays.<String> asList(new String[] { "Activity", "ActivityType" }), 1);
     }
 }

@@ -11,7 +11,8 @@ public class ComponentsConfiguration {
 
     @Bean(name = "salesforce")
     public SalesforceComponent constructSalesforceComponent(@Value("${eai.salesforce.loginurl}") String loginUrl,
-            @Value("${eai.salesforce.clientid}") String clientId, @Value("${eai.salesforce.clientsecret}") String clientSecret) {
+            @Value("${eai.salesforce.clientid}") String clientId,
+            @Value("${eai.salesforce.clientsecret}") String clientSecret) {
         SalesforceComponent salesForce = new SalesforceComponent();
         SalesforceLoginConfig loginConfig = new SalesforceLoginConfig();
         loginConfig.setClientId(clientId);

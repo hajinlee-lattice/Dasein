@@ -20,7 +20,6 @@ public class ActivityTypeToDataProcessor implements Processor {
         this.context = (SpringCamelContext) context;
     }
 
-
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void process(Exchange exchange) throws Exception {
