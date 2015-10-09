@@ -103,7 +103,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         LoadConfiguration config = getLoadConfig();
         Map<String, String> errorResult = ignoreErrorRestTemplate.postForObject("http://" + restEndpointHost
                 + "/rest/load", config, HashMap.class, new Object[] {});
-        assertTrue(errorResult.get("errorCode").equals("LEDP_12010"));
+        assertTrue(errorResult.containsKey("errorCode"));
     }
 
     private LoadConfiguration getLoadConfig() {
