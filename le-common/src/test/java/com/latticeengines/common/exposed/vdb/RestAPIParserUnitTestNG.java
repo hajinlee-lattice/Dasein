@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 public class RestAPIParserUnitTestNG {
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testGetRestAPIResponse() throws IOException {
         String url = "http://10.41.1.187:8081/DLRestService/GetSpecDetails";
         Map<String, String> headers = new HashMap<>();
@@ -23,7 +23,7 @@ public class RestAPIParserUnitTestNG {
         Assert.assertNotNull(result);
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testGetSpecDetails() throws Exception {
         String url = "http://10.41.1.187:8081/DLRestService/GetSpecDetails";
         Map<String, String> headers = new HashMap<>();
