@@ -30,6 +30,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.CrmConfigService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 
+@SuppressWarnings("deprecation")
 public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
@@ -45,7 +46,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private final static int SUCCESS = 3;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "functional" }, enabled = false)
     public void setup() throws Exception {
         try {
             afterClass();
@@ -81,7 +82,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         return headers;
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterClass(groups = { "functional" }, enabled = false)
     public void afterClass() throws Exception {
         String url = dataLoaderUrl + "/DeleteDLTenant";
         Map<String, Object> parameters = new HashMap<>();
@@ -90,7 +91,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         excuteHttpRequest(url, parameters);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void config() {
         CrmCredential crmCredential;
         CrmConfig crmConfig;
