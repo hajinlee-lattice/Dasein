@@ -55,7 +55,7 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
 
     private boolean enableCleanHdfs;
 
-    private int waitTime = 180;
+    private int waitTime = 300;
 
     public void init(ApplicationContext appCtx) {
         scoringProcessorExecutor = (AsyncTaskExecutor) appCtx.getBean("scoringProcessorExecutor");
@@ -77,7 +77,6 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         }
         ApplicationContext appCtx = (ApplicationContext) sc.get("applicationContext");
         init(appCtx);
-        cleanTables();
         List<Future<Long>> futures = new ArrayList<>();
         List<ScoringCommand> scoringCommands = scoringCommandEntityMgr.getPopulated();
         for (ScoringCommand scoringCommand : scoringCommands) {
@@ -93,6 +92,7 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
                 log.fatal(e.getMessage(), e);
             }
         }
+        cleanTables();
     }
 
     @VisibleForTesting
