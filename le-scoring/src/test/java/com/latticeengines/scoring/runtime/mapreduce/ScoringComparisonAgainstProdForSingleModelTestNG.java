@@ -139,7 +139,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         List<GenericRecord> oldlist = null;
 
         // load new scores from HDFS
-        newlist = loadHDFSAvroFiles(new Configuration(), scorePath);
+        newlist = loadHDFSAvroFiles(yarnConfiguration, scorePath);
 
         // load existing scores from testing file
         URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/results/"
