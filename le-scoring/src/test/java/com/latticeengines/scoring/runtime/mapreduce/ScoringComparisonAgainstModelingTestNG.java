@@ -342,7 +342,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     }
 
     private Map<String, Double> getScoringResults() {
-        List<GenericRecord> resultList = loadHDFSAvroFiles(new Configuration(), scorePath);
+        List<GenericRecord> resultList = loadHDFSAvroFiles(yarnConfiguration, scorePath);
         Map<String, Double> scoringResults = new HashMap<String, Double>();
         for (GenericRecord result : resultList) {
             String leadId = String.valueOf(result.get("LeadID"));
