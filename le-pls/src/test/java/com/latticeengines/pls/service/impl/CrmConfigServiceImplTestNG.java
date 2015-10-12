@@ -30,7 +30,6 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.CrmConfigService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 
-@SuppressWarnings("deprecation")
 public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired

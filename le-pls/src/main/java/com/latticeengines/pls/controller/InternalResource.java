@@ -56,7 +56,6 @@ import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@SuppressWarnings("deprecation")
 @Api(value = "internal", description = "REST resource for internal operations")
 @RestController
 @RequestMapping(value = "/internal")
