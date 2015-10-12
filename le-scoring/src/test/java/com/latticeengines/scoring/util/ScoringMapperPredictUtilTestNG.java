@@ -235,7 +235,6 @@ public class ScoringMapperPredictUtilTestNG {
         return same;
     }
 
-    @SuppressWarnings("rawtypes")
     @Test(groups = "unit")
     public void testEvaluate() throws IOException, InterruptedException {
         // copy over the test scoring.py file to the current directory
