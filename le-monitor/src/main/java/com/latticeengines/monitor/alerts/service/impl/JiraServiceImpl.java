@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.monitor.exposed.alerts.service.JiraService;
 
+@SuppressWarnings("deprecation")
 @Component("jiraService")
 public class JiraServiceImpl implements JiraService {
 

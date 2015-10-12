@@ -17,6 +17,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.monitor.exposed.alerts.service.PagerDutyService;
 
+@SuppressWarnings("deprecation")
 @Component("pagerDutyService")
 public class PagerDutyServiceImpl implements PagerDutyService {
 
