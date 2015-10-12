@@ -16,6 +16,7 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
+@SuppressWarnings("deprecation")
 @Component
 public class DanteComponent extends LatticeComponent {
     public static final String componentName = "Dante";
