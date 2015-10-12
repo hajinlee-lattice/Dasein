@@ -49,6 +49,11 @@ public class SqoopJobServiceImpl {
         cmds.add(jobName);
         cmds.add("--export-dir");
         cmds.add(sourceDir);
+        String uuid = UUID.randomUUID().toString();
+        cmds.add("--bindir");
+        cmds.add(getBinaryInputputDir(uuid));
+        cmds.add("--outdir");
+        cmds.add(getGenerateOutputDir(uuid));
         if (javaColumnTypeMappings != null) {
             cmds.add("--map-column-java");
             cmds.add(javaColumnTypeMappings);
@@ -57,7 +62,12 @@ public class SqoopJobServiceImpl {
             cmds.add("--columns");
             cmds.add(exportColumns);
         }
-        return runTool(cmds, yarnConfiguration, sync);
+        try {
+            return runTool(cmds, yarnConfiguration, sync, uuid);
+        } finally {
+            FileUtils.deleteQuietly(new File(getGenerateOutputDir(uuid)));
+            FileUtils.deleteQuietly(new File(getBinaryInputputDir(uuid)));
+        }
     }
 
     protected ApplicationId importData(String table, //
@@ -103,6 +113,11 @@ public class SqoopJobServiceImpl {
         cmds.add(StringUtils.join(splitCols, ","));
         cmds.add("--target-dir");
         cmds.add(targetDir);
+        String uuid = UUID.randomUUID().toString();
+        cmds.add("--bindir");
+        cmds.add(getBinaryInputputDir(uuid));
+        cmds.add("--outdir");
+        cmds.add(getGenerateOutputDir(uuid));
         String propsFileName = null;
         if (props != null) {
             propsFileName = String.format("sqoop-import-props-%s.properties", System.currentTimeMillis());
@@ -125,10 +140,10 @@ public class SqoopJobServiceImpl {
         // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
 
         try {
-            return runTool(cmds, yarnConfiguration, sync);
+            return runTool(cmds, yarnConfiguration, sync, uuid);
         } finally {
-            FileUtils.deleteQuietly(new File(table + ".avsc"));
-            FileUtils.deleteQuietly(new File(table + ".java"));
+            FileUtils.deleteQuietly(new File(getGenerateOutputDir(uuid)));
+            FileUtils.deleteQuietly(new File(getBinaryInputputDir(uuid)));
 
             if (propsFileName != null) {
                 FileUtils.deleteQuietly(new File(propsFileName));
@@ -136,9 +151,9 @@ public class SqoopJobServiceImpl {
         }
     }
 
-    private ApplicationId getApplicationId(final String appIdFileName) {
+    private ApplicationId getApplicationId(final String appIdFilePath) {
         String jobId = null;
-        File appIdFile = new File(appIdFileName);
+        File appIdFile = new File(appIdFilePath);
         try {
             jobId = FileUtils.readFileToString(appIdFile);
         } catch (IOException e) {
@@ -152,13 +167,21 @@ public class SqoopJobServiceImpl {
         }
     }
 
-    private ApplicationId runTool(List<String> cmds, Configuration config, boolean sync) {
+    private ApplicationId runTool(List<String> cmds, Configuration config, boolean sync, String uuid) {
         String appIdFileName = String.format("appid-%s.txt", UUID.randomUUID().toString());
-
+        String appIdFilePath = getBinaryInputputDir(uuid) + "/" + appIdFileName;
         config.set("sqoop.sync", Boolean.toString(sync));
-        config.set("sqoop.app.id.file.name", appIdFileName);
+        config.set("sqoop.app.id.file.name", appIdFilePath);
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(config));
-        return getApplicationId(appIdFileName);
+        return getApplicationId(appIdFilePath);
+    }
+
+    private String getBinaryInputputDir(String uuid) {
+        return "/tmp/sqoop-yarn/compile/indir/" + uuid;
+    }
+
+    private String getGenerateOutputDir(String uuid) {
+        return "/tmp/sqoop-yarn/generate/outdir/" + uuid;
     }
 
 }
