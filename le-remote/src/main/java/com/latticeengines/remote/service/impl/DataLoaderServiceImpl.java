@@ -44,7 +44,6 @@ import com.latticeengines.remote.exposed.service.Headers;
 import com.latticeengines.remote.util.CrmUtils;
 import com.latticeengines.remote.util.DlConfigUtils;
 
-@SuppressWarnings("deprecation")
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
 
