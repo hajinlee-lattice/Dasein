@@ -37,6 +37,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
 
     @Override
     public void installPackage(SoftwarePackage swPackage, File localFile) {
+        log.info("fs.defaultFS = " + yarnConfiguration.get("fs.defaultFS"));
         String localFilePath = localFile.getAbsolutePath();
         String hdfsJarPath = String.format("%s/%s", TOPLEVELPATH, swPackage.getHdfsPath());
         String hdfsJsonPath = String.format("%s/%s", TOPLEVELPATH, swPackage.getHdfsPath("json"));
@@ -57,6 +58,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     @Override
     public void afterPropertiesSet() throws Exception {
         createSoftwareLibDir(TOPLEVELPATH);
+        yarnConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
     }
 
     protected void createSoftwareLibDir(String dir) {
