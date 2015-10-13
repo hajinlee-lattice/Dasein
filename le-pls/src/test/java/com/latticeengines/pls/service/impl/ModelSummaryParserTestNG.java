@@ -19,7 +19,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
 
-    @Value("${pls.default.buyerinsights.predictor.number}")
+    @Value("${pls.default.buyerinsights.num.predictors}")
     private int defaultBiPredictorNum;
 
     @Autowired
@@ -56,14 +56,14 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
 
         boolean isSorted = true;
         boolean isSet = true;
-        double MinUncertaintyCoefficient = 1.0;
+        double minUncertaintyCoefficient = 1.0;
         for (int i = 0; i < defaultBiPredictorNum; i++) {
             Predictor p = predictors.get(i);
             double currentUncertaintyCoefficient = p.getUncertaintyCoefficient();
-            if (currentUncertaintyCoefficient <= MinUncertaintyCoefficient && p.getUsedForBuyerInsights()) {
-                MinUncertaintyCoefficient = currentUncertaintyCoefficient;
+            if (currentUncertaintyCoefficient <= minUncertaintyCoefficient && p.getUsedForBuyerInsights()) {
+                minUncertaintyCoefficient = currentUncertaintyCoefficient;
             } else {
-                if (currentUncertaintyCoefficient > MinUncertaintyCoefficient) {
+                if (currentUncertaintyCoefficient > minUncertaintyCoefficient) {
                     isSorted = false;
                 }
                 if (!p.getUsedForBuyerInsights()) {
@@ -73,7 +73,7 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
             }
         }
         Predictor unSetPredictor = predictors.get(defaultBiPredictorNum);
-        if (unSetPredictor.getUncertaintyCoefficient() > MinUncertaintyCoefficient) {
+        if (unSetPredictor.getUncertaintyCoefficient() > minUncertaintyCoefficient) {
             isSorted = false;
         }
         if (unSetPredictor.getUsedForBuyerInsights()) {

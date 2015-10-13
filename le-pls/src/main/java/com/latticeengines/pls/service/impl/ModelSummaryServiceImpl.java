@@ -52,8 +52,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     public boolean modelIdinTenant(String modelId, String tenantId) {
         ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false, false);
-        if (modelSummary == null)
+        if (modelSummary == null) {
             return false;
+        }
         Tenant tenant = modelSummary.getTenant();
         return (tenant != null) && tenantId.equals(tenant.getId());
     }

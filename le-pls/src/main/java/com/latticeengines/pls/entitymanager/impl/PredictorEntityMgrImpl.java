@@ -28,7 +28,7 @@ public class PredictorEntityMgrImpl extends BaseEntityMgrImpl<Predictor> impleme
     }
 
     @Override
-    public List<Predictor> findUsedByBuyerInsightsViaModelId(String ModelId) {
+    public List<Predictor> findUsedByBuyerInsightsByModelId(String ModelId) {
         // TODO Auto-generated method stub
         return null;
     }

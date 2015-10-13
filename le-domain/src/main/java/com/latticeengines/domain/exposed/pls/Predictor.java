@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -169,8 +170,10 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
 
     @Override
     public int compareTo(Predictor predictor) {
-        Double compareUncertaintyCoefficient = predictor.getUncertaintyCoefficient();
         // descending order
-        return Double.compare(compareUncertaintyCoefficient, this.getUncertaintyCoefficient());
+        return ObjectUtils.compare(
+                predictor != null && predictor.getUncertaintyCoefficient() != null ? predictor
+                        .getUncertaintyCoefficient() : null,
+                this.uncertaintyCoefficient != null ? this.uncertaintyCoefficient : null);
     }
 }

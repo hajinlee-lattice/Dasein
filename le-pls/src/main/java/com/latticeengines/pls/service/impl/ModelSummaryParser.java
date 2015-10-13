@@ -59,7 +59,7 @@ public class ModelSummaryParser {
 
     private static final Double DEFAULT_PREDICTOR_UNCERTAINTY_COEFFICIENT = 0D;
 
-    @Value("${pls.default.buyerinsights.predictor.number}")
+    @Value("${pls.default.buyerinsights.num.predictors}")
     private int defaultBiPredictorNum;
 
     public ModelSummary parse(String hdfsPath, String fileContents) {

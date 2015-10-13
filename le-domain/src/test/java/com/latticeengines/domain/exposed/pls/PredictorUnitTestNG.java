@@ -9,8 +9,10 @@ public class PredictorUnitTestNG {
 
     private Predictor predictor1;
     private Predictor predictor2;
+    private Predictor predictor3;
+    private Predictor predictor4;
 
-    @BeforeClass
+    @BeforeClass(groups = "unit")
     public void setup() {
         ModelSummary summary = new ModelSummary();
 
@@ -33,10 +35,24 @@ public class PredictorUnitTestNG {
         predictor2.setUncertaintyCoefficient(0.12);
         predictor2.setModelSummary(summary);
         predictor2.setTenantId(1L);
+
+        predictor3 = new Predictor();
+        predictor3.setName("p3");
+        predictor3.setDisplayName("p3");
+        predictor3.setApprovedUsage("Model");
+        predictor3.setCategory("external");
+        predictor3.setFundamentalType("numeric");
+        predictor3.setModelSummary(summary);
+        predictor3.setTenantId(1L);
+
+        predictor4 = null;
     }
 
     @Test(groups = "unit")
     public void testCompare() {
         assertTrue(predictor1.compareTo(predictor2) > 0);
+        // null-safe cases
+        assertTrue(predictor2.compareTo(predictor3) < 0);
+        assertTrue(predictor2.compareTo(predictor4) < 0);
     }
 }

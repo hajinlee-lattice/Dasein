@@ -9,6 +9,6 @@ public interface PredictorEntityMgr extends BaseEntityMgr<Predictor> {
 
     List<Predictor> findByModelId(String ModelId);
 
-    List<Predictor> findUsedByBuyerInsightsViaModelId(String ModelId);
+    List<Predictor> findUsedByBuyerInsightsByModelId(String ModelId);
 
 }

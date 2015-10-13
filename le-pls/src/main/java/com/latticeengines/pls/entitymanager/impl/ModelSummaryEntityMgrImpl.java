@@ -280,10 +280,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public ModelSummary retrieveByModelIdForInternalOperations(String modelId) {
         ModelSummary summary = modelSummaryDao.findByModelId(modelId);
-        if (summary != null)
+        if (summary != null) {
             inflateDetails(summary);
-        if (summary != null)
+        }
+        if (summary != null) {
             inflatePredictors(summary);
+        }
         return summary;
     }
 
