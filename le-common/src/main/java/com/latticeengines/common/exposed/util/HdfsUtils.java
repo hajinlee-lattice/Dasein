@@ -203,11 +203,13 @@ public class HdfsUtils {
     public static List<String> getFilesByGlob(Configuration configuration, String globPath) throws IOException {
         FileSystem fs = FileSystem.get(configuration);
         FileStatus[] statuses = fs.globStatus(new Path(globPath));
-        List<String> filePaths = new ArrayList<String>();
+        List<String> filePaths = new ArrayList<>();
+        if (statuses == null) {
+            return filePaths;
+        }
         for (FileStatus status : statuses) {
             Path filePath = status.getPath();
             filePaths.add(Path.getPathWithoutSchemeAndAuthority(filePath).toString());
-
         }
         return filePaths;
 

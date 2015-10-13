@@ -234,11 +234,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (sourceTable.getName() == null) {
             throw new LedpException(LedpCode.LEDP_26009);
         }
-        
+
         if (sourceTable.getExtracts().size() == 0) {
             throw new LedpException(LedpCode.LEDP_26012, new String[] { sourceTable.getName() });
         }
-        
+
         for (Extract extract : sourceTable.getExtracts()) {
             if (extract.getName() == null) {
                 throw new LedpException(LedpCode.LEDP_26010, new String[] { sourceTable.getName() });
@@ -259,6 +259,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
             if (lmk == null) {
                 throw new LedpException(LedpCode.LEDP_26013, new String[] { sourceTable.getName() });
+            }
+        }
+
+        if (sourceTable.getPrimaryKey() != null) {
+            if (sourceTable.getPrimaryKey().getAttributes().size() == 0) {
+                throw new LedpException(LedpCode.LEDP_26008, new String[] {sourceTable.getName() });
             }
         }
     }

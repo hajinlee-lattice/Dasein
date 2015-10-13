@@ -52,6 +52,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     public void setup() throws Exception {
         sampleDataFlowBuilder.reset();
         tableWithExtractsDataFlowBuilder.reset();
+
         if (sampleDataFlowBuilder.isLocal()) {
             config.set("fs.defaultFS", "file:///");
         }
@@ -116,8 +117,8 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     @DataProvider(name = "engineProvider")
     public Object[][] getEngine() {
         return new Object[][] {
-                { "MR" }, //
-                { "TEZ" }
+                { "MR" }
+                //{ "TEZ"}
         };
     }
     
@@ -170,6 +171,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     @Test(groups = "functional", dataProvider = "errorUseCaseProvider", //
             dependsOnMethods = { "executeNamedTransformationForTableSource" })
     public void executeNamedTransformationForErrors(Table table, String message) throws Exception {
+        executeNamedTransformationForTableSource("MR");
         Map<String, Table> sourceTables = new HashMap<>();
         sourceTables.put("Source", table);
 
@@ -212,13 +214,6 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         Extract tableExtractNoPathExtract = new Extract();
         tableExtractNoPathExtract.setName("extract1");
         tableExtractNoPath.addExtract(tableExtractNoPathExtract);
-        
-        Table tableExtractNoPK = new Table();
-        tableExtractNoPK.setName("tableExtractNoPK");
-        Extract tableExtractNoPKExtract = new Extract();
-        tableExtractNoPKExtract.setName("extract1");
-        tableExtractNoPKExtract.setPath("/extract1");
-        tableExtractNoPK.addExtract(tableExtractNoPKExtract);
 
         Table tableExtractNoPKAttribute = new Table();
         tableExtractNoPKAttribute.setName("tableExtractNoPKAttribute");
@@ -234,7 +229,6 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
                 { tableNoExtracts, "Table tableNoExtract has no extracts." }, //
                 { tableExtractNoName, "Extract for table tableExtractNoName has no name." }, //
                 { tableExtractNoPath, "Extract extract1 for table tableExtractNoPath has no path." }, //
-                { tableExtractNoPK, "Table tableExtractNoPK has no primary key." }, //
                 { tableExtractNoPKAttribute, "Primary key of table tableExtractNoPKAttribute has no attributes." }
         };
     }
