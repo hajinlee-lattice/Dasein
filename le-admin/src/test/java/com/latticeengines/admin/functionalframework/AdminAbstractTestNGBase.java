@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 /**
  * This is the base class of functional tests
@@ -160,28 +161,6 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         Assert.assertTrue(created);
     }
     
-    public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-
-        private String headerValue;
-
-        public MagicAuthenticationHeaderHttpRequestInterceptor(String headerValue) {
-            this.headerValue = headerValue;
-        }
-
-        @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-                throws IOException {
-            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
-
-            return execution.execute(requestWrapper, body);
-        }
-
-        public void setAuthValue(String headerValue) {
-            this.headerValue = headerValue;
-        }
-    }
-
     @SuppressWarnings("unchecked")
     protected void loginAD(){
         Credentials creds = new Credentials();

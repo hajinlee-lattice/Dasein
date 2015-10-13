@@ -26,19 +26,25 @@ import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.entitymanager.impl.TenantEntityMgrImpl;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataflowapi-context.xml" })
 public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+
+    protected static final CustomerSpace CUSTOMERSPACE = CustomerSpace.parse("DFAPITests.DFAPITests.DFAPITests");
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFlowApiFunctionalTestNGBase.class);
@@ -48,6 +54,9 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
     
     @Autowired
     private YarnClient defaultYarnClient;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr = new TenantEntityMgrImpl();
     
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
@@ -55,8 +64,25 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
+        Tenant t = tenantEntityMgr.findByTenantId(CUSTOMERSPACE.toString());
+        if (t != null) {
+            tenantEntityMgr.delete(t);
+        }
+        t = createTenant(CUSTOMERSPACE);
+        tenantEntityMgr.create(t);
+
+        com.latticeengines.domain.exposed.camille.Path path = //
+            PathBuilder.buildCustomerSpacePath("Production", CUSTOMERSPACE);
+        HdfsUtils.rmdir(yarnConfiguration, path.toString());
+        HdfsUtils.mkdir(yarnConfiguration, path.toString());
     }
 
+    private Tenant createTenant(CustomerSpace customerSpace) {
+        Tenant tenant = new Tenant();
+        tenant.setId(customerSpace.toString());
+        tenant.setName(customerSpace.toString());
+        return tenant;
+    }
 
     public void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();

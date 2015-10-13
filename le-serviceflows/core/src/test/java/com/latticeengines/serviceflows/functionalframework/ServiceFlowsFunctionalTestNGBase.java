@@ -1,16 +1,8 @@
 package com.latticeengines.serviceflows.functionalframework;
 
-import java.nio.file.PathMatcher;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -21,16 +13,12 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
-import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import org.testng.annotations.BeforeClass;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceflows-context.xml" })
@@ -48,8 +36,8 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
     
     protected Configuration yarnConfiguration = new Configuration();
 
-    protected void executeDataFlow(DataFlowContext dataFlowContext, String beanName) throws Exception {
-        dataTransformationService.executeNamedTransformation(dataFlowContext, beanName);
+    protected Table executeDataFlow(DataFlowContext dataFlowContext, String beanName) throws Exception {
+        return dataTransformationService.executeNamedTransformation(dataFlowContext, beanName);
     }
     
     protected DataFlowContext createDataFlowContext() {
@@ -60,30 +48,10 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
         ctx.setProperty("ENGINE", "MR");
         return ctx;
     }
-    
-    protected Table createTableFromDir(String tableName, String path, String lastModifiedColName) {
-        Table table = new Table();
-        table.setName(tableName);
-        Extract extract = new Extract();
-        extract.setName("e1");
-        extract.setPath(path);
-        table.addExtract(extract);
-        PrimaryKey pk = new PrimaryKey();
-        Attribute pkAttr = new Attribute();
-        pkAttr.setName("Id");
-        pk.addAttribute("Id");
-        LastModifiedKey lmk = new LastModifiedKey();
-        Attribute lastModifiedColumn = new Attribute();
-        lastModifiedColumn.setName(lastModifiedColName);
-        lmk.addAttribute(lastModifiedColName);
-        table.setPrimaryKey(pk);
-        table.setLastModifiedKey(lmk);
-        return table;
-    }
 
-    protected List<GenericRecord> readTable(String path) {
+    protected List<GenericRecord> readTable(String avroFile) {
         try {
-            List<String> matches = HdfsUtils.getFilesByGlob(yarnConfiguration, path);
+            List<String> matches = HdfsUtils.getFilesByGlob(yarnConfiguration, avroFile);
             List<GenericRecord> output = new ArrayList<>();
             for (String match : matches) {
                 output.addAll(AvroUtils.getData(yarnConfiguration, new Path(match)));

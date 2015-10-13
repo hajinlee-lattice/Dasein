@@ -10,4 +10,10 @@ public interface MetadataService {
     Table getTable(CustomerSpace customerSpace, String name);
 
     List<Table> getTables(CustomerSpace customerSpace);
+
+    void createTable(CustomerSpace customerSpace, Table table);
+
+    void deleteTable(CustomerSpace customerSpace, String name);
+
+    void updateTable(CustomerSpace customerSpace, Table table);
 }

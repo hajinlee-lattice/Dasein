@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -63,7 +62,7 @@ public class LastModifiedKey extends AttributeOwner {
     }
 
     @JsonIgnore
-    @OneToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+    @OneToOne
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Table getTable() {

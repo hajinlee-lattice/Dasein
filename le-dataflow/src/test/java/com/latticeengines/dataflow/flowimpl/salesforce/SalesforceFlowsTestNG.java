@@ -85,6 +85,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty("CUSTOMER", "customer1");
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("TARGETPATH", "/tmp/TmpEventTable");
+        ctx.setProperty("TARGETTABLENAME", "TmpEventTable");
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
         ctx.setProperty("CHECKPOINT", checkpoint);
@@ -96,6 +97,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         // Execute the second flow, with the output of the first flow as input into the second
         sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
         ctx.setProperty("TARGETPATH", "/tmp/PDTable");
+        ctx.setProperty("TARGETTABLENAME", "PDTable");
         ctx.setProperty("FLOWNAME", "CreatePropDataInput");
         dataTransformationService.executeNamedTransformation(ctx, "createPropDataInput");
         verifyNumRows(config, "/tmp/PDTable", 106);
@@ -103,6 +105,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         // Execute the third flow, with the output of the first flow as input into the third
         sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
         ctx.setProperty("TARGETPATH", "/tmp/EventTable");
+        ctx.setProperty("TARGETTABLENAME", "EventTable");
         ctx.setProperty("FLOWNAME", "CreateFinalEventTable");
 
         ctx.setProperty("EVENTDEFNEXPR", "StageName.equals(\"Contracting\") || StageName.equals(\"Closed Won\")");

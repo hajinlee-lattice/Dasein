@@ -216,6 +216,8 @@ public enum LedpCode {
     LEDP_26010("Extract for table {0} has no name."), //
     LEDP_26011("Extract {0} for table {1} has no path."), //
     LEDP_26012("Table {0} has no extracts."), //
+    LEDP_26013("Table {0} has no last modified key."), //
+    LEDP_26014("Table {0} last modified key has no attributes."), //
 
     // le-swlib
     LEDP_27000("Software library cannot be initialized."), //

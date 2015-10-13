@@ -49,6 +49,20 @@ public class AvroUtils {
         }
     }
 
+    public static Schema getSchemaFromGlob(Configuration config, String path) {
+        List<String> matches = null;
+        try {
+            matches = HdfsUtils.getFilesByGlob(config, path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (matches.size() == 0) {
+            throw new RuntimeException(String.format("No such file could be found: %s", path));
+        }
+        String first = matches.get(0);
+        return AvroUtils.getSchema(config, new Path(first));
+    }
+
     public static List<GenericRecord> getData(Configuration config, Path path) throws Exception {
         try (FileReader<GenericRecord> reader = getAvroFileReader(config, path)) {
             List<GenericRecord> data = new ArrayList<>();

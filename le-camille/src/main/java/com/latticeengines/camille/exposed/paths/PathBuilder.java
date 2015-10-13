@@ -56,6 +56,10 @@ public final class PathBuilder {
                 tenantId, PathConstants.SPACES, spaceId);
     }
 
+    public static Path buildCustomerSpacePath(String podId, CustomerSpace customerSpace) {
+        return buildCustomerSpacePath(podId, customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId());
+    }
+
     public static Path buildCustomerSpaceServicesPath(String podId, CustomerSpace space) {
         return buildCustomerSpaceServicesPath(podId, space.getContractId(), space.getTenantId(), space.getSpaceId());
     }

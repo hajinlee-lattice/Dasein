@@ -13,19 +13,29 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflowapi.functionalframework.DataFlowApiFunctionalTestNGBase;
 import com.latticeengines.dataflowapi.service.DataFlowService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 public class DataFlowServiceImplTestNG extends DataFlowApiFunctionalTestNGBase {
+
+    @Value("${metadata.api.hostport}")
+    private String metadataHostPort;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -42,7 +52,10 @@ public class DataFlowServiceImplTestNG extends DataFlowApiFunctionalTestNGBase {
     
     private String opportunity;
 
-    @BeforeClass(groups = "functional")
+    public DataFlowServiceImplTestNG() {
+    }
+
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         String jarFile = ClassLoader.getSystemResource(
                 "com/latticeengines/dataflowapi/service/impl/le-serviceflows-prospectdiscovery.jar").getPath();
@@ -81,11 +94,11 @@ public class DataFlowServiceImplTestNG extends DataFlowApiFunctionalTestNGBase {
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void submitDataFlow() throws Exception {
         DataFlowConfiguration config = new DataFlowConfiguration();
-        config.setName("DataFlowConfig1");
-        config.setCustomerSpace(CustomerSpace.parse("C1.T1.QA"));
+        config.setName("DataFlowServiceImpl_submitDataFlow");
+        config.setCustomerSpace(CUSTOMERSPACE);
         config.setDataFlowBeanName("createEventTable");
         List<DataFlowSource> sources = new ArrayList<>();
         
@@ -94,13 +107,17 @@ public class DataFlowServiceImplTestNG extends DataFlowApiFunctionalTestNGBase {
         sources.add(createDataFlowSource("Opportunity", opportunity, "LastModifiedDate"));
         
         config.setDataSources(sources);
-        config.setTargetPath("/tmp/TmpEventTable");
+        config.setTargetPath("/TmpEventTable");
 
         ApplicationId appId = dataFlowService.submitDataFlow(config);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        
+        Table metadata = retrieveMetadata(config.getCustomerSpace(), config.getName());
+        assertNotNull(metadata);
+        assertEquals(metadata.getExtracts().size(), 1);
+        Path expectedLocation = PathBuilder.buildCustomerSpacePath("Production", config.getCustomerSpace());
+        assertEquals(metadata.getExtracts().get(0).getPath(), expectedLocation.append(config.getTargetPath()).toString());
     }
     
     private DataFlowSource createDataFlowSource(String name, String path, String lastModifiedColName) {
@@ -108,6 +125,16 @@ public class DataFlowServiceImplTestNG extends DataFlowApiFunctionalTestNGBase {
         s.setName(name);
         s.setTable(createTableFromDir(name, path, lastModifiedColName));
         return s;
+    }
+
+    private Table retrieveMetadata(CustomerSpace customerSpace, String tableName) {
+        RestTemplate restTemplate = new RestTemplate();
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+        restTemplate.setInterceptors(interceptors);
+        String url = String.format("%s/metadata/customerspaces/%s/tables/%s",
+                metadataHostPort, customerSpace, tableName);
+        return restTemplate.getForObject(url, Table.class);
     }
 }
 

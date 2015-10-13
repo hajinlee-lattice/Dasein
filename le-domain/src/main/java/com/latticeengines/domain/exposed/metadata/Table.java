@@ -169,11 +169,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-        
+
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-        
+
     }
 
     @JsonIgnore

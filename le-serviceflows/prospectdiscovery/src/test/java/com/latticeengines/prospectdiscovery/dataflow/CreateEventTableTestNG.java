@@ -1,6 +1,5 @@
 package com.latticeengines.prospectdiscovery.dataflow;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
@@ -35,19 +35,26 @@ public class CreateEventTableTestNG extends ServiceFlowsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void executeDataFlow() throws Exception {
         Map<String, Table> sources = new HashMap<>();
-        sources.put("Account", createTableFromDir("Account", account, "CreatedDate"));
-        sources.put("Opportunity", createTableFromDir("Opportunity", opportunity, "LastModifiedDate"));
-        sources.put("Contact", createTableFromDir("Contact", contact, "LastModifiedDate"));
+        sources.put("Account", MetadataConverter.readMetadataFromAvroFile(
+                yarnConfiguration, account, "Id", "CreatedDate"));
+        sources.put("Opportunity", MetadataConverter.readMetadataFromAvroFile(
+                yarnConfiguration, opportunity, "Id", "LastModifiedDate"));
+        sources.put("Contact", MetadataConverter.readMetadataFromAvroFile(
+                yarnConfiguration, contact, "Id", "LastModifiedDate"));
         
         DataFlowContext ctx = super.createDataFlowContext();
         ctx.setProperty("SOURCETABLES", sources);
         ctx.setProperty("CUSTOMER", "customer1");
         ctx.setProperty("TARGETPATH", "/tmp/TmpEventTable");
+        ctx.setProperty("TARGETTABLENAME", "TmpEventTable");
         ctx.setProperty("FLOWNAME", "CreateEventTable");
         
-        super.executeDataFlow(ctx, "createEventTable");
+        Table result = super.executeDataFlow(ctx, "createEventTable");
 
-        List<GenericRecord> outputTable = readTable("/tmp/TmpEventTable/*.avro");
+        Assert.assertEquals(result.getExtracts().size(), 1);
+        Assert.assertTrue(result.getAttributes().size() > 0);
+
+        List<GenericRecord> outputTable = readTable(result.getExtracts().get(0).getPath() + "/*.avro");
         List<GenericRecord> accountTable = readTable(account);
 
         Assert.assertTrue(identicalSets(outputTable, "Id", accountTable, "Id"));

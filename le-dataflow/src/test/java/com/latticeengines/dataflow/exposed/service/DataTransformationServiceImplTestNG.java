@@ -103,6 +103,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("CUSTOMER", "customer1");
         ctx.setProperty("TARGETPATH", "/tmp/EventTable");
+        ctx.setProperty("TARGETTABLENAME", "EventTable");
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", "SampleDataFlow-Lead*Oppty");
         ctx.setProperty("CHECKPOINT", true);
@@ -156,6 +157,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("SOURCETABLES", sources);
         ctx.setProperty("CUSTOMER", "customer2");
         ctx.setProperty("TARGETPATH", "/tmp/CombinedImportTable");
+        ctx.setProperty("TARGETTABLENAME", "CombinedImportTable");
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", "TableWithExtractsDataFlow");
         ctx.setProperty("CHECKPOINT", false);
@@ -175,6 +177,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("SOURCETABLES", sourceTables);
         ctx.setProperty("CUSTOMER", "customer2");
         ctx.setProperty("TARGETPATH", "/tmp/CombinedImportTable");
+        ctx.setProperty("TARGETTABLENAME", "CombinedImportTable");
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", "TableWithExtractsDataFlow");
         ctx.setProperty("CHECKPOINT", false);

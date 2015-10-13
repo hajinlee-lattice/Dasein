@@ -16,9 +16,12 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class DataFlowBuilder {
@@ -37,7 +40,7 @@ public abstract class DataFlowBuilder {
 
     public abstract Schema getSchema(String flowName, String operatorName, DataFlowContext dataFlowCtx);
 
-    public abstract void runFlow(DataFlowContext dataFlowCtx);
+    public abstract Table runFlow(DataFlowContext dataFlowCtx);
     
     protected abstract String addSource(Table sourceTable);
 
@@ -188,6 +191,49 @@ public abstract class DataFlowBuilder {
         RIGHT, //
         OUTER
     }
+
+    protected Table getTableMetadata(String tableName, String targetPath, List<FieldMetadata> metadata) {
+        Table table = new Table();
+        table.setName(tableName);
+        table.setDisplayName(tableName);
+
+        for (FieldMetadata fm : metadata) {
+            try {
+                Attribute attribute = new Attribute();
+                attribute.setName(fm.getFieldName());
+                attribute.setDisplayName(fm.getPropertyValue("displayName"));
+                if (fm.getPropertyValue("length") != null) {
+                    attribute.setLength(Integer.parseInt(fm.getPropertyValue("length")));
+                }
+                attribute.setLogicalDataType(fm.getPropertyValue("logicalType"));
+                attribute.setNullable(true);
+                attribute.setPhysicalDataType(fm.getAvroType().toString().toLowerCase());
+
+                if (fm.getPropertyValue("precision") != null) {
+                    attribute.setPrecision(Integer.parseInt(fm.getPropertyValue("precision")));
+                }
+                if (fm.getPropertyValue("scale") != null) {
+                    attribute.setScale(Integer.parseInt(fm.getPropertyValue("scale")));
+                }
+                attribute.setCleanedUpEnumValuesAsString(fm.getPropertyValue("enumValues"));
+
+                table.addAttribute(attribute);
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        String.format("Failed to convert field %s to output metadata format", fm.getFieldName()), e);
+            }
+        }
+
+        Extract extract = new Extract();
+        extract.setName("extract");
+        extract.setPath(targetPath);
+        extract.setExtractionTimestamp(DateTime.now().getMillis());
+        table.addExtract(extract);
+
+        return table;
+    }
+
+
 
     public static class Aggregation {
         public static enum AggregationType {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class DataFlowConfiguration extends BasePayloadConfiguration {
 

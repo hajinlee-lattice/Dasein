@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,28 +87,6 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
                 throws IOException {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
             requestWrapper.getHeaders().add(Constants.AUTHORIZATION, headerValue);
-
-            return execution.execute(requestWrapper, body);
-        }
-
-        public void setAuthValue(String headerValue) {
-            this.headerValue = headerValue;
-        }
-    }
-
-    public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-
-        private String headerValue;
-
-        public MagicAuthenticationHeaderHttpRequestInterceptor(String headerValue) {
-            this.headerValue = headerValue;
-        }
-
-        @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-                throws IOException {
-            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
 
             return execution.execute(requestWrapper, body);
         }

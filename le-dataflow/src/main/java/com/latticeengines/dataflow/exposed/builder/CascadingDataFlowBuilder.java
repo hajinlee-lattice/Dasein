@@ -73,6 +73,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -214,14 +215,19 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             }
             i++;
         }
-        Pipe merge = new Merge(pipes);
-        String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0); 
-        Fields sortFields = new Fields(lastModifiedKeyColName);
-        sortFields.setComparator(lastModifiedKeyColName, Collections.reverseOrder());
-        
-        Pipe groupby = new GroupBy(merge, new Fields(sourceTable.getPrimaryKey().getAttributeNames()), sortFields);
-        Pipe first = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
-        return register(first, getFieldMetadata(allColumns), false, sourceTable.getName());
+
+        Pipe toRegister = new Merge(pipes);
+
+        // group and sort the extracts
+        if (sourceTable.getPrimaryKey() != null && sourceTable.getLastModifiedKey() != null)  {
+            String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0);
+            Fields sortFields = new Fields(lastModifiedKeyColName);
+            sortFields.setComparator(lastModifiedKeyColName, Collections.reverseOrder());
+
+            Pipe groupby = new GroupBy(toRegister, new Fields(sourceTable.getPrimaryKey().getAttributeNames()), sortFields);
+            toRegister = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
+        }
+        return register(toRegister, getFieldMetadata(allColumns), false, sourceTable.getName());
     }
     
     private void validateTableForSource(Table sourceTable) {
@@ -241,15 +247,19 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 throw new LedpException(LedpCode.LEDP_26011, new String[] { extract.getName(), sourceTable.getName() });
             }
         }
-        
-        PrimaryKey key = sourceTable.getPrimaryKey();
-        
-        if (key == null) {
-            throw new LedpException(LedpCode.LEDP_26007, new String[] { sourceTable.getName() });
-        }
-        
-        if (key.getAttributes().size() == 0) {
-            throw new LedpException(LedpCode.LEDP_26008, new String[] { sourceTable.getName() });
+
+        if (sourceTable.getExtracts().size() > 1) {
+            PrimaryKey key = sourceTable.getPrimaryKey();
+
+            if (key == null) {
+                throw new LedpException(LedpCode.LEDP_26007, new String[] { sourceTable.getName() });
+            }
+
+            LastModifiedKey lmk = sourceTable.getLastModifiedKey();
+
+            if (lmk == null) {
+                throw new LedpException(LedpCode.LEDP_26013, new String[] { sourceTable.getName() });
+            }
         }
     }
 
@@ -746,7 +756,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     @Override
-    public void runFlow(DataFlowContext dataFlowCtx) {
+    public Table runFlow(DataFlowContext dataFlowCtx) {
         @SuppressWarnings("unchecked")
         Map<String, String> sourcePaths = dataFlowCtx.getProperty("SOURCES", Map.class);
         @SuppressWarnings("unchecked")
@@ -763,14 +773,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         } else {
             lastOperator = constructFlowDefinition(dataFlowCtx, sourcePaths);
         }
-        
+
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
         Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
         if (!isLocal()) {
             sink = new Hfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
         }
-        
-        
+
+
         Properties properties = new Properties();
         if (jobProperties != null) {
             properties.putAll(jobProperties);
@@ -781,7 +791,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         FlowDef flowDef = FlowDef.flowDef().setName(flowName) //
                 .addSources(getSources()) //
                 .addTailSink(getPipeByName(lastOperator), sink);
-        
+
         for (AbstractMap.SimpleEntry<Checkpoint, Tap> entry : checkpoints.values()) {
             flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());
         }
@@ -803,6 +813,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         flow.addListener(dataFlowListener);
         flow.addStepListener(dataFlowStepListener);
         flow.complete();
+        return getTableMetadata(
+                dataFlowCtx.getProperty("TARGETTABLENAME", String.class), //
+                targetPath, //
+                pipesAndOutputSchemas.get(lastOperator).getValue());
     }
 
     public static class RegexFilter implements HdfsUtils.HdfsFileFilter {

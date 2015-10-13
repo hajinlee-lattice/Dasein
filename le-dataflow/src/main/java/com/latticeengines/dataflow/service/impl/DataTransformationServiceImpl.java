@@ -14,6 +14,7 @@ import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component("dataTransformationService")
 public class DataTransformationServiceImpl implements DataTransformationService {
@@ -22,8 +23,9 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     private ApplicationContext appContext;
 
     @Override
-    public void executeNamedTransformation(DataFlowContext dataFlowCtx, String dataFlowBldrBeanName) {
+    public Table executeNamedTransformation(DataFlowContext dataFlowCtx, String dataFlowBldrBeanName) {
         validateParameters(dataFlowCtx, //
+                "TARGETTABLENAME",
                 "QUEUE", //
                 "TARGETPATH", //
                 "CUSTOMER", //
@@ -49,7 +51,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         Configuration hadoopConfig = dataFlowCtx.getProperty("HADOOPCONF", Configuration.class);
         dataFlow.setLocal(hadoopConfig == null || hadoopConfig.get("fs.defaultFS").equals("file:///"));
         dataFlow.setCheckpoint(doCheckpoint);
-        dataFlow.runFlow(dataFlowCtx);
+        return dataFlow.runFlow(dataFlowCtx);
     }
 
     private void validateParameters(DataFlowContext dataFlowCtx, String... keys) {

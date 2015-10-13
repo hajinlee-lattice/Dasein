@@ -65,6 +65,9 @@ public class Path implements Serializable {
     }
 
     public Path append(String part) {
+        if (part.contains("/")) {
+            return append(new Path(part));
+        }
         List<String> concat = new ArrayList<String>();
         concat.addAll(this.parts);
         concat.add(part);
@@ -72,6 +75,9 @@ public class Path implements Serializable {
     }
 
     public Path prefix(String part) {
+        if (part.contains("/")) {
+            return prefix(new Path(part));
+        }
         List<String> concat = new ArrayList<String>();
         concat.add(part);
         concat.addAll(this.parts);

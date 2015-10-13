@@ -20,6 +20,8 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
+    <context:component-scan base-package="com.latticeengines.security.exposed.entitymanager"/>
+    <context:component-scan base-package="com.latticeengines.security.exposed.dao"/>
     
     <import resource="classpath:dataflowapi-context.xml"/>
     <import resource="classpath:dataflowapi-properties-context.xml"/> 
