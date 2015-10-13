@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
-public class DataFlowServiceImplTestNG extends DataFlowApiFunctionalTestNGBase {
+public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTestNGBase {
 
     @Value("${metadata.api.hostport}")
     private String metadataHostPort;
@@ -52,7 +52,7 @@ public class DataFlowServiceImplTestNG extends DataFlowApiFunctionalTestNGBase {
     
     private String opportunity;
 
-    public DataFlowServiceImplTestNG() {
+    public DataFlowServiceImplDeploymentTestNG() {
     }
 
     @BeforeClass(groups = "deployment")

@@ -17,7 +17,7 @@
         <le.dataplatform.version>2.0.12-SNAPSHOT</le.dataplatform.version>
         <le.domain.version>2.0.12-SNAPSHOT</le.domain.version>
         <le.scheduler.version>2.0.12-SNAPSHOT</le.scheduler.version>
-        <le.security.version>2.0.11-SNAPSHOT</le.security.version>
+        <le.security.version>2.0.12-SNAPSHOT</le.security.version>
         <cascading.version>3.0.1</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <tez.version>0.5.2.2.2.0.0-2041</tez.version>
