@@ -140,7 +140,7 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
     
     public void setAttributesAsStr(String attrStr) {
         if (attrStr != null) {
-            attributes.addAll(Arrays.asList(attrStr.split(",")));
+            attributes = Arrays.asList(attrStr.split(","));
         }
     }
 
