@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
@@ -122,6 +123,8 @@
                                             implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                             <resource>META-INF/spring.schemas</resource>
                                         </transformer>
+                                        <transformer
+                                            implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                                     </transformers>
                                 </configuration>
                             </execution>
@@ -152,8 +155,8 @@
                             </artifactSet>
 
                             <filters>
-                                <!-- Strip any signatures to avoid security 
-                                    errors running the shaded JAR. -->
+                                <!-- Strip any signatures to avoid security errors running the shaded 
+                                    JAR. -->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -191,6 +194,9 @@
                                     <skip>false</skip>
                                     <groups>${unit.groups}</groups>
                                     <forkMode>always</forkMode>
+                                    <additionalClasspathElements>
+                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
+                                    </additionalClasspathElements>
                                 </configuration>
                             </execution>
                             <execution>
@@ -458,7 +464,8 @@
                                         <!-- Execute an ant task within maven -->
                                         <echo message="Generating jacoco reports..." />
                                         <taskdef name="report" classname="org.jacoco.ant.ReportTask">
-                                            <classpath path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
+                                            <classpath
+                                                path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
                                         </taskdef>
                                         <mkdir dir="${jacoco.coverage.dir}/site/jacoco" />
                                         <report>
@@ -470,7 +477,8 @@
                                             <structure name="Jacoco Multi-Run Coverage Project">
                                                 <group name="jacoco-multi-run-coverage">
                                                     <classfiles>
-                                                        <fileset dir="${project.build.directory}/classes" />
+                                                        <fileset
+                                                            dir="${project.build.directory}/classes" />
                                                     </classfiles>
                                                     <sourcefiles encoding="UTF-8">
                                                         <fileset dir="${project.build.sourceDirectory}" />
@@ -510,14 +518,12 @@
         <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
-                <!-- The Jetty Maven plugin is useful for rapid development 
-                    and testing. You can add it to any webapp project that is structured according 
-                    to the usual Maven defaults. The plugin can then periodically scan your project 
-                    for changes and automatically redeploy the webapp if any are found. This 
-                    makes the development cycle more productive by eliminating the build and 
-                    deploy steps: you use your IDE to make changes to the project, and the running 
-                    web container automatically picks them up, allowing you to test them straight 
-                    away. To run - mvn jetty:run -->
+                <!-- The Jetty Maven plugin is useful for rapid development and testing. You can add 
+                    it to any webapp project that is structured according to the usual Maven defaults. The plugin can then 
+                    periodically scan your project for changes and automatically redeploy the webapp if any are found. This 
+                    makes the development cycle more productive by eliminating the build and deploy steps: you use your IDE 
+                    to make changes to the project, and the running web container automatically picks them up, allowing you 
+                    to test them straight away. To run - mvn jetty:run -->
                 <plugin>
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-maven-plugin</artifactId>
@@ -557,8 +563,7 @@
                     </configuration>
                 </plugin>
                 <!-- -->
-                <!-- jar plugin to produce 3 jars: impl (default), interface, 
-                    tests -->
+                <!-- jar plugin to produce 3 jars: impl (default), interface, tests -->
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven.jar.version}</version>
