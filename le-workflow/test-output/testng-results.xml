@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="1702" started-at="2015-10-12T22:03:18Z" finished-at="2015-10-12T22:03:20Z">
+    <groups>
+      <group name="functional">
+        <method signature="DLOrchestrationWorkflowTest.testWorkflow()[pri:0, instance:com.latticeengines.workflow.library.DLOrchestrationWorkflowTest@58b37561]" name="testWorkflow" class="com.latticeengines.workflow.library.DLOrchestrationWorkflowTest"/>
+      </group> <!-- functional -->
+    </groups>
+    <test name="Default test" duration-ms="1702" started-at="2015-10-12T22:03:18Z" finished-at="2015-10-12T22:03:20Z">
+      <class name="com.latticeengines.workflow.library.DLOrchestrationWorkflowTest">
+        <test-method status="PASS" signature="springTestContextBeforeTestClass()[pri:0, instance:com.latticeengines.workflow.library.DLOrchestrationWorkflowTest@58b37561]" name="springTestContextBeforeTestClass" is-config="true" duration-ms="7" started-at="2015-10-12T15:03:18Z" finished-at="2015-10-12T15:03:18Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- springTestContextBeforeTestClass -->
+        <test-method status="PASS" signature="springTestContextPrepareTestInstance()[pri:0, instance:com.latticeengines.workflow.library.DLOrchestrationWorkflowTest@58b37561]" name="springTestContextPrepareTestInstance" is-config="true" duration-ms="1286" started-at="2015-10-12T15:03:18Z" depends-on-methods="org.springframework.test.context.testng.AbstractTestNGSpringContextTests.springTestContextBeforeTestClass" finished-at="2015-10-12T15:03:19Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- springTestContextPrepareTestInstance -->
+        <test-method status="PASS" signature="springTestContextBeforeTestMethod(java.lang.reflect.Method)[pri:0, instance:com.latticeengines.workflow.library.DLOrchestrationWorkflowTest@58b37561]" name="springTestContextBeforeTestMethod" is-config="true" duration-ms="0" started-at="2015-10-12T15:03:19Z" finished-at="2015-10-12T15:03:19Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[public void com.latticeengines.workflow.library.DLOrchestrationWorkflowTest.testWorkflow() throws java.lang.Exception]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- springTestContextBeforeTestMethod -->
+        <test-method status="PASS" signature="testWorkflow()[pri:0, instance:com.latticeengines.workflow.library.DLOrchestrationWorkflowTest@58b37561]" name="testWorkflow" duration-ms="396" started-at="2015-10-12T15:03:19Z" finished-at="2015-10-12T15:03:20Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testWorkflow -->
+        <test-method status="PASS" signature="springTestContextAfterTestMethod(java.lang.reflect.Method)[pri:0, instance:com.latticeengines.workflow.library.DLOrchestrationWorkflowTest@58b37561]" name="springTestContextAfterTestMethod" is-config="true" duration-ms="2" started-at="2015-10-12T15:03:20Z" finished-at="2015-10-12T15:03:20Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[public void com.latticeengines.workflow.library.DLOrchestrationWorkflowTest.testWorkflow() throws java.lang.Exception]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- springTestContextAfterTestMethod -->
+        <test-method status="PASS" signature="springTestContextAfterTestClass()[pri:0, instance:com.latticeengines.workflow.library.DLOrchestrationWorkflowTest@58b37561]" name="springTestContextAfterTestClass" is-config="true" duration-ms="0" started-at="2015-10-12T15:03:20Z" finished-at="2015-10-12T15:03:20Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- springTestContextAfterTestClass -->
+      </class> <!-- com.latticeengines.workflow.library.DLOrchestrationWorkflowTest -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
