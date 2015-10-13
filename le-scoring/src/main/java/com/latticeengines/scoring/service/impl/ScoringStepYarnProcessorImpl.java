@@ -131,7 +131,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String targetDir = customerBaseDir + "/" + tenant + "/scoring/" + table + "/data";
         metadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
         try {
-            if (HdfsUtils.getFilesForDir(yarnConfiguration, targetDir).size() > 0)
+            if (HdfsUtils.fileExists(yarnConfiguration, targetDir))
                 HdfsUtils.rmdir(yarnConfiguration, targetDir);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00004, new String[] { targetDir });
