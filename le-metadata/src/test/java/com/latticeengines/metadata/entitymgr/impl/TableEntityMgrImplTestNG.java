@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -37,6 +38,15 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
                 tenantEntityMgr.findByTenantId(customerSpace));
 
         Table table = tableEntityMgr.findByName(tableName);
+        validateTable(table);
+        
+        String serializedStr = JsonUtils.serialize(table);
+        
+        Table deserializedTable = JsonUtils.deserialize(serializedStr, Table.class);
+        validateTable(deserializedTable);
+    }
+    
+    private void validateTable(Table table) {
         List<Attribute> attrs = table.getAttributes();
         
         Collections.sort(attrs, new Comparator<Attribute>() {
@@ -65,7 +75,6 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrs.get(1).getLogicalDataType(), "Date");
         assertEquals(table.getPrimaryKey().getAttributes().get(0), "ID");
         assertEquals(table.getLastModifiedKey().getAttributes().get(0), "LID");
-
     }
     
     @DataProvider(name = "tableProvider")
