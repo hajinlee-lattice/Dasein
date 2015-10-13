@@ -1,3 +1,4 @@
 #!/bin/bash -x
+touch /opt/jetty/logs/start.log
 service jetty restart > /opt/jetty/logs/start.log 2>&1
 

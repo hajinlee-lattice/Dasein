@@ -8,6 +8,8 @@
 
     <properties>
         <component-name>microservice-parent</component-name>
+        <le.monitor.version>2.0.12-SNAPSHOT</le.monitor.version>
+        <le.microservice.version>2.0.12-SNAPSHOT</le.microservice.version>
     </properties>
 
     <parent>
@@ -160,21 +162,41 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <modules>
         <module>core</module>
     <!-- 
-        <module>dataflow</module> -->
-        
+        <module>dataflow</module>
+    -->
         <module>eai</module>
-    <!-- 
-        <module>metadata</module> -->
+        <module>metadata</module>
         <module>modeling</module>
+        <module>dataflowapi</module>
     <!--         
         <module>propdata</module>
         <module>scoring</module>
-        <module>workflow</module> -->
+        <module>workflow</module>
+    -->
     </modules>
 
 </project>

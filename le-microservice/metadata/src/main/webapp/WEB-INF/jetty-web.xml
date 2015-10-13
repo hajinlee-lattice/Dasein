@@ -6,7 +6,7 @@
     <!--  + contextPath                                                  -->
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <Set name="contextPath">/</Set>
+    <Set name="contextPath">/metadata</Set>
     <Set name="war"><Property name="jetty.webapps" default="."/>/le-metadata-microservice-2.0.12-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

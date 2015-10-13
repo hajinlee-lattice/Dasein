@@ -29,6 +29,8 @@
         <module>le-camille</module>
         <module>le-baton</module>
         <module>le-monitor</module>
+        <module>le-metadata</module>
+        <module>le-dataflowapi</module>
         <module>le-api</module>
         <module>le-perf</module>
         <module>le-web</module>

@@ -91,7 +91,7 @@ HADOOP_CONF=--lib=/etc/hadoop/conf
 SQOOP_HOME=/usr/hdp/current/sqoop-server
 JAVA_HOME=/usr/java/default
 
-JAVA_OPTIONS=(-XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty -DEAI_PROPDIR=/etc/ledp -DDATAPLATFORM_PROPDIR=/etc/ledp -DDB_PROPDIR=/etc/ledp -DDPDL_QUARTZ_ENABLED=disabled)
+JAVA_OPTIONS=(-XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty -DEAI_PROPDIR=/etc/ledp -DDATAPLATFORM_PROPDIR=/etc/ledp -DDB_PROPDIR=/etc/ledp -DMETADATA_PROPDIR=/etc/ledp -DDATAFLOWAPI_PROPDIR=/etc/ledp -DSECURITY_PROPDIR=/etc/ledp -DDPDL_QUARTZ_ENABLED=disabled)
 JAVA_OPTIONS+=(-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099)
 
 usage()

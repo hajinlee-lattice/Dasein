@@ -2,15 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-metadata-microservice</artifactId>
+    <artifactId>le-dataflowapi-microservice</artifactId>
     <packaging>war</packaging>
     <name>le-${component-name}</name>
-    <description>LE METADATA</description>
+    <description>LE DATAFLOWAPI</description>
 
     <properties>
-        <component-name>metadata-microservice</component-name>
-        <le.metadata.version>2.0.12-SNAPSHOT</le.metadata.version>
-        <le.domain.version>2.0.12-SNAPSHOT</le.domain.version>
+        <component-name>dataflowapi-microservice</component-name>
+        <le.dataflowapi.version>2.0.12-SNAPSHOT</le.dataflowapi.version>
+        <le.microservice.version>2.0.12-SNAPSHOT</le.microservice.version>
     </properties>
 
     <parent>
@@ -23,14 +23,14 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-metadata</artifactId>
-            <version>${le.metadata.version}</version>
+            <artifactId>le-dataflowapi</artifactId>
+            <version>${le.dataflowapi.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-metadata</artifactId>
-            <version>${le.metadata.version}</version>
+            <artifactId>le-dataflowapi</artifactId>
+            <version>${le.dataflowapi.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
