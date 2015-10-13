@@ -1,5 +1,9 @@
 package com.latticeengines.pls.dao.impl;
 
+import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -12,6 +16,15 @@ public class PredictorDaoImpl extends BaseDaoImpl<Predictor> implements Predicto
     @Override
     protected Class<Predictor> getEntityClass() {
         return Predictor.class;
+    }
+
+    @Override
+    public List<Predictor> findByModelId(String ModelId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Predictor> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where modelSummary. = '%s'", entityClz.getSimpleName(), ModelId);
+        Query query = session.createQuery(queryStr);
+        return query.list();
     }
 
 }

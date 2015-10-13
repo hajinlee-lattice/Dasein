@@ -54,8 +54,12 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Tenant tenant1 = tenantService.findByTenantId("TENANT1");
         Tenant tenant2 = tenantService.findByTenantId("TENANT2");
 
-        if (tenant1 != null) { tenantService.discardTenant(tenant1); }
-        if (tenant2 != null) { tenantService.discardTenant(tenant2); }
+        if (tenant1 != null) {
+            tenantService.discardTenant(tenant1);
+        }
+        if (tenant2 != null) {
+            tenantService.discardTenant(tenant2);
+        }
 
         summary1 = createModelSummaryForTenant1();
         summary2 = createModelSummaryForTenant2();
@@ -71,8 +75,8 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     private void setDetails(ModelSummary summary) throws Exception {
-        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
+        InputStream modelSummaryFileAsStream = ClassLoader
+                .getSystemResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();
@@ -208,7 +212,8 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 "approvedUsage", //
                 "category", //
                 "fundamentalType", //
-                "uncertaintyCoefficient" };
+                "uncertaintyCoefficient", //
+                "tenantId" };
 
         String[] predictorElementFields = new String[] { "name", //
                 "correlationSign", //
@@ -291,7 +296,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    
     @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForActiveModel" })
     public void updateAsDeletedForInactiveModel() {
         setupSecurityContext(summary1);
@@ -301,11 +305,12 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         modelSummaryEntityMgr.update(retrievedSummary);
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.DELETED);
         assertNotNull(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false));
-        assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false).getStatus(), ModelSummaryStatus.DELETED);
+        assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false).getStatus(),
+                ModelSummaryStatus.DELETED);
         List<ModelSummary> modelSummaryList = modelSummaryEntityMgr.findAllValid();
         Assert.assertEquals(modelSummaryList.size(), 0);
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForInactiveModel" })
     public void updateAsActiveForDeletedModel() {
         setupSecurityContext(summary1);
@@ -317,12 +322,11 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         } catch (LedpException ex) {
             Assert.assertEquals(ex.getCode(), LedpCode.LEDP_18024);
         }
-        
+
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.INACTIVE);
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);
-        
-    }
 
+    }
 
     @Test(groups = "functional", dependsOnMethods = { "updateAsActiveForDeletedModel" })
     public void deleteForModelInTenant() {

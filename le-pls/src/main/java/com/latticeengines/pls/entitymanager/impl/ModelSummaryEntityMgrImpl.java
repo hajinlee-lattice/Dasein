@@ -74,6 +74,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         modelSummaryDao.create(summary);
 
         for (Predictor predictor : summary.getPredictors()) {
+            predictor.setTenantId(tenant.getPid());
+            predictor.setModelSummary(summary);
             predictorDao.create(predictor);
 
             for (PredictorElement el : predictor.getPredictorElements()) {
@@ -121,11 +123,15 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
     }
 
-    private Long getTenantId()  {
-        // By the time this method is invoked, the aspect joinpoint in MultiTenantEntityMgrAspect would
-        // have been invoked, and any exceptions with respect to nulls would already
-        // have been caught there, which is why there is no defensive checking here
-        TicketAuthenticationToken token = (TicketAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+    private Long getTenantId() {
+        // By the time this method is invoked, the aspect joinpoint in
+        // MultiTenantEntityMgrAspect would
+        // have been invoked, and any exceptions with respect to nulls would
+        // already
+        // have been caught there, which is why there is no defensive checking
+        // here
+        TicketAuthenticationToken token = (TicketAuthenticationToken) SecurityContextHolder.getContext()
+                .getAuthentication();
         return token.getSession().getTenant().getPid();
     }
 
@@ -141,7 +147,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
         // We need to have a separate call to delete from the KeyValue table
         // because the idea is that multiple entities should be able to use
-        // the KeyValue table so we cannot create a foreign key from KEY_VALUE to
+        // the KeyValue table so we cannot create a foreign key from KEY_VALUE
+        // to
         // the owning entity to get the delete cascade effect.
         // Instead a delete of a model summary needs to reach into the KEY_VALUE
         // table, and delete the associated KeyValue instance
@@ -238,7 +245,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly) {
+    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
+            boolean validOnly) {
         ModelSummary summary = null;
         if (validOnly) {
             summary = modelSummaryDao.findValidByModelId(modelId);
@@ -254,7 +262,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         if (summaryTenantId == null //
                 || secCtxTenantId == null //
                 || summaryTenantId.longValue() != secCtxTenantId.longValue()) {
-            log.warn(String.format("Summary tenant id = %d, Security context tenant id = %d", summaryTenantId, secCtxTenantId));
+            log.warn(String.format("Summary tenant id = %d, Security context tenant id = %d", summaryTenantId,
+                    secCtxTenantId));
             return null;
         }
         if (returnRelational) {
@@ -271,8 +280,10 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public ModelSummary retrieveByModelIdForInternalOperations(String modelId) {
         ModelSummary summary = modelSummaryDao.findByModelId(modelId);
-        if (summary != null) inflateDetails(summary);
-        if (summary != null) inflatePredictors(summary);
+        if (summary != null)
+            inflateDetails(summary);
+        if (summary != null)
+            inflatePredictors(summary);
         return summary;
     }
 

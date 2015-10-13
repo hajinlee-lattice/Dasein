@@ -18,7 +18,7 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 @DisallowConcurrentExecution
 @Component("modelSummaryService")
 public class ModelSummaryServiceImpl implements ModelSummaryService {
-    
+
     private static final Log log = LogFactory.getLog(ModelSummaryServiceImpl.class);
 
     @Autowired
@@ -52,7 +52,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     public boolean modelIdinTenant(String modelId, String tenantId) {
         ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false, false);
-        if (modelSummary == null) return false;
+        if (modelSummary == null)
+            return false;
         Tenant tenant = modelSummary.getTenant();
         return (tenant != null) && tenantId.equals(tenant.getId());
     }
@@ -61,7 +62,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getAll();
         List<String> existingNames = new ArrayList<>();
         List<String> existingIds = new ArrayList<>();
-        for (ModelSummary summary: modelSummaries) {
+        for (ModelSummary summary : modelSummaries) {
             if (summary.getTenant().getId().equals(tenantId)) {
                 existingNames.add(summary.getName());
             }
@@ -78,18 +79,17 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         }
 
         if (version > 0) {
-            log.info(String.format(
-                    "Change model name from \"%s\" to \"%s\" to avoid conflicts.",
-                    modelSummary.getName(), possibleName
-            ));
-            log.info(String.format(
-                    "Change model id from \"%s\" to \"%s\" to avoid conflicts.",
-                    modelSummary.getId(), possibleId
-            ));
+            log.info(String.format("Change model name from \"%s\" to \"%s\" to avoid conflicts.",
+                    modelSummary.getName(), possibleName));
+            log.info(String.format("Change model id from \"%s\" to \"%s\" to avoid conflicts.", modelSummary.getId(),
+                    possibleId));
         }
 
         modelSummary.setId(possibleId);
         modelSummary.setName(possibleName);
     }
 
+    // public void updatePredictors() {
+    // predictorEntityMgr.
+    // }
 }

@@ -6,6 +6,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class JobStatus implements HasId<String> {
 
@@ -19,7 +20,12 @@ public class JobStatus implements HasId<String> {
     private String trackingUrl;
     private long startTime;
     private long finishTime;
-    private ApplicationResourceUsageReport appResUsgReport; 
+    private ApplicationResourceUsageReport appResUsgReport;
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 
     @Override
     public String getId() {
@@ -31,7 +37,6 @@ public class JobStatus implements HasId<String> {
         this.jobId = jobId;
     }
 
-    
     @JsonProperty("status")
     public FinalApplicationStatus getStatus() {
         return status;
@@ -48,7 +53,7 @@ public class JobStatus implements HasId<String> {
     }
 
     @JsonProperty("state")
-    public void setState(YarnApplicationState state){
+    public void setState(YarnApplicationState state) {
         this.state = state;
     }
 
@@ -61,7 +66,7 @@ public class JobStatus implements HasId<String> {
     public void setResultDirectory(String resultDirectory) {
         this.resultDirectory = resultDirectory;
     }
-    
+
     @JsonProperty("diagnostics_path")
     public String getDataDiagnosticsPath() {
         return dataDiagnosticsPath;
@@ -71,7 +76,7 @@ public class JobStatus implements HasId<String> {
     public void setDataDiagnosticsPath(String dataDiagnosticsPath) {
         this.dataDiagnosticsPath = dataDiagnosticsPath;
     }
-    
+
     @JsonProperty("progress")
     public float getProgress() {
         return progress;
@@ -121,9 +126,9 @@ public class JobStatus implements HasId<String> {
     public void setFinishTime(long finishTime) {
         this.finishTime = finishTime;
     }
-    
+
     @JsonIgnore
-    public ApplicationResourceUsageReport getAppResUsageReport(){
+    public ApplicationResourceUsageReport getAppResUsageReport() {
         return this.appResUsgReport;
     }
 

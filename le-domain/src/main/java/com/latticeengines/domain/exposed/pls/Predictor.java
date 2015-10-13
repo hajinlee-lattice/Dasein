@@ -21,6 +21,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -28,7 +29,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 @Entity
 @Table(name = "PREDICTOR")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class Predictor implements HasName, HasPid, HasTenantId {
+public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predictor> {
 
     private Long pid;
     private String name;
@@ -40,6 +41,7 @@ public class Predictor implements HasName, HasPid, HasTenantId {
     private ModelSummary modelSummary;
     private List<PredictorElement> predictorElements = new ArrayList<>();
     private Long tenantId;
+    private Boolean usedForBuyerInsights = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,7 +68,7 @@ public class Predictor implements HasName, HasPid, HasTenantId {
         this.name = name;
     }
 
-    @Column(name = "DISPLAY_NAME", nullable = false)
+    @Column(name = "DISPLAY_NAME")
     public String getDisplayName() {
         return displayName;
     }
@@ -84,7 +86,7 @@ public class Predictor implements HasName, HasPid, HasTenantId {
         this.approvedUsage = approvedUsage;
     }
 
-    @Column(name = "CATEGORY", nullable = false)
+    @Column(name = "CATEGORY")
     public String getCategory() {
         return category;
     }
@@ -151,4 +153,24 @@ public class Predictor implements HasName, HasPid, HasTenantId {
         this.tenantId = tenantId;
     }
 
+    @Column(name = "USED_FOR_BI", nullable = false)
+    public Boolean getUsedForBuyerInsights() {
+        return usedForBuyerInsights;
+    }
+
+    public void setUsedForBuyerInsights(Boolean usedForBuyerInsights) {
+        this.usedForBuyerInsights = usedForBuyerInsights;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
+    @Override
+    public int compareTo(Predictor predictor) {
+        Double compareUncertaintyCoefficient = predictor.getUncertaintyCoefficient();
+        // descending order
+        return Double.compare(compareUncertaintyCoefficient, this.getUncertaintyCoefficient());
+    }
 }

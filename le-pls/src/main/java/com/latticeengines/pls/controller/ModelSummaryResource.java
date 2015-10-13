@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.PredictorEntityMgr;
 import com.latticeengines.pls.service.ModelAlertService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -46,6 +47,9 @@ public class ModelSummaryResource {
 
     @Autowired
     private ModelAlertService modelAlertService;
+
+    @Autowired
+    private PredictorEntityMgr predictorEntityMgr;
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -143,6 +147,17 @@ public class ModelSummaryResource {
 
     public ModelSummaryEntityMgr getModelSummaryEntityMgr() {
         return modelSummaryEntityMgr;
+    }
+
+    @RequestMapping(value = "/predictors/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update predictors of a modelSummary for the use of BuyerInsights")
+    @PreAuthorize("hasRole('Edit_PLS_Models')")
+    public Boolean updatePredictors(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
+        ModelSummary modelSummary = new ModelSummary();
+        modelSummary.setId(modelId);
+        modelSummaryEntityMgr.updateModelSummary(modelSummary, attrMap);
+        return true;
     }
 
 }
