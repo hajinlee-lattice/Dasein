@@ -7,7 +7,7 @@ public enum LedpCode {
     LEDP_00001("Could not collect yarn queue information from ResourceManager."), //
     LEDP_00002("Generic system error."), //
     LEDP_00003("Could not find the file at path {0} on server {1}."), //
-
+    LEDP_00004("Could not delete hdfs dir {0}."), //
     // Validation service: 10000-10999
     LEDP_10000("Metadata schema is null."), //
     LEDP_10001("Metadata schema is not retrievable from hdfs."), //
