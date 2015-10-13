@@ -16,6 +16,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
@@ -251,6 +252,17 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
+    }
+
+    @Column(name = "PROPERTIES", nullable = false)
+    @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+    
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
     }
 
     @Override

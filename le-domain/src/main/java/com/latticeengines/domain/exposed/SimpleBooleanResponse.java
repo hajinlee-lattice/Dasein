@@ -4,6 +4,9 @@ import java.util.List;
 
 @SuppressWarnings("rawtypes")
 public class SimpleBooleanResponse extends ResponseDocument {
+    
+    public SimpleBooleanResponse() {
+    }
 
     @SuppressWarnings("unchecked")
     private SimpleBooleanResponse(boolean success, List<String> errors) {

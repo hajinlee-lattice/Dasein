@@ -12,17 +12,17 @@ import com.latticeengines.common.exposed.validator.annotation.RequiredKeysInMap;
 
 public class ModelingMetadata {
 
-    private static final String NONE_APPROVED_USAGE = "None";
-    private static final String MODEL_APPROVED_USAGE = "Model";
-    private static final String MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE = "ModelAndModelInsights";
-    private static final String MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE = "ModelAndAllInsights";
-    private static final String INTERNAL_TAG = "Internal";
-    private static final String EXTERNAL_TAG = "External";
-    private static final String NOMINAL_STAT_TYPE = "nominal";
-    private static final String ORDINAL_STAT_TYPE = "ordinal";
-    private static final String INTERVAL_STAT_TYPE = "interval";
-    private static final String RATIO_STAT_TYPE = "ratio";
-    private static final String CATEGORY_EXTENSION = "Category";
+    public static final String NONE_APPROVED_USAGE = "None";
+    public static final String MODEL_APPROVED_USAGE = "Model";
+    public static final String MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE = "ModelAndModelInsights";
+    public static final String MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE = "ModelAndAllInsights";
+    public static final String INTERNAL_TAG = "Internal";
+    public static final String EXTERNAL_TAG = "External";
+    public static final String NOMINAL_STAT_TYPE = "nominal";
+    public static final String ORDINAL_STAT_TYPE = "ordinal";
+    public static final String INTERVAL_STAT_TYPE = "interval";
+    public static final String RATIO_STAT_TYPE = "ratio";
+    public static final String CATEGORY_EXTENSION = "Category";
 
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 

@@ -36,6 +36,9 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -250,6 +253,33 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (lastModifiedKey != null) {
             lastModifiedKey.setTable(this);
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Transient
+    public ModelingMetadata getModelingMetadata() {
+        ModelingMetadata metadata = new ModelingMetadata();
+        List<AttributeMetadata> attrMetadata = new ArrayList<>();
+        for (Attribute attr : getAttributes()) {
+            Map<String, Object> properties = attr.getProperties();
+            AttributeMetadata attrMetadatum = new AttributeMetadata();
+            
+            attrMetadatum.setColumnName(attr.getName());
+            attrMetadatum.setDisplayName(attr.getDisplayName());
+            attrMetadatum.setApprovedUsage((List<String>) properties.get("ApprovedUsage"));
+            attrMetadatum.setDescription((String) properties.get("Description"));
+            attrMetadatum.setStatisticalType((String) properties.get("StatisticalType"));
+            attrMetadatum.setTags((List<String>) properties.get("Tags"));
+            attrMetadatum.setDisplayDiscretizationStrategy((String) properties.get("DisplayDiscretizationStrategy"));
+            attrMetadatum.setFundamentalType((String) properties.get("FundamentalType"));
+            attrMetadatum.setExtensions(((List<KV>) properties.get("Extensions")));
+            attrMetadatum.setDataQuality((String) properties.get("DataQuality"));
+            attrMetadatum.setDataSource((List<String>) properties.get("DataSource"));
+            
+            attrMetadata.add(attrMetadatum);
+        }
+        metadata.setAttributeMetadata(attrMetadata);
+        return metadata;
     }
 
     @Override
