@@ -35,7 +35,6 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         String leadInputQueueId = context.getConfiguration().get(ScoringProperty.LEAD_INPUT_QUEUE_ID.name());
         String logDir = context.getConfiguration().get(ScoringProperty.LOG_DIR.name());
         String tenantId = context.getConfiguration().get(ScoringProperty.TENANT_ID.name());
-
         @SuppressWarnings("deprecation")
         Path[] paths = context.getLocalCacheFiles();
         long leadFileThreshold = context.getConfiguration().getLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(),

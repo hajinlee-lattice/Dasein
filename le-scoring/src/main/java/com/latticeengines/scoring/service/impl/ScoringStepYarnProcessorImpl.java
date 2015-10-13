@@ -130,6 +130,12 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String tenant = getTenant(scoringCommand);
         String targetDir = customerBaseDir + "/" + tenant + "/scoring/" + table + "/data";
         metadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
+        try {
+            if (!CollectionUtils.isEmpty(HdfsUtils.getFilesForDir(yarnConfiguration, targetDir)))
+                HdfsUtils.rmdir(yarnConfiguration, targetDir);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00004, new String[] { targetDir });
+        }
         ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, scoringCreds,
                 LedpQueueAssigner.getScoringQueueNameForSubmission(), tenant, Arrays.asList(PID), "");
         return appId;
@@ -214,7 +220,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
             throw new LedpException(LedpCode.LEDP_20008, new String[] { tenant });
         }
         List<String> localizedModelFilePaths = new ArrayList<>();
-        for(String path : modelFilePaths){
+        for (String path : modelFilePaths) {
             try {
                 HdfsUtils.getCheckSum(yarnConfiguration, path);
                 localizedModelFilePaths.add(path);
