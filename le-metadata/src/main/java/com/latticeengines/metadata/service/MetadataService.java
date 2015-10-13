@@ -1,9 +1,13 @@
 package com.latticeengines.metadata.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import com.latticeengines.common.exposed.expection.AnnotationValidationError;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public interface MetadataService {
 
@@ -16,4 +20,6 @@ public interface MetadataService {
     void deleteTable(CustomerSpace customerSpace, String name);
 
     void updateTable(CustomerSpace customerSpace, Table table);
+
+    Map<String, Set<AnnotationValidationError>> validateTableMetadata(CustomerSpace customerSpace, ModelingMetadata modelingMetadata);
 }

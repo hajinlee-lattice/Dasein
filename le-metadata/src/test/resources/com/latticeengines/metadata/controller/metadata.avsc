@@ -1,0 +1,43 @@
+{
+  "Attributes": [
+    {
+      "ApprovedUsage": [
+        "Model"
+      ],
+      "ColumnName": "ActiveRetirementParticipants",
+      "DataQuality": null,
+      "DataSource": [
+        "DerivedColumns"
+      ],
+      "DataType": "Integer",
+      "Description": "Number of participants in the company reitirement plan that are in active service with the company",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":10,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "Active Retirement Plan Participants",
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": "Firmographics"
+        },
+        {
+          "Key": "DataType",
+          "Value": "Int"
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1436901660000)/",
+          "OffsetMinutes": -240
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(1436901660000)/",
+        "OffsetMinutes": -240
+      },
+      "StatisticalType": "ratio",
+      "Tags": [
+        "External"
+      ]
+    }
+  ]
+ }

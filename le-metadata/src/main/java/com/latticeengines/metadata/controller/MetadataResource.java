@@ -2,6 +2,8 @@ package com.latticeengines.metadata.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.common.exposed.expection.AnnotationValidationError;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.wordnik.swagger.annotations.Api;
@@ -78,11 +82,24 @@ public class MetadataResource extends InternalResourceBase {
 
     @RequestMapping(value = "/tables/{tableName}/validations", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Validate table metadata")
-    public ResponseDocument<?> validateTable(@PathVariable String customerSpace, //
+    @ApiOperation(value = "Validate metadata")
+    public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestBody Table table) {
+            @RequestBody ModelingMetadata metadata) {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        return null;
+        Map<String, Set<AnnotationValidationError>> validationErrors = mdService.validateTableMetadata(space, metadata);
+        SimpleBooleanResponse response = SimpleBooleanResponse.successResponse();
+        if (validationErrors.size() > 0) {
+            List<String> errors = new ArrayList<>();
+            for (Map.Entry<String, Set<AnnotationValidationError>> entry : validationErrors.entrySet()) {
+                
+                for (AnnotationValidationError error : entry.getValue()) {
+                    errors.add(String.format("Error with field %s for column %s.", error.getFieldName(), entry.getKey()));
+                }
+                
+            }
+            response = SimpleBooleanResponse.failedResponse(errors);
+        }
+        return response;
     }
 }

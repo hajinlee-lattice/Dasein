@@ -1,5 +1,10 @@
 package com.latticeengines.metadata.functionalframework;
 
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Map;
+
+import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -13,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.impl.SetTenantAspect;
@@ -108,7 +114,7 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         pkAttr.setScale(10);
         pkAttr.setPhysicalDataType("XYZ");
         pkAttr.setLogicalDataType("Identity");
-        pkAttr.setPropertyValue("ApprovedUsage", "Model");
+        pkAttr.setPropertyValue("ApprovedUsage", ModelingMetadata.NONE_APPROVED_USAGE);
 
         Attribute lkAttr = new Attribute();
         lkAttr.setName("LID");
@@ -118,10 +124,39 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         lkAttr.setScale(20);
         lkAttr.setPhysicalDataType("ABC");
         lkAttr.setLogicalDataType("Date");
-        lkAttr.setPropertyValue("ApprovedUsage", "Model");
+        lkAttr.setPropertyValue("ApprovedUsage", ModelingMetadata.NONE_APPROVED_USAGE);
+
+        Attribute spamIndicator = new Attribute();
+        spamIndicator.setName("SPAM_INDICATOR");
+        spamIndicator.setDisplayName("SpamIndicator");
+        spamIndicator.setLength(20);
+        spamIndicator.setPrecision(-1);
+        spamIndicator.setScale(-1);
+        spamIndicator.setPhysicalDataType("Boolean");
+        spamIndicator.setLogicalDataType("Boolean");
+        spamIndicator.setPropertyValue("ApprovedUsage", Arrays.asList(new String[] { ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE }));
+        
+        Attribute activeRetirementParticipants = new Attribute();
+        activeRetirementParticipants.setName("ActiveRetirementParticipants");
+        activeRetirementParticipants.setDisplayName("Active Retirement Plan Participants");
+        activeRetirementParticipants.setLength(5);
+        activeRetirementParticipants.setPrecision(0);
+        activeRetirementParticipants.setScale(0);
+        activeRetirementParticipants.setPhysicalDataType(Schema.Type.INT.toString());
+        activeRetirementParticipants.setLogicalDataType("Integer");
+        activeRetirementParticipants.setPropertyValue("ApprovedUsage", Arrays.asList(new String[] { ModelingMetadata.MODEL_APPROVED_USAGE }));
+        Map.Entry<String, String> category = new AbstractMap.SimpleEntry<String, String>("Category", "Firmographics");
+        Map.Entry<String, String> dataType = new AbstractMap.SimpleEntry<String, String>("DataType", "Int");
+        activeRetirementParticipants.setPropertyValue("Extensions", Arrays.asList(new Map.Entry[] { category, dataType }));
+        activeRetirementParticipants.setPropertyValue("FundamentalType", "numeric");
+        activeRetirementParticipants.setPropertyValue("StatisticalType", "ratio");
+        activeRetirementParticipants.setPropertyValue("Tags", Arrays.asList(new String[] { ModelingMetadata.EXTERNAL_TAG }));
+        activeRetirementParticipants.setPropertyValue("DataSource", Arrays.asList(new String[] { "DerivedColumns" }));
 
         table.addAttribute(pkAttr);
         table.addAttribute(lkAttr);
+        table.addAttribute(spamIndicator);
+        table.addAttribute(activeRetirementParticipants);
 
         return table;
     }
