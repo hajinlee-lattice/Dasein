@@ -76,9 +76,7 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
                 attributeDao.create(attr);
             }
         }
-
-        getDao().create(entity);
-    }
+}
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
@@ -118,7 +116,7 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
         return table;
     }
     
-    private void inflateTable(Table table) {
+    static void inflateTable(Table table) {
         if (table != null) {
             Hibernate.initialize(table.getAttributes());
             Hibernate.initialize(table.getExtracts());

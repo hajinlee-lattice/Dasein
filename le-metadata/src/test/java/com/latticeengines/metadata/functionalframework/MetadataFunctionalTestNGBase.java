@@ -113,10 +113,10 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         Attribute lkAttr = new Attribute();
         lkAttr.setName("LID");
         lkAttr.setDisplayName("LastUpdatedDate");
-        lkAttr.setLength(10);
-        lkAttr.setPrecision(10);
-        lkAttr.setScale(10);
-        lkAttr.setPhysicalDataType("XYZ");
+        lkAttr.setLength(20);
+        lkAttr.setPrecision(20);
+        lkAttr.setScale(20);
+        lkAttr.setPhysicalDataType("ABC");
         lkAttr.setLogicalDataType("Date");
         lkAttr.setPropertyValue("ApprovedUsage", "Model");
 
