@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.hadoop.conf.Configuration;
@@ -22,6 +24,12 @@ import org.apache.hadoop.fs.RemoteIterator;
 import org.springframework.util.StreamUtils;
 
 public class HdfsUtils {
+
+    public interface HdfsFileFormat {
+        public static final String AVRO_FILE = ".*.avro";
+        public static final String AVSC_FILE = ".*.avsc";
+        public static final String JSON_FILE = ".*.json";
+    }
 
     public interface HdfsFilenameFilter {
         boolean accept(String filename);
@@ -96,6 +104,21 @@ public class HdfsUtils {
 
     public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir) throws Exception {
         return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) null);
+    }
+
+    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir, final String regex)
+            throws Exception {
+        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
+
+            @Override
+            public boolean accept(String filename) {
+                Pattern p = Pattern.compile(regex);
+                Matcher matcher = p.matcher(filename.toString());
+                return matcher.matches();
+            }
+        };
+
+        return getFilesForDir(configuration, hdfsDir, filter);
     }
 
     public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir,
@@ -225,8 +248,8 @@ public class HdfsUtils {
         return FileUtil.copy(FileSystem.get(configuration), new Path(src), FileSystem.get(configuration),
                 new Path(dst), false, false, configuration);
     }
-    
-    public static FileChecksum getCheckSum(Configuration configuration, String path) throws IOException{
+
+    public static FileChecksum getCheckSum(Configuration configuration, String path) throws IOException {
         FileSystem fs = FileSystem.get(configuration);
         return fs.getFileChecksum(new Path(path));
     }

@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,9 +18,11 @@ import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
 import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
@@ -78,11 +81,11 @@ public class AvroUtils {
     @SuppressWarnings("deprecation")
     public static Object[] combineSchemas(Schema s1, Schema s2) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(s1.getName());
-        
+
         for (Map.Entry<String, String> entry : s1.getProps().entrySet()) {
             String k = entry.getKey();
             String v = entry.getValue();
-            
+
             if (k.equals("uuid")) {
                 recordBuilder = recordBuilder.prop("uuid", UUID.randomUUID().toString());
             } else {
@@ -93,16 +96,16 @@ public class AvroUtils {
         if (s1uuid == null) {
             s1uuid = s1.getProp("uuid");
         }
-        
+
         String s2uuid = s2.getProp("uuids");
         if (s2uuid == null) {
             s2uuid = s2.getProp("uuid");
         }
-        
+
         if (s2uuid != null) {
             recordBuilder = recordBuilder.prop("uuids", s1uuid + "," + s2uuid);
         }
-        
+
         FieldAssembler<Schema> fieldAssembler = recordBuilder.doc(s1.getDoc()).fields();
 
         FieldBuilder<Schema> fieldBuilder;
@@ -188,7 +191,7 @@ public class AvroUtils {
     public static String getAvroFriendlyString(String value) {
         return value.replaceAll("[^A-Za-z0-9()\\[\\]]", "_");
     }
-    
+
     public static Class<?> getJavaType(Type avroType) {
         if (avroType == null) {
             return null;
@@ -209,7 +212,7 @@ public class AvroUtils {
         default:
             throw new RuntimeException("Unknown java type for avro type " + avroType);
         }
-        
+
     }
 
     public static String getHiveType(Type avroType) {
@@ -231,12 +234,13 @@ public class AvroUtils {
             return "BOOLEAN";
         case BYTES:
             return "STRING";
-            
+
         default:
             throw new RuntimeException("Unknown hive type for avro type " + avroType);
         }
-        
+
     }
+
     public static Type getAvroType(Class<?> javaType) {
         if (javaType == null) {
             return null;
@@ -261,19 +265,51 @@ public class AvroUtils {
         default:
             throw new RuntimeException("Unknown avro type for java type " + javaType.getSimpleName());
         }
-        
+
     }
-    
+
     public static String generateHiveCreateTableStatement(Schema schema) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("CREATE TABLE %s (\n", schema.getName()));
         int size = schema.getFields().size();
         int i = 1;
         for (Field field : schema.getFields()) {
-            sb.append(String.format("  %s %s%s\n", field.name(), getHiveType(field.schema().getTypes().get(1).getType()), i == size ? ")" : ","));
+            sb.append(String.format("  %s %s%s\n", field.name(),
+                    getHiveType(field.schema().getTypes().get(1).getType()), i == size ? ")" : ","));
             i++;
         }
         sb.append("STORED AS PARQUET;");
         return sb.toString();
+    }
+
+    public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {
+        File avroFile = new File(path);
+        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());) {
+            writer.create(schema, avroFile);
+            for (GenericRecord datum : data) {
+                writer.append(datum);
+            }
+        }
+    }
+
+    public static List<GenericRecord> readFromLocalFile(String path) throws IOException {
+        List<GenericRecord> data = new ArrayList<GenericRecord>();
+        try (FileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(new File(path),
+                new GenericDatumReader<GenericRecord>())) {
+
+            for (GenericRecord datum : reader) {
+                data.add(datum);
+            }
+        }
+        return data;
+    }
+
+    public static Schema readSchemaFromLocalFile(String path) throws IOException {
+        Schema schema = null;
+        try (FileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(new File(path),
+                new GenericDatumReader<GenericRecord>())) {
+            schema = reader.getSchema();
+        }
+        return schema;
     }
 }
