@@ -27,8 +27,8 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 
 @Entity
 @Table(name = "ALGORITHM")
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="ALGO_TYPE", discriminatorType=DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "ALGO_TYPE", discriminatorType = DiscriminatorType.STRING)
 public class AlgorithmBase implements Algorithm {
 
     private Long pid;
@@ -41,6 +41,7 @@ public class AlgorithmBase implements Algorithm {
     private ModelDefinition modelDefinition;
     private String pipelineScript;
     private String pipelineLibScript;
+    private String mapperSize = "1";
 
     @Override
     @Id
@@ -184,6 +185,17 @@ public class AlgorithmBase implements Algorithm {
     @JsonProperty("pipeline_lib_script")
     public void setPipelineLibScript(String pipelineLibScript) {
         this.pipelineLibScript = pipelineLibScript;
+    }
+
+    @JsonProperty("mapper_size")
+    @Column(name = "MAPPER_SIZE")
+    public String getMapperSize() {
+        return this.mapperSize;
+    }
+
+    @JsonProperty("mapper_size")
+    public void setMapperSize(String mapperSize) {
+        this.mapperSize = mapperSize;
     }
 
     @Override

@@ -38,6 +38,7 @@ public enum LedpCode {
     LEDP_12008("Table {0} does not exist for analytics load job."), //
     LEDP_12009("Failed to submit MapReduce job {0}"), //
     LEDP_12010("Failed to {0} data by using Sqoop"), //
+    LEDP_12011("Failed to complete Python process due to {0}"), //
 
     // Metric system: 13000-13999
     LEDP_13000("Tag {0} does not have a value."), //
@@ -56,8 +57,15 @@ public enum LedpCode {
     LEDP_15005("Input data has too few rows: {0}."), //
     LEDP_15006("Failed to validate the input data."), //
     LEDP_15007("No sample avro files found in path {0}."), //
+    LEDP_15008("Could not set input format for MapReduce."), //
+    LEDP_15009("Could not set localized files for MapReduce."), //
+    LEDP_15010("Could not set localized archive files for MapReduce."), //
+    LEDP_15011("Could not customize sampling job for the specified sampling type."), //
+    LEDP_15012("SamplingConfiguration was not set up correctly."), //
+    LEDP_15013("Failed to validate SamplingConfiguration."), //
     LEDP_15014("Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
-
+    LEDP_15015("Could not set up configuration file correctly for MapReduce."), //
+    
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
     LEDP_16001("Problem deleting path {0} before load."), //

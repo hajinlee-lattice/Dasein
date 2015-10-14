@@ -55,4 +55,8 @@ public interface Algorithm extends HasName, HasPid {
     String getPipelineScript();
     
     String getPipelineLibScript();
+
+    String getMapperSize();
+
+    void setMapperSize(String mapperSize);
 }

@@ -26,6 +26,9 @@ public class Classifier implements HasName {
     private String dataDiagnosticsPath;
     private String pythonPipelineLibHdfsPath;
     private String pythonPipelineScriptHdfsPath;
+    private String pythonMRConfigHdfsPath;
+    
+    private boolean parallelEnabled;
 
     @Override
     @JsonProperty("name")
@@ -201,7 +204,7 @@ public class Classifier implements HasName {
     public void setPythonPipelineScriptHdfsPath(String pythonPipelineScriptHdfsPath) {
         this.pythonPipelineScriptHdfsPath = pythonPipelineScriptHdfsPath;
     }
-    
+
     @JsonProperty("python_pipeline_lib")
     public String getPythonPipelineLibHdfsPath() {
         return pythonPipelineLibHdfsPath;
@@ -211,5 +214,25 @@ public class Classifier implements HasName {
     public void setPythonPipelineLibHdfsPath(String pythonPipelineLibHdfsPath) {
         this.pythonPipelineLibHdfsPath = pythonPipelineLibHdfsPath;
     }
+
+    @JsonProperty("python_mr_config")
+    public String getPythonMRConfigHdfsPath() {
+        return pythonMRConfigHdfsPath;
+    }
+
+    @JsonProperty("python_mr_config")
+    public void setPythonMRConfigHdfsPath(String pythonMRConfigHdfsPath) {
+        this.pythonMRConfigHdfsPath = pythonMRConfigHdfsPath;
+    }
     
+    @JsonProperty("parallel_enabled")
+    public boolean isParallelEnabled() {
+        return parallelEnabled;
+    }
+
+    @JsonProperty("parallel_enabled")
+    public void setParallelEnabled(boolean parallelEnabled) {
+        this.parallelEnabled = parallelEnabled;
+    }
+
 }
