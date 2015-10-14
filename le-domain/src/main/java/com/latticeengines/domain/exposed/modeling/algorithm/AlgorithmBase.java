@@ -187,13 +187,13 @@ public class AlgorithmBase implements Algorithm {
         this.pipelineLibScript = pipelineLibScript;
     }
 
-    @JsonProperty("mapper_size")
-    @Column(name = "MAPPER_SIZE")
+    @Transient
+    @JsonIgnore
     public String getMapperSize() {
         return this.mapperSize;
     }
-
-    @JsonProperty("mapper_size")
+    
+    @JsonIgnore
     public void setMapperSize(String mapperSize) {
         this.mapperSize = mapperSize;
     }
