@@ -194,9 +194,6 @@
                                     <skip>false</skip>
                                     <groups>${unit.groups}</groups>
                                     <forkMode>always</forkMode>
-                                    <additionalClasspathElements>
-                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
-                                    </additionalClasspathElements>
                                 </configuration>
                             </execution>
                             <execution>
