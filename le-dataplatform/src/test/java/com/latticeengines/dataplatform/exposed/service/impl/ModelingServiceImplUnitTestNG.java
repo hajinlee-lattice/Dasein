@@ -5,10 +5,10 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
@@ -57,7 +57,7 @@ public class ModelingServiceImplUnitTestNG {
         targets.add("P1_Event");
         targets.add("P2_Event");
         targets.add("P2_Event");
-        Set<String> events = modelingService.getEventList(targets);
+        List<String> events = modelingService.getEventList(targets);
         assertTrue(events.size() == 2);
 
         // Test list of key-value pair

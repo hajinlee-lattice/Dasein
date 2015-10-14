@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.runtime.mapreduce;
+package com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel;
 
 import java.io.IOException;
 
@@ -10,9 +10,10 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class EventDataSamplingReducer extends
- Reducer<Text, AvroValue<Record>, AvroKey<Record>, NullWritable> {
-    private AvroMultipleOutputs outputs = null;
+public class DefaultSamplingReducer extends Reducer<Text, AvroValue<Record>, AvroKey<Record>, NullWritable> {
+
+    private AvroMultipleOutputs outputs;
+    private AvroKey<Record> outKey = new AvroKey<Record>();
     private static final NullWritable nullWritable = NullWritable.get();
 
     @Override
@@ -20,13 +21,12 @@ public class EventDataSamplingReducer extends
         outputs = new AvroMultipleOutputs(context);
     }
 
-
     @Override
-    protected void reduce(Text key, Iterable<AvroValue<Record>> values,
-            Context context) throws IOException, InterruptedException {
-        
+    protected void reduce(Text key, Iterable<AvroValue<Record>> values, Context context) throws IOException,
+            InterruptedException {
         for (AvroValue<Record> value : values) {
-            outputs.write(key.toString(), new AvroKey<Record>(value.datum()), nullWritable);
+            outKey.datum(value.datum());
+            outputs.write(key.toString(), outKey, nullWritable);
         }
     }
 
@@ -34,5 +34,4 @@ public class EventDataSamplingReducer extends
     protected void cleanup(Context context) throws IOException, InterruptedException {
         outputs.close();
     }
-
 }

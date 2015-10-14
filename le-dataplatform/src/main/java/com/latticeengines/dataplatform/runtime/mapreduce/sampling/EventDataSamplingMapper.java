@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.runtime.mapreduce;
+package com.latticeengines.dataplatform.runtime.mapreduce.sampling;
 
 import java.io.IOException;
 import java.util.List;

@@ -13,12 +13,13 @@
     <import resource="classpath:dataplatform-mr-config-context.xml" />
 
     <!-- Configures the sampling job. -->
-    <hdp:job id="samplingJob" number-reducers="1"
-        mapper="com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingMapper"
-        reducer="com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingReducer" />
+    <hdp:job id="parallelSamplingJob"
+        mapper="com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel.DefaultSamplingMapper"
+        partitioner="com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel.DefaultSamplingPartitioner"
+        reducer="com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel.DefaultSamplingReducer" />
 
-    <bean id="samplingCustomization"
-        class="com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingJob">
+    <bean id="parallelSamplingCustomization"
+        class="com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel.ParallelEventDataSamplingJob">
         <constructor-arg ref="hadoopConfiguration" />
         <constructor-arg ref="mapReduceCustomizationRegistry" />
     </bean>

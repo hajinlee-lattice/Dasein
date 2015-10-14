@@ -18,11 +18,11 @@ logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
 logger = logging.getLogger(name='argumentparser')
 
 
-class ArgumentParser(object):
+class AggRFArgumentParser(object):
 
     """
     This class is responsible for parsing the json file as understood by the
-    LE data platform.
+    LE data platform. This version addresses the model of aggregated predictors.
     """
     def __init__(self, metadataFile, propertyFile = None):
         metadataJson = open(self.stripPath(metadataFile)).read()
@@ -48,14 +48,15 @@ class ArgumentParser(object):
         if "depivoted" in self.metadataSchema:
             self.depivoted = self.metadataSchema["depivoted"] == "True"
         self.transformer = None
-
+        
         self.algorithmProperties = self.__parseProperties("algorithm_properties")
         self.provenanceProperties = self.__parseProperties("provenance_properties")
         self.runtimeProperties = self.__parseRuntimeProperties(propertyFile)
         logger.debug("Reading runtime properties %s" % str(self.runtimeProperties))
         self.numOfSkippedRow = 0
         self.highUCThreshold = 0.2
-
+        self.modelsDir = self.metadataSchema["modelsDir"]
+    
     def extractTargets(self):
         specifiedTargets = self.metadataSchema["targets"]
 
@@ -123,7 +124,7 @@ class ArgumentParser(object):
         return element
 
     def __parseRuntimeProperties(self, propertyFile):
-        if propertyFile is None or propertyFile  == "None":
+        if propertyFile is None:
             logger.info("No runtime properties found")
             return None
 
@@ -259,3 +260,6 @@ class ArgumentParser(object):
 
     def getConfigMetadata(self):
         return self.configMetadata
+    
+    def getModelsDir(self):
+        return self.modelsDir

@@ -26,6 +26,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;

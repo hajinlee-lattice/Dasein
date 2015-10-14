@@ -1,6 +1,5 @@
 package com.latticeengines.dataplatform.service.impl.modeling;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,21 +34,21 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
     private MetadataService metadataService;
 
     @Autowired
-    private ModelEntityMgr modelEntityMgr;
+    protected ModelEntityMgr modelEntityMgr;
 
     @Autowired
-    private ModelDefinitionEntityMgr modelDefinitionEntityMgr;
+    protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
     @Autowired
-    private JobNameService jobNameService;
+    protected JobNameService jobNameService;
 
     @Autowired
-    private JobEntityMgr jobEntityMgr;
+    protected JobEntityMgr jobEntityMgr;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId submitJob(ModelingJob modelingJob) {
-        ApplicationId appId = super.submitJob(modelingJob);
+        ApplicationId appId = sumbitJobInternal(modelingJob);
         modelingJob.setId(appId.toString());
         Model model = ((ModelingJob) modelingJob).getModel();
 
@@ -70,6 +69,10 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         modelEntityMgr.createOrUpdate(model);
         jobEntityMgr.create(modelingJob);
         return appId;
+    }
+
+    protected ApplicationId sumbitJobInternal(ModelingJob modelingJob) {
+        return super.submitJob(modelingJob);
     }
 
     @Override
@@ -135,5 +138,10 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
             modelingJob = (ModelingJob) jobEntityMgr.findByObjectId(applicationId);
         }
         return modelingJob;
+    }
+
+    @Override
+    public ApplicationId submitParallelMRJob(ModelingJob modelingJob) {
+        return null;
     }
 }

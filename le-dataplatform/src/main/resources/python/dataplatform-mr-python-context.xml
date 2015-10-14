@@ -10,15 +10,13 @@
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
       http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
 
-    <import resource="classpath:dataplatform-mr-config-context.xml" />
+    <import resource="classpath:dataplatform-mr-config-context.xml"/>
 
-    <!-- Configures the sampling job. -->
-    <hdp:job id="samplingJob" number-reducers="1"
-        mapper="com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingMapper"
-        reducer="com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingReducer" />
+    <!-- Configures the Python job. -->
+    <hdp:job id="pythonMRJob" mapper="com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMapperBase"/>
 
-    <bean id="samplingCustomization"
-        class="com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingJob">
+    <bean id="pythonMRCustomization"
+        class="com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRJob">
         <constructor-arg ref="hadoopConfiguration" />
         <constructor-arg ref="mapReduceCustomizationRegistry" />
     </bean>

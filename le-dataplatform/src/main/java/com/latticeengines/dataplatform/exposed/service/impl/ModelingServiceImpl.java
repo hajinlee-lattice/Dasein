@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import javax.annotation.Resource;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -24,8 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -35,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
@@ -46,7 +44,8 @@ import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
-import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
+import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
+import com.latticeengines.dataplatform.service.ParallelDispatchService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -78,7 +77,7 @@ public class ModelingServiceImpl implements ModelingService {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Resource(name = "modelingJobService")
     private ModelingJobService modelingJobService;
 
     @Autowired
@@ -96,6 +95,9 @@ public class ModelingServiceImpl implements ModelingService {
     @Autowired
     private MetadataService metadataService;
 
+    @Resource(name = "ParallelDispatchService")
+    private ParallelDispatchService parallelDispatchService;
+
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
@@ -109,11 +111,83 @@ public class ModelingServiceImpl implements ModelingService {
     private int memory;
 
     @Override
+    public ApplicationId loadData(LoadConfiguration config) {
+        Model model = new Model();
+        model.setCustomer(config.getCustomer());
+        model.setTable(config.getTable());
+        model.setMetadataTable(config.getMetadataTable());
+        setupModelProperties(model);
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
+
+        return sqoopSyncJobService.importData(model.getTable(), model.getDataHdfsPath(), config.getCreds(),
+                assignedQueue, model.getCustomer(), config.getKeyCols(),
+                columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()));
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    /**
-     * @param model
-     * required attributes: job, modeldefinition - it should be something predefined.
-     */
+    public ApplicationId createSamples(SamplingConfiguration config) {
+
+        parallelDispatchService.customizeSampleConfig(config);
+
+        Model model = new Model();
+        model.setCustomer(config.getCustomer());
+        model.setTable(config.getTable());
+        setupModelProperties(model);
+        String inputDir = model.getDataHdfsPath();
+        String outputDir = model.getSampleHdfsPath();
+        Properties properties = new Properties();
+        properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
+        properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), config.toString());
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
+        properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
+
+        return modelingJobService.submitMRJob(parallelDispatchService.getSampleJobName(), properties);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ApplicationId profileData(DataProfileConfiguration dataProfileConfig) {
+        if (dataProfileConfig.getCustomer() == null) {
+            throw new LedpException(LedpCode.LEDP_15002);
+        }
+
+        Model m = setupProfileModel(dataProfileConfig);
+        List<String> featureList = getFeatureList(dataProfileConfig, m);
+
+        m.setDataFormat("avro");
+        m.setTargetsList(dataProfileConfig.getTargets());
+        m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
+        m.setFeaturesList(featureList);
+
+        m.setModelHdfsDir(m.getMetadataHdfsPath());
+        ModelDefinition modelDefinition = new ModelDefinition();
+        modelDefinition.setName(m.getName());
+        AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
+        dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
+        dataProfileAlgorithm.setMapperSize(parallelDispatchService.getNumberOfProfilingMappers());
+        if (StringUtils.isEmpty(dataProfileConfig.getContainerProperties())) {
+            dataProfileAlgorithm.setContainerProperties(getDefaultContainerProperties());
+        } else {
+            dataProfileAlgorithm.setContainerProperties(dataProfileConfig.getContainerProperties());
+        }
+        if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
+            dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
+        }
+        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
+        m.setModelDefinition(modelDefinition);
+
+        ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue,
+                parallelDispatchService.getProfileJobName());
+        m.addModelingJob(modelingJob);
+        return parallelDispatchService.submitJob(modelingJob);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public List<ApplicationId> submitModel(Model model) {
         setupModelProperties(model);
         try {
@@ -153,7 +227,8 @@ public class ModelingServiceImpl implements ModelingService {
             if (StringUtils.isEmpty(algorithm.getContainerProperties())) {
                 algorithm.setContainerProperties(getDefaultContainerProperties());
             }
-            ModelingJob modelingJob = createJob(model, algorithm, "modeling");
+            algorithm.setMapperSize(parallelDispatchService.getNumberOfSamplingTrainingSet());
+            ModelingJob modelingJob = createJob(model, algorithm, parallelDispatchService.getModelingJobName());
             model.addModelingJob(modelingJob);
 
             // JobService is responsible for persistence during submitJob
@@ -190,6 +265,16 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getMetadataTable());
     }
 
+    private Model setupProfileModel(DataProfileConfiguration dataProfileConfig) {
+        Model m = new Model();
+        m.setName("DataProfile-" + System.currentTimeMillis());
+        m.setCustomer(dataProfileConfig.getCustomer());
+        m.setTable(dataProfileConfig.getTable());
+        m.setMetadataTable(dataProfileConfig.getMetadataTable());
+        setupModelProperties(m);
+        return m;
+    }
+
     private void validateModelInputData(Model model) throws Exception {
         String diagnosticsPath = model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE;
 
@@ -197,10 +282,7 @@ public class ModelingServiceImpl implements ModelingService {
             throw new LedpException(LedpCode.LEDP_15004);
         }
         // Parse diagnostics file
-        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
-        long sampleSize = (long) ((JSONObject) jsonObject.get("Summary")).get("SampleSize");
+        long sampleSize = parallelDispatchService.getSampleSize(yarnConfiguration, diagnosticsPath);
 
         if (sampleSize < rowSizeThreshold) {
             throw new LedpException(LedpCode.LEDP_15005, new String[] { Double.toString(sampleSize) });
@@ -242,14 +324,17 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setDataDiagnosticsPath(model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE);
 
         String samplePrefix = algorithm.getSampleName();
-        String trainingPath = getAvroFileHdfsPath(samplePrefix + "Training", model.getSampleHdfsPath());
+        String trainingFile = parallelDispatchService.getTrainingFile(samplePrefix);
+        String trainingPath = getAvroFileHdfsPath(trainingFile, model.getSampleHdfsPath());
 
         if (trainingPath == null) {
-            throw new LedpException(LedpCode.LEDP_15001, new String[] { samplePrefix + "Training" });
+            throw new LedpException(LedpCode.LEDP_15001, new String[] { trainingFile });
         }
-        String testPath = getAvroFileHdfsPath(samplePrefix + "Test", model.getSampleHdfsPath());
+
+        String testFile = parallelDispatchService.getTestFile(samplePrefix);
+        String testPath = getAvroFileHdfsPath(testFile, model.getSampleHdfsPath());
         if (testPath == null) {
-            throw new LedpException(LedpCode.LEDP_15001, new String[] { samplePrefix + "Test" });
+            throw new LedpException(LedpCode.LEDP_15001, new String[] { testFile });
         }
         classifier.setTrainingDataHdfsPath(trainingPath);
         classifier.setTestDataHdfsPath(testPath);
@@ -260,14 +345,7 @@ public class ModelingServiceImpl implements ModelingService {
     private String getDataProfileAvroPathInHdfs(String path) {
         List<String> files = new ArrayList<String>();
         try {
-            files = HdfsUtils.getFilesForDir(yarnConfiguration, path, new HdfsFilenameFilter() {
-
-                @Override
-                public boolean accept(String filename) {
-                    return filename.endsWith(".avro");
-                }
-
-            });
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, path, HdfsFileFormat.AVRO_FILE);
         } catch (Exception e) {
             log.warn(e);
         }
@@ -283,14 +361,7 @@ public class ModelingServiceImpl implements ModelingService {
     private String getConfigMetadataPathInHdfs(String path) {
         List<String> files = new ArrayList<String>();
         try {
-            files = HdfsUtils.getFilesForDir(yarnConfiguration, path, new HdfsFilenameFilter() {
-
-                @Override
-                public boolean accept(String filename) {
-                    return filename.endsWith(".avsc");
-                }
-
-            });
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, path, HdfsFileFormat.AVSC_FILE);
         } catch (Exception e) {
             log.warn(e);
         }
@@ -318,25 +389,17 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     private String getAvroFileHdfsPath(final String samplePrefix, String baseDir) {
+        String format = ".*" + samplePrefix + HdfsFileFormat.AVRO_FILE;
         List<String> files = new ArrayList<String>();
         try {
-            files = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir, new HdfsFilenameFilter() {
-
-                @Override
-                public boolean accept(String filename) {
-                    Pattern p = Pattern.compile(".*" + samplePrefix + ".*.avro");
-                    Matcher matcher = p.matcher(filename.toString());
-                    return matcher.matches();
-                }
-
-            });
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir, format);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
 
         if (files.size() == 1) {
-            String path = files.get(0);
-            return path.substring(path.indexOf(customerBaseDir));
+            String p = files.get(0);
+            return p.substring(p.indexOf(customerBaseDir));
         }
         return null;
     }
@@ -351,8 +414,8 @@ public class ModelingServiceImpl implements ModelingService {
         Classifier classifier = createClassifier(model, algorithm);
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
-
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
+        appMasterProperties.put(parallelDispatchService.getMapSizeKeyName(), algorithm.getMapperSize());
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
         containerProperties.put(ContainerProperty.JOB_TYPE.name(), jobType);
@@ -386,123 +449,36 @@ public class ModelingServiceImpl implements ModelingService {
         throttleConfigurationEntityMgr.deleteAll();
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public ApplicationId createSamples(SamplingConfiguration config) {
-        Model model = new Model();
-        model.setCustomer(config.getCustomer());
-        model.setTable(config.getTable());
-        setupModelProperties(model);
-        String inputDir = model.getDataHdfsPath();
-        String outputDir = model.getSampleHdfsPath();
-        Properties properties = new Properties();
-        properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
-        properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), config.toString());
-        properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
-        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-        properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
-        return modelingJobService.submitMRJob("samplingJob", properties);
-    }
+    private List<String> getFeatureList(DataProfileConfiguration dataProfileConfig, Model m) {
+        List<String> featureList = new ArrayList<String>();
+        List<String> includeList = dataProfileConfig.getIncludeColumnList();
+        List<String> excludeList = dataProfileConfig.getExcludeColumnList();
+        List<String> eventList = getEventList(dataProfileConfig.getTargets());
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public ApplicationId profileData(DataProfileConfiguration dataProfileConfig) {
-        Set<String> excludeList = new HashSet<String>(dataProfileConfig.getExcludeColumnList());
-        Set<String> includeList = new HashSet<String>(dataProfileConfig.getIncludeColumnList());
-        Set<String> eventList = getEventList(dataProfileConfig.getTargets());
-        if (dataProfileConfig.getCustomer() == null) {
-            throw new LedpException(LedpCode.LEDP_15002);
-        }
-        Model m = new Model();
-        m.setName("DataProfile-" + System.currentTimeMillis());
-        m.setCustomer(dataProfileConfig.getCustomer());
-        m.setTable(dataProfileConfig.getTable());
-        m.setMetadataTable(dataProfileConfig.getMetadataTable());
-        setupModelProperties(m);
         String sampleDataPath = m.getDataHdfsPath() + "/samples";
-        try {
-            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDataPath, new HdfsFilenameFilter() {
+        String schemaPath = getSchemaPath(sampleDataPath);
+        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(schemaPath));
 
-                @Override
-                public boolean accept(String filename) {
-                    Pattern p = Pattern.compile(".*.avro");
-                    Matcher matcher = p.matcher(filename.toString());
-                    return matcher.matches();
+        boolean useIncludeList = CollectionUtils.isNotEmpty(includeList);
+        for (org.apache.avro.Schema.Field field : schema.getFields()) {
+            String name = field.name();
+            // If an include list is passed, only use the features in the
+            // include list
+            // if the name is part of the schema. If the include list is
+            // empty, then
+            // just add all the columns in the schema except for any columns
+            // in the excluded list
+            if (useIncludeList) {
+                if (includeList.contains(name)) {
+                    featureList.add(name);
                 }
-
-            });
-
-            if (paths.size() == 0) {
-                throw new LedpException(LedpCode.LEDP_15007, new String[] { sampleDataPath });
-            }
-            String schemaPath = paths.get(0);
-            List<String> featureList = new ArrayList<String>();
-            Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(schemaPath));
-            boolean useIncludeList = includeList.size() > 0;
-            for (org.apache.avro.Schema.Field field : schema.getFields()) {
-                String name = field.name();
-                // If an include list is passed, only use the features in the
-                // include list
-                // if the name is part of the schema. If the include list is
-                // empty, then
-                // just add all the columns in the schema except for any columns
-                // in the excluded list
-                if (useIncludeList) {
-                    if (includeList.contains(name)) {
-                        featureList.add(name);
-                    }
-                } else {
-                    if (!excludeList.contains(name) && !eventList.contains(name)) {
-                        featureList.add(name);
-                    }
+            } else {
+                if (!excludeList.contains(name) && !eventList.contains(name)) {
+                    featureList.add(name);
                 }
             }
-            m.setDataFormat("avro");
-            m.setTargetsList(dataProfileConfig.getTargets());
-            m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
-            m.setFeaturesList(featureList);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        m.setModelHdfsDir(m.getMetadataHdfsPath());
-        ModelDefinition modelDefinition = new ModelDefinition();
-        modelDefinition.setName(m.getName());
-        AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
-        dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
-        if (StringUtils.isEmpty(dataProfileConfig.getContainerProperties())) {
-            dataProfileAlgorithm.setContainerProperties(getDefaultContainerProperties());
-        } else {
-            dataProfileAlgorithm.setContainerProperties(dataProfileConfig.getContainerProperties());
-        }
-        if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
-            dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
-        }
-        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
-        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-        m.setModelDefinition(modelDefinition);
-        ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue, "profiling");
-        m.addModelingJob(modelingJob);
-        return modelingJobService.submitJob(modelingJob);
-    }
-
-    @VisibleForTesting
-    Set<String> getEventList(List<String> targets) {
-        Set<String> eventList = new HashSet<String>();
-        String eventKey = "Event:"; // assumes key:value form
-        for (String token : targets) {
-            int index = token.indexOf(eventKey);
-            if (index >= 0) {
-                // List of key-value pairs
-                eventList.add(token.substring(index + eventKey.length() + 1));
-                return eventList;
-            }
-        }
-
-        // List of columns
-        eventList.addAll(targets);
-
-        return eventList;
+        return featureList;
     }
 
     @Override
@@ -519,24 +495,15 @@ public class ModelingServiceImpl implements ModelingService {
         Set<String> pivotedFeatures = new LinkedHashSet<>();
 
         try {
-            HdfsFilenameFilter filter = new HdfsFilenameFilter() {
-
-                @Override
-                public boolean accept(String path) {
-                    return path.endsWith(".avro");
-                }
-
-            };
-            List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dataSchemaPath, filter);
-
+            List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dataSchemaPath,
+                    HdfsFileFormat.AVRO_FILE);
             if (avroDataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
             }
-
             dataSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDataFiles.get(0)));
 
-            List<String> avroMetadataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, metadataPath, filter);
-
+            List<String> avroMetadataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, metadataPath,
+                    HdfsFileFormat.AVRO_FILE);
             if (avroMetadataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
             }
@@ -592,34 +559,59 @@ public class ModelingServiceImpl implements ModelingService {
         }
     }
 
-    @Override
-    public ApplicationId loadData(LoadConfiguration config) {
-        Model model = new Model();
-        model.setCustomer(config.getCustomer());
-        model.setTable(config.getTable());
-        model.setMetadataTable(config.getMetadataTable());
-        setupModelProperties(model);
-        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-
-        return sqoopSyncJobService.importData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
-                model.getCustomer(), config.getKeyCols(), columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()));
+    private String getSchemaPath(String sampleDataPath) {
+        String schemaPath = null;
+        try {
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDataPath, HdfsFileFormat.AVRO_FILE);
+            if (CollectionUtils.isEmpty(paths)) {
+                throw new LedpException(LedpCode.LEDP_15007, new String[] { sampleDataPath });
+            }
+            schemaPath = paths.get(0);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
+        return schemaPath;
     }
 
+    @VisibleForTesting
+    List<String> getEventList(List<String> targets) {
+        List<String> eventList = new ArrayList<String>();
+        String eventKey = "Event:"; // assumes key:value form
+        for (String token : targets) {
+            int index = token.indexOf(eventKey);
+            if (index >= 0) {
+                // List of key-value pairs
+                eventList.add(token.substring(index + eventKey.length() + 1));
+                return eventList;
+            }
+        }
 
-    private String columnsToInclude(String table, DbCreds creds, Map<String, String> properties){
+        // List of columns
+        Set<String> eventSet = new HashSet<String>(targets);
+        eventList.addAll(eventSet);
+
+        return eventList;
+    }
+
+    private String columnsToInclude(String table, DbCreds creds, Map<String, String> properties) {
         StringBuilder lb = new StringBuilder();
         try {
             DataSchema dataSchema = metadataService.createDataSchema(creds, table);
             List<Field> fields = dataSchema.getFields();
 
-            boolean excludeTimestampCols = Boolean.parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.getValue(properties));
+            boolean excludeTimestampCols = Boolean.parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS
+                    .getValue(properties));
             boolean first = true;
             for (Field field : fields) {
 
-                // The scoring engine does not know how to convert datetime columns into a numeric value,
-                // which Sqoop does automatically. This should not be a problem now since dates are
-                // typically not predictive anyway so we can safely exclude them for now.
-                // We can start including TIMESTAMP and TIME columns by explicitly setting EXCLUDETIMESTAMPCOLUMNS=false
+                // The scoring engine does not know how to convert datetime
+                // columns into a numeric value,
+                // which Sqoop does automatically. This should not be a problem
+                // now since dates are
+                // typically not predictive anyway so we can safely exclude them
+                // for now.
+                // We can start including TIMESTAMP and TIME columns by
+                // explicitly setting EXCLUDETIMESTAMPCOLUMNS=false
                 // in the load configuration.
                 if (excludeTimestampCols && (field.getSqlType() == Types.TIMESTAMP || field.getSqlType() == Types.TIME)) {
                     continue;
