@@ -82,7 +82,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
             } catch (Exception e) {
                 log.error("Sqoop Import Failed! Retry " + retryCount + "\n", e);
                 try {
-                    Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(retryCount++));
                 } catch (InterruptedException e1) {
                     log.error("Sqoop Import Retry Failed! " + ExceptionUtils.getStackTrace(e1));
                 }
@@ -108,7 +108,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
             } catch (Exception e) {
                 log.error("Sqoop Export Failed! Retry " + retryCount + "\n", e);
                 try {
-                    Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(retryCount++));
                 } catch (InterruptedException e1) {
                     log.error("Sqoop Export Retry Failed! " + ExceptionUtils.getStackTrace(e1));
                 }
@@ -173,6 +173,32 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 null, //
                 metadataService, //
                 hadoopConfiguration, //
+                true);
+        long time2 = System.currentTimeMillis();
+        log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));
+        return appId;
+    }
+
+    @Override
+    public ApplicationId importDataSyncWithAvscAndWhereCondition(String table, String targetDir, DbCreds creds, String queue, String customer,
+                                        List<String> splitCols, String columnsToInclude, String whereCondition, int numMappers) {
+        long time1 = System.currentTimeMillis();
+        final String jobName = jobNameService.createJobName(customer, "sqoop-import");
+
+        ApplicationId appId = super.importDataWithAvscAndWhereCondition(table, //
+                targetDir, //
+                creds, //
+                queue, //
+                jobName, //
+                splitCols, //
+                columnsToInclude, //
+                whereCondition, //
+                numMappers, //
+                creds.getDriverClass(), //
+                null, //
+                metadataService, //
+                hadoopConfiguration, //
+                true, //
                 true);
         long time2 = System.currentTimeMillis();
         log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));

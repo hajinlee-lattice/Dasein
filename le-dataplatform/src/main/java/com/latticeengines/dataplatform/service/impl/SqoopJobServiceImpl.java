@@ -26,16 +26,16 @@ public class SqoopJobServiceImpl {
     private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
 
     protected ApplicationId exportData(String table, //
-            String sourceDir, //
-            DbCreds creds, //
-            String queue, //
-            String jobName, //
-            int numMappers, //
-            String javaColumnTypeMappings, //
-            String exportColumns, //
-            MetadataService metadataService, //
-            Configuration yarnConfiguration, //
-            boolean sync) {
+                                       String sourceDir, //
+                                       DbCreds creds, //
+                                       String queue, //
+                                       String jobName, //
+                                       int numMappers, //
+                                       String javaColumnTypeMappings, //
+                                       String exportColumns, //
+                                       MetadataService metadataService, //
+                                       Configuration yarnConfiguration, //
+                                       boolean sync) {
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
         cmds.add("-Dmapred.job.queue.name=" + queue);
@@ -84,6 +84,29 @@ public class SqoopJobServiceImpl {
             Configuration yarnConfiguration, //
             boolean sync) {
 
+        return importDataWithAvscAndWhereCondition(
+                table, targetDir, creds, queue, jobName, splitCols, //
+                columnsToInclude, "", numMappers, driver, props, //
+                metadataService, yarnConfiguration, sync, false
+        );
+    }
+
+    protected ApplicationId importDataWithAvscAndWhereCondition(String table, //
+                                       String targetDir, //
+                                       DbCreds creds, //
+                                       String queue, //
+                                       String jobName, //
+                                       List<String> splitCols, //
+                                       String columnsToInclude, //
+                                       String whereCondition, //
+                                       int numMappers, //
+                                       String driver, //
+                                       Properties props, //
+                                       MetadataService metadataService, //
+                                       Configuration yarnConfiguration, //
+                                       boolean sync, //
+                                       boolean keepAvsc ) {
+
         if (table.startsWith("Play")) {
             numMappers = 1;
         }
@@ -104,6 +127,10 @@ public class SqoopJobServiceImpl {
         if (columnsToInclude != null && !columnsToInclude.isEmpty()) {
             cmds.add("--columns");
             cmds.add(columnsToInclude);
+        }
+        if (StringUtils.isNotEmpty(whereCondition)) {
+            cmds.add("--where");
+            cmds.add(whereCondition);
         }
         if (driver != null && !driver.isEmpty()) {
             cmds.add("--driver");
@@ -144,6 +171,7 @@ public class SqoopJobServiceImpl {
         } finally {
             FileUtils.deleteQuietly(new File(getGenerateOutputDir(uuid)));
             FileUtils.deleteQuietly(new File(getBinaryInputputDir(uuid)));
+            if (!keepAvsc) { FileUtils.deleteQuietly(new File(table + ".avsc")); }
 
             if (propsFileName != null) {
                 FileUtils.deleteQuietly(new File(propsFileName));
