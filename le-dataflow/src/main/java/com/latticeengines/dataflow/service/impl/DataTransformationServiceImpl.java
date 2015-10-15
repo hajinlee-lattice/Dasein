@@ -49,6 +49,9 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         boolean doCheckpoint = dataFlowCtx.getProperty("CHECKPOINT", Boolean.class);
 
         Configuration hadoopConfig = dataFlowCtx.getProperty("HADOOPCONF", Configuration.class);
+        // Ensure that we use the fatjars rather than the hadoop class path to resolve dependencies.
+        // This should eventually be set globally.
+        hadoopConfig.set("mapreduce.job.user.classpath.first", "true");
         dataFlow.setLocal(hadoopConfig == null || hadoopConfig.get("fs.defaultFS").equals("file:///"));
         dataFlow.setCheckpoint(doCheckpoint);
         return dataFlow.runFlow(dataFlowCtx);
