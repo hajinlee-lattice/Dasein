@@ -183,7 +183,7 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         lk.setName("LK_LUD");
         lk.setDisplayName("Last Modified Key for LastUpdatedDate column");
         lk.addAttribute("LID");
-        
+        lk.setLastModifiedTimestamp(1000000000000L);
         return lk;
     }
     
