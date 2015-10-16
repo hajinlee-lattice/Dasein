@@ -81,14 +81,17 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 return appId;
             } catch (Exception e) {
                 log.error("Sqoop Import Failed! Retry " + retryCount + "\n", e);
+                if (retryCount == MAX_SQOOP_RETRY) {
+                    throw new LedpException(LedpCode.LEDP_12010, e, new String[] { "import" });
+                }
                 try {
-                    Thread.sleep(RetryUtils.getExponentialWaitTime(retryCount++));
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
                 } catch (InterruptedException e1) {
                     log.error("Sqoop Import Retry Failed! " + ExceptionUtils.getStackTrace(e1));
                 }
             }
         }
-        throw new LedpException(LedpCode.LEDP_12010, new String[] { "import" });
+        return null;
     }
 
     @Override
@@ -107,14 +110,17 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 return exportData(table, sourceDir, creds, queue, jobName, numMappers, null);
             } catch (Exception e) {
                 log.error("Sqoop Export Failed! Retry " + retryCount + "\n", e);
+                if (retryCount == MAX_SQOOP_RETRY) {
+                    throw new LedpException(LedpCode.LEDP_12010, e, new String[] { "export" });
+                }
                 try {
-                    Thread.sleep(RetryUtils.getExponentialWaitTime(retryCount++));
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
                 } catch (InterruptedException e1) {
                     log.error("Sqoop Export Retry Failed! " + ExceptionUtils.getStackTrace(e1));
                 }
             }
         }
-        throw new LedpException(LedpCode.LEDP_12010, new String[] { "export" });
+        return null;
     }
 
     @Override
@@ -180,8 +186,9 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public ApplicationId importDataSyncWithAvscAndWhereCondition(String table, String targetDir, DbCreds creds, String queue, String customer,
-                                        List<String> splitCols, String columnsToInclude, String whereCondition, int numMappers) {
+    public ApplicationId importDataSyncWithAvscAndWhereCondition(String table, String targetDir, DbCreds creds,
+            String queue, String customer, List<String> splitCols, String columnsToInclude, String whereCondition,
+            int numMappers) {
         long time1 = System.currentTimeMillis();
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
