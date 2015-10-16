@@ -19,7 +19,7 @@ public class MapReduceExecutionEngine extends ExecutionEngine {
     @Override
     public FlowConnector createFlowConnector(DataFlowContext dataFlowCtx, Properties properties) {
         String queue = getQueue(dataFlowCtx);
-        properties.put("mapred.job.queue.name", queue);
+        properties.put("mapreduce.job.queuename", queue);
         return new HadoopFlowConnector(properties);
     }
 
