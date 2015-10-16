@@ -199,7 +199,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             var nameFiler = {
                 logic: "or",
                 filters: [
-                    { field: "Field", operator: "contains", value: $scope.field },
+                    { field: "ColumnName", operator: "contains", value: $scope.field },
                     { field: "DisplayName", operator: "contains", value: $scope.field }
                 ]
             };
