@@ -56,7 +56,8 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTableName, String oldTableName) {
-        jdbcTemplate.execute(String.format("create table `%s` select * from `%s` where 1 = 0", newTableName, oldTableName));
+        jdbcTemplate.execute(String.format("create table `%s` select * from `%s` where 1 = 0", newTableName,
+                oldTableName));
     }
 
     @Override
@@ -71,7 +72,10 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid) {
-        jdbcTemplate.execute(String.format("alter table `%s` add %s INT PRIMARY KEY auto_increment", tableName, pid));
+        Integer count  = jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = '%s' and COLUMN_NAME='%s'", tableName, pid), Integer.class);
+        if (count == 0 ) {
+            jdbcTemplate.execute(String.format("alter table `%s` add %s INT PRIMARY KEY auto_increment", tableName, pid));
+        }
     }
 
     @Override

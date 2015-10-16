@@ -75,7 +75,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid) {
-        jdbcTemplate.execute(String.format("ALTER TABLE [%s] ADD %s INT IDENTITY", tableName, pid));
+        jdbcTemplate.execute(String.format("IF COL_LENGTH('%1$s', '%2$s') IS NULL ALTER TABLE [%1$s] ADD [%2$s] INT IDENTITY", tableName, pid));
     }
 
     @Override
