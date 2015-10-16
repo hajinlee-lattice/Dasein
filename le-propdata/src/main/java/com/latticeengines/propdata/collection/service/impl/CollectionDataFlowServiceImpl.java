@@ -30,7 +30,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Value("${propdata.collection.use.default.job.properties:true}")
     private boolean useDefaultProperties;
 
-    @Value("${propdata.collection.mapred.reduce.tasks}")
+    @Value("${propdata.collection.mapred.reduce.tasks:8}")
     private int reduceTasks;
 
     @Override
