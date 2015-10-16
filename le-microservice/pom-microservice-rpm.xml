@@ -157,6 +157,9 @@
                                     <location>${security.properties.path}/security.properties</location>
                                 </source>
                                 <source>
+                                    <location>${metadata.properties.path}/metadata.properties</location>
+                                </source>
+                                <source>
                                     <location>${dataflowapi.properties.path}/dataflowapi.properties</location>
                                 </source>
                             </sources>
