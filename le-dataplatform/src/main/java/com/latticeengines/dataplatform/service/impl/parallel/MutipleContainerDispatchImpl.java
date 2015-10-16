@@ -4,11 +4,11 @@ import javax.annotation.Resource;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.runtime.python.PythonMRJobType;
 import com.latticeengines.dataplatform.runtime.python.PythonMRProperty;
@@ -30,63 +30,74 @@ public class MutipleContainerDispatchImpl implements ParallelDispatchService {
     private ModelingJobService modelingJobService;
 
     @Override
-    public void customizeSampleConfig(SamplingConfiguration config) {
+    public void customizeSampleConfig(SamplingConfiguration config, boolean isParallelEnabled) {
 
         config.setTrainingSetCount(Integer.parseInt(numberOfSamplingTrainingSet));
         config.setTrainingElements();
     }
 
     @Override
-    public String getSampleJobName() {
+    public String getSampleJobName(boolean isParallelEnabled) {
         return "parallelSamplingJob";
     }
 
     @Override
-    public String getModelingJobName() {
+    public String getModelingJobName(boolean isParallelEnabled) {
         return PythonMRJobType.MODELING_JOB.jobType();
     }
 
     @Override
-    public String getNumberOfSamplingTrainingSet() {
+    public String getNumberOfSamplingTrainingSet(boolean isParallelEnabled) {
         return numberOfSamplingTrainingSet;
     }
-
+// TODO:
+//    @Override
+//    public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath, boolean isParallelEnabled)
+//            throws Exception {
+//        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
+//        JsonNode diagnostics = new ObjectMapper().readTree(content);
+//        long sampleSize = diagnostics.get("DataSummary").get("RowSize").asLong();
+//
+//        return sampleSize;
+//    }
+//    
     @Override
-    public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath) throws Exception {
+    public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath, boolean isParallelEnabled)
+            throws Exception {
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
-        JsonNode diagnostics = new ObjectMapper().readTree(content);
-        long sampleSize = diagnostics.get("DataSummary").get("RowSize").asLong();
-
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
+        long sampleSize = (long) ((JSONObject) jsonObject.get("Summary")).get("SampleSize");
         return sampleSize;
     }
 
     @Override
-    public String getTrainingFile(String samplePrefix) {
+    public String getTrainingFile(String samplePrefix, boolean isParallelEnabled) {
         return SamplingConfiguration.TRAINING_ALL_PREFIX;
     }
 
     @Override
-    public String getTestFile(String samplePrefix) {
+    public String getTestFile(String samplePrefix, boolean isParallelEnabled) {
         return SamplingConfiguration.TESTING_SET_PREFIX;
     }
 
     @Override
-    public String getNumberOfProfilingMappers() {
+    public String getNumberOfProfilingMappers(boolean isParallelEnabled) {
         return numberOfProfilingMappers;
     }
 
     @Override
-    public String getProfileJobName() {
+    public String getProfileJobName(boolean isParallelEnabled) {
         return PythonMRJobType.PROFILING_JOB.jobType();
     }
 
     @Override
-    public ApplicationId submitJob(ModelingJob modelingJob) {
+    public ApplicationId submitJob(ModelingJob modelingJob, boolean isParallelEnabled, boolean isModeling) {
         return modelingJobService.submitJob(modelingJob);
     }
 
     @Override
-    public Object getMapSizeKeyName() {
+    public String getMapSizeKeyName(boolean isParallelEnabled) {
         return PythonMRProperty.MAPPER_SIZE.name();
     }
 

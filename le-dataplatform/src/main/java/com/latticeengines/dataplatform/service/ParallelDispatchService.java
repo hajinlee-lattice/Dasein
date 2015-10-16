@@ -8,26 +8,26 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
 public interface ParallelDispatchService {
 
-    void customizeSampleConfig(SamplingConfiguration config);
+    void customizeSampleConfig(SamplingConfiguration config, boolean isParallelEnabled);
 
-    String getSampleJobName();
+    String getSampleJobName(boolean isParallelEnabled);
 
-    String getModelingJobName();
+    String getModelingJobName(boolean isParallelEnabled);
 
-    String getNumberOfSamplingTrainingSet();
+    String getNumberOfSamplingTrainingSet(boolean isParallelEnabled);
 
-    long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath) throws Exception;
+    long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath, boolean isParallelEnabled) throws Exception;
 
-    String getTrainingFile(String samplePrefix);
+    String getTrainingFile(String samplePrefix, boolean isParallelEnabled);
 
-    String getTestFile(String samplePrefix);
+    String getTestFile(String samplePrefix, boolean isParallelEnabled);
 
-    String getNumberOfProfilingMappers();
+    String getNumberOfProfilingMappers(boolean isParallelEnabled);
 
-    String getProfileJobName();
+    String getProfileJobName(boolean isParallelEnabled);
 
-    ApplicationId submitJob(ModelingJob modelingJob);
+    ApplicationId submitJob(ModelingJob modelingJob, boolean isParallelEnabled, boolean isModeling);
 
-    Object getMapSizeKeyName();
+    String getMapSizeKeyName(boolean isParallelEnabled);
 
 }

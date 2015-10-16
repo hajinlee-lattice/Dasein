@@ -128,7 +128,7 @@ public class ModelingServiceImpl implements ModelingService {
     @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId createSamples(SamplingConfiguration config) {
 
-        parallelDispatchService.customizeSampleConfig(config);
+        parallelDispatchService.customizeSampleConfig(config, config.isParallelEnabled());
 
         Model model = new Model();
         model.setCustomer(config.getCustomer());
@@ -144,7 +144,8 @@ public class ModelingServiceImpl implements ModelingService {
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
 
-        return modelingJobService.submitMRJob(parallelDispatchService.getSampleJobName(), properties);
+        return modelingJobService.submitMRJob(parallelDispatchService.getSampleJobName(config.isParallelEnabled()),
+                properties);
     }
 
     @Override
@@ -167,7 +168,8 @@ public class ModelingServiceImpl implements ModelingService {
         modelDefinition.setName(m.getName());
         AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
-        dataProfileAlgorithm.setMapperSize(parallelDispatchService.getNumberOfProfilingMappers());
+        dataProfileAlgorithm.setMapperSize(parallelDispatchService.getNumberOfProfilingMappers(dataProfileConfig
+                .isParallelEnabled()));
         if (StringUtils.isEmpty(dataProfileConfig.getContainerProperties())) {
             dataProfileAlgorithm.setContainerProperties(getDefaultContainerProperties());
         } else {
@@ -181,9 +183,9 @@ public class ModelingServiceImpl implements ModelingService {
         m.setModelDefinition(modelDefinition);
 
         ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue,
-                parallelDispatchService.getProfileJobName());
+                parallelDispatchService.getProfileJobName(dataProfileConfig.isParallelEnabled()));
         m.addModelingJob(modelingJob);
-        return parallelDispatchService.submitJob(modelingJob);
+        return parallelDispatchService.submitJob(modelingJob, dataProfileConfig.isParallelEnabled(), false);
     }
 
     @Override
@@ -227,12 +229,13 @@ public class ModelingServiceImpl implements ModelingService {
             if (StringUtils.isEmpty(algorithm.getContainerProperties())) {
                 algorithm.setContainerProperties(getDefaultContainerProperties());
             }
-            algorithm.setMapperSize(parallelDispatchService.getNumberOfSamplingTrainingSet());
-            ModelingJob modelingJob = createJob(model, algorithm, parallelDispatchService.getModelingJobName());
+            algorithm.setMapperSize(parallelDispatchService.getNumberOfSamplingTrainingSet(model.isParallelEnabled()));
+            ModelingJob modelingJob = createJob(model, algorithm,
+                    parallelDispatchService.getModelingJobName(model.isParallelEnabled()));
             model.addModelingJob(modelingJob);
 
             // JobService is responsible for persistence during submitJob
-            applicationIds.add(modelingJobService.submitJob(modelingJob));
+            applicationIds.add(parallelDispatchService.submitJob(modelingJob, model.isParallelEnabled(), true));
         }
 
         return applicationIds;
@@ -282,7 +285,8 @@ public class ModelingServiceImpl implements ModelingService {
             throw new LedpException(LedpCode.LEDP_15004);
         }
         // Parse diagnostics file
-        long sampleSize = parallelDispatchService.getSampleSize(yarnConfiguration, diagnosticsPath);
+        long sampleSize = parallelDispatchService.getSampleSize(yarnConfiguration, diagnosticsPath,
+                model.isParallelEnabled());
 
         if (sampleSize < rowSizeThreshold) {
             throw new LedpException(LedpCode.LEDP_15005, new String[] { Double.toString(sampleSize) });
@@ -324,14 +328,14 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setDataDiagnosticsPath(model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE);
 
         String samplePrefix = algorithm.getSampleName();
-        String trainingFile = parallelDispatchService.getTrainingFile(samplePrefix);
+        String trainingFile = parallelDispatchService.getTrainingFile(samplePrefix, model.isParallelEnabled());
         String trainingPath = getAvroFileHdfsPath(trainingFile, model.getSampleHdfsPath());
 
         if (trainingPath == null) {
             throw new LedpException(LedpCode.LEDP_15001, new String[] { trainingFile });
         }
 
-        String testFile = parallelDispatchService.getTestFile(samplePrefix);
+        String testFile = parallelDispatchService.getTestFile(samplePrefix, model.isParallelEnabled());
         String testPath = getAvroFileHdfsPath(testFile, model.getSampleHdfsPath());
         if (testPath == null) {
             throw new LedpException(LedpCode.LEDP_15001, new String[] { testFile });
@@ -415,7 +419,8 @@ public class ModelingServiceImpl implements ModelingService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
-        appMasterProperties.put(parallelDispatchService.getMapSizeKeyName(), algorithm.getMapperSize());
+        appMasterProperties.put(parallelDispatchService.getMapSizeKeyName(model.isParallelEnabled()),
+                algorithm.getMapperSize());
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
         containerProperties.put(ContainerProperty.JOB_TYPE.name(), jobType);

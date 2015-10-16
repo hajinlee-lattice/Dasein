@@ -8,7 +8,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.runtime.python.PythonMRJobType;
 import com.latticeengines.dataplatform.service.ParallelDispatchService;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
@@ -17,7 +16,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 public class ParallelDispatchServiceImpl implements ParallelDispatchService {
 
     @Value("${dataplatform.model.parallel.enabled:false}")
-    private boolean parallelEnabled;
+    private boolean configParallelEnabled;
 
     @Resource(name = "SingleContainerDispatcher")
     private ParallelDispatchService singleContainerDispatcher;
@@ -29,7 +28,7 @@ public class ParallelDispatchServiceImpl implements ParallelDispatchService {
 
     @PostConstruct
     public void init() {
-        if (parallelEnabled) {
+        if (configParallelEnabled) {
             defaultContainerDispatcher = multipleContainerDispatcher;
         } else {
             defaultContainerDispatcher = singleContainerDispatcher;
@@ -37,61 +36,81 @@ public class ParallelDispatchServiceImpl implements ParallelDispatchService {
     }
 
     @Override
-    public void customizeSampleConfig(SamplingConfiguration config) {
-        getContainerDispatcher().customizeSampleConfig(config);
+    public void customizeSampleConfig(SamplingConfiguration config, boolean isParallelEnabled) {
+        getContainerDispatcher(isParallelEnabled).customizeSampleConfig(config, isParallelEnabled);
     }
 
     @Override
-    public String getSampleJobName() {
-        return getContainerDispatcher().getSampleJobName();
+    public String getSampleJobName(boolean isParallelEnabled) {
+        return getContainerDispatcher(isParallelEnabled).getSampleJobName(isParallelEnabled);
     }
 
     @Override
-    public String getModelingJobName() {
-        return PythonMRJobType.MODELING_JOB.jobType();
+    public String getModelingJobName(boolean isParallelEnabled) {
+        if (configParallelEnabled && !isParallelEnabled) {
+            return singleContainerDispatcher.getModelingJobName(isParallelEnabled);
+        }
+        return getContainerDispatcher(isParallelEnabled).getModelingJobName(isParallelEnabled);
     }
 
     @Override
-    public String getNumberOfSamplingTrainingSet() {
-        return getContainerDispatcher().getNumberOfSamplingTrainingSet();
+    public String getNumberOfSamplingTrainingSet(boolean isParallelEnabled) {
+        if (configParallelEnabled && !isParallelEnabled) {
+            return singleContainerDispatcher.getNumberOfProfilingMappers(isParallelEnabled);
+        }
+        return getContainerDispatcher(isParallelEnabled).getNumberOfSamplingTrainingSet(isParallelEnabled);
     }
 
     @Override
-    public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath) throws Exception {
-        return getContainerDispatcher().getSampleSize(yarnConfiguration, diagnosticsPath);
+    public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath, boolean isParallelEnabled)
+            throws Exception {
+        return getContainerDispatcher(isParallelEnabled).getSampleSize(yarnConfiguration, diagnosticsPath,
+                isParallelEnabled);
     }
 
     @Override
-    public String getTrainingFile(String samplePrefix) {
-        return getContainerDispatcher().getTrainingFile(samplePrefix);
+    public String getTrainingFile(String samplePrefix, boolean isParallelEnabled) {
+        return getContainerDispatcher(isParallelEnabled).getTrainingFile(samplePrefix, isParallelEnabled);
     }
 
     @Override
-    public String getTestFile(String samplePrefix) {
-        return getContainerDispatcher().getTestFile(samplePrefix);
+    public String getTestFile(String samplePrefix, boolean isParallelEnabled) {
+        return getContainerDispatcher(isParallelEnabled).getTestFile(samplePrefix, isParallelEnabled);
     }
 
     @Override
-    public String getNumberOfProfilingMappers() {
-        return getContainerDispatcher().getNumberOfProfilingMappers();
+    public String getNumberOfProfilingMappers(boolean isParallelEnabled) {
+        return getContainerDispatcher(isParallelEnabled).getNumberOfProfilingMappers(isParallelEnabled);
     }
 
     @Override
-    public String getProfileJobName() {
-        return getContainerDispatcher().getProfileJobName();
+    public String getProfileJobName(boolean isParallelEnabled) {
+        return getContainerDispatcher(isParallelEnabled).getProfileJobName(isParallelEnabled);
     }
 
-    private ParallelDispatchService getContainerDispatcher() {
+    @Override
+    public ApplicationId submitJob(ModelingJob modelingJob, boolean isParallelEnabled, boolean isModeling) {
+
+        if (configParallelEnabled && !isParallelEnabled && isModeling) {
+            return singleContainerDispatcher.submitJob(modelingJob, isParallelEnabled, isModeling);
+        }
+        return getContainerDispatcher(isParallelEnabled).submitJob(modelingJob, isParallelEnabled, isModeling);
+
+    }
+
+    @Override
+    public String getMapSizeKeyName(boolean isParallelEnabled) {
+        if (configParallelEnabled && !isParallelEnabled) {
+            return singleContainerDispatcher.getMapSizeKeyName(isParallelEnabled);
+        }
+        return getContainerDispatcher(isParallelEnabled).getMapSizeKeyName(isParallelEnabled);
+    }
+
+    private ParallelDispatchService getContainerDispatcher(boolean isParallelEnabled) {
+        if (isParallelEnabled) {
+            return multipleContainerDispatcher;
+        }
+
         return defaultContainerDispatcher;
-    }
-
-    @Override
-    public ApplicationId submitJob(ModelingJob modelingJob) {
-        return getContainerDispatcher().submitJob(modelingJob);
-    }
-
-    @Override
-    public Object getMapSizeKeyName() {
-        return getContainerDispatcher().getMapSizeKeyName();
     }
 }

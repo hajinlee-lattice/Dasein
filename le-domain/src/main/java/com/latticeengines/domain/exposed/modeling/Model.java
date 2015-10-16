@@ -47,6 +47,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     private String table;
     private String metadataTable;
     private String provenanceProperties;
+    private boolean parallelEnabled;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -277,6 +278,17 @@ public class Model implements HasName, HasPid, HasId<String> {
     @JsonProperty("key_columns")
     public void setKeyCols(List<String> keyCols) {
         this.keyCols = keyCols;
+    }
+
+    @Transient
+    @JsonProperty(value = "parallel_enabled", required = false)
+    public boolean isParallelEnabled() {
+        return parallelEnabled;
+    }
+
+    @JsonProperty(value = "parallel_enabled", required = false)
+    public void setParallelEnabled(boolean parallelEnabled) {
+        this.parallelEnabled = parallelEnabled;
     }
 
     @JsonIgnore

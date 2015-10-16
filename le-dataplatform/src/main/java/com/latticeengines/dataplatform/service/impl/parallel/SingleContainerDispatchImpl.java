@@ -22,26 +22,27 @@ public class SingleContainerDispatchImpl implements ParallelDispatchService {
     private ModelingJobService modelingJobService;
 
     @Override
-    public void customizeSampleConfig(SamplingConfiguration config) {
+    public void customizeSampleConfig(SamplingConfiguration config, boolean isParallelEnabled) {
     }
 
     @Override
-    public String getSampleJobName() {
+    public String getSampleJobName(boolean isParallelEnabled) {
         return "samplingJob";
     }
 
     @Override
-    public String getModelingJobName() {
+    public String getModelingJobName(boolean isParallelEnabled) {
         return "modeling";
     }
 
     @Override
-    public String getNumberOfSamplingTrainingSet() {
+    public String getNumberOfSamplingTrainingSet(boolean isParallelEnabled) {
         return "0";
     }
 
     @Override
-    public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath) throws Exception {
+    public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath, boolean isParallelEnabled)
+            throws Exception {
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
@@ -50,32 +51,32 @@ public class SingleContainerDispatchImpl implements ParallelDispatchService {
     }
 
     @Override
-    public String getTrainingFile(String samplePrefix) {
+    public String getTrainingFile(String samplePrefix, boolean isParallelEnabled) {
         return samplePrefix + "Training";
     }
 
     @Override
-    public String getTestFile(String samplePrefix) {
+    public String getTestFile(String samplePrefix, boolean isParallelEnabled) {
         return samplePrefix + "Test";
     }
 
     @Override
-    public String getNumberOfProfilingMappers() {
+    public String getNumberOfProfilingMappers(boolean isParallelEnabled) {
         return "0";
     }
 
     @Override
-    public String getProfileJobName() {
+    public String getProfileJobName(boolean isParallelEnabled) {
         return "profiling";
     }
 
     @Override
-    public ApplicationId submitJob(ModelingJob modelingJob) {
+    public ApplicationId submitJob(ModelingJob modelingJob, boolean isParallelEnabled, boolean isModeling) {
         return modelingJobService.submitJob(modelingJob);
     }
-    
+
     @Override
-    public Object getMapSizeKeyName() {
+    public String getMapSizeKeyName(boolean isParallelEnabled) {
         return PythonMRProperty.MAPPER_SIZE.name();
     }
 }

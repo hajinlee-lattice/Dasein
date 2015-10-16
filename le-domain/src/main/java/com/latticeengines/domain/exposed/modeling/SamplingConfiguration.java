@@ -34,6 +34,8 @@ public class SamplingConfiguration {
     private List<SamplingElement> trainingElements = new ArrayList<SamplingElement>();
     private SamplingElement trainingAll = new SamplingElement(TRAINING_ALL_PREFIX);
     private SamplingElement testingElement = new SamplingElement(TESTING_SET_PREFIX);
+    
+    private boolean parallelEnabled;
 
     public void addSamplingElement(SamplingElement samplingElement) {
         samplingElements.add(samplingElement);
@@ -178,6 +180,16 @@ public class SamplingConfiguration {
     public void createDefaultSamplingElements() {
         samplingElements.add(trainingAll);
         samplingElements.add(testingElement);
+    }
+    
+    @JsonProperty("parallel_enabled")
+    public boolean isParallelEnabled() {
+        return parallelEnabled;
+    }
+
+    @JsonProperty("parallel_enabled")
+    public void setParallelEnabled(boolean parallelEnabled) {
+        this.parallelEnabled = parallelEnabled;
     }
 
 }
