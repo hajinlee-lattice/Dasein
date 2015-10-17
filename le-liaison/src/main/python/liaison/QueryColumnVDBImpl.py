@@ -62,8 +62,6 @@ class QueryColumnVDBImpl( QueryColumn ):
             name = c_has_metadata.group(1)
             expression = ExpressionVDBImplFactory.Create( c_has_metadata.group(2) )
             sed = c_has_metadata.group(3)
-            if name == "Industry_Group":
-                print defn
 
             while True:
                 metadata_is_extracted = False
