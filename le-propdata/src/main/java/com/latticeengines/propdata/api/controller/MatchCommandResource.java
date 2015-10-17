@@ -29,7 +29,9 @@ public class MatchCommandResource {
 
     @RequestMapping(value = "/{commandID}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get status of match command")
+    @ApiOperation(value = "Get the status of a match command on the specific client. " +
+            "URL parameter matchClient can be PD126, PD127, PD128, PD131, or PD130. " +
+            "PD130 should be used only in QA.")
     public MatchStatusResponse getMatchStatus(@PathVariable Long commandID,
                                              @RequestParam(value="matchClient") String clientName) {
         MatchClient client = MatchClient.valueOf(clientName);
@@ -40,7 +42,9 @@ public class MatchCommandResource {
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get status of match command")
+    @ApiOperation(value = "Create a match command on the specific client. " +
+            "URL parameter matchClient can be PD126, PD127, PD128, PD131, or PD130. " +
+            "PD130 should be used only in QA.")
     public Commands createMatchCommand(@RequestBody CreateCommandRequest request,
                                       @RequestParam(value="matchClient", required=false, defaultValue = "PD130") String clientName) {
         MatchClient client = MatchClient.valueOf(clientName);
