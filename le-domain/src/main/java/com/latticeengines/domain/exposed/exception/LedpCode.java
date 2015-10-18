@@ -65,7 +65,7 @@ public enum LedpCode {
     LEDP_15013("Failed to validate SamplingConfiguration."), //
     LEDP_15014("Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
     LEDP_15015("Could not set up configuration file correctly for MapReduce."), //
-    
+
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
     LEDP_16001("Problem deleting path {0} before load."), //
@@ -139,6 +139,7 @@ public enum LedpCode {
     LEDP_18049("Failed to retrieve feature flags from ZK for the tenant {0}."), //
     LEDP_18050("Query with name {0} not found."), //
     LEDP_18051("Column with name {0} not found."), //
+    LEDP_18052("The following predictors do not exist in the predictor table: {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
