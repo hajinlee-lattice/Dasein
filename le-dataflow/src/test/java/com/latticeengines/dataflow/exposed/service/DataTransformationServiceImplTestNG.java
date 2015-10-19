@@ -55,8 +55,9 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
 
         if (sampleDataFlowBuilder.isLocal()) {
             config.set("fs.defaultFS", "file:///");
+            config.set("fs.default.name", "file:///");
         }
-        
+
         HdfsUtils.rmdir(config, "/tmp/EventTable");
         HdfsUtils.rmdir(config, "/tmp/CombinedImportTable");
         HdfsUtils.rmdir(config, "/tmp/checkpoints");
@@ -91,7 +92,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
             extract3 = "/tmp/avro/file3.avro";
             FileSystem fs = FileSystem.get(config);
             doCopy(fs, entries);
-        } 
+        }
     }
 
     @Test(groups = "functional", dataProvider = "engineProvider", enabled = true)
@@ -113,7 +114,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
         verifyNumRows(config, "/tmp/EventTable", 308);
     }
-    
+
     @DataProvider(name = "engineProvider")
     public Object[][] getEngine() {
         return new Object[][] {
@@ -171,7 +172,6 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     @Test(groups = "functional", dataProvider = "errorUseCaseProvider", //
             dependsOnMethods = { "executeNamedTransformationForTableSource" })
     public void executeNamedTransformationForErrors(Table table, String message) throws Exception {
-        executeNamedTransformationForTableSource("MR");
         Map<String, Table> sourceTables = new HashMap<>();
         sourceTables.put("Source", table);
 

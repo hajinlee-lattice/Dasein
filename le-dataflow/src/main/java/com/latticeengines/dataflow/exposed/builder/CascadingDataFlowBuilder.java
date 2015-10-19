@@ -21,24 +21,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
-import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
-import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
-import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
-import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
-import com.latticeengines.domain.exposed.metadata.PrimaryKey;
-import com.latticeengines.domain.exposed.metadata.Table;
-
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -76,6 +58,24 @@ import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
+
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
+import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
@@ -132,16 +132,15 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(pipe, fields, true, null);
     }
 
-    private String register(Pipe pipe, List<FieldMetadata> fields, boolean allowCheckpoint, String name) {
-        if (name == null) {
-            name = "node" + counter++;
+    private String register(Pipe pipe, List<FieldMetadata> fields, boolean allowCheckpoint, String lookupId) {
+        if (lookupId == null) {
+            lookupId = "node-" + counter++;
         }
-        pipe = new Pipe(name, pipe);
-        pipesAndOutputSchemas.put(name, new AbstractMap.SimpleEntry<>(pipe, fields));
+        pipesAndOutputSchemas.put(lookupId, new AbstractMap.SimpleEntry<>(pipe, fields));
 
         if (isCheckpoint() && allowCheckpoint) {
             DataFlowContext ctx = getDataFlowCtx();
-            String ckptName = "ckpt" + counter++;
+            String ckptName = "ckpt-" + counter++;
             Checkpoint ckpt = new Checkpoint(ckptName, pipe);
             String targetPath = String.format("/tmp/checkpoints/%s/%s/%s", //
                     ctx.getProperty("CUSTOMER", String.class), //
@@ -149,11 +148,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     ckptName);
             Tap ckptTap = new Hfs(new SequenceFile(Fields.UNKNOWN), targetPath, SinkMode.REPLACE);
             checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptTap));
-            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas.get(name);
+            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas.get(lookupId);
             pipesAndOutputSchemas.put(ckptName, new AbstractMap.SimpleEntry<>((Pipe) ckpt, pipeAndFields.getValue()));
             return ckptName;
         }
-        return name;
+        return lookupId;
     }
 
     @Override
@@ -308,6 +307,16 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(new Pipe(sourceName), fields, false, sourceName);
     }
 
+    @Override
+    protected String rename(String prior, String newname) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> priorLookup = pipesAndOutputSchemas.get(prior);
+        if (priorLookup == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[]{prior});
+        }
+        Pipe pipe = new Pipe(newname, priorLookup.getKey());
+        return register(pipe, priorLookup.getValue());
+    }
+
     private Configuration getConfig() {
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
@@ -365,7 +374,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             String originalFieldName = fieldName;
 
             if (seenFields.contains(fieldName)) {
-                fieldName = rhs.replaceAll("\\*|-", "__") + "__" + fieldName;
+                fieldName = rhsPipesAndFields.getKey().getName().replaceAll("\\*|-", "__") + "__" + fieldName;
             }
             seenFields.add(fieldName);
             FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);

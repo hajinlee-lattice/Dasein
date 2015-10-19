@@ -38,7 +38,7 @@ public abstract class DataFlowBuilder {
         return null;
     }
 
-    public abstract Schema getSchema(String flowName, String operatorName, DataFlowContext dataFlowCtx);
+    protected abstract Schema getSchema(String flowName, String operatorName, DataFlowContext dataFlowCtx);
 
     public abstract Table runFlow(DataFlowContext dataFlowCtx);
     
@@ -79,6 +79,8 @@ public abstract class DataFlowBuilder {
             FieldList fieldsToApply, FieldMetadata targetField);
 
     protected abstract List<FieldMetadata> getMetadata(String operator);
+
+    protected abstract String rename(String prior, String newname);
 
     public DataFlowBuilder() {
         this(false, false);

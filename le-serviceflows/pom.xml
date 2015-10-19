@@ -26,6 +26,60 @@
         <module>core</module>
         <module>prospectdiscovery</module>
     </modules>
+
+    <!-- Override parent functional profile in order to always run in local mode -->
+    <profiles>
+        <profile>
+            <id>functional</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>functional-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration combine.self="override">
+                                    <argLine>${maxpermsize} ${argLine} -Dsqoop.throwOnError=true</argLine>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${functional.classes.include}</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>${functional.classes.exclude}</exclude>
+                                        <exclude>${deployment.classes.include}</exclude>
+                                        <exclude>${infrastructure.classes.include}</exclude>
+                                    </excludes>
+                                    <groups>${functional.groups}</groups>
+                                    <forkMode>always</forkMode>
+                                    <classpathDependencyExcludes>
+                                        <classpathDependencyExcludes>${env.HADOOP_HOME}/etc/hadoop</classpathDependencyExcludes>
+                                    </classpathDependencyExcludes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
 
 

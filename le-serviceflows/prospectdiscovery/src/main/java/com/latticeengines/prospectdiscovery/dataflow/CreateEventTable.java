@@ -59,6 +59,8 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
                 new FieldList("AccountId"), //
                 aggregations);
 
+        retrieveMaxDomainBucketSize = rename(retrieveMaxDomainBucketSize, "RetrieveMaxDomainBucketSize");
+
         String retrieveBestDomain = addInnerJoin(retrieveDomainBucketsForEachAccount,
                 new FieldList("AccountId", "BucketSize"), //
                 retrieveMaxDomainBucketSize, //

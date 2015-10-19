@@ -11,9 +11,6 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 @Component("sampleDataFlowBuilder")
 public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
 
-    public SampleDataFlowBuilder() {
-        super(true, true);
-    }
 
     /**
      * SELECT Domain, MaxRevenue, TotalEmployees FROM ( SELECT Domain,

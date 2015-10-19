@@ -31,7 +31,7 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
             lastAggregatedOperatorName = createPctChangeCollumns(lastAggregatedOperatorName);
         } else {
             addSource("MadisonLogicForYesterday", pastDateData);
-            lastAggregatedOperatorName = joinWithLastDateData();
+            lastAggregatedOperatorName = joinWithLastDateData(lastAggregatedOperatorName);
         }
 
         return lastAggregatedOperatorName;
@@ -77,17 +77,16 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
         return lastAggregatedOperatorName;
     }
 
-    private String joinWithLastDateData() {
-
-        String lastAggregatedOperatorName = addRetainFunction("MadisonLogicForYesterday", new FieldList(new String[] {
+    private String joinWithLastDateData(String todayAggregated) {
+        String yesterdayAggregated = addRetainFunction("MadisonLogicForYesterday", new FieldList(new String[] {
                 "DomainID", "Category", "ML_30Day_Category_Total", "ML_30Day_Category_UniqueUsers" }));
 
-        lastAggregatedOperatorName = addLeftOuterJoin("MadisonLogicForToday", new FieldList("DomainID", "Category"),
-                lastAggregatedOperatorName, new FieldList("DomainID", "Category"));
+        String joined = addLeftOuterJoin(todayAggregated, new FieldList("DomainID", "Category"),
+                yesterdayAggregated, new FieldList("DomainID", "Category"));
         FieldMetadata fieldMetaData = new FieldMetadata(Type.DOUBLE, Float.class, "ML_30Day_Category_Total_PctChange",
                 null);
-        lastAggregatedOperatorName = addFunction(
-                lastAggregatedOperatorName, //
+        String lastAggregatedOperatorName = addFunction(
+                joined, //
                 "MadisonLogicForYesterday__ML_30Day_Category_Total != null ? "
                         + "new Double((ML_30Day_Category_Total.doubleValue() - MadisonLogicForYesterday__ML_30Day_Category_Total.doubleValue())/MadisonLogicForYesterday__ML_30Day_Category_Total.doubleValue()) : null", //
                 new FieldList("ML_30Day_Category_Total", "MadisonLogicForYesterday__ML_30Day_Category_Total"), //
