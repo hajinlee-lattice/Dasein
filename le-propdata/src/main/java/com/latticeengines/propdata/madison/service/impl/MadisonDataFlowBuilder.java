@@ -31,7 +31,7 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
             lastAggregatedOperatorName = createPctChangeCollumns(lastAggregatedOperatorName);
         } else {
             addSource("MadisonLogicForYesterday", pastDateData);
-            lastAggregatedOperatorName = joinWithLastDateData(lastAggregatedOperatorName);
+            lastAggregatedOperatorName = joinWithLastDateData();
         }
 
         return lastAggregatedOperatorName;
@@ -77,31 +77,30 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
         return lastAggregatedOperatorName;
     }
 
-    private String joinWithLastDateData(String todayAggregated) {
+    private String joinWithLastDateData() {
 
-        String yesterdayAggregated = addRetainFunction("MadisonLogicForYesterday", new FieldList(new String[] {
+        String lastAggregatedOperatorName = addRetainFunction("MadisonLogicForYesterday", new FieldList(new String[] {
                 "DomainID", "Category", "ML_30Day_Category_Total", "ML_30Day_Category_UniqueUsers" }));
-        String joined = addLeftOuterJoin(todayAggregated, new FieldList("DomainID", "Category"),
-                yesterdayAggregated, new FieldList("DomainID", "Category"));
+
+        lastAggregatedOperatorName = addLeftOuterJoin("MadisonLogicForToday", new FieldList("DomainID", "Category"),
+                lastAggregatedOperatorName, new FieldList("DomainID", "Category"));
         FieldMetadata fieldMetaData = new FieldMetadata(Type.DOUBLE, Float.class, "ML_30Day_Category_Total_PctChange",
                 null);
-        String lastAggregatedOperatorName = addFunction(
-                joined, //
-                String.format("%s__ML_30Day_Category_Total != null ? " //
-                        + "new Double((ML_30Day_Category_Total.doubleValue() - %s__ML_30Day_Category_Total.doubleValue())/%s__ML_30Day_Category_Total.doubleValue()) : null", //
-                        yesterdayAggregated, yesterdayAggregated, yesterdayAggregated), //
-                new FieldList("ML_30Day_Category_Total", String.format("%s__ML_30Day_Category_Total", yesterdayAggregated)), //
+        lastAggregatedOperatorName = addFunction(
+                lastAggregatedOperatorName, //
+                "MadisonLogicForYesterday__ML_30Day_Category_Total != null ? "
+                        + "new Double((ML_30Day_Category_Total.doubleValue() - MadisonLogicForYesterday__ML_30Day_Category_Total.doubleValue())/MadisonLogicForYesterday__ML_30Day_Category_Total.doubleValue()) : null", //
+                new FieldList("ML_30Day_Category_Total", "MadisonLogicForYesterday__ML_30Day_Category_Total"), //
                 fieldMetaData);
 
         fieldMetaData = new FieldMetadata(Type.DOUBLE, Float.class, "ML_30Day_Category_UniqueUsers_PctChange", null);
         lastAggregatedOperatorName = addFunction(
                 lastAggregatedOperatorName, //
-                String.format("%s__ML_30Day_Category_UniqueUsers != null ? "
+                "MadisonLogicForYesterday__ML_30Day_Category_UniqueUsers != null ? "
                         + "new Double((ML_30Day_Category_UniqueUsers.doubleValue() - "
-                        + "%s__ML_30Day_Category_UniqueUsers.doubleValue())/%s__ML_30Day_Category_UniqueUsers.doubleValue()) : null", //
-                        yesterdayAggregated, yesterdayAggregated, yesterdayAggregated), //
+                        + "MadisonLogicForYesterday__ML_30Day_Category_UniqueUsers.doubleValue())/MadisonLogicForYesterday__ML_30Day_Category_UniqueUsers.doubleValue()) : null", //
                 new FieldList("ML_30Day_Category_UniqueUsers",
-                        String.format("%s__ML_30Day_Category_UniqueUsers", yesterdayAggregated)), fieldMetaData, new FieldList(
+                        "MadisonLogicForYesterday__ML_30Day_Category_UniqueUsers"), fieldMetaData, new FieldList(
                         new String[] { "DomainID", "Category", "ML_30Day_Category_Total",
                                 "ML_30Day_Category_UniqueUsers", "ML_30Day_Category_Total_PctChange",
                                 "ML_30Day_Category_UniqueUsers_PctChange" }));
