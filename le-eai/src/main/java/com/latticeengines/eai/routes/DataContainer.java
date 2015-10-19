@@ -88,6 +88,10 @@ public class DataContainer {
         }
     }
 
+    public Object getValueForAttribute(Attribute attribute) {
+        return record.get(attribute.getName());
+    }
+
     public File getLocalDataFile() {
         return file;
     }

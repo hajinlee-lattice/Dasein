@@ -75,6 +75,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, importContext);
 
         for (Table table : tables) {
+            System.out.println(table);
             for (Attribute attribute : table.getAttributes()) {
                 assertNotNull(attribute.getPhysicalDataType());
             }

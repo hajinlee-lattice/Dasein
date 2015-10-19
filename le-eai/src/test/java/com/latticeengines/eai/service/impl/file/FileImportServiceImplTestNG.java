@@ -61,7 +61,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         fileImportConfig.setProperties(props);
 
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
-        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { tables.get(0) }));
+        fileImportConfig.setTables(Arrays.<Table> asList(tables.get(0)));
         fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx);
 
         ApplicationId appId = ctx.getProperty(ImportProperty.APPID, ApplicationId.class);

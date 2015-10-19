@@ -1,7 +1,6 @@
 package com.latticeengines.eai.service;
 
 import java.util.List;
-
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;

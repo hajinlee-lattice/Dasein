@@ -1,16 +1,12 @@
 package com.latticeengines.domain.exposed.scoring;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 
 import org.apache.avro.Schema;
 
 @Entity
-@IdClass(ScoreOutput.ScoreOutputPK.class)
 public class ScoreOutput extends org.apache.avro.specific.SpecificRecordBase implements
         org.apache.avro.specific.SpecificRecord {
 
@@ -18,7 +14,6 @@ public class ScoreOutput extends org.apache.avro.specific.SpecificRecordBase imp
     @Column(name = "LeadID", nullable = true)
     private String LeadID;
 
-    @Id
     @Column(name = "Play_Display_Name", nullable = true)
     private String Play_Display_Name;
 
@@ -45,22 +40,6 @@ public class ScoreOutput extends org.apache.avro.specific.SpecificRecordBase imp
 
     public static org.apache.avro.Schema getClassSchema() {
         return SCHEMA$;
-    }
-
-    public static class ScoreOutputPK implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        @SuppressWarnings("unused")
-        private String LeadID;
-
-        @SuppressWarnings("unused")
-        private String Play_Display_Name;
-
-        public ScoreOutputPK(String leadID, String playDisplayName) {
-            this.LeadID = leadID;
-            this.Play_Display_Name = playDisplayName;
-        }
     }
 
     public ScoreOutput(){}

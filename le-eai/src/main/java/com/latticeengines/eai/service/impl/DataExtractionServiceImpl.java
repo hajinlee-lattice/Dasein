@@ -10,23 +10,29 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.DataExtractionService;
+import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -47,13 +53,18 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private EaiMetadataService eaiMetadataService;
+
     @Override
     public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
-        context.setProperty(ImportProperty.CUSTOMER, importConfig.getCustomer());
+        String customer = importConfig.getCustomer();
+        context.setProperty(ImportProperty.CUSTOMER, customer);
         String targetPath = createTargetPath(importConfig.getCustomer());
         context.setProperty(ImportProperty.TARGETPATH, targetPath);
         context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
+        context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
         List<Table> tableMetadata = null;
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
@@ -68,6 +79,28 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             tableMetadata = importService.importMetadata(sourceImportConfig, context);
 
             sourceImportConfig.setTables(tableMetadata);
+            for (Table table : tableMetadata) {
+                LastModifiedKey lmd = eaiMetadataService.getLastModifiedKey(CustomerSpace.parse(customer).toString(),
+                        table);
+                StringBuilder filter = new StringBuilder();
+                String lastModifiedDate;
+                DateTime date;
+                if (lmd != null) {
+                    lastModifiedDate = lmd.getAttributeNames()[0];
+                    date = new DateTime(lmd.getLastModifiedTimestamp());
+                } else {
+                    lastModifiedDate = "LastModifiedDate";
+                    date = new DateTime(1000000000000L);
+                }
+                String defaultFilter = sourceImportConfig.getFilter(table.getName());
+                if (!StringUtils.isEmpty(defaultFilter)) {
+                    filter.append(defaultFilter).append(", ");
+                }
+                filter.append(lastModifiedDate).append(" >= ").append(date).append(" Order By ")
+                        .append(lastModifiedDate).append(" Desc ").toString();
+
+                sourceImportConfig.setFilter(table.getName(), filter.toString());
+            }
 
             importService.importDataAndWriteToHdfs(sourceImportConfig, context);
 
@@ -123,7 +156,8 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     }
 
     public String createTargetPath(String customer) {
-        Path customerSpacePath = PathBuilder.buildCustomerSpacePath("Production", customer, customer, "Production");
+        Path customerSpacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customer, customer,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         return (customerSpacePath + "/Data/Tables").toString();
     }
 
@@ -134,5 +168,10 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             log.info("Table is： " + entry.getKey() + "  Path is: " + entry.getValue());
             HdfsUtils.rmdir(yarnConfiguration, StringUtils.substringBeforeLast(entry.getValue(), "/"));
         }
+    }
+
+    @VisibleForTesting
+    void setEaiMetadataService(EaiMetadataService eaiMetadataService) {
+        this.eaiMetadataService = eaiMetadataService;
     }
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.eai.yarn.runtime;
 
+
 import java.util.List;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
@@ -74,6 +75,8 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
                 Thread.sleep(5000L);
             }
             log.info("Finished extract and import.");
+
+            eaiMetadataService.setLastModifiedTimeStamp(tableMetadata, importContext);
             eaiMetadataService.registerTables(tableMetadata, importContext);
         } catch (Exception e) {
             Thread.sleep(20000);

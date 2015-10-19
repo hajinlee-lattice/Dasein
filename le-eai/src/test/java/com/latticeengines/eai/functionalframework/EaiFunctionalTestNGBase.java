@@ -26,12 +26,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -43,9 +45,11 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
+import com.latticeengines.security.exposed.service.TenantService;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
@@ -75,6 +79,9 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
     @Autowired
     protected SalesforceRouteConfig salesforceRouteConfig;
+
+    @Autowired
+    protected TenantService tenantService;
 
     protected ImportConfiguration importConfig;
 
@@ -145,7 +152,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     }
 
     protected void checkExtractsDirectoryExists(String customer, List<String> tables) throws Exception {
-        Path customerSpacePath = PathBuilder.buildCustomerSpacePath("Production", customer, customer, "Production");
+        Path customerSpacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customer, customer,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         for (String table : tables) {
             String path = (customerSpacePath + "/Data/Tables/" + table + "/Extracts").toString();
             assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
@@ -187,4 +195,13 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         importConfig.addSourceConfiguration(salesforceConfig);
         importConfig.setCustomer(customer);
     }
+
+    protected Tenant createTenant(String customerSpace) {
+        Tenant tenant = new Tenant();
+        tenant.setId(customerSpace);
+        tenant.setName(customerSpace);
+        tenant.setRegisteredTime(System.currentTimeMillis());
+        return tenant;
+    }
+
 }

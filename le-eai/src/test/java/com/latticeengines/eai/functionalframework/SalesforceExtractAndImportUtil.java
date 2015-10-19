@@ -85,11 +85,14 @@ public class SalesforceExtractAndImportUtil {
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
         pk.addAttribute(id.getName());
+        pk.setDisplayName(id.getName());
         table.setPrimaryKey(pk);
 
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
+        lk.setDisplayName(lastModifiedDate.getName());
         lk.addAttribute(lastModifiedDate.getName());
+        lk.setLastModifiedTimestamp(1000000000000L);
         table.setLastModifiedKey(lk);
         return table;
     }
@@ -113,7 +116,89 @@ public class SalesforceExtractAndImportUtil {
         Attribute city = new Attribute();
         city.setName("BillingCity");
         Attribute state = new Attribute();
-        state.setName("ShippinhState");
+        state.setName("ShippingState");
+        Attribute postalCode = new Attribute();
+        postalCode.setName("BillingPostalCode");
+        Attribute country = new Attribute();
+        country.setName("BillingCountry");
+        Attribute website = new Attribute();
+        website.setName("Website");
+        Attribute sic = new Attribute();
+        sic.setName("Sic");
+        Attribute industry = new Attribute();
+        industry.setName("Industry");
+        Attribute annualRevenue = new Attribute();
+        annualRevenue.setName("AnnualRevenue");
+        Attribute numEmployees = new Attribute();
+        numEmployees.setName("NumberOfEmployees");
+        Attribute lastActivityDate = new Attribute();
+        lastActivityDate.setName("LastActivityDate");
+        Attribute lastViewedDate = new Attribute();
+        lastViewedDate.setName("LastViewedDate");
+        Attribute createdDate = new Attribute();
+        createdDate.setName("CreatedDate");
+        Attribute ownerId = new Attribute();
+        ownerId.setName("OwnerId");
+        Attribute ownership = new Attribute();
+        ownership.setName("Ownership");
+        Attribute rating = new Attribute();
+        rating.setName("Rating");
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
+
+        table.addAttribute(id);
+        table.addAttribute(accountSource);
+        table.addAttribute(name);
+        table.addAttribute(tickerSymbol);
+        table.addAttribute(type);
+        table.addAttribute(street);
+        table.addAttribute(city);
+        table.addAttribute(state);
+        table.addAttribute(postalCode);
+        table.addAttribute(country);
+        table.addAttribute(website);
+        table.addAttribute(sic);
+        table.addAttribute(industry);
+        table.addAttribute(annualRevenue);
+        table.addAttribute(numEmployees);
+        table.addAttribute(lastActivityDate);
+        table.addAttribute(createdDate);
+        table.addAttribute(ownerId);
+        table.addAttribute(rating);
+        table.addAttribute(lastModifiedDate);
+
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("PK_ID");
+        pk.addAttribute(id.getName());
+        table.setPrimaryKey(pk);
+
+        LastModifiedKey lk = new LastModifiedKey();
+        lk.setName("LK_CreatedDate");
+        lk.addAttribute(createdDate.getName());
+        table.setLastModifiedKey(lk);
+        return table;
+    }
+    
+    public static Table createAccountWithNonExistingAttr(){
+        Table table = new Table();
+        table.setName("Account");
+
+        Attribute id = new Attribute();
+        id.setName("Id");
+        Attribute accountSource = new Attribute();
+        accountSource.setName("AccountSource");
+        Attribute name = new Attribute();
+        name.setName("Name");
+        Attribute tickerSymbol = new Attribute();
+        tickerSymbol.setName("TickerSymbol");
+        Attribute type = new Attribute();
+        type.setName("Type");
+        Attribute street = new Attribute();
+        street.setName("BillingStreet");
+        Attribute city = new Attribute();
+        city.setName("BillingCity");
+        Attribute state = new Attribute();
+        state.setName("ShippingState");
         Attribute postalCode = new Attribute();
         postalCode.setName("BillingPostalCode");
         Attribute country = new Attribute();

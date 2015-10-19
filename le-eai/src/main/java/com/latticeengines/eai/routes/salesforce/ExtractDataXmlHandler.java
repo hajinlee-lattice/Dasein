@@ -24,6 +24,8 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     private int errorRecords = 0;
     private int totalRecords = 0;
     private DataContainer dataContainer;
+    private String lmk;
+    private long lmkValue;
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -78,12 +80,22 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         if (currentQname == null) {
             return;
         }
+
         dataContainer.setValueForAttribute(attr, new String(ch, start, length));
+        if (processedRecords == 0 && attr.getName().equals(lmk)) {
+            String value = dataContainer.getValueForAttribute(attr).toString();
+            lmkValue = Long.parseLong(value);
+        }
+    }
+
+    public Long getLmkValue() {
+        return lmkValue;
     }
 
     public String initialize(SpringCamelContext context, Table table) {
         this.dataContainer = new DataContainer(context, table);
         this.tableAttributeMap = table.getNameAttributeMap();
+        this.lmk = "LastModifiedDate";
         return dataContainer.getLocalDataFile().getName();
     }
 

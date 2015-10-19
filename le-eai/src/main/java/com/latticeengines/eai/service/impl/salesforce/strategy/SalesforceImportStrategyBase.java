@@ -28,8 +28,11 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
+import com.latticeengines.eai.metadata.util.EaiMetadataUtil;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 
@@ -121,13 +124,15 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         JobInfo jobInfo = setupJob(template, table);
 
+        PrimaryKey pk = EaiMetadataUtil.createPrimaryKey();
+        LastModifiedKey lk = EaiMetadataUtil.createLastModifiedKey();
+
         try {
             SObjectDescription desc = template.requestBodyAndHeader("direct:getDescription", jobInfo,
                     SalesforceEndpointConfig.SOBJECT_NAME, table.getName(), SObjectDescription.class);
             List<SObjectField> descFields = desc.getFields();
             Map<String, Attribute> nameAttrMap = table.getNameAttributeMap();
-            // validateSalesforceMetadata(table.getName(), nameAttrMap,
-            // descFields);
+            validateSalesforceMetadata(table.getName(), nameAttrMap, descFields);
 
             Table newTable = new Table();
             newTable.setName(table.getName());
@@ -168,8 +173,15 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 } else if (type.equals("datetime")) {
                     attr.setPropertyValue("dateFormat", "YYYY-MM-DD'T'HH:mm:ss.sssZ");
                 }
+                if (attr.getLogicalDataType().equals("id")) {
+                    pk.addAttribute(attr.getName());
+                } else if (attr.getName().equals("LastModifiedDate")) {
+                    lk.addAttribute(attr.getName());
+                }
                 newTable.addAttribute(attr);
             }
+            newTable.setPrimaryKey(pk);
+            newTable.setLastModifiedKey(lk);
 
             Schema schema = AvroSchemaBuilder.createSchema(newTable.getName(), newTable);
             newTable.setSchema(schema);

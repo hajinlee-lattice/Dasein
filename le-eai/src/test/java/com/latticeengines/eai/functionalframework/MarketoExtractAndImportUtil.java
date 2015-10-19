@@ -26,10 +26,15 @@ public class MarketoExtractAndImportUtil {
         activityTypeId.setName("activityTypeId");
         activityTypeId.setDisplayName("Activity Type Id");
         activityTypeId.setLogicalDataType("Int");
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
+        lastModifiedDate.setDisplayName("LastModifiedDate");
+        lastModifiedDate.setLogicalDataType("Timestamp");
         table.addAttribute(id);
         table.addAttribute(leadId);
         table.addAttribute(activityDate);
         table.addAttribute(activityTypeId);
+        table.addAttribute(lastModifiedDate);
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
@@ -65,11 +70,17 @@ public class MarketoExtractAndImportUtil {
         attributes.setName("attributes");
         attributes.setDisplayName("Attributes");
         attributes.setLogicalDataType("String");
+        
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
+        lastModifiedDate.setDisplayName("LastModifiedDate");
+        lastModifiedDate.setLogicalDataType("Timestamp");
 
         table.addAttribute(id);
         table.addAttribute(name);
         table.addAttribute(description);
         table.addAttribute(attributes);
+        table.addAttribute(lastModifiedDate);
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
@@ -129,6 +140,10 @@ public class MarketoExtractAndImportUtil {
         facebookReferredEnrollments.setName("facebookReferredEnrollments");
         Attribute facebookReferredVisits = new Attribute();
         facebookReferredVisits.setName("facebookReferredVisits");
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
+        lastModifiedDate.setDisplayName("LastModifiedDate");
+        lastModifiedDate.setLogicalDataType("Timestamp");
 
         table.addAttribute(id);
         table.addAttribute(anonymousIP);
@@ -153,6 +168,7 @@ public class MarketoExtractAndImportUtil {
         table.addAttribute(phone);
         table.addAttribute(facebookReferredEnrollments);
         table.addAttribute(facebookReferredVisits);
+        table.addAttribute(lastModifiedDate);
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");

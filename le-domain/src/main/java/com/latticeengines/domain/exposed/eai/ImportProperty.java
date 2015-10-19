@@ -12,4 +12,5 @@ public class ImportProperty extends BaseProperty {
     public static final String PRODUCERTEMPLATE = "producerTemplate";
     public static final String FILEURLPROPERTIES = "fileUrlProperties";
     public static final String EXTRACT_PATH = "extractPaths";
+    public static final String LAST_MODIFIED_DATE = "lastModifiedDate";
 }

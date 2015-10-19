@@ -3,13 +3,18 @@ package com.latticeengines.eai.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.am.AppmasterServiceClient;
 import org.springframework.yarn.integration.ip.mind.MindAppmasterServiceClient;
 import org.springframework.yarn.integration.ip.mind.binding.BaseObject;
@@ -20,20 +25,26 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.eai.appmaster.service.AppMasterServiceResponse;
 import com.latticeengines.eai.appmaster.service.AppmasterServiceRequest;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.DataExtractionService;
+import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
-public class SalesforceEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
+public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private EaiService eaiService;
@@ -53,14 +64,27 @@ public class SalesforceEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private AppmasterServiceClient appmasterServiceClient;
 
+    @Autowired
+    private EaiMetadataService eaiMetadataService;
+
+    @Value("${eai.salesforce.username}")
+    private String salesforceUserName;
+
+    @Value("${eai.salesforce.password}")
+    private String salesforcePasswd;
+
     private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
             "Opportunity", "OpportunityContactRole" });
 
-    private String customer = "Salesforce-Eai";
+    private String customer = "SFDC-Eai-Customer";
 
     private String targetPath;
 
-    @BeforeClass(groups = "functional")
+    private String customerSpace = CustomerSpace.parse(customer).toString();
+
+    private Tenant tenant;
+
+    @BeforeClass(groups = "deployment")
     private void setup() throws Exception {
         targetPath = dataExtractionService.createTargetPath(customer);
         HdfsUtils.rmdir(yarnConfiguration, targetPath);
@@ -74,23 +98,43 @@ public class SalesforceEaiServiceImplTestNG extends EaiFunctionalTestNGBase {
         baton.createTenant(customer, customer, "defaultspaceId", spaceInfo);
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
-        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
-        crmCredential.setPassword("Happy2010oIogZVEFGbL3n0qiAp6F66TC");
+        crmCredential.setUserName(salesforceUserName);
+        crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
+
+        tenant = createTenant(customerSpace);
+        try {
+            tenantService.discardTenant(tenant);
+        } catch (Exception e) {
+        }
+        tenantService.registerTenant(tenant);
+
+        List<Table> tables = new ArrayList<>();
+        for (String tableName : tableNameList) {
+            URL url = ClassLoader.getSystemResource(String.format(
+                    "com/latticeengines/eai/service/impl/salesforce/%s.avsc", tableName).toString());
+            String str = FileUtils.readFileToString(new File(url.getFile()));
+            Table table = JsonUtils.deserialize(str, Table.class);
+            tables.add(table);
+        }
+        System.out.println(tables);
+        eaiMetadataService.updateTables(customerSpace, tables);
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     private void cleanUp() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath("Production", customer).toString());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
+                .toString());
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
+        tenantService.discardTenant(tenant);
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "deployment" }, enabled = true)
     public void extractAndImport() throws Exception {
         setupSalesforceImportConfig(customer);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         BaseObject request = new AppmasterServiceRequest();
-        Thread.sleep(20000);
+        Thread.sleep(22000);
         BaseResponseObject response = ((MindAppmasterServiceClient) appmasterServiceClient).doMindRequest(request);
         log.info(((AppMasterServiceResponse) response));
 

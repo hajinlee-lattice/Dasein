@@ -12,28 +12,38 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
-import com.latticeengines.eai.service.DataExtractionService;
+import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
 
 public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
-    private DataExtractionService dataExtractionService;
+    private DataExtractionServiceImpl dataExtractionService;
 
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
@@ -45,12 +55,16 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private String targetPath;
 
+    @Autowired
+    private EaiMetadataService eaiMetadataService;
+
     private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
             "Opportunity", "OpportunityContactRole" });
 
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath("Production", customer).toString());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
+                .toString());
         crmCredentialZKService.removeCredentials(customer, customer, true);
         targetPath = dataExtractionService.createTargetPath(customer);
         BatonService baton = new BatonServiceImpl();
@@ -67,11 +81,36 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
         setupSalesforceImportConfig(customer);
+
+        EaiMetadataServiceImpl eaiMetadataService = mock(EaiMetadataServiceImpl.class);
+        when(eaiMetadataService.getLastModifiedKey(any(String.class), any(Table.class))).thenAnswer(
+                new Answer<LastModifiedKey>() {
+
+                    private List<String> attributes = Arrays.<String> asList(new String[] { "LastModifiedDate" });
+
+                    private final Map<String, LastModifiedKey> map = ImmutableMap.of("Account", new LastModifiedKey(
+                            attributes, 1442544230000L), "Contact", new LastModifiedKey(attributes, 1223400194000L),
+                            "Lead", new LastModifiedKey(attributes, 1237387254000L), "Opportunity",
+                            new LastModifiedKey(attributes, 1346770851000L), "OpportunityContactRole",
+                            new LastModifiedKey(attributes, 1341330034000L));
+
+                    @Override
+                    public LastModifiedKey answer(InvocationOnMock invocation) throws Throwable {
+
+                        Object[] args = invocation.getArguments();
+                        Table t = (Table) args[1];
+                        return map.get(t.getName());
+                    }
+
+                });
+        dataExtractionService.setEaiMetadataService(eaiMetadataService);
+
     }
 
     @AfterClass(groups = "functional")
     private void cleanUp() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath("Production", customer).toString());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
+                .toString());
         crmCredentialZKService.removeCredentials(customer, customer, true);
     }
 
@@ -81,10 +120,15 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
-        dataExtractionService.extractAndImport(importConfig, importContext);
+        List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
+        for(Table table : tables){
+            System.out.println(table);
+        }
 
         Thread.sleep(30000L);
         checkDataExists(targetPath, tableNameList, 1);
+        System.out.println(importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class));
+
         dataExtractionService.cleanUpTargetPathData(importContext);
         checkDataExists(targetPath, tableNameList, 0);
         checkExtractsDirectoryExists(customer, tableNameList);

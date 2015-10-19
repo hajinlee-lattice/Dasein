@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.camel.ProducerTemplate;
+
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -47,4 +49,5 @@ public abstract class ImportStrategy {
             throw new LedpException(LedpCode.LEDP_17003, new String[] { missedAttrNames.toString(), table });
         }
     }
+
 }
