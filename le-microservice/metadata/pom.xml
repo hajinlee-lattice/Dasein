@@ -10,6 +10,7 @@
     <properties>
         <component-name>metadata-microservice</component-name>
         <le.metadata.version>2.0.12-SNAPSHOT</le.metadata.version>
+        <le.microservice.version>2.0.12-SNAPSHOT</le.microservice.version>
         <le.domain.version>2.0.12-SNAPSHOT</le.domain.version>
     </properties>
 
