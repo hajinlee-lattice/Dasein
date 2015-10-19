@@ -134,14 +134,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private String register(Pipe pipe, List<FieldMetadata> fields, boolean allowCheckpoint, String name) {
         if (name == null) {
-            name = "node-" + counter++;
+            name = "node" + counter++;
         }
         pipe = new Pipe(name, pipe);
         pipesAndOutputSchemas.put(name, new AbstractMap.SimpleEntry<>(pipe, fields));
 
         if (isCheckpoint() && allowCheckpoint) {
             DataFlowContext ctx = getDataFlowCtx();
-            String ckptName = "ckpt-" + counter++;
+            String ckptName = "ckpt" + counter++;
             Checkpoint ckpt = new Checkpoint(ckptName, pipe);
             String targetPath = String.format("/tmp/checkpoints/%s/%s/%s", //
                     ctx.getProperty("CUSTOMER", String.class), //

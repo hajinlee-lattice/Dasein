@@ -48,6 +48,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("CUSTOMER", "MadisonLogic");
         ctx.setProperty("TARGETPATH", targetPath + "/1");
+        ctx.setProperty("TARGETTABLENAME", "MadisonLogic");
 
         ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", flowName + "-Aggregation");
@@ -67,6 +68,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("CUSTOMER", "MadisonLogic");
         ctx.setProperty("TARGETPATH", targetPath + "/output");
         ctx.setProperty("TARGETSCHEMAPATH", targetSchemaPath + "/*.avro");
+        ctx.setProperty("TARGETTABLENAME", "MadisonLogic");
 
         ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", flowName + "-GroupAndExpand");
@@ -81,7 +83,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         if (useDefaultProperties) {
             return jobProperties;
         }
-        jobProperties.put("mapred.reduce.tasks", "36");
+        jobProperties.put("mapred.reduce.tasks", "72");
         jobProperties.put("mapred.tasktracker.map.tasks.maximum", "8");
         jobProperties.put("mapred.tasktracker.reduce.tasks.maximum", "8");
         jobProperties.put("mapred.compress.map.output", "true");

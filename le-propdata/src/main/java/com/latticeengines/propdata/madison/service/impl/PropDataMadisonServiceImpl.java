@@ -214,7 +214,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     private Date findPreviousAvailableDays(Date today, List<Date> pastDays) throws Exception {
         Date newDay = today;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             newDay = DateUtils.addDays(newDay, -1);
             String targetDir = getHdfsWorkflowTotalRawPath(newDay);
             if (!HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(getOutputDir(targetDir)))) {
