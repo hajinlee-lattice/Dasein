@@ -1,6 +1,7 @@
 package com.latticeengines.db.exposed.schemagen;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -13,6 +14,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 
 public class SchemaGenerator {
 
@@ -86,12 +90,36 @@ public class SchemaGenerator {
         export.execute(bScript, bExportToDb, false, false);
     }
 
-    public void generateToScript() {
-        generate("ddl_" + schemaName.toLowerCase() + "_" + dialect.name().toLowerCase() + ".sql", true, false);
+    public File generateToScript() throws IOException {
+        String exportFileName = "ddl_" + schemaName.toLowerCase() + "_" + dialect.name().toLowerCase() + ".sql";
+        generate(exportFileName, true, false);
+
+        return new File(exportFileName);
     }
 
     public void generateToDatabase() {
         generate(null, false, true);
+    }
+
+    public void appendStaticSql(File exportFile, DBDialect dbDialect) throws IOException {
+        String leafFolder = "";
+        switch (dbDialect) {
+        case MYSQL5INNODB:
+            leafFolder = "mysql";
+            break;
+        case SQLSERVER:
+            leafFolder = "sqlserver";
+            break;
+        default:
+            break;
+        }
+        Iterable<File> iterable = Files.fileTreeTraverser().children(new File("src/main/resources/staticsql/" + leafFolder));
+        for (File f : iterable) {
+            log.info(String.format("appending %s to %s", f.getAbsolutePath(), exportFile.getAbsolutePath()));
+            String staticSql = Files.toString(f, Charsets.UTF_8);
+            Files.append(staticSql, exportFile, Charsets.UTF_8);
+        }
+
     }
 
     /**
@@ -121,10 +149,14 @@ public class SchemaGenerator {
         for (int i = 1; i < length; i++) {
             packages[j++] = args[i];
         }
-        SchemaGenerator gen = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, packages);
-        gen.generateToScript();
-        gen = new SchemaGenerator(dbName, DBDialect.SQLSERVER, packages);
-        gen.generateToScript();
+        SchemaGenerator mysqlGenerator = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, packages);
+        File mysqlExportFile = mysqlGenerator.generateToScript();
+
+        SchemaGenerator sqlServerGenerator = new SchemaGenerator(dbName, DBDialect.SQLSERVER, packages);
+        File sqlServerExportFile = sqlServerGenerator.generateToScript();
+
+        mysqlGenerator.appendStaticSql(mysqlExportFile, DBDialect.MYSQL5INNODB);
+        sqlServerGenerator.appendStaticSql(sqlServerExportFile, DBDialect.SQLSERVER);
     }
 
     private List<Class<?>> getClasses(String packageName) throws Exception {
