@@ -883,9 +883,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
-        Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
+        Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, SinkMode.REPLACE);
         if (!isLocal()) {
-            sink = new Hfs(new AvroScheme(schema), targetPath, SinkMode.KEEP);
+            sink = new Hfs(new AvroScheme(schema), targetPath, SinkMode.REPLACE);
         }
 
 

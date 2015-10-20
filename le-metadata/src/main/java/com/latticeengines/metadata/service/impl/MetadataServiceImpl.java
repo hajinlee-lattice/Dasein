@@ -43,7 +43,7 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public void createTable(CustomerSpace customerSpace, Table table) {
         if (tableEntityMgr.findByName(table.getName()) != null) {
-            log.error("Table with name " + table.getName() + " already exists.  Updating instead");
+            log.info("Table with name " + table.getName() + " already exists.  Updating instead");
             updateTable(customerSpace, table);
         }
         else {
