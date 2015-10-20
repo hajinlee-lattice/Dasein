@@ -21,8 +21,10 @@ public class JythonFunction extends BaseOperation implements Function {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(JythonFunction.class);
     private static final long serialVersionUID = 7015322136073224137L;
-    private static JythonEvaluator evaluator;
 
+    private transient JythonEvaluator evaluator;
+
+    private String scriptName;
     private String functionName;
     private Class<?> returnType;
     private Fields fieldsToApply;
@@ -30,7 +32,7 @@ public class JythonFunction extends BaseOperation implements Function {
 
     public JythonFunction(String scriptName, String functionName, Class<?> returnType, Fields fieldsToApply, Fields fieldsDeclaration) {
         super(0, fieldsDeclaration);
-        evaluator = JythonEvaluator.fromResource(scriptName);
+        this.scriptName = scriptName;
         this.functionName = functionName;
         this.fieldsToApply = fieldsToApply;
         this.returnType = returnType;
@@ -53,6 +55,11 @@ public class JythonFunction extends BaseOperation implements Function {
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
+        if (evaluator == null) {
+            log.info(String.format("Constructing evaluator from %s", scriptName));
+            evaluator = JythonEvaluator.fromResource(scriptName);
+        }
+
         Fields argFields = functionCall.getArgumentFields();
         if (paramList == null) {
             paramList = computeParamList(fieldsToApply, argFields);
