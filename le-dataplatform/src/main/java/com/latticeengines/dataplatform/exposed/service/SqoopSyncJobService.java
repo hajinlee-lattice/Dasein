@@ -21,7 +21,7 @@ public interface SqoopSyncJobService {
     ApplicationId importDataSync(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers);
 
-    ApplicationId importDataSyncWithAvscAndWhereCondition(String table, String targetDir, DbCreds creds, String queue, String customer,
+    ApplicationId importDataSyncWithWhereCondition(String table, String targetDir, DbCreds creds, String queue, String customer,
                                  List<String> splitCols, String columnsToInclude, String whereCondition, int numMappers);
 
     ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer);

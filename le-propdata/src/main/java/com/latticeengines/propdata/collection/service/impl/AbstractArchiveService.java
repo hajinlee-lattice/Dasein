@@ -7,6 +7,8 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -334,13 +336,15 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
                 HdfsUtils.rmdir(yarnConfiguration, avscPath);
             }
-            HdfsUtils.copyLocalToHdfs(yarnConfiguration, avscFile, avscPath);
+            String avroPath = targetDir + "/part-m-00000.avro";
+            if (HdfsUtils.fileExists(yarnConfiguration, avroPath)) {
+                Schema schema = AvroUtils.getSchema(yarnConfiguration, new org.apache.hadoop.fs.Path(avroPath));
+                HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
+            }
         } catch (Exception e) {
             LoggingUtils.logError(log, progress, "Failed to upload avsc.", e);
             updateStautsToFailed(progress);
             return false;
-        } finally {
-            FileUtils.deleteQuietly(new File(avscFile));
         }
 
         return true;
@@ -369,7 +373,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         builder.host(srcHost).port(srcPort).db(srcDb).user(dbUser).password(dbPassword);
         DbCreds creds = new DbCreds(builder);
         try {
-            sqoopService.importDataSyncWithAvscAndWhereCondition(
+            sqoopService.importDataSyncWithWhereCondition(
                     table, targetDir, creds, assignedQueue, customer,
                     Collections.singletonList(getSrcTableSplitColumn()), "", whereClause, numMappers);
         } catch (Exception e) {

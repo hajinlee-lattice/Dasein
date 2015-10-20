@@ -84,14 +84,14 @@ public class SqoopJobServiceImpl {
             Configuration yarnConfiguration, //
             boolean sync) {
 
-        return importDataWithAvscAndWhereCondition(
+        return importDataWithWhereCondition(
                 table, targetDir, creds, queue, jobName, splitCols, //
                 columnsToInclude, "", numMappers, driver, props, //
-                metadataService, yarnConfiguration, sync, false
+                metadataService, yarnConfiguration, sync
         );
     }
 
-    protected ApplicationId importDataWithAvscAndWhereCondition(String table, //
+    protected ApplicationId importDataWithWhereCondition(String table, //
                                        String targetDir, //
                                        DbCreds creds, //
                                        String queue, //
@@ -104,8 +104,7 @@ public class SqoopJobServiceImpl {
                                        Properties props, //
                                        MetadataService metadataService, //
                                        Configuration yarnConfiguration, //
-                                       boolean sync, //
-                                       boolean keepAvsc ) {
+                                       boolean sync ) {
 
         if (table.startsWith("Play")) {
             numMappers = 1;
@@ -171,8 +170,6 @@ public class SqoopJobServiceImpl {
         } finally {
             FileUtils.deleteQuietly(new File(getGenerateOutputDir(uuid)));
             FileUtils.deleteQuietly(new File(getBinaryInputputDir(uuid)));
-            if (!keepAvsc) { FileUtils.deleteQuietly(new File(table + ".avsc")); }
-
             if (propsFileName != null) {
                 FileUtils.deleteQuietly(new File(propsFileName));
             }

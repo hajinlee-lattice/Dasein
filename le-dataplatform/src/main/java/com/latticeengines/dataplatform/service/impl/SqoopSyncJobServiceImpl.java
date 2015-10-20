@@ -186,13 +186,13 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public ApplicationId importDataSyncWithAvscAndWhereCondition(String table, String targetDir, DbCreds creds,
+    public ApplicationId importDataSyncWithWhereCondition(String table, String targetDir, DbCreds creds,
             String queue, String customer, List<String> splitCols, String columnsToInclude, String whereCondition,
             int numMappers) {
         long time1 = System.currentTimeMillis();
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
-        ApplicationId appId = super.importDataWithAvscAndWhereCondition(table, //
+        ApplicationId appId = super.importDataWithWhereCondition(table, //
                 targetDir, //
                 creds, //
                 queue, //
@@ -205,7 +205,6 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 null, //
                 metadataService, //
                 hadoopConfiguration, //
-                true, //
                 true);
         long time2 = System.currentTimeMillis();
         log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));

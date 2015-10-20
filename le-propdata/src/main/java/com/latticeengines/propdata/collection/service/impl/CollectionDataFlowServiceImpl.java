@@ -59,6 +59,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("CUSTOMER", sourceName);
         ctx.setProperty("RECORDNAME", sourceName);
+        ctx.setProperty("TARGETTABLENAME", sourceName);
 
         ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty("CHECKPOINT", false);
