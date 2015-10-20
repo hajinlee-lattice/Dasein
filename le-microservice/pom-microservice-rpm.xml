@@ -37,6 +37,7 @@
                 <security.properties.path>../le-security/conf/env/buildmachine</security.properties.path>
                 <metadata.properties.path>../le-metadata/conf/env/buildmachine</metadata.properties.path>
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/buildmachine</dataflowapi.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/buildmachine</propdata.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -58,6 +59,7 @@
                 <security.properties.path>../le-security/conf/env/devcluster</security.properties.path>
                 <metadata.properties.path>../le-metadata/conf/env/devcluster</metadata.properties.path>
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/devcluster</dataflowapi.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/devcluster</propdata.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -78,6 +80,7 @@
                 <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
                 <metadata.properties.path>../le-metadata/conf/env/qacluster</metadata.properties.path>
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/qacluster</dataflowapi.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/qacluster</propdata.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -98,6 +101,7 @@
                 <security.properties.path>../le-security/conf/env/procluster</security.properties.path>
                 <metadata.properties.path>../le-metadata/conf/env/procluster</metadata.properties.path>
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/procluster</dataflowapi.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/procluster</propdata.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -136,6 +140,9 @@
                                 <source>
                                     <location>dataflowapi/target/le-dataflowapi-microservice-${le.rpm.version}.war</location>
                                 </source>
+                                <source>
+                                    <location>propdata/target/le-propdata-microservice-${le.rpm.version}.war</location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
@@ -161,6 +168,9 @@
                                 </source>
                                 <source>
                                     <location>${dataflowapi.properties.path}/dataflowapi.properties</location>
+                                </source>
+                                <source>
+                                    <location>${propdata.properties.path}/propdata.api.properties</location>
                                 </source>
                             </sources>
                         </mapping>
