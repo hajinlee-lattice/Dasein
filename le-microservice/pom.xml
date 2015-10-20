@@ -10,6 +10,7 @@
         <component-name>microservice-parent</component-name>
         <le.monitor.version>2.0.12-SNAPSHOT</le.monitor.version>
         <le.microservice.version>2.0.12-SNAPSHOT</le.microservice.version>
+        <le.propdata.version>2.0.12-SNAPSHOT</le.propdata.version>
     </properties>
 
     <parent>
@@ -185,15 +186,18 @@
 
     <modules>
         <module>core</module>
+
     <!-- 
         <module>dataflow</module>
     -->
+
         <module>eai</module>
         <module>metadata</module>
         <module>modeling</module>
         <module>dataflowapi</module>
-    <!--         
         <module>propdata</module>
+
+    <!--
         <module>scoring</module>
         <module>workflow</module>
     -->

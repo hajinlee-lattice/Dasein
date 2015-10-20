@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-toplevel</artifactId>
-    <version>2.0.9-SNAPSHOT</version>
+    <version>2.0.12-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>le-toplevel</name>
     <description>Lattice Data Platform Top Level Module</description>
@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.9-SNAPSHOT</version>
+        <version>2.0.12-SNAPSHOT</version>
         <relativePath>le-parent</relativePath>
     </parent>
     
@@ -30,9 +30,10 @@
     -->
         <module>le-dataplatform</module>
         <module>le-microservice/modeling</module>
-    <!--         
+
         <module>le-propdata</module>
         <module>le-microservice/propdata</module>
+    <!--
         <module>le-scoring</module>
         <module>le-microservice/scoring</module>
         <module>le-workflow</module>
