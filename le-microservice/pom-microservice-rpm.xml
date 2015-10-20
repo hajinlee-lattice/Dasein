@@ -174,28 +174,6 @@
                                 </source>
                             </sources>
                         </mapping>
-                        <mapping>
-                            <directory>/opt/jetty/bin</directory>
-                            <filemode>755</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
-                            <sources>
-                                <source>
-                                    <location>${bin.env.path}/jetty.sh</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>/home/yarn</directory>
-                            <filemode>700</filemode>
-                            <username>yarn</username>
-                            <groupname>hadoop</groupname>
-                            <sources>
-                                <source>
-                                    <location>${bin.env.path}/.bashrc</location>
-                                </source>
-                            </sources>
-                        </mapping>
                     </mappings>
                     <preremoveScriptlet>
                         <scriptFile>core/src/main/scripts/preremove</scriptFile>
