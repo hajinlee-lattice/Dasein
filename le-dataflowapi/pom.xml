@@ -12,12 +12,12 @@
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
         <avro.version>1.7.7</avro.version>
-        <le.common.version>2.0.12-SNAPSHOT</le.common.version>
-        <le.dataflow.version>2.0.12-SNAPSHOT</le.dataflow.version>
-        <le.dataplatform.version>2.0.12-SNAPSHOT</le.dataplatform.version>
-        <le.domain.version>2.0.12-SNAPSHOT</le.domain.version>
-        <le.scheduler.version>2.0.12-SNAPSHOT</le.scheduler.version>
-        <le.security.version>2.0.12-SNAPSHOT</le.security.version>
+        <le.common.version>2.0.13-SNAPSHOT</le.common.version>
+        <le.dataflow.version>2.0.13-SNAPSHOT</le.dataflow.version>
+        <le.dataplatform.version>2.0.13-SNAPSHOT</le.dataplatform.version>
+        <le.domain.version>2.0.13-SNAPSHOT</le.domain.version>
+        <le.scheduler.version>2.0.13-SNAPSHOT</le.scheduler.version>
+        <le.security.version>2.0.13-SNAPSHOT</le.security.version>
         <cascading.version>3.0.1</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <tez.version>0.5.2.2.2.0.0-2041</tez.version>
@@ -26,7 +26,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>2.0.12-SNAPSHOT</version>
+        <version>2.0.13-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 

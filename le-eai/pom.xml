@@ -11,12 +11,12 @@
         <component-name>eai</component-name>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <camel.version>2.15.3</camel.version>
-        <le.common.version>2.0.12-SNAPSHOT</le.common.version>
-        <le.domain.version>2.0.12-SNAPSHOT</le.domain.version>
-        <le.dataplatform.version>2.0.12-SNAPSHOT</le.dataplatform.version>
-        <le.scheduler.version>2.0.12-SNAPSHOT</le.scheduler.version>
-        <le.security.version>2.0.12-SNAPSHOT</le.security.version>
-        <le.baton.version>2.0.12-SNAPSHOT</le.baton.version>
+        <le.common.version>2.0.13-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.13-SNAPSHOT</le.domain.version>
+        <le.dataplatform.version>2.0.13-SNAPSHOT</le.dataplatform.version>
+        <le.scheduler.version>2.0.13-SNAPSHOT</le.scheduler.version>
+        <le.security.version>2.0.13-SNAPSHOT</le.security.version>
+        <le.baton.version>2.0.13-SNAPSHOT</le.baton.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <parquet.avro.version>1.4.3</parquet.avro.version>
         <avro.version>1.7.7</avro.version>
@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>2.0.12-SNAPSHOT</version>
+        <version>2.0.13-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 
