@@ -2,12 +2,15 @@ package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -83,6 +86,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     private String customerSpace = CustomerSpace.parse(customer).toString();
 
     private Tenant tenant;
+    
+    private Map<String, Long> map = new HashMap<>();
 
     @BeforeClass(groups = "deployment")
     private void setup() throws Exception {
@@ -116,6 +121,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
             String str = FileUtils.readFileToString(new File(url.getFile()));
             Table table = JsonUtils.deserialize(str, Table.class);
             tables.add(table);
+            map.put(table.getName(), table.getLastModifiedKey().getLastModifiedTimestamp());
         }
         System.out.println(tables);
         eaiMetadataService.updateTables(customerSpace, tables);
@@ -143,5 +149,15 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         checkDataExists(targetPath, tableNameList, 1);
+        checkLastModifiedDateChanged();
+
+    }
+    
+    private void checkLastModifiedDateChanged(){
+        List<Table> tables = eaiMetadataService.getTables(customerSpace);
+        for(Table table : tables){
+            Long lastModifiedValue = table.getLastModifiedKey().getLastModifiedTimestamp();
+            assertTrue(lastModifiedValue > map.get(table.getName()));
+        }
     }
 }
