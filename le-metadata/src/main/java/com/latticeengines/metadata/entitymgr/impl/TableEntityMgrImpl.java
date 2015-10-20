@@ -76,8 +76,7 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
                 attributeDao.create(attr);
             }
         }
-        
-}
+    }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override

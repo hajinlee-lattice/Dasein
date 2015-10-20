@@ -30,57 +30,7 @@ public abstract class DataFlowBuilder {
     private boolean checkpoint;
     private DataFlowContext dataFlowCtx;
 
-    public abstract String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources);
-    
-    public String constructFlowDefinition(DataFlowContext dataFlowCtx, //
-            Map<String, String> sources, //
-            Map<String, Table> sourceTables) { 
-        return null;
-    }
-
-    protected abstract Schema getSchema(String flowName, String operatorName, DataFlowContext dataFlowCtx);
-
     public abstract Table runFlow(DataFlowContext dataFlowCtx);
-    
-    protected abstract String addSource(Table sourceTable);
-
-    protected abstract String addSource(String sourceName, String sourcePath);
-
-    protected abstract String addSource(String sourceName, String sourcePath, boolean regex);
-
-    protected abstract String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields);
-
-    protected abstract String addLeftOuterJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields);
-
-    protected abstract String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields,
-            JoinType joinType);
-
-    protected abstract String addGroupBy(String prior, FieldList groupByFields, List<Aggregation> aggregation);
-
-    protected abstract String addGroupBy(String prior, FieldList groupByFieldList, FieldList sortFieldList,
-            List<Aggregation> aggregation);
-    
-    protected abstract String addGroupByAndExpand(String prior, FieldList groupByFieldList, String expandField,
-            List<String> expandFormats, FieldList argumentsFieldList, FieldList declaredFieldList);
-
-    protected abstract String addFilter(String prior, String expression, FieldList filterFields);
-
-    protected abstract String addFunction(String prior, String expression, FieldList fieldsToApply,
-            FieldMetadata fieldToCreate);
-
-    protected abstract String addFunction(String prior, String expression, FieldList fieldsToApply,
-            FieldMetadata targetField, FieldList outputFields);
-
-    protected abstract String addRowId(String prior, String fieldName, String tableName);
-
-    protected abstract String addMD5(String prior, FieldList fieldsToApply, String targetFieldName);
-
-    protected abstract String addJythonFunction(String prior, String scriptName, String functionName,
-            FieldList fieldsToApply, FieldMetadata targetField);
-
-    protected abstract List<FieldMetadata> getMetadata(String operator);
-
-    protected abstract String rename(String prior, String newname);
 
     public DataFlowBuilder() {
         this(false, false);
@@ -207,10 +157,12 @@ public abstract class DataFlowBuilder {
             try {
                 Attribute attribute = new Attribute();
                 attribute.setName(fm.getFieldName());
-                attribute.setDisplayName(fm.getPropertyValue("displayName"));
+                String displayName = fm.getPropertyValue("displayName") != null ? fm.getPropertyValue("displayName") : fm.getFieldName();
+                attribute.setDisplayName(displayName);
                 if (fm.getPropertyValue("length") != null) {
                     attribute.setLength(Integer.parseInt(fm.getPropertyValue("length")));
                 }
+
                 attribute.setLogicalDataType(fm.getPropertyValue("logicalType"));
                 attribute.setNullable(true);
                 attribute.setPhysicalDataType(fm.getAvroType().toString().toLowerCase());

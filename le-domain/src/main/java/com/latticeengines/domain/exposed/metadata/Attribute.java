@@ -92,7 +92,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.displayName = displayName;
     }
 
-    @Column(name = "LENGTH", nullable = false)
+    @Column(name = "LENGTH", nullable = true)
     public Integer getLength() {
         return length;
     }
@@ -119,7 +119,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.physicalDataType = physicalDataType;
     }
 
-    @Column(name = "LOGICAL_DATA_TYPE", nullable = false)
+    @Column(name = "LOGICAL_DATA_TYPE", nullable = true)
     @JsonProperty("logical_type")
     public String getLogicalDataType() {
         return logicalDataType;
@@ -130,7 +130,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.logicalDataType = logicalDataType;
     }
 
-    @Column(name = "PRECISION", nullable = false)
+    @Column(name = "PRECISION", nullable = true)
     public Integer getPrecision() {
         return precision;
     }
@@ -139,7 +139,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.precision = precision;
     }
 
-    @Column(name = "SCALE", nullable = false)
+    @Column(name = "SCALE", nullable = true)
     public Integer getScale() {
         return scale;
     }
