@@ -97,13 +97,29 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     }
 
     @Override
+    public void createTables(String customerSpace, List<Table> tables) {
+        for (Table table : tables) {
+            createTable(customerSpace, table);
+        }
+    }
+
+    @Override
+    public void createTable(String customerSpace, Table table) {
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("customerSpace", customerSpace);
+        uriVariables.put("tableName", table.getName());
+        restTemplate.postForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}", table, String.class, uriVariables);
+    }
+
+    @Override
     public void updateTables(String customerSpace, List<Table> tables) {
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
 
         for (Table table : tables) {
             uriVariables.put("tableName", table.getName());
-            restTemplate.put(String.format("%s/customerspaces/%s/tables/%s", metadataUrl, customerSpace, table.getName()), //
+            restTemplate.put(
+                    String.format("%s/customerspaces/%s/tables/%s", metadataUrl, customerSpace, table.getName()), //
                     table);
         }
     }
@@ -115,7 +131,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         uriVariables.put("tableName", table.getName());
         Table newTable = restTemplate.getForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}",
                 Table.class, uriVariables);
-        
+
         if (newTable != null) {
             return newTable.getLastModifiedKey();
         }
@@ -168,7 +184,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     public void setLastModifiedTimeStamp(List<Table> tableMetadata, ImportContext importContext) {
         @SuppressWarnings("unchecked")
         Map<String, Long> map = importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class);
-        for(Table table : tableMetadata){
+        for (Table table : tableMetadata) {
             LastModifiedKey lmk = table.getLastModifiedKey();
             Long lastModifiedDateValue = map.get(table.getName());
             lmk.setLastModifiedTimestamp(lastModifiedDateValue);

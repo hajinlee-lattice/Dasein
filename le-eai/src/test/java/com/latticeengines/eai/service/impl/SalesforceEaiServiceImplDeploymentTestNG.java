@@ -124,7 +124,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
             map.put(table.getName(), table.getLastModifiedKey().getLastModifiedTimestamp());
         }
         System.out.println(tables);
-        eaiMetadataService.updateTables(customerSpace, tables);
+        eaiMetadataService.createTables(customerSpace, tables);
     }
 
     @AfterClass(groups = "deployment")

@@ -20,4 +20,8 @@ public interface EaiMetadataService {
 
     void setLastModifiedTimeStamp(List<Table> tableMetadata, ImportContext importContext);
 
+    void createTable(String customerSpace, Table table);
+
+    void createTables(String customerSpace, List<Table> tables);
+
 }
