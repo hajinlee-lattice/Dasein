@@ -43,15 +43,21 @@ public class ExportAndReportService {
 
     @Value("${dellebi.datatarget.host}")
     private String targetJdbcHost;
+    
     @Value("${dellebi.datatarget.port}")
     private String targetJdbcPort;
 
     @Value("${dellebi.datatarget.type}")
     private String targetJdbcType;
+    
     @Value("${dellebi.datatarget.user}")
     private String targetJdbcUser;
+    
     @Value("${dellebi.datatarget.password.encrypted}")
     private String targetJdbcPassword;
+    
+    @Value("${dellebi.quotefields.targetcolumns}")
+    private String targetColumns;
 
     @Autowired
     private MailSender mailSender;
@@ -62,15 +68,11 @@ public class ExportAndReportService {
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
 
-    @Autowired
-    private HadoopFileSystemOperations hadoopfilesystemoperations;
-
     public boolean export(DataFlowContext context) {
 
         String targetTable = targetRawTable;
         String sourceDir = dellEbiFlowService.getOutputDir(null);
         String successFile = dellEbiFlowService.getOutputDir(null) + "/_SUCCESS";
-        String columns = "QuoteNumber,Date,CustomerID,Product,RepBadge,Quantity,Amount,BusinessUnitID,QuoteFileName";
         String sqlStr = "exec " + quote_sp;
 
         Configuration conf = new Configuration();
@@ -94,7 +96,7 @@ public class ExportAndReportService {
         String errorMsg = null;
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         try {
-            sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 8, null,  columns);
+            sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 8, null,  targetColumns);
 
         } catch (Exception e) {
             errorMsg = "Export files " + sourceDir + " to SQL server failed! errorMsg=" + e.getMessage();

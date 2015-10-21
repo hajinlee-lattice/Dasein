@@ -25,7 +25,7 @@ public class PipeFactory {
 
     private static final Log log = LogFactory.getLog(PipeFactory.class);
 
-    public static Pipe getPipe(String pipeName, String fields) {
+    public static Pipe getPipe(String pipeName, String fields, String exportedFields) {
 
         Pipe docPipe = null;
 
@@ -43,7 +43,7 @@ public class PipeFactory {
             docPipe = createWarrantyPipe(fields);
             break;
         case "quote_trans_Pipe":
-            docPipe = createQuoteTransPipe(fields);
+            docPipe = createQuoteTransPipe(fields, exportedFields);
             break;
         default:
             log.error(pipeName + " is not registed!");
@@ -145,7 +145,7 @@ public class PipeFactory {
         return docPipe;
     }
 
-    private static Pipe createQuoteTransPipe(String fields) {
+    private static Pipe createQuoteTransPipe(String fields, String exportedQuoteFields) {
 
         log.info("Create quote trans pipe!");
         log.info("Quote fields: " + fields);
@@ -158,11 +158,15 @@ public class PipeFactory {
             Fields scrubArgument = new Fields(s);
             scrubArguments = scrubArguments.append(scrubArgument);
         }
-        Fields outputScrubArguments = new Fields("#QTE_NUM_VAL").append(new Fields("QUOTE_CREATE_DATE"))
-                .append(new Fields("SLDT_CUST_NUM_VAL")).append(new Fields("ITM_NUM_VAL"))
-                .append(new Fields("LEAD_SLS_REP_ASSOC_BDGE_NBR")).append(new Fields("SYS_QTY"))
-                .append(new Fields("REVN_USD_AMT")).append(new Fields("SLDT_BU_ID"))
-                .append(new Fields("fileName"));
+        
+        Fields outputScrubArguments = new Fields("#QTE_NUM_VAL");
+        
+        List<String> exportedItems = new ArrayList<String>(Arrays.asList(exportedQuoteFields.split(",")));
+        
+        for (String s: exportedItems) {
+            Fields outputScrubrgument = new Fields(s);
+            outputScrubArguments = outputScrubArguments.append(outputScrubrgument);
+        }
 
         docPipe = new Pipe("copy");
         AssertSizeEquals equals = new AssertSizeEquals(111);

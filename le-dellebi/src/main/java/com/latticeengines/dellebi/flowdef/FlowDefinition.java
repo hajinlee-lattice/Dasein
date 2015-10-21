@@ -55,6 +55,16 @@ public class FlowDefinition {
     private String warrantyFields;
     @Value("${dellebi.quotefields}")
     private String quoteFields;
+    @Value("${dellebi.exportedordersummaryfields}")
+    private String exportedOrderSummaryFields;
+    @Value("${dellebi.exportedorderdetailfields}")
+    private String exportedOrderDetailFields;
+    @Value("${dellebi.exportedshiptoaddrfields}")
+    private String exportedShipToAddrFields;
+    @Value("${dellebi.exportedwarrantyfields}")
+    private String exportedWarrantyFields;
+    @Value("${dellebi.exportedquotefields}")
+    private String exportedQuoteFields;
 
     @Autowired
     private DellEbiFlowService dellEbiFlowService;
@@ -71,7 +81,7 @@ public class FlowDefinition {
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
         try {
-            filePipe = PipeFactory.getPipe("order_summary_Pipe", orderSummaryFields);
+            filePipe = PipeFactory.getPipe("order_summary_Pipe", orderSummaryFields, exportedOrderSummaryFields);
         } catch (Exception e) {
             log.error("Failed to get order summary pipe!", e);
         }
@@ -93,7 +103,7 @@ public class FlowDefinition {
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
         try {
-            filePipe = PipeFactory.getPipe("order_detail_Pipe", orderDetailFields);
+            filePipe = PipeFactory.getPipe("order_detail_Pipe", orderDetailFields, exportedOrderDetailFields);
         } catch (Exception e) {
             log.error("Failed to get order detail pipe!", e);
         }
@@ -114,7 +124,7 @@ public class FlowDefinition {
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
         try {
-            filePipe = PipeFactory.getPipe("ship_to_addr_lattice_Pipe", shipToAddrFields);
+            filePipe = PipeFactory.getPipe("ship_to_addr_lattice_Pipe", shipToAddrFields, exportedShipToAddrFields);
         } catch (Exception e) {
             log.error("Failed to get ship to addr pipe!", e);
         }
@@ -135,7 +145,7 @@ public class FlowDefinition {
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
         try {
-            filePipe = PipeFactory.getPipe("warranty_global_Pipe", warrantyFields);
+            filePipe = PipeFactory.getPipe("warranty_global_Pipe", warrantyFields, exportedWarrantyFields);
         } catch (Exception e) {
             log.error("Failed to get ship to addr pipe!", e);
         }
@@ -160,7 +170,7 @@ public class FlowDefinition {
         Pipe filePipe = null;
         
         try {
-            filePipe = PipeFactory.getPipe("quote_trans_Pipe", quoteFields);
+            filePipe = PipeFactory.getPipe("quote_trans_Pipe", quoteFields, exportedQuoteFields);
         } catch (Exception e) {
             log.error("Failed to get quote data pipe!", e);
         }

@@ -21,17 +21,17 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class ScrubQuoteFunction extends BaseOperation implements Function {
 
-	private static final long serialVersionUID = 4333077483123704366L;
+    private static final long serialVersionUID = 4333077483123704366L;
 
-	public ScrubQuoteFunction(Fields fieldDeclaration) {
+    public ScrubQuoteFunction(Fields fieldDeclaration) {
         super(2, fieldDeclaration);
     }
-
+    
     private static final Log log = LogFactory.getLog(ScrubQuoteFunction.class);
 
-    
-	@Override
-    public void operate( FlowProcess flowProcess, FunctionCall functionCall ) {
+    @Override
+    public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
+
         TupleEntry argument = functionCall.getArguments();
 
         HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;
@@ -39,24 +39,31 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         FileSplit fs = (FileSplit) mis.getWrappedInputSplit();
         String fileName = fs.getPath().getName();
 
-        String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
-
         Tuple result = new Tuple();
-        result.add(argument.getString("#QTE_NUM_VAL"));
-        result.add(quoteCreationDate);
-        result.add(argument.getString("SLDT_CUST_NUM_VAL"));
-        result.add(argument.getString("ITM_NUM_VAL"));
-        result.add(argument.getString("LEAD_SLS_REP_ASSOC_BDGE_NBR"));
-        result.add(argument.getString("SYS_QTY"));
-        result.add(argument.getString("REVN_USD_AMT"));
-        result.add(argument.getString("SLDT_BU_ID"));
-        result.add(fileName);
+        
+        int sizeOfFieldDeclaration = this.fieldDeclaration.size();
+        
+        for (int i = 0; i < sizeOfFieldDeclaration; i++) {
+            String fieldName = this.fieldDeclaration.get(i).toString();
+            switch (fieldName) {
+            case "QUOTE_CREATE_DATE":
+                String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
+                result.add(quoteCreationDate);
+                break; 
+            case "fileName":
+                result.add(fileName);
+                break;
+            default:
+                result.add(argument.getString(fieldName));
+            }
+        }
 
         functionCall.getOutputCollector().add(result);
 
     }
 
     private String convertDatetimeToDate(String s) {
+        
         if (s != null && !s.isEmpty() && s.trim().length() > 10) {
             SimpleDateFormat formatterOld = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
             SimpleDateFormat formatterNew = new SimpleDateFormat("yyyy-MM-dd");
