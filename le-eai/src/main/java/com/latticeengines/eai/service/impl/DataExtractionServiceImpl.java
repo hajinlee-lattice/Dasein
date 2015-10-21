@@ -23,7 +23,6 @@ import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -156,9 +155,8 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     }
 
     public String createTargetPath(String customer) {
-        Path customerSpacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customer, customer,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-        return (customerSpacePath + "/Data/Tables").toString();
+        CustomerSpace space = CustomerSpace.parse(customer);
+        return PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), space).toString();
     }
 
     public void cleanUpTargetPathData(ImportContext context) throws Exception {

@@ -27,7 +27,7 @@ public final class PathBuilder {
     }
 
     public static Path buildServiceConfigSchemaPath(String podId, String serviceName) {
-        return new Path(PathConstants.PODS, podId, PathConstants.CONFIGSCHEMA_NODE, serviceName );
+        return new Path(PathConstants.PODS, podId, PathConstants.CONFIGSCHEMA_NODE, serviceName);
     }
 
     public static Path buildContractsPath(String podId) {
@@ -56,8 +56,12 @@ public final class PathBuilder {
                 tenantId, PathConstants.SPACES, spaceId);
     }
 
-    public static Path buildCustomerSpacePath(String podId, CustomerSpace customerSpace) {
-        return buildCustomerSpacePath(podId, customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId());
+    public static Path buildDataTablePath(String podId, CustomerSpace space) {
+        return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.TABLES);
+    }
+
+    public static Path buildCustomerSpacePath(String podId, CustomerSpace space) {
+        return buildCustomerSpacePath(podId, space.getContractId(), space.getTenantId(), space.getSpaceId());
     }
 
     public static Path buildCustomerSpaceServicesPath(String podId, CustomerSpace space) {

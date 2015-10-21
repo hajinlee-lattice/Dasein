@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
@@ -38,16 +39,16 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
     @Autowired
     private ApplicationContext appContext;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private DataTransformationService dataTransformationService;
-    
+
     @Autowired
     private SoftwareLibraryService softwareLibraryService;
-    
+
     public DataFlowProcessor() {
         super();
     }
@@ -58,39 +59,40 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         appContext = loadSoftwarePackages("dataflowapi", softwareLibraryService, appContext);
         Map<String, String> sources = new HashMap<>();
         Map<String, Table> sourceTables = new HashMap<>();
-        
+
         List<DataFlowSource> dataFlowSources = dataFlowConfig.getDataSources();
-        
+
         boolean usesTables = false;
         boolean usesPaths = false;
         for (DataFlowSource dataFlowSource : dataFlowSources) {
             String name = dataFlowSource.getName();
-            
+
             if (dataFlowSource.getRawData() != null) {
                 sources.put(name, dataFlowSource.getRawData());
                 usesPaths = true;
             }
-            
+
             if (dataFlowSource.getTable() != null) {
                 sourceTables.put(name, dataFlowSource.getTable());
                 usesTables = true;
             }
         }
-        
+
         if (usesPaths && usesTables) {
             throw new LedpException(LedpCode.LEDP_27005);
         }
-        
+
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("TARGETTABLENAME", dataFlowConfig.getName());
         ctx.setProperty("CUSTOMER", dataFlowConfig.getCustomerSpace().toString());
-        
+
         if (usesTables) {
             ctx.setProperty("SOURCETABLES", sourceTables);
         } else {
             ctx.setProperty("SOURCES", sources);
         }
-        Path baseTargetPath = PathBuilder.buildCustomerSpacePath("Production", dataFlowConfig.getCustomerSpace());
+        Path baseTargetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
+                dataFlowConfig.getCustomerSpace());
         String targetPath = baseTargetPath.append(dataFlowConfig.getTargetPath()).toString();
         ctx.setProperty("TARGETPATH", targetPath);
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
@@ -105,20 +107,18 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     }
 
     private void registerMetadata(CustomerSpace customerSpace, Table table) {
-        String url = String.format("%s/metadata/customerspaces/%s/tables/%s",
-                metadataEndpoint, customerSpace, table.getName());
+        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", metadataEndpoint, customerSpace,
+                table.getName());
         try {
             RestTemplate restTemplate = new RestTemplate();
             List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
             interceptors.add(new MagicAuthenticationHeaderHttpRequestInterceptor());
             restTemplate.setInterceptors(interceptors);
             restTemplate.postForLocation(url, table);
-        }
-        catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Failure registering metadata of data flow output table %s with metadata service at address %s",
-                            table.getName(), url),
-                    e);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "Failure registering metadata of data flow output table %s with metadata service at address %s",
+                    table.getName(), url), e);
         }
 
     }

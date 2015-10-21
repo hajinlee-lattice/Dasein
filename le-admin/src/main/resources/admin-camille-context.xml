@@ -27,7 +27,7 @@
         <property name="targetMethod" value="start" />
 	    <property name="arguments">
             <list>
-                <value>BOOTSTRAP</value>
+                <value>RUNTIME</value>
                 <bean class="com.latticeengines.camille.exposed.CamilleConfiguration">
                     <constructor-arg value="${admin.zk.pod.id:Default}" />
                     <constructor-arg value="${admin.zk.connectionString:localhost:2181}" />

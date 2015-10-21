@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflowapi.functionalframework.DataFlowApiFunctionalTestNGBase;
@@ -45,11 +46,11 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
 
     @Autowired
     private SoftwareLibraryService softwareLibraryService;
-    
+
     private String account;
-    
+
     private String contact;
-    
+
     private String opportunity;
 
     public DataFlowServiceImplDeploymentTestNG() {
@@ -68,7 +69,7 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         pkg.setVersion("2.0.12-SNAPSHOT");
         pkg.setInitializerClass("com.latticeengines.prospectdiscovery.Initializer");
         softwareLibraryService.installPackage(pkg, new File(jarFile));
-        
+
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/avro");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/PDTable");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/EventTable");
@@ -78,13 +79,13 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         account = ClassLoader.getSystemResource("Account/Account.avro").getPath();
         opportunity = ClassLoader.getSystemResource("Opportunity/Opportunity.avro").getPath();
         contact = ClassLoader.getSystemResource("Contact/Contact.avro").getPath();
-        
+
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
 
         entries.add(new AbstractMap.SimpleEntry<>("file://" + account, "/tmp/avro/Account"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunity, "/tmp/avro/Opportunity"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, "/tmp/avro/Contact"));
-        
+
         account = "/tmp/avro/Account/*.avro";
         contact = "/tmp/avro/Contact/*.avro";
         opportunity = "/tmp/avro/Opportunity/*.avro";
@@ -101,11 +102,11 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         config.setCustomerSpace(CUSTOMERSPACE);
         config.setDataFlowBeanName("createEventTable");
         List<DataFlowSource> sources = new ArrayList<>();
-        
+
         sources.add(createDataFlowSource("Account", account, "CreatedDate"));
         sources.add(createDataFlowSource("Contact", contact, "LastModifiedDate"));
         sources.add(createDataFlowSource("Opportunity", opportunity, "LastModifiedDate"));
-        
+
         config.setDataSources(sources);
         config.setTargetPath("/TmpEventTable");
 
@@ -116,10 +117,12 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         Table metadata = retrieveMetadata(config.getCustomerSpace(), config.getName());
         assertNotNull(metadata);
         assertEquals(metadata.getExtracts().size(), 1);
-        Path expectedLocation = PathBuilder.buildCustomerSpacePath("Production", config.getCustomerSpace());
-        assertEquals(metadata.getExtracts().get(0).getPath(), expectedLocation.append(config.getTargetPath()).toString());
+        Path expectedLocation = PathBuilder.buildDataTablePath( //
+                CamilleEnvironment.getPodId(), config.getCustomerSpace());
+        assertEquals(metadata.getExtracts().get(0).getPath(), //
+                expectedLocation.append(config.getTargetPath()).toString());
     }
-    
+
     private DataFlowSource createDataFlowSource(String name, String path, String lastModifiedColName) {
         DataFlowSource s = new DataFlowSource();
         s.setName(name);
@@ -132,9 +135,8 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         interceptors.add(new MagicAuthenticationHeaderHttpRequestInterceptor());
         restTemplate.setInterceptors(interceptors);
-        String url = String.format("%s/metadata/customerspaces/%s/tables/%s",
+        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", //
                 metadataHostPort, customerSpace, tableName);
         return restTemplate.getForObject(url, Table.class);
     }
 }
-

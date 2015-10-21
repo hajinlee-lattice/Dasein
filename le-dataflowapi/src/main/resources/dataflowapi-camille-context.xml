@@ -19,7 +19,7 @@
       http://www.springframework.org/schema/security/spring-security-4.0.xsd
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
-
+      
     <bean id="camilleEnvironment" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="targetClass" value="com.latticeengines.camille.exposed.CamilleEnvironment" />
         <property name="targetMethod" value="start" />
@@ -27,8 +27,8 @@
             <list>
                 <value>RUNTIME</value>
                 <bean class="com.latticeengines.camille.exposed.CamilleConfiguration">
-                    <constructor-arg value="${dataplatform.zk.pod.id:Default}" />
-                    <constructor-arg value="${dataplatform.zk.connectionString:localhost:2181}" />
+                    <constructor-arg value="${dataflowapi.zk.pod.id:Default}" />
+                    <constructor-arg value="${dataflowapi.zk.connectionString:localhost:2181}" />
                 </bean>
             </list>
         </property>
