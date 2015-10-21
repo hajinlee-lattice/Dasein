@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.apache.hadoop.mapreduce.MapContext;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -129,25 +131,55 @@ public class ScoringMapperPredictUtil {
         List<ScoreOutput> resultList = new ArrayList<ScoreOutput>();
         for (String modelGuid : modelGuidSet) {
             log.info("modelGuid is " + modelGuid);
-            // key: leadID, value: raw score
-            Map<String, Double> scores = new HashMap<String, Double>();
+            // key: leadID, value: list of raw scores for that lead
+            Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
             long value = modelInfoMap.get(modelGuid).getLeadNumber();
             JSONObject model = models.get(modelGuid);
             long remain = value / leadFileThreshold;
+            int totalRawScoreNumber = 0;
             for (int i = 0; i <= remain; i++) {
-                readScoreFile(modelGuid, i, scores);
+                totalRawScoreNumber += readScoreFile(modelGuid, i, scores);
+            }
+            List<String> duplicateLeadIdList = checkForDuplicateLeads(scores, totalRawScoreNumber, modelGuid);
+            if (duplicateLeadIdList != null && duplicateLeadIdList.size() > 0) {
+                String message = String.format("The duplicate leads for model %s are: %s\n", modelGuid,
+                        Arrays.toString(duplicateLeadIdList.toArray()));
+                log.warn(message);
             }
             Set<String> keySet = scores.keySet();
             for (String key : keySet) {
-                ScoreOutput result = getResult(modelInfoMap, modelGuid, key, model, scores.get(key));
-                resultList.add(result);
+                List<Double> rawScoreList = scores.get(key);
+                for (Double rawScore : rawScoreList) {
+                    ScoreOutput result = getResult(modelInfoMap, modelGuid, key, model, rawScore);
+                    resultList.add(result);
+                }
             }
         }
         return resultList;
     }
 
-    private static void readScoreFile(String modelGuid, int index, Map<String, Double> scores) throws IOException {
+    @VisibleForTesting
+    static List<String> checkForDuplicateLeads(Map<String, List<Double>> scoreMap, int totalRawScoreNumber,
+            String modelGuid) {
+        List<String> duplicateLeadsList = new ArrayList<String>();
+        if (totalRawScoreNumber != scoreMap.size()) {
+            int duplicateLeadNumber = totalRawScoreNumber - scoreMap.size();
+            String message = String.format("There are %d duplicate leads for model %s\n", duplicateLeadNumber,
+                    modelGuid);
+            log.warn(message);
+            Set<String> leadIdSet = scoreMap.keySet();
+            for (String leadId : leadIdSet) {
+                if (scoreMap.get(leadId).size() > 1) {
+                    duplicateLeadsList.add(leadId);
+                }
+            }
+        }
+        return duplicateLeadsList;
+    }
 
+    private static int readScoreFile(String modelGuid, int index, Map<String, List<Double>> scores) throws IOException {
+
+        int rawScoreNum = 0;
         String fileName = modelGuid + SCORING_OUTPUT_PREFIX + index + ".txt";
         File f = new File(fileName);
         if (!f.exists()) {
@@ -160,8 +192,19 @@ public class ScoringMapperPredictUtil {
             if (splitLine.length != 2) {
                 throw new LedpException(LedpCode.LEDP_20013);
             }
-            scores.put(splitLine[0], Double.parseDouble(splitLine[1]));
+            String leadId = splitLine[0];
+            Double rawScore = Double.parseDouble(splitLine[1]);
+            if (scores.containsKey(leadId)) {
+                scores.get(leadId).add(rawScore);
+                rawScoreNum++;
+            } else {
+                List<Double> scoreListWithSameLeadId = new ArrayList<Double>();
+                scoreListWithSameLeadId.add(rawScore);
+                scores.put(leadId, scoreListWithSameLeadId);
+                rawScoreNum++;
+            }
         }
+        return rawScoreNum;
     }
 
     private static ScoreOutput getResult(Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap, String modelGuid,

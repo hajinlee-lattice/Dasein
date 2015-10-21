@@ -236,6 +236,26 @@ public class ScoringMapperPredictUtilTestNG {
     }
 
     @Test(groups = "unit")
+    public void testCheckForDuplicateLeads() {
+        String modelGuid = "modelGuid";
+        Map<String, List<Double>> scoreMap = new HashMap<String, List<Double>>();
+        List<Double> l1 = new ArrayList<Double>();
+        l1.add(0.1);
+        List<Double> l2 = new ArrayList<Double>();
+        l2.add(0.2);
+        scoreMap.put("lead1", l1);
+        scoreMap.put("lead2", l2);
+        List<String> list = ScoringMapperPredictUtil.checkForDuplicateLeads(scoreMap, 2, modelGuid);
+        assertTrue(list.size() == 0);
+        List<Double> l3 = new ArrayList<Double>();
+        l3.add(0.3);
+        l3.add(0.4);
+        scoreMap.put("lead3", l3);
+        list = ScoringMapperPredictUtil.checkForDuplicateLeads(scoreMap, 4, modelGuid);
+        assertTrue(list.size() == 1);
+    }
+
+    @Test(groups = "unit")
     public void testEvaluate() throws IOException, InterruptedException {
         // copy over the test scoring.py file to the current directory
         URL scoreUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/python/scoring.py");

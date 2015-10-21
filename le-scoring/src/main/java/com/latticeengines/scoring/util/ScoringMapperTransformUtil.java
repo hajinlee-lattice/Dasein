@@ -183,11 +183,21 @@ public class ScoringMapperTransformUtil {
         JSONObject leadJsonObject = (JSONObject) parser.parse(leadString);
 
         Set<String> modelGuidSet = localizedFiles.getModels().keySet();
-        String modelId = String.valueOf(leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN));
-        String modelGuid = identifyModelGuid(modelId, modelGuidSet);
-        // first step validation, to see whether the model is provided.
+        // first step validation, to see whether the leadId is provided.
+        Object leadIdObj = leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
+        if (leadIdObj == null) {
+            throw new LedpException(LedpCode.LEDP_20003, new String[] { (String) leadIdObj });
+        }
+        // second step validation, to see whether the modelGuid is provided.
+        Object modelIdObj = leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN);
+        if (modelIdObj == null) {
+            throw new LedpException(LedpCode.LEDP_20004, new String[] { (String) modelIdObj });
+        }
+        String modelId = String.valueOf(modelIdObj);
+        // third step validation, to see whether the model is localized.
+        String modelGuid = identifyModelGuid(String.valueOf(modelIdObj), modelGuidSet);
         if (modelGuid.isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_20007, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_20007, new String[] { modelGuid });
         }
 
         JSONObject modelContents = localizedFiles.getModels().get(modelGuid);

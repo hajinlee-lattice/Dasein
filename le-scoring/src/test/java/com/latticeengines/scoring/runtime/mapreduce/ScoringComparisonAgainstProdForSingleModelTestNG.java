@@ -1,6 +1,5 @@
 package com.latticeengines.scoring.runtime.mapreduce;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -20,7 +19,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -76,7 +74,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-    
+
     @Autowired
     private DbCreds scoringCreds;
 
@@ -95,7 +93,6 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     private String scorePath;
 
     private static final String scoreResTable = "scoreResultTable";
-
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
@@ -131,7 +128,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         String filePath = modelPath + "/model.json";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
     }
-    
+
     // compare the results
     private boolean compareEvaluationResults() {
         boolean evaluationIsSame = false;
@@ -151,31 +148,37 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     }
 
     /**
-     * Don't directly load data from Prod DB, please import data to a dev db before you use this method
-     * resultJdbcUrl should be something like "jdbc:sqlserver://10.41.1.207\\SQL2012STD;databaseName=ScoringDaemon_QA;user=$$USER$$;password=$$PASSWD$$"
+     * Don't directly load data from Prod DB, please import data to a dev db
+     * before you use this method resultJdbcUrl should be something like
+     * "jdbc:sqlserver://10.41.1.207\\SQL2012STD;databaseName=ScoringDaemon_QA;user=$$USER$$;password=$$PASSWD$$"
+     * 
      * @throws Exception
      */
 
-    private List<GenericRecord> loadAvroResultToHdfs(String customerName, String scoreTargetTable, String resultJdbcUrl) throws Exception{
-        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/"+ CustomerSpace.parse(customerName) + "/scoring");
+    private List<GenericRecord> loadAvroResultToHdfs(String customerName, String scoreTargetTable, String resultJdbcUrl)
+            throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/" + CustomerSpace.parse(customerName)
+                + "/scoring");
         scoringJdbcTemplate.setDataSource(new DriverManagerDataSource(resultJdbcUrl));
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, scoreResTable))){
+        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, scoreResTable))) {
             metadataService.dropTable(scoringJdbcTemplate, scoreResTable);
         }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, scoreResTable, scoreTargetTable);
 
         ScoringCommand scoringCommand = new ScoringCommand(customerName, ScoringCommandStatus.POPULATED, scoreResTable,
                 0, 4352, new Timestamp(System.currentTimeMillis()));
-        
+
         scoringCreds.setJdbcUrl(resultJdbcUrl);
-        // Will load result avros to /user/s-analytics/customers/customerName.customerName.Production/scoring/scoreResTable/data
+        // Will load result avros to
+        // /user/s-analytics/customers/customerName.customerName.Production/scoring/scoreResTable/data
         ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.LOAD_DATA);
         waitForSuccess(appId, ScoringCommandStep.LOAD_DATA);
-        String hdfsDir = "/user/s-analytics/customers/" + CustomerSpace.parse(customerName) + "/scoring/scoreResultTable/data/";
+        String hdfsDir = "/user/s-analytics/customers/" + CustomerSpace.parse(customerName)
+                + "/scoring/scoreResultTable/data/";
         List<GenericRecord> records = loadHDFSAvroFiles(yarnConfiguration, hdfsDir);
         return records;
     }
-    
+
     private ArrayList<GenericRecord> loadHDFSAvroFiles(Configuration configuration, String hdfsDir) {
         ArrayList<GenericRecord> newlist = new ArrayList<GenericRecord>();
         List<String> files = null;
@@ -196,7 +199,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
             throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
         }
         for (String file : files) {
-            try { 
+            try {
                 List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
                 newlist.addAll(list);
             } catch (Exception e) {
@@ -316,7 +319,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         // compare the results
         assertTrue(compareEvaluationResults());
     }
-    
+
     public void loadAndCompare() throws Exception {
         // need to customize the url
         String resultJdbcUrl = "jdbc:sqlserver://10.41.1.207\\SQL2012STD;databaseName=ScoringDaemon_QA;user=Dataloader_Prod;password=@@@";
@@ -324,15 +327,9 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         String customer2 = "c2";
         String table1 = "Cision_QA_results";
         String table2 = "Cision_Prod_results";
-        List<GenericRecord> records1 =loadAvroResultToHdfs(customer1, table1, resultJdbcUrl);
-        List<GenericRecord> records2 =loadAvroResultToHdfs(customer2, table2, resultJdbcUrl);
+        List<GenericRecord> records1 = loadAvroResultToHdfs(customer1, table1, resultJdbcUrl);
+        List<GenericRecord> records2 = loadAvroResultToHdfs(customer2, table2, resultJdbcUrl);
         assertTrue(compareJsonResults(records1, records2));
-    }
-
-    private void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        log.info(step + ": appId succeeded: " + appId.toString());
     }
 
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)

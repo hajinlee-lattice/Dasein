@@ -1,5 +1,7 @@
 package com.latticeengines.scoring.functionalframework;
 
+import static org.testng.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -17,6 +21,7 @@ import org.testng.annotations.AfterClass;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.exposed.domain.ScoringRequest;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -57,6 +62,12 @@ public class ScoringFunctionalTestNGBase extends DataPlatformFunctionalTestNGBas
             requests.add(request);
         }
         return requests;
+    }
+
+    protected void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        log.info(step + ": appId succeeded: " + appId.toString());
     }
 
 }

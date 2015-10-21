@@ -3,28 +3,24 @@ package com.latticeengines.scoring.runtime.mapreduce;
 import java.sql.Timestamp;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
-import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
-import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
-public class ScoringWithAvroAndModelTestNG extends ScoringFunctionalTestNGBase {
+public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctionalTestNGBase {
 
-    @Autowired
-    private ScoringCommandEntityMgr scoringCommandEntityMgr;
+    // !!! need to comment out the clearTables() in ScoringFunctionalTestNGBase
+    // when using this test in QA environment !!!
 
     @Autowired
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
@@ -35,22 +31,8 @@ public class ScoringWithAvroAndModelTestNG extends ScoringFunctionalTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
 
+    // need do change it according to the customer
     private static final String customer = "Nutanix_TEST_DELL";
-
-    @Value("${scoring.test.table}")
-    private String testInputTable;
-
-    @Autowired
-    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-
-    @Autowired
-    private DbCreds scoringCreds;
-
-    @Autowired
-    private JdbcTemplate scoringJdbcTemplate;
-
-    @Autowired
-    private MetadataService metadataService;
 
     private String inputLeadsTable;
 
@@ -60,6 +42,8 @@ public class ScoringWithAvroAndModelTestNG extends ScoringFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        // need to change the inputLeadsTable name to match the status in real
+        // environments.
         inputLeadsTable = getClass().getSimpleName() + "__LeadsTable";
         CustomerSpace.parse(customer).toString();
     }
@@ -71,7 +55,8 @@ public class ScoringWithAvroAndModelTestNG extends ScoringFunctionalTestNGBase {
         // set a fake Pid
         scoringCommand.setPid(1234L);
         // submit scoring job directly without going through database
-        scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
+        waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
     }
 
 }

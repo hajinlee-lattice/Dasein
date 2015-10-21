@@ -39,10 +39,15 @@ public class ScoringMapperTransformUtilUnitTestNG {
     private final static String PROPER_TEST_RECORD = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
             + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
-
-    private final static String IMPROPER_TEST_RECORD = "{\"LeadID\": \"837395\", \"ModelingID\": 113881, \"PercentileModel\": null, "
+    private final static String IMPROPER_TEST_RECORD_WITH_FAKE_MODEL_ID = "{\"LeadID\": \"837395\", \"ModelingID\": 113881, \"PercentileModel\": null, "
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 36, \"C_Job_Role1\": \"\", "
             + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_SOME_RANDOM_MODEL_ID\"}";
+    private final static String IMPROPER_TEST_RECORD_WITH_NO_MODEL_GUID = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
+            + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
+            + "\"BusinessSocialPresence\": \"True\"}";
+    private final static String IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID = "{\"ModelingID\": 113880, \"PercentileModel\": null, "
+            + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
+            + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
 
     private Path datatypePath;
     private Path modelPath;
@@ -233,18 +238,32 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testTransformAndWriteLeadWithUnmatchedModel() throws IOException, ParseException {
+    public void testTransformAndWriteLeadWithNegativeCases() throws IOException, ParseException {
         Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
         LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
         try {
-            ScoringMapperTransformUtil.transformAndWriteLead(IMPROPER_TEST_RECORD, modelInfoMap, leadFileBufferMap,
-                    localizedFiles, 10000);
+            ScoringMapperTransformUtil.transformAndWriteLead(IMPROPER_TEST_RECORD_WITH_FAKE_MODEL_ID, modelInfoMap,
+                    leadFileBufferMap, localizedFiles, 10000);
             Assert.fail("Should have thrown expcetion.");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20007);
+        }
+        try {
+            ScoringMapperTransformUtil.transformAndWriteLead(IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID, modelInfoMap,
+                    leadFileBufferMap, localizedFiles, 10000);
+            Assert.fail("Should have thrown expcetion.");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_20003);
+        }
+        try {
+            ScoringMapperTransformUtil.transformAndWriteLead(IMPROPER_TEST_RECORD_WITH_NO_MODEL_GUID, modelInfoMap,
+                    leadFileBufferMap, localizedFiles, 10000);
+            Assert.fail("Should have thrown expcetion.");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_20004);
         }
     }
 }

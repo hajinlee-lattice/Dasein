@@ -295,12 +295,6 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
     }
 
-    private void waitForSuccess(ApplicationId appId, ScoringCommandStep step) throws Exception {
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        log.info(step + ": appId succeeded: " + appId.toString());
-    }
-
     private boolean compareEvaluationResults() throws Exception {
         boolean resultsAreSame = false;
         // locate the scored.txt after modeling is done
