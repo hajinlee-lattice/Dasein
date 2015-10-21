@@ -24,9 +24,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
@@ -46,6 +48,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
+import com.latticeengines.scoring.service.ScoringDaemonService;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
 @Component("scoringStepYarnProcessor")
@@ -80,6 +83,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Value("${scoring.mapper.max.input.split.size}")
     private String maxInputSplitSize;
+
+    @Value("${scoring.mapper.min.input.split.size}")
+    private String minInputSplitSize;
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
@@ -131,8 +137,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String targetDir = customerBaseDir + "/" + tenant + "/scoring/" + table + "/data";
         metadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
         try {
-            if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
-                HdfsUtils.rmdir(yarnConfiguration, targetDir);
+            String scoringTableDir = customerBaseDir + "/" + tenant + "/scoring/" + table;
+            if (HdfsUtils.fileExists(yarnConfiguration, scoringTableDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, scoringTableDir);
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00004, new String[] { targetDir });
@@ -194,11 +201,18 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
                 + "/scores");
         properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), maxInputSplitSize);
+        properties.setProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name(), minInputSplitSize);
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
 
+        List<String> modelUrls = findModelUrlsToLocalize(tenant, scoringCommand.getTableName());
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));
+        return properties;
+    }
+
+    private List<String> findAllModelPathsInHdfs(String tenant){
         String customerModelPath = customerBaseDir + "/" + tenant + "/models";
         List<String> modelFilePaths = Collections.emptyList();
         try {
@@ -220,16 +234,34 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         if (CollectionUtils.isEmpty(modelFilePaths)) {
             throw new LedpException(LedpCode.LEDP_20008, new String[] { tenant });
         }
-        List<String> localizedModelFilePaths = new ArrayList<>();
-        for (String path : modelFilePaths) {
-            try {
-                HdfsUtils.getCheckSum(yarnConfiguration, path);
-                localizedModelFilePaths.add(path);
-            } catch (IOException e) {
-                log.warn(String.format("Model %s could not be localized for tenant %s due to data loss.", path, tenant));
+        return modelFilePaths;
+    }
+
+    private List<String> findModelUrlsToLocalize(String tenant, String tableName){
+        List<String> modelGuids = metadataService.getDistinctColumnValues(scoringJdbcTemplate, tableName, ScoringDaemonService.MODEL_GUID);
+        List<String> modelFilePaths = findAllModelPathsInHdfs(tenant);
+        return findModelUrlsToLocalize(tenant, modelGuids, modelFilePaths);
+    }
+
+    @VisibleForTesting
+    List<String> findModelUrlsToLocalize(String tenant, List<String> modelGuids, List<String> modelFilePaths){
+        List<String> modelUrlsToLocalize = new ArrayList<>();
+        label:
+            for(String modelGuid : modelGuids){
+                String uuid = UuidUtils.extractUuid(modelGuid);
+                for (String path : modelFilePaths) {
+                    if(uuid.equals(UuidUtils.parseUuid(path))){
+                        try {
+                            HdfsUtils.getCheckSum(yarnConfiguration, path);
+                        }catch (IOException e) {
+                            throw new LedpException(LedpCode.LEDP_20021, new String[]{path, tenant});
+                        }
+                        modelUrlsToLocalize.add(path + "#" + uuid);
+                        continue label;
+                    }
+                }
+                throw new LedpException(LedpCode.LEDP_18007, new String[]{modelGuid});
             }
-        }
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(localizedModelFilePaths));
-        return properties;
+        return modelUrlsToLocalize;
     }
 }

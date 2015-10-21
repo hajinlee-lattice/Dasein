@@ -72,9 +72,9 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid) {
-        Integer count  = jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = '%s' and COLUMN_NAME='%s'", tableName, pid), Integer.class);
-        if (count == 0 ) {
-            jdbcTemplate.execute(String.format("alter table `%s` add %s INT PRIMARY KEY auto_increment", tableName, pid));
+        if (!checkIfColumnExists(jdbcTemplate, tableName, pid)) {
+            jdbcTemplate.execute(String
+                    .format("alter table `%s` add %s INT PRIMARY KEY auto_increment", tableName, pid));
         }
     }
 
@@ -106,4 +106,19 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
         return jdbcTemplate.update(String.format("insert into `%s` " + columnStatement, tableName), args);
     }
 
+    @Override
+    public boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column) {
+        Integer count = jdbcTemplate.queryForObject(String.format(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = '%s' and COLUMN_NAME='%s'",
+                tableName, column), Integer.class);
+        if (count > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
+        return jdbcTemplate.queryForList(String.format("SELECT DISTINCT '%s' FROM `%s`", column, tableName), String.class);
+    }
 }

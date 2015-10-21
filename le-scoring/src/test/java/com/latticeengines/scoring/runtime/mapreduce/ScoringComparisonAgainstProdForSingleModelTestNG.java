@@ -101,6 +101,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
+        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
         tenant = CustomerSpace.parse(customer).toString();
 
         // upload lead files to HDFS
@@ -339,6 +340,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
             HdfsUtils.rmdir(yarnConfiguration, path);
             HdfsUtils.rmdir(yarnConfiguration, scorePath);
             HdfsUtils.rmdir(yarnConfiguration, modelPath);
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

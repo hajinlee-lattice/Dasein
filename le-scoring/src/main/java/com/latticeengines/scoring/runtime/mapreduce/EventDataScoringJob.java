@@ -79,6 +79,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
             AvroKeyInputFormat.setMaxInputSplitSize(mrJob,
                     Long.valueOf(properties.getProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name())));
+            AvroKeyInputFormat.setMinInputSplitSize(mrJob,
+                    Long.valueOf(properties.getProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name())));
 
             List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, new HdfsFilenameFilter() {
 
@@ -108,15 +110,11 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             mrJob.setMapperClass(EventDataScoringMapper.class);
             mrJob.setNumReduceTasks(0);
 
-            String customer = properties.getProperty(MapReduceProperty.CUSTOMER.name());
             if (properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()) != null) {
                 String[] cachePaths = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()).split(comma);
                 URI[] cacheFiles = new URI[cachePaths.length];
                 for (int i = 0; i < cacheFiles.length; i++) {
-                    int idx = cachePaths[i].indexOf(customer);
-                    // ${customer}/models/${table_name}/model_id
-                    String id = cachePaths[i].substring(idx).split("/")[3];
-                    cacheFiles[i] = new URI(cachePaths[i].trim() + "#" + id);
+                    cacheFiles[i] = new URI(cachePaths[i].trim());
                 }
                 mrJob.setCacheFiles(cacheFiles);
             }
@@ -170,10 +168,11 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         properties.setProperty(MapReduceProperty.OUTPUT.name(), args[2]);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[4]);
         properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), args[5]);
-        properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), args[6]);
-        properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), args[7]);
-        properties.setProperty(ScoringProperty.TENANT_ID.name(), args[8]);
-        properties.setProperty(ScoringProperty.LOG_DIR.name(), args[9]);
+        properties.setProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name(), args[6]);
+        properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), args[7]);
+        properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), args[8]);
+        properties.setProperty(ScoringProperty.TENANT_ID.name(), args[9]);
+        properties.setProperty(ScoringProperty.LOG_DIR.name(), args[10]);
 
         customize(job, properties);
         if (job.waitForCompletion(true)) {

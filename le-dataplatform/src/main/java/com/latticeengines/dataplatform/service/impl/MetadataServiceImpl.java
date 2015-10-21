@@ -155,4 +155,16 @@ public class MetadataServiceImpl implements MetadataService {
         MetadataProvider provider = getProvider(jdbcTemplate);
         return provider.insertRow(jdbcTemplate, tableName, columnStatement, args);
     }
+
+    @Override
+    public boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column){
+        MetadataProvider provider = getProvider(jdbcTemplate);
+        return provider.checkIfColumnExists(jdbcTemplate, tableName, column);
+    }
+
+    @Override
+    public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
+        MetadataProvider provider = getProvider(jdbcTemplate);
+        return provider.getDistinctColumnValues(jdbcTemplate, tableName, column);
+    }
 }

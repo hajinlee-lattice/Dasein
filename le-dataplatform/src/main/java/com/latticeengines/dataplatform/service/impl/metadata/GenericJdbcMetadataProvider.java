@@ -86,4 +86,14 @@ public class GenericJdbcMetadataProvider extends MetadataProvider {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
+        throw new UnsupportedOperationException();
+    }
+
 }

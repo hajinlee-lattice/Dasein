@@ -41,4 +41,8 @@ public interface MetadataService {
     void createNewTable(JdbcTemplate jdbcTemplate, String tableName, String columnInfo);
 
     int insertRow(JdbcTemplate jdbcTemplate, String tableName, String columnStatement, Object... args);
+
+    boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column);
+
+    List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column);
 }

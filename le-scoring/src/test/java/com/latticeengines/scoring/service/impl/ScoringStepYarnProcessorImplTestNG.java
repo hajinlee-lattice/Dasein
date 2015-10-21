@@ -151,4 +151,10 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
                 metadataService.getRowCount(scoringJdbcTemplate, outputTable));
     }
 
+    @Test(groups = "functional", enabled = false)
+    public void findModelUrlsToLocalize() throws Exception {
+        
+        //((ScoringStepYarnProcessorImpl)scoringStepYarnProcessor).findModelUrlsToLocalize(tenant, modelGuids, modelFilePaths)
+        
+    }
 }

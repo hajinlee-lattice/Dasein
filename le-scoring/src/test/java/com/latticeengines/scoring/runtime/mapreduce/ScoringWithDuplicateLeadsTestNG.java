@@ -63,6 +63,9 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
     @Autowired
     private MetadataService metadataService;
 
+    @Value("${scoring.test.table}")
+    private String testInputTable;
+
     private String inputLeadsTable;
 
     private String modelPath;
@@ -74,6 +77,7 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
+        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
         tenant = CustomerSpace.parse(customer).toString();
 
         URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
@@ -118,6 +122,7 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
             HdfsUtils.rmdir(yarnConfiguration, path);
             HdfsUtils.rmdir(yarnConfiguration, scorePath);
             HdfsUtils.rmdir(yarnConfiguration, modelPath);
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -139,5 +144,4 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
             assertTrue(true, "Should have have thrown any exception.");
         }
     }
-
 }

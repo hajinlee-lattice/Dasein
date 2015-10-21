@@ -178,6 +178,7 @@ public enum LedpCode {
     LEDP_20018("Cannot find any lead avro files"), //
     LEDP_20019("Average avro file size cannot be 0 byte."), //
     LEDP_20020("No model has been localized for scoring."), //
+    LEDP_20021("Cannot localize model {0} for tenant {1}"), //
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"), //

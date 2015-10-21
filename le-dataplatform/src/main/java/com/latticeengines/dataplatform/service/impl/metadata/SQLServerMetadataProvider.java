@@ -75,12 +75,25 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid) {
-        jdbcTemplate.execute(String.format("IF COL_LENGTH('%1$s', '%2$s') IS NULL ALTER TABLE [%1$s] ADD [%2$s] INT IDENTITY", tableName, pid));
+        jdbcTemplate.execute(String.format(
+                "IF COL_LENGTH('%1$s', '%2$s') IS NULL ALTER TABLE [%1$s] ADD [%2$s] INT IDENTITY", tableName, pid));
+    }
+
+    @Override
+    public boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column) {
+        List<String> columnNames = jdbcTemplate.queryForList(String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '%1$s' AND COLUMN_NAME= '%2$s'",
+                tableName, column), String.class);
+        if (columnNames.size() > 0) {
+            return true;
+        }
+        return false;
     }
 
     @Override
     public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
-        Integer positiveEventCount = jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM [%s] WHERE [%s] = 1", tableName, eventColName), Integer.class);
+        Integer positiveEventCount = jdbcTemplate.queryForObject(
+                String.format("SELECT COUNT(*) FROM [%s] WHERE [%s] = 1", tableName, eventColName), Integer.class);
         return Long.valueOf(positiveEventCount);
     }
 
@@ -92,5 +105,10 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     @Override
     public int insertRow(JdbcTemplate jdbcTemplate, String tableName, String columnStatement, Object... args) {
         return jdbcTemplate.update(String.format("insert into [%s] " + columnStatement, tableName), args);
+    }
+
+    @Override
+    public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
+        return jdbcTemplate.queryForList(String.format("SELECT DISTINCT [%s] FROM [%s]", column, tableName), String.class);
     }
 }

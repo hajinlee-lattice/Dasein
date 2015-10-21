@@ -109,4 +109,8 @@ public abstract class MetadataProvider {
 
     public abstract Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName);
 
+    public abstract boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column);
+
+    public abstract List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column);
+
 }

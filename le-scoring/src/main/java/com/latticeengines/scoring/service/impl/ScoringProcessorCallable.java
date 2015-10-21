@@ -13,13 +13,11 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -32,15 +30,14 @@ import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.service.ScoringCommandLogService;
+import com.latticeengines.scoring.service.ScoringDaemonService;
 import com.latticeengines.scoring.service.ScoringStepProcessor;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
+import com.latticeengines.scoring.service.ScoringValidationService;
 
 @Component("scoringProcessor")
 @Scope("prototype")
 public class ScoringProcessorCallable implements Callable<Long> {
-
-    private static final int SUCCESS = 0;
-    private static final int FAIL = -1;
 
     private ScoringCommand scoringCommand;
 
@@ -60,6 +57,9 @@ public class ScoringProcessorCallable implements Callable<Long> {
     private ScoringStepProcessor scoringStepFinishProcessor;
 
     @Autowired
+    private ScoringValidationService scoringValidationService;
+
+    @Autowired
     private JobService jobService;
 
     @Autowired
@@ -70,12 +70,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
     @Value("${dataplatform.yarn.timeline-service.webapp.address}")
     private String appTimeLineWebAppAddress;
-
-    @Autowired
-    private MetadataService metadataService;
-
-    @Autowired
-    private JdbcTemplate scoringJdbcTemplate;
 
     private static final Log log = LogFactory.getLog(ScoringProcessorCallable.class);
 
@@ -92,7 +86,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
     @Override
     public Long call() throws Exception {
-        int result = SUCCESS;
+        int result = ScoringDaemonService.SUCCESS;
         try {
             log.info("Begin scheduled work on " + ScoringCommandLogServiceImpl.SCORINGCOMMAND_ID_LOG_PREFIX + ":"
                     + this.scoringCommand.getPid()); // Need this line to
@@ -104,13 +98,13 @@ public class ScoringProcessorCallable implements Callable<Long> {
             log.info("End scheduled work on " + ScoringCommandLogServiceImpl.SCORINGCOMMAND_ID_LOG_PREFIX + ":"
                     + this.scoringCommand.getPid());
         } catch (LedpException e) {
-            result = FAIL;
+            result = ScoringDaemonService.FAIL;
             this.scoringCommandLogService.logLedpException(this.scoringCommand, e);
         } catch (Exception e) {
-            result = FAIL;
+            result = ScoringDaemonService.FAIL;
             this.scoringCommandLogService.logException(this.scoringCommand, e);
         } finally {
-            if (result == FAIL) {
+            if (result == ScoringDaemonService.FAIL) {
                 this.handleJobFailed();
             }
         }
@@ -122,13 +116,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
                 .findLastStateByScoringCommand(this.scoringCommand);
         if (scoringCommandState == null) {
             this.scoringCommandLogService.log(this.scoringCommand, "Total: " + this.scoringCommand.getTotal());
-            long total = this.metadataService.getRowCount(this.scoringJdbcTemplate, this.scoringCommand.getTableName());
-            if (total != this.scoringCommand.getTotal()) {
-                throw new LedpException(LedpCode.LEDP_20016);
-            }
-            if (total < 1) {
-                throw new LedpException(LedpCode.LEDP_20017);
-            }
+            scoringValidationService.validateBeforeProcessing(scoringCommand);
             this.executeYarnStep(ScoringCommandStep.LOAD_DATA);
         } else { // scoringCommand IN_PROGRESS
             String yarnApplicationId;

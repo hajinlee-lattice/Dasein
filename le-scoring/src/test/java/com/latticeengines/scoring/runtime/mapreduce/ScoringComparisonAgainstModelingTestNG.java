@@ -53,6 +53,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
+import com.latticeengines.scoring.service.ScoringDaemonService;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
 public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTestNGBase {
@@ -129,6 +130,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         modelingModelPath = customerBaseDir + "/" + tenant + "/models/Q_PLS_ModelingMulesoft_Relaunch/";
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/scores";
+        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 
     @Test(groups = "functional")
@@ -202,6 +204,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         String modelId = "ms__" + modelGuid + "-PLS_model";
 
         File scoringLeadFile = addColumnsToTestDataFile(modelId);
+        scoringJdbcTemplate.execute(String.format("Update [%s] Set [%s] = '%s'", inputLeadsTable, ScoringDaemonService.MODEL_GUID, modelId));
         scoringDataPath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data/1.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoringLeadFile.getAbsolutePath(), scoringDataPath);
         // deletet he temp file
@@ -411,6 +414,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
         try {
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
             HdfsUtils.rmdir(yarnConfiguration, path);
         } catch (Exception e) {
             log.error(e.getMessage());

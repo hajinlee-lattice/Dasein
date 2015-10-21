@@ -2,6 +2,8 @@ package com.latticeengines.scoring.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
 
@@ -27,6 +29,7 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringCommandLogService;
+import com.latticeengines.scoring.service.ScoringDaemonService;
 
 public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
@@ -157,6 +160,16 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         this.scoringCommandStateEntityMgr.create(scoringCommandState);
         PagerDutyTestUtils.confirmPagerDutyIncident(this.scoringProcessor.handleJobFailed(failedAppId));
         PagerDutyTestUtils.confirmPagerDutyIncident(this.scoringProcessor.handleJobFailed());
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void checkIfModelGuidExists() {
+        assertFalse(metadataService.checkIfColumnExists(scoringJdbcTemplate, "LeadInputQueue", "Model_GUID"));
+        assertTrue(metadataService.checkIfColumnExists(scoringJdbcTemplate, testInputTable,
+                ScoringDaemonService.MODEL_GUID));
+        assertEquals(
+                metadataService.getDistinctColumnValues(scoringJdbcTemplate, testInputTable,
+                        ScoringDaemonService.MODEL_GUID).get(0), "ms__1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3-PLSModel");
     }
 
 }
