@@ -212,7 +212,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         return properties;
     }
 
-    private List<String> findAllModelPathsInHdfs(String tenant){
+    private List<String> findAllModelPathsInHdfs(String tenant) {
         String customerModelPath = customerBaseDir + "/" + tenant + "/models";
         List<String> modelFilePaths = Collections.emptyList();
         try {
@@ -237,31 +237,36 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         return modelFilePaths;
     }
 
-    private List<String> findModelUrlsToLocalize(String tenant, String tableName){
-        List<String> modelGuids = metadataService.getDistinctColumnValues(scoringJdbcTemplate, tableName, ScoringDaemonService.MODEL_GUID);
+    private List<String> findModelUrlsToLocalize(String tenant, String tableName) {
+        List<String> modelGuids = metadataService.getDistinctColumnValues(scoringJdbcTemplate, tableName,
+                ScoringDaemonService.MODEL_GUID);
         List<String> modelFilePaths = findAllModelPathsInHdfs(tenant);
         return findModelUrlsToLocalize(tenant, modelGuids, modelFilePaths);
     }
 
     @VisibleForTesting
-    List<String> findModelUrlsToLocalize(String tenant, List<String> modelGuids, List<String> modelFilePaths){
+    List<String> findModelUrlsToLocalize(String tenant, List<String> modelGuids, List<String> modelFilePaths) {
         List<String> modelUrlsToLocalize = new ArrayList<>();
-        label:
-            for(String modelGuid : modelGuids){
-                String uuid = UuidUtils.extractUuid(modelGuid);
-                for (String path : modelFilePaths) {
-                    if(uuid.equals(UuidUtils.parseUuid(path))){
-                        try {
-                            HdfsUtils.getCheckSum(yarnConfiguration, path);
-                        }catch (IOException e) {
-                            throw new LedpException(LedpCode.LEDP_20021, new String[]{path, tenant});
-                        }
-                        modelUrlsToLocalize.add(path + "#" + uuid);
-                        continue label;
+        label: for (String modelGuid : modelGuids) {
+            String uuid = UuidUtils.extractUuid(modelGuid);
+            for (String path : modelFilePaths) {
+                if (uuid.equals(UuidUtils.parseUuid(path))) {
+                    try {
+                        HdfsUtils.getCheckSum(yarnConfiguration, path);
+                    } catch (IOException e) {
+                        throw new LedpException(LedpCode.LEDP_20021, new String[] { path, tenant });
                     }
+                    modelUrlsToLocalize.add(path + "#" + uuid);
+                    continue label;
                 }
-                throw new LedpException(LedpCode.LEDP_18007, new String[]{modelGuid});
             }
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelGuid });
+        }
         return modelUrlsToLocalize;
+    }
+
+    @VisibleForTesting
+    void setYarnConfiguration(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
     }
 }
