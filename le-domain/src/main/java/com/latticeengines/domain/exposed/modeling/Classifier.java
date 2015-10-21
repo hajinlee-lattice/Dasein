@@ -28,8 +28,6 @@ public class Classifier implements HasName {
     private String pythonPipelineScriptHdfsPath;
     private String pythonMRConfigHdfsPath;
     
-    private boolean parallelEnabled;
-
     @Override
     @JsonProperty("name")
     public String getName() {
@@ -225,14 +223,4 @@ public class Classifier implements HasName {
         this.pythonMRConfigHdfsPath = pythonMRConfigHdfsPath;
     }
     
-    @JsonProperty("parallel_enabled")
-    public boolean isParallelEnabled() {
-        return parallelEnabled;
-    }
-
-    @JsonProperty("parallel_enabled")
-    public void setParallelEnabled(boolean parallelEnabled) {
-        this.parallelEnabled = parallelEnabled;
-    }
-
 }

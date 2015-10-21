@@ -275,6 +275,7 @@ public class ModelingServiceImpl implements ModelingService {
         m.setTable(dataProfileConfig.getTable());
         m.setMetadataTable(dataProfileConfig.getMetadataTable());
         setupModelProperties(m);
+        m.setParallelEnabled(dataProfileConfig.isParallelEnabled());
         return m;
     }
 

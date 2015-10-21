@@ -18,22 +18,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
-import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
-public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
+public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTestNG {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ModelResourceDeploymentTestNG.class);
@@ -44,7 +41,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
-    private Model model;
+    Model model;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -89,7 +86,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment")
     public void load() throws Exception {
-        LoadConfiguration config = getLoadConfig();
+        LoadConfiguration config = getLoadConfig(model);
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -100,48 +97,15 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void loadAgain() throws Exception {
-        LoadConfiguration config = getLoadConfig();
+        LoadConfiguration config = getLoadConfig(model);
         Map<String, String> errorResult = ignoreErrorRestTemplate.postForObject("http://" + restEndpointHost
                 + "/rest/load", config, HashMap.class, new Object[] {});
         assertTrue(errorResult.containsKey("errorCode"));
     }
 
-    private LoadConfiguration getLoadConfig() {
-        LoadConfiguration config = new LoadConfiguration();
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dataSourceHost) //
-                .port(dataSourcePort) //
-                .db(dataSourceDB) //
-                .user(dataSourceUser) //
-                .password(dataSourcePasswd) //
-                .dbType(dataSourceDBType);
-        DbCreds creds = new DbCreds(builder);
-        config.setCreds(creds);
-        config.setCustomer("INTERNAL_ModelResourceDeploymentTestNG");
-        config.setTable("iris");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
-        config.setMetadataTable("EventMetadata");
-        return config;
-    }
-
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
-        SamplingConfiguration samplingConfig = new SamplingConfiguration();
-        samplingConfig.setTrainingPercentage(80);
-        SamplingElement s0 = new SamplingElement();
-        s0.setName("s0");
-        s0.setPercentage(30);
-        SamplingElement s1 = new SamplingElement();
-        s1.setName("s1");
-        s1.setPercentage(60);
-        SamplingElement all = new SamplingElement();
-        all.setName("all");
-        all.setPercentage(100);
-        samplingConfig.addSamplingElement(s0);
-        samplingConfig.addSamplingElement(s1);
-        samplingConfig.addSamplingElement(all);
-        samplingConfig.setCustomer(model.getCustomer());
-        samplingConfig.setTable(model.getTable());
+        SamplingConfiguration samplingConfig = getSampleConfig(model);
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
@@ -152,13 +116,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
     public void profile() throws Exception {
-        DataProfileConfiguration config = new DataProfileConfiguration();
-        config.setCustomer(model.getCustomer());
-        config.setTable(model.getTable());
-        config.setMetadataTable(model.getMetadataTable());
-        config.setIncludeColumnList(model.getFeaturesList());
-        config.setSamplePrefix("all");
-        config.setTargets(model.getTargetsList());
+        DataProfileConfiguration config = getProfileConfig(model);
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));

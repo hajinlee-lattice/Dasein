@@ -24,10 +24,11 @@ import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
-public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
+public class ParallelDellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
 
-    private static final Log log = LogFactory.getLog(DellAPJDeploymentTestNG.class);
+    private static final Log log = LogFactory.getLog(ParallelDellAPJDeploymentTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -39,11 +40,15 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        
+
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path(customerBaseDir + "/INTERNAL_DellAPJDeploymentTestNG"), true);
-        
-        model = getModel("INTERNAL_DellAPJDeploymentTestNG");
+        fs.delete(new Path(customerBaseDir + "/Parallel_INTERNAL_DellAPJDeploymentTestNG"), true);
+
+        model = getModel("Parallel_INTERNAL_DellAPJDeploymentTestNG");
+        RandomForestAlgorithm randomForestAlgorithm = (RandomForestAlgorithm) model.getModelDefinition()
+                .getAlgorithms().get(0);
+        randomForestAlgorithm.setScript("/app/dataplatform/scripts/algorithm/parallel_rf_train.py");
+        model.setParallelEnabled(true);
     }
 
     private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
@@ -62,12 +67,12 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
-    
+
     @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = true)
     public void createSamples() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "createSamples");
         SamplingConfiguration samplingConfig = getSampleConfig(model);
-
+        samplingConfig.setParallelEnabled(true);
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
@@ -80,6 +85,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
     public void profile() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "profile");
         DataProfileConfiguration config = getProfileConfig(model);
+        config.setParallelEnabled(true);
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));

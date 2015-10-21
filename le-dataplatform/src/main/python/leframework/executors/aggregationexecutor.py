@@ -1,8 +1,9 @@
 import logging
 import os
 import shutil
-
 import fastavro as avro
+from pandas import Series
+
 from leframework.codestyle import overrides
 from leframework.executor import Executor
 from leframework.model.statemachine import StateMachine
@@ -27,18 +28,12 @@ from leframework.model.states.scorederivationgenerator import ScoreDerivationGen
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
 
-
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name='learningexecutor')
+logger = logging.getLogger(name='aggregationexecutor')
 
 
-class LearningExecutor(Executor):
-    '''
-    Base executor for all machine learning modeling. It does basic data preparation before
-    passing the data into the modeling.
-    '''
-
+class AggregationExecutor(Executor):
 
     def __init__(self, runtimeProperties=None):
         if runtimeProperties is None:
@@ -48,7 +43,7 @@ class LearningExecutor(Executor):
         else:
             self.amHost = runtimeProperties["host"]
             self.amPort = int(runtimeProperties["port"])
-    
+
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine(self.amHost, self.amPort)
         stateMachine.addState(Initialize(), 1)  
@@ -76,7 +71,7 @@ class LearningExecutor(Executor):
     def retrieveMetadata(self, schema, depivoted):
         metadata = dict()
         realColNameToRecord = dict()
-        
+
         if os.path.isfile(schema):
             with open(schema) as fp:
                 reader = avro.reader(fp)
@@ -91,21 +86,20 @@ class LearningExecutor(Executor):
                     else:
                         sqlcolname = colname
                         record["hashValue"] = record["columnvalue"]
-                
+
                     if colname in metadata:
                         metadata[colname].append(record)
                     else:
                         metadata[colname] = [record]
-                
+
                     realColNameToRecord[sqlcolname] = [record]
         return (metadata, realColNameToRecord)
-    
+
     @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):
-        training = parser.createList(trainingFile, postProcessClf)
-        test= parser.createList(testFile, postProcessClf)
-        return (training, test)
-    
+        test = parser.createList(testFile, postProcessClf)
+        return (None, test)
+
     @overrides(Executor)
     def writeToHdfs(self, hdfs, params):
         metadataFile = params["metadataFile"]
@@ -123,29 +117,33 @@ class LearningExecutor(Executor):
         for filename in filter(lambda e: self.accept(e), filenames):
             hdfs.copyFromLocal(modelEnhancementsLocalDir + filename, "%s%s" % (modelEnhancementsHdfsDir, filename))
 
-        super(LearningExecutor, self).writeToHdfs(hdfs, params)
-        
+        super(AggregationExecutor, self).writeToHdfs(hdfs, params)
+
     @overrides(Executor)
     def transformData(self, params):
+        test = params["test"]
+        schema = params["schema"]
+        test[schema["reserved"]["training"]].update(Series([False] * test.shape[0]))
+        params["allDataPreTransform"] = test
+        
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
         stringColumns = params["parser"].getStringColumns()
-        
+
         # Execute the packaged script from the client and get the returned file
         # that contains the generated data pipeline
         script = params["pipelineScript"]
         execfile(script, globals())
-        
+
         # Transform the categorical values in the metadata file into numerical values
         globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
-        
+
         # Create the data pipeline
         pipeline = globals()["setupPipeline"](metadata[0], stringColumns)
         params["pipeline"] = pipeline
-        
-        training = pipeline.predict(params["training"])
-        test = pipeline.predict(params["test"])
-        
-        return (training, test, metadata)
+
+        test = pipeline.predict(test)
+        params["allDataPostTransform"] = test
+        return (None, test, metadata)
 
     @overrides(Executor)
     def postProcessClassifier(self, clf, params):
@@ -174,20 +172,16 @@ class LearningExecutor(Executor):
     @overrides(Executor)
     def getModelDirPath(self, schema):
         if "CONTAINER_ID" in os.environ:
-            tokens = os.environ['CONTAINER_ID'].split("_")
-            if(tokens[1].startswith("e")):
-                appIdList = tokens[2:4]
-            else:
-                appIdList = tokens[1:3]
+            appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
             modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
             return modelDirPath
         else:
             return ""
-    
+
     @overrides(Executor)
     def accept(self, filename):
         badSuffixes = [".p", ".dot", ".gz"]
-        
+
         for badSuffix in badSuffixes:
             if filename.endswith(badSuffix):
                 return False

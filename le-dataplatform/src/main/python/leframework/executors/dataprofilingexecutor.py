@@ -12,6 +12,12 @@ class DataProfilingExecutor(Executor):
         Constructor
         '''
     @overrides(Executor)
+    def parseData(self, parser, trainingFile, testFile, postProcessClf):
+        training = parser.createList(trainingFile, postProcessClf)
+        test = parser.createList(testFile, postProcessClf)
+        return (training, test)
+    
+    @overrides(Executor)
     def transformData(self, params):
         training = params["training"]
         test = params["test"]
@@ -19,6 +25,10 @@ class DataProfilingExecutor(Executor):
     
     @overrides(Executor)
     def postProcessClassifier(self, clf, params): pass
+    
+    @overrides(Executor)
+    def writeToHdfs(self, hdfs, params):
+        super(DataProfilingExecutor, self).writeToHdfs(hdfs, params)
 
     @overrides(Executor)
     def getModelDirPath(self, schema):

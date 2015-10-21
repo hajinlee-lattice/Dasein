@@ -76,7 +76,7 @@ public class PythonReducer extends Reducer<Text, Text, NullWritable, NullWritabl
             }
 
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_12011, new String[] { "Failed to localize " + targetfile
+            throw new LedpException(LedpCode.LEDP_12011, e, new String[] { "Failed to localize " + targetfile
                     + " for aggregation" });
         }
 

@@ -39,7 +39,6 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         String metadata = containerProperties.getProperty(ContainerProperty.METADATA.name());
         containerProperties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
         Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
-        classifier.setParallelEnabled(true);
         
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
         String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier);

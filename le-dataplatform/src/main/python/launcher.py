@@ -122,7 +122,7 @@ class Launcher(object):
         schema["python_pipeline_script"] = params["pipelineScript"]
         schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
 
-        if postProcessClf:
+        if postProcessClf and isinstance(executor, LearningExecutor):
             self.training[schema["reserved"]["training"]].update(Series([True] * self.training.shape[0]))
             self.test[schema["reserved"]["training"]].update(Series([False] * self.test.shape[0]))
             params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
