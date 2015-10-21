@@ -22,11 +22,12 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
                 "Contact", //
                 new FieldList("Email"), //
                 JoinType.OUTER);
-        
-        String removeNullsForEmailsOnBothSides = addFilter(lead$contact, //
+
+        String removeNullsForEmailsOnBothSides = addFilter(
+                lead$contact, //
                 "(Email == null || Email.trim().isEmpty()) && (Contact__Email == null || Contact__Email.trim().isEmpty())", //
                 new FieldList("Email", "Contact__Email"));
-        
+
         String normalizeEmail = addFunction(removeNullsForEmailsOnBothSides, //
                 "Email != null ? Email : Contact__Email", //
                 new FieldList("Email", "Contact__Email"), //
@@ -42,7 +43,6 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
                 "CleanEmail.substring(CleanEmail.indexOf('@') + 1)", //
                 new FieldList("CleanEmail"), //
                 domain);
-
 
         String opptyContactRole$lead$contact = addInnerJoin(addDomain, //
                 new FieldList("Contact__Id"), //

@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-
 public class MetadataConverter {
     private static Set<Schema.Type> supportedAvroTypes = new HashSet<Schema.Type>();
 
@@ -29,8 +28,8 @@ public class MetadataConverter {
         supportedAvroTypes.add(Schema.Type.BOOLEAN);
     }
 
-    public static Table readMetadataFromAvroFile(Configuration configuration, String path,
-                                                 String primaryKeyName, String lastModifiedKeyName) {
+    public static Table readMetadataFromAvroFile(Configuration configuration, String path, String primaryKeyName,
+            String lastModifiedKeyName) {
         try {
             Schema schema = AvroUtils.getSchemaFromGlob(configuration, path);
             List<Extract> extracts = new ArrayList<Extract>();
@@ -41,12 +40,12 @@ public class MetadataConverter {
             Table table = convertToTable(schema, extracts, primaryKeyName, lastModifiedKeyName);
             return table;
         } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Failed to parse metadata for avro file located at %s", path), e);
+            throw new RuntimeException(String.format("Failed to parse metadata for avro file located at %s", path), e);
         }
     }
 
-    public static Table convertToTable(Schema schema, List<Extract> extracts, String primaryKeyName, String lastModifiedKeyName) {
+    public static Table convertToTable(Schema schema, List<Extract> extracts, String primaryKeyName,
+            String lastModifiedKeyName) {
         try {
             Table table = new Table();
             table.setName(schema.getName());
@@ -64,8 +63,8 @@ public class MetadataConverter {
             if (primaryKeyName != null) {
                 Schema.Field primaryKeyField = schema.getField(primaryKeyName);
                 if (primaryKeyField == null) {
-                    throw new RuntimeException(
-                            String.format("Could not locate primary key field %s in avro schema", primaryKeyName));
+                    throw new RuntimeException(String.format("Could not locate primary key field %s in avro schema",
+                            primaryKeyName));
                 }
                 PrimaryKey primaryKey = new PrimaryKey();
                 primaryKey.setName(primaryKeyName);
@@ -76,8 +75,8 @@ public class MetadataConverter {
             if (lastModifiedKeyName != null) {
                 Schema.Field lastModifiedField = schema.getField(lastModifiedKeyName);
                 if (lastModifiedField == null) {
-                    throw new RuntimeException(
-                            String.format("Could not locate last modified key field %s in avro schema", lastModifiedKeyName));
+                    throw new RuntimeException(String.format(
+                            "Could not locate last modified key field %s in avro schema", lastModifiedKeyName));
                 }
 
                 LastModifiedKey lastModifiedKey = new LastModifiedKey();
@@ -88,8 +87,7 @@ public class MetadataConverter {
 
             return table;
         } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Failed to read avro schema from %s", schema.getName()), e);
+            throw new RuntimeException(String.format("Failed to read avro schema from %s", schema.getName()), e);
         }
     }
 
@@ -101,10 +99,15 @@ public class MetadataConverter {
             String type = convertToType(field.schema());
             attribute.setPhysicalDataType(type);
             attribute.setLogicalDataType(field.getProp("logicalType"));
-            attribute.setScale(Integer.parseInt(field.getProp("scale")));
-            attribute.setPrecision(Integer.parseInt(field.getProp("precision")));
-            attribute.setLength(Integer.parseInt(field.getProp("length")));
-
+            if (field.getProp("scale") != null) {
+                attribute.setScale(Integer.parseInt(field.getProp("scale")));
+            }
+            if (field.getProp("precision") != null) {
+                attribute.setPrecision(Integer.parseInt(field.getProp("precision")));
+            }
+            if (field.getProp("length") != null) {
+                attribute.setLength(Integer.parseInt(field.getProp("length")));
+            }
             // standardize date and datetime display
             if (type.equals("date")) {
                 attribute.setPropertyValue("dateformat", "YYYY-MM-DD");
@@ -120,10 +123,8 @@ public class MetadataConverter {
             }
 
             return attribute;
-        }
-        catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Failed to read avro field %s", field.name()), e);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Failed to read avro field %s", field.name()), e);
         }
     }
 
@@ -142,8 +143,8 @@ public class MetadataConverter {
                     foundNull = true;
             }
             if (!foundNull || foundType == null) {
-                throw new RuntimeException(
-                        String.format("Avro union type must contain a null and a supported type but is %s", schema.getType()));
+                throw new RuntimeException(String.format(
+                        "Avro union type must contain a null and a supported type but is %s", schema.getType()));
             }
             type = convertToType(foundType);
         } else {

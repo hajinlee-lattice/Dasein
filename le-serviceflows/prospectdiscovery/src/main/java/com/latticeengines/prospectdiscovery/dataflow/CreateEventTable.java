@@ -14,21 +14,22 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public class CreateEventTable extends CascadingDataFlowBuilder {
 
     @Override
-    public Node constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources, Map<String, Table> sourceTables) {
+    public Node constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources,
+            Map<String, Table> sourceTables) {
         setDataFlowCtx(dataFlowCtx);
         Node account = addSource(sourceTables.get("Account"));
         Node contact = addSource(sourceTables.get("Contact"));
         Node opportunity = addSource(sourceTables.get("Opportunity"));
+        Node stoplist = addSource(sourceTables.get("Stoplist"));
+
         Node removeNullEmailAddresses = contact.filter("Email != null && !Email.trim().isEmpty()", //
                 new FieldList("Email"));
 
-        Node removeNullAccountIds = removeNullEmailAddresses.filter("AccountId != null && !AccountId.trim().isEmpty()",
-                new FieldList("AccountId"));
+        Node removeNullAccountIds = removeNullEmailAddresses.filter( //
+                "AccountId != null && !AccountId.trim().isEmpty()", new FieldList("AccountId"));
 
         FieldMetadata contactDomain = new FieldMetadata("ContactDomain", String.class);
         contactDomain.setPropertyValue("length", "255");
-        contactDomain.setPropertyValue("precision", "0");
-        contactDomain.setPropertyValue("scale", "0");
         contactDomain.setPropertyValue("logicalType", "domain");
         contactDomain.setPropertyValue("displayName", "ContactDomain");
 
@@ -37,14 +38,14 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
                 new FieldList("Email"), //
                 contactDomain);
 
-        // XXX Filter out public email address domains
+        Node stopped = retrieveDomains.stopList(stoplist, "ContactDomain", "Domain");
 
         // Select domains with the largest number of entries for each account
 
         // Bucket into domains for each account
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation("AccountId", "BucketSize", Aggregation.AggregationType.COUNT));
-        Node retrieveDomainBucketsForEachAccount = retrieveDomains.groupBy(new FieldList("ContactDomain", "AccountId"), //
+        Node retrieveDomainBucketsForEachAccount = stopped.groupBy(new FieldList("ContactDomain", "AccountId"), //
                 aggregations);
 
         aggregations = new ArrayList<>();
@@ -64,8 +65,7 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
         aggregations.add(new Aggregation("ContactDomain", "ContactDomain", Aggregation.AggregationType.MAX));
         Node resolveTies = retrieveBestDomain.groupBy(new FieldList("AccountId"), aggregations);
 
-        Node joinedWithAccounts = account.leftOuterJoin(
-                new FieldList("Id"), //
+        Node joinedWithAccounts = account.leftOuterJoin(new FieldList("Id"), //
                 resolveTies, //
                 new FieldList("AccountId"));
 
@@ -81,8 +81,6 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
                 new FieldList("Website", "ContactDomain"), //
                 domain);
 
-        // XXX Remove "NULL"s
-        
         Node last = addIsWonEvent(domainsForEachAccount, opportunity);
         last = addStageClosedWonEvent(last, opportunity);
         last = addClosedEvent(last, opportunity);

@@ -18,11 +18,12 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctiona
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
 public class CreateEventTableTestNG extends ServiceFlowsFunctionalTestNGBase {
-    
+
     private String account;
     private String opportunity;
     private String contact;
-    
+    private String stoplist;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/TmpEventTable");
@@ -30,18 +31,21 @@ public class CreateEventTableTestNG extends ServiceFlowsFunctionalTestNGBase {
         account = ClassLoader.getSystemResource("Account").getPath() + "/*.avro";
         opportunity = ClassLoader.getSystemResource("Opportunity").getPath() + "/*.avro";
         contact = ClassLoader.getSystemResource("Contact").getPath() + "/*.avro";
+        stoplist = ClassLoader.getSystemResource("Stoplist").getPath() + "/*.avro";
     }
-    
+
     @Test(groups = "functional")
     public void executeDataFlow() throws Exception {
         Map<String, Table> sources = new HashMap<>();
-        sources.put("Account", MetadataConverter.readMetadataFromAvroFile(
-                yarnConfiguration, account, "Id", "CreatedDate"));
-        sources.put("Opportunity", MetadataConverter.readMetadataFromAvroFile(
-                yarnConfiguration, opportunity, "Id", "LastModifiedDate"));
-        sources.put("Contact", MetadataConverter.readMetadataFromAvroFile(
-                yarnConfiguration, contact, "Id", "LastModifiedDate"));
-        
+        sources.put("Account", //
+                MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, account, "Id", "CreatedDate"));
+        sources.put("Opportunity", //
+                MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, opportunity, "Id", "LastModifiedDate"));
+        sources.put("Contact", //
+                MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, contact, "Id", "LastModifiedDate"));
+        sources.put("Stoplist", //
+                MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, stoplist, null, null));
+
         DataFlowContext ctx = super.createDataFlowContext();
         ctx.setProperty("SOURCETABLES", sources);
         ctx.setProperty("CUSTOMER", "customer1");
@@ -49,7 +53,7 @@ public class CreateEventTableTestNG extends ServiceFlowsFunctionalTestNGBase {
         ctx.setProperty("TARGETTABLENAME", "TmpEventTable");
         ctx.setProperty("FLOWNAME", "CreateEventTable");
         ctx.setProperty("CHECKPOINT", true);
-        
+
         Table result = super.executeDataFlow(ctx, "createEventTable");
 
         Assert.assertEquals(result.getExtracts().size(), 1);
@@ -59,5 +63,10 @@ public class CreateEventTableTestNG extends ServiceFlowsFunctionalTestNGBase {
         List<GenericRecord> accountTable = readTable(account);
 
         Assert.assertTrue(identicalSets(outputTable, "Id", accountTable, "Id"));
+
+        // Confirm that email stop-list filtering worked
+        for (GenericRecord record : outputTable) {
+            Assert.assertTrue(record.get("Domain") == null || !record.equals("gmail.com"));
+        }
     }
 }

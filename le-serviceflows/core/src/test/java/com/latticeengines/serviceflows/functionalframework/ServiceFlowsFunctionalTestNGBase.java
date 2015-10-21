@@ -30,16 +30,16 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     @Autowired
     private DataTransformationService dataTransformationService;
-    
+
     @Autowired
     private ApplicationContext appContext;
-    
+
     protected Configuration yarnConfiguration = new Configuration();
 
     protected Table executeDataFlow(DataFlowContext dataFlowContext, String beanName) throws Exception {
         return dataTransformationService.executeNamedTransformation(dataFlowContext, beanName);
     }
-    
+
     protected DataFlowContext createDataFlowContext() {
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
@@ -57,18 +57,18 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
                 output.addAll(AvroUtils.getData(yarnConfiguration, new Path(match)));
             }
             return output;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Returns whether everything in test with testId exists in master using masterId.
-     * Duplicates are ignored.
-     * Can't we just upgrade to Java 8 already?
+     * Returns whether everything in test with testId exists in master using
+     * masterId. Duplicates are ignored. Can't we just upgrade to Java 8
+     * already?
      */
-    protected boolean allEntriesExist(List<GenericRecord> test, String testId, List<GenericRecord> master, String masterId) {
+    protected boolean allEntriesExist(List<GenericRecord> test, String testId, List<GenericRecord> master,
+            String masterId) {
 
         for (GenericRecord record : test) {
             Object value = record.get(testId);

@@ -78,8 +78,8 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
     }
 
     private String joinWithLastDateData(String todayAggregated) {
-        String yesterdayAggregated = addRetainFunction("MadisonLogicForYesterday", new FieldList(new String[] {
-                "DomainID", "Category", "ML_30Day_Category_Total", "ML_30Day_Category_UniqueUsers" }));
+        String yesterdayAggregated = addRetain("MadisonLogicForYesterday", new FieldList(new String[]{
+                "DomainID", "Category", "ML_30Day_Category_Total", "ML_30Day_Category_UniqueUsers"}));
 
         String joined = addLeftOuterJoin(todayAggregated, new FieldList("DomainID", "Category"),
                 yesterdayAggregated, new FieldList("DomainID", "Category"));
