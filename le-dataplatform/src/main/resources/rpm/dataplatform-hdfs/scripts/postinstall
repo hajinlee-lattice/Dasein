@@ -19,10 +19,11 @@ for microservice in 'dataflowapi' 'eai'
 do
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$microservice/lib"
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$microservice.properties /app/$microservice"
-    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/db.properties /app/$microservice"
-    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/security.properties /app/$microservice"
 done
-
+for service in 'db' 'security'
+do
+    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$service.properties /app/$service"
+done
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker
 rm -rf /tmp/datascientist
