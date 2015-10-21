@@ -311,7 +311,8 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     public void loadAndScore() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
                 0, 4352, new Timestamp(System.currentTimeMillis()));
-        scoringCommandEntityMgr.create(scoringCommand);
+        // set a fake Pid
+        scoringCommand.setPid(1234L);
         // trigger the scoring
         ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
         waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
