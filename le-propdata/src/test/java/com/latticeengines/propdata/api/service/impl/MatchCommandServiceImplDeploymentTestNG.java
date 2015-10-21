@@ -1,11 +1,14 @@
 package com.latticeengines.propdata.api.service.impl;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.latticeengines.domain.exposed.propdata.Commands;
+import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
+import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
+import com.latticeengines.domain.exposed.propdata.MatchCommandType;
+import com.latticeengines.propdata.api.datasource.MatchClientContextHolder;
+import com.latticeengines.propdata.api.datasource.MatchClientRoutingDataSource;
+import com.latticeengines.propdata.api.service.MatchCommandService;
+import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
+import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,18 +18,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.Commands;
-import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
-import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
-import com.latticeengines.domain.exposed.propdata.MatchCommandType;
-import com.latticeengines.propdata.api.datasource.MatchClientContextHolder;
-import com.latticeengines.propdata.api.datasource.MatchClientRoutingDataSource;
-import com.latticeengines.propdata.api.service.MatchCommandService;
-import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
+import java.util.*;
 
-public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBase {
+public class MatchCommandServiceImplDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(MatchCommandServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchCommandServiceImplDeploymentTestNG.class);
 
     @Autowired
     private MatchCommandService matchCommandService;
@@ -36,12 +32,12 @@ public class MatchCommandServiceImplTestNG extends PropDataApiFunctionalTestNGBa
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
-    @BeforeMethod(groups = "api.functional")
+    @BeforeMethod(groups = "api.deployment")
     public void beforeMethod() {
         jdbcTemplate.setDataSource(dataSource);
     }
 
-    @Test(groups = "api.functional", dataProvider = "matchDataProvider", threadPoolSize = 3)
+    @Test(groups = "api.deployment", dataProvider = "matchDataProvider", threadPoolSize = 3)
     public void testMatch(String sourceTable, String destTables, String contractId, MatchVerifier verifier) {
         MatchClientContextHolder.setMatchClient(getMatchClient()); // set match client for current thread.
 
