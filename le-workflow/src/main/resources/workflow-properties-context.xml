@@ -24,6 +24,7 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
+                <value>file:${DB_PROPDIR}/db.properties</value>
                 <value>file:${WORKFLOW_PROPDIR}/workflow.properties</value>
             </list>
         </property>
@@ -31,4 +32,4 @@
         <property name="ignoreResourceNotFound" value="false" />
     </bean>
 
-</beans>    
+</beans>

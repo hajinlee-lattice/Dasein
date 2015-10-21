@@ -4,10 +4,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.workflow.build.WorkflowStep;
+import com.latticeengines.workflow.build.AbstractStep;
 
 @Component("modelLoadData")
-public class ModelLoadData extends WorkflowStep {
+public class ModelLoadData extends AbstractStep {
 
     private static final Log log = LogFactory.getLog(ModelLoadData.class);
 

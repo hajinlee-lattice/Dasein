@@ -25,12 +25,14 @@ public class DLOrchestrationWorkflowTest extends WorkflowFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testWorkflow() throws Exception {
         Job modelWorkflow = jobRegistry.getJob("ModelWorkflow");
-        JobParameters parms = new JobParametersBuilder().addString("testParameter", "testValue").toJobParameters();
+        JobParameters parms = new JobParametersBuilder().addLong("time", System.currentTimeMillis())
+                .addString("testParameter", "testValue", false).toJobParameters();
         JobExecution jobExecution = jobLauncher.run(modelWorkflow, parms);
         assertEquals(jobExecution.getStatus(), BatchStatus.COMPLETED);
 
         Job dlOrchestration = jobRegistry.getJob("DLOrchestrationWorkflow");
-        parms = new JobParametersBuilder().addString("testParameter", "testValue").toJobParameters();
+        parms = new JobParametersBuilder().addLong("time", System.currentTimeMillis())
+                .addString("testParameter", "testValue", false).toJobParameters();
         jobExecution = jobLauncher.run(dlOrchestration, parms);
         assertEquals(jobExecution.getStatus(), BatchStatus.COMPLETED);
     }

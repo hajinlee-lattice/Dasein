@@ -2,7 +2,7 @@ package com.latticeengines.workflow.build;
 
 import org.springframework.beans.factory.BeanNameAware;
 
-public abstract class WorkflowStep implements BeanNameAware {
+public abstract class AbstractStep implements BeanNameAware {
 
     private String name;
     private boolean dryRun = false;

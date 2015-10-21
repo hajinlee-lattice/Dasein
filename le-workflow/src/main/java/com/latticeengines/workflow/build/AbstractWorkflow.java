@@ -2,13 +2,11 @@ package com.latticeengines.workflow.build;
 
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 
 import com.latticeengines.workflow.core.Workflow;
 import com.latticeengines.workflow.core.WorkflowTranslator;
 
-@Import(WorkflowTranslator.class)
-public abstract class BaseWorkflow {
+public abstract class AbstractWorkflow {
 
     public abstract Workflow defineWorkflow();
 

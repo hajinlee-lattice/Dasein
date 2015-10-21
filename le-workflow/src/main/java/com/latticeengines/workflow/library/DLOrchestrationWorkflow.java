@@ -5,14 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.workflow.build.BaseWorkflow;
+import com.latticeengines.workflow.build.AbstractWorkflow;
 import com.latticeengines.workflow.build.WorkflowBuilder;
 import com.latticeengines.workflow.core.Workflow;
 import com.latticeengines.workflow.steps.ModelOutputCommandResults;
 import com.latticeengines.workflow.steps.RetrieveMetaData;
 
 @Component("dlOrchestrationWorkflow")
-public class DLOrchestrationWorkflow extends BaseWorkflow {
+public class DLOrchestrationWorkflow extends AbstractWorkflow {
 
     @Autowired
     private RetrieveMetaData retrieveMetaData;
@@ -31,7 +31,7 @@ public class DLOrchestrationWorkflow extends BaseWorkflow {
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder().next(retrieveMetaData) //
-                .next(modelWorkflow.defineWorkflow()) //
+                .next(modelWorkflow) //
                 .next(modelOutputCommandResults) //
                 .build();
     }

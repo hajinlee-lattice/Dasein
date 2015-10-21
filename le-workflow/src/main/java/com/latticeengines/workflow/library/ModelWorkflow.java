@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.workflow.build.BaseWorkflow;
+import com.latticeengines.workflow.build.AbstractWorkflow;
 import com.latticeengines.workflow.build.WorkflowBuilder;
 import com.latticeengines.workflow.core.Workflow;
 import com.latticeengines.workflow.steps.ModelGenerateSamples;
@@ -14,7 +14,7 @@ import com.latticeengines.workflow.steps.ModelProfileData;
 import com.latticeengines.workflow.steps.ModelSubmit;
 
 @Component("modelWorkflow")
-public class ModelWorkflow extends BaseWorkflow {
+public class ModelWorkflow extends AbstractWorkflow {
 
     @Autowired
     private ModelLoadData modelLoadData;

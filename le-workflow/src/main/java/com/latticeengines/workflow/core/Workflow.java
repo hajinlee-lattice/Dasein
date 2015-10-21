@@ -3,18 +3,18 @@ package com.latticeengines.workflow.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.workflow.build.WorkflowStep;
+import com.latticeengines.workflow.build.AbstractStep;
 
 public class Workflow {
 
     private boolean dryRun = false;
-    private List<WorkflowStep> steps = new ArrayList<>();
+    private List<AbstractStep> steps = new ArrayList<>();
 
-    public List<WorkflowStep> getSteps() {
+    public List<AbstractStep> getSteps() {
         return steps;
     }
 
-    public void step(WorkflowStep step) {
+    public void step(AbstractStep step) {
         steps.add(step);
     }
 

@@ -15,7 +15,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
-import com.latticeengines.workflow.build.WorkflowStep;
+import com.latticeengines.workflow.build.AbstractStep;
 import com.latticeengines.workflow.listener.LogJobListener;
 
 @Configuration
@@ -36,7 +36,7 @@ public class WorkflowTranslator {
 
     public Job buildWorkflow(String name, Workflow workflow) throws Exception {
         if (workflow.isDryRun()) {
-            for (WorkflowStep step : workflow.getSteps()) {
+            for (AbstractStep step : workflow.getSteps()) {
                 step.setDryRun(true);
             }
         }
@@ -50,13 +50,13 @@ public class WorkflowTranslator {
         return simpleJobBuilder.build();
     }
 
-    protected Step step(WorkflowStep step) throws Exception {
+    protected Step step(AbstractStep step) throws Exception {
         return stepBuilderFactory.get(step.name()) //
                 .tasklet(tasklet(step)) //
                 .build();
     }
 
-    protected Tasklet tasklet(final WorkflowStep step) {
+    protected Tasklet tasklet(final AbstractStep step) {
         return new Tasklet() {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext context) {
