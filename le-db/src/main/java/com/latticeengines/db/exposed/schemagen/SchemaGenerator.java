@@ -115,6 +115,9 @@ public class SchemaGenerator {
         }
         Iterable<File> iterable = Files.fileTreeTraverser().children(new File("src/main/resources/staticsql/" + leafFolder));
         for (File f : iterable) {
+            if (f.getName().equals(".svn")) {
+                continue;
+            }
             log.info(String.format("appending %s to %s", f.getAbsolutePath(), exportFile.getAbsolutePath()));
             String staticSql = Files.toString(f, Charsets.UTF_8);
             Files.append(staticSql, exportFile, Charsets.UTF_8);
