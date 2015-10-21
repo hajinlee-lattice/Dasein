@@ -2,6 +2,7 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Properties;
 
@@ -27,7 +28,6 @@ import org.json.simple.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
@@ -82,14 +82,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             AvroKeyInputFormat.setMinInputSplitSize(mrJob,
                     Long.valueOf(properties.getProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name())));
 
-            List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, new HdfsFilenameFilter() {
-
-                @Override
-                public boolean accept(String filename) {
-                    return filename.endsWith(".avro");
-                }
-
-            });
+            List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, ".*.avro$");
             String filename = files.size() > 0 ? files.get(0) : null;
             if (filename == null) {
                 throw new LedpException(LedpCode.LEDP_12003, new String[] { inputDir });
@@ -111,29 +104,29 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             mrJob.setNumReduceTasks(0);
 
             if (properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()) != null) {
-                String[] cachePaths = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()).split(comma);
-                URI[] cacheFiles = new URI[cachePaths.length];
-                for (int i = 0; i < cacheFiles.length; i++) {
-                    cacheFiles[i] = new URI(cachePaths[i].trim());
-                }
-                mrJob.setCacheFiles(cacheFiles);
+                String cacheFilePath = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name());
+                mrJob.setCacheFiles(getURIs(cacheFilePath));
             }
             mrJob.addCacheFile(new URI(dataTypeFilePath));
             mrJob.addCacheFile(new URI(scoringPythonPath));
 
             if (properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()) != null) {
-                String[] cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()).split(
-                        comma);
-                URI[] cacheArchives = new URI[cacheArchivePaths.length];
-                for (int i = 0; i < cacheArchives.length; i++) {
-                    cacheArchives[i] = new URI(cacheArchivePaths[i].trim());
-                }
-                mrJob.setCacheArchives(cacheArchives);
+                String cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name());
+                mrJob.setCacheArchives(getURIs(cacheArchivePaths));
             }
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
+    }
+    
+    private URI[] getURIs(String hdfsPaths) throws URISyntaxException{
+        String[] paths = hdfsPaths.split(comma);
+        URI[] files = new URI[paths.length];
+        for (int i = 0; i < files.length; i++) {
+            files[i] = new URI(paths[i].trim());
+        }
+        return files;
     }
 
     @SuppressWarnings("unchecked")
