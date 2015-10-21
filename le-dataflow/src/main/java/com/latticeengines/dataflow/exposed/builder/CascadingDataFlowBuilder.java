@@ -44,6 +44,8 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
+import cascading.pipe.assembly.Discard;
+import cascading.pipe.assembly.Rename;
 import cascading.pipe.assembly.Retain;
 import cascading.pipe.joiner.BaseJoiner;
 import cascading.pipe.joiner.InnerJoin;
@@ -98,8 +100,16 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addInnerJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields), builder);
         }
 
+        public Node innerJoin(String lhsField, Node rhs, String rhsField) {
+            return innerJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
+        }
+
         public Node leftOuterJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
             return new Node(builder.addLeftOuterJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields), builder);
+        }
+
+        public Node leftOuterJoin(String lhsField, Node rhs, String rhsField) {
+            return leftOuterJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
         }
 
         public Node groupBy(FieldList groupByFieldList, List<Aggregation> aggregations) {
@@ -116,7 +126,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     expandFormats, argumentsFieldList, declaredFieldList), builder);
         }
 
-        public Node groupByAndFirst(Node[] priors, Fields groupByFields, Fields sortFields) {
+        public static Node groupByAndFirst(Node[] priors, Fields groupByFields, Fields sortFields) {
+            if (priors.length == 0) {
+                throw new IllegalArgumentException("priors must have a non-zero length");
+            }
+            CascadingDataFlowBuilder builder = priors[0].builder;
+
             List<String> priorIdentifiers = new ArrayList<>();
             for (Node n : priors) {
                 priorIdentifiers.add(n.identifier);
@@ -156,8 +171,29 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addRetainFunction(identifier, outputFields), builder);
         }
 
+        public Node discard(FieldList toDiscard) {
+            return new Node(builder.addDiscardFunction(identifier, toDiscard), builder);
+        }
+
+        public Node checkpoint(String name) {
+            return new Node(builder.addCheckpoint(identifier, name), builder);
+        }
+
+        public Node rename(FieldList previousNames, FieldList newNames) {
+            return new Node(builder.addRename(identifier, previousNames, newNames), builder);
+        }
+
         public List<FieldMetadata> getSchema() {
             return builder.getMetadata(identifier);
+        }
+
+        public FieldList getFieldNames() {
+            List<String> names = new ArrayList<>();
+            List<FieldMetadata> fields = getSchema();
+            for (FieldMetadata field : fields) {
+                names.add(field.getFieldName());
+            }
+            return new FieldList(names);
         }
 
         private String getIdentifier() {
@@ -221,30 +257,37 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     private String register(Pipe pipe, List<FieldMetadata> fields) {
-        return register(pipe, fields, true, null);
+        return register(pipe, fields, null);
     }
 
-    private String register(Pipe pipe, List<FieldMetadata> fields, boolean allowCheckpoint, String lookupId) {
+    private String register(Pipe pipe, List<FieldMetadata> fields, String lookupId) {
         if (lookupId == null) {
             lookupId = "node-" + counter++;
         }
         pipesAndOutputSchemas.put(lookupId, new AbstractMap.SimpleEntry<>(pipe, fields));
+        return lookupId;
+    }
 
-        if (isCheckpoint() && allowCheckpoint) {
+    protected String addCheckpoint(String prior, String name) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(prior);
+        if (pipeAndMetadata == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
+        }
+        Pipe pipe = pipeAndMetadata.getKey();
+
+        if (isCheckpoint()) {
+            Checkpoint ckpt = new Checkpoint(name, pipe);
             DataFlowContext ctx = getDataFlowCtx();
-            String ckptName = "ckpt-" + counter++;
-            Checkpoint ckpt = new Checkpoint(ckptName, pipe);
             String targetPath = String.format("/tmp/checkpoints/%s/%s/%s", //
                     ctx.getProperty("CUSTOMER", String.class), //
                     ctx.getProperty("FLOWNAME", String.class), //
-                    ckptName);
+                    name);
             Tap ckptTap = new Hfs(new SequenceFile(Fields.UNKNOWN), targetPath, SinkMode.REPLACE);
             checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptTap));
-            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas.get(lookupId);
-            pipesAndOutputSchemas.put(ckptName, new AbstractMap.SimpleEntry<>((Pipe) ckpt, pipeAndFields.getValue()));
-            return ckptName;
+            return register(ckpt, pipeAndMetadata.getValue());
         }
-        return lookupId;
+
+        return prior;
     }
 
     protected Node addSource(Table sourceTable) {
@@ -317,7 +360,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             Pipe groupby = new GroupBy(toRegister, new Fields(sourceTable.getPrimaryKey().getAttributeNames()), sortFields);
             toRegister = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
         }
-        return new Node(register(toRegister, getFieldMetadata(allColumns), false, sourceTable.getName()), this);
+        return new Node(register(toRegister, getFieldMetadata(allColumns), sourceTable.getName()), this);
     }
     
     private void validateTableForSource(Table sourceTable) {
@@ -393,7 +436,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             fields.add(fm);
         }
 
-        return register(new Pipe(sourceName), fields, false, sourceName);
+        return register(new Pipe(sourceName), fields, sourceName);
     }
 
     protected String addRenamePipe(String prior, String newname) {
@@ -682,7 +725,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(groupby, fieldMetadata);
     }
 
-    // XXX Figure out how to put into Node interface
     protected String addGroupByAndFirst(String[] priors, Fields groupByFields, Fields sortFields) {
         Pipe[] pipes = new Pipe[priors.length];
         List<FieldMetadata> fm =  new ArrayList<>();
@@ -758,7 +800,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         if (fieldStrategy != Fields.REPLACE) {
             fm.add(targetField);
-            fm = retainOutputFields(outputFields, fm);
+            fm = retainFields(outputFields, fm);
         } else {
             Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);
             FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField.getFieldName());
@@ -787,11 +829,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Pipe retain = new Retain(pm.getKey(), convertToFields(outputFields.getFields()));
 
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
-        fm = retainOutputFields(outputFields, fm);
+        fm = retainFields(outputFields, fm);
         return register(retain, fm);
     }
 
-    private List<FieldMetadata> retainOutputFields(FieldList outputFields, List<FieldMetadata> fm) {
+    private List<FieldMetadata> retainFields(FieldList outputFields, List<FieldMetadata> fm) {
         if (outputFields != null) {
             List<FieldMetadata> newFieldMetadata = new ArrayList<>();
             Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);
@@ -805,6 +847,72 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return newFieldMetadata;
         }
         return fm;
+    }
+
+    protected String addDiscardFunction(String prior, FieldList toDiscard) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        if (pm == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
+        }
+
+        Pipe discard = new Discard(pm.getKey(), convertToFields(toDiscard.getFields()));
+        List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
+        discardFields(toDiscard, fm);
+        return register(discard, fm);
+    }
+
+    private void discardFields(FieldList toDiscard, List<FieldMetadata> fm) {
+        if (toDiscard != null) {
+            for (String field : toDiscard.getFields()) {
+                for (int i = 0; i < fm.size(); ++i) {
+                    FieldMetadata fmentry = fm.get(i);
+                    if (fmentry.getFieldName().equals(field)) {
+                        fm.remove(i);
+                        --i;
+                    }
+                }
+            }
+        }
+    }
+
+    protected String addRename(String prior, FieldList previousNames, FieldList newNames) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        if (pm == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
+        }
+
+        Pipe rename = new Rename(pm.getKey(), convertToFields(previousNames.getFields()),
+                convertToFields(newNames.getFields()));
+        List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
+        renameFields(previousNames, newNames, fm);
+        return register(rename, fm);
+    }
+
+    private void renameFields(FieldList previousNames, FieldList newNames, List<FieldMetadata> metadata) {
+        if (previousNames.getFields().length != newNames.getFields().length) {
+            throw new RuntimeException("Previous and new name array lengths must be the same");
+        }
+
+        String[] previousNameStrings = previousNames.getFields();
+        String[] newNameStrings = newNames.getFields();
+        for (int i = 0; i < previousNameStrings.length; ++i) {
+            String previousName = previousNameStrings[i];
+            String newName = newNameStrings[i];
+
+            boolean found = false;
+            for (FieldMetadata field : metadata) {
+                if (field.getFieldName().equals(previousName)) {
+                    field.setFieldName(newName);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                throw new RuntimeException(
+                        String.format("Could not locate field with name %s in metadata", previousName));
+            }
+        }
     }
 
     protected String addMD5(String prior, FieldList fieldsToApply, String targetFieldName) {

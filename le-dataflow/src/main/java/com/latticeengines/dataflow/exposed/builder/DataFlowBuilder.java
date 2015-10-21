@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.exposed.builder;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -355,6 +356,8 @@ public abstract class DataFlowBuilder {
             this.fields = fields;
         }
 
+        public FieldList(List<String> fields) { this.fields = fields.toArray(new String[fields.size()]); }
+
         public String[] getFields() {
             return fields;
         }
@@ -363,7 +366,7 @@ public abstract class DataFlowBuilder {
             if (fields == null) {
                 return null;
             }
-            return Arrays.<String> asList(fields);
+            return new ArrayList<>(Arrays.asList(fields));
         }
 
         public KindOfFields getKind() {

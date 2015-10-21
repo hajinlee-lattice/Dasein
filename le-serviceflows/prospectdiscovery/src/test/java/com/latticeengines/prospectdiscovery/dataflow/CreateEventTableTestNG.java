@@ -48,6 +48,7 @@ public class CreateEventTableTestNG extends ServiceFlowsFunctionalTestNGBase {
         ctx.setProperty("TARGETPATH", "/tmp/TmpEventTable");
         ctx.setProperty("TARGETTABLENAME", "TmpEventTable");
         ctx.setProperty("FLOWNAME", "CreateEventTable");
+        ctx.setProperty("CHECKPOINT", true);
         
         Table result = super.executeDataFlow(ctx, "createEventTable");
 

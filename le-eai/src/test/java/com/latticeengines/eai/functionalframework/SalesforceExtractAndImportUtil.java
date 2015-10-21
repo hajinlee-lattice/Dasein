@@ -116,7 +116,7 @@ public class SalesforceExtractAndImportUtil {
         Attribute city = new Attribute();
         city.setName("BillingCity");
         Attribute state = new Attribute();
-        state.setName("ShippingState");
+        state.setName("BillingState");
         Attribute postalCode = new Attribute();
         postalCode.setName("BillingPostalCode");
         Attribute country = new Attribute();
