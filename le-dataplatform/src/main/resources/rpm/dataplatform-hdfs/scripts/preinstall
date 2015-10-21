@@ -2,6 +2,11 @@
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker
 rm -rf /tmp/datascientist
-hadoop fs -rm -f -r /app/dataplatform
-hadoop fs -rm -f -r /app/playmaker
-hadoop fs -rm -f -r /datascientist
+hdfs dfs -rm -f -r /app/dataplatform
+hdfs dfs -rm -f -r /app/playmaker
+hdfs dfs -rm -f -r /datascientist
+hdfs dfs -rm -f -r /app/dataflowapi
+hdfs dfs -mkdir -p /app/dataflowapi/lib
+hdfs dfs -rm -f -r /app/eai
+hdfs dfs -mkdir -p /app/eai/lib
+
