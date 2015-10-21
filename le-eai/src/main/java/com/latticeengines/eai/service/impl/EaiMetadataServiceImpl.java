@@ -52,8 +52,8 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
 
     @PostConstruct
     public void init() {
-        restTemplate.setInterceptors(Arrays
-                        .<ClientHttpRequestInterceptor> asList(new ClientHttpRequestInterceptor[] { new AuthorizationHeaderHttpRequestInterceptor() }));
+        restTemplate.setInterceptors(Arrays.<ClientHttpRequestInterceptor> asList( //
+                new ClientHttpRequestInterceptor[] { new AuthorizationHeaderHttpRequestInterceptor() }));
     }
 
     @Override
@@ -73,7 +73,6 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
 
     @Override
     public List<Table> getTables(String customerSpace) {
-
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
         String[] tableNames = restTemplate.getForObject(metadataUrl + "customerspaces/{customerSpace}/tables",
@@ -82,7 +81,6 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         for (String tableName : tableNames) {
             uriVariables.put("tableName", tableName);
             Table table = getTable(customerSpace, tableName);
-            System.out.println(table);
             tables.add(table);
         }
         return tables;
@@ -90,9 +88,6 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
 
     @Override
     public Table getTable(String customerSpace, String tableName) {
-        restTemplate
-                .setInterceptors(Arrays
-                        .<ClientHttpRequestInterceptor> asList(new ClientHttpRequestInterceptor[] { new AuthorizationHeaderHttpRequestInterceptor() }));
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
         uriVariables.put("tableName", tableName);
@@ -103,33 +98,28 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
 
     @Override
     public void updateTables(String customerSpace, List<Table> tables) {
-        restTemplate
-                .setInterceptors(Arrays
-                        .<ClientHttpRequestInterceptor> asList(new ClientHttpRequestInterceptor[] { new AuthorizationHeaderHttpRequestInterceptor() }));
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
 
         for (Table table : tables) {
             uriVariables.put("tableName", table.getName());
-            restTemplate.postForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}", table,
-                    String.class, uriVariables);
-            System.out.println(table);
-            Table newTable = getTable(customerSpace, table.getName());
-            System.out.println(newTable);
+            restTemplate.put(String.format("%s/customerspaces/%s/tables/%s", metadataUrl, customerSpace, table.getName()), //
+                    table);
         }
     }
 
     @Override
     public LastModifiedKey getLastModifiedKey(String customerSpace, Table table) {
-        restTemplate
-                .setInterceptors(Arrays
-                        .<ClientHttpRequestInterceptor> asList(new ClientHttpRequestInterceptor[] { new AuthorizationHeaderHttpRequestInterceptor() }));
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
         uriVariables.put("tableName", table.getName());
         Table newTable = restTemplate.getForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}",
                 Table.class, uriVariables);
-        return newTable.getLastModifiedKey();
+        
+        if (newTable != null) {
+            return newTable.getLastModifiedKey();
+        }
+        return null;
     }
 
     private void addTenantToTable(Table table, String customerSpace) {
