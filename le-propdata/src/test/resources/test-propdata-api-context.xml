@@ -8,12 +8,8 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
 
-
-    <import resource="classpath:propdata-persistence-match-context.xml" />
-    <import resource="classpath:propdata-persistence-entitlements-context.xml" />
-
     <import resource="classpath:propdata-api-context.xml"/>
     <import resource="classpath:propdata-api-properties-context.xml"/>
-    <context:component-scan base-package="com.latticeengines.propdata.api.controller"/>
+    <context:component-scan base-package="com.latticeengines.propdata.api.controller" />
 
 </beans>
