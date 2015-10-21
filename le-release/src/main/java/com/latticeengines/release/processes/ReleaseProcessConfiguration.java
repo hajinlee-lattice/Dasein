@@ -87,7 +87,7 @@ public class ReleaseProcessConfiguration {
         releaseAllActivities.addAll(preReleaseActivities);
         releaseAllActivities.addAll(Arrays.asList(new Activity[] { dpDeploymentJobActivity, plsDeploymentJobActivity, adminDeploymentJobActivity,
                 dpDeploymentTestActivity, orcDeploymentTestActivity, scoringDeploymentTestActivity, plsProtractorTestActivity,
-                plsDeploymentTestActivity })); // jmxCheckActivity, 
+                plsDeploymentTestActivity, jmxCheckActivity })); 
         releaseAllActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseAllActivities);
     }
