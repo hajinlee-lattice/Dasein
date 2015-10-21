@@ -119,8 +119,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }
-    
-    private URI[] getURIs(String hdfsPaths) throws URISyntaxException{
+
+    private URI[] getURIs(String hdfsPaths) throws URISyntaxException {
         String[] paths = hdfsPaths.split(comma);
         URI[] files = new URI[paths.length];
         for (int i = 0; i < files.length; i++) {
