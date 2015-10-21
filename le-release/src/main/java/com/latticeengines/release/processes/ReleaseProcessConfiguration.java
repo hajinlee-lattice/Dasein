@@ -85,9 +85,9 @@ public class ReleaseProcessConfiguration {
         init();
         List<Activity> releaseAllActivities = new ArrayList<>();
         releaseAllActivities.addAll(preReleaseActivities);
-        releaseAllActivities.addAll(Arrays.asList(new Activity[] { dpDeploymentJobActivity, plsDeploymentJobActivity,
-                dpDeploymentTestActivity, orcDeploymentTestActivity, scoringDeploymentTestActivity, jmxCheckActivity, plsProtractorTestActivity,
-                plsDeploymentTestActivity, adminDeploymentJobActivity }));
+        releaseAllActivities.addAll(Arrays.asList(new Activity[] { dpDeploymentJobActivity, plsDeploymentJobActivity, adminDeploymentJobActivity,
+                dpDeploymentTestActivity, orcDeploymentTestActivity, scoringDeploymentTestActivity, plsProtractorTestActivity,
+                plsDeploymentTestActivity })); // jmxCheckActivity, 
         releaseAllActivities.addAll(postReleaseActivities);
         return new ReleaseProcess(releaseAllActivities);
     }
