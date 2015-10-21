@@ -57,6 +57,9 @@ abstract public class ArchiveProgressBase implements HasPid {
     @Column(name = "StatusBeforeFailed")
     protected ArchiveProgressStatus statusBeforeFailed;
 
+    @Column(name = "ErrorMessage")
+    protected String errorMessage;
+
     @Override
     public Long getPid() {
         return pid;
@@ -130,6 +133,10 @@ abstract public class ArchiveProgressBase implements HasPid {
     public ArchiveProgressStatus getStatusBeforeFailed() { return statusBeforeFailed; }
 
     public void setStatusBeforeFailed(ArchiveProgressStatus statusBeforeFailed) { this.statusBeforeFailed = statusBeforeFailed; }
+
+    public String getErrorMessage() { return errorMessage; }
+
+    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 
     public static <T extends ArchiveProgressBase> T constructByDates(Date startDate, Date endDate, Class<T> tClass)
             throws InstantiationException, IllegalAccessException {

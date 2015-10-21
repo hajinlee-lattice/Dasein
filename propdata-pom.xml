@@ -27,5 +27,6 @@
         <module>le-monitor</module>
         <module>le-camille</module>
         <module>le-cassandra</module>
+        <module>le-swlib</module>
     </modules>
 </project>

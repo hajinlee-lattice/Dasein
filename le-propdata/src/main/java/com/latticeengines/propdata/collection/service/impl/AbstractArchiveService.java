@@ -222,7 +222,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             LoggingUtils.logInfoWithDuration(log, progress, "Uploaded " + rowsUploaded + " rows to stage table.", uploadStartTime);
         } catch (Exception e) {
             LoggingUtils.logError(log, progress, "Failed to upload data to DB.", e);
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to upload data to DB.");
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
         } finally {
@@ -239,7 +239,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             jdbcTemplateDest.execute("EXEC sp_rename '" + stageTableName + "', '" + destTable + "'");
         } catch (Exception e) {
             LoggingUtils.logError(log, progress, "Failed to swap stage and dest tables", e);
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to swap stage and dest tables");
 
             LoggingUtils.logInfo(log, progress, "Restore backup table to dest table.");
             dropJdbcTableIfExists(jdbcTemplateDest, destTable);
@@ -311,7 +311,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     private boolean importIncrementalRawDataAndUpdateProgress(Progress progress) {
         String targetDir = incrementalDataDirInHdfs(progress);
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
             return false;
         }
 
@@ -320,7 +320,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
 
         if (!importSrcDBBySqoop(getSourceTableName(), targetDir, customer, whereClause, progress)) {
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to import incremental data from DB.");
             return false;
         }
 
@@ -343,7 +343,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             }
         } catch (Exception e) {
             LoggingUtils.logError(log, progress, "Failed to upload avsc.", e);
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to upload avsc.");
             return false;
         }
 
@@ -353,14 +353,14 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     private boolean importSnapshotDestData(Progress progress) {
         String targetDir = hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSourceTableName()).toString();
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
             return false;
         }
 
         String customer = getSqoopCustomerName(progress) + "-downloadSnapshotData" ;
 
         if (!importDestDBBySqoop(getDestTableName(), targetDir, customer, progress)) {
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to import snapshot data from DB.");
             return false;
         }
 
@@ -402,7 +402,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         // prepare target dir in hdfs
         String targetDir = workflowDirsInHdfs(progress);
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
             return false;
         }
 
@@ -411,7 +411,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             transformRawDataInternal(progress);
         } catch (Exception e) {
             log.error("Failed to transform raw data for progress " + progress, e);
-            updateStautsToFailed(progress);
+            updateStautsToFailed(progress, "Failed to transform raw data.");
             return false;
         }
 
@@ -441,8 +441,9 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     }
 
 
-    private void updateStautsToFailed(Progress progress) {
+    private void updateStautsToFailed(Progress progress, String errorMsg) {
         progress.setStatusBeforeFailed(progress.getStatus());
+        progress.setErrorMessage(errorMsg);
         entityMgr.updateStatus(progress, ArchiveProgressStatus.FAILED);
     }
 
