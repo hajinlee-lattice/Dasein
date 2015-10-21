@@ -42,7 +42,7 @@ class AppSequence( object ):
     self._resultsFile = open( self._resultsFileName, mode = 'w' )
     self._resultsFile.write( 'TenantName,Upgraded' )
     for step in self._sequence:
-      self._resultsFile.write( ',{0}v{1}'.format( step.getName(), step.getVersion() ) )
+      self._resultsFile.write( ',{0}:{1}'.format( step.getName(), step.getVersion() ) )
     self._resultsFile.write( '\n' )
 
 
