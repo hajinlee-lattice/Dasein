@@ -37,7 +37,7 @@ public class MatchCommandResource {
     @Value("${propdata.matcher.available.clients}")
     private String availableClientsNames;
 
-    @Value("${propdata.matcher.default.clients}")
+    @Value("${propdata.matcher.default.client}")
     private String defaultClient;
 
     private Set<MatchClient> availableClients;
