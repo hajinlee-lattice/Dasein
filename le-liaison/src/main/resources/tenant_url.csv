@@ -1,5 +1,9 @@
-BD_ADEDTBDd72086nL280102n154,https://10.41.1.207:8080/
-MW_Devel_TypeRepository_20150422,https://10.41.1.187:8080/
+Tmpl_LP_Trunk_ELQ_Main,https://10.41.1.187:8080/
+Tmpl_LP_Trunk_MKTO_Main,https://10.41.1.187:8080/
+Tmpl_LP_Trunk_SFDC_Main,https://10.41.1.187:8080/
+Tmpl_LP_02-00-01_ELQ_Main,https://10.41.1.187:8080/
+Tmpl_LP_02-00-01_MKTO_Main,https://10.41.1.187:8080/
+Tmpl_LP_02-00-01_SFDC_Main,https://10.41.1.187:8080/
 2Checkout_LP_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 DataCloudForecast_PLS134,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Dell_LPA,https://data-pls.lattice-engines.com/Dataloader_PLS/
