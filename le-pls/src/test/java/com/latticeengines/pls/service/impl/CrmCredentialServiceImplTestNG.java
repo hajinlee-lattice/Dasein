@@ -73,6 +73,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
         // marketo
         crmCredential = new CrmCredential();
+        crmCredential.setUrl("https://na-sj02.marketo.com/soap/mktows/2_0");
         crmCredential.setUserName("latticeenginessandbox1_9026948050BD016F376AE6");
         crmCredential.setPassword("41802295835604145500BBDD0011770133777863CA58");
         newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_MARKETO, fullId, null, crmCredential);

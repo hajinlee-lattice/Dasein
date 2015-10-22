@@ -29,7 +29,7 @@ public class CrmUtils {
 
     static {
         loginUrls.put(CRM_ELOQUA, "https://login.eloqua.com/id");
-        loginUrls.put(CRM_MARKETO, "https://na-sj02.marketo.com/soap/mktows/2_0");
+        loginUrls.put(CRM_ELOQUA_BULK, "https://login.eloqua.com/id");
         loginUrls.put(CRM_SFDC, "https://login.salesforce.com/services/Soap/u/33.0");
     }
 
@@ -61,7 +61,7 @@ public class CrmUtils {
 
         if (crmType.equals(CRM_ELOQUA) || crmType.endsWith(CRM_ELOQUA_BULK)) {
             Map<String, String> values = new HashMap<>();
-            values.put("URL", loginUrls.get(CRM_ELOQUA));
+            values.put("URL", crmUrl(crmType, crmConfig.getCrmCredential(), true));
             values.put("Username", crmConfig.getCrmCredential().getUserName());
             values.put("Password", crmConfig.getCrmCredential().getPassword());
             values.put("Company", crmConfig.getCrmCredential().getCompany());
@@ -71,7 +71,7 @@ public class CrmUtils {
 
         if (crmType.equals(CRM_MARKETO)) {
             Map<String, String> values = new HashMap<>();
-            values.put("URL", loginUrls.get(CRM_MARKETO));
+            values.put("URL", crmUrl(crmType, crmConfig.getCrmCredential(), true));
             values.put("UserID", crmConfig.getCrmCredential().getUserName());
             values.put("EncryptionKey", crmConfig.getCrmCredential().getPassword());
             parameters.put("values", toDictFormat(values));
@@ -79,7 +79,7 @@ public class CrmUtils {
 
         if (crmType.equals(CRM_SFDC)) {
             Map<String, String> values = new HashMap<>();
-            values.put("URL", loginUrls.get(CRM_SFDC));
+            values.put("URL", crmUrl(crmType, crmConfig.getCrmCredential(), true));
             values.put("User", crmConfig.getCrmCredential().getUserName());
             values.put("Password", crmConfig.getCrmCredential().getPassword());
             values.put("SecurityToken", crmConfig.getCrmCredential().getSecurityToken());
@@ -94,16 +94,16 @@ public class CrmUtils {
     }
 
     private static String crmUrl(String crmType, CrmCredential crmCredential, boolean isProduction) {
+
         String url;
 
-        if (StringUtils.isEmpty(crmCredential.getUrl())) {
-            url = loginUrls.get(crmType);
-        } else {
+        if (crmType.equals(CRM_MARKETO)) {
             url = crmCredential.getUrl();
-        }
-
-        if (crmType.equals(CRM_SFDC) && !isProduction) {
-            url = url.replace("://login", "://test");
+        } else {
+            url = loginUrls.get(crmType);
+            if (crmType.equals(CRM_SFDC) && !isProduction) {
+                url = url.replace("://login", "://test");
+            }
         }
 
         return url;
