@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNull;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
+import org.joda.time.DateTime;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -61,6 +64,13 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
             "Opportunity", "OpportunityContactRole" });
 
+    private List<String> attributes = Arrays.<String> asList(new String[] { "LastModifiedDate" });
+
+    private final Map<String, LastModifiedKey> map = ImmutableMap.of("Account", new LastModifiedKey(attributes,
+            1442544230000L), "Contact", new LastModifiedKey(attributes, 1223400194000L), "Lead", new LastModifiedKey(
+            attributes, 1237387254000L), "Opportunity", new LastModifiedKey(attributes, 1346770851000L),
+            "OpportunityContactRole", new LastModifiedKey(attributes, 1341330034000L));
+
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
@@ -85,14 +95,6 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         EaiMetadataServiceImpl eaiMetadataService = mock(EaiMetadataServiceImpl.class);
         when(eaiMetadataService.getLastModifiedKey(any(String.class), any(Table.class))).thenAnswer(
                 new Answer<LastModifiedKey>() {
-
-                    private List<String> attributes = Arrays.<String> asList(new String[] { "LastModifiedDate" });
-
-                    private final Map<String, LastModifiedKey> map = ImmutableMap.of("Account", new LastModifiedKey(
-                            attributes, 1442544230000L), "Contact", new LastModifiedKey(attributes, 1223400194000L),
-                            "Lead", new LastModifiedKey(attributes, 1237387254000L), "Opportunity",
-                            new LastModifiedKey(attributes, 1346770851000L), "OpportunityContactRole",
-                            new LastModifiedKey(attributes, 1341330034000L));
 
                     @Override
                     public LastModifiedKey answer(InvocationOnMock invocation) throws Throwable {
@@ -121,7 +123,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         camelContext.start();
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
-        for(Table table : tables){
+        for (Table table : tables) {
             System.out.println(table);
         }
 
@@ -163,6 +165,26 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
                 assertTrue(entry.getValue().endsWith(".avro"));
                 assertTrue(HdfsUtils.fileExists(yarnConfiguration, entry.getValue()));
             }
+        }
+    }
+
+    @Test(groups = "functional")
+    public void setFilters() {
+        SourceImportConfiguration sourceImportConfig = importConfig.getSourceConfigurations().get(0);
+
+        List<Table> tableMetadata = sourceImportConfig.getTables();
+        for (Table table : tableMetadata) {
+            sourceImportConfig.setFilter(table.getName(), null);
+            assertNull(sourceImportConfig.getFilter(table.getName()));
+        }
+
+        dataExtractionService.setFilters(sourceImportConfig, customer);
+        tableMetadata = sourceImportConfig.getTables();
+        for (Table table : tableMetadata) {
+            String filter = sourceImportConfig.getFilter(table.getName());
+            System.out.println(filter);
+            long timeStamp = map.get(table.getName()).getLastModifiedTimestamp();
+            assertTrue(filter.contains(String.valueOf(new DateTime(timeStamp))));
         }
     }
 

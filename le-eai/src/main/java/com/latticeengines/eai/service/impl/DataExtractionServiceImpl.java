@@ -78,33 +78,39 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             tableMetadata = importService.importMetadata(sourceImportConfig, context);
 
             sourceImportConfig.setTables(tableMetadata);
-            for (Table table : tableMetadata) {
-                LastModifiedKey lmd = eaiMetadataService.getLastModifiedKey(CustomerSpace.parse(customer).toString(),
-                        table);
-                StringBuilder filter = new StringBuilder();
-                String lastModifiedDate;
-                DateTime date;
-                if (lmd != null) {
-                    lastModifiedDate = lmd.getAttributeNames()[0];
-                    date = new DateTime(lmd.getLastModifiedTimestamp());
-                } else {
-                    lastModifiedDate = "LastModifiedDate";
-                    date = new DateTime(1000000000000L);
-                }
-                String defaultFilter = sourceImportConfig.getFilter(table.getName());
-                if (!StringUtils.isEmpty(defaultFilter)) {
-                    filter.append(defaultFilter).append(", ");
-                }
-                filter.append(lastModifiedDate).append(" >= ").append(date).append(" Order By ")
-                        .append(lastModifiedDate).append(" Desc ").toString();
-
-                sourceImportConfig.setFilter(table.getName(), filter.toString());
-            }
+            setFilters(sourceImportConfig, customer);
 
             importService.importDataAndWriteToHdfs(sourceImportConfig, context);
 
         }
         return tableMetadata;
+    }
+
+    @VisibleForTesting
+    void setFilters(SourceImportConfiguration sourceImportConfig, String customer) {
+        List<Table> tableMetadata = sourceImportConfig.getTables();
+        for (Table table : tableMetadata) {
+            LastModifiedKey lmd = eaiMetadataService
+                    .getLastModifiedKey(CustomerSpace.parse(customer).toString(), table);
+            StringBuilder filter = new StringBuilder();
+            String lastModifiedDate;
+            DateTime date;
+            if (lmd != null) {
+                lastModifiedDate = lmd.getAttributeNames()[0];
+                date = new DateTime(lmd.getLastModifiedTimestamp());
+            } else {
+                lastModifiedDate = "LastModifiedDate";
+                date = new DateTime(1000000000000L);
+            }
+            String defaultFilter = sourceImportConfig.getFilter(table.getName());
+            if (!StringUtils.isEmpty(defaultFilter)) {
+                filter.append(defaultFilter).append(", ");
+            }
+            filter.append(lastModifiedDate).append(" >= ").append(date).append(" Order By ").append(lastModifiedDate)
+                    .append(" Desc ").toString();
+
+            sourceImportConfig.setFilter(table.getName(), filter.toString());
+        }
     }
 
     @Override

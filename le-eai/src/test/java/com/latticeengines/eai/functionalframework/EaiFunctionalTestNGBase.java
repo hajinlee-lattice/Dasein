@@ -34,7 +34,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -152,10 +151,9 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     }
 
     protected void checkExtractsDirectoryExists(String customer, List<String> tables) throws Exception {
-        Path customerSpacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customer, customer,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        CustomerSpace space = CustomerSpace.parse(customer);
         for (String table : tables) {
-            String path = (customerSpacePath + "/Data/Tables/" + table + "/Extracts").toString();
+            String path = (PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), space) + "/" + table + "/Extracts").toString();
             assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
         }
     }

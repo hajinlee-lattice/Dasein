@@ -81,7 +81,9 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         for (String tableName : tableNames) {
             uriVariables.put("tableName", tableName);
             Table table = getTable(customerSpace, tableName);
-            tables.add(table);
+            if (table != null) {
+                tables.add(table);
+            }
         }
         return tables;
     }
@@ -108,7 +110,8 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
         uriVariables.put("tableName", table.getName());
-        restTemplate.postForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}", table, String.class, uriVariables);
+        restTemplate.postForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}", table,
+                String.class, uriVariables);
     }
 
     @Override

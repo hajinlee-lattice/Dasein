@@ -2,18 +2,17 @@ package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +29,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
@@ -86,8 +86,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     private String customerSpace = CustomerSpace.parse(customer).toString();
 
     private Tenant tenant;
-    
-    private Map<String, Long> map = new HashMap<>();
+
+    private List<Table> tables;
 
     @BeforeClass(groups = "deployment")
     private void setup() throws Exception {
@@ -114,14 +114,13 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         }
         tenantService.registerTenant(tenant);
 
-        List<Table> tables = new ArrayList<>();
+        tables = new ArrayList<>();
         for (String tableName : tableNameList) {
             URL url = ClassLoader.getSystemResource(String.format(
                     "com/latticeengines/eai/service/impl/salesforce/%s.avsc", tableName).toString());
             String str = FileUtils.readFileToString(new File(url.getFile()));
             Table table = JsonUtils.deserialize(str, Table.class);
             tables.add(table);
-            map.put(table.getName(), table.getLastModifiedKey().getLastModifiedTimestamp());
         }
         System.out.println(tables);
         eaiMetadataService.createTables(customerSpace, tables);
@@ -149,15 +148,52 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         checkDataExists(targetPath, tableNameList, 1);
-        checkLastModifiedDateChanged();
+        List<Table> tablesBeforeExtract = tables;
+        List<Table> tablesAfterExtract = eaiMetadataService.getTables(customerSpace);
+        checkLastModifiedTimestampChanged(true, tablesBeforeExtract, tablesAfterExtract);
+
+        HdfsUtils.rmdir(yarnConfiguration, targetPath);
+        appId = eaiService.extractAndImport(importConfig);
+        assertNotNull(appId);
+        status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        checkDataExists(targetPath, tableNameList, 1);
+        tablesBeforeExtract = tablesAfterExtract;
+        tablesAfterExtract = eaiMetadataService.getTables(customerSpace);
+        checkLastModifiedTimestampInRecords(tablesBeforeExtract);
+        checkLastModifiedTimestampChanged(false, tablesBeforeExtract, tablesAfterExtract);
 
     }
-    
-    private void checkLastModifiedDateChanged(){
-        List<Table> tables = eaiMetadataService.getTables(customerSpace);
-        for(Table table : tables){
-            Long lastModifiedValue = table.getLastModifiedKey().getLastModifiedTimestamp();
-            assertTrue(lastModifiedValue > map.get(table.getName()));
+
+    private void checkLastModifiedTimestampChanged(boolean changed, List<Table> tablesBeforeExtract,
+            List<Table> tablesAfterExtract) {
+
+        for (Table tableAfterExtract : tablesAfterExtract) {
+            Long lastModifiedValue = tableAfterExtract.getLastModifiedKey().getLastModifiedTimestamp();
+            for (Table tableBeforeExtract : tablesBeforeExtract) {
+                if (tableAfterExtract.getName().equals(tableBeforeExtract.getName())) {
+                    if (changed) {
+                        assertEquals(lastModifiedValue.compareTo(tableBeforeExtract.getLastModifiedKey()
+                                .getLastModifiedTimestamp()), 1);
+                    } else {
+                        assertEquals(lastModifiedValue.compareTo(tableBeforeExtract.getLastModifiedKey()
+                                .getLastModifiedTimestamp()), 0);
+                    }
+                }
+            }
         }
     }
+
+    private void checkLastModifiedTimestampInRecords(List<Table> tablesBeforeExtract) throws Exception {
+        for (Table table : tablesBeforeExtract) {
+            List<String> filesForTable = getFilesFromHdfs(targetPath, table.getName());
+            List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(filesForTable.get(0)));
+            for (GenericRecord record : records) {
+                Long lastModifiedDateValue = (Long) record.get(table.getLastModifiedKey().getAttributeNames()[0]);
+                assertEquals(table.getLastModifiedKey().getLastModifiedTimestamp().compareTo(lastModifiedDateValue), 0);
+            }
+        }
+    }
+
 }
