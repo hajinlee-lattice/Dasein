@@ -52,7 +52,7 @@ public class DataFlowServiceImpl implements DataFlowService {
         Properties containerProperties = new Properties();
         containerProperties.put(DataFlowProperty.DATAFLOWCONFIG, dataFlowConfig.toString());
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "128");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         dataFlowJob.setAppMasterPropertiesObject(appMasterProperties);
