@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -156,7 +157,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     void addExtractToTable(Table table, String path) {
         Extract e = new Extract();
         e.setName(StringUtils.substringAfterLast(path, "/"));
-        e.setPath(path);
+        e.setPath(PathUtils.stripoutProtocal(path));
         String dateTime = StringUtils.substringBetween(path, "/Extracts/", "/");
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         try {

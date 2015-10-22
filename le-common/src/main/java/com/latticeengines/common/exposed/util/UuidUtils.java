@@ -15,12 +15,9 @@ public class UuidUtils {
     }
 
     public static String parseUuid(String hdfsPath) {
-        hdfsPath = stripoutProtocal(hdfsPath);
+        hdfsPath = PathUtils.stripoutProtocal(hdfsPath);
         String[] tokens = hdfsPath.split("/");
         return tokens[7];
     }
 
-    private static String stripoutProtocal(String hdfsPath) {
-        return hdfsPath.replaceFirst("[^:]*://[^/]*/", "/");
-    }
 }
