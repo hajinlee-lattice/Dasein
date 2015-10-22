@@ -1,6 +1,5 @@
 package com.latticeengines.dataflowapi.yarn.runtime;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,16 +8,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
+import com.latticeengines.dataflowapi.util.MetadataProxy;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -27,15 +23,11 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConfiguration> {
 
     private static final Log log = LogFactory.getLog(DataFlowProcessor.class);
-
-    @Value("${metadata.api.hostport}")
-    private String metadataEndpoint;
 
     @Autowired
     private ApplicationContext appContext;
@@ -48,6 +40,9 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
     @Autowired
     private SoftwareLibraryService softwareLibraryService;
+
+    @Autowired
+    private MetadataProxy proxy;
 
     public DataFlowProcessor() {
         super();
@@ -67,13 +62,11 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         for (DataFlowSource dataFlowSource : dataFlowSources) {
             String name = dataFlowSource.getName();
 
-            if (dataFlowSource.getRawData() != null) {
-                sources.put(name, dataFlowSource.getRawData());
+            if (dataFlowSource.getRawDataPath() != null) {
+                sources.put(name, dataFlowSource.getRawDataPath());
                 usesPaths = true;
-            }
-
-            if (dataFlowSource.getTable() != null) {
-                sourceTables.put(name, dataFlowSource.getTable());
+            } else {
+                sourceTables.put(name, proxy.getMetadata(dataFlowConfig.getCustomerSpace(), name));
                 usesTables = true;
             }
         }
@@ -102,24 +95,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty("ENGINE", "MR");
         ctx.setProperty("APPCTX", appContext);
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
-        registerMetadata(dataFlowConfig.getCustomerSpace(), table);
+        proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);
         return null;
-    }
-
-    private void registerMetadata(CustomerSpace customerSpace, Table table) {
-        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", metadataEndpoint, customerSpace,
-                table.getName());
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-            interceptors.add(new MagicAuthenticationHeaderHttpRequestInterceptor());
-            restTemplate.setInterceptors(interceptors);
-            restTemplate.postForLocation(url, table);
-        } catch (Exception e) {
-            throw new RuntimeException(String.format(
-                    "Failure registering metadata of data flow output table %s with metadata service at address %s",
-                    table.getName(), url), e);
-        }
-
     }
 }

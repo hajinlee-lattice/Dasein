@@ -89,6 +89,9 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         account = "/tmp/avro/Account/*.avro";
         contact = "/tmp/avro/Contact/*.avro";
         opportunity = "/tmp/avro/Opportunity/*.avro";
+        createAndRegisterMetadata("Account", account, "CreatedDate");
+        createAndRegisterMetadata("Contact", contact, "LastModifiedDate");
+        createAndRegisterMetadata("Opportunity", opportunity, "LastModifiedDate");
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
         doCopy(fs, entries);
@@ -102,10 +105,9 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         config.setCustomerSpace(CUSTOMERSPACE);
         config.setDataFlowBeanName("createEventTable");
         List<DataFlowSource> sources = new ArrayList<>();
-
-        sources.add(createDataFlowSource("Account", account, "CreatedDate"));
-        sources.add(createDataFlowSource("Contact", contact, "LastModifiedDate"));
-        sources.add(createDataFlowSource("Opportunity", opportunity, "LastModifiedDate"));
+        sources.add(createDataFlowSource("Account"));
+        sources.add(createDataFlowSource("Contact"));
+        sources.add(createDataFlowSource("Opportunity"));
 
         config.setDataSources(sources);
         config.setTargetPath("/TmpEventTable");
@@ -123,10 +125,9 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
                 expectedLocation.append(config.getTargetPath()).toString());
     }
 
-    private DataFlowSource createDataFlowSource(String name, String path, String lastModifiedColName) {
+    private DataFlowSource createDataFlowSource(String name) {
         DataFlowSource s = new DataFlowSource();
         s.setName(name);
-        s.setTable(createTableFromDir(name, path, lastModifiedColName));
         return s;
     }
 

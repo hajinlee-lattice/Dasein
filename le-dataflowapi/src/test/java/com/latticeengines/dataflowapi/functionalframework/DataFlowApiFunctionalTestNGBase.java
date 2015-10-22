@@ -14,6 +14,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -29,6 +30,7 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflowapi.util.MetadataProxy;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -48,16 +50,19 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFlowApiFunctionalTestNGBase.class);
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private YarnClient defaultYarnClient;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr = new TenantEntityMgrImpl();
-    
+
+    @Autowired
+    private MetadataProxy proxy;
+
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
     @BeforeClass(groups = { "functional", "deployment" })
@@ -72,7 +77,7 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
         tenantEntityMgr.create(t);
 
         com.latticeengines.domain.exposed.camille.Path path = //
-            PathBuilder.buildCustomerSpacePath("Production", CUSTOMERSPACE);
+        PathBuilder.buildCustomerSpacePath("Production", CUSTOMERSPACE);
         HdfsUtils.rmdir(yarnConfiguration, path.toString());
         HdfsUtils.mkdir(yarnConfiguration, path.toString());
     }
@@ -119,27 +124,36 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
         assertEquals(numRows, expectedNumRows);
     }
 
-    protected Table createTableFromDir(String tableName, String path, String lastModifiedColName) {
-        Tenant tenant = new Tenant();
-        tenant.setId("T1");
-        tenant.setName("T1");
+    protected void createAndRegisterMetadata(String tableName, String path, String lastModifiedColName) {
         Table table = new Table();
-        table.setTenant(tenant);
         table.setName(tableName);
+        table.setDisplayName(tableName);
+
         Extract extract = new Extract();
-        extract.setName("e1");
+        extract.setName("extract");
         extract.setPath(path);
+        extract.setExtractionTimestamp(DateTime.now().getMillis());
         table.addExtract(extract);
+
         PrimaryKey pk = new PrimaryKey();
         Attribute pkAttr = new Attribute();
         pkAttr.setName("Id");
+        pkAttr.setDisplayName("Id");
+        pk.setName("Id");
+        pk.setDisplayName("Id");
         pk.addAttribute("Id");
+
         LastModifiedKey lmk = new LastModifiedKey();
         Attribute lastModifiedColumn = new Attribute();
         lastModifiedColumn.setName(lastModifiedColName);
+        lastModifiedColumn.setDisplayName(lastModifiedColName);
+        lmk.setName(lastModifiedColName);
+        lmk.setDisplayName(lastModifiedColName);
         lmk.addAttribute(lastModifiedColName);
+        lmk.setLastModifiedTimestamp(DateTime.now().getMillis());
+
         table.setPrimaryKey(pk);
         table.setLastModifiedKey(lmk);
-        return table;
+        proxy.setMetadata(CUSTOMERSPACE, table);
     }
 }
