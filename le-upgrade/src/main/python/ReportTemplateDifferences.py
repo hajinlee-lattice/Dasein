@@ -31,12 +31,13 @@ def ReportTemplateDifferences( tenant_1, tenant_2, template_type, descriptor ):
 
       vDBResultsFile.write('ContainerElementName,Operator,New or Modified\n')
       newSpecsFile.write('SpecLatticeNamedElements((\n')
-
+      sep = ' '
       for (name,specdata) in specmap_2.iteritems():
 
         if name not in specmap_1:
           vDBResultsFile.write( '{0},{1},New\n'.format(name,specdata.vdbtype) )
-          newSpecsFile.write( '  {0}\n'.format(specdata.slne) )
+          newSpecsFile.write( ' {0}{1}\n'.format(sep,specdata.slne) )
+          sep = ','
         elif specmap_1[name].defn != specdata.defn:
           vDBResultsFile.write( '{0},{1},Modified\n'.format(name,specdata.vdbtype) )
 
@@ -84,7 +85,7 @@ def GetSpecsDictionary( tenant ):
       vdbtype = s3.group(2)
       name    = s3.group(3)
 
-      if vdbtype not in set(['SpecLatticeExtract','SpecLatticeBinder']):
+      if vdbtype not in set(['SpecLatticeExtract']):
 
         if name not in specs:
           specs[name] = SpecData( vdbtype, defn, singlespec )

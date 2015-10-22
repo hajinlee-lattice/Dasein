@@ -113,6 +113,7 @@ class AppSequence( object ):
             allStepsSuccessful = False
             break
           print '.',
+        self._lg_mgr.commit()
         print 'Done'
 
       else:

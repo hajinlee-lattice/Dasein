@@ -6,10 +6,7 @@
 #
 
 from liaison import *
-
-from .Applicability import Applicability
-from .AppSequence   import AppSequence
-from .StepBase      import StepBase
+from appsequence import Applicability, AppSequence, StepBase
 
 class StepTemplate( StepBase ):
 
