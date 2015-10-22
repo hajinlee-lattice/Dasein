@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.workflow.build.AbstractStep;
 
-@Component("RunAgainWhenCompleteStep")
+@Component("runAgainWhenCompleteStep")
 public class RunAgainWhenCompleteStep extends AbstractStep {
 
     private static final Log log = LogFactory.getLog(RunAgainWhenCompleteStep.class);

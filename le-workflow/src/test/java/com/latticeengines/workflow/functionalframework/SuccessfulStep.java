@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.workflow.build.AbstractStep;
 
-@Component("SuccessfulStep")
+@Component("successfulStep")
 public class SuccessfulStep extends AbstractStep {
 
     private static final Log log = LogFactory.getLog(SuccessfulStep.class);

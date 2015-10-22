@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.workflow.build.AbstractStep;
 
-@Component("ModelSubmit")
+@Component("modelSubmit")
 public class ModelSubmit extends AbstractStep {
 
     private static final Log log = LogFactory.getLog(ModelSubmit.class);

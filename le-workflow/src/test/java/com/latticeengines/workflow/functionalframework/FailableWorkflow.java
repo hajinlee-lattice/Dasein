@@ -9,7 +9,7 @@ import com.latticeengines.workflow.build.AbstractWorkflow;
 import com.latticeengines.workflow.build.WorkflowBuilder;
 import com.latticeengines.workflow.core.Workflow;
 
-@Component("FailableWorkflow")
+@Component("failableWorkflow")
 public class FailableWorkflow extends AbstractWorkflow {
 
     @Autowired

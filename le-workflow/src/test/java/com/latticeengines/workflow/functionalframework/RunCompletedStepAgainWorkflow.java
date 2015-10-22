@@ -9,7 +9,7 @@ import com.latticeengines.workflow.build.AbstractWorkflow;
 import com.latticeengines.workflow.build.WorkflowBuilder;
 import com.latticeengines.workflow.core.Workflow;
 
-@Component("RunCompletedStepAgainWorkflow")
+@Component("runCompletedStepAgainWorkflow")
 public class RunCompletedStepAgainWorkflow extends AbstractWorkflow {
 
     @Autowired
