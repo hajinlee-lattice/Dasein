@@ -52,8 +52,9 @@ public class WorkflowTranslator {
 
     protected Step step(AbstractStep step) throws Exception {
         return stepBuilderFactory.get(step.name()) //
-                .tasklet(tasklet(step)) //
-                .build();
+        .tasklet(tasklet(step)) //
+        .allowStartIfComplete(step.isRunAgainWhenComplete()) //
+        .build();
     }
 
     protected Tasklet tasklet(final AbstractStep step) {
@@ -65,6 +66,7 @@ public class WorkflowTranslator {
                 if (!step.isDryRun()) {
                     step.execute();
                 }
+
                 return RepeatStatus.FINISHED;
             }
         };

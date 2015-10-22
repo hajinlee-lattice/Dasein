@@ -13,13 +13,15 @@ import org.springframework.batch.core.repository.support.JobRepositoryFactoryBea
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableBatchProcessing(modular = true)
+@Import(JobOperatorInfrastructure.class)
 public class DataPlatformInfrastructure implements BatchConfigurer {
 
-    private static final String WORKFLOW_PREFIX = "WORKFLOW_";
+    public static final String WORKFLOW_PREFIX = "WORKFLOW_";
 
     @Autowired
     private DataSource dataSource;
@@ -58,6 +60,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
     public JobExplorer getJobExplorer() throws Exception {
         JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
         jobExplorerFactoryBean.setDataSource(dataSource);
+        jobExplorerFactoryBean.setTablePrefix(WORKFLOW_PREFIX);
         jobExplorerFactoryBean.afterPropertiesSet();
         return jobExplorerFactoryBean.getObject();
     }
