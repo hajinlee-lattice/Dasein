@@ -50,6 +50,8 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         self._url         = dataloader_url
         self._tenant_name = tenant_name
         self._verify      = verify
+        if dataloader_url in ['https://10.41.1.187:8080/','http://10.41.1.207:8081/']:
+            self._verify = False
 
 
     def GetTable( self, table_name ):
