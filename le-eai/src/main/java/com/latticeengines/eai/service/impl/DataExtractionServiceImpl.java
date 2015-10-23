@@ -90,14 +90,14 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     void setFilters(SourceImportConfiguration sourceImportConfig, String customer) {
         List<Table> tableMetadata = sourceImportConfig.getTables();
         for (Table table : tableMetadata) {
-            LastModifiedKey lmd = eaiMetadataService
+            LastModifiedKey lmk = eaiMetadataService
                     .getLastModifiedKey(CustomerSpace.parse(customer).toString(), table);
             StringBuilder filter = new StringBuilder();
             String lastModifiedDate;
             DateTime date;
-            if (lmd != null) {
-                lastModifiedDate = lmd.getAttributeNames()[0];
-                date = new DateTime(lmd.getLastModifiedTimestamp());
+            if (lmk != null) {
+                lastModifiedDate = lmk.getAttributeNames()[0];
+                date = new DateTime(lmk.getLastModifiedTimestamp());
             } else {
                 lastModifiedDate = "LastModifiedDate";
                 date = new DateTime(1000000000000L);

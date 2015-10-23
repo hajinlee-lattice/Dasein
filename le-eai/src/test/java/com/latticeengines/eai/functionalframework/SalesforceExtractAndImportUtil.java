@@ -92,7 +92,7 @@ public class SalesforceExtractAndImportUtil {
         lk.setName("LK_LastModifiedDate");
         lk.setDisplayName(lastModifiedDate.getName());
         lk.addAttribute(lastModifiedDate.getName());
-        lk.setLastModifiedTimestamp(1000000000000L);
+        lk.setLastModifiedTimestamp(1237387254000L);
         table.setLastModifiedKey(lk);
         return table;
     }
@@ -175,6 +175,7 @@ public class SalesforceExtractAndImportUtil {
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_CreatedDate");
         lk.addAttribute(createdDate.getName());
+        lk.setLastModifiedTimestamp(1442544230000L);
         table.setLastModifiedKey(lk);
         return table;
     }
@@ -317,6 +318,7 @@ public class SalesforceExtractAndImportUtil {
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
         lk.addAttribute(lastModifiedDate.getName());
+        lk.setLastModifiedTimestamp(1346770851000L);
         table.setLastModifiedKey(lk);
         return table;
     }
@@ -347,6 +349,7 @@ public class SalesforceExtractAndImportUtil {
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
         lk.addAttribute(lastModifiedDate.getName());
+        lk.setLastModifiedTimestamp(1223400194000L);
         table.setLastModifiedKey(lk);
 
         return table;
@@ -387,6 +390,7 @@ public class SalesforceExtractAndImportUtil {
         LastModifiedKey lk = new LastModifiedKey();
         lk.setName("LK_LastModifiedDate");
         lk.addAttribute(lastModifiedDate.getName());
+        lk.setLastModifiedTimestamp(1341330034000L);
         table.setLastModifiedKey(lk);
 
         return table;

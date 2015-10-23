@@ -14,17 +14,27 @@ public class StandaloneHttpServer {
     private Server server;
     private Context root;
 
+    private int port;
     public static final Integer SERVER_PORT = 8082;
 
     public void init() throws Exception {
         if (server == null) {
+            this.port = SERVER_PORT;
             server = new Server(SERVER_PORT);
             root = new Context(server, "/", Context.SESSIONS);
         }
     }
 
+    public void init(int port) throws Exception {
+        if (server == null) {
+            this.port = port;
+            server = new Server(port);
+            root = new Context(server, "/", Context.SESSIONS);
+        }
+    }
+
     public void start() throws Exception {
-        log.info("Starting http server at port: " + SERVER_PORT);
+        log.info("Starting http server at port: " + port);
         if (!server.isStarted()) {
             server.start();
             log.info("Server started");

@@ -525,6 +525,12 @@
             <artifactId>spring-webmvc</artifactId>
             <version>4.0.0.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <version>6.1.26</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
 
