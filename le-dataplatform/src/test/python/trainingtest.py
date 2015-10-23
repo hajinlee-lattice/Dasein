@@ -32,7 +32,7 @@ class TrainingTest(TrainingTestBase):
             if entry["Key"].find('STPipelineBinary') >= 0:
                 pipeline = pickle.load(open(fileName, "r"))
                 self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
-            elif entry["Key"].find('encoder') >= 0 or entry["Key"].find('pipelinesteps') >= 0: self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
+            elif entry["Key"].find('encoder') >= 0 or entry["Key"].find('pipelinesteps') >= 0 or entry["Key"].find('aggregatedmodel') >= 0: self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
             else: self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
