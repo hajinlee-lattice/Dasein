@@ -35,9 +35,6 @@ public abstract class BaseFileFlowService implements FileFlowService {
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
     
-    @Value("${dellebi.datahadooprootpath}")
-    private String datahadooprootpath;
-    
     @Value("${dellebi.datahadooperrorworkingpath}")
     private String dataHadoopErrorWorkingPath;
 
@@ -166,25 +163,22 @@ public abstract class BaseFileFlowService implements FileFlowService {
     
     @Override
     public String getTxtDir() {
-        return getQualifiedHadoopPath() + "/txt_dir";
+        return dataHadoopWorkingPath + "/txt_dir";
     }
 
     @Override
     public String getZipDir() {
-        return getQualifiedHadoopPath() + "/zip_dir";
+        return dataHadoopWorkingPath + "/zip_dir";
     }
 
     @Override
     public String getOutputDir() {
-        return getQualifiedHadoopPath() + "/output";
+        return dataHadoopWorkingPath + "/output";
     }
     
     @Override
     public String getErrorOutputDir() {
-        return datahadooprootpath + '/' + dataHadoopErrorWorkingPath;
+        return dataHadoopErrorWorkingPath;
     }
-    
-    private String getQualifiedHadoopPath() {
-        return datahadooprootpath + '/' + dataHadoopWorkingPath;
-    }
+
 }
