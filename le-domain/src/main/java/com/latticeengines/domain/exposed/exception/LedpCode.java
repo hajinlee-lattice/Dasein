@@ -236,7 +236,12 @@ public enum LedpCode {
     LEDP_27002("Software package {0} already exists."), //
     LEDP_27003("JSON file {0} not a software package."), //
     LEDP_27004("Cannot instantiate class {0} for software library initialization."), //
-    LEDP_27005("Cannot execute a data flow with both path and table sources.");
+    LEDP_27005("Cannot execute a data flow with both path and table sources."), //
+
+    // le-workflow
+    LEDP_28000("Workflow does not exist: {0}."), //
+    LEDP_28001("Problem starting workflow: {0}."), //
+    LEDP_28002("Problem restarting workflow: {0}.");
 
     private String message;
 
