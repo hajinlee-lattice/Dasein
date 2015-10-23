@@ -27,6 +27,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
@@ -55,11 +57,16 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     private String tenantId;
 
+    private String modelId = MODEL_ID;
+
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
+
+    @Value("${pls.default.buyerinsights.num.predictors}")
+    private int defaultBiPredictorNum;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -140,7 +147,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional" })
-    public void getModelSummariesHasViewPlsModelsRight() {
+    public void getModelSummariesAndPredictorsHasViewPlsModelsRight() {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
@@ -148,9 +155,19 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
                 ModelSummary.class);
         assertNotNull(summary.getDetails());
+
+        List<Predictor> predictors = restTemplate.getForObject(getRestAPIHostPort()
+                + "/pls/modelsummaries/predictors/all/" + summary.getId(), List.class);
+        assertNotNull(predictors);
+        assertEquals(predictors.size(), 185);
+
+        List<Predictor> predictorsForBi = restTemplate.getForObject(getRestAPIHostPort()
+                + "/pls/modelsummaries/predictors/bi/" + summary.getId(), List.class);
+        assertNotNull(predictorsForBi);
+        assertEquals(predictorsForBi.size(), defaultBiPredictorNum);
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "getModelSummariesAndPredictorsHasViewPlsModelsRight" })
     public void testUpdateModelSummary() {
         switchToSuperAdmin();
         assertChangeModelNameSuccess();
@@ -166,6 +183,107 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
         switchToExternalUser();
         assertChangeModelNameGet403();
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = { "testUpdateModelSummary" })
+    public void testUpdatePredictors() {
+        switchToSuperAdmin();
+        assertUpdatePredictorsSuccess();
+
+        switchToInternalAdmin();
+        assertUpdatePredictorsSuccess();
+
+        switchToInternalUser();
+        assertUpdatePredictorsGet403();
+
+        switchToExternalAdmin();
+        assertUpdatePredictorsGet403();
+
+        switchToExternalUser();
+        assertUpdatePredictorsGet403();
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void assertUpdatePredictorsSuccess() {
+
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/predictors/all/"
+                + modelId, List.class);
+        assertNotNull(response);
+        int size = response.size();
+        assertEquals(size, 185);
+
+        Map<String, Object> firstPredictor = (Map) response.get(0);
+        Map<String, Object> lastPredictor = (Map) response.get(size - 1);
+        Map<String, Object> secondLastPredictor = (Map) response.get(size - 2);
+        boolean firstPredictorPredictorIsUsed = Boolean.parseBoolean(firstPredictor.get("UsedForBuyerInsights")
+                .toString());
+        boolean lastPredictorIsUsed = Boolean.parseBoolean(lastPredictor.get("UsedForBuyerInsights").toString());
+        boolean secondLastPredictorIsUsed = Boolean.parseBoolean(lastPredictor.get("UsedForBuyerInsights").toString());
+
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put(firstPredictor.get("Name").toString(),
+                PredictorStatus.getflippedStatusCode(firstPredictorPredictorIsUsed));
+        attrMap.put(lastPredictor.get("Name").toString(), PredictorStatus.getflippedStatusCode(lastPredictorIsUsed));
+        attrMap.put(secondLastPredictor.get("Name").toString(),
+                PredictorStatus.getflippedStatusCode(secondLastPredictorIsUsed));
+
+        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/predictors/" + modelId, attrMap, new HashMap<>());
+
+        List<Predictor> predictorsForBi = restTemplate.getForObject(getRestAPIHostPort()
+                + "/pls/modelsummaries/predictors/bi/" + modelId, List.class);
+        assertNotNull(predictorsForBi);
+        assertEquals(predictorsForBi.size(), defaultBiPredictorNum + 1);
+
+        response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/predictors/all/" + modelId,
+                List.class);
+        firstPredictor = (Map) response.get(0);
+        lastPredictor = (Map) response.get(size - 1);
+        secondLastPredictor = (Map) response.get(size - 2);
+        firstPredictorPredictorIsUsed = Boolean.parseBoolean(firstPredictor.get("UsedForBuyerInsights").toString());
+        lastPredictorIsUsed = Boolean.parseBoolean(lastPredictor.get("UsedForBuyerInsights").toString());
+        secondLastPredictorIsUsed = Boolean.parseBoolean(lastPredictor.get("UsedForBuyerInsights").toString());
+
+        AttributeMap newAttrMap = new AttributeMap();
+        newAttrMap.put(firstPredictor.get("Name").toString(),
+                PredictorStatus.getflippedStatusCode(firstPredictorPredictorIsUsed));
+        newAttrMap.put(lastPredictor.get("Name").toString(), PredictorStatus.getflippedStatusCode(lastPredictorIsUsed));
+        newAttrMap.put(secondLastPredictor.get("Name").toString(),
+                PredictorStatus.getflippedStatusCode(secondLastPredictorIsUsed));
+
+        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/predictors/" + modelId, newAttrMap,
+                new HashMap<>());
+
+        predictorsForBi = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/predictors/bi/"
+                + modelId, List.class);
+        assertNotNull(predictorsForBi);
+        assertEquals(predictorsForBi.size(), defaultBiPredictorNum);
+
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void assertUpdatePredictorsGet403() {
+        boolean exception = false;
+        try {
+            List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/predictors/all/"
+                    + modelId, List.class);
+            assertNotNull(response);
+            int size = response.size();
+            assertEquals(size, 185);
+
+            Map<String, Object> firstPredictor = (Map) response.get(0);
+            boolean firstPredictorPredictorIsUsed = Boolean.parseBoolean(firstPredictor.get("UsedForBuyerInsights")
+                    .toString());
+            AttributeMap attrMap = new AttributeMap();
+            attrMap.put(firstPredictor.get("Name").toString(),
+                    PredictorStatus.getflippedStatusCode(firstPredictorPredictorIsUsed));
+            restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/predictors/" + modelId, attrMap,
+                    new HashMap<>());
+        } catch (Exception e) {
+            String code = e.getMessage();
+            exception = true;
+            assertEquals(code, "403");
+        }
+        assertTrue(exception);
     }
 
     @Deprecated

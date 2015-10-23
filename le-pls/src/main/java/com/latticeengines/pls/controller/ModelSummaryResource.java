@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.PredictorEntityMgr;
 import com.latticeengines.pls.service.ModelAlertService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -47,9 +46,6 @@ public class ModelSummaryResource {
 
     @Autowired
     private ModelAlertService modelAlertService;
-
-    @Autowired
-    private PredictorEntityMgr predictorEntityMgr;
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -149,15 +145,28 @@ public class ModelSummaryResource {
         return modelSummaryEntityMgr;
     }
 
+    @RequestMapping(value = "/predictors/all/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all the predictors for a specific model")
+    public List<Predictor> getAllPredictors(@PathVariable String modelId) {
+        List<Predictor> predictors = modelSummaryEntityMgr.findAllPredictorsByModelId(modelId);
+        return predictors;
+    }
+
+    @RequestMapping(value = "/predictors/bi/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get predictors used by BuyerInsgihts for a specific model")
+    public List<Predictor> getPredictorsForBuyerInsights(@PathVariable String modelId) {
+        List<Predictor> predictors = modelSummaryEntityMgr.findPredictorsUsedByBuyerInsightsByModelId(modelId);
+        return predictors;
+    }
+
     @RequestMapping(value = "/predictors/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update predictors of a modelSummary for the use of BuyerInsights")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
     public Boolean updatePredictors(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
-        ModelSummary modelSummary = new ModelSummary();
-        modelSummary.setId(modelId);
-        modelSummaryEntityMgr.updateModelSummary(modelSummary, attrMap);
+        modelSummaryService.updatePredictors(modelId, attrMap);
         return true;
     }
-
 }

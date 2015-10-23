@@ -1,6 +1,8 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -22,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.KeyValueDao;
@@ -61,12 +65,13 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(ModelSummary summary) {
         Tenant tenant = summary.getTenant();
+        Long tenantId = tenant.getPid();
         tenantDao.createOrUpdate(tenant);
         KeyValue details = summary.getDetails();
 
         if (details != null) {
             if (details.getTenantId() == null) {
-                details.setTenantId(tenant.getPid());
+                details.setTenantId(tenantId);
             }
             keyValueDao.create(details);
         }
@@ -74,11 +79,13 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         modelSummaryDao.create(summary);
 
         for (Predictor predictor : summary.getPredictors()) {
-            predictor.setTenantId(tenant.getPid());
+            predictor.setTenantId(tenantId);
             predictor.setModelSummary(summary);
             predictorDao.create(predictor);
 
             for (PredictorElement el : predictor.getPredictorElements()) {
+                el.setPredictor(predictor);
+                el.setTenantId(tenantId);
                 predictorElementDao.create(el);
             }
         }
@@ -309,4 +316,99 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Predictor> findAllPredictorsByModelId(String modelId) {
+        if (modelId == null) {
+            throw new NullPointerException("ModelId should not be null when finding all the predictors.");
+        }
+        ModelSummary summary = findByModelId(modelId, true, false, true);
+        return summary == null ? null : summary.getPredictors();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Predictor> findPredictorsUsedByBuyerInsightsByModelId(String modelId) {
+        if (modelId == null) {
+            throw new NullPointerException("ModelId should not be null when finding the predictors For BuyerInsights.");
+        }
+        ModelSummary summary = findByModelId(modelId, true, false, true);
+        if (summary == null) {
+            return null;
+        }
+        List<Predictor> allPredictors = summary.getPredictors();
+        List<Predictor> predictorForBi = new ArrayList<Predictor>();
+        for (Predictor predictor : allPredictors) {
+            if (predictor.getUsedForBuyerInsights()) {
+                predictorForBi.add(predictor);
+            }
+        }
+        return predictorForBi;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updatePredictors(List<Predictor> predictors, AttributeMap attrMap) {
+
+        if (predictors == null) {
+            throw new NullPointerException("Predictors should not be null when updating the predictors");
+        }
+        if (attrMap == null) {
+            throw new NullPointerException("Attribute Map should not be null when updating the predictors");
+        }
+
+        List<String> missingPredictors = getMissingPredictors(predictors, attrMap);
+        if (missingPredictors.size() != 0) {
+            throw new LedpException(LedpCode.LEDP_18052,
+                    missingPredictors.toArray(new String[missingPredictors.size()]));
+        }
+
+        for (Predictor predictor : predictors) {
+            String predictorName = predictor.getName();
+            if (predictorName == null) {
+                throw new NullPointerException("predictorName should not be null.");
+            }
+            if (attrMap.containsKey(predictorName)) {
+                PredictorStatus updateStatus = PredictorStatus.getStatusByName(attrMap.get(predictorName));
+                switch (updateStatus) {
+                case NOT_USED_FOR_BUYER_INSIGHTS:
+                    predictor.setUsedForBuyerInsights(PredictorStatus.NOT_USED_FOR_BUYER_INSIGHTS.getStatus());
+                    break;
+                case USED_FOR_BUYER_INSIGHTS:
+                    predictor.setUsedForBuyerInsights(PredictorStatus.USED_FOR_BUYER_INSIGHTS.getStatus());
+                    break;
+                default:
+                    log.warn("Invalid input for updating predictor status.");
+                    break;
+                }
+                predictorDao.update(predictor);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    List<String> getMissingPredictors(List<Predictor> predictors, AttributeMap attrMap) {
+
+        if (predictors == null) {
+            throw new NullPointerException("Predictors should not be null when updating the predictors");
+        }
+        if (attrMap == null) {
+            throw new NullPointerException("Attribute Map should not be null when updating the predictors");
+        }
+
+        List<String> predictorNameList = new ArrayList<String>();
+        for (Predictor predictor : predictors) {
+            predictorNameList.add(predictor.getName());
+        }
+        List<String> missingNameList = new ArrayList<String>();
+        Set<String> updatePredictorNameSet = attrMap.keySet();
+        if (!predictorNameList.containsAll(updatePredictorNameSet)) {
+            for (String updatePredictorName : updatePredictorNameSet) {
+                if (!predictorNameList.contains(updatePredictorName)) {
+                    missingNameList.add(updatePredictorName);
+                }
+            }
+        }
+        return missingNameList;
+    }
 }

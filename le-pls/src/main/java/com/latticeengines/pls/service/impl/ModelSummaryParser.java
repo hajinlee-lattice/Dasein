@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.KeyValue;
@@ -89,7 +90,7 @@ public class ModelSummaryParser {
 
         JsonNode details = json.get("ModelDetails");
 
-        String name = getOrDefault(details.get("Name"), String.class, "PLS");
+        String name = JsonUtils.getOrDefault(details.get("Name"), String.class, "PLS");
         Long constructionTime;
         try {
             long currentMillis = details.get("ConstructionTime").asLong() * 1000;
@@ -98,17 +99,17 @@ public class ModelSummaryParser {
         } catch (Exception e) {
             constructionTime = System.currentTimeMillis();
         }
-        String lookupId = getOrDefault(details.get("LookupID"), String.class, "");
+        String lookupId = JsonUtils.getOrDefault(details.get("LookupID"), String.class, "");
         summary.setName(String.format("%s-%s", name.replace(' ', '_'),
                 getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
         summary.setLookupId(lookupId);
-        summary.setRocScore(getOrDefault(details.get("RocScore"), Double.class, 0.0));
-        summary.setTrainingRowCount(getOrDefault(details.get("TrainingLeads"), Long.class, 0L));
-        summary.setTestRowCount(getOrDefault(details.get("TestingLeads"), Long.class, 0L));
-        summary.setTotalRowCount(getOrDefault(details.get("TotalLeads"), Long.class, 0L));
-        summary.setTrainingConversionCount(getOrDefault(details.get("TrainingConversions"), Long.class, 0L));
-        summary.setTestConversionCount(getOrDefault(details.get("TestingConversions"), Long.class, 0L));
-        summary.setTotalConversionCount(getOrDefault(details.get("TotalConversions"), Long.class, 0L));
+        summary.setRocScore(JsonUtils.getOrDefault(details.get("RocScore"), Double.class, 0.0));
+        summary.setTrainingRowCount(JsonUtils.getOrDefault(details.get("TrainingLeads"), Long.class, 0L));
+        summary.setTestRowCount(JsonUtils.getOrDefault(details.get("TestingLeads"), Long.class, 0L));
+        summary.setTotalRowCount(JsonUtils.getOrDefault(details.get("TotalLeads"), Long.class, 0L));
+        summary.setTrainingConversionCount(JsonUtils.getOrDefault(details.get("TrainingConversions"), Long.class, 0L));
+        summary.setTestConversionCount(JsonUtils.getOrDefault(details.get("TestingConversions"), Long.class, 0L));
+        summary.setTotalConversionCount(JsonUtils.getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
         summary.setIncomplete(isIncomplete(json));
 
@@ -176,17 +177,18 @@ public class ModelSummaryParser {
         for (final JsonNode predictorJson : predictorsJsonNode) {
             Predictor predictor = new Predictor();
 
-            predictor.setName(getOrDefault(predictorJson.get(NAME), String.class, DEFAULT_PREDICTOR_NAME));
-            predictor.setDisplayName(getOrDefault(predictorJson.get(PREDICTOR_DISPLAY_NAME), String.class,
+            predictor.setName(JsonUtils.getOrDefault(predictorJson.get(NAME), String.class, DEFAULT_PREDICTOR_NAME));
+            predictor.setDisplayName(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_DISPLAY_NAME), String.class,
                     DEFAULT_PREDICTOR_DISPLAY_NAME));
-            predictor.setApprovedUsage(getOrDefault(predictorJson.get(PREDICTOR_APPROVED_USAGE), String.class,
-                    DEFAULT_PREDICTOR_APPROVED_USAGE));
-            predictor.setCategory(getOrDefault(predictorJson.get(PREDICTOR_CATEGORY), String.class,
+            predictor.setApprovedUsage(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_APPROVED_USAGE),
+                    String.class, DEFAULT_PREDICTOR_APPROVED_USAGE));
+            predictor.setCategory(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_CATEGORY), String.class,
                     DEFAULT_PREDICTOR_CATEGORY));
-            predictor.setFundamentalType(getOrDefault(predictorJson.get(PREDICTOR_FUNDAMENTAL_TYPE), String.class,
-                    DEFAULT_PREDICTOR_FUNDAMENTAL_TYPE));
-            predictor.setUncertaintyCoefficient(getOrDefault(predictorJson.get(PREDICTOR_UNCERTAINTY_COEFFICIENT),
-                    Double.class, DEFAULT_PREDICTOR_UNCERTAINTY_COEFFICIENT));
+            predictor.setFundamentalType(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_FUNDAMENTAL_TYPE),
+                    String.class, DEFAULT_PREDICTOR_FUNDAMENTAL_TYPE));
+            predictor.setUncertaintyCoefficient(JsonUtils.getOrDefault(
+                    predictorJson.get(PREDICTOR_UNCERTAINTY_COEFFICIENT), Double.class,
+                    DEFAULT_PREDICTOR_UNCERTAINTY_COEFFICIENT));
             predictor.setModelSummary(summary);
             predictor.setTenantId(summary.getTenantId());
 
@@ -224,18 +226,6 @@ public class ModelSummaryParser {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(milliSeconds);
         return formatter.format(calendar.getTime());
-    }
-
-    private <T> T getOrDefault(JsonNode node, Class<T> targetClass, T defaultValue) {
-        if (node == null) {
-            return defaultValue;
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.treeToValue(node, targetClass);
-        } catch (JsonProcessingException e) {
-            return defaultValue;
-        }
     }
 
     public String parseOriginalName(String nameDatetime) {

@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service;
 
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 
 public interface ModelSummaryService {
@@ -9,5 +10,7 @@ public interface ModelSummaryService {
     ModelSummary createModelSummary(ModelSummary modelSummary, String tenantId);
 
     boolean modelIdinTenant(String modelId, String tenantId);
+
+    void updatePredictors(String modelId, AttributeMap attrMap);
 
 }

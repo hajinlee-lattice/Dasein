@@ -9,7 +9,9 @@ import org.quartz.DisallowConcurrentExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -90,7 +92,18 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         modelSummary.setName(possibleName);
     }
 
-    // public void updatePredictors() {
-    // predictorEntityMgr.
-    // }
+    public void updatePredictors(String modelId, AttributeMap attrMap) {
+        if (modelId == null) {
+            throw new NullPointerException("ModelId should not be null when updating the predictors");
+        }
+        if (attrMap == null) {
+            throw new NullPointerException("Attribute Map should not be null when updating the predictors");
+        }
+        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, true, false, true);
+        if (summary == null) {
+            throw new NullPointerException("ModelSummary should not be null when updating the predictors");
+        }
+        List<Predictor> predictors = summary.getPredictors();
+        modelSummaryEntityMgr.updatePredictors(predictors, attrMap);
+    }
 }

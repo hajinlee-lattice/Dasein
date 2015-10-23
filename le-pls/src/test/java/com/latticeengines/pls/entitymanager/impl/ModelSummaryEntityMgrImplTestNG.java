@@ -110,7 +110,26 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s1p1.setDisplayName("LeadSource");
         s1p1.setFundamentalType("");
         s1p1.setUncertaintyCoefficient(0.151911);
+        s1p1.setUsedForBuyerInsights(true);
         summary1.addPredictor(s1p1);
+        Predictor s1p2 = new Predictor();
+        s1p2.setApprovedUsage("ModelAndModelInsights");
+        s1p2.setCategory("Banking");
+        s1p2.setName("Website_Custom");
+        s1p2.setDisplayName("Website_Custom");
+        s1p2.setFundamentalType("");
+        s1p2.setUncertaintyCoefficient(0.251911);
+        s1p2.setUsedForBuyerInsights(true);
+        summary1.addPredictor(s1p2);
+        Predictor s1p3 = new Predictor();
+        s1p3.setApprovedUsage("ModelAndModelInsights");
+        s1p3.setCategory("Finance");
+        s1p3.setName("Income");
+        s1p3.setDisplayName("Income");
+        s1p3.setFundamentalType("numeric");
+        s1p3.setUncertaintyCoefficient(0.171911);
+        s1p3.setUsedForBuyerInsights(false);
+        summary1.addPredictor(s1p3);
 
         PredictorElement s1el1 = new PredictorElement();
         s1el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
@@ -200,7 +219,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(retrievedSummary.getName(), summary1.getName());
 
         List<Predictor> predictors = retrievedSummary.getPredictors();
-        assertEquals(predictors.size(), 1);
+        assertEquals(predictors.size(), 3);
 
         KeyValue details = retrievedSummary.getDetails();
         String uncompressedStr = new String(CompressionUtils.decompressByteArray(details.getData()));
@@ -213,6 +232,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 "category", //
                 "fundamentalType", //
                 "uncertaintyCoefficient", //
+                "usedForBuyerInsights", //
                 "tenantId" };
 
         String[] predictorElementFields = new String[] { "name", //
@@ -353,4 +373,63 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertTrue(exception);
     }
 
+    @Test(groups = "functional")
+    public void testFindAndUpdatePredictorsForSummary() {
+        setupSecurityContext(summary1);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, false, false);
+
+        List<Predictor> predictorsUsedForBi = modelSummaryEntityMgr.findPredictorsUsedByBuyerInsightsByModelId(summary1
+                .getId());
+        assertTrue(predictorsUsedForBi.size() == 2);
+
+        List<Predictor> predictors = retrievedSummary.getPredictors();
+        AttributeMap attrMap = createValidMap();
+        modelSummaryEntityMgr.updatePredictors(predictors, attrMap);
+
+        ModelSummary retrievedSummaryAfterUpdatingPredictors = modelSummaryEntityMgr.findByModelId(summary1.getId(),
+                true, false, false);
+
+        predictorsUsedForBi = modelSummaryEntityMgr.findPredictorsUsedByBuyerInsightsByModelId(summary1.getId());
+        assertTrue(predictorsUsedForBi.size() == 1);
+
+        predictors = retrievedSummaryAfterUpdatingPredictors.getPredictors();
+        for (Predictor predictor : predictors) {
+            String predictorName = predictor.getName();
+            switch (predictorName) {
+            case "LeadSource":
+                assertTrue(predictor.getUsedForBuyerInsights() == false);
+                break;
+            case "Website_Custom":
+                assertTrue(predictor.getUsedForBuyerInsights() == false);
+                break;
+            case "Income":
+                assertTrue(predictor.getUsedForBuyerInsights() == true);
+                break;
+            }
+        }
+
+        attrMap = createInvalidMap();
+        try {
+            modelSummaryEntityMgr.updatePredictors(predictors, attrMap);
+            assertTrue(true, "Should have thrown exception.");
+        } catch (Exception e) {
+            assertTrue(e instanceof LedpException);
+            assertTrue(((LedpException) e).getCode().equals(LedpCode.LEDP_18052));
+        }
+    }
+
+    private AttributeMap createValidMap() {
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("LeadSource", "0");
+        attrMap.put("Website_Custom", "0");
+        attrMap.put("Income", "1");
+        return attrMap;
+    }
+
+    private AttributeMap createInvalidMap() {
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("LeadSource", "0");
+        attrMap.put("Browser", "0");
+        return attrMap;
+    }
 }

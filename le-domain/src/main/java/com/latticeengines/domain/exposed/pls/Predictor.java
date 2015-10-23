@@ -22,6 +22,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -59,57 +60,69 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
     }
 
     @Override
+    @JsonProperty("Name")
     @Column(name = "NAME", nullable = false)
     public String getName() {
         return name;
     }
 
     @Override
+    @JsonProperty("Name")
     public void setName(String name) {
         this.name = name;
     }
 
     @Column(name = "DISPLAY_NAME")
+    @JsonProperty("DisplayName")
     public String getDisplayName() {
         return displayName;
     }
 
+    @JsonProperty("DisplayName")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
     @Column(name = "APPROVED_USAGE", nullable = true)
+    @JsonProperty("ApprovedUsage")
     public String getApprovedUsage() {
         return approvedUsage;
     }
 
+    @JsonProperty("ApprovedUsage")
     public void setApprovedUsage(String approvedUsage) {
         this.approvedUsage = approvedUsage;
     }
 
     @Column(name = "CATEGORY")
+    @JsonProperty("Category")
     public String getCategory() {
         return category;
     }
 
+    @JsonProperty("Category")
     public void setCategory(String category) {
         this.category = category;
     }
 
     @Column(name = "FUNDAMENTAL_TYPE", nullable = true)
+    @JsonProperty("FundamentalType")
     public String getFundamentalType() {
         return fundamentalType;
     }
 
+    @JsonProperty("FundamentalType")
     public void setFundamentalType(String fundamentalType) {
         this.fundamentalType = fundamentalType;
     }
 
     @Column(name = "UNCERTAINTY_COEFF", nullable = true)
+    @JsonProperty("UncertaintyCoefficient")
     public Double getUncertaintyCoefficient() {
         return uncertaintyCoefficient;
     }
 
+    @JsonProperty("UncertaintyCoefficient")
     public void setUncertaintyCoefficient(Double uncertaintyCoefficient) {
         this.uncertaintyCoefficient = uncertaintyCoefficient;
     }
@@ -155,10 +168,12 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
     }
 
     @Column(name = "USED_FOR_BI", nullable = false)
+    @JsonProperty("UsedForBuyerInsights")
     public Boolean getUsedForBuyerInsights() {
         return usedForBuyerInsights;
     }
 
+    @JsonProperty("UsedForBuyerInsights")
     public void setUsedForBuyerInsights(Boolean usedForBuyerInsights) {
         this.usedForBuyerInsights = usedForBuyerInsights;
     }
