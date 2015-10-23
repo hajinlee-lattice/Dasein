@@ -44,6 +44,8 @@ class TrainingTestBase(TestBase):
         shutil.copy("../../main/python" + enginedir, fwkdir + enginedir)
         shutil.copy("../../main/python/pipeline/encoder.py", pipelinefwkdir + "/encoder.py")
         shutil.copy("../../main/python/pipeline/pipelinesteps.py", pipelinefwkdir + "/pipelinesteps.py")
+        shutil.copy("../../main/python/pipeline/aggregatedmodel.py", pipelinefwkdir + "/aggregatedmodel.py")
+        
         sys.path.append(pipelinefwkdir)
 
         # Symbolic links will be cleaned up by testBase

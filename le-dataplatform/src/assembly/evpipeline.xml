@@ -6,10 +6,18 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/test/python/data/evpipeline.tar.gz</directory>
+            <directory>src/test/python/data/evpipeline.tar.gz
+            </directory>
             <outputDirectory>.</outputDirectory>
             <includes>
                 <include>**/*.py</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/python/pipeline</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>aggregatedmodel.py</include>
             </includes>
         </fileSet>
     </fileSets>

@@ -4,10 +4,10 @@ from lxml.builder import E, ElementMaker
 from sklearn.tree import _tree
 from sklearn.ensemble import RandomForestClassifier
 import traceback
- 
+
 from leframework.codestyle import overrides
 from leframework.model.state import State
-from leframework.aggregatedmodel import AggregatedModel
+from aggregatedmodel import AggregatedModel
 from pipelinefwk import ModelStep
  
  
