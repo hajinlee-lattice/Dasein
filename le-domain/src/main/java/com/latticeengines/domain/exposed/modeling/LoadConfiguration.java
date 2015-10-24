@@ -16,6 +16,8 @@ public class LoadConfiguration {
     private DbCreds creds;
     private List<String> keyCols = new ArrayList<String>();
     private Map<String, String> properties = new HashMap<>();
+    private String query;
+    private String targetHdfsDir;
 
     public String getTable() {
         return table;
@@ -75,8 +77,28 @@ public class LoadConfiguration {
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
+    
+    @JsonProperty(value = "query", required = false)
+    public void setQuery(String query) {
+        this.query = query;
+    }
+    
+    @JsonProperty(value = "query", required = false)
+    public String getQuery() {
+        return query;
+    }
 
     public void setProperty(String propertyName, String propertyValue) {
         properties.put(propertyName, propertyValue);
+    }
+
+    @JsonProperty(value = "target_dir", required = false)
+    public String getTargetHdfsDir() {
+        return targetHdfsDir;
+    }
+
+    @JsonProperty(value = "target_dir", required = false)
+    public void setTargetHdfsDir(String targetHdfsDir) {
+        this.targetHdfsDir = targetHdfsDir;
     }
 }
