@@ -27,7 +27,6 @@
     <context:component-scan base-package="com.latticeengines.eai.service" />
     <context:component-scan base-package="com.latticeengines.eai.yarn" />
     <context:component-scan base-package="com.latticeengines.eai.components" />
-    <context:component-scan base-package="com.latticeengines.eai.exposed.service" />
     <context:component-scan base-package="com.latticeengines.remote.exposed.service" />
 
     <import resource="classpath:eai-marketo-context.xml" />

@@ -1,4 +1,4 @@
-package com.latticeengines.eai.exposed.service.impl;
+package com.latticeengines.eai.service.impl;
 
 import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
