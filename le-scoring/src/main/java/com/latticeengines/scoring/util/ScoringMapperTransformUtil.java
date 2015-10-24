@@ -63,7 +63,7 @@ public class ScoringMapperTransformUtil {
                 datatype = parseDatatypeFile(p);
             } else if (p.getName().equals("scoring.py")) {
                 scoringScriptProvided = true;
-            } else {
+            } else if (!p.getName().endsWith(".jar")){
                 String modelGuid = p.getName();
                 JSONObject modelJsonObj = parseModelFiles(p);
                 models.put(modelGuid, modelJsonObj);

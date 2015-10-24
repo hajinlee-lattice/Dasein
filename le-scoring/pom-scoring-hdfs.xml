@@ -115,6 +115,19 @@
                             </sources>
                         </mapping>
                     </mappings>
+                    <mappings>
+                        <mapping>
+                            <directory>/tmp/app/scoring</directory>
+                            <filemode>750</filemode>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
+                            <sources>
+                                <source>
+                                    <location>target/le-scoring-${le.rpm.version}-shaded.jar</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                    </mappings>
                     <preinstallScriptlet>
                         <scriptFile>src/main/resources/rpm/scoring-hdfs/scripts/${pre.install.script}</scriptFile>
                     </preinstallScriptlet>

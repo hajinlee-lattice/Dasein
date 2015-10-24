@@ -44,7 +44,9 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
-    private static final String scoringPythonPath = "/app/scoring/scripts/scoring.py";
+    private static final String dependencyPath = "/app/scoring";
+
+    private static final String scoringPythonPath = dependencyPath + "/scripts/scoring.py";
 
     private static final Log log = LogFactory.getLog(EventDataScoringJob.class);
 
@@ -107,8 +109,12 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
                 String cacheFilePath = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name());
                 mrJob.setCacheFiles(getURIs(cacheFilePath));
             }
-            mrJob.addCacheFile(new URI(dataTypeFilePath));
+            List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), dependencyPath, ".*.jar$");
+            for (String jarFilePath : jarFilePaths) {
+                mrJob.addCacheFile(new URI(jarFilePath));
+            }
             mrJob.addCacheFile(new URI(scoringPythonPath));
+            mrJob.addCacheFile(new URI(dataTypeFilePath));
 
             if (properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()) != null) {
                 String cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name());

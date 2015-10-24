@@ -1,5 +1,5 @@
 #!/bin/bash
-chmod 755 /tmp/app/scoring/scripts
+chmod 755 -R /tmp/app/scoring
 rm /tmp/app/scoring/scripts/*.pyc
 rm /tmp/app/scoring/scripts/*.pyo
 
