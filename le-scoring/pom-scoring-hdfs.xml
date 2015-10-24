@@ -19,6 +19,7 @@
         <mapping.groupname>hdfs</mapping.groupname>
         <pre.install.script>preinstall</pre.install.script>
         <post.install.script>postinstall</post.install.script>
+        <le.rpm.version>2.0.13-SNAPSHOT</le.rpm.version>
     </properties>
 
     <profiles>
