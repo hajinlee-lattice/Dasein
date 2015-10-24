@@ -70,6 +70,9 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase.getMagicAuthHeaderInterceptor();
     protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase.getStatusErrorHandler();
+    
+    protected List<ClientHttpRequestInterceptor> addAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader });
+    protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
 
     protected UserDocument loginAndAttach(AccessLevel level, Tenant tenant) {
         String username = internalTestUserService.getUsernameForAccessLevel(level);
@@ -209,4 +212,6 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     }
 
     abstract protected String getRestAPIHostPort();
+    
+    
 }

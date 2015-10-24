@@ -11,5 +11,6 @@
     <import resource="classpath:pls-context.xml"/>
     <import resource="classpath:pls-properties-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
+    <import resource="classpath:swlib-context.xml"/>
 
 </beans>
