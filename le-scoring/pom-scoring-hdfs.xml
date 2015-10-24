@@ -116,7 +116,7 @@
                             </sources>
                         </mapping>
                         <mapping>
-                            <directory>/tmp/app/scoring</directory>
+                            <directory>/tmp/app/scoring/lib</directory>
                             <filemode>750</filemode>
                             <username>${mapping.username}</username>
                             <groupname>${mapping.groupname}</groupname>
