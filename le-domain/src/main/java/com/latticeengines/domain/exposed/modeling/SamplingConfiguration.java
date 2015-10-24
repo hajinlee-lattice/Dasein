@@ -34,7 +34,7 @@ public class SamplingConfiguration {
     private List<SamplingElement> trainingElements = new ArrayList<SamplingElement>();
     private SamplingElement trainingAll = new SamplingElement(TRAINING_ALL_PREFIX);
     private SamplingElement testingElement = new SamplingElement(TESTING_SET_PREFIX);
-    
+
     private boolean parallelEnabled;
 
     public void addSamplingElement(SamplingElement samplingElement) {
@@ -63,7 +63,7 @@ public class SamplingConfiguration {
 
     @JsonProperty("training_percentage")
     public void setTrainingPercentage(int trainingPercentage) {
-        assert (trainingPercentage <= 100);
+        checkNumberRange(trainingPercentage);
         this.trainingPercentage = trainingPercentage;
         setTestPercentage(100 - trainingPercentage);
     }
@@ -103,6 +103,7 @@ public class SamplingConfiguration {
     /* parallel */
 
     public void setTrainingElements() {
+        trainingElements.clear();
         for (int i = 0; i < trainingSetCount; i++) {
             SamplingElement element = new SamplingElement(TRAINING_SET_PREFIX + i);
             trainingElements.add(element);
@@ -152,7 +153,6 @@ public class SamplingConfiguration {
 
     @JsonProperty("training_set_count")
     public void setTrainingSetCount(int trainingSetCount) {
-        checkNumberRange(trainingSetCount);
         this.trainingSetCount = trainingSetCount;
     }
 
@@ -181,7 +181,7 @@ public class SamplingConfiguration {
         samplingElements.add(trainingAll);
         samplingElements.add(testingElement);
     }
-    
+
     @JsonProperty("parallel_enabled")
     public boolean isParallelEnabled() {
         return parallelEnabled;
