@@ -30,6 +30,8 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.CrmConstants;
+import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
@@ -55,12 +57,16 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @Autowired
     private EaiMetadataService eaiMetadataService;
 
+    @Autowired
+    private EaiCredentialValidationService eaiCredentialValidationService;
+
     @Override
     public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
-        String customer = importConfig.getCustomer();
-        context.setProperty(ImportProperty.CUSTOMER, customer);
-        String targetPath = createTargetPath(importConfig.getCustomer());
+        String customerSpace = CustomerSpace.parse(importConfig.getCustomer()).toString();
+        context.setProperty(ImportProperty.CUSTOMER, customerSpace);
+
+        String targetPath = createTargetPath(customerSpace);
         context.setProperty(ImportProperty.TARGETPATH, targetPath);
         context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
         context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
@@ -78,7 +84,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             tableMetadata = importService.importMetadata(sourceImportConfig, context);
 
             sourceImportConfig.setTables(tableMetadata);
-            setFilters(sourceImportConfig, customer);
+            setFilters(sourceImportConfig, customerSpace);
 
             importService.importDataAndWriteToHdfs(sourceImportConfig, context);
 
@@ -87,11 +93,10 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     }
 
     @VisibleForTesting
-    void setFilters(SourceImportConfiguration sourceImportConfig, String customer) {
+    void setFilters(SourceImportConfiguration sourceImportConfig, String customerSpace) {
         List<Table> tableMetadata = sourceImportConfig.getTables();
         for (Table table : tableMetadata) {
-            LastModifiedKey lmk = eaiMetadataService
-                    .getLastModifiedKey(CustomerSpace.parse(customer).toString(), table);
+            LastModifiedKey lmk = eaiMetadataService.getLastModifiedKey(customerSpace, table);
             StringBuilder filter = new StringBuilder();
             String lastModifiedDate;
             DateTime date;
@@ -115,8 +120,10 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Override
     public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig) {
-        ApplicationId appId = null;
+        String customerSpace = CustomerSpace.parse(importConfig.getCustomer()).toString();
+        eaiCredentialValidationService.validateCredential(customerSpace, CrmConstants.CRM_SFDC);
 
+        ApplicationId appId = null;
         boolean hasNonEaiJobSourceType = false;
         for (SourceImportConfiguration sourceImportConfig : importConfig.getSourceConfigurations()) {
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
@@ -139,14 +146,13 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     private EaiJob createJob(ImportConfiguration importConfig) {
         EaiJob eaiJob = new EaiJob();
-
-        String customer = importConfig.getCustomer();
+        String customerSpace = CustomerSpace.parse(importConfig.getCustomer()).toString();
 
         eaiJob.setClient("eaiClient");
-        eaiJob.setCustomer(customer);
+        eaiJob.setCustomer(customerSpace);
 
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace);
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
 
         Properties containerProperties = new Properties();
@@ -160,8 +166,8 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         return eaiJob;
     }
 
-    public String createTargetPath(String customer) {
-        CustomerSpace space = CustomerSpace.parse(customer);
+    public String createTargetPath(String customerSpace) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
         return PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), space).toString();
     }
 

@@ -1,6 +1,5 @@
 package com.latticeengines.eai.yarn.runtime;
 
-
 import java.util.List;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
@@ -63,12 +62,13 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
+
+        CamelContext camelContext = constructCamelContext(importConfig);
+        camelContext.start();
+        log.info("Routes are:" + camelContext.getRoutes());
+        importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
+        log.info("Starting extract and import.");
         try {
-            CamelContext camelContext = constructCamelContext(importConfig);
-            camelContext.start();
-            log.info("Routes are:" + camelContext.getRoutes());
-            importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
-            log.info("Starting extract and import.");
             List<Table> tableMetadata = dataExtractionService.extractAndImport(importConfig, importContext);
 
             while (camelContext.getInflightRepository().size() > 0) {

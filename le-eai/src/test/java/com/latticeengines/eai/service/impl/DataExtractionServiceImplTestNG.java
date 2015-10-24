@@ -17,6 +17,7 @@ import org.joda.time.DateTime;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -55,6 +56,12 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private ImportContext importContext;
+    
+    @Value("${eai.salesforce.username}")
+    private String salesforceUserName;
+
+    @Value("${eai.salesforce.password}")
+    private String salesforcePasswd;
 
     private String targetPath;
 
@@ -86,8 +93,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         baton.createTenant(customer, customer, "defaultspaceId", spaceInfo);
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
-        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
-        crmCredential.setPassword("Happy2010oIogZVEFGbL3n0qiAp6F66TC");
+        crmCredential.setUserName(salesforceUserName);
+        crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
         setupSalesforceImportConfig(customer);
