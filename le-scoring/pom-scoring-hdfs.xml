@@ -115,8 +115,6 @@
                                 </source>
                             </sources>
                         </mapping>
-                    </mappings>
-                    <mappings>
                         <mapping>
                             <directory>/tmp/app/scoring</directory>
                             <filemode>750</filemode>
