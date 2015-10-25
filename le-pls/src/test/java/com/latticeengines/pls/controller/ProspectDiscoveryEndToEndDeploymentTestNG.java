@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -124,14 +125,14 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
                     " SYSOBJECTS.name = '" + matchTableName + "'" +
                     " AND r.InternalColumnName = s.name";
 
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            ResultSet rset = pstmt.executeQuery();
-            
-            while (rset.next()) {
-                String column = rset.getString(1);
-                sb.append(", ").append(column).append("\n");
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                ResultSet rset = pstmt.executeQuery();
+                
+                while (rset.next()) {
+                    String column = rset.getString(1);
+                    sb.append(", ").append(column).append("\n");
+                }
             }
-            
             sb.append(" FROM " + matchTableName + " WHERE $CONDITIONS");
         }
         String hdfsTargetPath = getTargetPath() + "/Data/Tables/" + matchTableName;
@@ -149,14 +150,58 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             
             @Override
             public boolean accept(String fileName) {
-                return fileName.endsWith("*.avro");
+                return fileName.endsWith(".avro");
             }
         });
         
         Table eventTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, avroFiles.get(0), null, null);
+        eventTable.setName(matchTableName);
+        
+        addMetadata(eventTable, preMatchEventTableAndCreds.getValue());
         url = String.format("%s/metadata/customerspaces/%s/tables/%s", microServiceHostPort, CUSTOMERSPACE, eventTable.getName());
         restTemplate.postForLocation(url, eventTable);
         return eventTable;
+    }
+    
+    private void addMetadata(Table table, DbCreds creds) throws Exception {
+        try (Connection conn = DriverManager.getConnection(creds.getJdbcUrl())) {
+            String query = "SELECT InternalColumnName, MetaDataName, MetaDataValue FROM " +
+                    table.getName() + "_MetaData ORDER BY InternalColumnName";
+            Map<String, Attribute> map = table.getNameAttributeMap();
+            Class<?> attrClass = Class.forName(Attribute.class.getName());
+            Map<String, Method> methodMap = new HashMap<>();
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                ResultSet rset = pstmt.executeQuery();
+                
+                while (rset.next()) {
+                    String column = rset.getString(1);
+                    String metadataName = rset.getString(2);
+                    String metadataValue = rset.getString(3);
+                    
+                    Attribute attr = map.get(column);
+                    
+                    if (attr == null) {
+                        continue;
+                    }
+                    String methodName = "set" + metadataName;
+                    Method m = methodMap.get(methodName);
+                    
+                    if (m == null) {
+                        try {
+                            m = attrClass.getMethod(methodName, String.class);
+                        } catch (Exception e) {
+                            // no method, skip
+                            continue;
+                        }
+                        methodMap.put(methodName, m);
+                    }
+                    
+                    if (m != null) {
+                        m.invoke(attr, metadataValue);
+                    }
+                }
+            }
+        }
     }
     
     private String getTargetPath() {
@@ -295,7 +340,6 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         for (Table table : tables) {
             DataFlowSource source = new DataFlowSource();
             source.setName(table.getName());
-            source.setTable(table);
             sources.add(source);
         }
         return sources;
@@ -308,14 +352,20 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         List<Table> tables = new ArrayList<>();
         
         for (String tableName : tableList) {
-            url = String.format("%s/metadata/customerspaces/%s/tables/%s", microServiceHostPort, CUSTOMERSPACE, tableName);
-            tables.add(restTemplate.getForObject(url, Table.class));
+            Table t = new Table();
+            t.setName(tableName);
+            tables.add(t);
         }
-        // add the stop list
+        // add the stop list to HDFS
         String stoplist = ClassLoader.getSystemResource("com/latticeengines/pls/controller/Stoplist/Stoplist.avro").getPath();
         HdfsUtils.mkdir(yarnConfiguration, "/tmp/Stoplist");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, stoplist, "/tmp/Stoplist");
-        tables.add(MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, "/tmp/Stoplist/*.avro", null, null));
+        Table stopList = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, "/tmp/Stoplist/Stoplist.avro", null, null);
+        stopList.getExtracts().get(0).setPath("/tmp/Stoplist/*.avro");
+        // register the stop list table
+        url = String.format("%s/metadata/customerspaces/%s/tables/%s", microServiceHostPort, CUSTOMERSPACE, stopList.getName());
+        restTemplate.postForLocation(url, stopList);
+        tables.add(stopList);
         return tables;
     }
     
@@ -411,7 +461,4 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
 
 
-    public static void main(String[] args) throws Exception {
-        
-    }
 }
