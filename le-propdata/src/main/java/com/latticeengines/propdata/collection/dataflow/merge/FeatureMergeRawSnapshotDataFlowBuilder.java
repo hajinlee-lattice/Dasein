@@ -5,8 +5,6 @@ import java.util.Collections;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.collection.FeatureArchiveProgress;
-
 import cascading.tuple.Fields;
 
 @Component("featureMergeRawSnapshotDataFlowBuilder")
