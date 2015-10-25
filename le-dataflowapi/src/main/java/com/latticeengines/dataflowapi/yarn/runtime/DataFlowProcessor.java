@@ -66,7 +66,11 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
                 sources.put(name, dataFlowSource.getRawDataPath());
                 usesPaths = true;
             } else {
-                sourceTables.put(name, proxy.getMetadata(dataFlowConfig.getCustomerSpace(), name));
+                Table sourceTable = proxy.getMetadata(dataFlowConfig.getCustomerSpace(), name);
+                if (sourceTable == null) {
+                    log.error("Source table " + name + " retrieved from the metadata service is null.");
+                }
+                sourceTables.put(name, sourceTable);
                 usesTables = true;
             }
         }
@@ -92,7 +96,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty("FLOWNAME", dataFlowConfig.getDataFlowBeanName());
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty("ENGINE", "TEZ");
         ctx.setProperty("APPCTX", appContext);
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
         proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);

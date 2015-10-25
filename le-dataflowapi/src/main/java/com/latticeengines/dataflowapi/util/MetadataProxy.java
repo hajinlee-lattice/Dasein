@@ -1,6 +1,7 @@
 package com.latticeengines.dataflowapi.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +46,20 @@ public class MetadataProxy {
         } catch (Exception e) {
             throw new RuntimeException(String.format( //
                     "Failure setting metadata for table %s at address %s", table.getName(), url), e);
+        }
+    }
+    
+    public void deleteMetadata(CustomerSpace space, Table table) {
+        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", hostname, space, table.getName());
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+            interceptors.add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+            restTemplate.setInterceptors(interceptors);
+            restTemplate.delete(url, new HashMap<>());
+        } catch (Exception e) {
+            throw new RuntimeException(String.format( //
+                    "Failure deleting metadata for table %s at address %s", table.getName(), url), e);
         }
     }
 }

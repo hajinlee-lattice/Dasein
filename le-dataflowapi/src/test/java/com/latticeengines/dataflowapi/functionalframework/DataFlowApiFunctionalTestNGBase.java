@@ -154,6 +154,12 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
 
         table.setPrimaryKey(pk);
         table.setLastModifiedKey(lmk);
+        try {
+            proxy.deleteMetadata(CUSTOMERSPACE, table);
+        } catch (Exception e) {
+            // ignore if table doesn't exist yet
+        }
+        
         proxy.setMetadata(CUSTOMERSPACE, table);
     }
 }
