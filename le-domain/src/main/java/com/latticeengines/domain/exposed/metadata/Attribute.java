@@ -264,6 +264,164 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+    
+    @Transient
+    @JsonIgnore
+    public void setApprovedUsage(String approvedUsage) {
+        setApprovedUsage(Arrays.<String>asList(new String[] { approvedUsage }));
+    }
+    
+    @Transient
+    @JsonIgnore
+    public void setApprovedUsage(List<String> approvedUsage) {
+        properties.put("ApprovedUsage", approvedUsage);
+    }
+    
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public List<String> getApprovedUsage() {
+        return (List<String>) properties.get("ApprovedUsage");
+    }
+    
+    @Transient
+    @JsonIgnore
+    public void setStatisticalType(String statisticalType) {
+        properties.put("StatisticalType", statisticalType);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public String getStatisticalType() {
+        return (String) properties.get("StatisticalType");
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setFundamentalType(String fundamentalType) {
+        properties.put("FundamentalType", fundamentalType);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public String getFundamentalType() {
+        return (String) properties.get("FundamentalType");
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setDataSource(String dataSource) {
+        setDataSource(Arrays.<String>asList(new String[] { dataSource }));
+    }
+    
+    @Transient
+    @JsonIgnore
+    public void setDataSource(List<String> dataSource) {
+        properties.put("DataSource", dataSource);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Transient
+    @JsonIgnore
+    public List<String> getDataSource() {
+        return (List<String>) properties.get("DataSource");
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setDisplayDiscretizationStrategy(String displayDiscretizationStrategy) {
+        properties.put("DisplayDiscretizationStrategy", displayDiscretizationStrategy);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public String getDisplayDiscretizationStrategy() {
+        return (String) properties.get("DisplayDiscretizationStrategy");
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setDescription(String description) {
+        properties.put("Description", description);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public String getDescription() {
+        return (String) properties.get("Description");
+    }
+    
+    @Transient
+    @JsonIgnore
+    public void setTags(String tags) {
+        setTags(Arrays.<String>asList(new String[] { tags }));
+    }
+    
+    @Transient
+    @JsonIgnore
+    public void setTags(List<String> tags) {
+        properties.put("Tags", tags);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public void setCategory(String category) {
+        setExtensionValue("Category", category);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public String getCategory() {
+        return getExtensionValue("Category");
+    }
+    
+    @Transient
+    @JsonIgnore
+    public void setDataType(String dataType) {
+        setExtensionValue("DataType", dataType);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public String getDataType() {
+        return getExtensionValue("DataType");
+    }
+    
+    @SuppressWarnings({ "unchecked" })
+    private void setExtensionValue(String key, String value) {
+        List<Map<String, String>> entries = (List<Map<String, String>>) properties.get("Extensions");
+        boolean keyFound = false;
+        if (entries != null) {
+            for (Map<String, String> entry : entries) {
+                if (entry.containsKey(key)) {
+                    keyFound = true;
+                    entry.put(key, value);
+                }
+            }
+        } else {
+            entries = new ArrayList<>();
+        }
+        if (!keyFound) {
+            Map<String, String> map = new HashMap<>();
+            map.put(key, value);
+            entries.add(map);
+            properties.put("Extensions", entries);
+        }
+    }
+    
+    @SuppressWarnings({ "unchecked" })
+    private String getExtensionValue(String key) {
+        List<Map<String, String>> entries = (List<Map<String, String>>) properties.get("Extensions");
+        
+        if (entries != null) {
+            for (Map<String, String> entry : entries) {
+                if (entry.containsKey(key)) {
+                    return entry.get(key);
+                }
+            }
+        }
+        return null;
+    }
 
     @Override
     @Transient

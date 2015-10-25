@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -34,6 +36,9 @@ public class MetadataConverter {
             Schema schema = AvroUtils.getSchemaFromGlob(configuration, path);
             List<Extract> extracts = new ArrayList<Extract>();
             Extract extract = new Extract();
+            try (FileSystem fs = FileSystem.newInstance(configuration)) {
+                extract.setExtractionTimestamp(fs.getFileStatus(new Path(path)).getModificationTime());
+            }
             extract.setName("extract");
             extract.setPath(path);
             extracts.add(extract);
@@ -95,7 +100,11 @@ public class MetadataConverter {
         try {
             Attribute attribute = new Attribute();
             attribute.setName(field.name());
-            attribute.setDisplayName(field.getProp("displayName"));
+            String displayName = field.getProp("displayName");
+            if (displayName == null) {
+                displayName = field.name();
+            }
+            attribute.setDisplayName(displayName);
             String type = convertToType(field.schema());
             attribute.setPhysicalDataType(type);
             attribute.setLogicalDataType(field.getProp("logicalType"));
