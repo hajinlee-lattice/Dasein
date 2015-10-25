@@ -13,17 +13,16 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import com.latticeengines.propdata.collection.util.DateRange;
-import com.latticeengines.propdata.collection.util.LoggingUtils;
-
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.latticeengines.propdata.collection.util.DateRange;
+import com.latticeengines.propdata.collection.util.LoggingUtils;
 
 public class ArchiveJobRunner {
 
@@ -188,26 +187,28 @@ public class ArchiveJobRunner {
             promptContinue();
 
             System.out.println("Start archiving " + source.getName() + " ... ");
-            ApplicationContext ac = new ClassPathXmlApplicationContext("propdata-collection-context.xml");
-            ArchiveJobService jobService = (ArchiveJobService) ac.getBean(source.getArchiveJobBean());
-            jobService.setAutowiredArchiveService();
-            jobService.setJobSubmitter(JOB_SUBMITTER);
+            try (ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
+                    "propdata-collection-context.xml")) {
+                ArchiveJobService jobService = (ArchiveJobService) ac.getBean(source.getArchiveJobBean());
+                jobService.setAutowiredArchiveService();
+                jobService.setJobSubmitter(JOB_SUBMITTER);
 
-            i = 0;
-            long totalStartTime = System.currentTimeMillis();
-            for (DateRange period : periods) {
-                long startTime = System.currentTimeMillis();
-                System.out.println("Archiving data for (" + (++i) + "/" + periods.size() + ") period " + period
-                        + " (check propdata.log and progress table for detailed progress.) ...");
-                System.out.println("");
+                i = 0;
+                long totalStartTime = System.currentTimeMillis();
+                for (DateRange period : periods) {
+                    long startTime = System.currentTimeMillis();
+                    System.out.println("Archiving data for (" + (++i) + "/" + periods.size() + ") period " + period
+                            + " (check propdata.log and progress table for detailed progress.) ...");
+                    System.out.println("");
 
-                try {
-                    jobService.archivePeriod(period);
-                    System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime) +
-                            " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
-                } catch (Exception e) {
-                    System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime) +
-                            " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
+                    try {
+                        jobService.archivePeriod(period);
+                        System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime)
+                                + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
+                    } catch (Exception e) {
+                        System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime)
+                                + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
+                    }
                 }
             }
 
@@ -225,21 +226,24 @@ public class ArchiveJobRunner {
         // prompt for continue
         while (true) {
             System.out.print("Do you want continue? (Y/n) ");
-            Scanner scanner = new Scanner(System.in);
-            String answer = scanner.nextLine();
-            if (answer.equalsIgnoreCase("Y") || StringUtils.isEmpty(answer)) {
-                break;
-            } else if (answer.equalsIgnoreCase("N")) {
-                System.exit(0);
-            } else {
-                System.out.println("Unrecognized choice " + answer);
+            try (Scanner scanner = new Scanner(System.in)) {
+                String answer = scanner.nextLine();
+                if (answer.equalsIgnoreCase("Y") || StringUtils.isEmpty(answer)) {
+                    break;
+                } else if (answer.equalsIgnoreCase("N")) {
+                    System.exit(0);
+                } else {
+                    System.out.println("Unrecognized choice " + answer);
+                }
             }
         }
     }
 
     private void promptExit() throws IOException {
         System.out.println("Press enter to exit.");
-        new Scanner(System.in).nextLine();
+        try (Scanner scanner = new Scanner(System.in)) { 
+            scanner.nextLine();
+        }
         System.exit(0);
     }
 
