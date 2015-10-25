@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.latticeengines.propdata.collection.service.CollectionJobContext;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 

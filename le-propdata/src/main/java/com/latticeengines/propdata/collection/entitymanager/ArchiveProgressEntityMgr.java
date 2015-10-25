@@ -17,4 +17,7 @@ public interface ArchiveProgressEntityMgr<T> {
     T findProgressByRootOperationUid(String rootOperationUid);
 
     Class<T> getProgressClass();
+
+    T findEarliestFailureUnderMaxRetry();
+
 }

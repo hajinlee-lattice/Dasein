@@ -13,8 +13,6 @@ import cascading.tuple.Fields;
 @Scope("prototype")
 public class FeatureMergeRawSnapshotDataFlowBuilder extends MergeRawSnapshotDataFlowBuilder {
 
-    private static final FeatureArchiveProgress progress = new FeatureArchiveProgress();
-
     @Override
     protected Fields uniqueFields() {
         Fields fields = new Fields("URL", "Feature");

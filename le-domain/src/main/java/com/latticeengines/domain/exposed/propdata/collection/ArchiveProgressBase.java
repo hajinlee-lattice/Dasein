@@ -60,6 +60,9 @@ abstract public class ArchiveProgressBase implements HasPid {
     @Column(name = "ErrorMessage")
     protected String errorMessage;
 
+    @Column(name = "NumRetries")
+    protected int numRetries;
+
     @Override
     public Long getPid() {
         return pid;
@@ -108,6 +111,7 @@ abstract public class ArchiveProgressBase implements HasPid {
 
     public void setStatus(ArchiveProgressStatus status) {
         this.status = status;
+        setLatestStatusUpdate(new Date());
     }
 
     public String getRootOperationUID() {
@@ -120,7 +124,7 @@ abstract public class ArchiveProgressBase implements HasPid {
 
     public Date getLatestStatusUpdate() { return latestStatusUpdate; }
 
-    public void setLatestStatusUpdate(Date latestStatusUpdate) { this.latestStatusUpdate = latestStatusUpdate; }
+    private void setLatestStatusUpdate(Date latestStatusUpdate) { this.latestStatusUpdate = latestStatusUpdate; }
 
     public String getCreatedBy() { return createdBy; }
 
@@ -138,6 +142,10 @@ abstract public class ArchiveProgressBase implements HasPid {
 
     public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 
+    public int getNumRetries() { return numRetries; }
+
+    public void setNumRetries(int numRetries) { this.numRetries = numRetries; }
+
     public static <T extends ArchiveProgressBase> T constructByDates(Date startDate, Date endDate, Class<T> tClass)
             throws InstantiationException, IllegalAccessException {
         T progress = tClass.newInstance();
@@ -149,7 +157,6 @@ abstract public class ArchiveProgressBase implements HasPid {
         progress.setRowsDownloadedToHdfs(0);
         progress.setRowsUploadedToSql(0);
         progress.setStatus(ArchiveProgressStatus.NEW);
-        progress.setLatestStatusUpdate(new Date());
 
         return progress;
     }

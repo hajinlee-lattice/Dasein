@@ -33,4 +33,14 @@ public class FeatureArchiveProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         return list.get(0);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<FeatureArchiveProgress> findFailedProgresses() {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format("from %s where Status = 'FAILED' order by LatestStatusUpdate asc",
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        return (List<FeatureArchiveProgress>) query.list();
+    }
+
 }

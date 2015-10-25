@@ -7,7 +7,6 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -108,6 +108,8 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             Progress progress = entityMgr.insertNewProgress(startDate, endDate, creator);
             CollectionJobContext context = new CollectionJobContext();
             context.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
+            LoggingUtils.logInfo(log, progress, "Started a new progress with StartDate=" + startDate
+                    + " endDate=" + endDate);
             return context;
         } catch (InstantiationException|IllegalAccessException e) {
             throw new RuntimeException(
@@ -123,11 +125,12 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         if (!checkProgressStatus(request, ArchiveProgressStatus.NEW, ArchiveProgressStatus.DOWNLOADING)) {
             return response;
         }
-        Progress progress = request.getProperty(CollectionJobContext.PROGRESS_KEY, entityMgr.getProgressClass());
-        response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
 
         // update status
         long startTime = System.currentTimeMillis();
+        Progress progress = request.getProperty(CollectionJobContext.PROGRESS_KEY, entityMgr.getProgressClass());
+        logIfRetrying(progress);
+        response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
         entityMgr.updateStatus(progress, ArchiveProgressStatus.DOWNLOADING);
         LoggingUtils.logInfo(log, progress, "Start downloading ...");
 
@@ -142,6 +145,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         }
 
         LoggingUtils.logInfoWithDuration(log, progress, "Downloaded.", startTime);
+        progress.setNumRetries(0);
         return refreshContextAndDBToStatus(response, progress, ArchiveProgressStatus.DOWNLOADED);
     }
 
@@ -153,11 +157,12 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         if (!checkProgressStatus(request, ArchiveProgressStatus.DOWNLOADED, ArchiveProgressStatus.TRANSFORMING)) {
             return response;
         }
-        Progress progress = request.getProperty(CollectionJobContext.PROGRESS_KEY, entityMgr.getProgressClass());
-        response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
 
         // update status
         long startTime = System.currentTimeMillis();
+        Progress progress = request.getProperty(CollectionJobContext.PROGRESS_KEY, entityMgr.getProgressClass());
+        logIfRetrying(progress);
+        response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
         entityMgr.updateStatus(progress, ArchiveProgressStatus.TRANSFORMING);
         LoggingUtils.logInfo(log, progress, "Start transforming ...");
 
@@ -173,6 +178,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         }
 
         LoggingUtils.logInfoWithDuration(log, progress, "Transformed.", startTime);
+        progress.setNumRetries(0);
         return refreshContextAndDBToStatus(response, progress, ArchiveProgressStatus.TRANSFORMED);
     }
 
@@ -189,6 +195,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         // update status
         long startTime = System.currentTimeMillis();
         Progress progress = request.getProperty(CollectionJobContext.PROGRESS_KEY, entityMgr.getProgressClass());
+        logIfRetrying(progress);
         entityMgr.updateStatus(progress, ArchiveProgressStatus.UPLOADING);
         LoggingUtils.logInfo(log, progress, "Start uploading ...");
 
@@ -197,7 +204,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             return refreshContextAndDBToStatus(response, progress, ArchiveProgressStatus.UPLOADED);
         }
 
-        String sourceDir = workflowDirsInHdfs(progress) + "/Output";
+        String sourceDir = workflowDirsInHdfs() + "/Output";
         String destTable = getDestTableName();
 
         // cleanup stage table
@@ -222,7 +229,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             LoggingUtils.logInfoWithDuration(log, progress, "Uploaded " + rowsUploaded + " rows to stage table.", uploadStartTime);
         } catch (Exception e) {
             LoggingUtils.logError(log, progress, "Failed to upload data to DB.", e);
-            updateStautsToFailed(progress, "Failed to upload data to DB.");
+            updateStatusToFailed(progress, "Failed to upload data to DB.");
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
         } finally {
@@ -239,7 +246,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             jdbcTemplateDest.execute("EXEC sp_rename '" + stageTableName + "', '" + destTable + "'");
         } catch (Exception e) {
             LoggingUtils.logError(log, progress, "Failed to swap stage and dest tables", e);
-            updateStautsToFailed(progress, "Failed to swap stage and dest tables");
+            updateStatusToFailed(progress, "Failed to swap stage and dest tables");
 
             LoggingUtils.logInfo(log, progress, "Restore backup table to dest table.");
             dropJdbcTableIfExists(jdbcTemplateDest, destTable);
@@ -254,7 +261,19 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
 
         // finish
         LoggingUtils.logInfoWithDuration(log, progress, "Uploaded.", startTime);
+        progress.setNumRetries(0);
         return refreshContextAndDBToStatus(response, progress, ArchiveProgressStatus.UPLOADED);
+    }
+
+    @Override
+    public CollectionJobContext findRetriableArchiveJob() {
+        Progress progress = entityMgr.findEarliestFailureUnderMaxRetry();
+        if (progress != null) {
+            CollectionJobContext context = new CollectionJobContext();
+            context.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
+            return context;
+        }
+        return CollectionJobContext.NULL;
     }
 
     private boolean checkProgressStatus(CollectionJobContext request,
@@ -262,11 +281,18 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         Progress progress = request.getProperty(CollectionJobContext.PROGRESS_KEY, entityMgr.getProgressClass());
         if (progress == null) { return false; }
 
-        if (progress.getStatus().equals(inProgress)) {
+        if (inProgress.equals(progress.getStatus())) {
             return false;
         }
 
-        if (!progress.getStatus().equals(expectedStatus)) {
+        if (ArchiveProgressStatus.FAILED.equals(progress.getStatus()) && (
+                inProgress.equals(progress.getStatusBeforeFailed()) ||
+                        expectedStatus.equals(progress.getStatusBeforeFailed())
+        ) ) {
+            return true;
+        }
+
+        if (!expectedStatus.equals(progress.getStatus())) {
             LoggingUtils.logError(log, progress, "Progress is not in the status " + expectedStatus + " but rather " +
                     progress.getStatus() + " before "
                     + inProgress + ".", new IllegalStateException());
@@ -274,6 +300,15 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         }
 
         return true;
+    }
+
+    private void logIfRetrying(Progress progress) {
+        if (progress.getStatus().equals(ArchiveProgressStatus.FAILED)) {
+            int numRetries = progress.getNumRetries() + 1;
+            progress.setNumRetries(numRetries);
+            LoggingUtils.logInfo(log, progress, String.format("Retry [%d] from [%s].",
+                    progress.getNumRetries(), progress.getStatusBeforeFailed()));
+        }
     }
 
     private CollectionJobContext refreshContextAndDBToStatus(CollectionJobContext response,
@@ -311,7 +346,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     private boolean importIncrementalRawDataAndUpdateProgress(Progress progress) {
         String targetDir = incrementalDataDirInHdfs(progress);
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStautsToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
             return false;
         }
 
@@ -320,7 +355,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
 
         if (!importSrcDBBySqoop(getSourceTableName(), targetDir, customer, whereClause, progress)) {
-            updateStautsToFailed(progress, "Failed to import incremental data from DB.");
+            updateStatusToFailed(progress, "Failed to import incremental data from DB.");
             return false;
         }
 
@@ -343,7 +378,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             }
         } catch (Exception e) {
             LoggingUtils.logError(log, progress, "Failed to upload avsc.", e);
-            updateStautsToFailed(progress, "Failed to upload avsc.");
+            updateStatusToFailed(progress, "Failed to upload avsc.");
             return false;
         }
 
@@ -353,14 +388,14 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     private boolean importSnapshotDestData(Progress progress) {
         String targetDir = hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSourceTableName()).toString();
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStautsToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
             return false;
         }
 
         String customer = getSqoopCustomerName(progress) + "-downloadSnapshotData" ;
 
         if (!importDestDBBySqoop(getDestTableName(), targetDir, customer, progress)) {
-            updateStautsToFailed(progress, "Failed to import snapshot data from DB.");
+            updateStatusToFailed(progress, "Failed to import snapshot data from DB.");
             return false;
         }
 
@@ -400,9 +435,9 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
 
     private boolean transformRawDataToMostRecent(Progress progress) {
         // prepare target dir in hdfs
-        String targetDir = workflowDirsInHdfs(progress);
+        String targetDir = workflowDirsInHdfs();
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStautsToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
             return false;
         }
 
@@ -411,7 +446,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             transformRawDataInternal(progress);
         } catch (Exception e) {
             log.error("Failed to transform raw data for progress " + progress, e);
-            updateStautsToFailed(progress, "Failed to transform raw data.");
+            updateStatusToFailed(progress, "Failed to transform raw data.");
             return false;
         }
 
@@ -426,7 +461,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         );
     }
 
-    protected String workflowDirsInHdfs(Progress progress) {
+    protected String workflowDirsInHdfs() {
         return hdfsPathBuilder.constructWorkFlowDir(getSourceTableName(),
                 CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW).toString();
     }
@@ -441,7 +476,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     }
 
 
-    private void updateStautsToFailed(Progress progress, String errorMsg) {
+    private void updateStatusToFailed(Progress progress, String errorMsg) {
         progress.setStatusBeforeFailed(progress.getStatus());
         progress.setErrorMessage(errorMsg);
         entityMgr.updateStatus(progress, ArchiveProgressStatus.FAILED);

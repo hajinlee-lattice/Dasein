@@ -11,7 +11,6 @@ import com.latticeengines.propdata.collection.job.ArchiveJobService;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectionJobContext;
 import com.latticeengines.propdata.collection.util.DateRange;
-import com.latticeengines.propdata.collection.util.LoggingUtils;
 
 public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBase> extends QuartzJobBean
         implements ArchiveJobService {
@@ -25,26 +24,17 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        CollectionJobContext jobCtx = archiveService.findRetriableArchiveJob();
+        if (CollectionJobContext.NULL.equals(jobCtx)) {
+
+        }
     }
 
     @Override
     public void archivePeriod(DateRange period) {
-        Logger log = getLogger();
         CollectionJobContext context = archiveService.startNewProgress(period.getStartDate(), period.getEndDate(),
                 jobSubmitter);
-        P progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
-        LoggingUtils.logInfo(log, progress, "Start Archiving process.");
-
-        context = archiveService.importFromDB(context);
-        context = archiveService.transformRawData(context);
-        context = archiveService.exportToDB(context);
-
-        progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
-        if (progress.getStatus().equals(ArchiveProgressStatus.FAILED)) {
-            logJobFailed(progress);
-        } else {
-            logJobSucceed(progress);
-        }
+        proceedProgress(context);
     }
 
     @Override
@@ -55,6 +45,19 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
     @Override
     public void setAutowiredArchiveService() {
         setArchiveService(getArchiveService());
+    }
+
+    private void proceedProgress(CollectionJobContext context) {
+        context = archiveService.importFromDB(context);
+        context = archiveService.transformRawData(context);
+        context = archiveService.exportToDB(context);
+
+        P progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
+        if (progress.getStatus().equals(ArchiveProgressStatus.FAILED)) {
+            logJobFailed(progress);
+        } else {
+            logJobSucceed(progress);
+        }
     }
 
     public void setArchiveService(ArchiveService archiveService) {

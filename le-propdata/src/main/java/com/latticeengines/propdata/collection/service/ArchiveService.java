@@ -12,4 +12,6 @@ public interface ArchiveService {
 
     CollectionJobContext exportToDB(CollectionJobContext request);
 
+    CollectionJobContext findRetriableArchiveJob();
+
 }

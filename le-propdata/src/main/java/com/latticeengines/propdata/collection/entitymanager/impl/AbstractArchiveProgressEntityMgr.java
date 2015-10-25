@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.collection.entitymanager.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -14,6 +15,8 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 public abstract class AbstractArchiveProgressEntityMgr<T extends ArchiveProgressBase> implements ArchiveProgressEntityMgr<T> {
 
     ArchiveProgressDao<T> progressDao;
+
+    private static final int MAX_RETRIES = 5;
 
     abstract ArchiveProgressDao<T> getProgressDao();
 
@@ -45,7 +48,6 @@ public abstract class AbstractArchiveProgressEntityMgr<T extends ArchiveProgress
     @Transactional(value = "propDataCollectionDest")
     public T updateStatus(T progress, ArchiveProgressStatus status) {
         progress.setStatus(status);
-        progress.setLatestStatusUpdate(new Date());
         return updateProgress(progress);
     }
 
@@ -60,6 +62,18 @@ public abstract class AbstractArchiveProgressEntityMgr<T extends ArchiveProgress
     @Transactional(value = "propDataCollectionDest", readOnly = true)
     public T findProgressByRootOperationUid(String rootOperationUid) {
         return progressDao.findByRootOperationUid(rootOperationUid);
+    }
+
+    @Override
+    @Transactional(value = "propDataCollectionDest", readOnly = true)
+    public T findEarliestFailureUnderMaxRetry() {
+        List<T> progresses = progressDao.findFailedProgresses();
+        for (T progress: progresses) {
+            if (progress.getNumRetries() < MAX_RETRIES) {
+                return progress;
+            }
+        }
+        return null;
     }
 
 }

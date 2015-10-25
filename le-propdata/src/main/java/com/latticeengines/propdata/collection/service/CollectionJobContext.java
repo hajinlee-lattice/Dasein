@@ -31,4 +31,7 @@ public class CollectionJobContext {
     public Map<String, Object> getMap() {
         return properties;
     }
+
+    public static final CollectionJobContext NULL = new CollectionJobContext();
+
 }
