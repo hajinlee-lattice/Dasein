@@ -80,6 +80,17 @@ public class MetadataResource extends InternalResourceBase {
         mdService.updateTable(space, table);
     }
 
+    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete table")
+    public void deleteTable(@PathVariable String customerSpace, //
+            @PathVariable String tableName, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        mdService.deleteTable(space, tableName);
+    }
+
     @RequestMapping(value = "/tables/{tableName}/validations", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Validate metadata")

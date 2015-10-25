@@ -58,7 +58,10 @@ public class MetadataServiceImpl implements MetadataService {
     
     @Override
     public void updateTable(CustomerSpace customerSpace, Table table) {
-        tableEntityMgr.delete(table.getName());
+        if (tableEntityMgr.findByName(table.getName()) != null) {
+            tableEntityMgr.delete(table.getName());
+        }
+        
         tableEntityMgr.create(table);
     }
     
