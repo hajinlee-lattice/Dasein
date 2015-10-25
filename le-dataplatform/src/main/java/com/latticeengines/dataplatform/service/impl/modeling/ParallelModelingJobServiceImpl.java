@@ -32,6 +32,12 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     @Value("${dataplatform.fs.web.defaultFS}")
     private String webFS;
 
+    @Value("${dataplatform.container.parallel.map.memory}")
+    private String mapMemorySize;
+    @Value("${dataplatform.container.parallel.reduce.memory}")
+    private String reduceMemorySize;
+
+    
     protected ApplicationId sumbitJobInternal(ModelingJob modelingJob) {
         Properties appMasterProperties = modelingJob.getAppMasterPropertiesObject();
         Properties containerProperties = modelingJob.getContainerPropertiesObject();
@@ -107,6 +113,10 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
+        
+        properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), mapMemorySize);
+        properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), reduceMemorySize);
+        
 
         HdfsUtils.writeToFile(yarnConfiguration, inputDir + "/" + PythonMRJobType.MODELING_JOB.configName(),
                 StringUtils.join(trainingFiles, System.lineSeparator()));

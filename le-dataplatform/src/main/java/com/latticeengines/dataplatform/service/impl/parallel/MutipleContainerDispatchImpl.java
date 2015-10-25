@@ -20,10 +20,10 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 @Component("MutipleContainerDispatcher")
 public class MutipleContainerDispatchImpl implements ParallelDispatchService {
 
-    @Value("${dataplatform.sampling.trainingset.number}")
+    @Value("${dataplatform.sampling.parallel.trainingset.number}")
     private String numberOfSamplingTrainingSet;
 
-    @Value("${dataplatform.profiling.mapper.number}")
+    @Value("${dataplatform.profiling.parallel.mapper.number}")
     private String numberOfProfilingMappers;
 
     @Resource(name = "parallelModelingJobService")

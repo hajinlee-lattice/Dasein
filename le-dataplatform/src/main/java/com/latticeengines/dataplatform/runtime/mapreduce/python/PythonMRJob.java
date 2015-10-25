@@ -79,6 +79,15 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         String outputKey = MapReduceProperty.OUTPUT.name();
         config.set(outputKey, properties.getProperty(outputKey));
         config.set(MRPathFilter.INPUT_FILE_PATTERN, PythonMRJobType.CONFIG_FILE);
+
+        String mapMemorySize = properties.getProperty(MapReduceProperty.MAP_MEMORY_SIZE.name());
+        if (mapMemorySize != null) {
+            config.set("mapreduce.map.memory.mb", mapMemorySize);
+        }
+        String reduceMemorySize = properties.getProperty(MapReduceProperty.REDUCE_MEMORY_SIZE.name());
+        if (reduceMemorySize != null) {
+            config.set("mapreduce.reduce.memory.mb", reduceMemorySize);
+        }
     }
 
     private void setInputFormat(Job mrJob, Properties properties, Configuration config) {
