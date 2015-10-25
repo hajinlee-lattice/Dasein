@@ -55,8 +55,44 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
+    public ApplicationId importDataForQuery(String query, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols, String columnsToInclude) {
+        int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
+        return importDataForQuery(query, targetDir, creds, queue, customer, splitCols, columnsToInclude, numDefaultMappers, null);
+    }
+
+    @Override
+    public ApplicationId importDataForQuery(String query, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
+        return importData(null, //
+                query, //
+                targetDir, //
+                creds, //
+                queue, //
+                customer, //
+                splitCols, //
+                columnsToInclude, //
+                numMappers, //
+                props);
+    }
+    @Override
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
+        return importData(table, //
+                           null, //
+                           targetDir, //
+                           creds, //
+                           queue, //
+                           customer, //
+                           splitCols, //
+                           columnsToInclude, //
+                           numMappers, //
+                           props);
+    }
+    @Override
+    public ApplicationId importData(String table, String query, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
+
         long time1 = System.currentTimeMillis();
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
@@ -64,6 +100,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         while (retryCount < MAX_SQOOP_RETRY) {
             try {
                 ApplicationId appId = super.importData(table, //
+                        query, //
                         targetDir, //
                         creds, //
                         queue, //
@@ -168,6 +205,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
         ApplicationId appId = super.importData(table, //
+                null,//
                 targetDir, //
                 creds, //
                 queue, //
@@ -193,6 +231,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
         ApplicationId appId = super.importDataWithWhereCondition(table, //
+                null, //
                 targetDir, //
                 creds, //
                 queue, //

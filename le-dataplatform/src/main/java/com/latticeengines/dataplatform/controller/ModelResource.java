@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
@@ -35,7 +36,7 @@ public class ModelResource {
     
     @Autowired
     private JobService jobService;
-
+    
     public ModelResource() {
         // Need to set java.class.path in order for the Sqoop dynamic java
         // compilation to work
@@ -70,6 +71,14 @@ public class ModelResource {
     @ApiOperation(value = "Load data from a database table")
     public AppSubmission loadData(@RequestBody LoadConfiguration config) {
         AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.loadData(config)));
+        return submission;
+    }
+
+    @RequestMapping(value = "/dataexports", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Export data from HDFS to a database table")
+    public AppSubmission exportData(@RequestBody ExportConfiguration config) {
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.exportData(config)));
         return submission;
     }
 

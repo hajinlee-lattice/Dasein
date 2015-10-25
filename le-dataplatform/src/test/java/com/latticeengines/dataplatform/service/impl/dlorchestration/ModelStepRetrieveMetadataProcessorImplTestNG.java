@@ -115,7 +115,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
                 modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataFile(command, commandParameters)));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testMetadataJsonFormat() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);

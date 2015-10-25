@@ -18,6 +18,9 @@ public interface SqoopSyncJobService {
     ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers);
 
+    ApplicationId importData(String table, String query, String targetDir, DbCreds creds, String queue,
+            String customer, List<String> splitCols, String columnsToInclude, int numMappers, Properties props);
+
     ApplicationId importDataSync(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers);
 
@@ -39,5 +42,9 @@ public interface SqoopSyncJobService {
 
     void eval(String sql, String assignedQueue, String jobName, String connectionString);
 
+    ApplicationId importDataForQuery(String query, String dataHdfsPath, DbCreds creds, String assignedQueue,
+            String customer, List<String> keyCols, String columnsToInclude);
 
+    ApplicationId importDataForQuery(String query, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols, String columnsToInclude, int numMappers, Properties props);
 }

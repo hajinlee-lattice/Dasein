@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -118,11 +119,35 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
+        
+        String targetDir = config.getTargetHdfsDir();
+        
+        if (targetDir == null) {
+            targetDir = model.getDataHdfsPath();
+        }
 
-        return sqoopSyncJobService.importData(model.getTable(), model.getDataHdfsPath(), config.getCreds(),
+        if (config.getQuery() != null) {
+            return sqoopSyncJobService.importDataForQuery(config.getQuery(), //
+                    targetDir, //
+                    config.getCreds(), //
+                    assignedQueue, //
+                    model.getCustomer(), //
+                    config.getKeyCols(), //
+                    null);
+        }
+        return sqoopSyncJobService.importData(model.getTable(), targetDir, config.getCreds(),
                 assignedQueue, model.getCustomer(), config.getKeyCols(),
                 columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()));
     }
+
+    @Override
+    public ApplicationId exportData(ExportConfiguration config) {
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
+
+        return sqoopSyncJobService.exportData(config.getTable(), config.getHdfsDirPath(), config.getCreds(),
+                assignedQueue, config.getCustomer());
+    }
+
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
