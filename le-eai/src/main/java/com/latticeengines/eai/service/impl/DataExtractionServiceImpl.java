@@ -174,9 +174,12 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     public void cleanUpTargetPathData(ImportContext context) throws Exception {
         @SuppressWarnings("unchecked")
         Map<String, String> targetPaths = context.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
-        for (Map.Entry<String, String> entry : targetPaths.entrySet()) {
-            log.info("Table is： " + entry.getKey() + "  Path is: " + entry.getValue());
-            HdfsUtils.rmdir(yarnConfiguration, StringUtils.substringBeforeLast(entry.getValue(), "/"));
+        
+        if (targetPaths != null) {
+            for (Map.Entry<String, String> entry : targetPaths.entrySet()) {
+                log.info("Table is： " + entry.getKey() + " Path is: " + entry.getValue());
+                HdfsUtils.rmdir(yarnConfiguration, StringUtils.substringBeforeLast(entry.getValue(), "/"));
+            }
         }
     }
 
