@@ -159,14 +159,14 @@ public enum LedpCode {
 
     // le-scoring 20000-20100
     LEDP_20000("ScoringCommand Failed"), //
-    LEDP_20001("Validation of the datatype failed: {0}"), //
+    LEDP_20001("User error: Validation of the datatype failed: {0}"), //
     LEDP_20002("Python script for scoring is not provided."), //
-    LEDP_20003("Lead does not have 'LeadID' column."), //
-    LEDP_20004("Lead does not have 'Model_GUID' column."), //
+    LEDP_20003("User error: Lead does not have 'LeadID' column."), //
+    LEDP_20004("User error: Lead does not have 'Model_GUID' column."), //
     LEDP_20005("There are duplicate leads for 'LeadID': {0} and 'Model_GUID': {1} in one request."), //
     LEDP_20006("Datatype file for scoring is not provided."), //
-    LEDP_20007("The following model is not provided: {0}"), //
-    LEDP_20008("Cannot find any model for tenant: {0}"), //
+    LEDP_20007("User error: The following model is not provided: {0}"), //
+    LEDP_20008("User error: Cannot find any model for tenant: {0}"), //
     LEDP_20009("Not all the leads are not scored. {0} leads are transformed, but only {1} got scored."), //
     LEDP_20010("Not all the leads are transformed and stored. {0} leads are passed in, but only {1} got transformed."), //
     LEDP_20011("The scoring python script (scoring.py) failed, with the error message: {0}.}"), //
@@ -175,7 +175,7 @@ public enum LedpCode {
     LEDP_20014("The scoring mapper failed."), //
     LEDP_20015("The scoring mapper should not get 0 lead"), //
     LEDP_20016("The total number scoring leads is incorrect"), //
-    LEDP_20017("Cannot process scoring request with 0 lead"), //
+    LEDP_20017("User error: Cannot process scoring request with 0 lead"), //
     LEDP_20018("Cannot find any lead avro files"), //
     LEDP_20019("Average avro file size cannot be 0 byte."), //
     LEDP_20020("No model has been localized for scoring."), //

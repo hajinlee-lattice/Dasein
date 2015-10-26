@@ -35,27 +35,11 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
+import com.latticeengines.scoring.service.ScoringDaemonService;
 
 public class ScoringMapperPredictUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
-
-    public static final String CALIBRATION = "Calibration";
-    public static final String CALIBRATION_MAXIMUMSCORE = "MaximumScore";
-    public static final String CALIBRATION_MINIMUMSCORE = "MinimumScore";
-    public static final String CALIBRATION_PROBABILITY = "Probability";
-    public static final String AVERAGE_PROBABILITY = "AverageProbability";
-    public static final String BUCKETS = "Buckets";
-    public static final String BUCKETS_TYPE = "Type";
-    public static final String BUCKETS_MAXIMUMSCORE = "Maximum";
-    public static final String BUCKETS_MINIMUMSCORE = "Minimum";
-    public static final String BUCKETS_NAME = "Name";
-    public static final String PERCENTILE_BUCKETS = "PercentileBuckets";
-    public static final String PERCENTILE_BUCKETS_PERCENTILE = "Percentile";
-    public static final String PERCENTILE_BUCKETS_MINIMUMSCORE = "MinimumScore";
-    public static final String PERCENTILE_BUCKETS_MAXIMUMSCORE = "MaximumScore";
-    private static final String SCORING_OUTPUT_PREFIX = "scoringoutputfile-";
-    private static final String AVRO_FILE_SUFFIX = ".avro";
 
     public static String evaluate(MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context,
             Set<String> modelGuidSet) throws IOException, InterruptedException {
@@ -106,7 +90,7 @@ public class ScoringMapperPredictUtil {
     public static void writeToOutputFile(List<ScoreOutput> resultList, Configuration yarnConfiguration,
             String outputPath) throws Exception {
 
-        String fileName = UUID.randomUUID() + AVRO_FILE_SUFFIX;
+        String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
         File outputFile = new File(fileName);
         DatumWriter<ScoreOutput> userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
         DataFileWriter<ScoreOutput> dataFileWriter = new DataFileWriter<ScoreOutput>(userDatumWriter);
@@ -180,7 +164,7 @@ public class ScoringMapperPredictUtil {
     private static int readScoreFile(String modelGuid, int index, Map<String, List<Double>> scores) throws IOException {
 
         int rawScoreNum = 0;
-        String fileName = modelGuid + SCORING_OUTPUT_PREFIX + index + ".txt";
+        String fileName = modelGuid + ScoringDaemonService.SCORING_OUTPUT_PREFIX + index + ".txt";
         File f = new File(fileName);
         if (!f.exists()) {
             throw new LedpException(LedpCode.LEDP_20012, new String[] { fileName });
@@ -212,23 +196,23 @@ public class ScoringMapperPredictUtil {
         Double probability = null;
 
         // perform calibration
-        JSONArray calibrationRanges = (JSONArray) model.get(CALIBRATION);
+        JSONArray calibrationRanges = (JSONArray) model.get(ScoringDaemonService.CALIBRATION);
         if (calibrationRanges != null) {
             for (int i = 0; i < calibrationRanges.size(); i++) {
                 JSONObject range = (JSONObject) calibrationRanges.get(i);
-                Object lowerBoundObj = range.get(CALIBRATION_MINIMUMSCORE);
-                Object upperBoundObj = range.get(CALIBRATION_MAXIMUMSCORE);
+                Object lowerBoundObj = range.get(ScoringDaemonService.CALIBRATION_MINIMUMSCORE);
+                Object upperBoundObj = range.get(ScoringDaemonService.CALIBRATION_MAXIMUMSCORE);
                 Double lowerBound = lowerBoundObj == null ? null : Double.parseDouble(lowerBoundObj.toString());
                 Double upperBound = upperBoundObj == null ? null : Double.parseDouble(upperBoundObj.toString());
                 if (betweenBounds(score, lowerBound, upperBound)) {
-                    Object probabilityObj = range.get(CALIBRATION_PROBABILITY);
+                    Object probabilityObj = range.get(ScoringDaemonService.CALIBRATION_PROBABILITY);
                     probability = probabilityObj == null ? null : Double.parseDouble(probabilityObj.toString());
                     break;
                 }
             }
         }
 
-        Object averageProbabilityObj = model.get(AVERAGE_PROBABILITY);
+        Object averageProbabilityObj = model.get(ScoringDaemonService.AVERAGE_PROBABILITY);
         Double averageProbability = averageProbabilityObj == null ? null : Double.parseDouble(averageProbabilityObj
                 .toString());
         Double lift = averageProbability != null && averageProbability != 0 ? (double) probability / averageProbability
@@ -236,7 +220,7 @@ public class ScoringMapperPredictUtil {
 
         // perform bucketing
         String bucket = null;
-        JSONArray bucketRanges = (JSONArray) model.get(BUCKETS);
+        JSONArray bucketRanges = (JSONArray) model.get(ScoringDaemonService.BUCKETS);
         if (bucketRanges != null) {
             for (int i = 0; i < bucketRanges.size(); i++) {
                 Double value = probability;
@@ -245,15 +229,15 @@ public class ScoringMapperPredictUtil {
                     value = score;
                 }
                 // "0 - Probability, 1 - Lift"
-                if (Integer.parseInt(range.get(BUCKETS_TYPE).toString()) == 1) {
+                if (Integer.parseInt(range.get(ScoringDaemonService.BUCKETS_TYPE).toString()) == 1) {
                     value = lift;
                 }
-                Object lowerBoundObj = range.get(BUCKETS_MINIMUMSCORE);
-                Object upperBoundObj = range.get(BUCKETS_MAXIMUMSCORE);
+                Object lowerBoundObj = range.get(ScoringDaemonService.BUCKETS_MINIMUMSCORE);
+                Object upperBoundObj = range.get(ScoringDaemonService.BUCKETS_MAXIMUMSCORE);
                 Double lowerBound = lowerBoundObj == null ? null : Double.parseDouble(lowerBoundObj.toString());
                 Double upperBound = upperBoundObj == null ? null : Double.parseDouble(upperBoundObj.toString());
                 if (value != null && betweenBounds(value, lowerBound, upperBound)) {
-                    bucket = String.valueOf(range.get(BUCKETS_NAME));
+                    bucket = String.valueOf(range.get(ScoringDaemonService.BUCKETS_NAME));
                     break;
                 }
             }
@@ -261,7 +245,7 @@ public class ScoringMapperPredictUtil {
 
         // bucket into percentiles
         Integer percentile = null;
-        JSONArray percentileRanges = (JSONArray) model.get(PERCENTILE_BUCKETS);
+        JSONArray percentileRanges = (JSONArray) model.get(ScoringDaemonService.PERCENTILE_BUCKETS);
         if (percentileRanges != null) {
             Double topPercentileMaxScore = (Double) 0.0;
             Double bottomPercentileMinScore = (Double) 1.0;
@@ -271,11 +255,11 @@ public class ScoringMapperPredictUtil {
             boolean foundbottomPercentileMinScore = false;
             for (int i = 0; i < percentileRanges.size(); i++) {
                 JSONObject range = (JSONObject) percentileRanges.get(i);
-                Object minObject = range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
-                Object maxObject = range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
+                Object minObject = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_MINIMUMSCORE);
+                Object maxObject = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_MAXIMUMSCORE);
                 Double min = minObject == null ? null : Double.parseDouble(minObject.toString());
                 Double max = maxObject == null ? null : Double.parseDouble(maxObject.toString());
-                Object percentObj = range.get(PERCENTILE_BUCKETS_PERCENTILE);
+                Object percentObj = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_PERCENTILE);
                 Integer percent = percentObj == null ? null : Integer.parseInt(percentObj.toString());
                 if (max > topPercentileMaxScore) {
                     topPercentileMaxScore = max;
@@ -296,11 +280,11 @@ public class ScoringMapperPredictUtil {
             } else {
                 for (int i = 0; i < percentileRanges.size(); i++) {
                     JSONObject range = (JSONObject) percentileRanges.get(i);
-                    Object minObject = range.get(PERCENTILE_BUCKETS_MINIMUMSCORE);
-                    Object maxObject = range.get(PERCENTILE_BUCKETS_MAXIMUMSCORE);
+                    Object minObject = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_MINIMUMSCORE);
+                    Object maxObject = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_MAXIMUMSCORE);
                     Double min = minObject == null ? null : Double.parseDouble(minObject.toString());
                     Double max = maxObject == null ? null : Double.parseDouble(maxObject.toString());
-                    Object percentObj = range.get(PERCENTILE_BUCKETS_PERCENTILE);
+                    Object percentObj = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_PERCENTILE);
                     Integer percent = percentObj == null ? null : Integer.parseInt(percentObj.toString());
                     if (betweenBounds(score, min, max)) {
                         percentile = percent;

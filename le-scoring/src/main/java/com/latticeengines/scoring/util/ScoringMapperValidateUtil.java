@@ -14,16 +14,12 @@ import org.json.simple.JSONObject;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
+import com.latticeengines.scoring.service.ScoringDaemonService;
 import com.latticeengines.scoring.util.ModelAndLeadInfo.ModelInfo;
 
 public class ScoringMapperValidateUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
-
-    private static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
-    private static final String INPUT_COLUMN_METADATA_NAME = "Name";
-    private static final String INPUT_COLUMN_METADATA_PURPOSE = "Purpose";
-    private static final String INPUT_COLUMN_METADATA_VALUETYPE = "ValueType";
 
     static public enum MetadataPurpose {
         FEATURE(3), TARGET(4);
@@ -82,7 +78,7 @@ public class ScoringMapperValidateUtil {
         }
 
         // validate the datatype file with the model.json
-        JSONArray metadata = (JSONArray) model.get(INPUT_COLUMN_METADATA);
+        JSONArray metadata = (JSONArray) model.get(ScoringDaemonService.INPUT_COLUMN_METADATA);
         List<String> msgs = validate(datatype, modelId, metadata);
         if (msgs.size() != 0) {
             modelFailures.put(modelId, msgs);
@@ -99,9 +95,9 @@ public class ScoringMapperValidateUtil {
         if (metadata != null) {
             for (int i = 0; i < metadata.size(); i++) {
                 JSONObject obj = (JSONObject) metadata.get(i);
-                String name = String.valueOf(obj.get(INPUT_COLUMN_METADATA_NAME));
-                Long purpose = Long.parseLong(obj.get(INPUT_COLUMN_METADATA_PURPOSE).toString());
-                Long type = Long.parseLong(obj.get(INPUT_COLUMN_METADATA_VALUETYPE).toString());
+                String name = String.valueOf(obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_NAME));
+                Long purpose = Long.parseLong(obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_PURPOSE).toString());
+                Long type = Long.parseLong(obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_VALUETYPE).toString());
                 if (purpose.intValue() != MetadataPurpose.FEATURE.value) {
                     continue;
                 }
@@ -116,7 +112,7 @@ public class ScoringMapperValidateUtil {
                 }
             }
         } else {
-            String msg = String.format("%s does not contain %s. ", modelID, INPUT_COLUMN_METADATA);
+            String msg = String.format("%s does not contain %s. ", modelID, ScoringDaemonService.INPUT_COLUMN_METADATA);
             toReturn.add(msg);
         }
         return toReturn;

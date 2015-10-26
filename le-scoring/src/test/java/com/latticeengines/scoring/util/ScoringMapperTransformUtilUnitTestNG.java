@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.scoring.service.ScoringDaemonService;
 
 public class ScoringMapperTransformUtilUnitTestNG {
 
@@ -93,14 +94,14 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
         JSONObject modelJson = ScoringMapperTransformUtil.parseModelFiles(modelPath);
         Assert.assertNotNull(modelJson);
-        Assert.assertEquals(modelJson.get(ScoringMapperPredictUtil.AVERAGE_PROBABILITY), 0.011919253398255223);
-        Assert.assertNotNull(modelJson.get(ScoringMapperPredictUtil.BUCKETS));
-        Assert.assertNotNull(modelJson.get(ScoringMapperPredictUtil.CALIBRATION));
-        Assert.assertNotNull(modelJson.get(ScoringMapperTransformUtil.INPUT_COLUMN_METADATA));
-        Assert.assertNotNull(modelJson.get(ScoringMapperTransformUtil.MODEL));
+        Assert.assertEquals(modelJson.get(ScoringDaemonService.AVERAGE_PROBABILITY), 0.011919253398255223);
+        Assert.assertNotNull(modelJson.get(ScoringDaemonService.BUCKETS));
+        Assert.assertNotNull(modelJson.get(ScoringDaemonService.CALIBRATION));
+        Assert.assertNotNull(modelJson.get(ScoringDaemonService.INPUT_COLUMN_METADATA));
+        Assert.assertNotNull(modelJson.get(ScoringDaemonService.MODEL));
         Assert.assertNotNull(modelJson.get(SUMMARY));
-        Assert.assertEquals(modelJson.get(ScoringMapperPredictUtil.BUCKETS_NAME), MODEL_NAME);
-        Assert.assertNotNull(modelJson.get(ScoringMapperPredictUtil.PERCENTILE_BUCKETS));
+        Assert.assertEquals(modelJson.get(ScoringDaemonService.BUCKETS_NAME), MODEL_NAME);
+        Assert.assertNotNull(modelJson.get(ScoringDaemonService.PERCENTILE_BUCKETS));
         for (int i = 0; i < targetFiles.length; i++) {
             System.out.println("Current target file is " + targetFiles[i]);
             assertTrue(compareFiles(targetFiles[i]), "parseModelFiles should be successful");

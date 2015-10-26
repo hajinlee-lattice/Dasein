@@ -31,20 +31,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
+import com.latticeengines.scoring.service.ScoringDaemonService;
 
 public class ScoringMapperTransformUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
-
-    public static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
-    public static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
-    public static final String LEAD_RECORD_MODEL_ID_COLUMN = "Model_GUID";
-    public static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
-    public static final String MODEL = "Model";
-    public static final String MODEL_NAME = "Name";
-    public static final String MODEL_COMPRESSED_SUPPORT_Files = "CompressedSupportFiles";
-    public static final String MODEL_SCRIPT = "Script";
-    public static final String SCORING_SCRIPT_NAME = "scoringengine.py";
 
     public static LocalizedFiles processLocalizedFiles(Path[] paths) throws IOException, ParseException {
         JSONObject datatype = null;
@@ -99,15 +90,16 @@ public class ScoringMapperTransformUtil {
         // use the modelGuid to identify a model. It is a contact that when
         // mapper localizes the model, it changes its name to be the modelGuid
         String modelGuid = path.getName();
-        decodeSupportedFiles(modelGuid, (JSONObject) jsonObject.get(MODEL));
-        writeScoringScript(modelGuid, (JSONObject) jsonObject.get(MODEL));
-        log.info("modelName is " + jsonObject.get(MODEL_NAME));
+        decodeSupportedFiles(modelGuid, (JSONObject) jsonObject.get(ScoringDaemonService.MODEL));
+        writeScoringScript(modelGuid, (JSONObject) jsonObject.get(ScoringDaemonService.MODEL));
+        log.info("modelName is " + jsonObject.get(ScoringDaemonService.MODEL_NAME));
         return jsonObject;
     }
 
     private static void decodeSupportedFiles(String modelGuid, JSONObject modelObject) throws IOException {
 
-        JSONArray compressedSupportedFiles = (JSONArray) modelObject.get(MODEL_COMPRESSED_SUPPORT_Files);
+        JSONArray compressedSupportedFiles = (JSONArray) modelObject
+                .get(ScoringDaemonService.MODEL_COMPRESSED_SUPPORT_Files);
         for (int i = 0; i < compressedSupportedFiles.size(); i++) {
             JSONObject compressedFile = (JSONObject) compressedSupportedFiles.get(i);
             String compressedFileName = modelGuid + compressedFile.get("Key");
@@ -119,8 +111,8 @@ public class ScoringMapperTransformUtil {
 
     private static void writeScoringScript(String modelGuid, JSONObject modelObject) throws IOException {
 
-        String scriptContent = String.valueOf(modelObject.get(MODEL_SCRIPT));
-        String fileName = modelGuid + SCORING_SCRIPT_NAME;
+        String scriptContent = String.valueOf(modelObject.get(ScoringDaemonService.MODEL_SCRIPT));
+        String fileName = modelGuid + ScoringDaemonService.SCORING_SCRIPT_NAME;
         log.info("fileName is " + fileName);
         File file = new File(fileName);
         FileUtils.writeStringToFile(file, scriptContent);
@@ -184,12 +176,12 @@ public class ScoringMapperTransformUtil {
 
         Set<String> modelGuidSet = localizedFiles.getModels().keySet();
         // first step validation, to see whether the leadId is provided.
-        Object leadIdObj = leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN);
+        Object leadIdObj = leadJsonObject.get(ScoringDaemonService.LEAD_RECORD_LEAD_ID_COLUMN);
         if (leadIdObj == null) {
             throw new LedpException(LedpCode.LEDP_20003, new String[] { (String) leadIdObj });
         }
         // second step validation, to see whether the modelGuid is provided.
-        Object modelIdObj = leadJsonObject.get(LEAD_RECORD_MODEL_ID_COLUMN);
+        Object modelIdObj = leadJsonObject.get(ScoringDaemonService.MODEL_GUID);
         if (modelIdObj == null) {
             throw new LedpException(LedpCode.LEDP_20004, new String[] { (String) modelIdObj });
         }
@@ -258,11 +250,11 @@ public class ScoringMapperTransformUtil {
 
     @SuppressWarnings("unchecked")
     public static String transformLead(JSONObject leadJsonObject, JSONObject modelJsonObject) {
-        JSONArray metadata = (JSONArray) modelJsonObject.get(INPUT_COLUMN_METADATA);
+        JSONArray metadata = (JSONArray) modelJsonObject.get(ScoringDaemonService.INPUT_COLUMN_METADATA);
 
         // parse the avro file since it is in json format
         JSONObject jsonObj = new JSONObject();
-        String leadId = String.valueOf(leadJsonObject.get(LEAD_RECORD_LEAD_ID_COLUMN));
+        String leadId = String.valueOf(leadJsonObject.get(ScoringDaemonService.LEAD_RECORD_LEAD_ID_COLUMN));
 
         JSONArray jsonArray = new JSONArray();
         jsonObj.put("value", jsonArray);
@@ -287,7 +279,7 @@ public class ScoringMapperTransformUtil {
             } else {
                 typeAndValue = String.format("%s|", type);
             }
-            serializedValueAndTypeObj.put(LEAD_SERIALIZE_TYPE_KEY, typeAndValue);
+            serializedValueAndTypeObj.put(ScoringDaemonService.LEAD_SERIALIZE_TYPE_KEY, typeAndValue);
             jsonArray.add(columnObj);
         }
         return jsonObj.toString();
@@ -323,8 +315,8 @@ public class ScoringMapperTransformUtil {
         JSONObject modelObject;
         JSONParser parser = new JSONParser();
         modelObject = (JSONObject) parser.parse((modelStr));
-        decodeSupportedFiles("e2e", (JSONObject) modelObject.get(MODEL));
-        writeScoringScript("e2e", (JSONObject) modelObject.get(MODEL));
+        decodeSupportedFiles("e2e", (JSONObject) modelObject.get(ScoringDaemonService.MODEL));
+        writeScoringScript("e2e", (JSONObject) modelObject.get(ScoringDaemonService.MODEL));
     }
 
 }

@@ -23,7 +23,8 @@ public class ScoringValidationServiceImpl implements ScoringValidationService {
     @Override
     public void validateBeforeProcessing(ScoringCommand scoringCommand) {
         validateTotal(scoringCommand);
-        validateModelGUID(scoringCommand);
+        validateModelGuid(scoringCommand);
+        validateLeadId(scoringCommand);
     }
 
     private void validateTotal(ScoringCommand scoringCommand) {
@@ -36,10 +37,17 @@ public class ScoringValidationServiceImpl implements ScoringValidationService {
         }
     }
 
-    private void validateModelGUID(ScoringCommand scoringCommand) {
+    private void validateModelGuid(ScoringCommand scoringCommand) {
         if (!metadataService.checkIfColumnExists(scoringJdbcTemplate, scoringCommand.getTableName(),
                 ScoringDaemonService.MODEL_GUID)) {
             throw new LedpException(LedpCode.LEDP_20004);
+        }
+    }
+
+    private void validateLeadId(ScoringCommand scoringCommand) {
+        if (!metadataService.checkIfColumnExists(scoringJdbcTemplate, scoringCommand.getTableName(),
+                ScoringDaemonService.LEAD_RECORD_LEAD_ID_COLUMN)) {
+            throw new LedpException(LedpCode.LEDP_20003);
         }
     }
 }
