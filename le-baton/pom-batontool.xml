@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-baton-tool</artifactId>
+    <packaging>jar</packaging>
+    <version>2.0.13-SNAPSHOT</version>
+    <name>le-${component-name}</name>
+
+    <properties>
+        <component-name>baton-tool</component-name>
+        <le.domain.version>2.0.13-SNAPSHOT</le.domain.version>
+    </properties>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>2.0.13-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+
+                    <transformers>
+                        <transformer
+                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>com.latticeengines.baton.BatonTool</mainClass>
+                        </transformer>
+                    </transformers>
+
+                    <artifactSet>
+                        <excludes>
+                            <!-- Remove the largest of the unfortunate unused 
+                                dependencies. -->
+                            <!-- TODO Refactor POMs and overall dependencies 
+                                to avoid this situation. -->
+                            <exclude>org.hibernate:*</exclude>
+                            <exclude>org.apache.hadoop:*</exclude>
+                            <exclude>org.springframework.data:*</exclude>
+                            <exclude>org.apache.avro:*</exclude>
+                            <exclude>com.google.http-client:*</exclude>
+                        </excludes>
+                    </artifactSet>
+
+                    <filters>
+                        <!-- Strip any signatures to avoid security errors 
+                            running the shaded JAR. -->
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>2.0.13-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.argparse4j</groupId>
+            <artifactId>argparse4j</artifactId>
+            <version>0.4.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+    </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>deployment</id>
+            <name>Releases</name>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>deployment</id>
+            <name>Snapshots</name>
+            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>
