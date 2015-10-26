@@ -93,13 +93,15 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
                 new FieldMetadata("HasOpportunities", Boolean.class));
 
         last = addHasContacts(last, contact);
-        last = last.rename( //
-                new FieldList("BillingCity", "BillingState", "BillingCountry"), //
-                new FieldList("City", "State", "Country"));
 
-        last = last.retain(new FieldList("Id", "Name", "City", "State", "Country", //
-                "Domain", "Event_IsWon", "Event_StageIsClosedWon", "Event_IsClosed", //
-                "Event_OpportunityCreated", "HasContacts", "HasOpportunities"));
+        List<String> accountSchema = account.getFieldNames();
+        last = last.retain(new FieldList("Domain", "Event_IsWon", "Event_StageIsClosedWon", //
+                "Event_IsClosed", "Event_OpportunityCreated", "HasContacts", "HasOpportunities") //
+                .addAll(accountSchema));
+
+        last = last.rename( //
+                new FieldList("BillingStreet", "BillingCity", "BillingState", "BillingCountry", "BillingPostalCode"), //
+                new FieldList("Street", "City", "State", "Country", "PostalCode"));
 
         return last;
     }
@@ -113,7 +115,7 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
         // Left outer join with that
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
 
-        List<String> fieldsToRetain = account.getFieldNames().getFieldsAsList();
+        List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_IsWon");
 
         FieldMetadata event = new FieldMetadata("Event_IsWon", Boolean.class);
@@ -139,7 +141,7 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
 
-        List<String> fieldsToRetain = account.getFieldNames().getFieldsAsList();
+        List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_StageIsClosedWon");
 
         FieldMetadata event = new FieldMetadata("Event_StageIsClosedWon", Boolean.class);
@@ -158,7 +160,7 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
 
-        List<String> fieldsToRetain = account.getFieldNames().getFieldsAsList();
+        List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_IsClosed");
 
         FieldMetadata event = new FieldMetadata("Event_IsClosed", Boolean.class);
@@ -177,7 +179,7 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
 
-        List<String> fieldsToRetain = account.getFieldNames().getFieldsAsList();
+        List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_OpportunityCreated");
 
         FieldMetadata event = new FieldMetadata("Event_OpportunityCreated", Boolean.class);
@@ -196,7 +198,7 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
 
-        List<String> fieldsToRetain = account.getFieldNames().getFieldsAsList();
+        List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("HasContacts");
 
         FieldMetadata event = new FieldMetadata("HasContacts", Boolean.class);

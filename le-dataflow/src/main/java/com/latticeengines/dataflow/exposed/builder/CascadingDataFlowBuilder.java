@@ -200,13 +200,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return builder.getMetadata(identifier);
         }
 
-        public FieldList getFieldNames() {
+        public List<String> getFieldNames() {
             List<String> names = new ArrayList<>();
             List<FieldMetadata> fields = getSchema();
             for (FieldMetadata field : fields) {
                 names.add(field.getFieldName());
             }
-            return new FieldList(names);
+            return names;
         }
 
         private String getIdentifier() {

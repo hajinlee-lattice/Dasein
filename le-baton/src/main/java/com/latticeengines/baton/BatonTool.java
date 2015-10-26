@@ -90,7 +90,7 @@ public class BatonTool {
 
         try {
             CamilleConfiguration config;
-            if (camilleJsonPath != null) { 
+            if (camilleJsonPath != null) {
                 config = new ObjectMapper().readValue(new File(camilleJsonPath), CamilleConfiguration.class);
                 podId = config.getPodId();
                 connectionString = config.getConnectionString();

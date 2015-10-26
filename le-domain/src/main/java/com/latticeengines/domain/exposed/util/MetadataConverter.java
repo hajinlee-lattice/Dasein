@@ -12,6 +12,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -33,15 +34,19 @@ public class MetadataConverter {
     public static Table readMetadataFromAvroFile(Configuration configuration, String path, String primaryKeyName,
             String lastModifiedKeyName) {
         try {
+            List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
             Schema schema = AvroUtils.getSchemaFromGlob(configuration, path);
             List<Extract> extracts = new ArrayList<Extract>();
-            Extract extract = new Extract();
-            try (FileSystem fs = FileSystem.newInstance(configuration)) {
-                extract.setExtractionTimestamp(fs.getFileStatus(new Path(path)).getModificationTime());
+            for (String match : matches) {
+                Extract extract = new Extract();
+                try (FileSystem fs = FileSystem.newInstance(configuration)) {
+                    extract.setExtractionTimestamp(fs.getFileStatus(new Path(match)).getModificationTime());
+                }
+                extract.setName("extract");
+                extract.setPath(match);
+                extracts.add(extract);
             }
-            extract.setName("extract");
-            extract.setPath(path);
-            extracts.add(extract);
+
             Table table = convertToTable(schema, extracts, primaryKeyName, lastModifiedKeyName);
             return table;
         } catch (Exception e) {

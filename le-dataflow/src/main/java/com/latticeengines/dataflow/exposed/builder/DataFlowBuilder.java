@@ -158,7 +158,8 @@ public abstract class DataFlowBuilder {
             try {
                 Attribute attribute = new Attribute();
                 attribute.setName(fm.getFieldName());
-                String displayName = fm.getPropertyValue("displayName") != null ? fm.getPropertyValue("displayName") : fm.getFieldName();
+                String displayName = fm.getPropertyValue("displayName") != null ? fm.getPropertyValue("displayName")
+                        : fm.getFieldName();
                 attribute.setDisplayName(displayName);
                 if (fm.getPropertyValue("length") != null) {
                     attribute.setLength(Integer.parseInt(fm.getPropertyValue("length")));
@@ -178,8 +179,8 @@ public abstract class DataFlowBuilder {
 
                 table.addAttribute(attribute);
             } catch (Exception e) {
-                throw new RuntimeException(
-                        String.format("Failed to convert field %s to output metadata format", fm.getFieldName()), e);
+                throw new RuntimeException(String.format("Failed to convert field %s to output metadata format",
+                        fm.getFieldName()), e);
             }
         }
 
@@ -191,8 +192,6 @@ public abstract class DataFlowBuilder {
 
         return table;
     }
-
-
 
     public static class Aggregation {
         public static enum AggregationType {
@@ -233,7 +232,7 @@ public abstract class DataFlowBuilder {
         }
 
         public Aggregation(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType,
-                           FieldList outputFieldStrategy) {
+                FieldList outputFieldStrategy) {
             this.aggregatedFieldName = aggregatedFieldName;
             this.targetFieldName = targetFieldName;
             this.aggregationType = aggregationType;
@@ -339,13 +338,13 @@ public abstract class DataFlowBuilder {
         public static FieldList RESULTS = new FieldList(KindOfFields.RESULTS);
         public static FieldList GROUP = new FieldList(KindOfFields.GROUP);
 
-        public static enum KindOfFields {
+        public enum KindOfFields {
             ALL, //
             RESULTS, //
-            GROUP;
+            GROUP
         }
 
-        private String[] fields;
+        private List<String> fields;
         private KindOfFields kind;
 
         public FieldList(KindOfFields kind) {
@@ -353,20 +352,29 @@ public abstract class DataFlowBuilder {
         }
 
         public FieldList(String... fields) {
-            this.fields = fields;
+            this.fields = Arrays.asList(fields);
         }
 
-        public FieldList(List<String> fields) { this.fields = fields.toArray(new String[fields.size()]); }
+        public FieldList(List<String> fields) {
+            this.fields = new ArrayList<>(fields);
+        }
 
         public String[] getFields() {
-            return fields;
+            return fields.toArray(new String[fields.size()]);
         }
 
         public List<String> getFieldsAsList() {
             if (fields == null) {
                 return null;
             }
-            return new ArrayList<>(Arrays.asList(fields));
+            return new ArrayList<>(fields);
+        }
+
+        public FieldList addAll(List<String> fields) {
+            FieldList toReturn = new FieldList(this.fields);
+            toReturn.kind = this.kind;
+            toReturn.fields.addAll(fields);
+            return toReturn;
         }
 
         public KindOfFields getKind() {
