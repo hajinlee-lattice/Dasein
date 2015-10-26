@@ -94,8 +94,6 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
         
-        setMapReduceMemory(properties);
-
         HdfsUtils.writeToFile(yarnConfiguration, inputDir + "/" + PythonMRJobType.PROFILING_JOB.configName(),
                 StringUtils.join(features, System.lineSeparator()));
     }
