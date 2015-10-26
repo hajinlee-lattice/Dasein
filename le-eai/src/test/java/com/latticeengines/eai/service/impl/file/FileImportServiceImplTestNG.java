@@ -40,7 +40,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void importMetadataAndDataAndWriteToHdfs() throws Exception {
         ImportContext ctx = new ImportContext(yarnConfiguration);
         ctx.setProperty(ImportProperty.TARGETPATH, "/tmp/dataFromFile/file1");
