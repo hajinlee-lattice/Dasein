@@ -93,6 +93,8 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
+        
+        setMapReduceMemory(properties);
 
         HdfsUtils.writeToFile(yarnConfiguration, inputDir + "/" + PythonMRJobType.PROFILING_JOB.configName(),
                 StringUtils.join(features, System.lineSeparator()));
@@ -114,12 +116,15 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
         
-        properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), mapMemorySize);
-        properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), reduceMemorySize);
+        setMapReduceMemory(properties);
         
-
         HdfsUtils.writeToFile(yarnConfiguration, inputDir + "/" + PythonMRJobType.MODELING_JOB.configName(),
                 StringUtils.join(trainingFiles, System.lineSeparator()));
+    }
+
+    private void setMapReduceMemory(Properties properties) {
+        properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), mapMemorySize);
+        properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), reduceMemorySize);
     }
 
 }
