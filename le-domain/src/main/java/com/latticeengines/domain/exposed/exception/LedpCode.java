@@ -242,7 +242,8 @@ public enum LedpCode {
     // le-workflow
     LEDP_28000("Workflow does not exist: {0}."), //
     LEDP_28001("Problem starting workflow: {0}."), //
-    LEDP_28002("Problem restarting workflow: {0}.");
+    LEDP_28002("Problem restarting workflow: {0}."), //
+    LEDP_28003("Problem stopping workflow: {0}.");
 
     private String message;
 

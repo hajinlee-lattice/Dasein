@@ -2,11 +2,8 @@ package com.latticeengines.workflow.build;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.BeanNameAware;
+public abstract class AbstractStep extends AbstractNameAwareBean {
 
-public abstract class AbstractStep implements BeanNameAware {
-
-    private String name;
     private boolean dryRun = false;
     private boolean runAgainWhenComplete = false;
 
@@ -17,15 +14,6 @@ public abstract class AbstractStep implements BeanNameAware {
      */
     @PostConstruct
     public void initialize() {
-    }
-
-    @Override
-    public void setBeanName(String name) {
-        this.name = name;
-    }
-
-    public String name() {
-        return name;
     }
 
     public boolean isDryRun() {

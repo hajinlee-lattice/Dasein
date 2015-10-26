@@ -10,17 +10,17 @@ import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGB
 import com.latticeengines.workflow.service.WorkflowId;
 import com.latticeengines.workflow.service.WorkflowService;
 
-public class DLOrchestrationWorkflowTest extends WorkflowFunctionalTestNGBase {
+public class ModelWorkflowTest extends WorkflowFunctionalTestNGBase {
 
     @Autowired
     private WorkflowService workflowService;
 
     @Autowired
-    private DLOrchestrationWorkflow dlOrchestrationWorkflow;
+    private ModelWorkflow modelWorkflow;
 
     @Test(groups = "functional", enabled = true)
     public void testWorkflow() throws Exception {
-        WorkflowId workflowId = workflowService.start(dlOrchestrationWorkflow.name());
+        WorkflowId workflowId = workflowService.start(modelWorkflow.name());
         BatchStatus status = workflowService.getStatus(workflowId);
         assertEquals(status, BatchStatus.COMPLETED);
     }

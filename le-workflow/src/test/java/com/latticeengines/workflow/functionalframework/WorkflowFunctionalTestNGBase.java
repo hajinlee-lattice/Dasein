@@ -1,14 +1,7 @@
 package com.latticeengines.workflow.functionalframework;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.sql.DataSource;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.TransformerUtils;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +33,5 @@ public class WorkflowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     public void beforeEachTest() {
         jobRepositoryTestUtils.removeJobExecutions();
     }
-
-    protected Set<String> getStepNamesFromExecution(JobExecution jobExecution) {
-        @SuppressWarnings("unchecked")
-        Collection<String> stepNames = CollectionUtils.collect(jobExecution.getStepExecutions(),
-                TransformerUtils.invokerTransformer("getStepName"));
-
-        return new HashSet<String>(stepNames);
-    }
-
 
 }
