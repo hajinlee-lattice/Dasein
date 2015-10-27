@@ -99,7 +99,7 @@ class AggregatedModel(object):
 
         jobs, individual_models, starts = self.__partition_individual_models(self)
 
-        all_proba = Parallel(n_jobs=jobs)(
+        all_proba = Parallel(n_jobs=jobs, backend="threading")(
             delayed(_parallel_predict_proba)(self.models[starts[i]:starts[i + 1]], X)
             for i in range(jobs))
         
