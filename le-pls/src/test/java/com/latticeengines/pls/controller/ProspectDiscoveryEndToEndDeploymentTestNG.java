@@ -66,16 +66,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     private String salesforcePasswd = "Happy2010oIogZVEFGbL3n0qiAp6F66TC";
     private RestTemplate restTemplate = new RestTemplate();
     
-    @Value("${pls.modelingservice.rest.endpoint.hostport}")
-    private String modelingServiceHostPort;
-
-    @Value("${pls.modelingservice.basedir}")
-    private String modelingServiceHdfsBaseDir;
-
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microServiceHostPort;
-    
-    
 
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
@@ -370,7 +362,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
     
     private void setupHdfs() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, "/Pods");
+        String podId = CamilleEnvironment.getPodId();
+        HdfsUtils.rmdir(yarnConfiguration, "/Pods/" + podId + "/Contracts/DemoContract");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/Stoplist");
     }
     
