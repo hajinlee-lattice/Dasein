@@ -1,6 +1,7 @@
 package com.latticeengines.eai.yarn.runtime;
 
 import java.util.List;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
@@ -92,6 +93,14 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
         CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, tenantId, true);
 
         SalesforceLoginConfig loginConfig = salesforce.getLoginConfig();
+        
+        if (salesforce.getConfig() != null && salesforce.getConfig().getHttpClient() != null) {
+            log.info("Http connnection timeout = " + salesforce.getConfig().getHttpClient().getConnectTimeout());
+            log.info("Http response timeout = " + salesforce.getConfig().getHttpClient().getTimeout());
+        } else {
+            log.info("No salesforce endpoint configured.");
+        }
+        
         loginConfig.setUserName(crmCredential.getUserName());
         loginConfig.setPassword(crmCredential.getPassword());
 
