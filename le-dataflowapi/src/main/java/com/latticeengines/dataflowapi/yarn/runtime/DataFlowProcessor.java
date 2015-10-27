@@ -96,7 +96,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty("FLOWNAME", dataFlowConfig.getDataFlowBeanName());
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("ENGINE", "TEZ");
+        ctx.setProperty("ENGINE", "MR");
         ctx.setProperty("APPCTX", appContext);
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
         proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);
