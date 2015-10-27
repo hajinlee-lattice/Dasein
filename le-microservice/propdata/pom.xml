@@ -9,6 +9,8 @@
 
     <properties>
         <component-name>propdata-microservice</component-name>
+        <le.microservice.version>2.0.13-SNAPSHOT</le.microservice.version>
+        <le.propdata.version>2.0.13-SNAPSHOT</le.propdata.version>
     </properties>
 
     <parent>
