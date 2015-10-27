@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -288,8 +291,17 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
     
     private void installServiceFlow() throws Exception {
-        String jarFile = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/controller/le-serviceflows-prospectdiscovery.jar").getPath();
+        // Retrieve the service flow jar file from the maven repository
+        String command = "mvn -DgroupId=com.latticeengines " +
+                "-DartifactId=le-serviceflows-prospectdiscovery " + 
+                "-Dversion=2.0.13-SNAPSHOT -Dclassifier=shaded -Ddest=%s.jar dependency:get";
+        String jarFileName = "le-serviceflows-prospectdiscovery-" + System.currentTimeMillis();
+        command = String.format(command, jarFileName);
+        
+        CommandLine cmdLine = CommandLine.parse(command);
+        DefaultExecutor executor = new DefaultExecutor();
+        executor.execute(cmdLine);
+        
         HdfsUtils.rmdir(yarnConfiguration, //
                 String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, "dataflowapi"));
         SoftwarePackage pkg = new SoftwarePackage();
@@ -298,7 +310,13 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         pkg.setArtifactId("le-serviceflows-prospectdiscovery");
         pkg.setVersion("2.0.13-SNAPSHOT");
         pkg.setInitializerClass("com.latticeengines.prospectdiscovery.Initializer");
-        softwareLibraryService.installPackage(pkg, new File(jarFile));
+        File localFile = new File(jarFileName + ".jar");
+        try {
+            softwareLibraryService.installPackage(pkg, localFile);
+        } finally {
+            FileUtils.deleteQuietly(localFile);
+        }
+        
     }
     
     private void importData() throws Exception {
