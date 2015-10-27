@@ -10,9 +10,6 @@ from pandas import Series
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
-from leframework.executors.aggregationexecutor import AggregationExecutor
-from leframework.executors.parallellearningexecutor import ParallelLearningExecutor
-from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.webhdfs import WebHDFS
 from leframework.progressreporter import ProgressReporter
 
@@ -77,7 +74,9 @@ class Launcher(object):
         progressReporter.setTotalState(2)
         
         metadataFile = self.stripPath(schema["config_metadata"])
+        self.training = parser.createList(self.stripPath(schema["training_data"]), postProcessClf)
         progressReporter.nextStateForPreStateMachine(0, 0.1, 1)
+        self.test = parser.createList(self.stripPath(schema["test_data"]), postProcessClf)
         script = self.stripPath(schema["python_script"])
         progressReporter.nextStateForPreStateMachine(0, 0.1, 2)
         
@@ -115,29 +114,20 @@ class Launcher(object):
         params["modelLocalDir"] = modelLocalDir
         params["modelEnhancementsLocalDir"] = modelEnhancementsLocalDir
         params["modelHdfsDir"] = modelHdfsDir
+        params["training"] = self.training
+        params["test"] = self.test
         params["schema"] = schema
         params["parser"] = parser
         params["pipelineScript"] = self.stripPath(schema["python_pipeline_script"])
         schema["python_pipeline_script"] = params["pipelineScript"]
         schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
 
-        if isinstance(executor, LearningExecutor) or isinstance(executor, ParallelLearningExecutor) or isinstance(executor, DataProfilingExecutor):
-            self.training = parser.createList(self.stripPath(schema["training_data"]), postProcessClf)
-        
-        if isinstance(executor, LearningExecutor) or isinstance(executor, AggregationExecutor) or isinstance(executor, DataProfilingExecutor):
-            self.test = parser.createList(self.stripPath(schema["test_data"]), postProcessClf)
-          
-        params["training"] = self.training
-        params["test"] = self.test
-
-        # Processing steps in learning executor
-        if isinstance(executor, LearningExecutor):
+        if postProcessClf and isinstance(executor, LearningExecutor):
             self.training[schema["reserved"]["training"]].update(Series([True] * self.training.shape[0]))
             self.test[schema["reserved"]["training"]].update(Series([False] * self.test.shape[0]))
             params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
             (self.training, self.test, metadata) = executor.transformData(params)
             params["allDataPostTransform"] = DataFrame.append(self.training, self.test)
-        # Processing steps in all other executors (profiling, aggregation, and parallel learning executors)
         else:
             (self.training, self.test, metadata) = executor.transformData(params)
 
@@ -202,3 +192,4 @@ if __name__ == "__main__":
 
     l = Launcher(sys.argv[1], sys.argv[2])
     l.execute(True)
+
