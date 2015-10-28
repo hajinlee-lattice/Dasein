@@ -89,7 +89,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
 
         spec = self.GetSpec( query_name )
 
-        query = QueryVDBImpl.InitFromDefn( query_name, spec )
+        query = QueryVDBImpl.initFromDefn( query_name, spec )
 
         return query
     

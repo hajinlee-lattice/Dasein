@@ -17,16 +17,16 @@ class QueryVDBImpl( Query ):
 
     ## This is the default constructor
 
-    def __init__( self, name, columns, filters = None, entities = None, sqrs_spec = None ):
+    def __init__( self, name, columns, filters = [], entities = [], sqrs_spec = None ):
 
-        self.InitFromValues( name, columns, filters, entities, sqrs_spec )
+        self.initFromValues( name, columns, filters, entities, sqrs_spec )
     
 
 ## This is the pythonic way to create multiple constructors.  The call is
 ## q = QueryVDBImpl.InitFromDefn( defn )
 
     @classmethod
-    def InitFromDefn( cls, name, defn ):
+    def initFromDefn( cls, name, defn ):
 
         s1 = re.search( '^SpecLatticeQuery\((LatticeAddressSet.*), SpecQueryNamedFunctions\((.*)\), (SpecQueryResultSet.*)\)$', defn )
         if not s1:
@@ -38,20 +38,15 @@ class QueryVDBImpl( Query ):
         lae = ''
         isMatchedTopLevel = False
 
-        s3 = re.search( '^LatticeAddressSetPushforward\((LatticeAddressExpression.*), LatticeAddressSetMeet\((.*?)\), (LatticeAddressExpressionAtomic\(.*?\))\)$', las_spec )
-        if s3:
-            lasm = s3.group(2)
-            lae = '('+s3.group(3)+')'
-            isMatchedTopLevel = True
+        if not isMatchedTopLevel:
+            s3 = re.search( '^LatticeAddressSetPushforward\((LatticeAddressExpression\w*?)\(LatticeAddressSetMeet\((.*?)\)\), LatticeAddressSetMeet\((.*?)\), LatticeAddressExpressionMeet\((.*)\)\)$', las_spec )
+            if s3:
+                lasm = s3.group(2)
+                lae = s3.group(4)
+                isMatchedTopLevel = True
 
         if not isMatchedTopLevel:
-            s3 = re.search( '^LatticeAddressSetPushforward\((LatticeAddressExpression.*), LatticeAddressSetMeet\((.*?)\), LatticeAddressExpressionMeet\((.*?)\)\)$', las_spec )
-            if not s3:
-                raise MaudeStringError( las_spec )
-
-            lasm = s3.group(2)
-            lae = s3.group(3)
-            isMatchedTopLevel = True
+            raise MaudeStringError( las_spec )
 
         filters = []
         entities = []
@@ -66,11 +61,12 @@ class QueryVDBImpl( Query ):
                 remainingspec = ''
                 isMatched = False
 
-                s31 = re.search( '^(LatticeAddressSetFcn\(LatticeFunction.*?LatticeAddressSet.*?\))(, LatticeAddressSet.*|$)', lasm )
-                if s31:
-                    filterspec = s31.group(1)
-                    remainingspec = s31.group(2)
-                    isMatched = True
+                if not isMatched:
+                    s31 = re.search( '^(LatticeAddressSetFcn\(LatticeFunction.*?LatticeAddressSet.*?\))(, LatticeAddressSet.*|$)', lasm )
+                    if s31:
+                        filterspec = s31.group(1)
+                        remainingspec = s31.group(2)
+                        isMatched = True
 
                 if not isMatched:
                     s31 = re.search( '^(LatticeAddressSet(.*?)\((.*?)\))(, LatticeAddressSet.*|$)', lasm )
@@ -78,7 +74,7 @@ class QueryVDBImpl( Query ):
                         raise MaudeStringError( lasm )
 
                     if s31.group(2) in set(['Fcn','AndNot','Meet','Join','Pushforward','Pullback','Relation','Copy','Port','Level','Conflict','PivotFunctions']):
-                        raise ExpressionNotImplemented( 'LatticeAddressSet{0}'.format(s31.group(2)) )
+                        raise ExpressionNotImplemented( 'LatticeAddressSet{0}: {1}'.format(s31.group(2),lasm) )
 
                     filterspec = s31.group(1)
                     remainingspec = s31.group(4)
@@ -90,7 +86,7 @@ class QueryVDBImpl( Query ):
                 else:
                     # Strip off the ', ' at the beginning
                     lasm = remainingspec[2:]
-        
+
         if lae != 'empty':
 
             lae = lae[1:-1]
@@ -102,7 +98,6 @@ class QueryVDBImpl( Query ):
                 isMatched = False
 
                 if not isMatched:
-
                     s32 = re.search( '^(LatticeAddressExpression(.*?)\((.*?)\))(, LatticeAddressExpression.*|$)', lae )
                     if not s32:
                         raise MaudeStringError( lae )
@@ -145,29 +140,9 @@ class QueryVDBImpl( Query ):
         return cls( name, columns, filters, entities, sqrs_spec )
 
 
-    def InitFromValues( self, name, columns, filters = None, entities = None, sqrs_spec = None ):
+    def initFromValues( self, name, columns, filters, entities, sqrs_spec = None ):
 
-        super( QueryVDBImpl, self ).InitFromValues( name, columns )
-
-        self._filters = []
-
-        if filters is not None:
-            self._filters = filters
-
-        self._entities = []
-
-        if entities is not None:
-            self._entities = entities
-
-        #if las_spec is not None:
-        #  self._las_spec = las_spec
-
-        #else:
-        #  self._las_spec =  'LatticeAddressSetPushforward('
-        #  self._las_spec +=   'LatticeAddressExpressionFromLAS(LatticeAddressSetMeet(empty))'
-        #  self._las_spec += ', LatticeAddressSetMeet(empty)'
-        #  self._las_spec += ', LatticeAddressExpressionMeet(empty)'
-        #  self._las_spec += ')'
+        super( QueryVDBImpl, self ).initFromValues( name, columns, filters, entities )
 
         if sqrs_spec is not None:
             self._sqrs_spec = sqrs_spec
