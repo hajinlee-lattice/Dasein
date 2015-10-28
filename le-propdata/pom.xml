@@ -4,24 +4,24 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-propdata</artifactId>
-    <version>2.0.13-SNAPSHOT</version>
+    <version>2.0.14-SNAPSHOT</version>
     <name>le-${component-name}</name>
     <description>LE PropData</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.13-SNAPSHOT</version>
+        <version>2.0.14-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
     <properties>
         <component-name>propdata</component-name>
-        <le.cassandra.version>2.0.13-SNAPSHOT</le.cassandra.version>
-        <le.db.version>2.0.13-SNAPSHOT</le.db.version>
-        <le.dataflow.version>2.0.13-SNAPSHOT</le.dataflow.version>
-        <le.dataplatform.version>2.0.13-SNAPSHOT</le.dataplatform.version>
-        <le.propdata.version>2.0.13-SNAPSHOT</le.propdata.version>
+        <le.cassandra.version>2.0.14-SNAPSHOT</le.cassandra.version>
+        <le.db.version>2.0.14-SNAPSHOT</le.db.version>
+        <le.dataflow.version>2.0.14-SNAPSHOT</le.dataflow.version>
+        <le.dataplatform.version>2.0.14-SNAPSHOT</le.dataplatform.version>
+        <le.propdata.version>2.0.14-SNAPSHOT</le.propdata.version>
     </properties>
 
     <profiles>
