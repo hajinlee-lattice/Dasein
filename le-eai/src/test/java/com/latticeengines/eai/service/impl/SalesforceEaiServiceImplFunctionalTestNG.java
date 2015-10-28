@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -16,17 +17,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -57,7 +54,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     private static final int PORT = 9002;
 
-    private String customer = "SalesForceEaiFunctionalTest";
+    private String customer = this.getClass().getSimpleName();
 
     private String customerSpace = CustomerSpace.parse(customer).toString();
 
@@ -80,13 +77,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         targetPath = dataExtractionService.createTargetPath(customer);
         HdfsUtils.rmdir(yarnConfiguration, targetPath);
 
-        BatonService baton = new BatonServiceImpl();
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
-        spaceInfo.properties = new CustomerSpaceProperties();
-        spaceInfo.properties.displayName = "";
-        spaceInfo.properties.description = "";
-        spaceInfo.featureFlags = "";
-        baton.createTenant(customer, customer, "defaultspaceId", spaceInfo);
+        initZK(customer);
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
@@ -121,7 +112,8 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         httpServer.stop();
         HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
                 .toString());
-        crmCredentialZKService.removeCredentials("sfdc", customer, true);
+        Camille camille = CamilleEnvironment.getCamille();
+        camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
         tenantService.discardTenant(tenant);
 
     }

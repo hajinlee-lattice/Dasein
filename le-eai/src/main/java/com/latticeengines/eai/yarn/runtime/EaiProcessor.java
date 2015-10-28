@@ -7,6 +7,7 @@ import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.hadoop.conf.Configuration;
+import org.eclipse.jetty.client.HttpClient;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,12 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.appmaster.service.EaiAppmasterService;
+import com.latticeengines.eai.config.HttpClientConfig;
 import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.EaiMetadataService;
+import com.latticeengines.eai.service.EaiZKService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
@@ -61,6 +64,9 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
     @Autowired
     private EaiMetadataService eaiMetadataService;
 
+    @Autowired
+    private EaiZKService eaiZKService;
+
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
 
@@ -89,20 +95,25 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
     }
 
     private CamelContext constructCamelContext(ImportConfiguration importConfig) throws Exception {
-        String tenantId = importConfig.getCustomer();
-        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, tenantId, true);
+        String customerSpace = importConfig.getCustomer();
+        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace, true);
 
         SalesforceLoginConfig loginConfig = salesforce.getLoginConfig();
-        
+
         if (salesforce.getConfig() != null && salesforce.getConfig().getHttpClient() != null) {
             log.info("Http connnection timeout = " + salesforce.getConfig().getHttpClient().getConnectTimeout());
             log.info("Http response timeout = " + salesforce.getConfig().getHttpClient().getTimeout());
         } else {
             log.info("No salesforce endpoint configured.");
         }
-        
+
         loginConfig.setUserName(crmCredential.getUserName());
         loginConfig.setPassword(crmCredential.getPassword());
+
+        HttpClientConfig httpClientConfig = eaiZKService.getHttpClientConfig(customerSpace);
+        HttpClient httpClient = salesforce.getConfig().getHttpClient();
+        httpClient.setConnectTimeout(httpClientConfig.getConnectTimeout());
+        httpClient.setTimeout(httpClientConfig.getImportTimeout());
 
         CamelContext camelContext = new SpringCamelContext(applicationContext);
         camelContext.addRoutes(salesforceRouteConfig);

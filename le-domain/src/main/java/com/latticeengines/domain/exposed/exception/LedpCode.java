@@ -86,6 +86,7 @@ public enum LedpCode {
     LEDP_17002("No metadata for attribute {0}."), //
     LEDP_17003("Could not retrieve metadata of attributes {0} for table {1} from Endpoint."), //
     LEDP_17004("{0}'s CRM Credential is Invalid. Cannot use this credential to establish connection to Salesforce."), //
+    LEDP_17005("Failed to retrieve HttpClientConfig from Zookeeper for Tenant {0}"), //
 
     // PLS 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //

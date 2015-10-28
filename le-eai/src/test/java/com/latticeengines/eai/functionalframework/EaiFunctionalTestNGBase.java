@@ -20,12 +20,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -34,6 +38,10 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -88,6 +96,27 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
+    }
+
+    protected void initZK(String customer) throws Exception {
+        BatonService baton = new BatonServiceImpl();
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
+        spaceInfo.properties = new CustomerSpaceProperties();
+        spaceInfo.properties.displayName = "";
+        spaceInfo.properties.description = "";
+        spaceInfo.featureFlags = "";
+        baton.createTenant(customer, customer, "defaultspaceId", spaceInfo);
+
+        Camille camille = CamilleEnvironment.getCamille();
+        Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(customer), "Eai");
+        Path connectTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")
+                .append("ConnectTimeout");
+        camille.create(connectTimeoutDocPath, new Document("60000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        Path importTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")
+                .append("ImportTimeout");
+        camille.create(importTimeoutDocPath, new Document("3600000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 
     protected Table createFile(URL inputUrl, String fileName) {

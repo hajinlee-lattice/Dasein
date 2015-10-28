@@ -25,8 +25,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -34,8 +33,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -94,13 +91,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         targetPath = dataExtractionService.createTargetPath(customer);
         HdfsUtils.rmdir(yarnConfiguration, targetPath);
 
-        BatonService baton = new BatonServiceImpl();
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
-        spaceInfo.properties = new CustomerSpaceProperties();
-        spaceInfo.properties.displayName = "";
-        spaceInfo.properties.description = "";
-        spaceInfo.featureFlags = "";
-        baton.createTenant(customer, customer, "defaultspaceId", spaceInfo);
+        initZK(customer);
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
@@ -130,7 +121,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     private void cleanUp() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
                 .toString());
-        crmCredentialZKService.removeCredentials("sfdc", customer, true);
+        Camille camille = CamilleEnvironment.getCamille();
+        camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
         tenantService.discardTenant(tenant);
     }
 

@@ -11,6 +11,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
@@ -78,6 +81,7 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
 
     @AfterClass(groups = "functional")
     private void cleanUp() throws Exception {
-        crmCredentialZKService.removeCredentials(customer, customer, true);
+        Camille camille = CamilleEnvironment.getCamille();
+        camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
     }
 }
