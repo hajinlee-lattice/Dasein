@@ -86,8 +86,8 @@
             <properties>
                 <eai.properties.path>../le-eai/conf/env/prodcluster</eai.properties.path>
                 <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
-                <security.properties.path>../le-security/conf/env/procluster</security.properties.path>
-                <dataflowapi.properties.path>../le-dataflowapi/conf/env/procluster</dataflowapi.properties.path>
+                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/prodcluster</dataflowapi.properties.path>
                 <dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
                 <hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
             </properties>
