@@ -6,7 +6,7 @@ import Selenium2Library
 import yaml
 from Property import DanteEnvironments
 import time
-
+import os
 def ParseYaml(filepath):
     try:
         content=open(filepath,'r')
@@ -21,13 +21,29 @@ def ParseYaml(filepath):
 class DantePageHelper(object):
     PageLocator=ParseYaml(DanteEnvironments.Conf_file_Dante_Page)
     DantePages=PageLocator["DantePage"]
-    def __init__(self,sales_force_url=DanteEnvironments.Sales_Force_URL,salesforce_user=DanteEnvironments.Sales_Force_User,salefore_pwd=DanteEnvironments.Sales_Force_PWD,browertype='ff'):
+    def __init__(self,sales_force_url=DanteEnvironments.Sales_Force_URL,salesforce_user=DanteEnvironments.Sales_Force_User,salefore_pwd=DanteEnvironments.Sales_Force_PWD,browertype=DanteEnvironments.Browser_Type):
         self.salesforcelogin=sales_force_url
         self.dante_user=salesforce_user
         self.dante_pwd=salefore_pwd
+        print browertype
         self.browser_type=browertype
         self.sele_instance=Selenium2Library.Selenium2Library()
         self.Timeout='120s'
+
+    def OpenURL(self,url_to_open):
+        self.sele_instance.open_browser(url_to_open, self.browser_type)
+
+    def WaitElement(self,e_xpath):
+         self.sele_instance.wait_until_page_contains_element(e_xpath,self.Timeout)
+
+    def GetElementText(self,e_xpath):
+        return self.sele_instance.get_text(e_xpath)
+
+    def ClickLink(self,e_xpath):
+        self.sele_instance.click_link(e_xpath)
+
+    def GetCountMatched(self,e_xpath):
+        return self.sele_instance.get_matching_xpath_count(e_xpath)
 
     def LogInSaleForcePage(self):
         #print '===start to log in SalesForce==='
@@ -54,6 +70,8 @@ class DantePageHelper(object):
             self.sele_instance.select_from_list(DantePageHelper.DantePages["AccountListPage"]["ViewSelector"],DantePageHelper.DantePages["AccountListPage"]["OptionValue"])
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["AccountListPage"]["ListPane"],self.Timeout)
             self.sele_instance.select_frame(DantePageHelper.DantePages["AccountListPage"]["Iframe"])
+            #print 'selected frame'
+            #print DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"]
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"],self.Timeout)
             self.sele_instance.unselect_frame()
             self.sele_instance.click_element(DantePageHelper.DantePages["AccountListPage"]["DanteLink"])
@@ -70,6 +88,7 @@ class DantePageHelper(object):
             return Contact_FullID
         elif (D_Type=='Lead'):
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["AllTabPage"]["LeadsLink"],self.Timeout)
+            #print DantePageHelper.DantePages["AllTabPage"]["LeadsLink"]
             self.sele_instance.click_link(DantePageHelper.DantePages["AllTabPage"]["LeadsLink"])
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["LeadListPage"]["ListPane"],self.Timeout)
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["LeadListPage"]["ViewSelector"],self.Timeout)
@@ -170,10 +189,10 @@ class DantePageHelper(object):
         lead_Display_Name=self.sele_instance.get_text(DantePageHelper.DantePages["VisualLeadPage"]["LatticeTitle"])
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualLeadPage"]["ContentArea"],self.Timeout)
         #Score_Title and Score_Value be blocked by the bug ENG-7724, after it fixed we need to get the correct xpath to get them.
-        Score_Title='Lead Scoring Model'
+        #Score_Title='Lead Scoring Model'
         #Score_Title=self.sele_instance.get_text(DantePageHelper.DantePages["VisualLeadPage"]["ScoreTitle"])
-        Score_Value='77Score'
-        #Score_Value=self.sele_instance.get_text(DantePageHelper.DantePages["VisualLeadPage"]["ScoreValue"])
+        #Score_Value='77Score'
+        Score_Value=self.sele_instance.get_text(DantePageHelper.DantePages["VisualLeadPage"]["ScoreValue"])
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualLeadPage"]["External_buy_header"],self.Timeout)
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualLeadPage"]["Internal_buy_title"],self.Timeout)
         External_Header= self.sele_instance.get_text(DantePageHelper.DantePages["VisualLeadPage"]["External_buy_header"])
@@ -181,7 +200,7 @@ class DantePageHelper(object):
         if ISDetailPage:
             self.sele_instance.unselect_frame()
         self.sele_instance.unselect_frame()
-        return lead_Display_Name,Score_Title,Score_Value,External_Header,Internal_Header
+        return lead_Display_Name,Score_Value,External_Header,Internal_Header
 
     def GetAccountPlay(self,ISDetailPage=False):
         print '===start to get info for play:==='
@@ -220,19 +239,7 @@ class DantePageHelper(object):
         time.sleep(2)
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["PlayDetail"],self.Timeout)
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPHeaderArea"],self.Timeout)
-        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPLink"],self.Timeout)
-        #print 'Talk points lin exist in page'
-        self.sele_instance.click_link(DantePageHelper.DantePages["VisualAccountPage"]["TPLink"])
-        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPContentArea"],self.Timeout)
-        TP_count=self.sele_instance.get_matching_xpath_count(DantePageHelper.DantePages["VisualAccountPage"]["TPList"])
-        TP_Result_List=[]
-        for talkpoints_index in range(1,int(TP_count)+1):
-            TalkPoint_dic={}
-            TP_Title_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["TPTitle"]).replace('TP_Index_Temp',str(talkpoints_index))
-            self.sele_instance.wait_until_page_contains_element(TP_Title_Xpath,self.Timeout)
-            TP_Title= self.sele_instance.get_text(TP_Title_Xpath)
-            TalkPoint_dic["Title"]=TP_Title
-            TP_Result_List.append(TalkPoint_dic)
+        TP_Result_List=self.GetTalkingPoints()
         self.sele_instance.unselect_frame()
         #Following logic to return play list page is a work around for bug ENG-7716, after it fixed ,those code can be removed.
         if ISDetailPage:
@@ -244,6 +251,96 @@ class DantePageHelper(object):
             self.sele_instance.click_element(DantePageHelper.DantePages["AccountListPage"]["DanteLink"])
         self.sele_instance.select_frame(DantePageHelper.DantePages["AccountListPage"]["Iframe"])
         return TP_Result_List
+
+    def GetTalkingPoints(self):
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPLink"],self.Timeout)
+        #print 'Talk points lin exist in page'
+        self.sele_instance.click_link(DantePageHelper.DantePages["VisualAccountPage"]["TPLink"])
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPContentArea"],self.Timeout)
+        #time.sleep(5)
+        self.sele_instance.wait_until_page_contains_element('Xpath='+DantePageHelper.DantePages["VisualAccountPage"]["TPList"],self.Timeout)
+        #print 'wait completed 5s'
+        TP_count=self.sele_instance.get_matching_xpath_count(DantePageHelper.DantePages["VisualAccountPage"]["TPList"])
+        #print str(TP_count)
+        TP_Result_List=[]
+        for talkpoints_index in range(1,int(TP_count)+1):
+            TalkPoint_dic={}
+            TP_Title_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["TPTitle"]).replace('TP_Index_Temp',str(talkpoints_index))
+            self.sele_instance.wait_until_page_contains_element(TP_Title_Xpath,self.Timeout)
+            TP_Title= self.sele_instance.get_text(TP_Title_Xpath)
+            TalkPoint_dic["Title"]=TP_Title
+            #print TP_Title
+            if talkpoints_index>1:
+                #print 'click element for each title'
+                #print str(talkpoints_index)
+                self.sele_instance.click_element(TP_Title_Xpath)
+            time.sleep(2)
+            TPContent_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["TPContent"]).replace('TP_Index_Temp',str(talkpoints_index))
+            #print TPContent_Xpath
+            self.sele_instance.wait_until_page_contains_element(TPContent_Xpath,self.Timeout)
+            TP_Content= self.sele_instance.get_text(TPContent_Xpath)
+            #print '-------------------------'
+            #print TP_Content
+            #print '========================='
+            TalkPoint_dic["Content"]=TP_Content
+            TP_Result_List.append(TalkPoint_dic)
+            #print TalkPoint_dic
+        #print TP_Result_List
+        return sorted(TP_Result_List)
+
+    def GetBuyingSignalsInfo(self):
+        #self.sele_instance.()
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["BS_External_Header"],self.Timeout)
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["BS_Internal_Header"],self.Timeout)
+        External_Header= self.sele_instance.get_text(DantePageHelper.DantePages["VisualAccountPage"]["BS_External_Header"])
+        Internal_Header= self.sele_instance.get_text(DantePageHelper.DantePages["VisualAccountPage"]["BS_Internal_Header"])
+        self.sele_instance.wait_until_page_contains_element('Xpath='+DantePageHelper.DantePages["VisualAccountPage"]["BS_External_List"],self.Timeout)
+        self.sele_instance.wait_until_page_contains_element('Xpath='+DantePageHelper.DantePages["VisualAccountPage"]["BS_Internal_List"],self.Timeout)
+        count_external=self.sele_instance.get_matching_xpath_count(DantePageHelper.DantePages["VisualAccountPage"]["BS_External_List"])
+        count_internal=self.sele_instance.get_matching_xpath_count(DantePageHelper.DantePages["VisualAccountPage"]["BS_Internal_List"])
+        External_info_dic={}
+        External_info_dic["Title"]=External_Header
+        Internal_info_dic={}
+        Internal_info_dic["Title"]=Internal_Header
+        External_attrs_list=[]
+        for index_external in range(1,int(count_external)+1):
+            Lattice_attrs_dic={}
+            BS_Title_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["BS_Attr_Title_External"]).replace('BS_Index_Temp',str(index_external))
+            self.sele_instance.wait_until_page_contains_element(BS_Title_Xpath,self.Timeout)
+            TP_Title= self.sele_instance.get_text(BS_Title_Xpath)
+            Lattice_attrs_dic["Title"]=TP_Title
+            BS_Description_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["BS_Attr_Description_External"]).replace('BS_Index_Temp',str(index_external))
+            self.sele_instance.wait_until_page_contains_element(BS_Description_Xpath,self.Timeout)
+            BS_Description= self.sele_instance.get_text(BS_Description_Xpath)
+            Lattice_attrs_dic["Description"]=BS_Description
+            BS_Rate_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["BS_Attr_Rate_External"]).replace('BS_Index_Temp',str(index_external))
+            self.sele_instance.wait_until_page_contains_element(BS_Rate_Xpath,self.Timeout)
+            BS_Rate= self.sele_instance.get_text(BS_Rate_Xpath)
+            Lattice_attrs_dic["Rate"]=BS_Rate
+            External_attrs_list.append(Lattice_attrs_dic)
+        #print External_attrs_list
+        External_info_dic["Attrs"]=sorted(External_attrs_list)
+        Internal_attrs_list=[]
+        for index_internal in range(1,int(count_internal)+1):
+            Lattice_attrs_dic={}
+            BS_Title_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["BS_Attr_Title_Internal"]).replace('BS_Index_Temp',str(index_internal))
+            self.sele_instance.wait_until_page_contains_element(BS_Title_Xpath,self.Timeout)
+            TP_Title= self.sele_instance.get_text(BS_Title_Xpath)
+            Lattice_attrs_dic["Title"]=TP_Title
+            BS_Description_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["BS_Attr_Description_Internal"]).replace('BS_Index_Temp',str(index_internal))
+            self.sele_instance.wait_until_page_contains_element(BS_Description_Xpath,self.Timeout)
+            BS_Description= self.sele_instance.get_text(BS_Description_Xpath)
+            Lattice_attrs_dic["Description"]=BS_Description
+            BS_Rate_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["BS_Attr_Rate_Internal"]).replace('BS_Index_Temp',str(index_internal))
+            self.sele_instance.wait_until_page_contains_element(BS_Rate_Xpath,self.Timeout)
+            BS_Rate= self.sele_instance.get_text(BS_Rate_Xpath)
+            Lattice_attrs_dic["Rate"]=BS_Rate
+            Internal_attrs_list.append(Lattice_attrs_dic)
+        #print Internal_attrs_list
+        Internal_info_dic["Attrs"]=sorted(Internal_attrs_list)
+        return External_info_dic,Internal_info_dic
+
+
 
 
     def Configure_Dante_Package(self,D_Type):

@@ -3,6 +3,7 @@ __author__ = 'nxu'
 import pyodbc
 import json
 from Property import DanteEnvironments
+from XMLLibTool import XmlToolLibrary
 
 class DanteDataHelper(object):
     def __init__(self,server=DanteEnvironments.Dante_DB_Server_Server,DataBase=DanteEnvironments.Dante_DB_Name,User=DanteEnvironments.Dante_DB_User,Password=DanteEnvironments.Dante_DB_PWD):
@@ -19,7 +20,7 @@ class DanteDataHelper(object):
             Json_Value=cursor.execute(sql_Lead_Json).fetchall()
             J_dic=json.loads(Json_Value[0][0])
             Dic_Lead["Title"]=J_dic["PlayDisplayName"]
-            Dic_Lead["Score"]=str(J_dic["Percentile"])+"Score"
+            Dic_Lead["Score"]=str(J_dic["Percentile"])+'\nScore'
             Dic_Lead["Rate"]=J_dic["LikelihoodBucketDisplayName"]
         except Exception,e:
             print "connect or query DB Fail"
@@ -35,9 +36,12 @@ class DanteDataHelper(object):
         Dic_Account={}
         sql_Account_Json="Select [Value] From AccountCache Where [External_ID]='"+AccountID+"';"
         sql_AccountPlays_Json="Select [Value] From LeadCache Where [Account_External_ID]='"+AccountID+"';"
+        #print self.conn_info
+        conn=pyodbc.connect(self.conn_info)
+        cursor=conn.cursor()
         try:
-            conn=pyodbc.connect(self.conn_info)
-            cursor=conn.cursor()
+            #conn=pyodbc.connect(self.conn_info)
+            #cursor=conn.cursor()
             Account_json=cursor.execute(sql_Account_Json).fetchall()
             AJ_dic=json.loads(Account_json[0][0])
             Dic_Account["DisplayName"]=AJ_dic["DisplayName"]
@@ -48,7 +52,7 @@ class DanteDataHelper(object):
                 play_dic={}
                 J_dic=json.loads(one_play[0])
                 play_dic["P_Title"]=J_dic["PlayDisplayName"]
-                play_dic["P_Score"]=str(J_dic["ExternalProbability"])+str(J_dic["LikelihoodBucketDisplayName"])
+                play_dic["P_Score"]=str(J_dic["ExternalProbability"])+'\n'+str(J_dic["LikelihoodBucketDisplayName"])
                 #play_dic["P_ID"]=J_dic["PlayID"]
                 sql_talkingpoints="select [Value] from TalkingPointCache where Play_External_ID='"+J_dic["PlayID"]+"';"
                 TalkingPoints_json=cursor.execute(sql_talkingpoints).fetchall()
@@ -57,7 +61,7 @@ class DanteDataHelper(object):
                     #print "TalkPoint start"
                     TalkPoint_dic={}
                     TJ_dic=json.loads(one_TalkPoint[0])
-                    TalkPoint_dic["Title"]=TJ_dic["Title"]
+                    TalkPoint_dic["Title"]=str(TJ_dic["Title"]).upper()
                     TalkPoints_list.append(TalkPoint_dic)
                 play_dic["TalkingPoints"]=TalkPoints_list
                 Plays_list.append(play_dic)
@@ -89,6 +93,16 @@ class DanteDataHelper(object):
         #print '===complete to get expected talkingpoints dictionary==='
         return result
 
+    def GetTPTitleListFromTps(self,TalkingPointsList):
+        #print TalkingPointsList
+        Tp_Title_list=[]
+        for Tp in TalkingPointsList:
+            title=Tp["Title"]
+            Tp_Title_list.append(title)
+        #print Tp_Title_list
+        return sorted(Tp_Title_list)
+
+
     def CompareDanteDictionary(self,dict_Page,dict_DB):
         result=False
         if dict_Page.has_key("DisplayName"):
@@ -98,15 +112,15 @@ class DanteDataHelper(object):
                         assert self.CheckPlayTitleAndScore(dict_DB["Plays"],play_item["P_Title"],play_item["P_Score"]), 'Play score for the play "'+play_item["P_Title"]+'" in page is not right, actually is: "'+str(play_item["P_Score"])
                         tp_list_page=play_item["TalkingPoints"]
                         tp_list_DB=self.GetTPDicListByPlayTitle(dict_DB["Plays"],play_item["P_Title"])
-                        tp_list_page.sort()
-                        tp_list_DB.sort()
-                        if (tp_list_page==tp_list_DB):
+                        tp_title_list_page=self.GetTPTitleListFromTps(tp_list_page)
+                        tp_title_list_DB=self.GetTPTitleListFromTps(tp_list_DB)
+                        if (tp_title_list_page==tp_title_list_DB):
                             result=True
                         else:
                             print 'The talking points for play: "'+play_item["P_Title"]+'" in page is not right.'
-                            print tp_list_page
+                            print tp_title_list_page
                             print '-----'
-                            print tp_list_DB
+                            print tp_title_list_DB
                             result=False
                             break
                 else:
@@ -117,9 +131,68 @@ class DanteDataHelper(object):
                 result=False
         return result
 
+    def GetPRODExpectedTalkingPoints(self,filepath):
+        print 'get expected talking points value from xml file'
+        xmldoc=XmlToolLibrary()
+        xmldoc.loadXML(filepath)
+        tp_attrs_titles=xmldoc.getxmlVals('//PRODDanteUI/TalkingPoints/attrs/attr/title')
+        count_attr_tp=len(tp_attrs_titles)
+        tp_list=[]
+        for index_ex in range(1,int(count_attr_tp)+1):
+            attr_dic={}
+            title=xmldoc.getxmlVal('//PRODDanteUI/TalkingPoints/attrs/attr['+str(index_ex)+']/title')
+            descrition=xmldoc.getxmlVal('//PRODDanteUI/TalkingPoints/attrs/attr['+str(index_ex)+']/description')
+            #print descrition
+            attr_dic["Title"]=title
+            attr_dic["Content"]=descrition
+            #print attr_dic
+            tp_list.append(attr_dic)
+        return sorted(tp_list)
+
+    def GetPRODExpectedBuyingSingal(self,filepath):
+        print 'get expected buying signals value from xml file'
+        xmldoc=XmlToolLibrary()
+        xmldoc.loadXML(filepath)
+        Ex_Header=xmldoc.getxmlAtt('//PRODDanteUI/BuyingSignals/External_attrs','title')
+        In_Header=xmldoc.getxmlAtt('//PRODDanteUI/BuyingSignals/Internal_attrs','title')
+        Ex_attrs_titles=xmldoc.getxmlVals('//PRODDanteUI/BuyingSignals/External_attrs/attr/title')
+        In_attrs_titles=xmldoc.getxmlVals('//PRODDanteUI/BuyingSignals/Internal_attrs/attr/title')
+        count_attr_Ex=len(Ex_attrs_titles)
+        count_attr_In=len(In_attrs_titles)
+        ex_attr_list=[]
+        for index_ex in range(1,int(count_attr_Ex)+1):
+            attr_dic={}
+            title=xmldoc.getxmlVal('//PRODDanteUI/BuyingSignals/External_attrs/attr['+str(index_ex)+']/title')
+            descrition=xmldoc.getxmlVal('//PRODDanteUI/BuyingSignals/External_attrs/attr['+str(index_ex)+']/description')
+            rate=xmldoc.getxmlVal('//PRODDanteUI/BuyingSignals/External_attrs/attr['+str(index_ex)+']/rate')
+            attr_dic["Title"]=title
+            attr_dic["Description"]=descrition
+            attr_dic["Rate"]=rate
+            #print attr_dic
+            ex_attr_list.append(attr_dic)
+        #print sorted(ex_attr_list)
+        ex_info={'Title':Ex_Header,'Attrs':sorted(ex_attr_list)}
+        in_attr_list=[]
+        for index_in in range(1,int(count_attr_In)+1):
+            attr_dic={}
+            title=xmldoc.getxmlVal('//PRODDanteUI/BuyingSignals/Internal_attrs/attr['+str(index_in)+']/title')
+            descrition=xmldoc.getxmlVal('//PRODDanteUI/BuyingSignals/Internal_attrs/attr['+str(index_in)+']/description')
+            rate=xmldoc.getxmlVal('//PRODDanteUI/BuyingSignals/Internal_attrs/attr['+str(index_in)+']/rate')
+            attr_dic["Title"]=title
+            attr_dic["Description"]=descrition
+            attr_dic["Rate"]=rate
+            #print attr_dic
+            in_attr_list.append(attr_dic)
+        #print sorted(in_attr_list)
+        in_info={'Title':In_Header,'Attrs':sorted(in_attr_list)}
+        #print ex_info
+        #print in_info
+        return ex_info,in_info
+
 
 
 #if __name__ == '__main__':
    #ddh=DanteDataHelper()
    #dic=ddh.GetAccountsPlayJson('0018000000NW1EEAA1')
    #print dic
+

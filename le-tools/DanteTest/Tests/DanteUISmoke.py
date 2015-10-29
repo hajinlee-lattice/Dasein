@@ -35,12 +35,13 @@ class Test(unittest.TestCase):
         full_ID=dp_L_Detail.OpenDetailPage('Lead')
         lead_dic=ddh_ld.ParseLeadScore(full_ID)
         Lead_infos_page=dp_L_Detail.GetScoreInfo('Lead',True)
+        print Lead_infos_page
         dp_L_Detail.Close_browser()
         assert str(Lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(Lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
-        assert str(Lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
-        assert str(Lead_infos_page[2])==str(lead_dic["Score"]), 'Score in page is: "'+str(Lead_infos_page[2])+'", but should be: "'+str(lead_dic["Score"])+'"'
-        assert str(Lead_infos_page[3])=="LATTICE ATTRIBUTES", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "LATTICE ATTRIBUTES"'
-        assert str(Lead_infos_page[4])=="INTERNAL ATTRIBUTES", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "INTERNAL ATTRIBUTES"'
+        #assert str(Lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
+        assert str(Lead_infos_page[1])==str(lead_dic["Score"]), 'Score in page is: "'+str(Lead_infos_page[1])+'", but should be: "'+str(lead_dic["Score"])+'"'
+        assert str(Lead_infos_page[2])=="LATTICE ATTRIBUTES", 'Score Title in Page: "'+str(Lead_infos_page[2])+'" is not equal: "LATTICE ATTRIBUTES"'
+        assert str(Lead_infos_page[3])=="INTERNAL ATTRIBUTES", 'Score Title in Page: "'+str(Lead_infos_page[3])+'" is not equal: "INTERNAL ATTRIBUTES"'
 
     def testcase_4_LeadListPage(self):
         print '----test  case for Lead list page----'
@@ -50,12 +51,13 @@ class Test(unittest.TestCase):
         full_ID=dp_L_List.OpenDanteListPage('Lead')
         lead_dic=ddh_ll.ParseLeadScore(full_ID)
         lead_infos_page=dp_L_List.GetScoreInfo('Lead')
+        #print lead_infos_page
         dp_L_List.Close_browser()
         assert str(lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
-        assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
-        assert str(lead_infos_page[2])==str(lead_dic["Score"]), 'Score in page is: "'+str(lead_infos_page[2])+'", but should be: "'+str(lead_dic["Score"])+'"'
-        assert str(lead_infos_page[3])=="LATTICE ATTRIBUTES", 'Score Title in Page: "'+str(lead_infos_page[3])+'" is not equal: "LATTICE ATTRIBUTES"'
-        assert str(lead_infos_page[4])=="INTERNAL ATTRIBUTES", 'Score Title in Page: "'+str(lead_infos_page[4])+'" is not equal: "INTERNAL ATTRIBUTES"'
+        #assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
+        assert str(lead_infos_page[1])==str(lead_dic["Score"]), 'Score in page is: "'+str(lead_infos_page[1])+'", but should be: "'+str(lead_dic["Score"])+'"'
+        assert str(lead_infos_page[2])=="LATTICE ATTRIBUTES", 'Score Title in Page: "'+str(lead_infos_page[2])+'" is not equal: "LATTICE ATTRIBUTES"'
+        assert str(lead_infos_page[3])=="INTERNAL ATTRIBUTES", 'Score Title in Page: "'+str(lead_infos_page[3])+'" is not equal: "INTERNAL ATTRIBUTES"'
 
     def testcase_5_ContactListPage(self):
         print '----test  case for Contact list page----'
@@ -65,28 +67,30 @@ class Test(unittest.TestCase):
         full_ID=dp_C_List.OpenDanteListPage('Contact')
         lead_dic=ddh_cl.ParseLeadScore(full_ID)
         lead_infos_page=dp_C_List.GetScoreInfo('Contact')
+        #print Lead_infos_page
         dp_C_List.Close_browser()
         assert str(lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
-        assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
-        #assert str(lead_infos_page[2])==str(lead_dic["Score"]), 'Score in page is: "'+str(lead_infos_page[2])+'", but should be: "'+str(lead_dic["Score"])+'"'
-        assert str(lead_infos_page[3])=="LATTICE ATTRIBUTES", 'Score Title in Page: "'+str(lead_infos_page[3])+'" is not equal: "LATTICE ATTRIBUTES"'
-        assert str(lead_infos_page[4])=="INTERNAL ATTRIBUTES", 'Score Title in Page: "'+str(lead_infos_page[4])+'" is not equal: "INTERNAL ATTRIBUTES"'
+        #assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
+        assert str(lead_infos_page[1])==str(lead_dic["Score"]), 'Score in page is: "'+str(lead_infos_page[1])+'", but should be: "'+str(lead_dic["Score"])+'"'
+        assert str(lead_infos_page[2])=="LATTICE ATTRIBUTES", 'Score Title in Page: "'+str(lead_infos_page[2])+'" is not equal: "LATTICE ATTRIBUTES"'
+        assert str(lead_infos_page[3])=="INTERNAL ATTRIBUTES", 'Score Title in Page: "'+str(lead_infos_page[3])+'" is not equal: "INTERNAL ATTRIBUTES"'
 
     def testcase_6_ContactDetailPage(self):
         print '----test  case for Contact Detail page----'
-        print 'This case is blocked by the bug ENG-7677'
-        #dp_C_Detail=DantePageHelper()
-        #ddh_cd=DanteDataHelper()
-        #dp_C_Detail.LogInSaleForcePage()
-        #full_ID=dp_C_Detail.OpenDetailPage('Contact')
-        #lead_dic=ddh_cd.ParseLeadScore(full_ID)
-        #Lead_infos_page=dp_C_Detail.GetScoreInfo('Contact',True)
-        #dp_C_Detail.Close_browser()
-        #assert str(Lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(Lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
+        #print 'This case is blocked by the bug ENG-7677'
+        dp_C_Detail=DantePageHelper()
+        ddh_cd=DanteDataHelper()
+        dp_C_Detail.LogInSaleForcePage()
+        full_ID=dp_C_Detail.OpenDetailPage('Contact')
+        lead_dic=ddh_cd.ParseLeadScore(full_ID)
+        Lead_infos_page=dp_C_Detail.GetScoreInfo('Contact',True)
+        #print Lead_infos_page
+        dp_C_Detail.Close_browser()
+        assert str(Lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(Lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
         #assert str(Lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
-        #assert str(Lead_infos_page[2])==str(lead_dic["Score"]), 'Score in page is: "'+str(Lead_infos_page[2])+'", but should be: "'+str(lead_dic["Score"])+'"'
-        #assert str(Lead_infos_page[3])=="LATTICE ATTRIBUTES", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "LATTICE ATTRIBUTES"'
-        #assert str(Lead_infos_page[4])=="INTERNAL ATTRIBUTES", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "INTERNAL ATTRIBUTES"'
+        assert str(Lead_infos_page[1])==str(lead_dic["Score"]), 'Score in page is: "'+str(Lead_infos_page[1])+'", but should be: "'+str(lead_dic["Score"])+'"'
+        assert str(Lead_infos_page[2])=="LATTICE ATTRIBUTES", 'Score Title in Page: "'+str(Lead_infos_page[2])+'" is not equal: "LATTICE ATTRIBUTES"'
+        assert str(Lead_infos_page[3])=="INTERNAL ATTRIBUTES", 'Score Title in Page: "'+str(Lead_infos_page[3])+'" is not equal: "INTERNAL ATTRIBUTES"'
 
     def testcase_7_LeadDanteWithoutScore(self):
         print '----test  case for Lead list page without score be configured----'
@@ -100,8 +104,8 @@ class Test(unittest.TestCase):
         dp_L_List_No_Score.Close_browser()
         dp_L_List_No_Score.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,True,True)
         assert str(lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
-        assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
-        assert str(lead_infos_page[2])=='', 'Score in page is: "'+str(lead_infos_page[2])+'", but should be: ""'
+        #assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
+        assert str(lead_infos_page[1])=='', 'Score in page is: "'+str(lead_infos_page[1])+'", but should be: ""'
 
     def testcase_8_LeadDanteWithRate(self):
         print '----test  case for Lead list page without score be configured----'
@@ -115,8 +119,8 @@ class Test(unittest.TestCase):
         dp_L_List_Rate.Close_browser()
         dp_L_List_Rate.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,True,True)
         assert str(lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
-        assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
-        assert str(lead_infos_page[2])==lead_dic["Rate"], 'Score in page is: "'+str(lead_infos_page[2])+'", but should be: "'+str(lead_dic["Rate"])+'"'
+        #assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
+        assert str(lead_infos_page[1])==lead_dic["Rate"], 'Score in page is: "'+str(lead_infos_page[1])+'", but should be: "'+str(lead_dic["Rate"])+'"'
 
     def testcase_9_AccountWithoutScore(self):
         print '----test case for account listpage without score be configured'

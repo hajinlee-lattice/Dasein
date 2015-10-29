@@ -1,5 +1,5 @@
 ********************************
-There are 2 scripts:
+There are 3 scripts:
 
 
 Script1: CreateDanteSampleDataSqlFile
@@ -31,7 +31,7 @@ Script1: CreateDanteSampleDataSqlFile
 
  -------------------------------------------
 
- Script 2: ExportDanteSampleData
+ Script 2: ImportDanteSampleData
  -------------------------------------------
  Run this script, we can populate the sample data stored in sql file into the target Dante DB, In this version we need to populate data one table by one table.
  Following are the parameters required:
@@ -46,5 +46,16 @@ Script1: CreateDanteSampleDataSqlFile
 
   step1: cd to the folder stored the script (cd <rootfolder>\PreparSampleDanteData)
   setp2: run the command to export sampe Data for one table:
- ( python CreateDanteSampleDataSqlFile.py -S 10.41.1.87\SQL2012STD -U dataloader_user -P password -i .\Data\sql_AccountCache1.sql -rd DT_ABADEDTANwiaadd720133nC28010 -rc ABADEDTANwiaadd720133nC28010)
+ ( python ImportanteSampleDataSqlFile.py -S 10.41.1.87\SQL2012STD -U dataloader_user -P password -i .\Data\sql_AccountCache1.sql -rd DT_ABADEDTANwiaadd720133nC28010 -rc ABADEDTANwiaadd720133nC28010)
   step3: change the input file path (-i ****) to export other table.
+  if you want to import all 4 tables at once, please use parameter "-i All"
+
+
+
+ -------------------------------------------
+
+ Script 2: Insert 1M records
+ -------------------------------------------
+  This script will created one sql script which can insert more than 1M records to target DB, it will loop all LeadCache Data in source DB until the total number more than 1M. It has same parameters for script 1 "CreateDanteSampleDataSqlFile"
+  
+  run the command ( python Insert_1M_To_DB.py -S 10.41.1.87\SQL2012STD -D DT_ADEDTBDd720133nQ280105n154 -U dataloader_user -P password)

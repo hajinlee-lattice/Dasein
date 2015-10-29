@@ -21,6 +21,8 @@ def setProperties():
     parser.add_argument('-SU', '--salesforceuser', dest = 'sf_user', action = 'store', required = True, help = 'log in user for sales force')
     parser.add_argument('-SP', '--salesforcepwd', dest = 'sf_pwd', action = 'store', required = True, help = 'log in password for sales force')
     parser.add_argument('-SS', '--salesforceDanteService', dest = 'sf_dt_service', action = 'store', required = True, help = 'DT service for sales force')
+    parser.add_argument('-BT', '--Browser Type to use', dest = 'sf_bt', action = 'store', required = False, help = 'Browser to automation e.g ff chrome')
+    parser.add_argument('-PU', '--PROD Dante URL', dest = 'sf_prod_url', action = 'store', required = False, help = 'DT service for sales force')
     args = parser.parse_args()
 
     ''' Setting up properties in config.ini file... '''
@@ -36,6 +38,8 @@ def setProperties():
     configParser.set('Sales_Force', 'Sales_Force_User', args.sf_user)
     configParser.set('Sales_Force', 'Sales_Force_PWD', args.sf_pwd)
     configParser.set('Sales_Force', 'Sales_Force_DT_service', args.sf_dt_service)
+    configParser.set('Sales_Force', 'Browser_Type', args.sf_bt)
+    configParser.set('Sales_Force', 'PROD_Dante_URL', args.sf_prod_url)
     with open(configFile, 'wb') as configfile:
         configParser.write(configfile)
 
