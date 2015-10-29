@@ -72,6 +72,7 @@ import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
 import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
 import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -249,13 +250,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return taps;
     }
 
+    // Non-typesafe
     public abstract String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources);
 
-    public Node constructFlowDefinition(DataFlowContext dataFlowCtx, //
-            Map<String, String> sources, //
-            Map<String, Table> sourceTables) {
-        return null;
-    }
+    // Typesafe
+    public abstract Node constructFlowDefinition(DataFlowParameters parameters);
 
     private List<FieldMetadata> getFieldMetadata(Map<String, Field> fieldMap) {
         List<FieldMetadata> fields = new ArrayList<>(fieldMap.size());
@@ -302,9 +301,16 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return prior;
     }
 
-    protected Node addSource(Table sourceTable) {
-        validateTableForSource(sourceTable);
+    protected Node addSource(String sourceTableName) {
         DataFlowContext ctx = getDataFlowCtx();
+        @SuppressWarnings("unchecked")
+        Map<String, Table> sourceTables = ctx.getProperty("SOURCETABLES", Map.class);
+        Table sourceTable = sourceTables.get(sourceTableName);
+        if (sourceTable == null) {
+            throw new RuntimeException(String.format("Could not find source with name %s", sourceTableName));
+        }
+
+        validateTableForSource(sourceTable);
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
 
         List<Extract> extracts = sourceTable.getExtracts();
@@ -999,6 +1005,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     @Override
     public Table runFlow(DataFlowContext dataFlowCtx) {
+        setDataFlowCtx(dataFlowCtx);
+
         @SuppressWarnings("unchecked")
         Map<String, String> sourcePaths = dataFlowCtx.getProperty("SOURCES", Map.class);
         @SuppressWarnings("unchecked")
@@ -1008,10 +1016,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Properties jobProperties = dataFlowCtx.getProperty("JOBPROPERTIES", Properties.class);
         String engineType = dataFlowCtx.getProperty("ENGINE", String.class);
         ExecutionEngine engine = ExecutionEngine.get(engineType);
+        DataFlowParameters parameters = dataFlowCtx.getProperty("PARAMETERS", DataFlowParameters.class);
 
         String lastOperator = null;
         if (sourceTables != null) {
-            lastOperator = constructFlowDefinition(dataFlowCtx, sourcePaths, sourceTables).getIdentifier();
+            lastOperator = constructFlowDefinition(parameters).getIdentifier();
         } else {
             lastOperator = constructFlowDefinition(dataFlowCtx, sourcePaths);
         }

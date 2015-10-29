@@ -2,25 +2,21 @@ package com.latticeengines.prospectdiscovery.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 @Component("createEventTable")
-public class CreateEventTable extends CascadingDataFlowBuilder {
+public class CreateEventTable extends TypesafeDataFlowBuilder<DataFlowParameters> {
 
     @Override
-    public Node constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources,
-            Map<String, Table> sourceTables) {
-        setDataFlowCtx(dataFlowCtx);
-        Node account = addSource(sourceTables.get("Account"));
-        Node contact = addSource(sourceTables.get("Contact"));
-        Node opportunity = addSource(sourceTables.get("Opportunity"));
-        Node stoplist = addSource(sourceTables.get("Stoplist"));
+    public Node construct(DataFlowParameters parameters) {
+        Node account = addSource("Account");
+        Node contact = addSource("Contact");
+        Node opportunity = addSource("Opportunity");
+        Node stoplist = addSource("Stoplist");
 
         Node removeNullEmailAddresses = contact.filter("Email != null && !Email.trim().isEmpty()", //
                 new FieldList("Email"));
@@ -207,9 +203,5 @@ public class CreateEventTable extends CascadingDataFlowBuilder {
                 .addFunction("Count != null && Count > 0 ? true : false", new FieldList("Count"), event) //
                 .checkpoint("addHasContacts") //
                 .retain(new FieldList(fieldsToRetain));
-    }
-
-    public String constructFlowDefinition(DataFlowContext dataFlowContext, Map<String, String> sources) {
-        return null;
     }
 }

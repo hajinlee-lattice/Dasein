@@ -144,7 +144,8 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
         assertEquals(numRows, expectedNumRows);
     }
 
-    protected void createAndRegisterMetadata(String tableName, String path, String lastModifiedColName) {
+    protected void createAndRegisterMetadata(String tableName, String path, String primaryKeyName,
+            String lastModifiedColName) {
         Table table = new Table();
         table.setName(tableName);
         table.setDisplayName(tableName);
@@ -155,25 +156,29 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
         extract.setExtractionTimestamp(DateTime.now().getMillis());
         table.addExtract(extract);
 
-        PrimaryKey pk = new PrimaryKey();
-        Attribute pkAttr = new Attribute();
-        pkAttr.setName("Id");
-        pkAttr.setDisplayName("Id");
-        pk.setName("Id");
-        pk.setDisplayName("Id");
-        pk.addAttribute("Id");
+        if (primaryKeyName != null) {
+            PrimaryKey pk = new PrimaryKey();
+            Attribute pkAttr = new Attribute();
+            pkAttr.setName(primaryKeyName);
+            pkAttr.setDisplayName(primaryKeyName);
+            pk.setName(primaryKeyName);
+            pk.setDisplayName(primaryKeyName);
+            pk.addAttribute(primaryKeyName);
+            table.setPrimaryKey(pk);
+        }
 
-        LastModifiedKey lmk = new LastModifiedKey();
-        Attribute lastModifiedColumn = new Attribute();
-        lastModifiedColumn.setName(lastModifiedColName);
-        lastModifiedColumn.setDisplayName(lastModifiedColName);
-        lmk.setName(lastModifiedColName);
-        lmk.setDisplayName(lastModifiedColName);
-        lmk.addAttribute(lastModifiedColName);
-        lmk.setLastModifiedTimestamp(DateTime.now().getMillis());
+        if (lastModifiedColName != null) {
+            LastModifiedKey lmk = new LastModifiedKey();
+            Attribute lastModifiedColumn = new Attribute();
+            lastModifiedColumn.setName(lastModifiedColName);
+            lastModifiedColumn.setDisplayName(lastModifiedColName);
+            lmk.setName(lastModifiedColName);
+            lmk.setDisplayName(lastModifiedColName);
+            lmk.addAttribute(lastModifiedColName);
+            lmk.setLastModifiedTimestamp(DateTime.now().getMillis());
+            table.setLastModifiedKey(lmk);
+        }
 
-        table.setPrimaryKey(pk);
-        table.setLastModifiedKey(lmk);
         try {
             proxy.deleteMetadata(CUSTOMERSPACE, table);
         } catch (Exception e) {

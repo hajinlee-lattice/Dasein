@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 @Component("tableWithExtractsDataFlowBuilder")
 public class TableWithExtractsDataFlowBuilder extends CascadingDataFlowBuilder {
@@ -14,9 +14,8 @@ public class TableWithExtractsDataFlowBuilder extends CascadingDataFlowBuilder {
      * Load a source table with three extracts of differing schemas.
      */
     @Override
-    public Node constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources, Map<String, Table> sourceTables) {
-        setDataFlowCtx(dataFlowCtx);
-        return addSource(sourceTables.get("Source"));
+    public Node constructFlowDefinition(DataFlowParameters parameters) {
+        return addSource("Source");
     }
 
     @Override

@@ -7,10 +7,10 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 @Component("sampleDataFlowBuilder")
 public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
-
 
     /**
      * SELECT Domain, MaxRevenue, TotalEmployees FROM ( SELECT Domain,
@@ -25,7 +25,8 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
         String lead = addSource("Lead", sources.get("Lead"));
         String oppty = addSource("Opportunity", sources.get("Opportunity"));
 
-        // SELECT a.*, b.* FROM lead a, oppty b WHERE a.ConvertedOpportunityId = b.Id
+        // SELECT a.*, b.* FROM lead a, oppty b WHERE a.ConvertedOpportunityId =
+        // b.Id
         String joinOperatorName = addInnerJoin(lead, new FieldList("ConvertedOpportunityId"), oppty,
                 new FieldList("Id"));
 
@@ -34,15 +35,16 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
                 new FieldList("Email"), //
                 new FieldMetadata("Domain", String.class));
 
-        // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees 
+        // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees)
+        // TotalEmployees
         // FROM T GROUP BY Domain
         List<Aggregation> aggregation = new ArrayList<>();
         aggregation.add(new Aggregation("AnnualRevenue", "MaxRevenue", Aggregation.AggregationType.MAX));
-        aggregation.add(new Aggregation("NumberOfEmployees", "TotalEmployees",
-                Aggregation.AggregationType.SUM));
+        aggregation.add(new Aggregation("NumberOfEmployees", "TotalEmployees", Aggregation.AggregationType.SUM));
         String lastAggregatedOperatorName = addGroupBy(createDomain, new FieldList("Domain"), aggregation);
 
-        // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees, HashCode(Domain) DomainHashCode 
+        // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees)
+        // TotalEmployees, HashCode(Domain) DomainHashCode
         // FROM T GROUP BY Domain
         String domainConverted = addJythonFunction(lastAggregatedOperatorName, //
                 "com/latticeengines/domain/exposed/transforms/python/encoder.py", //
@@ -53,4 +55,8 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
         return domainConverted;
     }
 
+    @Override
+    public Node constructFlowDefinition(DataFlowParameters parameters) {
+        throw new IllegalStateException("Not supported");
+    }
 }

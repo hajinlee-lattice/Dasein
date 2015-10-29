@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 @Component("createFinalEventTable")
 public class CreateFinalEventTable extends CascadingDataFlowBuilder {
@@ -44,5 +45,10 @@ public class CreateFinalEventTable extends CascadingDataFlowBuilder {
             }
         }
         return convertBooleanToInt;
+    }
+
+    @Override
+    public Node constructFlowDefinition(DataFlowParameters parameters) {
+        throw new IllegalStateException("Not supported");
     }
 }

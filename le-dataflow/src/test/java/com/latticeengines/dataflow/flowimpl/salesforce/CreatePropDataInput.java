@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 @Component("createPropDataInput")
 public class CreatePropDataInput extends CascadingDataFlowBuilder {
@@ -24,5 +25,10 @@ public class CreatePropDataInput extends CascadingDataFlowBuilder {
                 new FieldList("Domain", "Company", "City", "State", "Country", "PropDataHash"), aggregation);
         String withRowId = addRowId(groupby, "RowId", groupby);
         return withRowId;
+    }
+
+    @Override
+    public Node constructFlowDefinition(DataFlowParameters parameters) {
+        throw new IllegalStateException("Not supported");
     }
 }

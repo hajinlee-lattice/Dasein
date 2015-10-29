@@ -7,4 +7,8 @@ public class DataFlowContext extends BaseContext {
     public DataFlowContext() {
         super();
     }
+
+    public DataFlowContext(DataFlowContext other) {
+        super(other);
+    }
 }

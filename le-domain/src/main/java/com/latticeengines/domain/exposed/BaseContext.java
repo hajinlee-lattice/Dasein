@@ -12,9 +12,14 @@ public class BaseContext {
 
     public BaseContext() {
     }
-    
+
     public BaseContext(Configuration yarnConfiguration) {
         setProperty(BaseProperty.HADOOPCONFIG, yarnConfiguration);
+    }
+
+    public BaseContext(BaseContext other) {
+        this.properties = new HashMap<>();
+        this.properties.putAll(other.properties);
     }
 
     public void setProperty(String propertyName, Object propertyValue) {
@@ -38,7 +43,7 @@ public class BaseContext {
     public Set<Map.Entry<String, Object>> getEntries() {
         return properties.entrySet();
     }
-    
+
     public boolean containsProperty(String propertyName) {
         return properties.containsKey(propertyName);
     }

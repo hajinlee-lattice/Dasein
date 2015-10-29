@@ -46,6 +46,8 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
 
     private String opportunity;
 
+    private String stoplist;
+
     public DataFlowResourceDeploymentTestNG() {
     }
 
@@ -72,19 +74,24 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
         account = ClassLoader.getSystemResource("Account/Account.avro").getPath();
         opportunity = ClassLoader.getSystemResource("Opportunity/Opportunity.avro").getPath();
         contact = ClassLoader.getSystemResource("Contact/Contact.avro").getPath();
+        contact = ClassLoader.getSystemResource("Contact/Contact.avro").getPath();
+        stoplist = ClassLoader.getSystemResource("Stoplist/Stoplist.avro").getPath();
 
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
 
         entries.add(new AbstractMap.SimpleEntry<>("file://" + account, "/tmp/avro/Account"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunity, "/tmp/avro/Opportunity"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, "/tmp/avro/Contact"));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + stoplist, "/tmp/avro/Stoplist"));
 
         account = "/tmp/avro/Account/*.avro";
         contact = "/tmp/avro/Contact/*.avro";
         opportunity = "/tmp/avro/Opportunity/*.avro";
-        createAndRegisterMetadata("Account", account, "CreatedDate");
-        createAndRegisterMetadata("Contact", contact, "LastModifiedDate");
-        createAndRegisterMetadata("Opportunity", opportunity, "LastModifiedDate");
+        stoplist = "/tmp/avro/Stoplist/*.avro";
+        createAndRegisterMetadata("Account", account, "Id", "CreatedDate");
+        createAndRegisterMetadata("Contact", contact, "Id", "LastModifiedDate");
+        createAndRegisterMetadata("Opportunity", opportunity, "Id", "LastModifiedDate");
+        createAndRegisterMetadata("Stoplist", stoplist, null, null);
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
         doCopy(fs, entries);
@@ -97,10 +104,12 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
         config.setName("DataFlowServiceImpl_submitDataFlow");
         config.setCustomerSpace(CUSTOMERSPACE);
         config.setDataFlowBeanName("createEventTable");
+
         List<DataFlowSource> sources = new ArrayList<>();
         sources.add(createDataFlowSource("Account"));
         sources.add(createDataFlowSource("Contact"));
         sources.add(createDataFlowSource("Opportunity"));
+        sources.add(createDataFlowSource("Stoplist"));
 
         config.setDataSources(sources);
         config.setTargetPath("/TmpEventTable");

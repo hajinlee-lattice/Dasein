@@ -4,13 +4,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class DataFlowConfiguration extends BasePayloadConfiguration {
 
     private String dataFlowBeanName;
     private List<DataFlowSource> dataSources;
     private String targetPath;
+    private DataFlowParameters dataFlowParameters;
 
     @JsonProperty("bean_name")
     public String getDataFlowBeanName() {
@@ -41,4 +41,15 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     public void setTargetPath(String targetPath) {
         this.targetPath = targetPath;
     }
+
+    @JsonProperty("data_flow_parameters")
+    public DataFlowParameters getDataFlowParameters() {
+        return dataFlowParameters;
+    }
+
+    @JsonProperty("data_flow_parameters")
+    public void setDataFlowParameters(DataFlowParameters dataFlowParameters) {
+        this.dataFlowParameters = dataFlowParameters;
+    }
+
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -51,4 +52,8 @@ public class MadisonDataFlowGroupAndExpandBuilder extends CascadingDataFlowBuild
         return new FieldList(fieldNames.toArray(new String[0]));
     }
 
+    @Override
+    public Node constructFlowDefinition(DataFlowParameters parameters) {
+        throw new IllegalStateException("Not supported");
+    }
 }

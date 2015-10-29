@@ -98,6 +98,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
         ctx.setProperty("ENGINE", "MR");
         ctx.setProperty("APPCTX", appContext);
+        ctx.setProperty("PARAMETERS", dataFlowConfig.getDataFlowParameters());
         log.info(String.format("Running data transform with bean %s", dataFlowConfig.getDataFlowBeanName()));
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
         log.info(String.format("Setting metadata for table %s", table.getName()));

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 @Component("createInitialEventTable")
 public class CreateInitialEventTable extends CascadingDataFlowBuilder {
@@ -54,5 +55,10 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
                 "PropDataHash");
 
         return propDataHash;
+    }
+
+    @Override
+    public Node constructFlowDefinition(DataFlowParameters parameters) {
+        throw new IllegalStateException("Not supported");
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 @Component("madisonDataFlowAggregationBuilder")
 @Scope("prototype")
@@ -46,8 +47,7 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
                 "HashedEmailID"), aggregation);
 
         aggregation = new ArrayList<>();
-        aggregation.add(new Aggregation("Topic_Total", "ML_30Day_Category_Total",
-                Aggregation.AggregationType.SUM));
+        aggregation.add(new Aggregation("Topic_Total", "ML_30Day_Category_Total", Aggregation.AggregationType.SUM));
         aggregation.add(new Aggregation("HashedEmailID", "ML_30Day_Category_UniqueUsers",
                 Aggregation.AggregationType.COUNT));
         lastAggregatedOperatorName = addGroupBy(lastAggregatedOperatorName, new FieldList("DomainID", "Category"),
@@ -78,11 +78,11 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
     }
 
     private String joinWithLastDateData(String todayAggregated) {
-        String yesterdayAggregated = addRetain("MadisonLogicForYesterday", new FieldList(new String[]{
-                "DomainID", "Category", "ML_30Day_Category_Total", "ML_30Day_Category_UniqueUsers"}));
+        String yesterdayAggregated = addRetain("MadisonLogicForYesterday", new FieldList(new String[] { "DomainID",
+                "Category", "ML_30Day_Category_Total", "ML_30Day_Category_UniqueUsers" }));
 
-        String joined = addLeftOuterJoin(todayAggregated, new FieldList("DomainID", "Category"),
-                yesterdayAggregated, new FieldList("DomainID", "Category"));
+        String joined = addLeftOuterJoin(todayAggregated, new FieldList("DomainID", "Category"), yesterdayAggregated,
+                new FieldList("DomainID", "Category"));
         FieldMetadata fieldMetaData = new FieldMetadata(Type.DOUBLE, Float.class, "ML_30Day_Category_Total_PctChange",
                 null);
         String lastAggregatedOperatorName = addFunction(
@@ -104,5 +104,10 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
                                 "ML_30Day_Category_UniqueUsers", "ML_30Day_Category_Total_PctChange",
                                 "ML_30Day_Category_UniqueUsers_PctChange" }));
         return lastAggregatedOperatorName;
+    }
+
+    @Override
+    public Node constructFlowDefinition(DataFlowParameters parameters) {
+        throw new IllegalStateException("Not supported");
     }
 }
