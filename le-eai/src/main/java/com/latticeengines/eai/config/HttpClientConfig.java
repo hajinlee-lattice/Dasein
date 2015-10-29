@@ -29,7 +29,7 @@ public class HttpClientConfig {
         this.importTimeout = importTimeout;
     }
 
-    public String toString(){
+    public String toString() {
         return JsonUtils.serialize(this);
     }
 }
