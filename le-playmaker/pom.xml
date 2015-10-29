@@ -6,15 +6,15 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-playmaker</artifactId>
     <packaging>war</packaging>
-    <version>2.0.14-SNAPSHOT</version>
+    <version>2.0.15-SNAPSHOT</version>
     <name>le-${component-name}</name>
 
     <properties>
         <component-name>playmaker</component-name>
-        <le.common.version>2.0.14-SNAPSHOT</le.common.version>
-        <le.domain.version>2.0.14-SNAPSHOT</le.domain.version>
-        <le.db.version>2.0.14-SNAPSHOT</le.db.version>
-        <le.oauth2.db.version>2.0.14-SNAPSHOT</le.oauth2.db.version>
+        <le.common.version>2.0.15-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.15-SNAPSHOT</le.domain.version>
+        <le.db.version>2.0.15-SNAPSHOT</le.db.version>
+        <le.oauth2.db.version>2.0.15-SNAPSHOT</le.oauth2.db.version>
         <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
         <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
         <spring.version>4.1.6.RELEASE</spring.version>
@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-playmaker-toplevel</artifactId>
-        <version>2.0.14-SNAPSHOT</version>
+        <version>2.0.15-SNAPSHOT</version>
         <relativePath>../playmaker-pom.xml</relativePath>
     </parent>
     <dependencies>

@@ -10,7 +10,7 @@
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="contextPath">/propdata</Set>
-    <Set name="war"><Property name="jetty.webapps" default="."/>/le-propdata-2.0.14-SNAPSHOT.war</Set>
+    <Set name="war"><Property name="jetty.webapps" default="."/>/le-propdata-2.0.15-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
