@@ -31,7 +31,7 @@ public abstract class RunJenkinsJobActivity extends BaseActivity {
                 if (status.getIsBuilding() == false && status.getNumber() > lastBuildNumber ) {
                     return;
                 }
-                log.warn(String.format("Waiting for deployment test %d to complete", status.getNumber()));
+                log.warn(String.format("Waiting for jenkins job %d to complete", status.getNumber()));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
