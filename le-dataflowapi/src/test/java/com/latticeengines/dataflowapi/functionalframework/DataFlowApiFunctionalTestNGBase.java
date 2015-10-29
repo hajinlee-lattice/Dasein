@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.avro.file.FileReader;
@@ -16,14 +17,17 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
@@ -32,19 +36,31 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflowapi.util.MetadataProxy;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.impl.TenantEntityMgrImpl;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataflowapi-context.xml" })
 public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+
+    protected RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${dataflowapi.test.api.hostport}")
+    private String hostPort;
+
+    protected String getRestAPIHostPort() {
+        return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
+    }
 
     protected static final CustomerSpace CUSTOMERSPACE = CustomerSpace.parse("DFAPITests.DFAPITests.DFAPITests");
 
@@ -61,7 +77,7 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
     private TenantEntityMgr tenantEntityMgr = new TenantEntityMgrImpl();
 
     @Autowired
-    private MetadataProxy proxy;
+    protected MetadataProxy proxy;
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
@@ -80,6 +96,10 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
         PathBuilder.buildCustomerSpacePath("Production", CUSTOMERSPACE);
         HdfsUtils.rmdir(yarnConfiguration, path.toString());
         HdfsUtils.mkdir(yarnConfiguration, path.toString());
+
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+        restTemplate.setInterceptors(interceptors);
     }
 
     private Tenant createTenant(CustomerSpace customerSpace) {
@@ -159,7 +179,17 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
         } catch (Exception e) {
             // ignore if table doesn't exist yet
         }
-        
+
         proxy.setMetadata(CUSTOMERSPACE, table);
+    }
+
+    protected AppSubmission submitDataFlow(DataFlowConfiguration configuration) {
+        String url = String.format("%s/dataflowapi/dataflows/", getRestAPIHostPort());
+        try {
+            AppSubmission submission = restTemplate.postForObject(url, configuration, AppSubmission.class);
+            return submission;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -13,7 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +43,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -341,6 +341,11 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     public FinalApplicationStatus waitForStatus(ApplicationId applicationId,
             FinalApplicationStatus... applicationStatuses) throws Exception {
+        return waitForStatus(applicationId.toString(), applicationStatuses);
+    }
+
+    public FinalApplicationStatus waitForStatus(String applicationId, FinalApplicationStatus... applicationStatuses)
+            throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
 
@@ -378,13 +383,13 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     protected FinalApplicationStatus getStatus(ApplicationId applicationId) {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
-        return findStatus(yarnClient, applicationId);
+        return findStatus(yarnClient, applicationId.toString());
     }
 
-    private FinalApplicationStatus findStatus(YarnClient client, ApplicationId applicationId) {
+    private FinalApplicationStatus findStatus(YarnClient client, String applicationId) {
         FinalApplicationStatus status = null;
         for (ApplicationReport report : client.listApplications()) {
-            if (report.getApplicationId().toString().equals(applicationId.toString())) {
+            if (report.getApplicationId().toString().equals(applicationId)) {
                 status = report.getFinalApplicationStatus();
                 break;
             }

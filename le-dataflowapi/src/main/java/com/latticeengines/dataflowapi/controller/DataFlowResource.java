@@ -16,11 +16,11 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "dataflow", description = "REST resource for transformations")
+@Api(value = "dataflowapi", description = "REST resource for transformations")
 @RestController
 @RequestMapping("/dataflows")
 public class DataFlowResource {
-    
+
     @Autowired
     private DataFlowService dataFlowService;
 
@@ -28,6 +28,7 @@ public class DataFlowResource {
     @ResponseBody
     @ApiOperation(value = "Create a data flow submission")
     public AppSubmission submitDataFlowExecution(@RequestBody DataFlowConfiguration dataFlowConfig) {
-        return new AppSubmission(Arrays.<ApplicationId>asList(new ApplicationId[] { dataFlowService.submitDataFlow(dataFlowConfig) }));
+        return new AppSubmission(Arrays.<ApplicationId> asList(new ApplicationId[] { dataFlowService
+                .submitDataFlow(dataFlowConfig) }));
     }
 }

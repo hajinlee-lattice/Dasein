@@ -1,6 +1,7 @@
 package com.latticeengines.dataflowapi.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
@@ -10,12 +11,8 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -24,19 +21,15 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflowapi.functionalframework.DataFlowApiFunctionalTestNGBase;
 import com.latticeengines.dataflowapi.service.DataFlowService;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
-import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
-public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTestNGBase {
-
-    @Value("${metadata.api.hostport}")
-    private String metadataHostPort;
+public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -53,7 +46,7 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
 
     private String opportunity;
 
-    public DataFlowServiceImplDeploymentTestNG() {
+    public DataFlowResourceDeploymentTestNG() {
     }
 
     @BeforeClass(groups = "deployment")
@@ -112,11 +105,14 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         config.setDataSources(sources);
         config.setTargetPath("/TmpEventTable");
 
-        ApplicationId appId = dataFlowService.submitDataFlow(config);
+        AppSubmission submission = submitDataFlow(config);
+        assertNotNull(submission);
+        assertNotEquals(submission.getApplicationIds().size(), 0);
+        String appId = submission.getApplicationIds().get(0);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        Table metadata = retrieveMetadata(config.getCustomerSpace(), config.getName());
+        Table metadata = proxy.getMetadata(config.getCustomerSpace(), config.getName());
         assertNotNull(metadata);
         assertEquals(metadata.getExtracts().size(), 1);
         Path expectedLocation = PathBuilder.buildDataTablePath( //
@@ -131,13 +127,4 @@ public class DataFlowServiceImplDeploymentTestNG extends DataFlowApiFunctionalTe
         return s;
     }
 
-    private Table retrieveMetadata(CustomerSpace customerSpace, String tableName) {
-        RestTemplate restTemplate = new RestTemplate();
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-        interceptors.add(new MagicAuthenticationHeaderHttpRequestInterceptor());
-        restTemplate.setInterceptors(interceptors);
-        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", //
-                metadataHostPort, customerSpace, tableName);
-        return restTemplate.getForObject(url, Table.class);
-    }
 }

@@ -7,6 +7,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +31,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}")
 public class MetadataResource extends InternalResourceBase {
-    
+    private static final Log log = LogFactory.getLog(MetadataResource.class);
+
     @Autowired
     private MetadataService mdService;
 
@@ -37,6 +40,7 @@ public class MetadataResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public List<String> getTables(@PathVariable String customerSpace, HttpServletRequest request) {
+        log.info(String.format("getTables(%s)", customerSpace));
         checkHeader(request);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         List<Table> tables = mdService.getTables(space);
@@ -51,6 +55,7 @@ public class MetadataResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName, HttpServletRequest request) {
+        log.info(String.format("getTable(%s, %s)", customerSpace, tableName));
         checkHeader(request);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.getTable(space, tableName);
@@ -63,6 +68,7 @@ public class MetadataResource extends InternalResourceBase {
             @PathVariable String tableName, //
             @RequestBody Table table, //
             HttpServletRequest request) {
+        log.info(String.format("createTable(%s)", table.getName()));
         checkHeader(request);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.createTable(space, table);
@@ -75,6 +81,7 @@ public class MetadataResource extends InternalResourceBase {
             @PathVariable String tableName, //
             @RequestBody Table table, //
             HttpServletRequest request) {
+        log.info(String.format("updateTable(%s)", table.getName()));
         checkHeader(request);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.updateTable(space, table);
@@ -86,6 +93,7 @@ public class MetadataResource extends InternalResourceBase {
     public void deleteTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
             HttpServletRequest request) {
+        log.info(String.format("deleteTable(%s)", tableName));
         checkHeader(request);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.deleteTable(space, tableName);
@@ -103,11 +111,11 @@ public class MetadataResource extends InternalResourceBase {
         if (validationErrors.size() > 0) {
             List<String> errors = new ArrayList<>();
             for (Map.Entry<String, Set<AnnotationValidationError>> entry : validationErrors.entrySet()) {
-                
+
                 for (AnnotationValidationError error : entry.getValue()) {
                     errors.add(String.format("Error with field %s for column %s.", error.getFieldName(), entry.getKey()));
                 }
-                
+
             }
             response = SimpleBooleanResponse.failedResponse(errors);
         }
