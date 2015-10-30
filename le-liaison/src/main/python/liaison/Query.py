@@ -51,7 +51,7 @@ class Query( object ):
             self._columns.remove( c )
 
     def updateColumn( self, c ):
-        if c.getName() in self._column_names:
+        if c.Name() in self._column_names:
             idx = self._column_names.index(c.Name())
             self._columns[idx] = c
         else:

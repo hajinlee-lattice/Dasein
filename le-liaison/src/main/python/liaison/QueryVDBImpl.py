@@ -39,15 +39,37 @@ class QueryVDBImpl( Query ):
         isMatchedTopLevel = False
 
         if not isMatchedTopLevel:
-            s3 = re.search( '^LatticeAddressSetPushforward\((LatticeAddressExpression\w*?)\(LatticeAddressSetMeet\((.*?)\)\), LatticeAddressSetMeet\((.*?)\), LatticeAddressExpressionMeet\((.*)\)\)$', las_spec )
+            s3 = re.search( '^LatticeAddressSetPushforward\(LatticeAddressExpressionFromLAS\(LatticeAddressSetMeet\((.*?)\)\), LatticeAddressSetMeet\((.*?)\), LatticeAddressExpressionMeet\((.*)\)\)$', las_spec )
             if s3:
                 lasm = s3.group(2)
-                lae = s3.group(4)
+                lae = s3.group(3)
+                isMatchedTopLevel = True
+
+        if not isMatchedTopLevel:
+            s3 = re.search( '^LatticeAddressSetPushforward\(LatticeAddressExpressionFromLAS\(LatticeAddressSetMeet\((.*?)\)\), LatticeAddressSetMeet\((.*?)\), (LatticeAddressExpressionAtomic\(.*\))\)$', las_spec )
+            if s3:
+                lasm = s3.group(2)
+                lae = '({0})'.format( s3.group(3) )
+                isMatchedTopLevel = True
+
+        if not isMatchedTopLevel:
+            s3 = re.search( '^LatticeAddressSetPushforward\(LatticeAddressExpressionMeet\((.*?)\), LatticeAddressSetMeet\((.*?)\), LatticeAddressExpressionMeet\((.*)\)\)$', las_spec )
+            if s3:
+                lasm = s3.group(2)
+                lae = s3.group(3)
+                isMatchedTopLevel = True
+
+        if not isMatchedTopLevel:
+            s3 = re.search( '^LatticeAddressSetPushforward\(LatticeAddressExpressionMeet\((.*?)\), LatticeAddressSetMeet\((.*?)\), (LatticeAddressExpressionAtomic\(.*\))\)$', las_spec )
+            if s3:
+                lasm = s3.group(2)
+                lae = '({0})'.format( s3.group(3) )
                 isMatchedTopLevel = True
 
         if not isMatchedTopLevel:
             raise MaudeStringError( las_spec )
 
+        
         filters = []
         entities = []
         
@@ -195,7 +217,7 @@ class QueryVDBImpl( Query ):
         defn +=       ')'
         defn +=     ', ' + self._sqrs_spec
         defn +=     ')'
-        defn +=   ', ContainerElementName(\"{0}\")'.format( self.Name() )
+        defn +=   ', ContainerElementName(\"{0}\")'.format( self.getName() )
         defn +=   ')'
         defn += '))'
 

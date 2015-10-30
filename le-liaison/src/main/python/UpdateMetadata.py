@@ -33,19 +33,19 @@ def UpdateMetadata( tenant, url, verify ):
             updates.append( (colname,type,value) )
 
         elif cmd.lower() == 'refresh':
-            modelcols = RefreshCache()
+            modelcols = RefreshCache( conn_mgr, query_name )
 
         elif cmd.lower() == 'commit':
             print 'Committing...',
             q = conn_mgr.GetQuery( query_name )
             for (colname,type,value) in updates:
-                if colname not in q.ColumnNames():
+                if colname not in q.getColumnNames():
                     print ''
                     print 'Column \'{0}\' does not exist in query; ignoring'.format( colname )
                     continue
-                qc = q.GetColumn( colname )
+                qc = q.getColumn( colname )
                 qc.SetMetadata( type, value )
-                q.UpdateColumn( qc )
+                q.updateColumn( qc )
             conn_mgr.SetQuery( q )
             print 'Done'
             updates = []

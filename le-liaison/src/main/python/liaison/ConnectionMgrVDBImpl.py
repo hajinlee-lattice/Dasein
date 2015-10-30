@@ -171,7 +171,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
 
     def SetQuery( self, query ):
 
-        self.SetSpec( query.Name(), query.SpecLatticeNamedElements() )
+        self.SetSpec( query.getName(), query.SpecLatticeNamedElements() )
 
 
     def ExecuteQuery( self, query_name ):

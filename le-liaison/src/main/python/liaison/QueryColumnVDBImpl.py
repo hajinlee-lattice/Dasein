@@ -82,7 +82,7 @@ class QueryColumnVDBImpl( QueryColumn ):
                         break
 
                 if not metadata_is_extracted:
-                    raise MaudeStringError( sed )
+                    raise MaudeStringError( 'Unsupported metadata type: {0}'.format(sed) )
 
                 if sed == '':
                     break
