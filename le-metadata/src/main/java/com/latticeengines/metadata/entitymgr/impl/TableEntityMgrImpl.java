@@ -48,12 +48,6 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void create(Table entity) {
-        Table found = findByName(entity.getName());
-        if (found != null) {
-            throw new RuntimeException(
-                    String.format("Table with name %s already exists", entity.getName()));
-        }
-
         setTenantId(entity);
         getDao().create(entity);
         updateReferences(entity);
@@ -76,23 +70,6 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
                 attributeDao.create(attr);
             }
         }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    @Override
-    public void delete(String tableName) {
-        Table found = findByName(tableName);
-        if (found == null) {
-            throw new RuntimeException(
-                    String.format("No table found with name %s", tableName));
-        }
-        tableDao.delete(found);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    @Override
-    public void delete(Table table) {
-        delete(table.getName());
     }
 
     @Override

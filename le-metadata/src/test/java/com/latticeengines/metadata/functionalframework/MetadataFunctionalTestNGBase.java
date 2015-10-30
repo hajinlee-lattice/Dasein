@@ -1,8 +1,11 @@
 package com.latticeengines.metadata.functionalframework;
 
+import java.util.Arrays;
+
 import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -17,7 +20,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.metadata.service.impl.SetTenantAspect;
+import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
@@ -25,7 +29,7 @@ import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGB
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-metadata-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:metadata-aspects-context.xml" })
 public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTests {
 
     protected static final String CUSTOMERSPACE1 = "X.Y1.Z";
@@ -44,6 +48,9 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
 
     @Autowired
     protected TenantEntityMgr tenantEntityMgr;
+    
+    @Autowired
+    protected TableTypeHolder tableTypeHolder;
 
     protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
 
@@ -54,7 +61,6 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
-
 
     public void setup() {
         Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
@@ -73,10 +79,31 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         Tenant tenant2 = createTenant(CUSTOMERSPACE2);
         tenantEntityMgr.create(tenant2);
 
-        new SetTenantAspect().setSecurityContext(tenant1);
-        tableEntityMgr.create(createTable(tenant1, TABLE1));
-        new SetTenantAspect().setSecurityContext(tenant2);
-        tableEntityMgr.create(createTable(tenant2, TABLE2));
+        // Tenant1, Type=DATATABLE
+        Table tbl = createTable(tenant1, TABLE1);
+        createTableByRestCall(tenant1, tbl, false);
+        // Tenant1, Type=IMPORTTABLE
+        createTableByRestCall(tenant1, tbl, true);
+
+        // Tenant2, Type=DATATABLE
+        tbl = createTable(tenant2, TABLE2);
+        createTableByRestCall(tenant2, tbl, false);
+        // Tenant2, Type=IMPORTTABLE
+        createTableByRestCall(tenant2, tbl, true);
+    }
+    
+    private void createTableByRestCall(Tenant tenant, Table table, boolean isImport) {
+        String urlType = "tables";
+        if (isImport) {
+            urlType = "importtables";
+        }
+        
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        String url = String.format("%s/metadata/customerspaces/%s/%s/%s",
+                getRestAPIHostPort(), table.getTenant().getId(), urlType, table.getName());
+        restTemplate.postForLocation(url, table);
+
     }
 
     protected Tenant createTenant(String customerSpace) {
@@ -135,6 +162,7 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         Attribute activeRetirementParticipants = new Attribute();
         activeRetirementParticipants.setName("ActiveRetirementParticipants");
         activeRetirementParticipants.setDisplayName("Active Retirement Plan Participants");
+        activeRetirementParticipants.setDescription("Number of active retirement plan participants");
         activeRetirementParticipants.setLength(5);
         activeRetirementParticipants.setPrecision(0);
         activeRetirementParticipants.setScale(0);

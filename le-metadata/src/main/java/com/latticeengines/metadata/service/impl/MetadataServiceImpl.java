@@ -42,7 +42,9 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public void createTable(CustomerSpace customerSpace, Table table) {
-        if (tableEntityMgr.findByName(table.getName()) != null) {
+        Table t = tableEntityMgr.findByName(table.getName());
+        
+        if (t != null) {
             log.info("Table with name " + table.getName() + " already exists.  Updating instead");
             updateTable(customerSpace, table);
         }
@@ -52,14 +54,19 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void deleteTable(CustomerSpace customerSpace, String tableName) { 
-        tableEntityMgr.delete(tableName);
+    public void deleteTable(CustomerSpace customerSpace, String tableName) {
+        Table t = tableEntityMgr.findByName(tableName);
+        
+        if (t != null) {
+            tableEntityMgr.delete(t);
+        }
     }
     
     @Override
     public void updateTable(CustomerSpace customerSpace, Table table) {
-        if (tableEntityMgr.findByName(table.getName()) != null) {
-            tableEntityMgr.delete(table.getName());
+        Table t = tableEntityMgr.findByName(table.getName());
+        if (t != null) {
+            tableEntityMgr.delete(t);
         }
         
         tableEntityMgr.create(table);

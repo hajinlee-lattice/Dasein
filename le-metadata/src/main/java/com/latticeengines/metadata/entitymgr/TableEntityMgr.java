@@ -7,8 +7,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface TableEntityMgr extends BaseEntityMgr<Table> {
 
-    void delete(String name);
-
     List<Table> getAll();
 
     Table findByName(String name);

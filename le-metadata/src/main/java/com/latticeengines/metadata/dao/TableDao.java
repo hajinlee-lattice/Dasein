@@ -6,4 +6,5 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public interface TableDao extends BaseDao<Table> {
 
     Table findByName(String name);
+
 }

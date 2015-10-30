@@ -17,5 +17,7 @@
     <bean id="metadataMultiTenancyAspect" class="com.latticeengines.metadata.entitymgr.impl.MetadataMultiTenantEntityMgrAspect" />
     
     <bean id="metadataSetTenantAspect" class="com.latticeengines.metadata.service.impl.SetTenantAspect" />
+    
+    <bean id="resourceAspect" class="com.latticeengines.metadata.service.impl.ResourceAspect" />
 
 </beans>
