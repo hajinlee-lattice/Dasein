@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMeta
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.security.exposed.Constants;
 
-public class MetadataResourceTestNG extends MetadataFunctionalTestNGBase {
+public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
     
     @BeforeClass(groups = "functional")
     public void setup() {

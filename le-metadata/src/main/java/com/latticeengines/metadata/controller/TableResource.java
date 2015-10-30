@@ -22,7 +22,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "metadata", description = "REST resource for data tables")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}")
-public class MetadataResource {
+public class TableResource {
 
     @Autowired
     private TableResourceHelper tableResourceHelper;

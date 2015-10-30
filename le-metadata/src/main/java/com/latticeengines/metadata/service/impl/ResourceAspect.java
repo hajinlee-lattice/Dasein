@@ -29,7 +29,7 @@ public class ResourceAspect {
         setTableType(joinPoint, TableType.IMPORTTABLE);
     }
     
-    @Before("execution(* com.latticeengines.metadata.controller.MetadataResource.*(..))")
+    @Before("execution(* com.latticeengines.metadata.controller.TableResource.*(..))")
     public void allMethodsForTableResource(JoinPoint joinPoint) {
         checkHeader(joinPoint);
         setTableType(joinPoint, TableType.DATATABLE);
