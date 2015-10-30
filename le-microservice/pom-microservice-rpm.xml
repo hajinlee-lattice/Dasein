@@ -38,6 +38,7 @@
                 <metadata.properties.path>../le-metadata/conf/env/buildmachine</metadata.properties.path>
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/buildmachine</dataflowapi.properties.path>
                 <propdata.properties.path>../le-propdata/conf/env/buildmachine</propdata.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/buildmachine</monitor.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -60,6 +61,7 @@
                 <metadata.properties.path>../le-metadata/conf/env/devcluster</metadata.properties.path>
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/devcluster</dataflowapi.properties.path>
                 <propdata.properties.path>../le-propdata/conf/env/devcluster</propdata.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/devcluster</monitor.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -81,6 +83,7 @@
                 <metadata.properties.path>../le-metadata/conf/env/qacluster</metadata.properties.path>
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/qacluster</dataflowapi.properties.path>
                 <propdata.properties.path>../le-propdata/conf/env/qacluster</propdata.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/qacluster</monitor.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -102,6 +105,7 @@
                 <metadata.properties.path>../le-metadata/conf/env/procluster</metadata.properties.path>
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/procluster</dataflowapi.properties.path>
                 <propdata.properties.path>../le-propdata/conf/env/procluster</propdata.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/prodcluster</monitor.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -171,6 +175,9 @@
                                 </source>
                                 <source>
                                     <location>${propdata.properties.path}/propdata.api.properties</location>
+                                </source>
+                                <source>
+                                    <location>${monitor.properties.path}/monitor.properties</location>
                                 </source>
                             </sources>
                         </mapping>
