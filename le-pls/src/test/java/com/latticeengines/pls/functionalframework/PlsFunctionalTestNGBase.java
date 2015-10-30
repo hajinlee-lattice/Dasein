@@ -21,7 +21,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
+import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -29,7 +31,9 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
+import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -66,6 +70,12 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
+    @Autowired
+    private QuotaEntityMgr quotaEntityMgr;
+    
+    @Autowired
+    private TargetMarketEntityMgr targetMarketEntityMgr;
+    
     @Autowired
     private UserService userService;
 
@@ -341,6 +351,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
                 testingTenants.add(tenant);
             }
             mainTestingTenant = testingTenants.get(0);
+            ALTERNATIVE_TESTING_TENANT = testingTenants.get(1);
         }
     }
 
@@ -363,6 +374,25 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         Mockito.when(token.getSession()).thenReturn(session);
         Mockito.when(securityContext.getAuthentication()).thenReturn(token);
         SecurityContextHolder.setContext(securityContext);
+    }
+
+    protected void cleanupTargetMarketDB() {
+        List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.getAllTargetMarkets();
+        for (TargetMarket targetMarket : targetMarkets) {
+            if (targetMarket.getName().startsWith("TEST")) {
+                this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
+            }
+            this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
+        }
+    }
+        
+    protected void cleanupQuotaDB() {
+        List<Quota> quotas = this.quotaEntityMgr.getAllQuotas();
+        for (Quota quota : quotas) {
+            if (quota.getId().startsWith("TEST")) {
+                this.quotaEntityMgr.deleteQuotaByQuotaId(quota.getId());
+            }
+        }
     }
 
 }

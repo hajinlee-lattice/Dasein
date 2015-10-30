@@ -1,6 +1,5 @@
 package com.latticeengines.security.exposed;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +53,45 @@ public enum GrantedRight implements GrantedAuthority {
     }, //
     EDIT_PLS_USERS {
         @Override
-        public String getAuthority() { return "Edit_PLS_Users"; }
+        public String getAuthority() {
+            return "Edit_PLS_Users";
+        }
+    }, //
+    VIEW_PLS_TARGETMARKETS {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_TargetMarkets";
+        }
+    }, //
+    CREATE_PLS_TARGETMARKETS {
+        @Override
+        public String getAuthority() {
+            return "Create_PLS_TargetMarkets";
+        }
+    }, //
+    EDIT_PLS_TARGETMARKETS {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_TargetMarkets";
+        }
+    },
+    VIEW_PLS_QUOTAS {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Quotas";
+        }
+    }, //
+    CREATE_PLS_QUOTAS {
+        @Override
+        public String getAuthority() {
+            return "Create_PLS_Quotas";
+        }
+    }, //
+    EDIT_PLS_QUOTAS {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_Quotas";
+        }
     };
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();
@@ -69,16 +106,18 @@ public enum GrantedRight implements GrantedAuthority {
         return grantedRightsMap.get(value);
     }
 
-    public static List<GrantedRight> getGrantedRights (List<String> values) {
+    public static List<GrantedRight> getGrantedRights(List<String> values) {
         List<GrantedRight> result = new ArrayList<>();
         for (String value : values) {
             GrantedRight right = GrantedRight.getGrantedRight(value);
-            if (right != null) { result.add(right); }
+            if (right != null) {
+                result.add(right);
+            }
         }
         return result;
     }
 
-    public static List<String> getAuthorities (List<GrantedRight> rights) {
+    public static List<String> getAuthorities(List<GrantedRight> rights) {
         List<String> result = new ArrayList<>();
         for (GrantedRight right : rights) {
             result.add(right.getAuthority());

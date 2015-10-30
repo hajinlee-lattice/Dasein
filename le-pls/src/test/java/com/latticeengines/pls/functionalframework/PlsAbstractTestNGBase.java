@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,9 +28,13 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.common.exposed.query.ExistsRestriction;
+import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
+import com.latticeengines.domain.exposed.pls.Quota;
+import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -52,9 +57,30 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String generalPassword = "admin";
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
+    protected static final Quota QUOTA = new Quota();
+    protected static final String TEST_QUOTA_ID = "TEST_QUOTA_ID";
+    protected static final Integer BALANCE = 100;
+    protected static final Integer BALANCE_1 = 200;
+    
+    protected static final TargetMarket TARGET_MARKET = new TargetMarket();
+    protected static final String TEST_TARGET_MARKET_NAME = "TEST_TARGET_MARKET_NAME";
+    protected static final Date CREATION_DATE = new Date();
+    protected static final String DESCRIPTION = "The Target Market For Functional Tests";
+    protected static final Integer NUM_PROPSPECTS_DESIRED = 100;
+    protected static final Integer NUM_PROPSPECTS_DESIRED_1 = 200;
+    protected static final Integer NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS = 10;
+    protected static final Double INTENT_SCORE_THRESHOLD = 0.5;
+    protected static final Double FIT_SCORE_THRESHOLD =  0.3;
+    protected static final String MODEL_ID = "MODEL_ID";
+    protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
+    protected static final Boolean SHOULD_GET_CONTACTS_FROM_EXISTING_CUSTOMERS = false;
+    protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account", new ArrayList<Restriction>());
+    protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact", new ArrayList<Restriction>());
+
     protected static HashMap<AccessLevel, UserDocument> testingUserSessions;
     protected static List<Tenant> testingTenants;
     protected static Tenant mainTestingTenant;
+    protected static Tenant ALTERNATIVE_TESTING_TENANT;
 
     @Autowired
     private InternalTestUserService internalTestUserService;
@@ -127,6 +153,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
                 testingTenants.add(tenant);
             }
             mainTestingTenant = testingTenants.get(0);
+            ALTERNATIVE_TESTING_TENANT = testingTenants.get(1);
         }
     }
 

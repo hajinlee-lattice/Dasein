@@ -28,6 +28,16 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.TargetMarketEntityMgrImpl.find*(..))")
+    public void findTargetMarket(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.QuotaEntityMgrImpl.find*(..))")
+    public void findQuota(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.update*(..))")
     public void updateModelSummary(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
@@ -38,6 +48,16 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.TargetMarketEntityMgrImpl.update*(..))")
+    public void updateTargetMarket(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.QuotaEntityMgrImpl.update*(..))")
+    public void updateQuota(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.delete*(..))")
     public void deleteModelSummary(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
@@ -45,6 +65,16 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.delete*(..))")
     public void deleteSegment(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.TargetMarketEntityMgrImpl.delete*(..))")
+    public void deleteTargetMarket(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.QuotaEntityMgrImpl.delete*(..))")
+    public void deleteQuota(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
