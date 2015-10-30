@@ -46,7 +46,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private Double fitScoreThreshold;
     private String modelId;
     private String eventColumnName;
-    private Boolean shouldGetContactsFromExistingCustomers;
+    private Boolean deliverProspectsFromExistingAccounts;
     private Restriction accountFilter;
     private Restriction contactFilter;
 
@@ -230,15 +230,15 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
         this.eventColumnName = eventColumnName;
     }
     
-    @Column(name="SHOULD_GET_CONTACTS_FROM_EXISTING_CUSTOMERS", nullable = false)
+    @Column(name="DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS", nullable = false)
     @JsonProperty
-    public Boolean isShouldGetContactsFromExistingCustomers() {
-        return this.shouldGetContactsFromExistingCustomers;
+    public Boolean isDeliverProspectsFromExistingAccounts() {
+        return this.deliverProspectsFromExistingAccounts;
     }
     
     @JsonProperty
-    public void setShouldGetContactsFromExistingCustomers(Boolean shouldGetContactsFromExistingCustomers) {
-        this.shouldGetContactsFromExistingCustomers = shouldGetContactsFromExistingCustomers;
+    public void setDeliverProspectsFromExistingAccounts(Boolean deliverProspectsFromExistingAccounts) {
+        this.deliverProspectsFromExistingAccounts = deliverProspectsFromExistingAccounts;
     }
     
 }

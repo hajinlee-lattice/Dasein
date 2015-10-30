@@ -73,7 +73,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final Double FIT_SCORE_THRESHOLD =  0.3;
     protected static final String MODEL_ID = "MODEL_ID";
     protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
-    protected static final Boolean SHOULD_GET_CONTACTS_FROM_EXISTING_CUSTOMERS = false;
+    protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
     protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account", new ArrayList<Restriction>());
     protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact", new ArrayList<Restriction>());
 
