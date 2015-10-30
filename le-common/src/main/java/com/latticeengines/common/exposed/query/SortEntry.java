@@ -1,47 +1,46 @@
 package com.latticeengines.common.exposed.query;
 
-import java.util.List;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Query {
-    private List<Lookup> lookups;
-    private Restriction restriction;
+public class SortEntry {
 
-    public Query(List<Lookup> lookups, Restriction restriction) {
-        this.lookups = lookups;
-        this.restriction = restriction;
+    private SingleReferenceLookup lookup;
+    private boolean ascending;
+
+    public SortEntry(SingleReferenceLookup lookup, boolean ascending) {
+        this.lookup = lookup;
+        this.ascending = ascending;
     }
 
-    @JsonProperty("restriction")
-    public Restriction getRestriction() {
-        return restriction;
+    @JsonProperty("lookup")
+    public SingleReferenceLookup getLookup() {
+        return lookup;
     }
 
-    @JsonProperty("restriction")
-    public void setRestriction(Restriction restriction) {
-        this.restriction = restriction;
+    @JsonProperty("lookup")
+    public void setLookup(SingleReferenceLookup lookup) {
+        this.lookup = lookup;
     }
 
-    @JsonProperty("lookups")
-    public List<Lookup> getLookups() {
-        return lookups;
+    @JsonProperty("ascending")
+    public boolean getAscending() {
+        return ascending;
     }
 
-    @JsonProperty("lookups")
-    public void setLookups(List<Lookup> lookups) {
-        this.lookups = lookups;
+    @JsonProperty("ascending")
+    public void setAscending(boolean ascending) {
+        this.ascending = ascending;
     }
 
     /**
      * Serialization constructor
      */
     @Deprecated
-    public Query() {
+    public SortEntry() {
     }
 
     @Override

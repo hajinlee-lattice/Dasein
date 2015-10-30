@@ -8,40 +8,28 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Query {
-    private List<Lookup> lookups;
-    private Restriction restriction;
+public class Sort {
+    private List<SortEntry> entries;
 
-    public Query(List<Lookup> lookups, Restriction restriction) {
-        this.lookups = lookups;
-        this.restriction = restriction;
+    public Sort(List<SortEntry> entries) {
+        this.entries = entries;
     }
 
-    @JsonProperty("restriction")
-    public Restriction getRestriction() {
-        return restriction;
+    @JsonProperty("entries")
+    public List<SortEntry> getEntries() {
+        return entries;
     }
 
-    @JsonProperty("restriction")
-    public void setRestriction(Restriction restriction) {
-        this.restriction = restriction;
-    }
-
-    @JsonProperty("lookups")
-    public List<Lookup> getLookups() {
-        return lookups;
-    }
-
-    @JsonProperty("lookups")
-    public void setLookups(List<Lookup> lookups) {
-        this.lookups = lookups;
+    @JsonProperty("entries")
+    public void setEntries(List<SortEntry> entries) {
+        this.entries = entries;
     }
 
     /**
      * Serialization constructor
      */
     @Deprecated
-    public Query() {
+    public Sort() {
     }
 
     @Override

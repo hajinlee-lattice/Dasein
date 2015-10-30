@@ -14,9 +14,31 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 public class LogicalRestriction extends Restriction {
+    private Connective connective;
+    private List<Restriction> restrictions;
 
     public LogicalRestriction(Connective connective, List<Restriction> restrictions) {
         this.connective = connective;
+        this.restrictions = restrictions;
+    }
+
+    @JsonProperty("connective")
+    public Connective getConnective() {
+        return connective;
+    }
+
+    @JsonProperty("connective")
+    public void setConnective(Connective connective) {
+        this.connective = connective;
+    }
+
+    @JsonProperty("restrictions")
+    public List<Restriction> getRestrictions() {
+        return restrictions;
+    }
+
+    @JsonProperty("restrictions")
+    public void setRestrictions(List<Restriction> restrictions) {
         this.restrictions = restrictions;
     }
 
@@ -26,12 +48,6 @@ public class LogicalRestriction extends Restriction {
     @Deprecated
     public LogicalRestriction() {
     }
-
-    @JsonProperty
-    public Connective connective;
-
-    @JsonProperty
-    public List<Restriction> restrictions;
 
     @Override
     public int hashCode() {
