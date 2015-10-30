@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
-@Component("createEventTable")
-public class CreateEventTable extends TypesafeDataFlowBuilder<DataFlowParameters> {
+@Component("preMatchEventTableFlow")
+public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowParameters> {
 
     @Override
     public Node construct(DataFlowParameters parameters) {

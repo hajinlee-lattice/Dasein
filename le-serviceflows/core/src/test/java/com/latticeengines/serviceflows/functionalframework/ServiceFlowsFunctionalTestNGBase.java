@@ -1,32 +1,36 @@
 package com.latticeengines.serviceflows.functionalframework;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceflows-context.xml" })
-public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
-
-    protected ServiceFlowsFunctionalTestNGBase() {
-        yarnConfiguration.set("fs.defaultFS", "file:///");
-    }
+public abstract class ServiceFlowsFunctionalTestNGBase<T extends DataFlowParameters> extends
+        AbstractTestNGSpringContextTests {
 
     @Autowired
     private DataTransformationService dataTransformationService;
@@ -36,8 +40,64 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     protected Configuration yarnConfiguration = new Configuration();
 
-    protected Table executeDataFlow(DataFlowContext dataFlowContext, String beanName) throws Exception {
-        return dataTransformationService.executeNamedTransformation(dataFlowContext, beanName);
+    protected ServiceFlowsFunctionalTestNGBase() {
+        yarnConfiguration.set("fs.defaultFS", "file:///");
+    }
+
+    protected abstract String getFlowBeanName();
+
+    protected String getIdColumnName(String tableName) {
+        return null;
+    }
+
+    protected String getLastModifiedColumnName(String tableName) {
+        return null;
+    }
+
+    protected DataFlowParameters getDataFlowParameters() {
+        return null;
+    }
+
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/Output/" + getFlowBeanName());
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/checkpoints");
+    }
+
+    protected Table executeDataFlow() throws Exception {
+        DataFlowContext context = createDataFlowContext();
+        String beanName = getFlowBeanName();
+        return dataTransformationService.executeNamedTransformation(context, beanName);
+    }
+
+    protected Map<String, Table> getSources() {
+        Map<String, Table> sources = new HashMap<>();
+
+        Map<String, String> sourcePaths = getSourcePaths();
+        for (String key : sourcePaths.keySet()) {
+            String path = sourcePaths.get(key);
+            String idColumn = getIdColumnName(key);
+            String lastModifiedColumn = getLastModifiedColumnName(key);
+            sources.put(key,
+                    MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, path, idColumn, lastModifiedColumn));
+        }
+        return sources;
+    }
+
+    protected Map<String, String> getSourcePaths() {
+        try {
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Resource[] resources = resolver.getResources(getFlowBeanName() + "/*/*.avro");
+            Map<String, String> sourcePaths = new HashMap<>();
+            for (Resource resource : resources) {
+                String path = resource.getFile().getAbsolutePath();
+                String[] parts = path.split("\\/");
+                sourcePaths.put(parts[parts.length - 2], path);
+            }
+            return sourcePaths;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected DataFlowContext createDataFlowContext() {
@@ -46,6 +106,13 @@ public class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContex
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
         ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty("TARGETPATH", "/tmp/Output/" + getFlowBeanName());
+        ctx.setProperty("TARGETTABLENAME", getFlowBeanName());
+        ctx.setProperty("FLOWNAME", getFlowBeanName());
+        ctx.setProperty("CHECKPOINT", true);
+        ctx.setProperty("SOURCETABLES", getSources());
+        ctx.setProperty("CUSTOMER", "customer1");
+        ctx.setProperty("PARAMETERS", getDataFlowParameters());
         return ctx;
     }
 

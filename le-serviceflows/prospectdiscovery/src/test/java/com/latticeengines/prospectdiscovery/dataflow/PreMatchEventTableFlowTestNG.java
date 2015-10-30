@@ -1,0 +1,57 @@
+package com.latticeengines.prospectdiscovery.dataflow;
+
+import java.util.List;
+
+import org.apache.avro.generic.GenericRecord;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
+
+@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
+public class PreMatchEventTableFlowTestNG extends ServiceFlowsFunctionalTestNGBase<DataFlowParameters> {
+
+    @Test(groups = "functional")
+    public void execute() throws Exception {
+        Table result = executeDataFlow();
+
+        Assert.assertEquals(result.getExtracts().size(), 1);
+        Assert.assertTrue(result.getAttributes().size() > 0);
+
+        List<GenericRecord> outputTable = readTable(result.getExtracts().get(0).getPath() + "/*.avro");
+        List<GenericRecord> accountTable = readTable(getSourcePaths().get("Account"));
+
+        Assert.assertTrue(identicalSets(outputTable, "Id", accountTable, "Id"));
+
+        // Confirm that email stop-list filtering worked
+        for (GenericRecord record : outputTable) {
+            Assert.assertTrue(record.get("Domain") == null || !record.equals("gmail.com"));
+        }
+    }
+
+    @Override
+    public String getFlowBeanName() {
+        return "preMatchEventTableFlow";
+    }
+
+    @Override
+    protected String getIdColumnName(String tableName) {
+        if (tableName.equals("Stoplist")) {
+            return null;
+        }
+        return "Id";
+    }
+
+    @Override
+    protected String getLastModifiedColumnName(String tableName) {
+        if (tableName.equals("Account")) {
+            return "CreatedDate";
+        } else if (tableName.equals("Stoplist")) {
+            return null;
+        }
+        return "LastModifiedDate";
+    }
+}
