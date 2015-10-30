@@ -85,7 +85,16 @@ def GetSpecsDictionary( tenant ):
             vdbtype = s3.group(2)
             name    = s3.group(3)
 
-            if vdbtype not in set(['SpecLatticeExtract']):
+            isExtractOrBinder = False
+
+            if vdbtype == 'SpecLatticeExtract':
+                isExtractOrBinder = True
+
+            s4 = re.search( 'SpecLatticeBinder\(SpecBoundName\(ContainerElementName\(\"\w*?\"\), NameTypeExtract', defn )
+            if s4:
+                isExtractOrBinder = True
+
+            if not isExtractOrBinder:
 
                 if name not in specs:
                     specs[name] = SpecData( vdbtype, defn, singlespec )
