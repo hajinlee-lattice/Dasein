@@ -27,7 +27,7 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET.setFitScoreThreshold(FIT_SCORE_THRESHOLD);
         TARGET_MARKET.setModelId(MODEL_ID);
         TARGET_MARKET.setEventColumnName(EVENT_COLUMN_NAME);
-        TARGET_MARKET.setShouldGetContactsFromExistingCustomers(SHOULD_GET_CONTACTS_FROM_EXISTING_CUSTOMERS);
+        TARGET_MARKET.setDeliverProspectsFromExistingAccounts(DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS);
         TARGET_MARKET.setAccountFilter(ACCOUNT_FILTER);
         TARGET_MARKET.setContactFilter(CONTACT_FILTER);
 
