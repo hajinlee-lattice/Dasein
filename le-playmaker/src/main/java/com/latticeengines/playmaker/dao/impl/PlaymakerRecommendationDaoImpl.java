@@ -34,7 +34,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + " T.[Address_Street_1] + '|' + T.[City] + '|' + T.[State_Province] + '|' + T.[Country]+ '|' + T.[Zip] "
                 + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
                 + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate, "
-                + "ROW_NUMBER() OVER ( ORDER BY L.[Last_Modification_Date] ) RowNum "
+                + "ROW_NUMBER() OVER ( ORDER BY L.[Last_Modification_Date], L.[PreLead_ID]) RowNum "
                 + getRecommendationFromWhereClause(syncDestination)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
 
