@@ -13,11 +13,56 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 public class ConcreteRestriction extends Restriction {
+    private boolean negate;
+    private Lookup lhs;
+    private ComparisonType relation;
+    private Lookup rhs;
+
     public ConcreteRestriction(boolean negate, Lookup lhs, ComparisonType relation, Lookup rhs) {
         this.negate = negate;
         this.lhs = lhs;
         this.relation = relation;
         this.rhs = rhs;
+    }
+
+    @JsonProperty("lhs")
+    public Lookup getLhs() {
+        return lhs;
+    }
+
+    @JsonProperty("lhs")
+    public void setLhs(Lookup lhs) {
+        this.lhs = lhs;
+    }
+
+    @JsonProperty("relation")
+    public ComparisonType getRelation() {
+        return relation;
+    }
+
+    @JsonProperty("relation")
+    public void setRelation(ComparisonType relation) {
+        this.relation = relation;
+    }
+
+    @JsonProperty("rhs")
+    public Lookup getRhs() {
+        return rhs;
+    }
+
+    @JsonProperty("rhs")
+    public void setRhs(Lookup rhs) {
+        this.rhs = rhs;
+    }
+
+    @JsonProperty("negate")
+    public boolean isNegate() {
+        return negate;
+    }
+
+    @JsonProperty("negate")
+    public void setNegate(boolean negate) {
+        this.negate = negate;
     }
 
     /**
@@ -26,18 +71,6 @@ public class ConcreteRestriction extends Restriction {
     @Deprecated
     public ConcreteRestriction() {
     }
-
-    @JsonProperty
-    public boolean negate;
-
-    @JsonProperty
-    public Lookup lhs;
-
-    @JsonProperty
-    public ComparisonType relation;
-
-    @JsonProperty
-    public Lookup rhs;
 
     @Override
     public int hashCode() {
