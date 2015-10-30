@@ -13,6 +13,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -100,20 +101,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
 
     @Test(groups = "deployment")
     public void submitDataFlow() throws Exception {
-        DataFlowConfiguration config = new DataFlowConfiguration();
-        config.setName("DataFlowServiceImpl_submitDataFlow");
-        config.setCustomerSpace(CUSTOMERSPACE);
-        config.setDataFlowBeanName("createEventTable");
-
-        List<DataFlowSource> sources = new ArrayList<>();
-        sources.add(createDataFlowSource("Account"));
-        sources.add(createDataFlowSource("Contact"));
-        sources.add(createDataFlowSource("Opportunity"));
-        sources.add(createDataFlowSource("Stoplist"));
-
-        config.setDataSources(sources);
-        config.setTargetPath("/TmpEventTable");
-
+        DataFlowConfiguration config = getDataFlowConfiguration();
         AppSubmission submission = submitDataFlow(config);
         assertNotNull(submission);
         assertNotEquals(submission.getApplicationIds().size(), 0);
@@ -128,6 +116,36 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
                 CamilleEnvironment.getPodId(), config.getCustomerSpace());
         assertEquals(metadata.getExtracts().get(0).getPath(), //
                 expectedLocation.append(config.getTargetPath()).toString());
+    }
+
+    @Test(groups = "deployment")
+    public void testBadHeader() {
+        DataFlowConfiguration config = getDataFlowConfiguration();
+        restTemplate.setInterceptors(null);
+        boolean caught = false;
+        try {
+            AppSubmission submission = submitDataFlow(config);
+        } catch (Exception e) {
+            caught = true;
+        }
+        Assert.assertTrue(caught);
+    }
+
+    private DataFlowConfiguration getDataFlowConfiguration() {
+        DataFlowConfiguration config = new DataFlowConfiguration();
+        config.setName("DataFlowServiceImpl_submitDataFlow");
+        config.setCustomerSpace(CUSTOMERSPACE);
+        config.setDataFlowBeanName("createEventTable");
+
+        List<DataFlowSource> sources = new ArrayList<>();
+        sources.add(createDataFlowSource("Account"));
+        sources.add(createDataFlowSource("Contact"));
+        sources.add(createDataFlowSource("Opportunity"));
+        sources.add(createDataFlowSource("Stoplist"));
+
+        config.setDataSources(sources);
+        config.setTargetPath("/TmpEventTable");
+        return config;
     }
 
     private DataFlowSource createDataFlowSource(String name) {

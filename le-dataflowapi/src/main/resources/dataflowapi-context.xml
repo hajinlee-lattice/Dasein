@@ -28,5 +28,6 @@
     <import resource="classpath:dataplatform-context.xml"/>
     <import resource="classpath:dataflowapi-yarn-client-context.xml"/>
     <import resource="classpath:dataflowapi-camille-context.xml"/>
+    <import resource="classpath:dataflowapi-aspects-context.xml"/>
 
 </beans>
