@@ -8,7 +8,7 @@ import com.latticeengines.security.exposed.exception.LoginException;
 
 public class InternalResourceBase {
 
-    protected void checkHeader(HttpServletRequest request) {
+    public void checkHeader(HttpServletRequest request) {
         String value = request.getHeader(Constants.INTERNAL_SERVICE_HEADERNAME);
         
         if (value == null || !value.equals(Constants.INTERNAL_SERVICE_HEADERVALUE)) {
