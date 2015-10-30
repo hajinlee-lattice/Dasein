@@ -19,6 +19,7 @@ public class AttributeUnitTestNG {
         attr.setDisplayDiscretizationStrategy("XYZ");
         attr.setDisplayName("Attribute 1");
         attr.setDataSource("DerivedColumns");
+        attr.setDataQuality("xyz");
         
         String serializedStr = JsonUtils.serialize(attr);
         
@@ -31,5 +32,6 @@ public class AttributeUnitTestNG {
         assertEquals(deserializedAttr.getDescription(), attr.getDescription());
         assertEquals(deserializedAttr.getDisplayDiscretizationStrategy(), attr.getDisplayDiscretizationStrategy());
         assertEquals(deserializedAttr.getDisplayName(), attr.getDisplayName());
+        assertEquals(deserializedAttr.getDataQuality(), attr.getDataQuality());
     }
 }

@@ -310,6 +310,18 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public void setDataQuality(String dataQuality) {
+        properties.put("DataQuality", dataQuality);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public String getDataQuality() {
+        return (String) properties.get("DataQuality");
+    }
+
+    @Transient
+    @JsonIgnore
     public void setDataSource(String dataSource) {
         setDataSource(Arrays.<String>asList(new String[] { dataSource }));
     }
@@ -362,7 +374,15 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setTags(List<String> tags) {
         properties.put("Tags", tags);
     }
+
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public List<String> getTags() {
+        return (List<String>) properties.get("Tags");
+    }
     
+
     @Transient
     @JsonIgnore
     public void setCategory(String category) {

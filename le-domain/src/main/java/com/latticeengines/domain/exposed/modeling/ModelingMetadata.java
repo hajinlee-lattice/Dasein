@@ -29,6 +29,14 @@ public class ModelingMetadata {
     public static class KV implements Map.Entry<String, String> {
         private String key;
         private String value;
+        
+        public KV() {
+        }
+        
+        public KV(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
 
         @JsonProperty("Key")
         public String getKey() {

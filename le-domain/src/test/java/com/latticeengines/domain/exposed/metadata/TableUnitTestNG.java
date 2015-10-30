@@ -2,10 +2,6 @@ package com.latticeengines.domain.exposed.metadata;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Map;
-
 import org.apache.avro.Schema;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -68,7 +64,7 @@ public class TableUnitTestNG {
         pkAttr.setScale(10);
         pkAttr.setPhysicalDataType(Schema.Type.INT.toString());
         pkAttr.setLogicalDataType("Identity");
-        pkAttr.setPropertyValue("ApprovedUsage", Arrays.asList(new String[] { ModelingMetadata.NONE_APPROVED_USAGE }));
+        pkAttr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
 
         Attribute lkAttr = new Attribute();
         lkAttr.setName("LID");
@@ -78,7 +74,7 @@ public class TableUnitTestNG {
         lkAttr.setScale(20);
         lkAttr.setPhysicalDataType(Schema.Type.LONG.toString());
         lkAttr.setLogicalDataType("Date");
-        lkAttr.setPropertyValue("ApprovedUsage", Arrays.asList(new String[] { ModelingMetadata.NONE_APPROVED_USAGE }));
+        lkAttr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
 
         Attribute spamIndicator = new Attribute();
         spamIndicator.setName("SPAM_INDICATOR");
@@ -88,7 +84,7 @@ public class TableUnitTestNG {
         spamIndicator.setScale(-1);
         spamIndicator.setPhysicalDataType(Schema.Type.BOOLEAN.toString());
         spamIndicator.setLogicalDataType("Boolean");
-        spamIndicator.setPropertyValue("ApprovedUsage", Arrays.asList(new String[] { ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE }));
+        spamIndicator.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         
         Attribute activeRetirementParticipants = new Attribute();
         activeRetirementParticipants.setName("ActiveRetirementParticipants");
@@ -98,14 +94,13 @@ public class TableUnitTestNG {
         activeRetirementParticipants.setScale(0);
         activeRetirementParticipants.setPhysicalDataType(Schema.Type.INT.toString());
         activeRetirementParticipants.setLogicalDataType("Integer");
-        activeRetirementParticipants.setPropertyValue("ApprovedUsage", Arrays.asList(new String[] { ModelingMetadata.MODEL_APPROVED_USAGE }));
-        Map.Entry<String, String> category = new AbstractMap.SimpleEntry<String, String>("Category", "Firmographics");
-        Map.Entry<String, String> dataType = new AbstractMap.SimpleEntry<String, String>("DataType", "Int");
-        activeRetirementParticipants.setPropertyValue("Extensions", Arrays.asList(new Map.Entry[] { category, dataType }));
-        activeRetirementParticipants.setPropertyValue("FundamentalType", "numeric");
-        activeRetirementParticipants.setPropertyValue("StatisticalType", "ratio");
-        activeRetirementParticipants.setPropertyValue("Tags", Arrays.asList(new String[] { ModelingMetadata.EXTERNAL_TAG }));
-        activeRetirementParticipants.setPropertyValue("DataSource", Arrays.asList(new String[] { "DerivedColumns" }));
+        activeRetirementParticipants.setApprovedUsage(ModelingMetadata.MODEL_APPROVED_USAGE);
+        activeRetirementParticipants.setCategory("Firmographics");
+        activeRetirementParticipants.setDataType("Int");
+        activeRetirementParticipants.setFundamentalType("numeric");
+        activeRetirementParticipants.setStatisticalType("ratio");
+        activeRetirementParticipants.setTags(ModelingMetadata.EXTERNAL_TAG);
+        activeRetirementParticipants.setDataSource("DerivedColumns");
 
         table.addAttribute(pkAttr);
         table.addAttribute(lkAttr);

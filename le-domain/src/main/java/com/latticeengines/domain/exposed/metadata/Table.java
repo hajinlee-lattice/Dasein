@@ -24,6 +24,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.avro.Schema;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -44,8 +45,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_TABLE", //
-                         uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+                         uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
+@Filters({
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
+@Filter(name = "typeFilter", condition = "TYPE = :typeFilterId")
+}
+)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
@@ -59,6 +64,16 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     private List<Extract> extracts = new ArrayList<>();
     private PrimaryKey primaryKey;
     private LastModifiedKey lastModifiedKey;
+    private TableType tableType;
+    private Integer tableTypeCode;
+    
+    public Table() {
+        setTableTypeCode(TableType.DATATABLE.getCode());
+    }
+    
+    public Table(TableType tableType) {
+        setTableTypeCode(tableType.getCode());
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -255,31 +270,56 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
     }
     
-    @SuppressWarnings("unchecked")
     @Transient
     public ModelingMetadata getModelingMetadata() {
         ModelingMetadata metadata = new ModelingMetadata();
         List<AttributeMetadata> attrMetadata = new ArrayList<>();
         for (Attribute attr : getAttributes()) {
-            Map<String, Object> properties = attr.getProperties();
             AttributeMetadata attrMetadatum = new AttributeMetadata();
             
             attrMetadatum.setColumnName(attr.getName());
             attrMetadatum.setDisplayName(attr.getDisplayName());
-            attrMetadatum.setApprovedUsage((List<String>) properties.get("ApprovedUsage"));
-            attrMetadatum.setDescription((String) properties.get("Description"));
-            attrMetadatum.setStatisticalType((String) properties.get("StatisticalType"));
-            attrMetadatum.setTags((List<String>) properties.get("Tags"));
-            attrMetadatum.setDisplayDiscretizationStrategy((String) properties.get("DisplayDiscretizationStrategy"));
-            attrMetadatum.setFundamentalType((String) properties.get("FundamentalType"));
-            attrMetadatum.setExtensions(((List<KV>) properties.get("Extensions")));
-            attrMetadatum.setDataQuality((String) properties.get("DataQuality"));
-            attrMetadatum.setDataSource((List<String>) properties.get("DataSource"));
+            attrMetadatum.setApprovedUsage(attr.getApprovedUsage());
+            attrMetadatum.setDescription(attr.getDescription());
+            attrMetadatum.setStatisticalType(attr.getStatisticalType());
+            attrMetadatum.setTags(attr.getTags());
+            attrMetadatum.setDisplayDiscretizationStrategy(attr.getDisplayDiscretizationStrategy());
+            attrMetadatum.setFundamentalType(attr.getFundamentalType());
+            attrMetadatum.setExtensions(Arrays.<KV>asList(new KV[] { //
+                    new KV("Category", attr.getCategory()), //
+                    new KV("DataType", attr.getDataType()) }));
+            attrMetadatum.setDataQuality(attr.getDataQuality());
+            attrMetadatum.setDataSource(attr.getDataSource());
             
             attrMetadata.add(attrMetadatum);
         }
         metadata.setAttributeMetadata(attrMetadata);
         return metadata;
+    }
+
+    @Transient
+    @JsonIgnore
+    public TableType getTableType() {
+        return tableType;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setTableType(TableType tableType) {
+        this.tableType = tableType;
+        this.tableTypeCode = tableType.getCode();
+    }
+
+    @Column(name = "TYPE", nullable = false)
+    @JsonIgnore
+    public Integer getTableTypeCode() {
+        return tableTypeCode;
+    }
+
+    @JsonIgnore
+    public void setTableTypeCode(Integer tableTypeCode) {
+        this.tableTypeCode = tableTypeCode;
+        setTableType(TableType.getTableTypeByCode(tableTypeCode));
     }
 
     @Override
