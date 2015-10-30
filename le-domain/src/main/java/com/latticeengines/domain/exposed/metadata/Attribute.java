@@ -443,6 +443,18 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return null;
     }
 
+    @Transient
+    @JsonIgnore
+    public void setSemanticType(String semanticType) {
+        properties.put("SemanticType", semanticType);
+    }
+    
+    @Transient
+    @JsonIgnore
+    public String getSemanticType() {
+        return (String) properties.get("SemanticType");
+    }
+    
     @Override
     @Transient
     @JsonIgnore
