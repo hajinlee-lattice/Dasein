@@ -1,40 +1,16 @@
 package com.latticeengines.common.exposed.query;
 
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 public class Query {
-    private List<Lookup> lookups;
-    private Restriction restriction;
-
     public Query(List<Lookup> lookups, Restriction restriction) {
         this.lookups = lookups;
         this.restriction = restriction;
-    }
-
-    @JsonProperty("restriction")
-    public Restriction getRestriction() {
-        return restriction;
-    }
-
-    @JsonProperty("restriction")
-    public void setRestriction(Restriction restriction) {
-        this.restriction = restriction;
-    }
-
-    @JsonProperty("lookups")
-    public List<Lookup> getLookups() {
-        return lookups;
-    }
-
-    @JsonProperty("lookups")
-    public void setLookups(List<Lookup> lookups) {
-        this.lookups = lookups;
     }
 
     /**
@@ -43,6 +19,12 @@ public class Query {
     @Deprecated
     public Query() {
     }
+
+    @JsonProperty
+    public List<Lookup> lookups;
+
+    @JsonProperty
+    public Restriction restriction;
 
     @Override
     public int hashCode() {

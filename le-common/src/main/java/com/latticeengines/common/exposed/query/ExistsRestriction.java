@@ -14,43 +14,10 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 public class ExistsRestriction extends Restriction {
-    private boolean negate;
-    private String association;
-    private List<Restriction> restrictions;
 
     public ExistsRestriction(boolean negate, String association, List<Restriction> restrictions) {
         this.negate = negate;
         this.association = association;
-        this.restrictions = restrictions;
-    }
-
-    @JsonProperty("negate")
-    public boolean isNegate() {
-        return negate;
-    }
-
-    @JsonProperty("negate")
-    public void setNegate(boolean negate) {
-        this.negate = negate;
-    }
-
-    @JsonProperty("association")
-    public String getAssociation() {
-        return association;
-    }
-
-    @JsonProperty("association")
-    public void setAssociation(String association) {
-        this.association = association;
-    }
-
-    @JsonProperty("restrictions")
-    public List<Restriction> getRestrictions() {
-        return restrictions;
-    }
-
-    @JsonProperty("restrictions")
-    public void setRestrictions(List<Restriction> restrictions) {
         this.restrictions = restrictions;
     }
 
@@ -60,6 +27,15 @@ public class ExistsRestriction extends Restriction {
     @Deprecated
     public ExistsRestriction() {
     }
+
+    @JsonProperty
+    public boolean negate;
+
+    @JsonProperty
+    public String association;
+
+    @JsonProperty
+    public List<Restriction> restrictions;
 
     @Override
     public int hashCode() {
