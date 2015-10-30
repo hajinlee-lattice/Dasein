@@ -26,6 +26,7 @@ from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
+from leframework.model.states.normalizationgenerator import NormalizationGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -52,25 +53,26 @@ class LearningExecutor(Executor):
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine(self.amHost, self.amPort)
         stateMachine.addState(Initialize(), 1)  
-        stateMachine.addState(CalibrationGenerator(), 4)
-        stateMachine.addState(AverageProbabilityGenerator(), 2)
-        stateMachine.addState(BucketGenerator(), 3)
-        stateMachine.addState(ColumnMetadataGenerator(), 5)
-        stateMachine.addState(ModelGenerator(), 6)
-        stateMachine.addState(PMMLModelGenerator(), 7)
-        stateMachine.addState(ROCGenerator(), 8)
-        stateMachine.addState(ProvenanceGenerator(), 9)
-        stateMachine.addState(PredictorGenerator(), 10)
-        stateMachine.addState(ModelDetailGenerator(), 11)
-        stateMachine.addState(SegmentationGenerator(), 12)
-        stateMachine.addState(SummaryGenerator(), 13)
-        stateMachine.addState(NameGenerator(), 14)
-        stateMachine.addState(PercentileBucketGenerator(), 15)
-        stateMachine.addState(SampleGenerator(), 16)
-        stateMachine.addState(DataCompositionGenerator(), 17)
-        stateMachine.addState(ScoreDerivationGenerator(), 18)
-        stateMachine.addState(EnhancedSummaryGenerator(), 19)
-        stateMachine.addState(Finalize(), 20)
+        stateMachine.addState(NormalizationGenerator(), 2)  
+        stateMachine.addState(CalibrationGenerator(), 5)
+        stateMachine.addState(AverageProbabilityGenerator(), 3)
+        stateMachine.addState(BucketGenerator(), 4)
+        stateMachine.addState(ColumnMetadataGenerator(), 6)
+        stateMachine.addState(ModelGenerator(), 7)
+        stateMachine.addState(PMMLModelGenerator(), 8)
+        stateMachine.addState(ROCGenerator(), 9)
+        stateMachine.addState(ProvenanceGenerator(), 10)
+        stateMachine.addState(PredictorGenerator(), 11)
+        stateMachine.addState(ModelDetailGenerator(), 12)
+        stateMachine.addState(SegmentationGenerator(), 13)
+        stateMachine.addState(SummaryGenerator(), 14)
+        stateMachine.addState(NameGenerator(), 15)
+        stateMachine.addState(PercentileBucketGenerator(), 16)
+        stateMachine.addState(SampleGenerator(), 17)
+        stateMachine.addState(DataCompositionGenerator(), 18)
+        stateMachine.addState(ScoreDerivationGenerator(), 19)
+        stateMachine.addState(EnhancedSummaryGenerator(), 20)
+        stateMachine.addState(Finalize(), 21)
         return stateMachine
 
     def retrieveMetadata(self, schema, depivoted):
@@ -139,12 +141,10 @@ class LearningExecutor(Executor):
         globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
         
         # Create the data pipeline
-        pipeline = globals()["setupPipeline"](metadata[0], stringColumns)
+        pipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
         params["pipeline"] = pipeline
-        
         training = pipeline.predict(params["training"])
         test = pipeline.predict(params["test"])
-        
         return (training, test, metadata)
 
     @overrides(Executor)

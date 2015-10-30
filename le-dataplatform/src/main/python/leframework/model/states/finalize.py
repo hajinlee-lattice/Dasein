@@ -44,12 +44,14 @@ class Finalize(State):
     def writeJson(self, mediator):
         stateMachine = self.getStateMachine()
         states = stateMachine.getStates()
+
         jsonDict = OrderedDict()
         for state in states:
             if isinstance(state, JsonGenBase):
                 key = state.getKey()
                 value = state.getJsonProperty()
                 jsonDict[key] = value
+
         with open(mediator.modelLocalDir + mediator.name + "_model.json", "wb") as fp:
             json.dump(jsonDict, fp)
             
@@ -69,6 +71,7 @@ class Finalize(State):
             json.dump(self.mediator.enhancedsummary, f, indent=4)
         
         with open(os.path.join(base, "DataComposition.json"), "wb") as f:
+            print self.mediator.data_composition
             json.dump(self.mediator.data_composition, f, indent=4)
             
         with open(os.path.join(base, "ScoreDerivation.json"), "wb") as f:
