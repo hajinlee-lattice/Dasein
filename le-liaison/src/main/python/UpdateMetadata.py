@@ -9,7 +9,7 @@ def UpdateMetadata( tenant, url, verify ):
 
     conn_mgr = ConnectionMgrFactory.Create( 'visiDB', tenant_name=tenant, dataloader_url=url, verify=verify )
     print 'Initializing...',
-    modelcols = conn_mgr.GetMetadata( query_name )
+    modelcols = conn_mgr.getMetadata( query_name )
     print 'Done'
 
     updates = []
@@ -37,16 +37,16 @@ def UpdateMetadata( tenant, url, verify ):
 
         elif cmd.lower() == 'commit':
             print 'Committing...',
-            q = conn_mgr.GetQuery( query_name )
+            q = conn_mgr.getQuery( query_name )
             for (colname,type,value) in updates:
                 if colname not in q.getColumnNames():
                     print ''
                     print 'Column \'{0}\' does not exist in query; ignoring'.format( colname )
                     continue
                 qc = q.getColumn( colname )
-                qc.SetMetadata( type, value )
+                qc.setMetadata( type, value )
                 q.updateColumn( qc )
-            conn_mgr.SetQuery( q )
+            conn_mgr.setQuery( q )
             print 'Done'
             updates = []
             modelcols = RefreshCache( conn_mgr, query_name )
@@ -126,7 +126,7 @@ def PrintMetadataForColumn( modelcols ):
 
 def RefreshCache( conn_mgr, query_name ):
     print 'Refreshing cache...',
-    modelcols = conn_mgr.GetMetadata( query_name )
+    modelcols = conn_mgr.getMetadata( query_name )
     print 'Done'
     return modelcols
 

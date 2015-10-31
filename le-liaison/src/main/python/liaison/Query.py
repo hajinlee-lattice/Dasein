@@ -5,79 +5,74 @@
 # $Rev$
 #
 
-class Query( object ):
+class Query(object):
 
-    def __init__( self, name, columns = [], filters = [], entities = [] ):
+    def __init__(self, name, columns = [], filters = [], entities = [], resultSet = None):
 
-        self.initFromValues( name, columns, filters, entities )
+        self.initFromValues(name, columns, filters, entities, resultSet)
 
 
-    def getName( self ):
-        return self._name
+    def getName(self):
+        return self.name_
 
-    def setName( self, n ):
-        self._name = n
-        return self._name
+    def setName(self, n):
+        self.name_ = n
 
-    def getColumns( self ):
-        return self._columns
+    def getColumns(self):
+        return self.columns_
 
-    def getColumnNames( self ):
-        return self._column_names
+    def getColumnNames(self):
+        return self.column_names_
 
-    def setColumns( self, cc ):
-        self._columns = cc
-        self._column_names = []
+    def setColumns(self, cc):
+        self.columns_ = cc
+        self.column_names_ = []
         for c in cc:
-            self._column_names.append( c.Name() )
-        return self._columns
+            self.column_names_.append(c.getName())
 
-    def getColumn( self, colname ):
-        if colname in self._column_names:
-            idx = self._column_names.index(colname)
-            return self._columns[idx]
+    def getColumn(self, colname):
+        if colname in self.column_names_:
+            idx = self.column_names_.index(colname)
+            return self.columns_[idx]
         return None
 
-    def appendColumn( self, c ):
-        if c.getName() not in self._column_names:
-            self._columns.append( c )
-            self._column_names.append( c.Name() )
-        return c
+    def appendColumn(self, c):
+        if c.getName() not in self.column_names_:
+            self.columns_.append(c)
+            self.column_names_.append(c.getName())
 
-    def removeColumn( self, colname ):
-        if colname in self._column_names:
-            self._column_names.remove( colname )
-            c = (c for c in self._columns if c.Name() == colname).next()
-            self._columns.remove( c )
+    def removeColumn(self, colname):
+        if colname in self.column_names_:
+            self.column_names_.remove(colname)
+            c = (c for c in self.columns_ if c.getName() == colname).next()
+            self.columns_.remove(c)
 
-    def updateColumn( self, c ):
-        if c.Name() in self._column_names:
-            idx = self._column_names.index(c.Name())
-            self._columns[idx] = c
+    def updateColumn(self, c):
+        if c.getName() in self.column_names_:
+            idx = self.column_names_.index(c.getName())
+            self.columns_[idx] = c
         else:
-            self.appendColumn( c )
-        return c
+            self.appendColumn(c)
 
-    def getFilters( self ):
-        return self._filters
+    def getFilters(self):
+        return self.filters_
 
-    def setFilters( self, ff ):
-        self._filters = ff
-        return self._filters
+    def setFilters(self, ff):
+        self.filters_ = ff
 
-    def getEntities( self ):
-        return self._entities
+    def getEntities(self):
+        return self.entities_
 
-    def setEntities( self, ee ):
-        self._entities = ee
-        return self._entities
+    def setEntities(self, ee):
+        self.entities_ = ee
 
-    def initFromValues( self, name, columns, filters, entities ):
+    def initFromValues(self, name, columns, filters, entities, resultSet):
 
-        self._name         = name
-        self._columns      = columns
-        self._column_names = []
+        self.name_         = name
+        self.columns_      = columns
+        self.column_names_ = []
         for c in columns:
-            self._column_names.append( c.Name() )
-        self._filters      = filters
-        self._entities     = entities
+            self.column_names_.append( c.getName() )
+        self.filters_      = filters
+        self.entities_     = entities
+        self.resultSet_    = resultSet

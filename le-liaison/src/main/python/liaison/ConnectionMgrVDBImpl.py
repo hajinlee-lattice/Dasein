@@ -34,18 +34,18 @@ from .QueryResultVDBImpl import QueryResultVDBImpl
 from .LoadGroupMgrImpl import LoadGroupMgrImpl
 
 
-class ConnectionMgrVDBImpl( ConnectionMgr ):
+class ConnectionMgrVDBImpl(ConnectionMgr):
 
-    def __init__( self, type, tenant_name, dataloader_url = None, verify = True, verbose = False ):
-        
-        super( ConnectionMgrVDBImpl, self ).__init__( type, verbose )
+    def __init__(self, type, tenant_name, dataloader_url = None, verify = True, verbose = False):
+
+        super(ConnectionMgrVDBImpl, self).__init__(type, verbose)
 
         self._headers = {}
         self._headers['MagicAuthentication'] = 'Security through obscurity!'
         self._headers['Content-Type']        = 'application/json; charset=utf-8'
 
         if dataloader_url is None:
-            dataloader_url = self.GetURLForTenant( tenant_name )
+            dataloader_url = self.__getURLForTenant(tenant_name)
         
         self._url         = dataloader_url
         self._tenant_name = tenant_name
@@ -54,55 +54,55 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             self._verify = False
 
 
-    def GetTable( self, table_name ):
+    def getTable(self, table_name):
 
         table_name_import = table_name + '_Import'
         
-        itable_spec = self.GetSpec( table_name_import )
-        stable_spec = self.GetSpec( table_name )
+        itable_spec = self.getSpec(table_name_import)
+        stable_spec = self.getSpec(table_name)
 
-        table = TableVDBImpl.InitFromDefn( table_name, stable_spec, itable_spec )
+        table = TableVDBImpl.initFromDefn(table_name, stable_spec, itable_spec)
 
         return table
     
 
-    def SetTable( self, table ):
+    def setTable(self, table):
 
-        self.SetSpec( table.Name(), table.SpecLatticeNamedElements() )
+        self.setSpec(table.getName(), table.SpecLatticeNamedElements())
 
 
-    def GetNamedExpression( self, expression_name ):
+    def getNamedExpression(self, expression_name):
 
-        spec = self.GetSpec( expression_name )
+        spec = self.getSpec(expression_name)
 
-        expression = NamedExpressionVDBImpl.InitFromDefn( expression_name, spec )
+        expression = NamedExpressionVDBImpl.InitFromDefn(expression_name, spec)
 
         return expression
     
 
-    def SetNamedExpression( self, expression ):
+    def setNamedExpression(self, expression):
 
-        self.SetSpec( expression.Name(), expression.SpecLatticeNamedElements() )
+        self.setSpec(expression.Name(), expression.SpecLatticeNamedElements())
 
 
-    def GetQuery( self, query_name ):
+    def getQuery(self, query_name):
 
-        spec = self.GetSpec( query_name )
+        spec = self.getSpec(query_name)
 
-        query = QueryVDBImpl.initFromDefn( query_name, spec )
+        query = QueryVDBImpl.initFromDefn(query_name, spec)
 
         return query
     
 
-    def GetMetadata( self, query_name ):
+    def getMetadata(self, query_name):
 
         url = self._url + '/DLRestService/GetQueryMetadataColumns'
-        
+
         payload = {}
         payload['tenantName'] = self._tenant_name
         payload['queryName'] = query_name
 
-        if self.IsVerbose():
+        if self.isVerbose():
             print self.Type() +': Getting visiDB Metadata for Query \'{0}\'...'.format( payload['queryName'] ),
 
         try:
@@ -111,7 +111,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
         
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.GetSpec(): POST request returned code {0}'.format(response.status_code) )
 
@@ -122,17 +122,17 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             errmsg = response.json()['ErrorMessage']
             mdraw  = response.json()['Metadata']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if status != 3:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to get metadata for query \'{0}\''.format( payload['queryName'] )
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.GetMetadata(): {0}'.format(payload['tenantName']) )
 
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
         columns = {}
@@ -169,12 +169,12 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         return columns
 
 
-    def SetQuery( self, query ):
+    def setQuery(self, query):
 
-        self.SetSpec( query.getName(), query.SpecLatticeNamedElements() )
+        self.setSpec(query.getName(), query.SpecLatticeNamedElements())
 
 
-    def ExecuteQuery( self, query_name ):
+    def executeQuery(self, query_name):
 
         url = self._url + '/DLQueryService/RunQuery'
 
@@ -182,7 +182,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         payload['tenantName'] = self._tenant_name
         payload['queryName'] = query_name
 
-        if self.IsVerbose():
+        if self.isVerbose():
             print self.Type() +': Executing Query \'{0}\'...'.format( payload['queryName'] ),
 
         try:
@@ -191,7 +191,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
 
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.ExecuteQuery(): POST request returned code {0}'.format(response.status_code) )
 
@@ -201,30 +201,30 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             success = response.json()['Success']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if not success:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to execute query \'{0}\''.format( payload['queryName'] )
                 print errmsg
             raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.ExecuteQuery(): {0}'.format(payload['queryName']) )
         
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
-        return QueryResultVDBImpl( self, response.json()['QueryHandle'] )
+        return QueryResultVDBImpl(self, response.json()['QueryHandle'])
 
 
-    def GetLoadGroupMgr( self ):
+    def getLoadGroupMgr(self):
 
         url = self._url + '/DLRestService/DownloadConfigFile'
         
         payload = {}
         payload['tenantName'] = self._tenant_name
 
-        if self.IsVerbose():
+        if self.isVerbose():
             print self.Type() +': Getting DataLoader Config File...',
 
         try:
@@ -233,7 +233,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
         
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.GetLoadGroupMgr(): POST request returned code {0}'.format(response.status_code) )
 
@@ -243,12 +243,12 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             status = response.json()['Status']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if status != 3:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to get config file'
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.GetLoadGroupMgr(): {0}'.format(payload['tenantName']) )
@@ -258,13 +258,13 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         
         lgm = LoadGroupMgrImpl( self, configfile )
 
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
         return lgm
 
  
-    def GetSpec( self, spec_name ):
+    def getSpec(self, spec_name):
         
         url = self._url + '/DLRestService/GetSpecDetails'
         
@@ -272,8 +272,8 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         payload['tenantName'] = self._tenant_name
         payload['specName'] = spec_name
 
-        if self.IsVerbose():
-            print self.Type() +': Getting visiDB Spec \'{0}\'...'.format( payload['specName'] ),
+        if self.isVerbose():
+            print self.getType() +': Getting visiDB Spec \'{0}\'...'.format( payload['specName'] ),
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -281,7 +281,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
         
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.GetSpec(): POST request returned code {0}'.format(response.status_code) )
 
@@ -291,12 +291,12 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             success = response.json()['Success']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if not success:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to get spec \'{0}\''.format( payload['specName'] )
                 print errmsg
             if errmsg == 'Tenant \'{0}\' does not exist.'.format( payload['tenantName'] ):
@@ -304,21 +304,21 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             else:
                 raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.GetSpec(): {0}'.format(payload['specName']) )
         
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
         return response.json()['SpecDetails']
 
 
-    def GetAllSpecs( self ):
+    def getAllSpecs(self):
         
         url = self._url + '/DLRestService/DownloadVisiDBStructureFile'
         
         payload = {}
         payload['tenantName'] = self._tenant_name
 
-        if self.IsVerbose():
-            print self.Type() +': Getting All visiDB Specs...',
+        if self.isVerbose():
+            print self.getType() +': Getting All visiDB Specs...',
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -326,7 +326,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
         
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.GetAllSpecs(): POST request returned code {0}'.format(response.status_code) )
 
@@ -336,12 +336,12 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             status = response.json()['Status']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if status != 3:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to get all specs'
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.GetAllSpecs(): {0}'.format(payload['tenantName']) )
@@ -354,13 +354,13 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         if specs is None:
             raise UnknownVisiDBSpec( 'No specs returned' )
 
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
         return specs.text
 
 
-    def SetSpec( self, obj_name, SpecLatticeNamedElements ):
+    def setSpec(self, obj_name, SpecLatticeNamedElements):
 
         url = self._url + '/DLRestService/InstallVisiDBStructureFile_Sync'
 
@@ -372,8 +372,8 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         payload['tenantName'] = self._tenant_name
         payload['value'] = vfile
 
-        if self.IsVerbose():
-            print self.Type() +': Setting visiDB Spec for object \'{0}\'...'.format( obj_name ),
+        if self.isVerbose():
+            print self.getType() +': Setting visiDB Spec for object \'{0}\'...'.format( obj_name ),
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -381,7 +381,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
         
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.SetSpec(): POST request returned code {0}'.format(response.status_code) )
 
@@ -391,7 +391,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             status = response.json()['Status']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
@@ -402,7 +402,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
                 raise MaudeStringError( errmsg )
 
         if status != 3:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to set spec \'{0}\''.format( obj_name )
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.SetSpec(): {0}'.format(payload['tenantName']) )
@@ -412,16 +412,16 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         info2   = value[1]
 
         if status2['Value'] != 'Succeed':
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to set spec \'{0}\''.format( obj_name )
                 print info2['Value']
             raise DataLoaderError( 'ConnectionMgrVDBImpl.SetSpec(): {0}'.format(payload['tenantName']) )
 
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
 
-    def GetQueryStatus( self, query_handle ):
+    def getQueryStatus(self, query_handle):
 
         url = self._url + '/DLQueryService/GetQueryStatus'
 
@@ -429,8 +429,8 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         payload['tenantName'] = self._tenant_name
         payload['queryHandle'] = query_handle
 
-        if self.IsVerbose():
-            print self.Type() +': Getting query status for handle \'{0}\'...'.format( payload['queryHandle'] ),
+        if self.isVerbose():
+            print self.getType() +': Getting query status for handle \'{0}\'...'.format( payload['queryHandle'] ),
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -438,7 +438,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
 
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.GetQueryStatus(): POST request returned code {0}'.format(response.status_code) )
 
@@ -448,17 +448,17 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             success = response.json()['Success']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if not success:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to get query status for handle \'{0}\''.format( payload['queryHandle'] )
                 print errmsg
             raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.GetQueryStatus(): {0}'.format(payload['queryHandle']) )
         
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
         status   = response.json()['Status']
@@ -478,7 +478,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         return 'Unknown'
 
 
-    def GetQueryResults( self, query_handle, start_row, row_count ):
+    def getQueryResults( self, query_handle, start_row, row_count ):
 
         url = self._url + '/DLQueryService/GetQueryResultData'
 
@@ -488,8 +488,8 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         payload['startRow'] = start_row
         payload['rowCount'] = row_count
 
-        if self.IsVerbose():
-            print self.Type() +': Getting query results for handle \'{0}\'...'.format( payload['queryHandle'] ),
+        if self.isVerbose():
+            print self.getType() +': Getting query results for handle \'{0}\'...'.format( payload['queryHandle'] ),
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -497,7 +497,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
 
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.GetQueryResults(): POST request returned code {0}'.format(response.status_code) )
 
@@ -507,17 +507,17 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             success = response.json()['Success']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if not success:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to get query results for handle \'{0}\''.format( payload['queryHandle'] )
                 print errmsg
             raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.GetQueryResults(): {0}'.format(payload['queryHandle']) )
         
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
         col_names     = []
@@ -577,10 +577,10 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
                     cols_list.append( value )
                 rows.append( tuple(cols_list) )
 
-        return ( col_names, col_datatypes, remaining_rows, tuple(rows) )
+        return (col_names, col_datatypes, remaining_rows, tuple(rows))
 
 
-    def UpdateDataProvider( self, dataProviderName, dataSourceType, tryConnect, **kwargs ):
+    def updateDataProvider(self, dataProviderName, dataSourceType, tryConnect, **kwargs):
 
         ## The available keys for each dataSourceType are:
         ##
@@ -608,8 +608,8 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         
         payload['values'] = values
 
-        if self.IsVerbose():
-            print self.Type() +': Updating DataProvider \'{0}\'...'.format( payload['dataProviderName'] ),
+        if self.isVerbose():
+            print self.getType() +': Updating DataProvider \'{0}\'...'.format( payload['dataProviderName'] ),
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -617,7 +617,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
 
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.UpdateDataProvider(): POST request returned code {0}'.format(response.status_code) )
 
@@ -627,21 +627,21 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             success = response.json()['Success']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if not success:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to update DataProvider \'{0}\''.format( payload['dataProviderName'] )
                 print errmsg
             raise UnknownDataLoaderObject( 'ConnectionMgrVDBImpl.UpdateDataProvider(): {0}'.format(payload['dataProviderName']) )
         
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
 
-    def executeGroup( self, groupName, userEmail ):
+    def executeGroup(self, groupName, userEmail):
         
         url = self._url + '/DLRestService/ExecuteGroup'
         
@@ -652,8 +652,8 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         payload['state'] = 'launch'
         payload['sync'] = 'false'
 
-        if self.IsVerbose():
-            print self.Type() +': Executing Load Group \'{0}\'...'.format( payload['groupName'] ),
+        if self.isVerbose():
+            print self.getType() +': Executing Load Group \'{0}\'...'.format( payload['groupName'] ),
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -661,7 +661,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
         
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.executeGroup(): POST request returned code {0}'.format(response.status_code) )
 
@@ -671,12 +671,12 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             status = response.json()['Status']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
         if status != 3:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to execute Load Group \'{0}\''.format( payload['groupName'] )
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.executeGroup(): {0}'.format(payload['tenantName']) )
@@ -684,13 +684,13 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         valuedict  = response.json()['Value'][0]
         launchid = valuedict['Value']
         
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
         return launchid
 
 
-    def installDLConfigFile( self, config ):
+    def installDLConfigFile(self, config):
 
         url = self._url + '/DLRestService/InstallConfigFile_Sync'
 
@@ -698,8 +698,8 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         payload['tenantName'] = self._tenant_name
         payload['value'] = config
 
-        if self.IsVerbose():
-            print self.Type() +': Setting DataLoader Config File...',
+        if self.isVerbose():
+            print self.getType() +': Setting DataLoader Config File...',
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -707,7 +707,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise EndpointError( e )
         
         if response.status_code != 200:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP POST request failed'
             raise HTTPError( 'ConnectionMgrVDBImpl.installDLConfigFile(): POST request returned code {0}'.format(response.status_code) )
 
@@ -717,7 +717,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             status = response.json()['Status']
             errmsg = response.json()['ErrorMessage']
         except ValueError as e:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
@@ -725,7 +725,7 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
             raise XMLStringError( errmsg )
 
         if status != 3:
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to set config'
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.installDLConfigFile(): {0}'.format(payload['tenantName']) )
@@ -735,17 +735,17 @@ class ConnectionMgrVDBImpl( ConnectionMgr ):
         info2   = value[1]
 
         if status2['Value'] != 'Succeed':
-            if self.IsVerbose():
+            if self.isVerbose():
                 print 'Failed to set config'
                 print info2['Value']
             raise DataLoaderError( 'ConnectionMgrVDBImpl.installDLConfigFile(): {0}'.format(payload['tenantName']) )
 
-        if self.IsVerbose():
+        if self.isVerbose():
             print 'Success'
 
 
     @classmethod
-    def GetURLForTenant( cls, tenant ):
+    def __getURLForTenant(cls, tenant):
 
         theurl = None
 

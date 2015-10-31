@@ -11,20 +11,20 @@ from .Table import Table
 from .TableColumnVDBImpl import TableColumnVDBImpl
 
 
-class TableVDBImpl( Table ):
+class TableVDBImpl(Table):
 
 ## This is the default constructor
 
-    def __init__( self, name, columns, srctable_specs = None, aggrule_spec = None, filter_spec = None ):
+    def __init__(self, name, columns, srctable_specs = None, aggrule_spec = None, filter_spec = None):
 
-        self.InitFromValues( name, columns, srctable_specs, aggrule_spec, filter_spec )
+        self.initFromValues(name, columns, srctable_specs, aggrule_spec, filter_spec)
 
 
 ## This is the pythonic way to create multiple constructors.  The call is
 ## t = TableVDBImpl.InitFromDefn( srctable_defn, imptable_defn )
 
     @classmethod
-    def InitFromDefn( cls, name, srctable_defn, imptable_defn ):
+    def initFromDefn(cls, name, srctable_defn, imptable_defn):
 
         s1 = re.search( '^SpecLatticeSourceTable\(SpecLatticeSourceTableColumnSet\(\((.*)\)\), (SpecKeys(.*))\)$', srctable_defn )
         if not s1:
@@ -43,7 +43,7 @@ class TableVDBImpl( Table ):
                 if not s2:
                     raise MaudeStringError( srctable_defn )
 
-                c = TableColumnVDBImpl.InitFromDefn( s2.group(1) )
+                c = TableColumnVDBImpl.initFromDefn( s2.group(1) )
                 columns.append( c )
 
                 if s2.group(2) == '':
@@ -64,34 +64,31 @@ class TableVDBImpl( Table ):
 
         filter_spec = i2.group(1)
 
-        return cls( name, columns, srctable_specs, aggrule_spec, filter_spec )
+        return cls(name, columns, srctable_specs, aggrule_spec, filter_spec)
 
 
-    def SourceTableSpecs( self ):
-        return self._srctable_specs
+    def getSourceTableSpecs(self):
+        return self.srctable_specs_
 
 
-    def SetSourceTableSpecs( self, sts ):
-        self._srctable_specs = sts
-        return self._srctable_specs
+    def setSourceTableSpecs(self, sts):
+        self.srctable_specs_ = sts
 
 
-    def AggregationRuleSpec( self ):
-        return self._aggrule_spec
+    def getAggregationRuleSpec(self):
+        return self.aggrule_spec_
 
 
-    def SetAggregationRuleSpec( self, ars ):
-        self._aggrule_spec = ars
-        return self._aggrule_spec
+    def setAggregationRuleSpec(self, ars):
+        self.aggrule_spec_ = ars
 
 
-    def ImportTableFilterSpec( self ):
-        return self._filter_spec
+    def getImportTableFilterSpec(self):
+        return self.filter_spec_
 
 
-    def SetImportTableFilterSpec( self, itf ):
-        self._filter_spec = itf
-        return self._filter_spec
+    def setImportTableFilterSpec(self, itf):
+        self.filter_spec_ = itf
 
 
     def SpecLatticeNamedElements( self ):
@@ -102,70 +99,70 @@ class TableVDBImpl( Table ):
         defn +=       'SpecLatticeSourceTableColumnSet(('
 
         sep = ''
-        for c in self._columns:
+        for c in self.columns_:
             defn += sep
-            defn += c.Definition()
+            defn += c.definition()
             sep = ', '
 
         defn +=       '))'
         defn +=     ', '
-        defn += self.SourceTableSpecs()
+        defn += self.getSourceTableSpecs()
         defn +=     ')'
-        defn +=   ', ContainerElementName(\"{0}\")'.format( self.Name() )
+        defn +=   ', ContainerElementName(\"{0}\")'.format( self.getName() )
         defn +=   ')'
         defn += ', SpecLatticeNamedElement('
         defn +=     'SpecLatticeImportTable('
-        defn += self.AggregationRuleSpec()
+        defn += self.getAggregationRuleSpec()
         defn +=     ', SpecColumnBindings(('
 
         sep = ''
-        for c in self._columns:
+        for c in self.columns_:
             defn += sep
-            defn += 'SpecColumnBinding(ContainerElementName(\"{0}\"),{1})'.format( c.Name(), 'DataType' + c.Datatype() )
+            defn += 'SpecColumnBinding(ContainerElementName(\"{0}\"),{1})'.format( c.getName(), 'DataType' + c.getDatatype() )
             sep = ', '
 
         defn +=       '))'
-        defn +=     ', {0}'.format( self.ImportTableFilterSpec() )
+        defn +=     ', {0}'.format( self.getImportTableFilterSpec() )
         defn +=     ')'
-        defn +=   ', ContainerElementName(\"{0}\")'.format( self.Name() + '_Import' )
+        defn +=   ', ContainerElementName(\"{0}\")'.format( self.getName() + '_Import' )
         defn +=   ')'
         defn += ', SpecLatticeNamedElement('
         defn +=     'SpecLatticeBinder('
-        defn +=       'SpecBoundName(ContainerElementName(\"{0}\"),NameTypeImportTable)'.format( self.Name() + '_Import' )
-        defn +=     ', SpecBoundName(ContainerElementName(\"{0}\"),NameTypeSourceTable)'.format( self.Name() )
+        defn +=       'SpecBoundName(ContainerElementName(\"{0}\"),NameTypeImportTable)'.format( self.getName() + '_Import' )
+        defn +=     ', SpecBoundName(ContainerElementName(\"{0}\"),NameTypeSourceTable)'.format( self.getName() )
         defn +=     ')'
-        defn +=   ', ContainerElementName(\"Binder_I2S_T_{0}_{1}\")'.format( self.Name() + '_Import', self.Name() )
+        defn +=   ', ContainerElementName(\"Binder_I2S_T_{0}_{1}\")'.format( self.getName() + '_Import', self.getName() )
         defn +=   ')'
         defn += '))'
 
         return defn
 
 
-    def InitFromValues( self, name, columns, srctable_specs = None, aggrule_spec = None, filter_spec = None ):
+    def initFromValues(self, name, columns, srctable_specs = None, aggrule_spec = None, filter_spec = None):
 
-        super( TableVDBImpl, self ).InitFromValues( name, columns )
+        super(TableVDBImpl, self).initFromValues(name, columns)
 
         if srctable_specs is not None:
-            self._srctable_specs = srctable_specs
+            self.srctable_specs_ = srctable_specs
 
         else:
-            self._srctable_specs =    'SpecKeys(empty)'
-            self._srctable_specs += ', SpecDescription("")'
-            self._srctable_specs += ', SpecMaximalIsMaximal'
-            self._srctable_specs += ', SpecKeyAggregation(SpecColumnAggregationRuleMostRecent)'
-            self._srctable_specs += ', SpecEquivalenceAggregation(SpecColumnAggregationRuleMostRecent)'
+            self.srctable_specs_ =    'SpecKeys(empty)'
+            self.srctable_specs_ += ', SpecDescription("")'
+            self.srctable_specs_ += ', SpecMaximalIsMaximal'
+            self.srctable_specs_ += ', SpecKeyAggregation(SpecColumnAggregationRuleMostRecent)'
+            self.srctable_specs_ += ', SpecEquivalenceAggregation(SpecColumnAggregationRuleMostRecent)'
 
         if aggrule_spec is not None:
-            self._aggrule_spec = aggrule_spec
+            self.aggrule_spec_ = aggrule_spec
 
         else:
-            self._aggrule_spec = 'SpecSourceAggregationRuleMostRecent(SpecTotalOrderEffectiveDate)'
+            self.aggrule_spec_ = 'SpecSourceAggregationRuleMostRecent(SpecTotalOrderEffectiveDate)'
 
         if filter_spec is not None:
-            self._filter_spec = filter_spec
+            self.filter_spec_ = filter_spec
 
         else:
-            self._filter_spec = 'SpecSourceFilterNone'
+            self.filter_spec_ = 'SpecSourceFilterNone'
 
 
 

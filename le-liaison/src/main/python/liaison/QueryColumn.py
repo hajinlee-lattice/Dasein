@@ -7,141 +7,131 @@
 
 from .exceptions import UnknownMetadataValue
 
-class QueryColumn( object ):
+class QueryColumn(object):
  
-    def __init__( self, name, expression, approved_usage = None, display_name = None,
-                                category = None, statistical_type = None, tags = None,
-                                fundamental_type = None, description = None,
-                                display_discretization = None ):
+    def __init__(self, name, expression, approved_usage = None, display_name = None,
+                 category = None, statistical_type = None, tags = None,
+                 fundamental_type = None, description = None,
+                 display_discretization = None):
 
-        self.InitFromValues( name, expression, approved_usage, display_name, category,
-                                                 statistical_type, tags, fundamental_type,
-                                                 description, display_discretization )
+        self.initFromValues(name, expression, approved_usage, display_name, category,
+                            statistical_type, tags, fundamental_type,
+                            description, display_discretization)
 
 
-    def Name( self ):
-        return self._name
+    def getName(self):
+        return self.name_
 
-    def SetName( self, n ):
-        self._name = n
-        return self._name
+    def setName(self, n):
+        self.name_ = n
 
-    def Expression( self ):
-        return self._exp
+    def getExpression(self):
+        return self.exp_
 
-    def SetExpression( self, e ):
-        self._exp = e
-        return self._exp
+    def setExpression(self, e):
+        self.exp_ = e
 
-    def ApprovedUsage( self ):
-        return self._approved_usage
+    def getApprovedUsage(self):
+        return self.approved_usage_
 
-    def SetApprovedUsage( self, au ):
+    def setApprovedUsage(self, au):
         if au is not None and au not in [ 'None', 'Model', 'ModelAndModelInsights', 'ModelAndAllInsights' ]:
-            raise UnknownMetadataValue( au )
-        self._approved_usage = au
-        return self._approved_usage
+            raise UnknownMetadataValue(au)
+        self.approved_usage_ = au
 
-    def DisplayName( self ):
-        return self._display_name
+    def getDisplayName(self):
+        return self.display_name_
 
-    def SetDisplayName( self, dn ):
+    def setDisplayName(self, dn):
         if dn is not None and len(dn) > 46:
-            print 'Warning: truncating DisplayName \'{0}\' to 46 characters'.format( dn )
-            self._display_name = dn[:46]
+            print 'Warning: truncating DisplayName \'{0}\' to 46 characters'.format(dn)
+            self.display_name_ = dn[:46]
         else:
-            self._display_name = dn
-        return self._display_name
+            self.display_name_ = dn
 
-    def Category( self ):
-        return self._category
+    def getCategory(self):
+        return self.category_
 
-    def SetCategory( self, c ):
+    def setCategory(self, c):
         if c is not None and len(c) > 22:
-            print 'Warning: truncating Category \'{0}\' to 22 characters'.format( c )
-            self._category = c[:22]
+            print 'Warning: truncating Category \'{0}\' to 22 characters'.format(c)
+            self.category_ = c[:22]
         else:
-            self._category = c
-        return self._category
+            self.category_ = c
 
-    def StatisticalType( self ):
-        return self._statistical_type
+    def getStatisticalType(self):
+        return self.statistical_type_
 
-    def SetStatisticalType( self, st ):
+    def setStatisticalType(self, st):
         if st is not None and st not in [ 'nominal', 'ratio', 'ordinal', 'interval' ]:
-            raise UnknownMetadataValue( st )
-        self._statistical_type = st
-        return self._statistical_type
+            raise UnknownMetadataValue(st)
+        self.statistical_type_ = st
 
-    def Tags( self ):
-        return self._tags
+    def getTags(self):
+        return self.tags_
 
-    def SetTags( self, t ):
+    def setTags(self, t):
         if t is not None and t.lower() not in [ 'internal', 'external' ]:
-            raise UnknownMetadataValue( t )
-        self._tags = t
-        return self._tags
+            raise UnknownMetadataValue(t)
+        self.tags_ = t
 
-    def FundamentalType( self ):
-        return self._fundamental_type
+    def getFundamentalType(self):
+        return self.fundamental_type_
 
-    def SetFundamentalType( self, ft ):
-        if ft is not None and ft not in [ 'numeric', 'currency', 'percentage', 'boolean', 'year' ]:
-            raise UnknownMetadataValue( ft )
-        self._fundamental_type = ft
-        return self._fundamental_type
+    def setFundamentalType(self, ft):
+        if ft is not None and ft not in [ 'alpha', 'numeric', 'currency', 'percentage', 'boolean', 'year' ]:
+            raise UnknownMetadataValue(ft)
+        self.fundamental_type_ = ft
 
-    def Description( self ):
-        return self._description
+    def getDescription(self):
+        return self.description_
 
-    def SetDescription( self, d ):
+    def setDescription(self, d):
         if d is not None and len(d) > 150:
-            print 'Warning: truncating Description \'{0}\' to 150 characters'.format( d )
-            self._description = d[:150]
+            print 'Warning: truncating Description \'{0}\' to 150 characters'.format(d)
+            self.description_ = d[:150]
         else:
-            self._description = d
-        return self._description
+            self.description_ = d
 
-    def DisplayDiscretization( self ):
-        return self._display_discretization
+    def getDisplayDiscretization(self):
+        return self.display_discretization_
 
-    def SetDisplayDiscretization( self, dd ):
-        self._display_discretization = dd
-        return self._display_discretization
+    def setDisplayDiscretization(self, dd):
+        self.display_discretization_ = dd
 
-    def SetMetadata( self, metadata_type, metadata_value ):
+    def setMetadata(self, metadata_type, metadata_value):
         if metadata_type == 'ApprovedUsage':
-            self.SetApprovedUsage( metadata_value )
+            self.setApprovedUsage(metadata_value)
         elif metadata_type == 'DisplayName':
-            self.SetDisplayName( metadata_value )
+            self.setDisplayName(metadata_value)
         elif metadata_type == 'Category':
-            self.SetCategory( metadata_value )
+            self.setCategory(metadata_value)
         elif metadata_type == 'StatisticalType':
-            self.SetStatisticalType( metadata_value )
+            self.setStatisticalType(metadata_value)
         elif metadata_type == 'Tags':
-            self.SetTags( metadata_value )
+            self.setTags(metadata_value)
         elif metadata_type == 'FundamentalType':
-            self.SetFundamentalType( metadata_value )
+            self.setFundamentalType(metadata_value)
         elif metadata_type == 'Description':
-            self.SetDescription( metadata_value )
+            self.setDescription(metadata_value)
         elif metadata_type == 'DisplayDiscretization':
-            self.SetDisplayDiscretization( metadata_value )
+            self.setDisplayDiscretization(metadata_value)
 
-    def Definition( self ):
-        raise NotImplementedError( 'QueryColumn.Definition()' )
+    def definition(self):
+        raise NotImplementedError('QueryColumn.definition()')
 
-    def InitFromValues( self, name, expression, approved_usage = None, display_name = None,
-                                            category = None, statistical_type = None, tags = None,
-                                            fundamental_type = None, description = None,
-                                            display_discretization = None ):
+    def initFromValues(self, name, expression, approved_usage = None, display_name = None,
+                       category = None, statistical_type = None, tags = None,
+                       fundamental_type = None, description = None,
+                       display_discretization = None):
 
-        self.SetName( name )
-        self.SetExpression( expression )
-        self.SetApprovedUsage( approved_usage )
-        self.SetDisplayName( display_name )
-        self.SetCategory( category )
-        self.SetStatisticalType( statistical_type )
-        self.SetTags( tags )
-        self.SetFundamentalType( fundamental_type )
-        self.SetDescription( description )
-        self.SetDisplayDiscretization( display_discretization )
+        self.setName(name)
+        self.setExpression(expression)
+        self.setApprovedUsage(approved_usage)
+        self.setDisplayName(display_name)
+        self.setCategory(category)
+        self.setStatisticalType(statistical_type)
+        self.setTags(tags)
+        self.setFundamentalType(fundamental_type)
+        self.setDescription(description)
+        self.setDisplayDiscretization(display_discretization)

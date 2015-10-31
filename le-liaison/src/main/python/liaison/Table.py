@@ -5,49 +5,46 @@
 # $Rev$
 #
 
-class Table( object ):
+class Table(object):
  
-    def __init__( self, name, columns = [] ):
+    def __init__(self, name, columns = []):
 
-        self.InitFromValues( name, columns )
+        self.initFromValues(name, columns)
 
 
-    def Name( self ):
-        return self._name
+    def getName(self):
+        return self.name_
 
-    def SetName( self, n ):
-        self._name = n
-        return self._name
+    def setName(self, n):
+        self.name_ = n
 
-    def Columns( self ):
-        return self._columns
+    def getColumns(self):
+        return self.columns_
 
-    def ColumnNames( self ):
-        return self._column_names
+    def getColumnNames(self):
+        return self.column_names_
 
-    def SetColumns( self, cc ):
-        self._columns = cc
-        self._column_names = []
+    def setColumns(self, cc):
+        self.columns_ = cc
+        self.column_names_ = []
         for c in cc:
-            self._column_names.append( c.Name() )
-        return self._columns
+            self.column_names_.append( c.getName() )
 
-    def AppendColumn( self, c ):
-        if c.Name() not in self._column_names:
-            self._columns.append( c )
-            self._column_names.append( c.Name() )
-        return c
+    def appendColumn(self, c):
+        if c.getName() not in self.column_names_:
+            self.columns_.append( c )
+            self.column_names_.append( c.getName() )
 
-    def RemoveColumn( self, colname ):
-        if colname in self._column_names:
-            self._column_names.remove( colname )
-            c = (c for c in self._columns if c.Name() == colname).next()
-            self._columns.remove( c )
+    def removeColumn(self, colname):
+        if colname in self.column_names_:
+            self.column_names_.remove( colname )
+            c = (c for c in self.columns_ if c.getName() == colname).next()
+            self.columns_.remove( c )
 
-    def InitFromValues( self, name, columns ):
+    def initFromValues(self, name, columns):
 
-        self._name         = name
-        self._columns      = columns
-        self._column_names = []
+        self.name_         = name
+        self.columns_      = columns
+        self.column_names_ = []
         for c in columns:
-            self._column_names.append( c.Name() )
+            self.column_names_.append( c.getName() )

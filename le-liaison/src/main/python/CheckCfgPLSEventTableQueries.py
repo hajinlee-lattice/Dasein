@@ -26,7 +26,7 @@ def CheckCfgPLSEventTableQueries( tenantFileName, resultsFileName ):
                 print 'Not on LP DataLoader'
                 continue
             
-            query_result = conn_mgr.ExecuteQuery( 'View_Table_Cfg_PLS_EventTableQueries' )
+            query_result = conn_mgr.executeQuery( 'View_Table_Cfg_PLS_EventTableQueries' )
 
             while( not query_result.IsReady() ):
                 print '.',

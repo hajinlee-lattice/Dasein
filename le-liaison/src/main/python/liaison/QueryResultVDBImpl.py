@@ -37,7 +37,7 @@ class QueryResultVDBImpl( QueryResult ):
 
         if (     self._last_status != 'Completed'
                  and ( datetime.datetime.now() - self._last_status_update ) > datetime.timedelta(0,5) ):
-            self._last_status = self.ConnectionMgr().GetQueryStatus( self.QueryHandle() )
+            self._last_status = self.ConnectionMgr().getQueryStatus( self.QueryHandle() )
             self._last_status_update = datetime.datetime.now()
 
         return self._last_status
@@ -67,7 +67,7 @@ class QueryResultVDBImpl( QueryResult ):
         ## Need to set set _rows_total
 
         if self._rows_total is None:
-            ( self._col_names, self._col_datatypes, remaining_rows, rows ) = self.ConnectionMgr().GetQueryResults( self.QueryHandle(), 0, n_rows )
+            ( self._col_names, self._col_datatypes, remaining_rows, rows ) = self.ConnectionMgr().getQueryResults( self.QueryHandle(), 0, n_rows )
             if remaining_rows > 0:
                 self._rows_downloaded = n_rows
                 self._rows_total = n_rows + remaining_rows

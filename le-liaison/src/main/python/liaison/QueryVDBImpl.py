@@ -13,20 +13,20 @@ from .QueryEntityVDBImpl import QueryEntityVDBImpl
 from .QueryFilterVDBImpl import QueryFilterVDBImpl
 
 
-class QueryVDBImpl( Query ):
+class QueryVDBImpl(Query):
 
     ## This is the default constructor
 
-    def __init__( self, name, columns, filters = [], entities = [], sqrs_spec = None ):
+    def __init__(self, name, columns, filters = [], entities = [], resultSet = None):
 
-        self.initFromValues( name, columns, filters, entities, sqrs_spec )
+        self.initFromValues(name, columns, filters, entities, resultSet)
     
 
 ## This is the pythonic way to create multiple constructors.  The call is
 ## q = QueryVDBImpl.InitFromDefn( defn )
 
     @classmethod
-    def initFromDefn( cls, name, defn ):
+    def initFromDefn(cls, name, defn):
 
         s1 = re.search( '^SpecLatticeQuery\((LatticeAddressSet.*), SpecQueryNamedFunctions\((.*)\), (SpecQueryResultSet.*)\)$', defn )
         if not s1:
@@ -138,7 +138,7 @@ class QueryVDBImpl( Query ):
                     # Strip off the ', ' at the beginning
                     lae = remainingspec[2:]
 
-        sqrs_spec = s1.group(3)
+        resultSet = s1.group(3)
 
         columns = []
         sqnf = s1.group(2)
@@ -150,7 +150,7 @@ class QueryVDBImpl( Query ):
             if not s2:
                 raise MaudeStringError( sqnf )
 
-            c = QueryColumnVDBImpl.InitFromDefn( s2.group(1) )
+            c = QueryColumnVDBImpl.initFromDefn( s2.group(1) )
             columns.append( c )
 
             if s2.group(2) == '':
@@ -159,34 +159,34 @@ class QueryVDBImpl( Query ):
                 # Strip off the ' ' at the beginning
                 sqnf = s2.group(2)[1:]
 
-        return cls( name, columns, filters, entities, sqrs_spec )
+        return cls(name, columns, filters, entities, resultSet)
 
 
-    def initFromValues( self, name, columns, filters, entities, sqrs_spec = None ):
+    def initFromValues(self, name, columns, filters, entities, resultSet = None):
 
-        super( QueryVDBImpl, self ).initFromValues( name, columns, filters, entities )
+        super(QueryVDBImpl, self).initFromValues(name, columns, filters, entities, resultSet)
 
-        if sqrs_spec is not None:
-            self._sqrs_spec = sqrs_spec
+        if resultSet is not None:
+            self.resultSet_ = resultSet
 
         else:
-            self._sqrs_spec = 'SpecQueryResultSetAll'
+            self.resultSet_ = 'SpecQueryResultSetAll'
 
 
-    def SpecLatticeNamedElements( self ):
+    def SpecLatticeNamedElements(self):
 
         defn =  'SpecLatticeNamedElements(('
         defn +=   'SpecLatticeNamedElement('
         defn +=     'SpecLatticeQuery('
         defn +=       'LatticeAddressSetPushforward('
 
-        if not self._filters:
+        if not self.filters_:
             defn +=       'LatticeAddressExpressionFromLAS(LatticeAddressSetMeet(empty))'
             defn +=     ', LatticeAddressSetMeet(empty)'
         else:
             sep = ''
             tmplas =      'LatticeAddressSetMeet(('
-            for f in self._filters:
+            for f in self.filters_:
                 tmplas += sep
                 tmplas += f.Definition()
                 sep = ', '
@@ -194,12 +194,12 @@ class QueryVDBImpl( Query ):
             defn +=       'LatticeAddressExpressionFromLAS({0})'.format( tmplas )
             defn +=     ', {0}'.format( tmplas )
 
-        if not self._entities:
+        if not self.entities_:
             defn +=     ', LatticeAddressExpressionMeet(empty)'
         else:
             sep = ''
             defn +=     ', LatticeAddressExpressionMeet(('
-            for e in self._entities:
+            for e in self.entities_:
                 defn += sep
                 defn += e.Definition()
                 sep = ', '
@@ -209,13 +209,13 @@ class QueryVDBImpl( Query ):
         defn +=     ', SpecQueryNamedFunctions('
 
         sep = ''
-        for c in self._columns:
+        for c in self.columns_:
             defn += sep
-            defn += c.Definition()
+            defn += c.definition()
             sep = ' '
 
         defn +=       ')'
-        defn +=     ', ' + self._sqrs_spec
+        defn +=     ', ' + self.resultSet_
         defn +=     ')'
         defn +=   ', ContainerElementName(\"{0}\")'.format( self.getName() )
         defn +=   ')'

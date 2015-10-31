@@ -11,25 +11,25 @@ from .QueryColumn import QueryColumn
 from .ExpressionVDBImpl import *
 
 
-class QueryColumnVDBImpl( QueryColumn ):
+class QueryColumnVDBImpl(QueryColumn):
 
 ## This is the default constructor
 
-    def __init__( self, name, expression, approved_usage = None, display_name = None,
-                                category = None, statistical_type = None, tags = None,
-                                fundamental_type = None, description = None,
-                                display_discretization = None ):
+    def __init__(self, name, expression, approved_usage = None, display_name = None,
+                 category = None, statistical_type = None, tags = None,
+                 fundamental_type = None, description = None,
+                 display_discretization = None):
 
-        self.InitFromValues( name, expression, approved_usage, display_name, category,
-                                                 statistical_type, tags, fundamental_type,
-                                                 description, display_discretization )
+        self.initFromValues(name, expression, approved_usage, display_name, category,
+                            statistical_type, tags, fundamental_type,
+                            description, display_discretization)
 
 
 ## This is the pythonic way to create multiple constructors.  The call is
 ## c = QueryColumnVDBImpl.InitFromDefn( defn )
 
     @classmethod
-    def InitFromDefn( cls, defn ):
+    def initFromDefn(cls, defn):
 
         name                   = None
         expression             = None
@@ -90,46 +90,46 @@ class QueryColumnVDBImpl( QueryColumn ):
         if expression is None:
             raise MaudeStringError( defn )
         
-        return cls( name, expression, md['ApprovedUsage'], md['DisplayName'], md['Category'],
-                                md['StatisticalType'], md['Tags'], md['FundamentalType'], md['Description'],
-                                md['DisplayDiscretizationStrategy'] )
+        return cls(name, expression, md['ApprovedUsage'], md['DisplayName'], md['Category'],
+                   md['StatisticalType'], md['Tags'], md['FundamentalType'], md['Description'],
+                   md['DisplayDiscretizationStrategy'])
 
 
-    def Definition( self ):
+    def definition(self):
 
-        if self.Name() == 'EntityFunctionBoundary':
+        if self.getName() == 'EntityFunctionBoundary':
             return 'SpecQueryNamedFunctionEntityFunctionBoundary'
 
         mdsep = ''
         md = ''
-        if self.DisplayName() is not None:
-            md += mdsep + 'SpecExtractDetail("DisplayName", "{0}")'.format( self.DisplayName().replace('"','\\"') )
+        if self.getDisplayName() is not None:
+            md += mdsep + 'SpecExtractDetail("DisplayName", "{0}")'.format( self.getDisplayName().replace('"','\\"') )
             mdsep = ', '
-        if self.Description() is not None:
-            md += mdsep + 'SpecExtractDetail("Description", "{0}")'.format( self.Description().replace('"','\\"') )
+        if self.getDescription() is not None:
+            md += mdsep + 'SpecExtractDetail("Description", "{0}")'.format( self.getDescription().replace('"','\\"') )
             mdsep = ', '
-        if self.ApprovedUsage() is not None:
-            md += mdsep + 'SpecExtractDetail("ApprovedUsage", "{0}")'.format( self.ApprovedUsage().replace('"','\\"') )
+        if self.getApprovedUsage() is not None:
+            md += mdsep + 'SpecExtractDetail("ApprovedUsage", "{0}")'.format( self.getApprovedUsage().replace('"','\\"') )
             mdsep = ', '
-        if self.FundamentalType() is not None:
-            md += mdsep + 'SpecExtractDetail("FundamentalType", "{0}")'.format( self.FundamentalType().replace('"','\\"') )
+        if self.getFundamentalType() is not None:
+            md += mdsep + 'SpecExtractDetail("FundamentalType", "{0}")'.format( self.getFundamentalType().replace('"','\\"') )
             mdsep = ', '
-        if self.StatisticalType() is not None:
-            md += mdsep + 'SpecExtractDetail("StatisticalType", "{0}")'.format( self.StatisticalType().replace('"','\\"') )
+        if self.getStatisticalType() is not None:
+            md += mdsep + 'SpecExtractDetail("StatisticalType", "{0}")'.format( self.getStatisticalType().replace('"','\\"') )
             mdsep = ', '
-        if self.Tags() is not None:
-            md += mdsep + 'SpecExtractDetail("Tags", "{0}")'.format( self.Tags().replace('"','\\"') )
+        if self.getTags() is not None:
+            md += mdsep + 'SpecExtractDetail("Tags", "{0}")'.format( self.getTags().replace('"','\\"') )
             mdsep = ', '
-        if self.DisplayDiscretization() is not None:
-            md += mdsep + 'SpecExtractDetail("DisplayDiscretizationStrategy", "{0}")'.format( self.DisplayDiscretization().replace('"','\\"') )
+        if self.getDisplayDiscretization() is not None:
+            md += mdsep + 'SpecExtractDetail("DisplayDiscretizationStrategy", "{0}")'.format( self.getDisplayDiscretization().replace('"','\\"') )
             mdsep = ', '
-        if self.Category() is not None:
-            md += mdsep + 'SpecExtractDetail("Category", "{0}")'.format( self.Category().replace('"','\\"') )
+        if self.getCategory() is not None:
+            md += mdsep + 'SpecExtractDetail("Category", "{0}")'.format( self.getCategory().replace('"','\\"') )
             mdsep = ', '
 
         sqnf =  'SpecQueryNamedFunctionExpression('
-        sqnf +=   'ContainerElementName("{0}")'.format( self.Name() )
-        sqnf += ', '+ self.Expression().Definition()
+        sqnf +=   'ContainerElementName("{0}")'.format( self.getName() )
+        sqnf += ', '+ self.getExpression().Definition()
         sqnf += ')'
 
         if md == '':

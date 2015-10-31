@@ -8,12 +8,12 @@
 from .ConnectionMgrVDBImpl import ConnectionMgrVDBImpl
 from .exceptions import UnknownDatabaseType
 
-class ConnectionMgrFactory( object ):
+class ConnectionMgrFactory(object):
 
     @classmethod
-    def Create( cls, type, **kwargs ):
+    def Create(cls, type, **kwargs):
         if type == 'visiDB':
-            return ConnectionMgrVDBImpl( type, **kwargs )
+            return ConnectionMgrVDBImpl(type, **kwargs)
         else:
-            raise UnknownDatabaseType( type )
+            raise UnknownDatabaseType(type)
         return None

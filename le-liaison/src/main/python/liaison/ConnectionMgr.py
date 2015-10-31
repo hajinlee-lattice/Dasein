@@ -5,42 +5,42 @@
 # $Rev$
 #
 
-class ConnectionMgr( object ):
-    
-    def __init__( self, type, verbose = False ):
+class ConnectionMgr(object):
 
-        self._type = type
-        self._verbose = verbose
+    def __init__(self, type, verbose = False):
 
-    def Type( self ):
-        return self._type
+        self.type_    = type
+        self.verbose_ = verbose
 
-    def IsVerbose( self ):
-        return self._verbose
+    def getType(self):
+        return self.type_
 
-    def GetTable( self, table_name ):
-        raise NotImplementedError( 'ConnectionMgr.GetTable()' )
+    def isVerbose(self):
+        return self.verbose_
 
-    def SetTable( self, table ):
-        raise NotImplementedError( 'ConnectionMgr.SetTable()' )
+    def getTable(self, table_name):
+        raise NotImplementedError('ConnectionMgr.getTable()')
 
-    def GetNamedExpression( self, expression_name ):
-        raise NotImplementedError( 'ConnectionMgr.GetExpression()' )
+    def setTable(self, table):
+        raise NotImplementedError('ConnectionMgr.setTable()')
 
-    def SetNamedExpression( self, expression ):
-        raise NotImplementedError( 'ConnectionMgr.SetExpression()' )
+    def getNamedExpression(self, expression_name):
+        raise NotImplementedError('ConnectionMgr.getNamedExpression()')
 
-    def GetQuery( self, query_name ):
-        raise NotImplementedError( 'ConnectionMgr.GetQuery()' )
+    def setNamedExpression(self, expression):
+        raise NotImplementedError('ConnectionMgr.setNamedExpression()')
 
-    def GetMetadata( self, query_name ):
-        raise NotImplementedError( 'ConnectionMgr.GetMetadata()' )
+    def getQuery(self, query_name):
+        raise NotImplementedError('ConnectionMgr.getQuery()')
 
-    def SetQuery( self, query ):
-        raise NotImplementedError( 'ConnectionMgr.SetQuery()' )
+    def getMetadata(self, query_name):
+        raise NotImplementedError('ConnectionMgr.getMetadata()')
 
-    def ExecuteQuery( self, query_name ):
-        raise NotImplementedError( 'ConnectionMgr.ExecuteQuery()' )
+    def setQuery(self, query):
+        raise NotImplementedError('ConnectionMgr.setQuery()')
 
-    def GetLoadGroupMgr( self ):
-        raise NotImplementedError( 'ConnectionMgr.GetDataLoaderMgr()' )
+    def executeQuery(self, query_name):
+        raise NotImplementedError('ConnectionMgr.executeQuery()')
+
+    def getLoadGroupMgr(self):
+        raise NotImplementedError('ConnectionMgr.getLoadGroupMgr()')
