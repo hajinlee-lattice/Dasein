@@ -21,7 +21,7 @@ public abstract class QueryColumn {
 	private static final Set<String> approvedUsageValues = new HashSet<String>( Arrays.asList("None","Model","ModelAndModelInsights","ModelAndAllInsights") );
 	private static final Set<String> statisticalTypeValues = new HashSet<String>( Arrays.asList("nominal","ratio","ordinal","interval") );
 	private static final Set<String> tagsValues = new HashSet<String>( Arrays.asList("Internal","External") );
-	private static final Set<String> fundamentalTypeValues = new HashSet<String>( Arrays.asList("numeric","currency","percentage","boolean","year") );
+	private static final Set<String> fundamentalTypeValues = new HashSet<String>( Arrays.asList("alpha","numeric","currency","percentage","boolean","year") );
 	
 	
 	public QueryColumn( String definition ) throws DefinitionException {

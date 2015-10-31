@@ -13,6 +13,7 @@ public class ConnectionMgrFactoryImpl implements ConnectionMgrFactory {
     @Autowired
     private DataLoaderService dataLoaderService;
 
+    @Override
     public ConnectionMgr getConnectionMgr( String type, String ... args ) throws RuntimeException {
         // Default is to return a visiDB Manager
         if( args.length != 2 ) {

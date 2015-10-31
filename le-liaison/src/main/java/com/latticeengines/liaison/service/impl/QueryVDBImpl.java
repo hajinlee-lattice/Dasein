@@ -29,9 +29,11 @@ public class QueryVDBImpl extends Query {
 	);
 	
 	private static final Pattern pattern_slq = Pattern.compile("^SpecLatticeQuery\\((LatticeAddressSet.*), SpecQueryNamedFunctions\\((.*)\\), (SpecQueryResultSet.*)\\)$");
-	private static final Pattern pattern_las_atomic = Pattern.compile("^LatticeAddressSetPushforward\\((LatticeAddressExpression.*), LatticeAddressSetMeet\\((.*?)\\), (LatticeAddressExpressionAtomic\\(.*?\\))\\)$");
-	private static final Pattern pattern_las_meet = Pattern.compile("^LatticeAddressSetPushforward\\((LatticeAddressExpression.*), LatticeAddressSetMeet\\((.*?)\\), LatticeAddressExpressionMeet\\((.*?)\\)\\)$");
-	private static final Pattern pattern_filter_fcn = Pattern.compile("^(LatticeAddressSetFcn\\(LatticeFunction.*?LatticeAddressSet.*?\\))(, LatticeAddressSet.*|$)");
+    private static final Pattern pattern_las_meet = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\(LatticeAddressSetMeet\\((.*?)\\)\\), LatticeAddressSetMeet\\((.*?)\\), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
+	private static final Pattern pattern_las_atomic = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\(LatticeAddressSetMeet\\((.*?)\\)\\), LatticeAddressSetMeet\\((.*?)\\), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");
+    private static final Pattern pattern_las_expmeet_meet = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionMeet\\((.*?)\\), LatticeAddressSetMeet\\((.*?)\\), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
+	private static final Pattern pattern_las_expmeet_atomic = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionMeet\\((.*?)\\), LatticeAddressSetMeet\\((.*?)\\), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");
+    private static final Pattern pattern_filter_fcn = Pattern.compile("^(LatticeAddressSetFcn\\(LatticeFunction.*?LatticeAddressSet.*?\\))(, LatticeAddressSet.*|$)");
 	private static final Pattern pattern_filter_las = Pattern.compile("^(LatticeAddressSet(.*?)\\((.*?)\\))(, LatticeAddressSet.*|$)");
 	private static final Pattern pattern_entity_lae = Pattern.compile("^(LatticeAddressExpression(.*?)\\((.*?)\\))(, LatticeAddressExpression.*|$)");
 	private static final Pattern pattern_sqnf = Pattern.compile("^(SpecQueryNamedFunction.*?)( SpecQueryNamedFunction.*|$)");
@@ -72,6 +74,15 @@ public class QueryVDBImpl extends Query {
 		resultSetDefn = m_slq.group(3);
 		
 		if( !isMatchedTopLevel ) {
+            Matcher m_las_meet = pattern_las_meet.matcher( las_spec );
+            if( m_las_meet.matches() ) {
+                lasm = m_las_meet.group(2);
+                lae = m_las_meet.group(3);
+                isMatchedTopLevel = Boolean.TRUE;
+            }
+        }
+		
+		if( !isMatchedTopLevel ) {
 			Matcher m_las_atomic = pattern_las_atomic.matcher( las_spec );
 			if( m_las_atomic.matches() ) {
 				lasm = m_las_atomic.group(2);
@@ -81,13 +92,24 @@ public class QueryVDBImpl extends Query {
 		}
 		
 		if( !isMatchedTopLevel ) {
-			Matcher m_las_meet = pattern_las_meet.matcher( las_spec );
-			if( m_las_meet.matches() ) {
-				lasm = m_las_meet.group(2);
-				lae = m_las_meet.group(3);
-				isMatchedTopLevel = Boolean.TRUE;
-			}
-		}
+            Matcher m_las_expmeet_meet = pattern_las_expmeet_meet.matcher( las_spec );
+            if( m_las_expmeet_meet.matches() ) {
+                lasm = m_las_expmeet_meet.group(2);
+                lae = m_las_expmeet_meet.group(3);
+                isMatchedTopLevel = Boolean.TRUE;
+            }
+        }
+        
+        if( !isMatchedTopLevel ) {
+            Matcher m_las_expmeet_atomic = pattern_las_expmeet_atomic.matcher( las_spec );
+            if( m_las_expmeet_atomic.matches() ) {
+                lasm = m_las_expmeet_atomic.group(2);
+                lae = "(" + m_las_expmeet_atomic.group(3) + ")";
+                isMatchedTopLevel = Boolean.TRUE;
+            }
+        }
+		
+		
 		
 		if( !isMatchedTopLevel ) {
 			throw new DefinitionException( String.format("Maude definition (LatticeAddressSet) cannot be interpretted: %s",las_spec) );
