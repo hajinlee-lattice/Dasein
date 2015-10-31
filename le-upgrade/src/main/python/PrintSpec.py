@@ -6,7 +6,7 @@ tenant = 'Tmpl_LP_Trunk_ELQ_Main'
 
 conn_mgr = liaison.ConnectionMgrFactory.Create( 'visiDB', tenant_name=tenant, verify=False )
 
-q = conn_mgr.GetQuery('Q_Dante_LeadSourceTable')
+q = conn_mgr.getQuery('Q_Dante_LeadSourceTable')
 
 print ''
 

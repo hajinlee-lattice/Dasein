@@ -63,7 +63,7 @@ class AppSequence( object ):
 
       try:
         self._conn_mgr = ConnectionMgrFactory.Create( 'visiDB', tenant_name=t )
-        self._lg_mgr = self._conn_mgr.GetLoadGroupMgr()
+        self._lg_mgr = self._conn_mgr.getLoadGroupMgr()
       except TenantNotMappedToURL:
         print 'Tenant \'{0}\' Not on LP DataLoader'.format( t )
         checkNextStep = False
