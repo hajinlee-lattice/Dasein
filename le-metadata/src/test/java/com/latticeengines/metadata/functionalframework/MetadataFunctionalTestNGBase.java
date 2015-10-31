@@ -66,7 +66,6 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
         if (t1 != null) {
             tenantEntityMgr.delete(t1);
-
         }
         Tenant t2 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE2);
         if (t2 != null) {
