@@ -160,6 +160,10 @@ public class ModelingServiceImpl implements ModelingService {
         model.setTable(config.getTable());
         setupModelProperties(model);
         String inputDir = model.getDataHdfsPath();
+        
+        if (config.getHdfsDirPath() != null) {
+            inputDir = config.getHdfsDirPath();
+        }
         String outputDir = model.getSampleHdfsPath();
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
@@ -518,7 +522,7 @@ public class ModelingServiceImpl implements ModelingService {
             throw new LedpException(LedpCode.LEDP_15002);
         }
         setupModelProperties(model);
-        String dataSchemaPath = model.getDataHdfsPath();
+        String sampleSchemaPath = model.getSampleHdfsPath();
         String metadataPath = model.getMetadataHdfsPath();
         Schema dataSchema = null;
         List<GenericRecord> data = new ArrayList<GenericRecord>();
@@ -526,7 +530,7 @@ public class ModelingServiceImpl implements ModelingService {
         Set<String> pivotedFeatures = new LinkedHashSet<>();
 
         try {
-            List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dataSchemaPath,
+            List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, sampleSchemaPath,
                     HdfsFileFormat.AVRO_FILE);
             if (avroDataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
