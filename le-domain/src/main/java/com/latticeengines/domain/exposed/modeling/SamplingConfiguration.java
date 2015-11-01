@@ -36,6 +36,7 @@ public class SamplingConfiguration {
     private SamplingElement testingElement = new SamplingElement(TESTING_SET_PREFIX);
 
     private boolean parallelEnabled;
+    private String hdfsDirPath;
 
     public void addSamplingElement(SamplingElement samplingElement) {
         samplingElements.add(samplingElement);
@@ -190,6 +191,16 @@ public class SamplingConfiguration {
     @JsonProperty("parallel_enabled")
     public void setParallelEnabled(boolean parallelEnabled) {
         this.parallelEnabled = parallelEnabled;
+    }
+
+    @JsonProperty(value = "hdfs_dir_path", required = false)
+    public String getHdfsDirPath() {
+        return hdfsDirPath;
+    }
+
+    @JsonProperty(value = "hdfs_dir_path", required = false)
+    public void setHdfsDirPath(String hdfsDirPath) {
+        this.hdfsDirPath = hdfsDirPath;
     }
 
 }
