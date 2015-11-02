@@ -61,6 +61,7 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 
+import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
@@ -142,6 +143,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(
                     builder.addGroupByAndFirst((String[]) priorIdentifiers.toArray(), groupByFields, sortFields),
                     builder);
+        }
+
+        public Node filter(Restriction restriction) {
+            // XXX TODO
+            return new Node(identifier, builder);
         }
 
         public Node filter(String expression, FieldList filterFieldList) {

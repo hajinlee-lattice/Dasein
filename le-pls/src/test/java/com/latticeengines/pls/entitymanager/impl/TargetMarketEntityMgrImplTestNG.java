@@ -49,8 +49,8 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 .findTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
-        assertEquals(targetMarket.getAccountFilter(), JsonUtils.serialize(ACCOUNT_FILTER));
-        assertEquals(targetMarket.getContactFilter(), JsonUtils.serialize(CONTACT_FILTER));
+        assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
+        assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
     }
 
     @Test(groups = { "functional" }, dependsOnMethods = { "create_calledWithParameters_assertTargetMarketIsCreated" })

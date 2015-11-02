@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -21,6 +22,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.query.Restriction;
+import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -39,7 +41,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private Date creationDate;
     private Tenant tenant;
     private Long tenantId;
-    // intent sortspec
+    private Sort intentSort;
     private Integer numProspectsDesired;
     private Integer numDaysBetweenIntentProspectResends;
     private Double intentScoreThreshold;
@@ -62,8 +64,8 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     public void setName(String name) {
         this.name = name;
     }
-    
-    @Column(name="DESCRIPTION", nullable=false)
+
+    @Column(name = "DESCRIPTION", nullable = false)
     @JsonProperty
     public String getDescription() {
         return this.description;
@@ -73,7 +75,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     @JsonProperty
     @Column(name = "CREATION_DATE", nullable = false)
     public Date getCreationDate() {
@@ -134,111 +136,132 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
         this.tenantId = tenantId;
     }
 
-    @Column(name="ACCOUNT_FILTER", nullable = true)
-    @JsonProperty
-    public String getAccountFilter() {
+    @Column(name = "ACCOUNT_FILTER", nullable = true)
+    @JsonIgnore
+    public String getAccountFilterString() {
         return JsonUtils.serialize(this.accountFilter);
     }
-    
-    @JsonProperty
-    public void setAccountFilter(String accountFilterString) {
+
+    public void setAccountFilterString(String accountFilterString) {
         this.accountFilter = JsonUtils.deserialize(accountFilterString, Restriction.class);
     }
-    
+
+    @JsonProperty
+    @Transient
+    public Restriction getAccountFilter() {
+        return this.accountFilter;
+    }
+
     public void setAccountFilter(Restriction accountFilter) {
         this.accountFilter = accountFilter;
     }
-    
-    @Column(name="CONTACT_FILTER", nullable = true)
-    @JsonProperty
-    public String getContactFilter() {
+
+    @Column(name = "CONTACT_FILTER", nullable = true)
+    @JsonIgnore
+    public String getContactFilterString() {
         return JsonUtils.serialize(this.contactFilter);
     }
-    
-    @JsonProperty
-    public void setContactFilter(String contactFilterString) {
+
+    @JsonIgnore
+    public void setContactFilterString(String contactFilterString) {
         this.contactFilter = JsonUtils.deserialize(contactFilterString, Restriction.class);
     }
-    
+
+    @JsonProperty
+    @Transient
+    public Restriction getContactFilter() {
+        return this.contactFilter;
+    }
+
     public void setContactFilter(Restriction contactFilter) {
         this.contactFilter = contactFilter;
     }
 
-    @Column(name="NUM_PROSPECTS_DESIRED", nullable = true)
+    @JsonProperty
+    @Transient
+    public Sort getIntentSort() {
+        return intentSort;
+    }
+
+    public void setIntentSort(Sort sort) {
+        this.intentSort = sort;
+    }
+
+    @Column(name = "NUM_PROSPECTS_DESIRED", nullable = true)
     @JsonProperty
     public Integer getNumProspectsDesired() {
         return this.numProspectsDesired;
     }
-    
+
     @JsonProperty
     public void setNumProspectsDesired(Integer numProspectsDesired) {
         this.numProspectsDesired = numProspectsDesired;
     }
-    
-    @Column(name="NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS", nullable = true)
+
+    @Column(name = "NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS", nullable = true)
     @JsonProperty
     public Integer getNumDaysBetweenIntentProspectResends() {
         return this.numDaysBetweenIntentProspectResends;
     }
-    
+
     @JsonProperty
     public void setNumDaysBetweenIntentProspectResends(Integer numDaysBetweenIntentProspectResends) {
         this.numDaysBetweenIntentProspectResends = numDaysBetweenIntentProspectResends;
     }
 
     @JsonProperty
-    @Column(name="INTENT_SCORE_THRESHOLD", nullable = true)
+    @Column(name = "INTENT_SCORE_THRESHOLD", nullable = true)
     public Double getIntentScoreThreshold() {
         return this.intentScoreThreshold;
     }
-    
+
     @JsonProperty
     public void setIntentScoreThreshold(Double intentScoreThreshold) {
         this.intentScoreThreshold = intentScoreThreshold;
     }
 
-    @Column(name="FIT_SCORE_THRESHOLD", nullable = true)
+    @Column(name = "FIT_SCORE_THRESHOLD", nullable = true)
     @JsonProperty
     public Double getFitScoreThreshold() {
         return this.fitScoreThreshold;
     }
-    
+
     @JsonProperty
     public void setFitScoreThreshold(Double fitScoreThreshold) {
         this.fitScoreThreshold = fitScoreThreshold;
     }
-    
-    @Column(name="MODEL_ID", nullable = true)
+
+    @Column(name = "MODEL_ID", nullable = true)
     @JsonProperty
     public String getModelId() {
         return this.modelId;
     }
-    
+
     @JsonProperty
     public void setModelId(String modelId) {
         this.modelId = modelId;
     }
 
-    @Column(name="EVENT_COLUMN_NAME", nullable = true)
+    @Column(name = "EVENT_COLUMN_NAME", nullable = true)
     @JsonProperty
     public String getEventColumnName() {
         return this.eventColumnName;
     }
-    
+
     @JsonProperty
     public void setEventColumnName(String eventColumnName) {
         this.eventColumnName = eventColumnName;
     }
-    
-    @Column(name="DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS", nullable = false)
+
+    @Column(name = "DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS", nullable = false)
     @JsonProperty
     public Boolean isDeliverProspectsFromExistingAccounts() {
         return this.deliverProspectsFromExistingAccounts;
     }
-    
+
     @JsonProperty
     public void setDeliverProspectsFromExistingAccounts(Boolean deliverProspectsFromExistingAccounts) {
         this.deliverProspectsFromExistingAccounts = deliverProspectsFromExistingAccounts;
     }
-    
+
 }

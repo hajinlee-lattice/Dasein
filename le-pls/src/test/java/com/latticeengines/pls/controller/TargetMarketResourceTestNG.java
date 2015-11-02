@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
-    
+
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarket/";
 
     @BeforeClass(groups = { "functional" })
@@ -43,16 +43,14 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void postTargetMarket_calledWithTargetMarket_assertTargetMarketPosted() {
-        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL,
-                TARGET_MARKET, TargetMarket.class);
+        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET, TargetMarket.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(
-                getRestAPIHostPort() + PLS_TARGETMARKET_URL
-                        + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
-        assertEquals(targetMarket.getAccountFilter(), JsonUtils.serialize(ACCOUNT_FILTER));
-        assertEquals(targetMarket.getContactFilter(), JsonUtils.serialize(CONTACT_FILTER));
+        assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
+        assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
     }
 
     @Test(groups = { "functional" }, dependsOnMethods = { "postTargetMarket_calledWithTargetMarket_assertTargetMarketPosted" })
@@ -60,10 +58,9 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
 
         restTemplate.put(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME, TARGET_MARKET);
-        
-        TargetMarket targetMarket = restTemplate.getForObject(
-                getRestAPIHostPort() + PLS_TARGETMARKET_URL
-                        + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
@@ -71,12 +68,10 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" }, dependsOnMethods = { "updateTargetMarket_calledWithParameters_assertTargetMarketUpdated" })
     public void deleteTargetMarketPosted_calledWithTargetMarketName_assertTargetMarketDeleted() {
-        restTemplate.delete(getRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TEST_TARGET_MARKET_NAME);
+        restTemplate.delete(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
 
-        TargetMarket targetMarket = restTemplate.getForObject(
-                getRestAPIHostPort() + PLS_TARGETMARKET_URL
-                        + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertNull(targetMarket);
     }
 
