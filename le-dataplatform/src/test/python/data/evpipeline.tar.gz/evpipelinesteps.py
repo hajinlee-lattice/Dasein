@@ -136,7 +136,7 @@ class ImputationStep(PipelineStep):
         return tuple(sp)
     
     def meanValuePair(self, x,tupleSize=2):
-        def mean(k):  return sum([y[k] for y in x]) / len(x) / 1.0
+        def mean(k):  return sum([float(y[k]) for y in x]) / len(x) / 1.0
         if tupleSize > 1: return [mean(k) for k in range(tupleSize)]
         return [sum(x) / 1.0 / len(x)]
 
