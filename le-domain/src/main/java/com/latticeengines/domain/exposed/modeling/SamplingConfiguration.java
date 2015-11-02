@@ -141,12 +141,12 @@ public class SamplingConfiguration {
         return properties;
     }
 
-    @JsonProperty("samplingRate")
+    @JsonProperty("sampling_rate")
     public int getSamplingRate() {
         return samplingRate;
     }
 
-    @JsonProperty("samplingRate")
+    @JsonProperty("sampling_rate")
     public void setSamplingRate(int samplingRate) {
         checkNumberRange(samplingRate);
         this.samplingRate = samplingRate;
@@ -168,12 +168,12 @@ public class SamplingConfiguration {
         }
     }
 
-    @JsonProperty("samplingType")
+    @JsonProperty("sampling_type")
     public SamplingType getSamplingType() {
         return samplingType;
     }
 
-    @JsonProperty("samplingType")
+    @JsonProperty("sampling_type")
     public void setSamplingType(SamplingType samplingType) {
         this.samplingType = samplingType;
     }
