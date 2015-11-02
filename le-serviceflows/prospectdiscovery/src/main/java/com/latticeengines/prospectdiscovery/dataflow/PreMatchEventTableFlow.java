@@ -103,9 +103,13 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
     }
 
     private Node addIsWonEvent(Node account, Node opportunity) {
-        // Get count of IsWon for each account
+        // Create a function for IsWon to convert to an integer
+        FieldMetadata isWonInteger = new FieldMetadata("IsWonInteger", Integer.class);
+        opportunity = opportunity.addFunction("IsWon ? 1 : 0", new FieldList("IsWon"), isWonInteger);
+
+        // Get count of IsWonInteger for each account
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("IsWon", "Count", Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("IsWonInteger", "Count", Aggregation.AggregationType.SUM));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         // Left outer join with that
@@ -121,18 +125,17 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 .addFunction("Count != null && Count > 0 ? true : false", new FieldList("Count"), event) //
                 .checkpoint("addIsWonEvent") //
                 .retain(new FieldList(fieldsToRetain));
-
     }
 
     private Node addStageClosedWonEvent(Node account, Node opportunity) {
         // Add Stage = "Closed Won" function
         opportunity = opportunity.addFunction( //
-                "StageName.equals(\"Closed Won\")", //
+                "StageName.equals(\"Closed Won\") ? 1 : 0", //
                 new FieldList("StageName"), //
-                new FieldMetadata("StageIsClosedWon", Boolean.class));
+                new FieldMetadata("StageIsClosedWon", Integer.class));
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("StageIsClosedWon", "Count", Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("StageIsClosedWon", "Count", Aggregation.AggregationType.SUM));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
@@ -150,8 +153,12 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
     }
 
     private Node addClosedEvent(Node account, Node opportunity) {
+        // Create a function for IsClosed to convert to an integer
+        FieldMetadata isClosedInteger = new FieldMetadata("IsClosedInteger", Integer.class);
+        opportunity = opportunity.addFunction("IsClosed ? 1 : 0", new FieldList("IsClosed"), isClosedInteger);
+
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("IsClosed", "Count", Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("IsClosedInteger", "Count", Aggregation.AggregationType.SUM));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
