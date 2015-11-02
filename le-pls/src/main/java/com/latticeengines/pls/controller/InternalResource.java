@@ -100,6 +100,9 @@ public class InternalResource extends InternalResourceBase {
     @Value("${pls.internal.admin.api}")
     private String adminApi;
 
+    @Value("${pls.test.tenant.reg.json}")
+    private String testTenangRegJson;
+
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")
@@ -299,7 +302,7 @@ public class InternalResource extends InternalResourceBase {
         String topologyToken = "${TOPOLOGY}";
         String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
         InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                "com/latticeengines/pls/controller/internal/tenant-registration.json");
+                "com/latticeengines/pls/controller/internal/" + testTenangRegJson);
         String payload = IOUtils.toString(ins);
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
         HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/tenants/" + dlTenantName + "?contractId="

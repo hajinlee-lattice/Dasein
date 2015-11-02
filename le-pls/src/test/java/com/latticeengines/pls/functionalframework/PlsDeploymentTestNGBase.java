@@ -29,17 +29,20 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 
     protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
         turnOffSslChecking();
+        resetTenantsViaTenantConsole();
 
+        setTestingTenants();
+        loginTestingUsersToMainTenant();
+        switchToSuperAdmin();
+    }
+
+    protected void resetTenantsViaTenantConsole() throws IOException {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
         String response = sendHttpPutForObject(magicRestTemplate, getRestAPIHostPort() + "/pls/internal/testtenants/", "", String.class);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode json = mapper.readTree(response);
         Assert.assertTrue(json.get("Success").asBoolean());
-
-        setTestingTenants();
-        loginTestingUsersToMainTenant();
-        switchToSuperAdmin();
     }
 
     protected void deleteUserByRestCall(String username) {

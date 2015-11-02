@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.pls;
 
 import java.io.InputStream;
 import java.util.List;
@@ -27,9 +27,9 @@ import com.latticeengines.security.exposed.AccessLevel;
 /**
  * This test needs access to remote Modeling Service API and HDP cluster.
  */
-public class ZEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final Log LOGGER = LogFactory.getLog(ZEndToEndDeploymentTestNG.class);
+    private static final Log LOGGER = LogFactory.getLog(LeadPrioritizationEndToEndDeploymentTestNG.class);
 
     @Value("${pls.modelingservice.rest.endpoint.hostport}")
     private String modelingServiceHostPort;
