@@ -137,7 +137,7 @@ public class InternalResource extends InternalResourceBase {
 
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Reset the testing environment for protracter tests.")
+    @ApiOperation(value = "Reset the testing environment for protractor tests.")
     public SimpleBooleanResponse createTestTenant(HttpServletRequest request) throws IOException {
         checkHeader(request);
         LOGGER.info("Cleaning up test tenants through internal API");

@@ -20,19 +20,23 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
@@ -53,6 +57,7 @@ import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.functionalframework.SalesforceExtractAndImportUtil;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
@@ -63,14 +68,16 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     private static final String CUSTOMERSPACE = "DemoContract.DemoTenant.Production";
     private CustomerSpace customerSpace;
-    //private String salesforceUserName = "rgonzalez2@lattice-engines.com";
-    //private String salesforcePasswd = "Welcome123JYJz57SnYag3YWQ5caQxIP04b";
-    private String salesforceUserName = "apeters-widgettech@lattice-engines.com";
-    private String salesforcePasswd = "Happy2010oIogZVEFGbL3n0qiAp6F66TC";
-    private RestTemplate restTemplate = new RestTemplate();
+    private String salesforceUserName = "rgonzalez2@lattice-engines.com";
+    private String salesforcePasswd = "Welcome123JYJz57SnYag3YWQ5caQxIP04b";
+    //private String salesforceUserName = "apeters-widgettech@lattice-engines.com";
+    //private String salesforcePasswd = "Happy2010oIogZVEFGbL3n0qiAp6F66TC";
     
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microServiceHostPort;
+    
+    @Value("${pls.modelingservice.basedir}")
+    private String modelingServiceHdfsBaseDir;
 
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
@@ -99,6 +106,64 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         AbstractMap.SimpleEntry<Table, DbCreds> preMatchEventTableAndCreds = loadHdfsTableToPDServer();
         Long commandId = match(preMatchEventTableAndCreds.getKey());
         Table eventTable = createEventTableFromMatchResult(commandId, preMatchEventTableAndCreds);
+        ModelingServiceExecutor.Builder bldr = sample(eventTable);
+        profileAndModel(eventTable, bldr);
+    }
+    
+    private ModelingServiceExecutor.Builder sample(Table eventTable) throws Exception {
+        String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
+        ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
+        bldr.sampleSubmissionUrl("/modeling/samples") //
+            .profileSubmissionUrl("/modeling/profiles") //
+            .modelSubmissionUrl("/modeling/models") //
+            .retrieveFeaturesUrl("/modeling/features") //
+            .retrieveJobStatusUrl("/modeling/jobs/%s") //
+            .modelingServiceHostPort(microServiceHostPort) //
+            .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+            .customer(CUSTOMERSPACE) //
+            .metadataContents(metadataContents) //
+            .yarnConfiguration(yarnConfiguration) //
+            .hdfsDirToSample(eventTable.getExtracts().get(0).getPath()) //
+            .table(eventTable.getName());
+        
+        ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
+        modelExecutor.sample();
+        return bldr;
+    }
+    
+    private void profileAndModel(Table eventTable, ModelingServiceExecutor.Builder bldr) throws Exception {
+        String[] eventCols = new String[] { //
+                "Event_IsWon", //
+                "Event_StageIsClosedWon", //
+                "Event_IsClosed", //
+                "Event_OpportunityCreated" //
+        };
+        List<String> excludedColumns = new ArrayList<>();
+        
+        for (String eventCol : eventCols) {
+            excludedColumns.add(eventCol);
+        }
+        
+        for (Attribute attr : eventTable.getAttributes()) {
+            if (attr.getApprovedUsage() == null || attr.getApprovedUsage().get(0).equals("None")) {
+                excludedColumns.add(attr.getName());
+            }
+        }
+        
+        String[] excludeList = new String[excludedColumns.size()];
+        excludedColumns.toArray(excludeList);
+        bldr = bldr.profileExcludeList(excludeList);
+
+        for (String eventCol : eventCols) {
+            bldr = bldr.targets(eventCol) //
+                       .metadataTable("EventTable-" + eventCol) //
+                       .keyColumn("ItemID") //
+                       .modelName("Model-" + eventCol);
+            ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
+            modelExecutor.profile();
+            modelExecutor.model();
+        }
+        
         
     }
     
@@ -153,6 +218,9 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         eventTable.setName(matchTableName);
         
         addMetadata(eventTable, preMatchEventTableAndCreds.getValue());
+        String extractPath = eventTable.getExtracts().get(0).getPath();
+        extractPath = extractPath.substring(0, extractPath.lastIndexOf("/"));
+        eventTable.getExtracts().get(0).setPath(extractPath);
         url = String.format("%s/metadata/customerspaces/%s/tables/%s", microServiceHostPort, CUSTOMERSPACE, eventTable.getName());
         restTemplate.postForLocation(url, eventTable);
         return eventTable;
@@ -283,7 +351,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             return "BIGINT";
         case "boolean":
             return "BIT";
-
+        case "int":
+            return "INT";
         default:
             throw new RuntimeException("Unknown SQL Server type for avro type " + type);
         }
@@ -291,12 +360,14 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
     
     private void installServiceFlow() throws Exception {
+        String mavenHome = System.getProperty("MVN_HOME");
+        String version = System.getProperty("ARTIFACT_VERSION");
         // Retrieve the service flow jar file from the maven repository
-        String command = "mvn -DgroupId=com.latticeengines " +
+        String command = "%s/bin/mvn -DgroupId=com.latticeengines " +
                 "-DartifactId=le-serviceflows-prospectdiscovery " + 
-                "-Dversion=2.0.13-SNAPSHOT -Dclassifier=shaded -Ddest=%s.jar dependency:get";
+                "-Dversion=%s -Dclassifier=shaded -Ddest=%s.jar dependency:get";
         String jarFileName = "le-serviceflows-prospectdiscovery-" + System.currentTimeMillis();
-        command = String.format(command, jarFileName);
+        command = String.format(command, mavenHome, version, jarFileName);
         
         CommandLine cmdLine = CommandLine.parse(command);
         DefaultExecutor executor = new DefaultExecutor();
@@ -338,7 +409,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         DataFlowConfiguration dataFlowConfig = new DataFlowConfiguration();
         dataFlowConfig.setName("PrematchFlow");
         dataFlowConfig.setCustomerSpace(CustomerSpace.parse(CUSTOMERSPACE));
-        dataFlowConfig.setDataFlowBeanName("createEventTable");
+        dataFlowConfig.setDataFlowBeanName("preMatchEventTableFlow");
         dataFlowConfig.setDataSources(createDataFlowSources());
         dataFlowConfig.setTargetPath("/PrematchFlowRun");
         return dataFlowConfig;
@@ -383,6 +454,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         String podId = CamilleEnvironment.getPodId();
         HdfsUtils.rmdir(yarnConfiguration, "/Pods/" + podId + "/Contracts/DemoContract");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/Stoplist");
+        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/DemoContract.DemoTenant.Production");
     }
     
     private void setupTenant() throws Exception {
@@ -409,6 +481,17 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", CUSTOMERSPACE, true, crmCredential, true);
+
+        Camille camille = CamilleEnvironment.getCamille();
+        Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(CUSTOMERSPACE), "Eai");
+        Path connectTimeoutDocPath = docPath.append("SalesforceEndpointConfig") //
+                .append("HttpClient").append("ConnectTimeout");
+        camille.create(connectTimeoutDocPath, new Document("60000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        Path importTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")
+                .append("ImportTimeout");
+        camille.create(importTimeoutDocPath, new Document("3600000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
     
     protected ImportConfiguration setupSalesforceImportConfig() {
@@ -470,6 +553,5 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         
         assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
     }
-
 
 }

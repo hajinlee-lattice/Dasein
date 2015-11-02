@@ -64,13 +64,13 @@ public class ModelingServiceExecutor {
         model();
     }
 
-    private void writeMetadataFile() throws Exception {
+    public void writeMetadataFile() throws Exception {
         String hdfsPath = String.format("%s/%s/data/%s/metadata.avsc", modelingServiceHdfsBaseDir,
                 builder.getCustomer(), builder.getMetadataTable());
         HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, builder.getMetadataContents());
     }
 
-    private void loadData() throws Exception {
+    public void loadData() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
 
         DbCreds.Builder credsBldr = new DbCreds.Builder();
@@ -86,14 +86,14 @@ public class ModelingServiceExecutor {
         config.setTable(builder.getTable());
         config.setMetadataTable(builder.getMetadataTable());
         config.setKeyCols(Collections.singletonList(builder.getKeyColumn()));
-        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + builder.getLoadSubmissionUrl(), config,
                 AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for load: %s", appId));
         waitForAppId(appId);
     }
     
-    private void sample() throws Exception {
+    public void sample() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         SamplingElement all = new SamplingElement();
@@ -102,14 +102,15 @@ public class ModelingServiceExecutor {
         samplingConfig.addSamplingElement(all);
         samplingConfig.setCustomer(builder.getCustomer());
         samplingConfig.setTable(builder.getTable());
-        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/createSamples",
+        samplingConfig.setHdfsDirPath(builder.getHdfsDirToSample());
+        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + builder.getSampleSubmissionUrl(),
                 samplingConfig, AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for sampling: %s", appId));
         waitForAppId(appId);
     }
 
-    private void profile() throws Exception {
+    public void profile() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(builder.getCustomer());
         config.setTable(builder.getTable());
@@ -117,14 +118,14 @@ public class ModelingServiceExecutor {
         config.setExcludeColumnList(Arrays.asList(builder.getProfileExcludeList()));
         config.setSamplePrefix("all");
         config.setTargets(Arrays.asList(builder.getTargets()));
-        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/profile", config,
+        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + builder.getProfileSubmissionUrl(), config,
                 AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for profile: %s", appId));
         waitForAppId(appId);
     }
     
-    private void model() throws Exception {
+    public void model() throws Exception {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
@@ -140,14 +141,14 @@ public class ModelingServiceExecutor {
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
-        model.setKeyCols(Arrays.asList(new String[]{builder.getKeyColumn()}));
+        model.setKeyCols(Arrays.asList(new String[] { builder.getKeyColumn() }));
         model.setDataFormat("avro");
         
         AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
         model.setTargetsList(targetAndFeatures.getKey());
         model.setFeaturesList(targetAndFeatures.getValue());
         
-        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/submit", model,
+        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + builder.getModelSubmissionUrl(), model,
                 AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for modeling: %s", appId));
@@ -159,7 +160,7 @@ public class ModelingServiceExecutor {
         int maxTries = 60;
         int i = 0;
         do {
-            String url = String.format(modelingServiceHostPort + "/rest/getJobStatus/%s", appId);
+            String url = String.format(modelingServiceHostPort + builder.getRetrieveJobStatusUrl(), appId);
             status = restTemplate.getForObject(url, JobStatus.class);
             Thread.sleep(10000L);
             i++;
@@ -179,7 +180,7 @@ public class ModelingServiceExecutor {
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
-        StringList features = restTemplate.postForObject(modelingServiceHostPort + "/rest/features", model,
+        StringList features = restTemplate.postForObject(modelingServiceHostPort + builder.getRetrieveFeaturesUrl(), model,
                 StringList.class);
         return new AbstractMap.SimpleEntry<>(Arrays.asList(builder.getTargets()), features.getElements());
     }
@@ -204,6 +205,15 @@ public class ModelingServiceExecutor {
         private Configuration yarnConfiguration;
         private String metadataContents;
         private String modelName;
+        
+        private String loadSubmissionUrl = "/rest/load";
+        private String modelSubmissionUrl = "/rest/submit";
+        private String sampleSubmissionUrl = "/rest/createSamples";
+        private String profileSubmissionUrl = "/rest/profile";
+        private String retrieveFeaturesUrl= "/rest/features";
+        private String retrieveJobStatusUrl = "/rest/getJobStatus/%s";
+        
+        private String hdfsDirToSample;
 
         public Builder() {
         }
@@ -291,6 +301,49 @@ public class ModelingServiceExecutor {
         public Builder modelName(String modelName) {
             this.setModelName(modelName);
             return this;
+        }
+        
+        public Builder modelSubmissionUrl(String modelSubmissionUrl) {
+            this.setModelSubmissionUrl(modelSubmissionUrl);
+            return this;
+        }
+
+        public Builder sampleSubmissionUrl(String sampleSubmissionUrl) {
+            this.setSampleSubmissionUrl(sampleSubmissionUrl);
+            return this;
+        }
+
+        public Builder profileSubmissionUrl(String profileSubmissionUrl) {
+            this.setProfileSubmissionUrl(profileSubmissionUrl);
+            return this;
+        }
+
+        public Builder loadSubmissionUrl(String loadSubmissionUrl) {
+            this.setLoadSubmissionUrl(loadSubmissionUrl);
+            return this;
+        }
+
+        public Builder retrieveFeaturesUrl(String retrieveFeaturesUrl) {
+            this.setRetrieveFeaturesUrl(retrieveFeaturesUrl);
+            return this;
+        }
+
+        public Builder retrieveJobStatusUrl(String retrieveJobStatusUrl) {
+            this.setRetrieveJobStatusUrl(retrieveJobStatusUrl);
+            return this;
+        }
+        
+        public Builder hdfsDirToSample(String hdfsDirToSample) {
+            this.setHdfsDirToSample(hdfsDirToSample);
+            return this;
+        }
+
+        public void setHdfsDirToSample(String hdfsDirToSample) {
+            this.hdfsDirToSample = hdfsDirToSample;
+        }
+        
+        public String getHdfsDirToSample() {
+            return hdfsDirToSample;
         }
 
         public String getHost() {
@@ -427,6 +480,54 @@ public class ModelingServiceExecutor {
 
         public void setModelName(String modelName) {
             this.modelName = modelName;
+        }
+
+        public String getModelSubmissionUrl() {
+            return modelSubmissionUrl;
+        }
+
+        public void setModelSubmissionUrl(String modelSubmissionUrl) {
+            this.modelSubmissionUrl = modelSubmissionUrl;
+        }
+
+        public String getSampleSubmissionUrl() {
+            return sampleSubmissionUrl;
+        }
+
+        public void setSampleSubmissionUrl(String sampleSubmissionUrl) {
+            this.sampleSubmissionUrl = sampleSubmissionUrl;
+        }
+
+        public String getProfileSubmissionUrl() {
+            return profileSubmissionUrl;
+        }
+
+        public void setProfileSubmissionUrl(String profileSubmissionUrl) {
+            this.profileSubmissionUrl = profileSubmissionUrl;
+        }
+
+        public String getRetrieveFeaturesUrl() {
+            return retrieveFeaturesUrl;
+        }
+
+        public void setRetrieveFeaturesUrl(String retrieveFeaturesUrl) {
+            this.retrieveFeaturesUrl = retrieveFeaturesUrl;
+        }
+
+        public String getRetrieveJobStatusUrl() {
+            return retrieveJobStatusUrl;
+        }
+
+        public void setRetrieveJobStatusUrl(String retrieveJobStatusUrl) {
+            this.retrieveJobStatusUrl = retrieveJobStatusUrl;
+        }
+
+        public String getLoadSubmissionUrl() {
+            return loadSubmissionUrl;
+        }
+
+        public void setLoadSubmissionUrl(String loadSubmissionUrl) {
+            this.loadSubmissionUrl = loadSubmissionUrl;
         }
 
     }

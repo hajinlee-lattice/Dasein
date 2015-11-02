@@ -150,21 +150,21 @@ public class SalesforceExtractAndImportUtil {
         table.addAttribute(accountSource);
         table.addAttribute(name);
         table.addAttribute(tickerSymbol);
-        table.addAttribute(type);
+        //table.addAttribute(type);
         table.addAttribute(street);
         table.addAttribute(city);
         table.addAttribute(state);
         table.addAttribute(postalCode);
         table.addAttribute(country);
         table.addAttribute(website);
-        table.addAttribute(sic);
+        //table.addAttribute(sic);
         table.addAttribute(industry);
         table.addAttribute(annualRevenue);
         table.addAttribute(numEmployees);
         table.addAttribute(lastActivityDate);
         table.addAttribute(createdDate);
         table.addAttribute(ownerId);
-        table.addAttribute(rating);
+        //table.addAttribute(rating);
         table.addAttribute(lastModifiedDate);
 
         PrimaryKey pk = new PrimaryKey();
