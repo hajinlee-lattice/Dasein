@@ -20,3 +20,4 @@ Following are the command to run test cases
 
 
 Most Test server and account information can be configured in the config.ini and Property.py, please make sure these configuration are correct before you run tests.	
+we can execute setupproperty.py to set configuration in config.ini
