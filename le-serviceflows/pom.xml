@@ -13,6 +13,7 @@
         <le.workflow.version>2.0.15-SNAPSHOT</le.workflow.version>
         <le.domain.version>2.0.15-SNAPSHOT</le.domain.version>
         <le.serviceflows.core.version>2.0.15-SNAPSHOT</le.serviceflows.core.version>
+        <le.swlib.version>2.0.15-SNAPSHOT</le.swlib.version>
     </properties>
 
 
@@ -83,53 +84,7 @@
         </profile>
     </profiles>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-
-                    <filters>
-                        <!-- Strip any signatures to avoid security errors running the shaded JAR. -->
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.handlers</resource>
-                                </transformer>
-                                <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.schemas</resource>
-                                </transformer>
-                                <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+    
 </project>
 
 

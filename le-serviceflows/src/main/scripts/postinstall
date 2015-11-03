@@ -1,0 +1,16 @@
+#!/bin/sh
+JARFILE=`ls /tmp/le-swlib-*-shaded.jar`
+VERSION=`echo $JARFILE | cut -d \- -f 3`
+SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
+
+if test $SNAPSHOT = "SNAPSHOT"
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+java -cp $JARFILE:$HADOOP_HOME/etc/hadoop com.latticeengines.swlib.SwlibTool \
+    -o install \
+    -m dataflowapi \
+    -g com.latticeengines \
+    -a le-serviceflows \
+    -v $VERSION \
+    -f /tmp/le-serviceflows-prospectdiscovery-*-shaded.jar
