@@ -18,8 +18,6 @@
     </parent>
 
     <dependencies>
-
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
@@ -29,8 +27,23 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-swlib</artifactId>
+            <version>${le.swlib.version}</version>
+            <classifier>shaded</classifier>
+            <scope>provided</scope>
+        </dependency>
+    
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.dataflow.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-workflow</artifactId>
+            <version>${le.workflow.version}</version>
             <scope>provided</scope>
         </dependency>
     
