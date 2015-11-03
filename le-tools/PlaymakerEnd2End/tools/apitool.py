@@ -74,17 +74,60 @@ def getRecommendations():
     request = requests.get(url, headers=headers, params=params)
     print request.text
 
+def getData(tenant, jdbcUrl):
+    url = apiUrl + "/recommendations"
+    startTime = 0
+    
+    key = getOneTimeKey(tenant, jdbcUrl)
+    testToken = 'bearer ' + getAccessToken(key, tenant)
+    
+    headers = {'Authorization':testToken}
+    params = {'start':startTime, 'offset':'0', 'maximum':'1000','destination':'SFDC'}
+    request = requests.get(url, headers=headers, params=params)
+    print request.text
+
+def getDataFromKey(tenant, key):
+    url = apiUrl + "/recommendations"
+    startTime = 0
+
+    testToken = 'bearer ' + getAccessToken(key, tenant)
+    
+    headers = {'Authorization':testToken}
+    params = {'start':startTime, 'offset':'0', 'maximum':'1000','destination':'SFDC'}
+    request = requests.get(url, headers=headers, params=params)
+    print request.text
+
+
+def getDataFromToken(token):
+    url = apiUrl + "/recommendations"
+    startTime = 0
+    
+    token = 'bearer ' + token
+    headers = {'Authorization':token}
+    params = {'start':startTime, 'offset':'0', 'maximum':'1000','destination':'SFDC'}
+    request = requests.get(url, headers=headers, params=params)
+    print request.text
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-func', '--function', dest = 'function_name', action = 'store', required = True, help = 'name of the function')
-    parser.add_argument('-t', '--tenant', dest = 'tenant', action = 'store', required = True, help = 'name of the tenant')
-    parser.add_argument('-db', '--database', dest = 'database', action = 'store', required = True, help = 'database connection string')
+    parser.add_argument('-t', '--tenant', dest = 'tenant', action = 'store', required = False, help = 'name of the tenant')
+    parser.add_argument('-db', '--database', dest = 'database', action = 'store', required = False, help = 'database connection string')
+    parser.add_argument('-k', '--key', dest = 'key', action = 'store', required = False, help = 'one time key')
+    parser.add_argument('-tk', '--token', dest = 'token', action = 'store', required = False, help = 'Access Token')
     args = parser.parse_args()
     
     if args.function_name == 'getKey':
         getKey(args.tenant, args.database)
     elif args.function_name == 'getTokenJson':
         getTokenJson(args.tenant, args.database)
+    elif args.function_name == 'getData':
+        getData(args.tenant, args.database)
+    elif args.function_name == 'getDataFromKey':
+        getDataFromKey(args.tenant, args.key)
+    elif args.function_name == 'getDataFromToken':
+        getDataFromToken(args.token)
     else:
         logging.error('No such function: ' + args.function_name)
 

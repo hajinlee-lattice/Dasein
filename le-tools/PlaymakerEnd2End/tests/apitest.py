@@ -22,40 +22,39 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        #Paypal_Obfusc_DB
-        tenant = 'PCMTest'
-        key = apitool.getOneTimeKey(tenant, "jdbc:sqlserver://10.41.1.193\\SQL2008R2;databaseName=PCM")
+        tenant = 'TestAPI_DB'
+        key = apitool.getOneTimeKey(tenant, "jdbc:sqlserver://10.41.1.193\\SQL2008R2;databaseName=TestAPI_DB")
         cls.token = 'bearer ' + apitool.getAccessToken(key, tenant)
-        #print "Key is: " + key
-        #print  "token is: " + cls.token
+        # print "Key is: " + key
+        # print  "token is: " + cls.token
 
 
     def testGetRecommendationCount(self):
         url = self.apiUrl + "/recommendationcount"
         headers = {'Authorization':self.token}
-        
-        #first request, start time = 0
+
+        # first request, start time = 0
         params = {'start':'0', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(json.loads(request.text)['count'],3348888) 
-        
-        #second request, start time = 1436549860
-        params = {'start':'1436549860', 'destination':'SFDC'}
+        self.assertEqual(json.loads(request.text)['count'], 471)
+
+        # second request, start time = 1445738581
+        params = {'start':'1445738581', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(json.loads(request.text)['count'],208)
-        
+        self.assertEqual(json.loads(request.text)['count'], 230)
+
 
     def testGetRecommendation(self):
         url = self.apiUrl + "/recommendations"
-        startTime = 1436549860
-        
+        startTime = 1445738581
+
         headers = {'Authorization':self.token}
-        params = {'start':startTime, 'offset':'0', 'maximum':'1000','destination':'SFDC'}
+        params = {'start':startTime, 'offset':'0', 'maximum':'1000', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(self.getRecordCount(request.text), 208)
+        self.assertEqual(self.getRecordCount(request.text), 230)
         self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
         self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
 
@@ -72,23 +71,23 @@ class Test(unittest.TestCase):
 
     def testGetRecommendationOffset(self):
         url = self.apiUrl + "/recommendations"
-        startTime = 1436549860
-        
+        startTime = 1445738581
+
         headers = {'Authorization':self.token}
-        params = {'start':startTime, 'offset':'100', 'maximum':'1000','destination':'SFDC'}
+        params = {'start':startTime, 'offset':'100', 'maximum':'1000', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(self.getRecordCount(request.text), 108)
+        self.assertEqual(self.getRecordCount(request.text), 130)
         self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
         self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
 
 
     def testGetRecommendationRowLimit(self):
         url = self.apiUrl + "/recommendations"
-        startTime = 1436549860
-        
+        startTime = 1445738581
+
         headers = {'Authorization':self.token}
-        params = {'start':startTime, 'offset':'0', 'maximum':'99','destination':'SFDC'}
+        params = {'start':startTime, 'offset':'0', 'maximum':'99', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
         self.assertEqual(self.getRecordCount(request.text), 99)
@@ -97,40 +96,39 @@ class Test(unittest.TestCase):
 
 
 
-    
+
     def testGetPlayCount(self):
         url = self.apiUrl + "/playcount"
         headers = {'Authorization':self.token}
-        
-        #first request, start time = 0
+
+        # first request, start time = 0
         params = {'start':'0'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        print 'Play count: ' + request.text
-        #self.assertEqual(json.loads(request.text)['count'], 3348888) 
-        
-        #second request, start time = 1436549860
-        params = {'start':'1436549860'}
+        # print 'Play count: ' + request.text
+        self.assertEqual(json.loads(request.text)['count'], 29)
+
+        # second request, start time = 1445738581
+        params = {'start':'1445738581'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        print 'Play count: ' + request.text
-        #self.assertEqual(json.loads(request.text)['count'], 208)
-        
+        # print 'Play count: ' + request.text
+        self.assertEqual(json.loads(request.text)['count'], 19)
+
 
     def testGetPlay(self):
         url = self.apiUrl + "/plays"
         startTime = 0
-        
+
         headers = {'Authorization':self.token}
         params = {'start':startTime, 'offset':'0', 'maximum':'1000'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        print 'Plays: ' + request.text
-        '''
-        self.assertEqual(self.getRecordCount(request.text), 208)
+        # print 'Plays: ' + request.text
+
+        self.assertEqual(self.getRecordCount(request.text), 29)
         self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
         self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
-        '''
 
 
 
@@ -142,7 +140,7 @@ class Test(unittest.TestCase):
             t = threading.Thread(target=self.requestRecommendationSingleThread, args=([i]))
             t.daemon = True
             t.start()
-            
+
         x = 1
         while x < 60:
             if self.threadCount == 3:
@@ -157,9 +155,9 @@ class Test(unittest.TestCase):
     def requestRecommendationSingleThread(self, i):
         i += 1
         print 'starting within the thread {} at time {}'.format(i, time.ctime())
-        startTime = 1436549860
+        startTime = 1445738581
         headers = {'Authorization':self.token}
-        params = {'start':startTime, 'offset':'0', 'maximum':'99','destination':'SFDC'}
+        params = {'start':startTime, 'offset':'0', 'maximum':'99', 'destination':'SFDC'}
         request = requests.get(self.apiUrl + "/recommendations", headers=headers, params=params)
         assert request.status_code == 200
         self.assertEqual(self.getRecordCount(request.text), 99)
@@ -171,25 +169,26 @@ class Test(unittest.TestCase):
 
     def testGetRecommendationMultipleTenants(self):
         # get token for another tenant
-        tenant = 'p83_1'
-        key = apitool.getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.83\sql2012std;databaseName=ADEDTBDd72072nK28083n154')
+        tenant = 'TestAPI_DB2'
+        key = apitool.getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.193\\SQL2008R2;databaseName=TestAPI_DB2')
         secondToken = 'bearer ' + apitool.getAccessToken(key, tenant)
-        
+
         url = self.apiUrl + "/recommendationcount"
         params = {'start':'0', 'destination':'SFDC'}
-        
-        #first request, for first tenant
+
+
+        # first request, for first tenant
         headers = {'Authorization':self.token}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(json.loads(request.text)['count'],3348888) 
-        
-        #second request, for second tenant
+        self.assertEqual(json.loads(request.text)['count'], 471)
+
+        # second request, for second tenant
         headers = {'Authorization':secondToken}
         request2 = requests.get(url, headers=headers, params=params)
         assert request2.status_code == 200
-        self.assertEqual(json.loads(request2.text)['count'],468)
+        self.assertEqual(json.loads(request2.text)['count'], 298)
 
-        
+
 if __name__ == "__main__":
     unittest.main()
