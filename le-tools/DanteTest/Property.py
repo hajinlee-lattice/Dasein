@@ -8,7 +8,7 @@ class DanteEnvironments(object):
     parser = SafeConfigParser()
     parser.read('config.ini')
 
-    Prod_Dante_Server = parser.get('Sales_Force', 'prod_dante_serer');
+    Prod_Dante_Server = parser.get('Sales_Force', 'prod_dante_server');
 
     # properties defination
     # Configuration for Dante DB

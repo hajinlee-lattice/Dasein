@@ -22,7 +22,7 @@ def setProperties():
     configFile = 'config.ini'
     configParser = SafeConfigParser()
     configParser.read(configFile)
-    configParser.set('Sales_Force', 'prod_dante_serer', args.server)
+    configParser.set('Sales_Force', 'prod_dante_server', args.server)
     with open(configFile, 'wb') as configfile:
         configParser.write(configfile)
 
