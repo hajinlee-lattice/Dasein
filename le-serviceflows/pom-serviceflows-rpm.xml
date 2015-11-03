@@ -35,8 +35,8 @@
                         <mapping>
                             <directory>/tmp</directory>
                             <filemode>755</filemode>
-                            <username>rgonzalez</username>
-                            <groupname>rgonzalez</groupname>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>prospectdiscovery/target/le-serviceflows-prospectdiscovery-${le.rpm.version}-shaded.jar</location>
@@ -46,8 +46,8 @@
                         <mapping>
                             <directory>/tmp</directory>
                             <filemode>755</filemode>
-                            <username>rgonzalez</username>
-                            <groupname>rgonzalez</groupname>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>prospectdiscovery/target/dependency/le-swlib-${le.rpm.version}-shaded.jar</location>
