@@ -39,7 +39,7 @@
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
-                                    <location>prospectdiscovery/target/le-serviceflows-prospectdiscovery-${le.rpm.version}-shaded.jar</location>
+                                    <location>le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-${le.rpm.version}-shaded.jar</location>
                                 </source>
                             </sources>
                         </mapping>
@@ -50,7 +50,7 @@
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
-                                    <location>prospectdiscovery/target/dependency/le-swlib-${le.rpm.version}-shaded.jar</location>
+                                    <location>le-serviceflows/prospectdiscovery/target/dependency/le-swlib-${le.rpm.version}-shaded.jar</location>
                                 </source>
                             </sources>
                         </mapping>
