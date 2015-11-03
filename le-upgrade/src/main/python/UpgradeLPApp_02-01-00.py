@@ -24,7 +24,7 @@ sequence.append( lp020100.LP_020100_VDB_ModifiedSpec() )
 sequence.append( lp020100.LP_020100_VDB_ModifiedFilters() )
 sequence.append( lp020100.LP_020100_VDB_ModifiedEntity() )
 sequence.append( lp020100.LP_020100_VDB_ModifiedColumns() )
-sequence.append( appsequence.LPSetVersion('2.1.1') )
+sequence.append( appsequence.LPSetVersion('2.1.0') )
 
 
 app = appsequence.AppSequence( tenantFileName, resultsFileName, sequence, checkOnly )
