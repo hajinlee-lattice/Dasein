@@ -88,6 +88,11 @@
     <profiles>
         <profile>
             <id>shaded-yarn</id>
+            <activation>
+                <file>
+                    <exists>shadedyarn.txt</exists>
+                </file>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -97,10 +102,8 @@
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-
                             <filters>
-                                <!-- Strip any signatures to avoid security errors running the shaded 
-                                    JAR. -->
+                                <!-- Strip any signatures to avoid security errors running the shaded JAR. -->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -868,7 +871,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8</version>
+            <version>6.9.8</version>
             <scope>test</scope>
         </dependency>
 
