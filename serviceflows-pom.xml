@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.latticeengines</groupId>
+    <artifactId>le-serviceflows-toplevel</artifactId>
+    <version>2.0.15-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Lattice Data Platform Service Flows Top Level Module</name>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>2.0.15-SNAPSHOT</version>
+        <relativePath>le-parent</relativePath>
+    </parent>
+    
+    <modules>
+        <module>le-domain</module>
+        <module>le-common</module>
+        <module>le-parent</module>
+        <module>le-scheduler</module>
+        <module>le-dataflow</module>
+        <module>le-workflow</module>
+        <module>le-swlib</module>
+        <module>le-serviceflows</module>
+    </modules>
+</project>
