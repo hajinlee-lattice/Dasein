@@ -14,9 +14,18 @@ print ''
 (checkOnly, tenantFileName, resultsFileName) = appsequence.AppArgs.get(sys.argv)
 
 sequence = []
-sequence.append( appsequence.LPCheckVersion('2.0') )
-sequence.append( lp020100.LP_020100_NewSpecs() )
-sequence.append( lp020100.LP_020100_AddDataProvider() )
+sequence.append( appsequence.LPCheckVersion('2.0.1') )
+sequence.append( lp020100.LP_020100_DL_LoadCRMData() )
+sequence.append( lp020100.LP_020100_DL_InsightsAllSteps() )
+sequence.append( lp020100.LP_020100_DL_PushToLeadDestination() )
+sequence.append( lp020100.LP_020100_DL_BulkScoring_Dante() )
+sequence.append( lp020100.LP_020100_VDB_NewSpecs() )
+sequence.append( lp020100.LP_020100_VDB_ModifiedSpec() )
+sequence.append( lp020100.LP_020100_VDB_ModifiedFilters() )
+sequence.append( lp020100.LP_020100_VDB_ModifiedEntity() )
+sequence.append( lp020100.LP_020100_VDB_ModifiedColumns() )
+sequence.append( appsequence.LPSetVersion('2.1.1') )
+
 
 app = appsequence.AppSequence( tenantFileName, resultsFileName, sequence, checkOnly )
 app.execute()
