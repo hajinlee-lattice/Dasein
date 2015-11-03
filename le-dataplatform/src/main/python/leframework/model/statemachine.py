@@ -1,5 +1,8 @@
 from leframework.model import mediator as mdtr
 from leframework.progressreporter import ProgressReporter
+import logging
+
+logger = logging.getLogger(name='StateMachine')
 
 class StateMachine(object):
     
@@ -22,7 +25,9 @@ class StateMachine(object):
         # Finished data preprocessing step
         self.progressReporter.inStateMachine()
         for state in self.states:
+            logger.info("Start step:" + state.getName())
             state.execute()
+            logger.info("Finish step:" + state.getName())
             self.progressReporter.nextState()
     
     def getMediator(self):
