@@ -61,7 +61,11 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 
+import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.Restriction;
+import com.latticeengines.common.exposed.query.SingleReferenceLookup;
+import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.common.exposed.query.SortEntry;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
@@ -150,6 +154,20 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(identifier, builder);
         }
 
+        public Node sort(Sort sort) {
+            // XXX TODO
+            return new Node(identifier, builder);
+        }
+
+        public Node sort(String column, boolean ascending) {
+            SingleReferenceLookup lookup = new SingleReferenceLookup("Score", ReferenceInterpretation.COLUMN);
+            SortEntry sortEntry = new SortEntry(lookup, false);
+            List<SortEntry> entries = new ArrayList<>();
+            entries.add(sortEntry);
+            Sort sort = new Sort(entries);
+            return sort(sort);
+        }
+
         public Node filter(String expression, FieldList filterFieldList) {
             return new Node(builder.addFilter(identifier, expression, filterFieldList), builder);
         }
@@ -205,6 +223,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public List<FieldMetadata> getSchema() {
             return builder.getMetadata(identifier);
+        }
+
+        public String getPipeName() {
+            return builder.getPipeByIdentifier(identifier).getName();
         }
 
         public List<String> getFieldNames() {
@@ -359,7 +381,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 allColumnsClone.remove(field.name());
             }
 
-            String source = addSource(String.format("%s-%s", sourceTable.getName(), extract.getName()), //
+            String source = addSource(String.format("%s-%s", sourceTableName, extract.getName()), //
                     extract.getPath(), true);
             String[] extraCols = new String[allColumnsClone.size()];
             allColumnsClone.toArray(extraCols);
@@ -386,7 +408,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     sortFields);
             toRegister = new Every(groupby, Fields.ALL, new First(), Fields.RESULTS);
         }
-        return new Node(register(toRegister, getFieldMetadata(allColumns), sourceTable.getName()), this);
+        toRegister = new Pipe(sourceTableName, toRegister);
+
+        return new Node(register(toRegister, getFieldMetadata(allColumns), sourceTableName), this);
     }
 
     private void validateTableForSource(Table sourceTable) {
@@ -465,6 +489,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(new Pipe(sourceName), fields, sourceName);
     }
 
+    protected String joinFieldName(String identifier, String fieldName) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> lookup = pipesAndOutputSchemas.get(identifier);
+        if (lookup == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { identifier });
+        }
+        return lookup.getKey().getName().replaceAll("\\*|-", "__") + "__" + fieldName;
+    }
+
     protected String addRenamePipe(String prior, String newname) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> priorLookup = pipesAndOutputSchemas.get(prior);
         if (priorLookup == null) {
@@ -528,7 +560,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             String originalFieldName = fieldName;
 
             if (seenFields.contains(fieldName)) {
-                fieldName = rhsPipesAndFields.getKey().getName().replaceAll("\\*|-", "__") + "__" + fieldName;
+                fieldName = joinFieldName(rhs, fieldName);
             }
             seenFields.add(fieldName);
             FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
@@ -639,8 +671,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return null;
     }
 
-    public Pipe getPipeByName(String name) {
-        return pipesAndOutputSchemas.get(name).getKey();
+    public Pipe getPipeByIdentifier(String identifier) {
+        return pipesAndOutputSchemas.get(identifier).getKey();
     }
 
     public Schema getSchema(String flowName, String identifier, DataFlowContext dataFlowCtx) {
@@ -1046,7 +1078,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         FlowDef flowDef = FlowDef.flowDef().setName(flowName) //
                 .addSources(getSources()) //
-                .addTailSink(getPipeByName(lastOperator), sink);
+                .addTailSink(getPipeByIdentifier(lastOperator), sink);
 
         for (AbstractMap.SimpleEntry<Checkpoint, Tap> entry : checkpoints.values()) {
             flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());

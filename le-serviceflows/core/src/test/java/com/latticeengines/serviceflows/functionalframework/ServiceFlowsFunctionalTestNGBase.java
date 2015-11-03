@@ -111,7 +111,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase<T extends DataFlowParamet
         ctx.setProperty("FLOWNAME", getFlowBeanName());
         ctx.setProperty("CHECKPOINT", true);
         ctx.setProperty("SOURCETABLES", getSources());
-        ctx.setProperty("CUSTOMER", "customer1");
+        ctx.setProperty("CUSTOMER", "customer");
         ctx.setProperty("PARAMETERS", getDataFlowParameters());
         return ctx;
     }

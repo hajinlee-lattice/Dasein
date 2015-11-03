@@ -179,8 +179,8 @@ public class SalesforceExtractAndImportUtil {
         table.setLastModifiedKey(lk);
         return table;
     }
-    
-    public static Table createAccountWithNonExistingAttr(){
+
+    public static Table createAccountWithNonExistingAttr() {
         Table table = new Table();
         table.setName("Account");
 
@@ -335,11 +335,14 @@ public class SalesforceExtractAndImportUtil {
         email.setName("Email");
         Attribute lastModifiedDate = new Attribute();
         lastModifiedDate.setName("LastModifiedDate");
+        Attribute createdDate = new Attribute();
+        createdDate.setName("CreatedDate");
 
         table.addAttribute(id);
         table.addAttribute(accountId);
         table.addAttribute(email);
         table.addAttribute(lastModifiedDate);
+        table.addAttribute(createdDate);
 
         PrimaryKey pk = new PrimaryKey();
         pk.setName("PK_ID");
