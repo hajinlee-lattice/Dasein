@@ -23,16 +23,16 @@ class LP_020100_VDB_ModifiedEntity( StepBase ):
       conn_mgr = appseq.getConnectionMgr()
       type = appseq.getText( 'template_type' )
       if type == 'MKTO' or type == 'ELQ':
-          conn_mgr.GetSpec("Q_Dante_ContactSourceTable")
-          conn_mgr.GetSpec("Q_Dante_LeadSourceTable")
+          conn_mgr.getSpec("Q_Dante_ContactSourceTable")
+          conn_mgr.getSpec("Q_Dante_LeadSourceTable")
 
-          if not conn_mgr.GetSpec("Q_Dante_LeadSourceTable") and conn_mgr.GetSpec("Q_Dante_ContactSourceTable"):
+          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and conn_mgr.getSpec("Q_Dante_ContactSourceTable"):
               return Applicability.cannotApplyFail
 
       else:
-          conn_mgr.GetSpec("Q_Dante_LeadSourceTable")
+          conn_mgr.getSpec("Q_Dante_LeadSourceTable")
 
-          if not conn_mgr.GetSpec("Q_Dante_LeadSourceTable"):
+          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable"):
               return Applicability.cannotApplyFail
 
       return  Applicability.canApply
@@ -48,73 +48,73 @@ class LP_020100_VDB_ModifiedEntity( StepBase ):
 
       if type == 'MKTO':
           #Modify the Entity in Q_Dante_ContactSourceTable
-          Q_Dante_ContactSourceTable    = conn_mgr.GetQuery("Q_Dante_ContactSourceTable")
+          Q_Dante_ContactSourceTable    = conn_mgr.getQuery("Q_Dante_ContactSourceTable")
           entity1 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Contact_ID")))')
           entity2 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("MKTO_LeadRecord_ID")))')
           entities_new.append(entity1)
           entities_new.append(entity2)
-          Q_Dante_ContactSourceTable._entities = entities_new
+          Q_Dante_ContactSourceTable.entities_ = entities_new
 
           entityColumn1 = liaison.ExpressionVDBImplGeneric('SpecQueryNamedFunctionExpression(ContainerElementName("MKTO_LeadRecord_ID"),LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("MKTO_LeadRecord_ID"))))')
-          Q_Dante_ContactSourceTable._columns.insert(1,entityColumn1)
+          Q_Dante_ContactSourceTable.columns_.insert(1,entityColumn1)
 
-          conn_mgr.SetSpec('Q_Dante_ContactSourceTable',Q_Dante_ContactSourceTable.SpecLatticeNamedElements())
+          conn_mgr.setSpec('Q_Dante_ContactSourceTable',Q_Dante_ContactSourceTable.SpecLatticeNamedElements())
 
           #Modify the Entity in Q_Dante_LeadSourceTable
           entities_new = []
-          Q_Dante_LeadSourceTable    = conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
+          Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           entity3 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_ID")))')
           entity4 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("MKTO_LeadRecord_ID")))')
           entities_new.append(entity3)
           entities_new.append(entity4)
-          Q_Dante_LeadSourceTable._entities = entities_new
+          Q_Dante_LeadSourceTable.entities_ = entities_new
 
           entityColumn2 = liaison.ExpressionVDBImplGeneric('SpecQueryNamedFunctionExpression(ContainerElementName("MKTO_LeadRecord_ID"),LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("MKTO_LeadRecord_ID"))))')
-          Q_Dante_LeadSourceTable._columns.insert(1,entityColumn2)
+          Q_Dante_LeadSourceTable.columns_.insert(1,entityColumn2)
 
-          conn_mgr.SetSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
+          conn_mgr.setSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
 
       elif type == 'ELQ':
            #Modify the Entity in Q_Dante_ContactSourceTable
           entities_new = []
-          Q_Dante_ContactSourceTable    = conn_mgr.GetQuery("Q_Dante_ContactSourceTable")
+          Q_Dante_ContactSourceTable    = conn_mgr.getQuery("Q_Dante_ContactSourceTable")
           entity1 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Contact_ID")))')
           entity2 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact_ContactID")))')
           entities_new.append(entity1)
           entities_new.append(entity2)
-          Q_Dante_ContactSourceTable._entities = entities_new
+          Q_Dante_ContactSourceTable.entities_ = entities_new
 
           entityColumn2 = liaison.ExpressionVDBImplGeneric('SpecQueryNamedFunctionExpression(ContainerElementName("ELQ_Contact_ContactID"),LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact_ContactID"))))')
-          Q_Dante_ContactSourceTable._columns.insert(1,entityColumn2)
+          Q_Dante_ContactSourceTable.columns_.insert(1,entityColumn2)
 
-          conn_mgr.SetSpec('Q_Dante_ContactSourceTable',Q_Dante_ContactSourceTable.SpecLatticeNamedElements())
+          conn_mgr.setSpec('Q_Dante_ContactSourceTable',Q_Dante_ContactSourceTable.SpecLatticeNamedElements())
 
           #Modify the Entity in Q_Dante_LeadSourceTable
           entities_new = []
-          Q_Dante_LeadSourceTable    = conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
+          Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           entity3 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_ID")))')
           entity4 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact_ContactID")))')
           entities_new.append(entity3)
           entities_new.append(entity4)
-          Q_Dante_LeadSourceTable._entities = entities_new
+          Q_Dante_LeadSourceTable.entities_ = entities_new
 
           entityColumn2 = liaison.ExpressionVDBImplGeneric('SpecQueryNamedFunctionExpression(ContainerElementName("ELQ_Contact_ContactID"),LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact_ContactID"))))')
-          Q_Dante_LeadSourceTable._columns.insert(1,entityColumn2)
+          Q_Dante_LeadSourceTable.columns_.insert(1,entityColumn2)
 
-          conn_mgr.SetSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
+          conn_mgr.setSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
       else:
            #Modify the Entity in Q_Dante_LeadSourceTable
           entities_new = []
-          Q_Dante_LeadSourceTable    = conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
+          Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           entity1 = liaison.ExpressionVDBImplGeneric('LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))')
           entities_new.append(entity1)
-          Q_Dante_LeadSourceTable._entities = entities_new
+          Q_Dante_LeadSourceTable.entities_ = entities_new
 
           entityColumn2 = liaison.ExpressionVDBImplGeneric('SpecQueryNamedFunctionExpression(ContainerElementName("SFDC_Lead_Contact_ID"),LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID"))))')
-          Q_Dante_LeadSourceTable._columns.insert(1,entityColumn2)
+          Q_Dante_LeadSourceTable.columns_.insert(1,entityColumn2)
           Q_Dante_LeadSourceTable.removeColumn('SFDCLeadID')
 
-          conn_mgr.SetSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
+          conn_mgr.setSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
 
 
 

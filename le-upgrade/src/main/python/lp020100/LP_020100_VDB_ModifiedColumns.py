@@ -23,37 +23,37 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
       conn_mgr = appseq.getConnectionMgr()
       type = appseq.getText( 'template_type' )
       if type == 'MKTO':
-          conn_mgr.GetQuery("Q_Diagnostic_ExtractLeadsRange")
-          conn_mgr.GetQuery("Q_Diagnostic_DownloadedUnscoredLeads")
-          conn_mgr.GetQuery("Q_Diagnostic_MissingDownloadedLeads")
-          conn_mgr.GetQuery("Q_Timestamp_PushToDante")
-          conn_mgr.GetTable("Timestamp_PushToDante")
-          conn_mgr.GetQuery("Q_Dante_ContactSourceTable")
-          conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
+          conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange")
+          conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads")
+          conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads")
+          conn_mgr.getQuery("Q_Timestamp_PushToDante")
+          conn_mgr.getTable("Timestamp_PushToDante")
+          conn_mgr.getQuery("Q_Dante_ContactSourceTable")
+          conn_mgr.getQuery("Q_Dante_LeadSourceTable")
 
-          if not conn_mgr.GetQuery("Q_Diagnostic_ExtractLeadsRange") and conn_mgr.GetQuery("Q_Diagnostic_DownloadedUnscoredLeads") and conn_mgr.GetQuery("Q_Diagnostic_MissingDownloadedLeads") and conn_mgr.GetQuery("Q_Timestamp_PushToDante") and conn_mgr.GetTable("Timestamp_PushToDante") and conn_mgr.GetQuery("Q_Dante_ContactSourceTable") and conn_mgr.GetQuery("Q_Dante_LeadSourceTable"):
+          if not conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange") and conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads") and conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads") and conn_mgr.getQuery("Q_Timestamp_PushToDante") and conn_mgr.getTable("Timestamp_PushToDante") and conn_mgr.getQuery("Q_Dante_ContactSourceTable") and conn_mgr.getQuery("Q_Dante_LeadSourceTable"):
               return Applicability.cannotApplyFail
 
       elif type == 'ELQ':
-          conn_mgr.GetQuery("Q_Diagnostic_ExtractLeadsRange")
-          conn_mgr.GetQuery("Q_Diagnostic_DownloadedUnscoredLeads")
-          conn_mgr.GetQuery("Q_Diagnostic_MissingDownloadedLeads")
-          conn_mgr.GetQuery("Q_Timestamp_PushToDante")
-          conn_mgr.GetTable("Timestamp_PushToDante")
-          conn_mgr.GetQuery("Q_Dante_ContactSourceTable")
-          conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
+          conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange")
+          conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads")
+          conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads")
+          conn_mgr.getQuery("Q_Timestamp_PushToDante")
+          conn_mgr.getTable("Timestamp_PushToDante")
+          conn_mgr.getQuery("Q_Dante_ContactSourceTable")
+          conn_mgr.getQuery("Q_Dante_LeadSourceTable")
 
-          if not conn_mgr.GetQuery("Q_Diagnostic_ExtractLeadsRange") and conn_mgr.GetQuery("Q_Diagnostic_DownloadedUnscoredLeads") and conn_mgr.GetQuery("Q_Diagnostic_MissingDownloadedLeads") and conn_mgr.GetQuery("Q_Timestamp_PushToDante") and conn_mgr.GetTable("Timestamp_PushToDante") and conn_mgr.GetQuery("Q_Dante_ContactSourceTable") and conn_mgr.GetQuery("Q_Dante_LeadSourceTable"):
+          if not conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange") and conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads") and conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads") and conn_mgr.getQuery("Q_Timestamp_PushToDante") and conn_mgr.getTable("Timestamp_PushToDante") and conn_mgr.getQuery("Q_Dante_ContactSourceTable") and conn_mgr.getQuery("Q_Dante_LeadSourceTable"):
               return Applicability.cannotApplyFail
 
       else:
-          conn_mgr.GetSpec("Q_Timestamp_PushToDante")
-          conn_mgr.GetTable("Timestamp_PushToDante")
-          conn_mgr.GetTable( 'SFDC_Opportunity')
-          conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
-          conn_mgr.GetQuery("Q_SFDC_Lead_Score")
-          conn_mgr.GetQuery("Q_SFDC_Contact_Score")
-          if not conn_mgr.GetSpec("Q_Dante_LeadSourceTable") and conn_mgr.GetTable("Timestamp_PushToDante") and conn_mgr.GetTable( 'SFDC_Opportunity') and conn_mgr.GetQuery("Q_SFDC_Lead_Score") and conn_mgr.GetQuery("Q_SFDC_Contact_Score"):
+          conn_mgr.getSpec("Q_Timestamp_PushToDante")
+          conn_mgr.getTable("Timestamp_PushToDante")
+          conn_mgr.getTable( 'SFDC_Opportunity')
+          conn_mgr.getQuery("Q_Dante_LeadSourceTable")
+          conn_mgr.getQuery("Q_SFDC_Lead_Score")
+          conn_mgr.getQuery("Q_SFDC_Contact_Score")
+          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and conn_mgr.getTable("Timestamp_PushToDante") and conn_mgr.getTable( 'SFDC_Opportunity') and conn_mgr.getQuery("Q_SFDC_Lead_Score") and conn_mgr.getQuery("Q_SFDC_Contact_Score"):
               return Applicability.cannotApplyFail
 
       return  Applicability.canApply
@@ -68,33 +68,33 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
 
       if type == 'MKTO':
           #Modify the Column in Q_Diagnostic_ExtractLeadsRange
-          query1 = conn_mgr.GetQuery("Q_Diagnostic_ExtractLeadsRange")
+          query1 = conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange")
           exp1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddHour"), LatticeFunctionIdentifier(ContainerElementName("Diagnostic_MAX_MKTO_ActivityRecord_ActivityDate")), LatticeFunctionExpressionConstant("-28", DataTypeInt))')
           col1 = liaison.QueryColumnVDBImpl('Diagnostic_LowerLimitTime',exp1)
 
           query1.updateColumn(col1)
-          conn_mgr.SetQuery(query1)
+          conn_mgr.setQuery(query1)
 
           #Modify the Column in Q_Diagnostic_DownloadedUnscoredLeads
-          query2 = conn_mgr.GetQuery("Q_Diagnostic_DownloadedUnscoredLeads")
+          query2 = conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads")
           exp2 = liaison.ExpressionVDBImplGeneric('LatticeFunctionIdentifier(ContainerElementName("Const_TenantName"))')
           col2 = liaison.QueryColumnVDBImpl('TenantName',exp2)
 
           query2.appendColumn(col2)
 
-          conn_mgr.SetQuery(query2)
+          conn_mgr.setQuery(query2)
 
           #Modify the Column in Q_Diagnostic_MissingDownloadedLeads
-          query3 = conn_mgr.GetQuery("Q_Diagnostic_MissingDownloadedLeads")
+          query3 = conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads")
           exp3 = liaison.ExpressionVDBImplGeneric('LatticeFunctionIdentifier(ContainerElementName("Const_TenantName"))')
           col3 = liaison.QueryColumnVDBImpl('TenantName',exp3)
 
           query3.appendColumn(col3)
 
-          conn_mgr.SetQuery(query3)
+          conn_mgr.setQuery(query3)
 
           #Modify the Column in Q_Timestamp_PushToDante
-          query4 = conn_mgr.GetQuery("Q_Timestamp_PushToDante")
+          query4 = conn_mgr.getQuery("Q_Timestamp_PushToDante")
           exp4_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionConstant("Now", DataTypeDateTime)')
           col4_1 = liaison.QueryColumnVDBImpl('Time_OfCompletion_PushToDante',exp4_1)
 
@@ -113,10 +113,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query4.appendColumn(col4_4)
           query4.removeColumn('Time_OfSubmission_PushToDante')
 
-          conn_mgr.SetQuery(query4)
+          conn_mgr.setQuery(query4)
 
           #Modify the Column in Timestamp_PushToDante
-          table1 = conn_mgr.GetTable( 'Timestamp_PushToDante')
+          table1 = conn_mgr.getTable( 'Timestamp_PushToDante')
           col1_1 = liaison.TableColumnVDBImpl( 'Time_OfCompletion_PushToDante', 'Timestamp_PushToDante', 'DateTime' )
           col1_2 = liaison.TableColumnVDBImpl( 'SFDC_Contact_ID', 'Timestamp_PushToDante', 'VarChar(18)' )
           col1_3 = liaison.TableColumnVDBImpl( 'SFDC_Lead_ID', 'Timestamp_PushToDante', 'VarChar(18)' )
@@ -128,10 +128,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           table1.appendColumn( col1_4 )
           table1.removeColumn( 'Time_OfSubmission_PushToDante' )
 
-          conn_mgr.SetTable( table1 )
+          conn_mgr.setTable( table1 )
 
           #Modify the Column in Q_LeadScoreForLeadDestination_Query
-          query5 = conn_mgr.GetQuery("Q_LeadScoreForLeadDestination_Query")
+          query5 = conn_mgr.getQuery("Q_LeadScoreForLeadDestination_Query")
           exp5_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Percentile"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col5_1 = liaison.QueryColumnVDBImpl('Score',exp5_1)
 
@@ -139,10 +139,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query5.removeColumn('SFDCLeadID')
           query5.appendColumn(col5_1)
 
-          conn_mgr.SetQuery(query5)
+          conn_mgr.setQuery(query5)
 
           #Modify the Column in Q_Dante_ContactSourceTable
-          query6 = conn_mgr.GetQuery("Q_Dante_ContactSourceTable")
+          query6 = conn_mgr.getQuery("Q_Dante_ContactSourceTable")
           exp6_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Score"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col6_1 = liaison.QueryColumnVDBImpl('Score',exp6_1)
 
@@ -172,10 +172,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query6.updateColumn(col6_6)
           query6.updateColumn(col6_7)
 
-          conn_mgr.SetQuery(query6)
+          conn_mgr.setQuery(query6)
 
           #Modify the Column in Q_Dante_LeadSourceTable
-          query7 = conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
+          query7 = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           exp7_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Score"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col7_1 = liaison.QueryColumnVDBImpl('Score',exp7_1)
 
@@ -205,11 +205,11 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query7.updateColumn(col7_6)
           query7.updateColumn(col7_7)
 
-          conn_mgr.SetQuery(query7)
+          conn_mgr.setQuery(query7)
 
       elif type == 'ELQ':
           #Modify the Columns in Q_Diagnostic_ExtractLeadsRange
-          query1 = conn_mgr.GetQuery("Q_Diagnostic_ExtractLeadsRange")
+          query1 = conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange")
           exp1_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddHour"), LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("ELQ_Contact")), ContainerElementName("C_DateModified"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact")))), FunctionAggregationOperator("Max")), LatticeFunctionExpressionConstant("-28", DataTypeInt))')
           col1_1 = liaison.QueryColumnVDBImpl('Diagnostic_LowerLimitTime',exp1_1)
           query1.updateColumn(col1_1)
@@ -218,28 +218,28 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           col1_2 = liaison.QueryColumnVDBImpl('Diagnostic_RescoreThreshold',exp1_2)
           query1.appendColumn(col1_2)
 
-          conn_mgr.SetQuery(query1)
+          conn_mgr.setQuery(query1)
 
           #Modify the Column in Q_Diagnostic_DownloadedUnscoredLeads
-          query2 = conn_mgr.GetQuery("Q_Diagnostic_DownloadedUnscoredLeads")
+          query2 = conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads")
           exp2 = liaison.ExpressionVDBImplGeneric('LatticeFunctionIdentifier(ContainerElementName("Const_TenantName"))')
           col2 = liaison.QueryColumnVDBImpl('TenantName',exp2)
 
           query2.appendColumn(col2)
 
-          conn_mgr.SetQuery(query2)
+          conn_mgr.setQuery(query2)
 
           #Modify the Column in Q_Diagnostic_MissingDownloadedLeads
-          query3 = conn_mgr.GetQuery("Q_Diagnostic_MissingDownloadedLeads")
+          query3 = conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads")
           exp3 = liaison.ExpressionVDBImplGeneric('LatticeFunctionIdentifier(ContainerElementName("Const_TenantName"))')
           col3 = liaison.QueryColumnVDBImpl('TenantName',exp3)
 
           query3.appendColumn(col3)
 
-          conn_mgr.SetQuery(query3)
+          conn_mgr.setQuery(query3)
 
           #Modify the Column in Q_Timestamp_PushToDante
-          query4 = conn_mgr.GetQuery("Q_Timestamp_PushToDante")
+          query4 = conn_mgr.getQuery("Q_Timestamp_PushToDante")
           exp4_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionConstant("Now", DataTypeDateTime)')
           col4_1 = liaison.QueryColumnVDBImpl('Time_OfCompletion_PushToDante',exp4_1)
 
@@ -258,10 +258,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query4.appendColumn(col4_4)
           query4.removeColumn('Time_OfSubmission_PushToDante')
 
-          conn_mgr.SetQuery(query4)
+          conn_mgr.setQuery(query4)
 
           #Modify the Column in Timestamp_PushToDante
-          table1 = conn_mgr.GetTable( 'Timestamp_PushToDante')
+          table1 = conn_mgr.getTable( 'Timestamp_PushToDante')
           col1_1 = liaison.TableColumnVDBImpl( 'Time_OfCompletion_PushToDante', 'Timestamp_PushToDante', 'DateTime' )
           col1_2 = liaison.TableColumnVDBImpl( 'SFDC_Contact_ID', 'Timestamp_PushToDante', 'VarChar(18)' )
           col1_3 = liaison.TableColumnVDBImpl( 'SFDC_Lead_ID', 'Timestamp_PushToDante', 'VarChar(18)' )
@@ -273,10 +273,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           table1.appendColumn( col1_4 )
           table1.removeColumn( 'Time_OfSubmission_PushToDante' )
 
-          conn_mgr.SetTable( table1 )
+          conn_mgr.setTable( table1 )
 
           #Modify the Column in Q_ELQ_Contact_Score
-          query5 = conn_mgr.GetQuery("Q_ELQ_Contact_Score")
+          query5 = conn_mgr.getQuery("Q_ELQ_Contact_Score")
           exp5_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Percentile"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col5_1 = liaison.QueryColumnVDBImpl('C_Lattice_Predictive_Score1',exp5_1)
 
@@ -284,10 +284,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query5.removeColumn('SFDCLeadID')
           query5.appendColumn(col5_1)
 
-          conn_mgr.SetQuery(query5)
+          conn_mgr.setQuery(query5)
 
          #Modify the Column in Q_Dante_ContactSourceTable
-          query6 = conn_mgr.GetQuery("Q_Dante_ContactSourceTable")
+          query6 = conn_mgr.getQuery("Q_Dante_ContactSourceTable")
           exp6_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Score"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col6_1 = liaison.QueryColumnVDBImpl('Score',exp6_1)
 
@@ -317,10 +317,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query6.updateColumn(col6_6)
           query6.updateColumn(col6_7)
 
-          conn_mgr.SetQuery(query6)
+          conn_mgr.setQuery(query6)
 
           #Modify the Column in Q_Dante_LeadSourceTable
-          query7 = conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
+          query7 = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           exp7_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Score"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col7_1 = liaison.QueryColumnVDBImpl('Score',exp7_1)
 
@@ -350,10 +350,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query7.updateColumn(col7_6)
           query7.updateColumn(col7_7)
 
-          conn_mgr.SetQuery(query7)
+          conn_mgr.setQuery(query7)
       else:
           #Modify the Column in Q_Timestamp_PushToDante
-          query1 = conn_mgr.GetQuery("Q_Timestamp_PushToDante")
+          query1 = conn_mgr.getQuery("Q_Timestamp_PushToDante")
           exp1_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionConstant("Now", DataTypeDateTime)')
           col1_1 = liaison.QueryColumnVDBImpl('Time_OfCompletion_PushToDante',exp1_1)
 
@@ -364,10 +364,10 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query1.appendColumn(col1_2)
           query1.removeColumn('Time_OfSubmission_PushToDante')
 
-          conn_mgr.SetQuery(query1)
+          conn_mgr.setQuery(query1)
 
           #Modify the Column in Timestamp_PushToDante
-          table1 = conn_mgr.GetTable( 'Timestamp_PushToDante')
+          table1 = conn_mgr.getTable( 'Timestamp_PushToDante')
           col1_1 = liaison.TableColumnVDBImpl( 'Time_OfCompletion_PushToDante', 'Timestamp_PushToDante', 'DateTime' )
           col1_2 = liaison.TableColumnVDBImpl( 'ScoreDate', 'Timestamp_PushToDante', 'DateTime' )
 
@@ -375,16 +375,16 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           table1.appendColumn( col1_2 )
           table1.removeColumn( 'Time_OfSubmission_PushToDante' )
 
-          conn_mgr.SetTable( table1 )
+          conn_mgr.setTable( table1 )
 
         #Add a Key Column into the Table SFDC_Opportunity
           table_key = []
-          table2 = conn_mgr.GetTable( 'SFDC_Opportunity')
-          table2.SetSourceTableSpecs('SpecKeys((SpecKey(LatticeAddress((LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Opportunity_ID")))),SpecKeyDomainEntire))),SpecDescription(""),SpecMaximalIsMaximal,SpecKeyAggregation(SpecColumnAggregationRuleMostRecent),SpecEquivalenceAggregation(SpecColumnAggregationRuleMostRecent)')
-          conn_mgr.SetTable( table2 )
+          table2 = conn_mgr.getTable( 'SFDC_Opportunity')
+          table2.setSourceTableSpecs('SpecKeys((SpecKey(LatticeAddress((LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Opportunity_ID")))),SpecKeyDomainEntire))),SpecDescription(""),SpecMaximalIsMaximal,SpecKeyAggregation(SpecColumnAggregationRuleMostRecent),SpecEquivalenceAggregation(SpecColumnAggregationRuleMostRecent)')
+          conn_mgr.setTable( table2 )
 
         #Modify the Column in Q_Dante_LeadSourceTable
-          query2 = conn_mgr.GetQuery("Q_Dante_LeadSourceTable")
+          query2 = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           exp2_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Score"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col2_1 = liaison.QueryColumnVDBImpl('Score',exp2_1)
 
@@ -414,29 +414,29 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           query2.updateColumn(col2_6)
           query2.updateColumn(col2_7)
 
-          conn_mgr.SetQuery(query2)
+          conn_mgr.setQuery(query2)
 
 
           #Modify the Column in Q_SFDC_Lead_Score
-          query3 = conn_mgr.GetQuery("Q_SFDC_Lead_Score")
+          query3 = conn_mgr.getQuery("Q_SFDC_Lead_Score")
           exp3 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Percentile"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col3 = liaison.QueryColumnVDBImpl('C_Lattice_Predictive_Score1',exp3)
 
           query3.removeColumn('C_Lattice_Predictive_Score1')
           query3.appendColumn(col3)
 
-          conn_mgr.SetQuery(query3)
+          conn_mgr.setQuery(query3)
 
 
           #Modify the Column in Q_SFDC_Contact_Score
-          query4 = conn_mgr.GetQuery("Q_SFDC_Contact_Score")
+          query4 = conn_mgr.getQuery("Q_SFDC_Contact_Score")
           exp4 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("Percentile"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))), FunctionAggregationSelectWhere(FunctionAggregationOperator("Max"), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")), ContainerElementName("ScoreDate"))), FunctionAggregationOperator("Max")))')
           col4 = liaison.QueryColumnVDBImpl('C_Lattice_Predictive_Score1',exp4)
 
           query4.removeColumn('C_Lattice_Predictive_Score1')
           query4.appendColumn(col4)
 
-          conn_mgr.SetQuery(query4)
+          conn_mgr.setQuery(query4)
 
       success = True
 

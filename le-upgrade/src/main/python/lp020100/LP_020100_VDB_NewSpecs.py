@@ -36,6 +36,6 @@ class LP_020100_VDB_NewSpecs( StepBase ):
       slnes = newSpecsFile.read()
 
     conn_mgr = appseq.getConnectionMgr()
-    conn_mgr.SetSpec( 'New Specs', slnes )
+    conn_mgr.setSpec( 'New Specs', slnes )
     
     return True

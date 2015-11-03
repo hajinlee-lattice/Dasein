@@ -21,10 +21,10 @@ class LP_020100_VDB_ModifiedSpec( StepBase ):
   def getApplicability( self, appseq ):
 
       conn_mgr = appseq.getConnectionMgr()
-      conn_mgr.GetSpec("SelectedForDante")
-      conn_mgr.GetSpec("Time_OfMostRecentPushToDante")
+      conn_mgr.getSpec("SelectedForDante")
+      conn_mgr.getSpec("Time_OfMostRecentPushToDante")
 
-      if not conn_mgr.GetSpec("SelectedForDante") and conn_mgr.GetSpec("Time_OfMostRecentPushToDante"):
+      if not conn_mgr.getSpec("SelectedForDante") and conn_mgr.getSpec("Time_OfMostRecentPushToDante"):
         return Applicability.cannotApplyFail
 
       return  Applicability.canApply
@@ -33,9 +33,9 @@ class LP_020100_VDB_ModifiedSpec( StepBase ):
   def getApplicability( self, appseq ):
 
       conn_mgr = appseq.getConnectionMgr()
-      conn_mgr.GetSpec("Time_OfMostRecentPushToDante")
+      conn_mgr.getSpec("Time_OfMostRecentPushToDante")
 
-      if not conn_mgr.GetSpec("Time_OfMostRecentPushToDante"):
+      if not conn_mgr.getSpec("Time_OfMostRecentPushToDante"):
         return Applicability.cannotApplyFail
 
       return  Applicability.canApply
@@ -69,7 +69,7 @@ class LP_020100_VDB_ModifiedSpec( StepBase ):
               '	ContainerElementName("SelectedForDante")'\
               '))'
           SelectedForDante=liaison.ExpressionVDBImplGeneric(spec1)
-          conn_mgr.SetSpec('SelectedForDante',SelectedForDante.Definition())
+          conn_mgr.setSpec('SelectedForDante',SelectedForDante.Definition())
 
       elif type =='ELQ':
         spec1='SpecLatticeNamedElements(SpecLatticeNamedElement('\
@@ -92,7 +92,7 @@ class LP_020100_VDB_ModifiedSpec( StepBase ):
               '	ContainerElementName("SelectedForDante")'\
               '))'
         SelectedForDante=liaison.ExpressionVDBImplGeneric(spec1)
-        conn_mgr.SetSpec('SelectedForDante',SelectedForDante.Definition())
+        conn_mgr.setSpec('SelectedForDante',SelectedForDante.Definition())
 
       else:
         spec1='SpecLatticeNamedElements(SpecLatticeNamedElement('\
@@ -108,18 +108,18 @@ class LP_020100_VDB_ModifiedSpec( StepBase ):
               '	ContainerElementName("SelectedForDante")'\
               '))'
         SelectedForDante=liaison.ExpressionVDBImplGeneric(spec1)
-        conn_mgr.SetSpec('SelectedForDante',SelectedForDante.Definition())
+        conn_mgr.setSpec('SelectedForDante',SelectedForDante.Definition())
 
       #Modify Time_OfMostRecentPushToDante
       if type == 'MKTO':
           Time_OfMostRecentPushToDante=liaison.ExpressionVDBImplGeneric('SpecLatticeNamedElements(SpecLatticeNamedElement(SpecLatticeFunction(LatticeFunctionExpressionTransform(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToDante")),ContainerElementName("Time_OfCompletion_PushToDante"))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante")))),FunctionAggregationOperator("Max")),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddDay"),LatticeFunctionExpressionConstant("Now",DataTypeDateTime),LatticeFunctionExpressionConstant("-7305",DataTypeInt))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicAll)),FunctionAggregationOperator("None")),DataTypeUnknown,SpecFunctionTypeMetric,SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),ContainerElementName("Time_OfMostRecentPushToDante")))')
-          conn_mgr.SetSpec('Time_OfMostRecentPushToDante',Time_OfMostRecentPushToDante.Definition())
+          conn_mgr.setSpec('Time_OfMostRecentPushToDante',Time_OfMostRecentPushToDante.Definition())
       elif type =='ELQ':
           Time_OfMostRecentPushToDante=liaison.ExpressionVDBImplGeneric('SpecLatticeNamedElements(SpecLatticeNamedElement(SpecLatticeFunction(LatticeFunctionExpressionTransform(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToDante")),ContainerElementName("Time_OfCompletion_PushToDante"))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante")))),FunctionAggregationOperator("Max")),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddDay"),LatticeFunctionExpressionConstant("Now",DataTypeDateTime),LatticeFunctionExpressionConstant("-7305",DataTypeInt))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicAll)),FunctionAggregationOperator("None")),DataTypeUnknown,SpecFunctionTypeMetric,SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),ContainerElementName("Time_OfMostRecentPushToDante")))')
-          conn_mgr.SetSpec('Time_OfMostRecentPushToDante',Time_OfMostRecentPushToDante.Definition())
+          conn_mgr.setSpec('Time_OfMostRecentPushToDante',Time_OfMostRecentPushToDante.Definition())
       else:
           Time_OfMostRecentPushToDante=liaison.ExpressionVDBImplGeneric('SpecLatticeNamedElements(SpecLatticeNamedElement(SpecLatticeFunction(LatticeFunctionExpressionTransform(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToDante")),ContainerElementName("Time_OfCompletion_PushToDante"))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante")))),FunctionAggregationOperator("Max")),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddDay"),LatticeFunctionExpressionConstant("Now",DataTypeDateTime),LatticeFunctionExpressionConstant("-7305",DataTypeInt))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicAll)),FunctionAggregationOperator("None")),DataTypeUnknown,SpecFunctionTypeMetric,SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),ContainerElementName("Time_OfMostRecentPushToDante")))')
-          conn_mgr.SetSpec('Time_OfMostRecentPushToDante',Time_OfMostRecentPushToDante.Definition())
+          conn_mgr.setSpec('Time_OfMostRecentPushToDante',Time_OfMostRecentPushToDante.Definition())
 
       success = True
 
