@@ -98,13 +98,14 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         restTemplate.setInterceptors(addMagicAuthHeaders);
         customerSpace = CustomerSpace.parse(CUSTOMERSPACE);
         setupTenant();
+        setupUsers();
         setupCamille();
         setupHdfs();
         installServiceFlow();
         createImportTablesInMetadataStore();
     }
-
-    @Test(groups = "deployment", enabled = true)
+    
+    @Test(groups = "deployment", enabled = false)
     public void runPipeline() throws Exception {
         importData();
         runDataFlow();
@@ -115,6 +116,15 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         profileAndModel(eventTable, bldr);
     }
 
+    private void setupUsers() throws Exception {
+        createAdminUserByRestCall(CUSTOMERSPACE, //
+                "rgonzalez@lattice-engines.com", //
+                "rgonzalez@lattice-engines.com", //
+                "PD Super", //
+                "User", //
+                adminPasswordHash);
+    }
+    
     private ModelingServiceExecutor.Builder sample(Table eventTable) throws Exception {
         String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
         ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
@@ -138,7 +148,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     private void profileAndModel(Table eventTable, ModelingServiceExecutor.Builder bldr) throws Exception {
         String[] eventCols = new String[] { //
-        "Event_IsWon", //
+                "Event_IsWon", //
                 "Event_StageIsClosedWon", //
                 "Event_IsClosed", //
                 "Event_OpportunityCreated" //
@@ -161,21 +171,21 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
         for (String eventCol : eventCols) {
             bldr = bldr.targets(eventCol) //
-                    .metadataTable("EventTable-" + eventCol) //
-                    .keyColumn("ItemID") //
-                    .modelName("Model-" + eventCol);
+                       .metadataTable("EventTable-" + eventCol) //
+                       .keyColumn("Id") //
+                       .modelName("Model-" + eventCol);
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
+            modelExecutor.writeMetadataFile();
             modelExecutor.profile();
             modelExecutor.model();
         }
-
     }
 
     private Table createEventTableFromMatchResult(Long commandId, //
             AbstractMap.SimpleEntry<Table, DbCreds> preMatchEventTableAndCreds) throws Exception {
         Table table = preMatchEventTableAndCreds.getKey();
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ItemID");
+        sb.append("SELECT Source_Id");
         for (Attribute attr : table.getAttributes()) {
             sb.append(", Source_" + attr.getName() + " AS " + attr.getName()).append("\n");
         }
@@ -197,13 +207,13 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             }
             sb.append(" FROM " + matchTableName + " WHERE $CONDITIONS");
         }
-        String hdfsTargetPath = getTargetPath() + "/Data/Tables/" + matchTableName;
+        String hdfsTargetPath = getTargetPath() + "/" + matchTableName;
         String url = String.format("%s/modeling/dataloads", microServiceHostPort);
         LoadConfiguration config = new LoadConfiguration();
         config.setCreds(preMatchEventTableAndCreds.getValue());
         config.setQuery(sb.toString());
         config.setCustomer(CUSTOMERSPACE);
-        config.setKeyCols(Arrays.<String> asList(new String[] { "ItemID" }));
+        config.setKeyCols(Arrays.<String>asList(new String[] { "Source_Id" }));
         config.setTargetHdfsDir(hdfsTargetPath);
 
         AppSubmission submission = restTemplate.postForObject(url, config, AppSubmission.class);
@@ -510,6 +520,9 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         File[] files = tablesDir.listFiles();
 
         for (File file : files) {
+            if (file.isDirectory()) {
+                continue;
+            }
             String str = FileUtils.readFileToString(file);
             Table table = JsonUtils.deserialize(str, Table.class);
 

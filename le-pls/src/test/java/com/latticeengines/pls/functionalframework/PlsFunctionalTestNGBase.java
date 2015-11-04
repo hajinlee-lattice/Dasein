@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -24,12 +23,9 @@ import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
@@ -105,31 +101,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         return magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
                 new HashMap<>());
-    }
-
-    protected boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName,
-            String lastName, String password) {
-        UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
-        userRegistrationWithTenant.setTenant(tenant);
-        UserRegistration userRegistration = new UserRegistration();
-        userRegistrationWithTenant.setUserRegistration(userRegistration);
-        User user = new User();
-        user.setActive(true);
-        user.setEmail(email);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setUsername(username);
-        Credentials creds = new Credentials();
-        creds.setUsername(username);
-        creds.setPassword(password);
-        userRegistration.setUser(user);
-        userRegistration.setCredentials(creds);
-
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-
-        return magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users", userRegistrationWithTenant,
-                Boolean.class);
     }
 
     @Override

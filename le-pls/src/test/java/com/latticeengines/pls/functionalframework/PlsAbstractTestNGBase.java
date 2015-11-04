@@ -38,7 +38,11 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserRegistration;
+import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
@@ -99,6 +103,31 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     
     protected List<ClientHttpRequestInterceptor> addAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader });
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
+
+    protected boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName,
+            String lastName, String password) {
+        UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
+        userRegistrationWithTenant.setTenant(tenant);
+        UserRegistration userRegistration = new UserRegistration();
+        userRegistrationWithTenant.setUserRegistration(userRegistration);
+        User user = new User();
+        user.setActive(true);
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setUsername(username);
+        Credentials creds = new Credentials();
+        creds.setUsername(username);
+        creds.setPassword(password);
+        userRegistration.setUser(user);
+        userRegistration.setCredentials(creds);
+
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+
+        return magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users", userRegistrationWithTenant,
+                Boolean.class);
+    }
 
     protected UserDocument loginAndAttach(AccessLevel level, Tenant tenant) {
         String username = internalTestUserService.getUsernameForAccessLevel(level);
@@ -238,7 +267,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
 
-    abstract protected String getRestAPIHostPort();
+    protected abstract String getRestAPIHostPort();
     
     
 }
