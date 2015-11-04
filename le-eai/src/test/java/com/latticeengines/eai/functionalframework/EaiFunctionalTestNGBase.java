@@ -4,8 +4,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -16,6 +19,7 @@ import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.testng.AbstractCamelTestNGSpringContextTests;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -34,6 +38,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -204,25 +209,23 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         ImportConfiguration importConfig = new ImportConfiguration();
         SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
         salesforceConfig.setSourceType(SourceType.SALESFORCE);
-        //salesforceConfig.setTables(tables);
+        // salesforceConfig.setTables(tables);
 
         importConfig.addSourceConfiguration(salesforceConfig);
         importConfig.setCustomer(customer);
         return importConfig;
     }
-    
-    protected List<Table> getSalesforceTables(){
+
+    protected List<Table> getSalesforceTables(List<String> tableNameList) throws IOException {
         List<Table> tables = new ArrayList<>();
-        Table lead = SalesforceExtractAndImportUtil.createLead();
-        Table account = SalesforceExtractAndImportUtil.createAccount();
-        Table opportunity = SalesforceExtractAndImportUtil.createOpportunity();
-        Table contact = SalesforceExtractAndImportUtil.createContact();
-        Table contactRole = SalesforceExtractAndImportUtil.createOpportunityContactRole();
-        tables.add(lead);
-        tables.add(account);
-        tables.add(opportunity);
-        tables.add(contact);
-        tables.add(contactRole);
+
+        for (String tableName : tableNameList) {
+            URL url = ClassLoader.getSystemResource(String.format(
+                    "com/latticeengines/eai/service/impl/salesforce/%s.avsc", tableName).toString());
+            String str = FileUtils.readFileToString(new File(url.getFile()));
+            Table table = JsonUtils.deserialize(str, Table.class);
+            tables.add(table);
+        }
         return tables;
     }
 

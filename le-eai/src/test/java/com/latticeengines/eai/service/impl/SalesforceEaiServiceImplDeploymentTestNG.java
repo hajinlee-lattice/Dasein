@@ -2,15 +2,10 @@ package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -30,7 +25,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -106,14 +100,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         }
         tenantService.registerTenant(tenant);
 
-        tables = new ArrayList<>();
-        for (String tableName : tableNameList) {
-            URL url = ClassLoader.getSystemResource(String.format(
-                    "com/latticeengines/eai/service/impl/salesforce/%s.avsc", tableName).toString());
-            String str = FileUtils.readFileToString(new File(url.getFile()));
-            Table table = JsonUtils.deserialize(str, Table.class);
-            tables.add(table);
-        }
+        tables = getSalesforceTables(tableNameList);
         System.out.println(tables);
         eaiMetadataService.createImportTables(customerSpace, tables);
     }

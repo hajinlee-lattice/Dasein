@@ -106,7 +106,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
                     }
 
                 });
-        when(eaiMetadataService.getImportTables(any(String.class))).thenReturn(getSalesforceTables());
+        when(eaiMetadataService.getImportTables(any(String.class))).thenReturn(getSalesforceTables(tableNameList));
         dataExtractionService.setEaiMetadataService(eaiMetadataService);
 
     }

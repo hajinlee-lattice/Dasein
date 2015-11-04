@@ -2,14 +2,8 @@ package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +16,6 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -68,8 +61,6 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     private Tenant tenant;
 
-    private List<Table> tables;
-
     private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
             "Opportunity", "OpportunityContactRole" });
 
@@ -93,14 +84,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         }
         tenantService.registerTenant(tenant);
 
-        tables = new ArrayList<>();
-        for (String tableName : tableNameList) {
-            URL url = ClassLoader.getSystemResource(String.format(
-                    "com/latticeengines/eai/service/impl/salesforce/%s.avsc", tableName).toString());
-            String str = FileUtils.readFileToString(new File(url.getFile()));
-            Table table = JsonUtils.deserialize(str, Table.class);
-            tables.add(table);
-        }
+        List<Table> tables = getSalesforceTables(tableNameList);
         System.out.println(tables);
 
         httpServer = new StandaloneHttpServer();
