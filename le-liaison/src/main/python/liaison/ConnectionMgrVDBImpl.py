@@ -54,6 +54,10 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             self._verify = False
 
 
+    def getTenantName(self):
+        return self._tenant_name
+
+
     def getTable(self, table_name):
 
         table_name_import = table_name + '_Import'
