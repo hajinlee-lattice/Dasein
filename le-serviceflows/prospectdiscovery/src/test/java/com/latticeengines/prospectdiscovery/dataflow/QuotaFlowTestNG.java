@@ -33,7 +33,7 @@ public class QuotaFlowTestNG extends ServiceFlowsFunctionalTestNGBase<QuotaFlowP
         TargetMarket market = new TargetMarket();
         market.setIntentScoreThreshold(20.0);
         market.setFitScoreThreshold(20.0);
-        market.setNumDaysBetweenIntentProspectResends(1);
+        market.setNumDaysBetweenIntentProspectResends(365);
         markets.add(market);
 
         ProspectDiscoveryConfiguration configuration = new ProspectDiscoveryConfiguration();

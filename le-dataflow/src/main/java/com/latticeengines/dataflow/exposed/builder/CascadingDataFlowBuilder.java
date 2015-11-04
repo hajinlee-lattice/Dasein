@@ -400,6 +400,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         // group and sort the extracts
         if (sourceTable.getPrimaryKey() != null && sourceTable.getLastModifiedKey() != null) {
+            // TODO Use logical sort
             String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0);
             Fields sortFields = new Fields(lastModifiedKeyColName);
             sortFields.setComparator(lastModifiedKeyColName, Collections.reverseOrder());
@@ -1033,6 +1034,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         String joined = addJoin(lhs, new FieldList(lhsJoinField), rhs, new FieldList(rhsJoinField), JoinType.OUTER);
         String expression = String.format("%s == null", rhsJoinField);
+        if (lhsJoinField.equals(rhsJoinField)) {
+            rhsJoinField = joinFieldName(rhs, rhsJoinField);
+        }
         String filtered = addFilter(joined, expression, new FieldList(lhsJoinField, rhsJoinField));
         return filtered;
     }
