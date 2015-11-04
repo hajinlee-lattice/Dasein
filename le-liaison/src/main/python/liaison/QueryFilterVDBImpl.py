@@ -12,7 +12,7 @@ class QueryFilterVDBImpl( object ):
         self.InitFromValues( spec )
 
 
-    def Definition( self ):
+    def definition( self ):
 
         return self._spec
         

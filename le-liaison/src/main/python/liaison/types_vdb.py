@@ -17,7 +17,7 @@ def IsStandardType( t ):
     if c:
         return True
 
-    if t in [ 'DateTime', 'Float', 'Double', 'Bit', 'Int', 'Long' ]:
+    if t in [ 'Date','DateTime', 'Float', 'Double', 'Bit', 'Int', 'Long' ]:
         return True
 
     return False

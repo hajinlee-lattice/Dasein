@@ -33,7 +33,7 @@ def GetVersionForTenants( tenantFileName, versionFileName ):
             if isLP:
                 try:
                     exp_version = conn_mgr.getNamedExpression( 'Version' )
-                    defn = exp_version.Object().Definition()
+                    defn = exp_version.Object().definition()
                     c = re.search( 'LatticeFunctionExpressionConstant\(\"(.*?)\".*LatticeFunctionExpressionConstant\(\"(.*?)\"', defn )
                     if c:
                         version = c.group(2)

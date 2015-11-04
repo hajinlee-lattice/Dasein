@@ -129,7 +129,7 @@ class QueryColumnVDBImpl(QueryColumn):
 
         sqnf =  'SpecQueryNamedFunctionExpression('
         sqnf +=   'ContainerElementName("{0}")'.format( self.getName() )
-        sqnf += ', '+ self.getExpression().Definition()
+        sqnf += ', '+ self.getExpression().definition()
         sqnf += ')'
 
         if md == '':

@@ -188,7 +188,7 @@ class QueryVDBImpl(Query):
             tmplas =      'LatticeAddressSetMeet(('
             for f in self.filters_:
                 tmplas += sep
-                tmplas += f.Definition()
+                tmplas += f.definition()
                 sep = ', '
             tmplas +=     '))'
             defn +=       'LatticeAddressExpressionFromLAS({0})'.format( tmplas )
@@ -201,7 +201,7 @@ class QueryVDBImpl(Query):
             defn +=     ', LatticeAddressExpressionMeet(('
             for e in self.entities_:
                 defn += sep
-                defn += e.Definition()
+                defn += e.definition()
                 sep = ', '
             defn +=       '))'
 

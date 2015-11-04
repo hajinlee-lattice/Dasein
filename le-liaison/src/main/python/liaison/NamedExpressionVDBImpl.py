@@ -61,10 +61,10 @@ class NamedExpressionVDBImpl( NamedExpression ):
         return self._other_specs
 
 
-    def Definition( self ):
+    def definition( self ):
 
         defn =  'SpecLatticeFunction('
-        defn +=   '{0}'.format( self._exp.Definition() )
+        defn +=   '{0}'.format( self._exp.definition() )
         defn += ', {0}'.format( self.OtherSpecs() )
         defn += ')'
 
@@ -75,7 +75,7 @@ class NamedExpressionVDBImpl( NamedExpression ):
 
         defn =  'SpecLatticeNamedElements(('
         defn +=   'SpecLatticeNamedElement('
-        defn += self.Definition()
+        defn += self.definition()
         defn +=   ', ContainerElementName(\"{0}\")'.format( self.Name() )
         defn +=   ')'
         defn += '))'

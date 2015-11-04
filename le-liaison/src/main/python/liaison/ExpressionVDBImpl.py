@@ -84,7 +84,7 @@ class ExpressionVDBImplFactory( object ):
 
 class ExpressionVDBImpl( object ):
 
-    def Definition( self ):
+    def definition( self ):
         return ''
 
 
@@ -99,7 +99,7 @@ class ExpressionVDBImplGeneric( ExpressionVDBImpl ):
 
         return cls( defn )
 
-    def Definition( self ):
+    def definition( self ):
 
         return self._spec_str
 
@@ -158,7 +158,7 @@ class ExpressionVDBImplConst( ExpressionVDBImpl ):
         self._datatype = dt
         return self._datatype
 
-    def Definition( self ):
+    def definition( self ):
 
         type = 'LatticeFunctionExpressionConstant'
         if self._isScalar:
@@ -203,7 +203,7 @@ class ExpressionVDBImplFcnRef( ExpressionVDBImpl ):
         self._fcn = f
         return self._fcn
 
-    def Definition( self ):
+    def definition( self ):
 
         return 'LatticeFunctionIdentifier(ContainerElementName("{0}"))'.format( self.FcnName() )
 
@@ -247,7 +247,7 @@ class ExpressionVDBImplColRef( ExpressionVDBImpl ):
         self._tablename = t
         return self._tablename
 
-    def Definition( self ):
+    def definition( self ):
 
         return 'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("{0}")), ContainerElementName("{1}")))'.format( self.TableName(), self.ColumnName() )
 

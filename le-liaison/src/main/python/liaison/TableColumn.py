@@ -31,7 +31,7 @@ class TableColumn(object):
         self.datatype_ = dt
 
     def definition( self ):
-        raise NotImplementedError( 'TableColumn.Definition()' )
+        raise NotImplementedError( 'TableColumn.definition()' )
 
     def initFromValues(self, name, tablename, datatype):
 
