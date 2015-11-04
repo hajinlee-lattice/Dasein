@@ -261,12 +261,12 @@ public class ModelingMetadata {
 
     }
 
-    @JsonProperty("Attributes")
+    @JsonProperty("Metadata")
     public List<AttributeMetadata> getAttributeMetadata() {
         return attributeMetadata;
     }
 
-    @JsonProperty("Attributes")
+    @JsonProperty("Metadata")
     public void setAttributeMetadata(List<AttributeMetadata> attributeMetadata) {
         this.attributeMetadata = attributeMetadata;
     }
