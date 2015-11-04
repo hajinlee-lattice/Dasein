@@ -75,6 +75,12 @@
                             <webAppConfig>
                                 <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
                             </webAppConfig>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>com.latticeengines.registerBootstrappers</name>
+                                    <value>true</value>
+                                </systemProperty>
+                            </systemProperties>
                         </configuration>
                         <dependencies>
                             <dependency>

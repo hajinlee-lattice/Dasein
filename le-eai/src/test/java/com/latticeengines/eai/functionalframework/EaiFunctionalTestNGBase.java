@@ -90,8 +90,6 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     @Autowired
     protected TenantService tenantService;
 
-    protected ImportConfiguration importConfig;
-
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
@@ -202,7 +200,18 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         return camelContext;
     }
 
-    protected void setupSalesforceImportConfig(String customer) {
+    protected ImportConfiguration createSalesforceImportConfig(String customer) {
+        ImportConfiguration importConfig = new ImportConfiguration();
+        SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
+        salesforceConfig.setSourceType(SourceType.SALESFORCE);
+        //salesforceConfig.setTables(tables);
+
+        importConfig.addSourceConfiguration(salesforceConfig);
+        importConfig.setCustomer(customer);
+        return importConfig;
+    }
+    
+    protected List<Table> getSalesforceTables(){
         List<Table> tables = new ArrayList<>();
         Table lead = SalesforceExtractAndImportUtil.createLead();
         Table account = SalesforceExtractAndImportUtil.createAccount();
@@ -214,14 +223,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         tables.add(opportunity);
         tables.add(contact);
         tables.add(contactRole);
-
-        importConfig = new ImportConfiguration();
-        SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
-        salesforceConfig.setSourceType(SourceType.SALESFORCE);
-        salesforceConfig.setTables(tables);
-
-        importConfig.addSourceConfiguration(salesforceConfig);
-        importConfig.setCustomer(customer);
+        return tables;
     }
 
     protected Tenant createTenant(String customerSpace) {

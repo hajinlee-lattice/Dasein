@@ -33,6 +33,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -114,7 +115,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
             tables.add(table);
         }
         System.out.println(tables);
-        eaiMetadataService.createTables(customerSpace, tables);
+        eaiMetadataService.createImportTables(customerSpace, tables);
     }
 
     @AfterClass(groups = "deployment")
@@ -128,7 +129,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
 
     @Test(groups = { "deployment" }, enabled = true)
     public void extractAndImport() throws Exception {
-        setupSalesforceImportConfig(customer);
+        ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         BaseObject request = new AppmasterServiceRequest();
         Thread.sleep(22000);

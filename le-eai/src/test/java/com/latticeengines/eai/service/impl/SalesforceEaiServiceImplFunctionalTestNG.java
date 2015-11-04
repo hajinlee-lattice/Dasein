@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -24,6 +25,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -103,7 +105,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
         httpServer = new StandaloneHttpServer();
         httpServer.init(PORT);
-        httpServer.addServlet(new MetadataServlet(tables), "/metadata/customerspaces/" + customerSpace + "/tables/*");
+        httpServer.addServlet(new MetadataServlet(tables), "/metadata/customerspaces/" + customerSpace + "/*");
         httpServer.start();
     }
 
@@ -120,7 +122,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     @Test(groups = "functional")
     public void extractAndImport() throws Exception {
-        setupSalesforceImportConfig(customer);
+        ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
 
         assertNotNull(appId);

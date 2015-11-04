@@ -14,6 +14,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -56,7 +57,7 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
-        setupSalesforceImportConfig(customer);
+        
     }
 
     @AfterClass(groups = "functional")
@@ -66,6 +67,7 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testValidateMetadataImport() throws Exception {
+        ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
 

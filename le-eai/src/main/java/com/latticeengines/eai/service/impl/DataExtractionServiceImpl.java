@@ -28,6 +28,8 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
@@ -70,7 +72,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         context.setProperty(ImportProperty.TARGETPATH, targetPath);
         context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
         context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
-        List<Table> tableMetadata = null;
+        List<Table> tableMetadata = eaiMetadataService.getImportTables(customerSpace);
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
             Map<String, String> props = sourceImportConfig.getProperties();
@@ -80,6 +82,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
                 context.setProperty(entry.getKey(), entry.getValue());
             }
 
+            sourceImportConfig.setTables(tableMetadata);
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
             tableMetadata = importService.importMetadata(sourceImportConfig, context);
 
@@ -98,20 +101,19 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         for (Table table : tableMetadata) {
             LastModifiedKey lmk = eaiMetadataService.getLastModifiedKey(customerSpace, table);
             StringBuilder filter = new StringBuilder();
-            String lastModifiedDate;
+            String lastModifiedKey;
             DateTime date;
             if (lmk != null) {
-                lastModifiedDate = lmk.getAttributeNames()[0];
+                lastModifiedKey = lmk.getAttributeNames()[0];
                 date = new DateTime(lmk.getLastModifiedTimestamp());
             } else {
-                lastModifiedDate = "LastModifiedDate";
-                date = new DateTime(1000000000000L);
+                throw new LedpException(LedpCode.LEDP_17006, new String[] { customerSpace });
             }
             String defaultFilter = sourceImportConfig.getFilter(table.getName());
             if (!StringUtils.isEmpty(defaultFilter)) {
                 filter.append(defaultFilter).append(", ");
             }
-            filter.append(lastModifiedDate).append(" >= ").append(date).append(" Order By ").append(lastModifiedDate)
+            filter.append(lastModifiedKey).append(" >= ").append(date).append(" Order By ").append(lastModifiedKey)
                     .append(" Desc ").toString();
 
             sourceImportConfig.setFilter(table.getName(), filter.toString());
@@ -174,7 +176,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     public void cleanUpTargetPathData(ImportContext context) throws Exception {
         @SuppressWarnings("unchecked")
         Map<String, String> targetPaths = context.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
-        
+
         if (targetPaths != null) {
             for (Map.Entry<String, String> entry : targetPaths.entrySet()) {
                 log.info("Table is： " + entry.getKey() + " Path is: " + entry.getValue());

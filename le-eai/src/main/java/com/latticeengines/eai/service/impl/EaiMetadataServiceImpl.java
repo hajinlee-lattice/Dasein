@@ -28,6 +28,8 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -73,10 +75,37 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     }
 
     @Override
+    public List<Table> getImportTables(String customerSpace) {
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("customerSpace", customerSpace);
+        String[] tableNames = restTemplate.getForObject(metadataUrl + "/customerspaces/{customerSpace}/importtables",
+                String[].class, uriVariables);
+        List<Table> tables = new ArrayList<>();
+        for (String tableName : tableNames) {
+            uriVariables.put("tableName", tableName);
+            Table table = getImportTable(customerSpace, tableName);
+            if (table != null) {
+                tables.add(table);
+            }
+        }
+        return tables;
+    }
+
+    @Override
+    public Table getImportTable(String customerSpace, String tableName) {
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("customerSpace", customerSpace);
+        uriVariables.put("tableName", tableName);
+        Table newTable = restTemplate.getForObject(metadataUrl
+                + "/customerspaces/{customerSpace}/importtables/{tableName}", Table.class, uriVariables);
+        return newTable;
+    }
+
+    @Override
     public List<Table> getTables(String customerSpace) {
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
-        String[] tableNames = restTemplate.getForObject(metadataUrl + "customerspaces/{customerSpace}/tables",
+        String[] tableNames = restTemplate.getForObject(metadataUrl + "/customerspaces/{customerSpace}/tables",
                 String[].class, uriVariables);
         List<Table> tables = new ArrayList<>();
         for (String tableName : tableNames) {
@@ -94,24 +123,24 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
         uriVariables.put("tableName", tableName);
-        Table newTable = restTemplate.getForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}",
+        Table newTable = restTemplate.getForObject(metadataUrl + "/customerspaces/{customerSpace}/tables/{tableName}",
                 Table.class, uriVariables);
         return newTable;
     }
 
     @Override
-    public void createTables(String customerSpace, List<Table> tables) {
+    public void createImportTables(String customerSpace, List<Table> tables) {
         for (Table table : tables) {
-            createTable(customerSpace, table);
+            createImportTable(customerSpace, table);
         }
     }
 
     @Override
-    public void createTable(String customerSpace, Table table) {
+    public void createImportTable(String customerSpace, Table table) {
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", customerSpace);
         uriVariables.put("tableName", table.getName());
-        restTemplate.postForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}", table,
+        restTemplate.postForObject(metadataUrl + "/customerspaces/{customerSpace}/importtables/{tableName}", table,
                 String.class, uriVariables);
     }
 
@@ -130,16 +159,15 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
 
     @Override
     public LastModifiedKey getLastModifiedKey(String customerSpace, Table table) {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", customerSpace);
-        uriVariables.put("tableName", table.getName());
-        Table newTable = restTemplate.getForObject(metadataUrl + "customerspaces/{customerSpace}/tables/{tableName}",
-                Table.class, uriVariables);
-
+        Table newTable = getTable(customerSpace, table.getName());
         if (newTable != null) {
             return newTable.getLastModifiedKey();
         }
-        return null;
+        newTable = getImportTable(customerSpace, table.getName());
+        if (newTable != null) {
+            return newTable.getLastModifiedKey();
+        }
+        throw new LedpException(LedpCode.LEDP_17007, new String[] { table.getName(), customerSpace });
     }
 
     private void addTenantToTable(Table table, String customerSpace) {

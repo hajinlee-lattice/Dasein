@@ -11,9 +11,9 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class TableUnitTestNG {
-    
+
     private Table table = null;
-    
+
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
         table = createTable();
@@ -30,7 +30,7 @@ public class TableUnitTestNG {
         assertEquals(deserializedTable.getPrimaryKey().getAttributeNames()[0], //
                 table.getPrimaryKey().getAttributeNames()[0]);
     }
-    
+
     @Test(groups = "unit")
     public void getModelingMetadata() {
         ModelingMetadata metadata = table.getModelingMetadata();
@@ -85,7 +85,7 @@ public class TableUnitTestNG {
         spamIndicator.setPhysicalDataType(Schema.Type.BOOLEAN.toString());
         spamIndicator.setLogicalDataType("Boolean");
         spamIndicator.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
-        
+
         Attribute activeRetirementParticipants = new Attribute();
         activeRetirementParticipants.setName("ActiveRetirementParticipants");
         activeRetirementParticipants.setDisplayName("Active Retirement Plan Participants");
@@ -132,7 +132,7 @@ public class TableUnitTestNG {
         lk.setName("LK_LUD");
         lk.setDisplayName("Last Modified Key for LastUpdatedDate column");
         lk.addAttribute("LID");
-        
+
         return lk;
     }
 

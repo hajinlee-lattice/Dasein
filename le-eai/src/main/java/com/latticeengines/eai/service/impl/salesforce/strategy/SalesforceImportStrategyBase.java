@@ -3,6 +3,7 @@ package com.latticeengines.eai.service.impl.salesforce.strategy;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.metadata.util.EaiMetadataUtil;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
@@ -150,6 +152,20 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 attr.setPrecision(descField.getPrecision());
                 attr.setScale(descField.getScale());
                 attr.setNullable(descField.isNillable());
+
+                attr.setApprovedUsage(Arrays.asList(new String[] { "" }));
+                attr.setDataSource(Arrays.asList(new String[] { "" }));
+                attr.setDataQuality("");
+                attr.setDescription("");
+                attr.setDisplayDiscretizationStrategy("");
+                attr.setDisplayName(descField.getLabel());
+                attr.setCategory("");
+                attr.setDataType("");
+                attr.setFundamentalType("");
+                attr.setSemanticType("");
+                attr.setStatisticalType("");
+                attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+
                 Schema.Type avroType = salesforceToAvroTypeConverter.convertTypeToAvro(type);
 
                 if (avroType == null) {

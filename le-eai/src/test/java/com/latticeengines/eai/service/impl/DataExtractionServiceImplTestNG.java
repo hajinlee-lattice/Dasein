@@ -27,6 +27,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -53,7 +54,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private ImportContext importContext;
-    
+
     @Value("${eai.salesforce.username}")
     private String salesforceUserName;
 
@@ -64,6 +65,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private EaiMetadataService eaiMetadataService;
+
+    private ImportConfiguration importConfig;
 
     private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
             "Opportunity", "OpportunityContactRole" });
@@ -88,7 +91,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
-        setupSalesforceImportConfig(customer);
+        importConfig = createSalesforceImportConfig(customer);
 
         EaiMetadataServiceImpl eaiMetadataService = mock(EaiMetadataServiceImpl.class);
         when(eaiMetadataService.getLastModifiedKey(any(String.class), any(Table.class))).thenAnswer(
@@ -103,6 +106,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
                     }
 
                 });
+        when(eaiMetadataService.getImportTables(any(String.class))).thenReturn(getSalesforceTables());
         dataExtractionService.setEaiMetadataService(eaiMetadataService);
 
     }
