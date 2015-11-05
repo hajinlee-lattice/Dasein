@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 public class DomainParserUnitTestNG {
 
-    @Test(groups = {"unit", "functional"}, dataProvider = "parseDomainDataProvider")
+    @Test(groups = {"unit"}, dataProvider = "parseDomainDataProvider")
     public void testParseDomain(String input, Set<String> output) {
         Set<String> domains = DomainParser.parseDomains(input);
         Assert.assertEquals(domains, output);

@@ -7,12 +7,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 public class DateRange {
 
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-    private static Calendar calendar = GregorianCalendar.getInstance();
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+    private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+    static  {
+        formatter.setCalendar(calendar);
+    }
 
     private Date startDate;
     private Date endDate;
@@ -24,7 +29,7 @@ public class DateRange {
 
     public DateRange(String startDate, String endDate) {
         try {
-            constructByDates(formatter.parse(startDate), formatter.parse(endDate));
+            constructByDates(formatter.parse(startDate + " 00:00:00 UTC"), formatter.parse(endDate + " 00:00:00 UTC"));
         } catch (ParseException e) {
             throw new IllegalArgumentException("Input strings cannot be parsed to dates.", e);
         }
