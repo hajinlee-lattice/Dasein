@@ -74,7 +74,7 @@ describe('top predictors', function () {
     };
 
     var checkHover = function (expected) {
-        helper.elementExists(element(by.css("div.attribute-hover")), expected);
+        helper.elementExists(element(by.className("attribute-hover")), expected);
     };
 
     var checkBackButtonHover = function (buttonExpected, hoverExpected) {
