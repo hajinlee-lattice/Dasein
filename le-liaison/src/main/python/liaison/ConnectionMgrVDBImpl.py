@@ -23,7 +23,7 @@ except ImportError as ie:
     print ''
     raise ie
 
-import os, datetime
+import os, datetime, re
 from .exceptions import HTTPError, EndpointError, TenantNotMappedToURL, TenantNotFoundAtURL, DataLoaderError
 from .exceptions import UnknownVisiDBSpec, UnknownDataLoaderObject, MaudeStringError, XMLStringError
 from .ConnectionMgr import ConnectionMgr
@@ -353,15 +353,75 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         valuedict  = response.json()['Value'][0]
         specfile = valuedict['Value'].encode('ascii', 'xmlcharrefreplace')
         
-        specxml = etree.fromstring(specfile)
-        specs =  specxml.find(".//specs")
-        if specs is None:
-            raise UnknownVisiDBSpec( 'No specs returned' )
+        specstart_i = specfile.find('<specs>') + 7
+        specend_i = specfile.find('</specs>')
+        
+        #if specs is None:
+        #    raise UnknownVisiDBSpec( 'No specs returned' )
 
         if self.isVerbose():
             print 'Success'
 
-        return specs.text
+        return specfile[specstart_i:specend_i]
+
+
+    def getSpecDictionary(self):
+
+        slne = self.getAllSpecs()
+
+        s1 = re.search( '^SpecLatticeNamedElements\((.*)\)$', slne )
+        if not s1:
+            if self.isVerbose():
+                print 'Tenant \'{0}\' has unrecognizable SpecLatticeNamedElements()'.format( tenant )
+            raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.getSpecDictionary(): Unrecognizable SpecLatticeNamedElements()' )
+
+        specs_maude = s1.group(1)
+        specs = {}
+
+        if specs_maude != 'empty':
+
+            specs_maude = specs_maude[1:-1]
+
+            while True:
+
+                s2 = re.search( '^(SpecLatticeNamedElement.*?)(, SpecLatticeNamedElement.*|$)', specs_maude )
+                if not s2:
+                    if self.isVerbose():
+                        print 'Tenant \'{0}\' has unrecognizable SpecLatticeNamedElement()'.format( tenant )
+                    raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.getSpecDictionary(): Unrecognizable SpecLatticeNamedElements()' )
+
+                singlespec    = s2.group(1)
+                remainingspec = s2.group(2)
+
+                s3 = re.search( 'SpecLatticeNamedElement\(((SpecLattice.*?)\(.*\)), ContainerElementName\(\"(.*?)\"\)\)$', singlespec )
+                if not s3:
+                    if self.isVerbose():
+                        print 'Cannot parse spec for Tenant \'{0}\':\n\n{1}\n'.format( tenant, singlespec )
+                    raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.getSpecDictionary(): Cannot parse spec' )
+
+                defn    = s3.group(1)
+                vdbtype = s3.group(2)
+                name    = s3.group(3)
+
+                isExtractOrBinder = False
+
+                if vdbtype == 'SpecLatticeExtract':
+                    isExtractOrBinder = True
+
+                s4 = re.search( 'SpecLatticeBinder\(SpecBoundName\(ContainerElementName\(\"\w*?\"\), NameTypeExtract', defn )
+                if s4:
+                    isExtractOrBinder = True
+
+                if not isExtractOrBinder:
+                    if name not in specs:
+                        specs[name] = (vdbtype, defn, singlespec)
+
+                if remainingspec == '':
+                    break
+                else:
+                    specs_maude = remainingspec[2:]
+
+        return specs
 
 
     def setSpec(self, obj_name, SpecLatticeNamedElements):

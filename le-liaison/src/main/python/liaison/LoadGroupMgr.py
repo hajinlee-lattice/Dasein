@@ -5,44 +5,48 @@
 # $Rev$
 #
 
-class LoadGroupMgr( object ):
+class LoadGroupMgr(object):
 
-  def __init__( self, conn_mgr ):
-    
-    self._conn_mgr = conn_mgr
-
-
-  def createDataProvider( self, config ):
-    raise NotImplementedError( 'LoadGroupMgr.createDataProvider()' )
+    def __init__(self, conn_mgr):
+        
+        self._conn_mgr = conn_mgr
 
 
-  def createLoadGroup( self, groupName, groupPath, groupAlias, autoClear, isNestedGroup ):
-    raise NotImplementedError( 'LoadGroupMgr.createLoadGroup()' )
+    def createDataProvider(self, config):
+        raise NotImplementedError( 'LoadGroupMgr.createDataProvider()' )
 
 
-  def deleteLoadGroup( self, groupName ):
-    raise NotImplementedError( 'LoadGroupMgr.deleteLoadGroup()' )
+    def createLoadGroup(self, groupName, groupPath, groupAlias, autoClear, isNestedGroup):
+        raise NotImplementedError( 'LoadGroupMgr.createLoadGroup()' )
 
 
-  def getLoadGroup( self, groupName ):
-    raise NotImplementedError( 'LoadGroupMgr.getLoadGroup()' )
+    def deleteLoadGroup(self, groupName):
+        raise NotImplementedError( 'LoadGroupMgr.deleteLoadGroup()' )
 
 
-  def setLoadGroup( self, config ):
-    raise NotImplementedError( 'LoadGroupMgr.setLoadGroup()' )
+    def getLoadGroup(self, groupName):
+        raise NotImplementedError( 'LoadGroupMgr.getLoadGroup()' )
 
 
-  def hasLoadGroup( self, groupName ):
-    raise NotImplementedError( 'LoadGroupMgr.hasLoadGroup()' )
+    def setLoadGroup(self, config):
+        raise NotImplementedError( 'LoadGroupMgr.setLoadGroup()' )
 
 
-  def getLoadGroupFunctionality( self, groupName, functionality ):
-    raise NotImplementedError( 'LoadGroupMgr.getLoadGroupFunctionality()' )
+    def hasLoadGroup(self, groupName):
+        raise NotImplementedError( 'LoadGroupMgr.hasLoadGroup()' )
 
 
-  def setLoadGroupFunctionality( self, groupName, config ):
-    raise NotImplementedError( 'LoadGroupMgr.setLoadGroupFunctionality()' )
+    def getLoadGroupFunctionality(self, groupName, functionality):
+        raise NotImplementedError( 'LoadGroupMgr.getLoadGroupFunctionality()' )
 
 
-  def commit( self ):
-    raise NotImplementedError( 'LoadGroupMgr.commit()' )
+    def setLoadGroupFunctionality(self, groupName, config):
+        raise NotImplementedError( 'LoadGroupMgr.setLoadGroupFunctionality()' )
+
+
+    def getConfig(self):
+        raise NotImplementedError( 'LoadGroupMgr.getConfig()' )
+
+
+    def commit(self):
+        raise NotImplementedError( 'LoadGroupMgr.commit()' )
