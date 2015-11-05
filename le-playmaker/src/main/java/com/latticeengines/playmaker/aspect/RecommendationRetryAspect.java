@@ -1,5 +1,7 @@
 package com.latticeengines.playmaker.aspect;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -7,6 +9,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -44,10 +48,21 @@ public class RecommendationRetryAspect {
 
         } finally {
             long endTime = System.currentTimeMillis();
-            log.info(String.format("Recommendation method=%s tenantName=%s threadName=%s, ElapsedTime=%s", joinPoint
-                    .getSignature().toShortString(), tenantName, Thread.currentThread().getName(), DurationFormatUtils
-                    .formatDuration(endTime - startTime, "HH:mm:ss:SS")));
+            String queryParameters = getQueryParameters();
+            log.info(String.format("Recommendation method=%s tenantName=%s threadName=%s ElapsedTime=%s queryParameters=%s",
+                    joinPoint.getSignature().toShortString(), tenantName, Thread.currentThread().getName(),
+                    DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"), queryParameters));
         }
 
+    }
+
+    private String getQueryParameters() {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder
+                .getRequestAttributes();
+        if (requestAttributes != null) {
+            HttpServletRequest request = requestAttributes.getRequest();
+            return request.getQueryString();
+        }
+        return "";
     }
 }
