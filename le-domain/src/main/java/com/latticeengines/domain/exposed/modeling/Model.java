@@ -48,6 +48,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     private String metadataTable;
     private String provenanceProperties;
     private boolean parallelEnabled;
+    private int featuresThreshold;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -291,6 +292,17 @@ public class Model implements HasName, HasPid, HasId<String> {
         this.parallelEnabled = parallelEnabled;
     }
 
+    @Transient
+    @JsonProperty(value = "features_threshold")
+    public int getFeaturesThreshold() {
+        return featuresThreshold;
+    }
+
+    @JsonProperty(value = "features_threshold")
+    public void setFeaturesThreshold(int featuresThreshold) {
+        this.featuresThreshold = featuresThreshold;
+    }
+    
     @JsonIgnore
     public void setKeyCols(String keyCols) {
         this.keyCols = StringTokenUtils.stringToList(keyCols);

@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -119,9 +121,9 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-        
+
         String targetDir = config.getTargetHdfsDir();
-        
+
         if (targetDir == null) {
             targetDir = model.getDataHdfsPath();
         }
@@ -135,8 +137,8 @@ public class ModelingServiceImpl implements ModelingService {
                     config.getKeyCols(), //
                     null);
         }
-        return sqoopSyncJobService.importData(model.getTable(), targetDir, config.getCreds(),
-                assignedQueue, model.getCustomer(), config.getKeyCols(),
+        return sqoopSyncJobService.importData(model.getTable(), targetDir, config.getCreds(), assignedQueue,
+                model.getCustomer(), config.getKeyCols(),
                 columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()));
     }
 
@@ -147,7 +149,6 @@ public class ModelingServiceImpl implements ModelingService {
         return sqoopSyncJobService.exportData(config.getTable(), config.getHdfsDirPath(), config.getCreds(),
                 assignedQueue, config.getCustomer());
     }
-
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -160,7 +161,7 @@ public class ModelingServiceImpl implements ModelingService {
         model.setTable(config.getTable());
         setupModelProperties(model);
         String inputDir = model.getDataHdfsPath();
-        
+
         if (config.getHdfsDirPath() != null) {
             inputDir = config.getHdfsDirPath();
         }
@@ -528,6 +529,7 @@ public class ModelingServiceImpl implements ModelingService {
         List<GenericRecord> data = new ArrayList<GenericRecord>();
         List<String> features = new ArrayList<String>();
         Set<String> pivotedFeatures = new LinkedHashSet<>();
+        Map<String, Double> featureScoreMap = new HashMap<String, Double>();
 
         try {
             List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, sampleSchemaPath,
@@ -549,6 +551,7 @@ public class ModelingServiceImpl implements ModelingService {
 
             Set<String> columnSet = new HashSet<String>();
             Set<String> featureSet = new HashSet<String>();
+
             for (org.apache.avro.Schema.Field field : dataSchema.getFields()) {
                 columnSet.add(field.getProp("columnName"));
             }
@@ -561,6 +564,9 @@ public class ModelingServiceImpl implements ModelingService {
                 String name = datum.get("barecolumnname").toString();
                 if (!depivoted) {
                     pivotedFeatures.add(name);
+                    if (model.getFeaturesThreshold() > 0) {
+                        populateFeatureScore(featureScoreMap, name, datum.get("uncertaintyCoefficient").toString());
+                    }
                     continue;
                 }
 
@@ -590,7 +596,45 @@ public class ModelingServiceImpl implements ModelingService {
         if (depivoted) {
             return new ArrayList<String>(features);
         } else {
-            return new ArrayList<String>(pivotedFeatures);
+            if (model.getFeaturesThreshold() > 0) {
+                return getSortedFeatureList(featureScoreMap, model.getFeaturesThreshold());
+            } else {
+                return new ArrayList<String>(pivotedFeatures);
+            }
+        }
+    }
+
+    List<String> getSortedFeatureList(Map<String, Double> featureScoreMap, int featuresTreshold) {
+        List<Map.Entry<String, Double>> featureEntries = new ArrayList<>(featureScoreMap.entrySet());
+        Collections.sort(featureEntries, new Comparator<Map.Entry<String, Double>>() {
+            @Override
+            public int compare(Entry<String, Double> e1, Entry<String, Double> e2) {
+                return Double.compare(e2.getValue(), e1.getValue());
+            }
+        });
+
+        List<String> features = new ArrayList<String>();
+        for (Map.Entry<String, Double> featureEntry : featureEntries) {
+            features.add(featureEntry.getKey());
+        }
+        if (features.size() > featuresTreshold) {
+            log.info("The number of skipped features is=" + (features.size() - featuresTreshold));
+            return features.subList(0, featuresTreshold);
+        } else {
+            return features;
+        }
+    }
+
+    void populateFeatureScore(Map<String, Double> featureScoreMap, String columnName, String columnValue) {
+        try {
+            Double uc = featureScoreMap.get(columnName);
+            if (uc == null) {
+                featureScoreMap.put(columnName, Double.parseDouble(columnValue));
+            } else {
+                featureScoreMap.put(columnName, uc + Double.parseDouble(columnValue));
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to pupoluate feature score!", ex);
         }
     }
 
