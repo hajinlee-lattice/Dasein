@@ -16,11 +16,14 @@ public class LoopConditionProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         List<?> list = exchange.getProperty(MarketoImportProperty.ACTIVITYRESULTLIST, List.class);
         Map<String, Object> body = exchange.getIn().getBody(Map.class);
-        list.addAll((List) body.get("result"));
 
+        Boolean hasMoreResults = Boolean.FALSE;
+        if (body.containsKey("result")) {
+            list.addAll((List) body.get("result"));
+            hasMoreResults = (Boolean) body.get("moreResult");
+        }
         String nextPageToken = (String) body.get("nextPageToken");
         log.info("Next page token = " + nextPageToken);
-        Boolean hasMoreResults = (Boolean) body.get("moreResult");
         exchange.setProperty(MarketoImportProperty.NEXTPAGETOKEN, nextPageToken);
 
         if (hasMoreResults) {
