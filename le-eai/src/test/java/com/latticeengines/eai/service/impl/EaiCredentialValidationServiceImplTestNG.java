@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
@@ -55,13 +56,23 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
     }
 
     @Test(groups = "functional")
-    public void testVerifyCrmCredential() {
+    public void testVerifyCrmCredentialInProduction() {
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
-        eaiCredentialValidationService.validateCrmCredential(customerSpace);
+        eaiCredentialValidationService.validateCrmCredential(customerSpace, SourceCredentialType.PRODUCTION);
+    }
+
+    @Test(groups = "functional")
+    public void testVerifyCrmCredentialInSandbox() {
+        crmCredentialZKService.removeCredentials("sfdc", customer, true);
+        CrmCredential crmCredential = new CrmCredential();
+        crmCredential.setUserName(salesforceUserName);
+        crmCredential.setPassword(salesforcePasswd);
+        crmCredentialZKService.writeToZooKeeper("sfdc", customer, false, crmCredential, true);
+        eaiCredentialValidationService.validateCrmCredential(customerSpace, SourceCredentialType.SANDBOX);
     }
 
     @Test(groups = "functional")
@@ -72,7 +83,7 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
         crmCredential.setPassword("some bad password");
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
         try {
-            eaiCredentialValidationService.validateCrmCredential(customerSpace);
+            eaiCredentialValidationService.validateCrmCredential(customerSpace, SourceCredentialType.PRODUCTION);
         } catch (LedpException e) {
             assertEquals(e.getCode(), LedpCode.LEDP_17004);
             assertTrue(e.getMessage().contains("Invalid"));

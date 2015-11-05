@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 @Component("crmCredentialZKService")
@@ -116,8 +117,9 @@ public class CrmCredentialZKServiceImpl implements CrmCredentialZKService {
             Camille camille = CamilleEnvironment.getCamille();
             if (camille.exists(docPath))
                 camille.delete(docPath);
-            log.info(String.format("Removing %s.%s credentials from tenant %s.", crmType, isProduction ? "Production"
-                    : "Sandbox", tenantId));
+            log.info(String.format("Removing %s.%s credentials from tenant %s.", crmType,
+                    isProduction ? SourceCredentialType.PRODUCTION.getName() : SourceCredentialType.SANDBOX.getName(),
+                    tenantId));
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18031, ex);
         }
@@ -126,7 +128,8 @@ public class CrmCredentialZKServiceImpl implements CrmCredentialZKService {
     private Path addExtraPath(String crmType, Path docPath, Boolean isProduction) {
         docPath = docPath.append(crmType);
         if (crmType.equalsIgnoreCase(CrmConstants.CRM_SFDC)) {
-            docPath = docPath.append(isProduction ? "Production" : "Sandbox");
+            docPath = docPath.append(isProduction ? SourceCredentialType.PRODUCTION.getName() : SourceCredentialType.SANDBOX
+                    .getName());
         }
         return docPath;
     }

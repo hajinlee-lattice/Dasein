@@ -2,6 +2,7 @@ package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.appmaster.service.AppMasterServiceResponse;
 import com.latticeengines.eai.appmaster.service.AppmasterServiceRequest;
 import com.latticeengines.eai.exposed.service.EaiService;
@@ -93,6 +95,9 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
+        crmCredential.setPassword(salesforcePasswd);
+        crmCredentialZKService.writeToZooKeeper("sfdc", customer, false, crmCredential, true);
+
         tenant = createTenant(customerSpace);
         try {
             tenantService.discardTenant(tenant);
@@ -133,6 +138,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         checkLastModifiedTimestampChanged(true, tablesBeforeExtract, tablesAfterExtract);
 
         HdfsUtils.rmdir(yarnConfiguration, targetPath);
+        importConfig.getSourceConfigurations().get(0).setSourceCredentialType(SourceCredentialType.SANDBOX);
         appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
         status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);

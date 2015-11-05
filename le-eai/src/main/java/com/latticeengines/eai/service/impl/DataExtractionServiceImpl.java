@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
+import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.EaiMetadataService;
@@ -123,7 +124,8 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @Override
     public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig) {
         String customerSpace = CustomerSpace.parse(importConfig.getCustomer()).toString();
-        eaiCredentialValidationService.validateCredential(customerSpace, CrmConstants.CRM_SFDC);
+        SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0).getSourceCredentialType();
+        eaiCredentialValidationService.validateCredential(customerSpace, CrmConstants.CRM_SFDC, sourceCredentialType);
 
         ApplicationId appId = null;
         boolean hasNonEaiJobSourceType = false;

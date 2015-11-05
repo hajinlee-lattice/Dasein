@@ -6,15 +6,15 @@ public enum SourceType {
     ELOQUA("Eloqua", true), //
     SALESFORCE("Salesforce", true), //
     FILE("File", false);
-    
+
     private String name;
     private boolean willSubmitEaiJob;
-    
+
     SourceType(String name, boolean willSubmitEaiJob) {
         this.name = name;
         this.willSubmitEaiJob = willSubmitEaiJob;
     }
-    
+
     public String getName() {
         return name;
     }

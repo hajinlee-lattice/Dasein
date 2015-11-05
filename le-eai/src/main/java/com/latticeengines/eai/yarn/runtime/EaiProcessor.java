@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.appmaster.service.EaiAppmasterService;
 import com.latticeengines.eai.config.HttpClientConfig;
 import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
@@ -96,7 +97,8 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     private CamelContext constructCamelContext(ImportConfiguration importConfig) throws Exception {
         String customerSpace = importConfig.getCustomer();
-        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace, true);
+        SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0).getSourceCredentialType();
+        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace, sourceCredentialType.isProduction());
 
         SalesforceLoginConfig loginConfig = salesforce.getLoginConfig();
 

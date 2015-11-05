@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
@@ -35,15 +36,15 @@ public class EaiCredentialValidationServiceImpl implements EaiCredentialValidati
     private String clientSecret;
 
     @Override
-    public void validateCredential(String customerSpace, String crmType) {
+    public void validateCredential(String customerSpace, String crmType, SourceCredentialType sourceCredentialType) {
         if (crmType.equals(CrmConstants.CRM_SFDC)) {
-            validateCrmCredential(customerSpace);
+            validateCrmCredential(customerSpace, sourceCredentialType);
         }
     }
 
     @Override
-    public void validateCrmCredential(String customerSpace) {
-        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace, true);
+    public void validateCrmCredential(String customerSpace, SourceCredentialType sourceCredentialType) {
+        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace, sourceCredentialType.isProduction());
         validateCrmCredential(customerSpace, crmCredential.getUserName(), crmCredential.getPassword());
     }
 

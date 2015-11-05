@@ -7,6 +7,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.source.SourceCredentialType;
 
 public class SourceImportConfiguration {
 
@@ -14,7 +15,8 @@ public class SourceImportConfiguration {
     private List<Table> tables;
     private Map<String, String> filters = new HashMap<>();
     private Map<String, String> properties = new HashMap<>();
-    
+    private SourceCredentialType sourceCredentialType = SourceCredentialType.PRODUCTION;
+
     @JsonProperty("source_type")
     public SourceType getSourceType() {
         return sourceType;
@@ -34,16 +36,16 @@ public class SourceImportConfiguration {
     public void setTables(List<Table> tables) {
         this.tables = tables;
     }
-    
+
     public void setFilter(String tableName, String expression) {
         filters.put(tableName, expression);
     }
-    
+
     @JsonProperty("filters")
     public Map<String, String> getFilters() {
         return filters;
     }
-    
+
     public String getFilter(String tableName) {
         return filters.get(tableName);
     }
@@ -66,6 +68,14 @@ public class SourceImportConfiguration {
     public void setProperty(String propertyName, String propertyValue) {
         filters.put(propertyName, propertyValue);
     }
-    
-    
+
+    @JsonProperty("source_cred_type")
+    public SourceCredentialType getSourceCredentialType() {
+        return sourceCredentialType;
+    }
+
+    @JsonProperty("source_cred_type")
+    public void setSourceCredentialType(SourceCredentialType sourceCredentialType) {
+        this.sourceCredentialType = sourceCredentialType;
+    }
 }
