@@ -10,7 +10,7 @@
     <properties>
         <component-name>serviceflows</component-name>
         <le.dataflow.version>2.0.16-SNAPSHOT</le.dataflow.version>
-        <le.workflow.version>2.0.16-SNAPSHOT</le.workflow.version>
+<!--        <le.workflow.version>2.0.16-SNAPSHOT</le.workflow.version> -->
         <le.domain.version>2.0.16-SNAPSHOT</le.domain.version>
         <le.serviceflows.core.version>2.0.16-SNAPSHOT</le.serviceflows.core.version>
         <le.swlib.version>2.0.16-SNAPSHOT</le.swlib.version>
@@ -84,7 +84,7 @@
         </profile>
     </profiles>
 
-    
+
 </project>
 
 
