@@ -3,10 +3,22 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ProspectDiscoveryConfiguration extends ConfigurationBag<ProspectDiscoveryOption> {
     @SuppressWarnings("unchecked")
     public ProspectDiscoveryConfiguration(List<ProspectDiscoveryOption> bag) {
         super(List.class.cast(bag));
+    }
+
+    @JsonProperty 
+    public List<ProspectDiscoveryOption> getBag() {
+        return this.bag;
+    }
+    
+    @JsonProperty 
+    public void setBag(List<ProspectDiscoveryOption> bag) {
+        this.bag = bag;
     }
 
     @SuppressWarnings("unchecked")
@@ -37,4 +49,5 @@ public class ProspectDiscoveryConfiguration extends ConfigurationBag<ProspectDis
     public void setDouble(ProspectDiscoveryOptionName option, double value) {
         super.setDouble(option.toString(), value);
     }
+
 }

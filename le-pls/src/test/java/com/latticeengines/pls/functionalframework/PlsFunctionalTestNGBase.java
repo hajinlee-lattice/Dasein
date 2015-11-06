@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
@@ -71,6 +73,9 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     
     @Autowired
     private TargetMarketEntityMgr targetMarketEntityMgr;
+    
+    @Autowired
+    private ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
     
     @Autowired
     private UserService userService;
@@ -348,21 +353,30 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     }
 
     protected void cleanupTargetMarketDB() {
+        setupSecurityContext(mainTestingTenant);
         List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.getAllTargetMarkets();
         for (TargetMarket targetMarket : targetMarkets) {
             if (targetMarket.getName().startsWith("TEST")) {
                 this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
             }
-            this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
         }
     }
         
     protected void cleanupQuotaDB() {
+        setupSecurityContext(mainTestingTenant);
         List<Quota> quotas = this.quotaEntityMgr.getAllQuotas();
         for (Quota quota : quotas) {
             if (quota.getId().startsWith("TEST")) {
                 this.quotaEntityMgr.deleteQuotaByQuotaId(quota.getId());
             }
+        }
+    }
+    
+    protected void cleanupProspectDiscoveryOptionDB() {
+        setupSecurityContext(mainTestingTenant);
+        List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryOptionEntityMgr.findAllProspectDiscoveryOptions();
+        for (ProspectDiscoveryOption option : prospectDiscoveryOptions) {
+            this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(option.getOption());
         }
     }
 

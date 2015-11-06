@@ -33,6 +33,9 @@ import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -78,9 +81,20 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String MODEL_ID = "MODEL_ID";
     protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
     protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
+    protected static final Boolean IS_DEFAULT = true;
     protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account", new ArrayList<Restriction>());
     protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact", new ArrayList<Restriction>());
 
+    protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_1 = new ProspectDiscoveryOption();
+    protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_2 = new ProspectDiscoveryOption();
+    protected static final ProspectDiscoveryOptionName OPTION_1 = ProspectDiscoveryOptionName.ProspectDeliveryObject;
+    protected static final ProspectDiscoveryOptionName OPTION_2 = ProspectDiscoveryOptionName.IntentPercentage;
+    protected static final String STRING_VALUE = "VALUE";
+    protected static final String STRING_VALUE_1 = "VALUE_1";
+    protected static final String DOUBLE_VALUE = "2.5";
+    protected static final ProspectDiscoveryConfiguration PROSPECT_DISCOVERY_CONFIGURATION =
+            new ProspectDiscoveryConfiguration(Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
+    
     protected static HashMap<AccessLevel, UserDocument> testingUserSessions;
     protected static List<Tenant> testingTenants;
     protected static Tenant mainTestingTenant;

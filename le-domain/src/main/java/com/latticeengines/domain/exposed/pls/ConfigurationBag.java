@@ -5,14 +5,10 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class ConfigurationBag<T extends HasOptionAndValue> {
-    private List<T> bag;
+    protected List<T> bag;
 
     public ConfigurationBag(List<T> bag) {
         this.bag = bag;
-    }
-
-    public List<T> getBag() {
-        return bag;
     }
 
     public String getString(String optionName, String dflt) {

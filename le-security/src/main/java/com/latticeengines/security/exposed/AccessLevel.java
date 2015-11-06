@@ -33,8 +33,8 @@ public enum AccessLevel {
         Arrays .asList(
             GrantedRight.VIEW_PLS_USERS,
             GrantedRight.EDIT_PLS_USERS,
-            GrantedRight.VIEW_PLS_CONFIGURATION,
-            GrantedRight.EDIT_PLS_CONFIGURATION,
+            GrantedRight.VIEW_PLS_CONFIGURATIONS,
+            GrantedRight.EDIT_PLS_CONFIGURATIONS,
             GrantedRight.VIEW_PLS_REPORTING,
             GrantedRight.VIEW_PLS_MODELS,
             GrantedRight.EDIT_PLS_MODELS,
@@ -48,8 +48,8 @@ public enum AccessLevel {
         Arrays.asList(
             GrantedRight.VIEW_PLS_USERS,
             GrantedRight.EDIT_PLS_USERS,
-            GrantedRight.VIEW_PLS_CONFIGURATION,
-            GrantedRight.EDIT_PLS_CONFIGURATION,
+            GrantedRight.VIEW_PLS_CONFIGURATIONS,
+            GrantedRight.EDIT_PLS_CONFIGURATIONS,
             GrantedRight.VIEW_PLS_REPORTING,
             GrantedRight.VIEW_PLS_MODELS,
             GrantedRight.EDIT_PLS_MODELS,

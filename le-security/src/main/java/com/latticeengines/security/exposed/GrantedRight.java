@@ -9,16 +9,16 @@ import org.springframework.security.core.GrantedAuthority;
 
 public enum GrantedRight implements GrantedAuthority {
 
-    VIEW_PLS_CONFIGURATION {
+    VIEW_PLS_CONFIGURATIONS {
         @Override
         public String getAuthority() {
-            return "View_PLS_Configuration";
+            return "View_PLS_Configurations";
         }
     }, //
-    EDIT_PLS_CONFIGURATION {
+    EDIT_PLS_CONFIGURATIONS {
         @Override
         public String getAuthority() {
-            return "Edit_PLS_Configuration";
+            return "Edit_PLS_Configurations";
         }
     }, //
     VIEW_PLS_REPORTING {

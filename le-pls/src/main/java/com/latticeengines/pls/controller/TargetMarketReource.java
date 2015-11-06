@@ -61,8 +61,7 @@ public class TargetMarketReource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get list of all target markets")
-    public List<TargetMarket> getAll() {
+    public List<TargetMarket> findAll() {
         return this.targetMarketService.getAllTargetMarkets();
     }
 }
