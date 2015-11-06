@@ -1,0 +1,223 @@
+package com.latticeengines.scoring.service.impl;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.net.URL;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.CollectionUtils;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.scoring.ScoringCommand;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
+import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
+import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
+import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
+import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
+import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
+
+public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGBase {
+
+    private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImplTestNG.class);
+
+    @Autowired
+    private ScoringCommandEntityMgr scoringCommandEntityMgr;
+
+    @Autowired
+    private ScoringStepYarnProcessor scoringStepYarnProcessor;
+
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    private static final String customer = "Nutanix";
+
+    @Value("${scoring.test.table}")
+    private String testInputTable;
+
+    @Autowired
+    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
+
+    @Autowired
+    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
+
+    @Autowired
+    private MetadataService metadataService;
+
+    @Autowired
+    private SqoopSyncJobService sqoopSyncJobService;
+
+    @Autowired
+    private DbCreds scoringCreds;
+
+    @Autowired
+    private JdbcTemplate scoringJdbcTemplate;
+
+    private String outputTable;
+
+    private String inputLeadsTable;
+
+    private String modelPath;
+
+    private String path;
+
+    private static String tenant;
+
+    @BeforeMethod(groups = "functional")
+    public void beforeMethod() throws Exception {
+    }
+
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
+        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        }
+
+        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
+        tenant = CustomerSpace.parse(customer).toString();
+        path = customerBaseDir + "/" + tenant + "/scoring";
+        HdfsUtils.rmdir(yarnConfiguration, path);
+
+        URL modelSummaryUrl = ClassLoader
+                .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json"); //
+        modelPath = customerBaseDir + "/" + tenant + "/models/" + inputLeadsTable
+                + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1429553747321_0004";
+        HdfsUtils.mkdir(yarnConfiguration, modelPath);
+        String filePath = modelPath + "/model.json";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
+    }
+
+    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    public void afterEachTest() {
+        if (outputTable != null) {
+            metadataService.dropTable(scoringJdbcTemplate, outputTable);
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+            clearTables();
+        }
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, path);
+            HdfsUtils.rmdir(yarnConfiguration, modelPath);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    @Test(groups = "functional")
+    public void executeYarnSteps() throws Exception {
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
+                0, 4352, new Timestamp(System.currentTimeMillis()));
+        scoringCommandEntityMgr.create(scoringCommand);
+
+        ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.LOAD_DATA);
+        waitForSuccess(appId, ScoringCommandStep.LOAD_DATA);
+
+        appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
+        waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
+
+        HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable
+                + "/data/datatype.avsc");
+        ScoringCommandState state = new ScoringCommandState(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        scoringCommandStateEntityMgr.create(state);
+        appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        waitForSuccess(appId, ScoringCommandStep.EXPORT_DATA);
+
+        state = scoringCommandStateEntityMgr
+                .findByScoringCommandAndStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr.findByKey(state
+                .getLeadOutputQueuePid());
+        outputTable = scoringCommandResult.getTableName();
+        assertEquals(metadataService.getRowCount(scoringJdbcTemplate, testInputTable),
+                metadataService.getRowCount(scoringJdbcTemplate, outputTable));
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void findModelUrlsToLocalize() throws Exception {
+        ScoringStepYarnProcessorImpl processor = (ScoringStepYarnProcessorImpl) scoringStepYarnProcessor;
+        processor.setYarnConfiguration(yarnConfiguration);
+
+        List<String> modelGuidsInHdfs = Arrays.<String> asList(new String[] { "c412ea67-6c5b-472e-91ef-d7cfd375c24d",
+                "02ed95bf-4bad-44da-9274-7de877d5612b", "0fc8614c-85ad-405c-8b1d-ff38f94ec741",
+                "231c3244-4770-424d-aa12-f9d701623876" });
+        List<String> modelFilePaths = new ArrayList<String>();
+        int numModelsInHdfs = 4;
+        for (int i = 0; i < numModelsInHdfs; i++) {
+            String modelDir = createModelDirPath(tenant, modelGuidsInHdfs.get(i), i);
+            HdfsUtils.mkdir(yarnConfiguration, modelDir);
+            String modelFilePath = modelDir + "/model" + i + ".json";
+            HdfsUtils.writeToFile(yarnConfiguration, modelFilePath, String.valueOf(i));
+            modelFilePaths.add(modelFilePath);
+        }
+        List<String> modelGuidsFromTable = Arrays.<String> asList(new String[] {
+                constructModelGuid("c412ea67-6c5b-472e-91ef-d7cfd375c24d"),
+                constructModelGuid("0fc8614c-85ad-405c-8b1d-ff38f94ec741") });
+
+        assertEquals(modelFilePaths.size(), 4);
+        assertEquals(modelGuidsFromTable.size(), 2);
+        List<String> modelUrls = processor.findModelUrlsToLocalize(tenant, modelGuidsFromTable, modelFilePaths);
+
+        assertEquals(modelUrls.size(), modelGuidsFromTable.size());
+        List<String> retrievedUuids = new ArrayList<>();
+        for (String url : modelUrls) {
+            String[] tokens = url.split("#");
+            assertEquals(tokens[1], UuidUtils.parseUuid(tokens[0]));
+            retrievedUuids.add(tokens[1]);
+        }
+
+        for (String modelGuid : modelGuidsFromTable) {
+            String uuid = UuidUtils.extractUuid(modelGuid);
+            assertTrue(retrievedUuids.contains(uuid));
+        }
+        System.out.println(modelUrls);
+
+        String nonExistUuid = "bddc1633-2305-4824-9a15-9efb2e430279";
+        modelGuidsFromTable = Arrays.<String> asList(new String[] {
+                constructModelGuid("c412ea67-6c5b-472e-91ef-d7cfd375c24d"),
+                constructModelGuid("0fc8614c-85ad-405c-8b1d-ff38f94ec741"), constructModelGuid(nonExistUuid) });
+        try {
+            modelUrls = processor.findModelUrlsToLocalize(tenant, modelGuidsFromTable, modelFilePaths);
+        } catch (LedpException e) {
+            assertEquals(e.getCode(), LedpCode.LEDP_18007);
+            assertTrue(e.getMessage().contains(nonExistUuid));
+        }
+        for (int i = 0; i < numModelsInHdfs; i++) {
+            HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + tenant + "/models/some_event_table" + i);
+        }
+    }
+
+    private String createModelDirPath(String tenant, String uuid, int modelNum) {
+        return customerBaseDir + "/" + tenant + "/models/some_event_table" + modelNum + "/" + uuid
+                + "/1445290697489_009" + modelNum;
+    }
+
+    private String constructModelGuid(String uuid) {
+        return "ms__" + uuid + "-PLSModel";
+    }
+}
