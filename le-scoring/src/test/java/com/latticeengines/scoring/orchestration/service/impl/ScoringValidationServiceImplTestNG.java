@@ -1,4 +1,4 @@
-package com.latticeengines.scoring.service.impl;
+package com.latticeengines.scoring.orchestration.service.impl;
 
 import static org.testng.Assert.assertTrue;
 
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoring.service.ScoringValidationService;
+import com.latticeengines.scoring.orchestration.service.ScoringValidationService;
 
 public class ScoringValidationServiceImplTestNG extends ScoringFunctionalTestNGBase {
 

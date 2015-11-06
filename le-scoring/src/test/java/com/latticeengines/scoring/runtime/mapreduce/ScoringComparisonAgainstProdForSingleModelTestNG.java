@@ -43,8 +43,8 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
-import com.latticeengines.scoring.service.impl.ScoringStepYarnProcessorImplTestNG;
+import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
+import com.latticeengines.scoring.orchestration.service.impl.ScoringStepYarnProcessorImplTestNG;
 
 public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFunctionalTestNGBase {
 

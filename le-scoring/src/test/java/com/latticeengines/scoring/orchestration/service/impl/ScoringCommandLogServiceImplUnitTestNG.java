@@ -1,4 +1,4 @@
-package com.latticeengines.scoring.service.impl;
+package com.latticeengines.scoring.orchestration.service.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandLogEntityMgr;
 import com.latticeengines.scoring.entitymanager.impl.ScoringCommandLogEntityMgrImpl;
+import com.latticeengines.scoring.orchestration.service.impl.ScoringCommandLogServiceImpl;
 
 public class ScoringCommandLogServiceImplUnitTestNG {
 

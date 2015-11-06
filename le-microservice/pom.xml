@@ -197,10 +197,8 @@
         <module>modeling</module>
         <module>dataflowapi</module>
         <module>propdata</module>
-    <!--
         <module>scoring</module>
         <module>workflowapi</module>
-    -->
     </modules>
 
 </project>

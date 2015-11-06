@@ -13,8 +13,8 @@ import org.json.simple.JSONObject;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
-import com.latticeengines.scoring.service.ScoringDaemonService;
 import com.latticeengines.scoring.util.ModelAndLeadInfo.ModelInfo;
 
 public class ScoringMapperValidateUtil {

@@ -5,7 +5,7 @@
     <artifactId>le-${component-name}</artifactId>
     <packaging>war</packaging>
     <name>le-${component-name}</name>
-    <description>LE MODELING</description>
+    <description>LE PROPDATA</description>
 
     <properties>
         <component-name>propdata-microservice</component-name>

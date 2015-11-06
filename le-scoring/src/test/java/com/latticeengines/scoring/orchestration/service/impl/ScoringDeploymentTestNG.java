@@ -1,4 +1,4 @@
-package com.latticeengines.scoring.service.impl;
+package com.latticeengines.scoring.orchestration.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

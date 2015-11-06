@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.scoring.service.ScoringDaemonService;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
 public class ScoringMapperTransformUtilUnitTestNG {
 

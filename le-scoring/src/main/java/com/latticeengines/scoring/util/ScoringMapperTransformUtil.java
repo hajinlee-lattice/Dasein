@@ -30,8 +30,8 @@ import org.json.simple.parser.ParseException;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
-import com.latticeengines.scoring.service.ScoringDaemonService;
 
 public class ScoringMapperTransformUtil {
 

@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
+import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
 
 public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctionalTestNGBase {
 

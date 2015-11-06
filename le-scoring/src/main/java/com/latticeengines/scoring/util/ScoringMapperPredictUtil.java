@@ -34,8 +34,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
-import com.latticeengines.scoring.service.ScoringDaemonService;
 
 public class ScoringMapperPredictUtil {
 

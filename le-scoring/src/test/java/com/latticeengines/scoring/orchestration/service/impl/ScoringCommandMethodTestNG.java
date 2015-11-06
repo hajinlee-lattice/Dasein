@@ -1,4 +1,4 @@
-package com.latticeengines.scoring.service.impl;
+package com.latticeengines.scoring.orchestration.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -28,8 +28,10 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoring.service.ScoringCommandLogService;
-import com.latticeengines.scoring.service.ScoringDaemonService;
+import com.latticeengines.scoring.orchestration.service.ScoringCommandLogService;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.scoring.orchestration.service.impl.ScoringManagerServiceImpl;
+import com.latticeengines.scoring.orchestration.service.impl.ScoringProcessorCallable;
 
 public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 

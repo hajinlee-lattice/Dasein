@@ -10,7 +10,7 @@
     <aop:config>
       <aop:aspect id="scoringValidation" ref="scoringServiceValidationAspect">
          <aop:pointcut id="beforeFinish" 
-         expression="execution(* com.latticeengines.scoring.service.impl.ScoringStepFinishProcessorImpl.executeStep(..)) and args(scoringCommand)"/>
+         expression="execution(* com.latticeengines.scoring.orchestration.service.impl.ScoringStepFinishProcessorImpl.executeStep(..)) and args(scoringCommand)"/>
          <aop:before pointcut-ref="beforeFinish" method="validateScoreResult" />
       </aop:aspect>
    </aop:config>

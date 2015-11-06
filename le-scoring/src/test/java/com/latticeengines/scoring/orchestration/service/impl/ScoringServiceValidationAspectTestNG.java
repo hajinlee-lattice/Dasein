@@ -1,4 +1,4 @@
-package com.latticeengines.scoring.service.impl;
+package com.latticeengines.scoring.orchestration.service.impl;
 
 import java.sql.Timestamp;
 
@@ -17,7 +17,8 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoring.service.ScoringStepProcessor;
+import com.latticeengines.scoring.orchestration.service.ScoringStepProcessor;
+import com.latticeengines.scoring.orchestration.service.impl.ScoringServiceValidationAspect;
 
 public class ScoringServiceValidationAspectTestNG extends ScoringFunctionalTestNGBase {
 

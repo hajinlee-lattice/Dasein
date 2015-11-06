@@ -2,16 +2,12 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -23,9 +19,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-import org.json.simple.JSONObject;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
@@ -33,24 +27,20 @@ import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomi
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.scoring.util.ScoringJobUtil;
 
 public class EventDataScoringJob extends Configured implements Tool, MRJobCustomization {
 
-    private static final String SCORING_JOB_TYPE = "scoringJob";
-
     private static final String dataTypeFile = "datatype.avsc";
-
-    private static String comma = ",";
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     private static final String dependencyPath = "/app/scoring";
 
     private static final String jarDependencyPath = dependencyPath + "/lib";
-    
-    private static final String scoringPythonPath = dependencyPath + "/scripts/scoring.py";
 
-    private static final Log log = LogFactory.getLog(EventDataScoringJob.class);
+    private static final String scoringPythonPath = dependencyPath + "/scripts/scoring.py";
 
     public EventDataScoringJob(Configuration config) {
         setConf(config);
@@ -64,15 +54,16 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     @Override
     public String getJobType() {
-        return SCORING_JOB_TYPE;
+        return ScoringDaemonService.SCORING_JOB_TYPE;
     }
 
     @Override
     public void customize(Job mrJob, Properties properties) {
         try {
             Configuration config = mrJob.getConfiguration();
-            config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(),
-                    properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
+            if (properties.containsKey(ScoringProperty.LEAD_INPUT_QUEUE_ID.name())) {
+                config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
+            }
             config.set(ScoringProperty.TENANT_ID.name(), properties.getProperty(ScoringProperty.TENANT_ID.name()));
             config.set(ScoringProperty.LOG_DIR.name(), properties.getProperty(ScoringProperty.LOG_DIR.name()));
 
@@ -96,12 +87,11 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             AvroJob.setInputKeySchema(mrJob, schema);
 
             String dataTypeFilePath = inputDir + "/" + dataTypeFile;
-            generateDataTypeSchema(schema, dataTypeFilePath, config);
+            ScoringJobUtil.generateDataTypeSchema(schema, dataTypeFilePath, config);
 
             String leadInputFileThreshold = properties.getProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name());
             config.setLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(), Long.parseLong(leadInputFileThreshold));
-            String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
-            config.set(MapReduceProperty.OUTPUT.name(), outputDir);
+            config.set(MapReduceProperty.OUTPUT.name(), properties.getProperty(MapReduceProperty.OUTPUT.name()));
             mrJob.setInputFormatClass(AvroKeyInputFormat.class);
             mrJob.setOutputFormatClass(NullOutputFormat.class);
             mrJob.setMapperClass(EventDataScoringMapper.class);
@@ -109,50 +99,23 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
             if (properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()) != null) {
                 String cacheFilePath = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name());
-                mrJob.setCacheFiles(getURIs(cacheFilePath));
+                mrJob.setCacheFiles(ScoringJobUtil.getURIs(cacheFilePath));
             }
             mrJob.addCacheFile(new URI(scoringPythonPath));
             mrJob.addCacheFile(new URI(dataTypeFilePath));
-            List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), jarDependencyPath, ".*.jar$");
+            List<String> jarFilePaths = HdfsUtils
+                    .getFilesForDir(mrJob.getConfiguration(), jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {
                 mrJob.addFileToClassPath(new Path(jarFilePath));
             }
 
             if (properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()) != null) {
                 String cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name());
-                mrJob.setCacheArchives(getURIs(cacheArchivePaths));
+                mrJob.setCacheArchives(ScoringJobUtil.getURIs(cacheArchivePaths));
             }
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
-        }
-    }
-
-    private URI[] getURIs(String hdfsPaths) throws URISyntaxException {
-        String[] paths = hdfsPaths.split(comma);
-        URI[] files = new URI[paths.length];
-        for (int i = 0; i < files.length; i++) {
-            files[i] = new URI(paths[i].trim());
-        }
-        return files;
-    }
-
-    @SuppressWarnings("unchecked")
-    @VisibleForTesting
-    void generateDataTypeSchema(Schema schema, String dataTypeFilePath, Configuration config) {
-        List<Field> fields = schema.getFields();
-        JSONObject jsonObj = new JSONObject();
-        for (Field field : fields) {
-            String type = field.schema().getTypes().get(0).getName();
-            if (type.equals("string") || type.equals("bytes"))
-                jsonObj.put(field.name(), 1);
-            else
-                jsonObj.put(field.name(), 0);
-        }
-        try {
-            HdfsUtils.writeToFile(config, dataTypeFilePath, jsonObj.toJSONString());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
         }
     }
 
