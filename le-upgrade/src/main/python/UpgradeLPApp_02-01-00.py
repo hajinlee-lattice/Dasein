@@ -16,6 +16,7 @@ sequence = []
 sequence.append(appsequence.LPCheckVersion('2.0.1'))
 sequence.append(lp020002.LP_020002_ImportCfgTables())
 sequence.append(lp020100.LP_020100_DL_LoadCRMData())
+sequence.append(lp020100.LP_020100_AddDataProvider())
 sequence.append(lp020100.LP_020100_DL_InsightsAllSteps())
 sequence.append(lp020100.LP_020100_DL_PushToLeadDestination())
 sequence.append(lp020100.LP_020100_DL_BulkScoring_Dante())
