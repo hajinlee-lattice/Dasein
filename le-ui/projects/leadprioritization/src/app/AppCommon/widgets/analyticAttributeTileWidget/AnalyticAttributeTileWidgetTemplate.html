@@ -1,0 +1,25 @@
+<div class="analytic-attribute-tile border-top" data-ng-controller="AnalyticAttributeTileWidgetController">
+    <div class="float-right" data-ng-show="data.Lift">
+        <div class="lift-container"  data-ng-show="showLift">
+            <div class="lift {{aboveAverageLift ? 'pos': 'neg'}}">{{data.Lift}}</div>
+            <div class="lift-sub-label">{{ResourceUtility.getString('LIFT_SUB_LABEL')}}</div>
+        </div>
+        <div data-ng-show="!showLift">
+            <div data-ng-show="aboveAverageLift">
+                <img class="lift-image" src="assets/images/lift-up-arrow.png"/>
+                <div class="lift-image-description">{{ResourceUtility.getString('LIFT_ABOVE_AVERAGE')}}</div>
+            </div>
+            <div data-ng-show="!aboveAverageLift">
+                <img class="lift-image" src="assets/images/lift-down-arrow.png"/>
+                <div class="lift-image-description">{{ResourceUtility.getString('LIFT_BELOW_AVERAGE')}}</div>
+            </div>
+        </div>
+    </div>
+  
+    <div class="analytic-attribute-heading">{{data.DisplayName}}</div>
+    <div class="analytic-attribute-title">{{data.BucketName}}</div>
+    
+    <div class="analytic-attribute-description" data-ng-show="data.Description">
+        {{data.Description}}
+    </div>
+</div>

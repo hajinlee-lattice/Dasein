@@ -1,0 +1,13 @@
+<div class="inner-header-style border action-footer footer row">
+    <div class="float-right action-footer-button">
+        <button type="button" id="<%=options.nextButtonId%>" class="btn btn-primary <%= options.nextButtonHidden === true ? 'is-hidden' : ''%>" <%= options.nextButtonEnabled === false ? 'disabled' : ''%>>
+            <%=options.nextButtonLabel%>
+        </button>
+    </div>
+  
+    <div class="float-left action-footer-button <%= options.backButtonHidden === true ? 'is-hidden' : '' %>">
+        <button type="button" id="<%=options.backButtonId%>" class="btn">
+            <%=options.backButtonLabel%>
+        </button>
+    </div>
+</div>

@@ -1,0 +1,71 @@
+<%== $.View('assets/CommonAssets/views/renderers/BaseRenderer.ejs',{itemValue: portfolioPlay.DisplayName, renderType: RenderWorker.PLAY_NAME_TEMPLATE_IMAGE_RENDERER}) %>
+
+<%
+    var elementName = StringUtil.GenerateUniqueExternalID("string");
+%>
+
+<!-- Settings Menu -->
+<input type="hidden" name="InternalID" value="<%= portfolioPlay.InternalID %>"/>
+<button type="button" class="mini-settings-button dropdown-input-control-dataTable" <%= portfolioPlay.Status.IsUnavailable === true ? 'disabled' : ''%>>
+    <span class="mini-icon mini-icon-arrow-down"></span>
+</button>
+<div class="launch-settings-dropdown <%= portfolioPlay.SettingsPopUpVisible !== true ? 'is-hidden' : ''%> dropdown-input-control-window" name="portfolioManagerSettingsDetails">
+    <div class="portfolio-manager-settings-likelihood-none tipped
+            <%= portfolioPlay.IsApproved ? 'is-hidden' : ''%>" 
+         title="<%=ResourceUtil.getString('PLAYMAKER_LAUNCH_GRID_SELECT_DISABLE')%>"i>
+         <%= ResourceUtil.getString('PLAYMAKER_LAUNCH_GRID_SELECT_LIKELIHOOD') %>
+    </div>
+    <a href="#" class="js-portfolio-manager-settings-likelihood portfolio-manager-settings-likelihood
+            <%= portfolioPlay.IsApproved ? '' : 'is-hidden'%>">
+        <%= ResourceUtil.getString('PLAYMAKER_LAUNCH_GRID_SELECT_LIKELIHOOD') %>
+    </a>
+	<div class='exempt-from-filter-container'>
+		<span ><%= ResourceUtil.getString('PLAYMAKER_LAUNCH_GRID_CUSTOMIZE_FILTER') %></span>
+		<input type="hidden" name="SwitchSelect"/>
+		<div class="exclude-from-filter-toggle toggle-container-small">
+				<%== $.View('//../assets/views/common/ToggleSwitchSlider.ejs',{rightValue: ResourceUtil.getString('BOOL_False'), leftValue: ResourceUtil.getString('BOOL_True'), startChecked: portfolioPlay.ExcludeFromFilters}) %>
+		</div>
+	</div>
+	<div class='exclude-from-holdouts-container toggle-container-small'>
+		<span><%= ResourceUtil.getString('PLAYMAKER_LAUNCH_GRID_CUSTOMIZE_HOLDOUTS') %></span>
+		<div class="exclude-from-holdouts-toggle">
+			<%== $.View('//../assets/views/common/ToggleSwitchSlider.ejs',{rightValue: ResourceUtil.getString('BOOL_False'), leftValue: ResourceUtil.getString('BOOL_True'), startChecked: portfolioPlay.ExcludeFromHoldouts}) %>
+		</div>
+	</div>
+    <% var showExportDiv = AuthenticationUtil.MayView(AuthenticationUtil.PLAY_ACCOUNT_EXPORT) === true ||  AuthenticationUtil.MayView(AuthenticationUtil.PLAY_CONTACT_EXPORT) === true || AuthenticationUtil.MayView(AuthenticationUtil.PLAY_ACCOUNT_CONTACT_EXPORT)%>
+	<div class="portfolio-manager-settings-export-holder <%= showExportDiv ? '' : 'is-hidden'%>">
+        <ul class="portfolio-manager-settings-export-menu settings-export-menu">
+            <li name="<%=ConfigConstantUtil.ExportPlayCustomerList%>" class="<%= AuthenticationUtil.MayView(AuthenticationUtil.PLAY_ACCOUNT_EXPORT) !== true ? 'is-hidden' : ''%>">
+                <a class='js-settings-menu-link' href="#">
+                    <%= ResourceUtil.getString('EXPORT_ACCOUNT_LIST') %>
+                </a>
+            </li>
+            <li name="<%=ConfigConstantUtil.ExportPlayCustomerListContacts%>" class="<%= AuthenticationUtil.MayView(AuthenticationUtil.PLAY_CONTACT_EXPORT) !== true ? 'is-hidden' : ''%>">
+                <a class='js-settings-menu-link' href="#">
+                    <%= ResourceUtil.getString('EXPORT_ACCOUNT_LIST_CONTACTS') %>
+                </a>
+            </li>
+            <li name="<%=ConfigConstantUtil.ExportPlayCustomerListWithContacts%>" class="<%= AuthenticationUtil.MayView(AuthenticationUtil.PLAY_ACCOUNT_CONTACT_EXPORT) !== true ? 'is-hidden' : ''%>">
+                <a class='js-settings-menu-link' href="#">
+                    <%= ResourceUtil.getString('EXPORT_ACCOUNT_LIST_PLUS_CONTACTS') %>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Settings Menu -->
+
+<% if (portfolioPlay.Status.LaunchErrorMessage == null ) { %>
+    <div class="play-template-image-thumbnail play-template-<%= portfolioPlay.ImageKey %>-thumbnail play-name-template-icon tipped" title="<%= portfolioPlay.TemplateDisplayName %>" alt="<%= portfolioPlay.TemplateDisplayName %>"> </div>
+<% } else { %>
+    <div class="play-error-image-thumbnail tipped" title="<%= portfolioPlay.Status.LaunchErrorMessage %>"><img src="assets/images/launchError.png" /></div>
+<% } %>
+
+<div class='fixed-width-string single-line-ellipsis' name="<%= elementName %>">
+    <% if (PortfolioManagerGridControl.canViewPlay) { %>
+	    <a href="#"><%= portfolioPlay.DisplayName %></a>
+    <% } else { %>
+        <%= portfolioPlay.DisplayName %>
+    <% } %>
+</div>

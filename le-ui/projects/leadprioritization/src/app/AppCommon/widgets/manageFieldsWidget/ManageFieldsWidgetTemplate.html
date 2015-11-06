@@ -1,0 +1,81 @@
+<div data-ng-controller="ManageFieldsWidgetController" id="manageFieldsWidget" class="manage-fields">
+    <div data-ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div class="global-error local-error" data-ng-show="showLoadingError">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{loadingError}}</span>
+    </div>
+    <div data-ng-show="saveInProgress">
+        <div class="loader"></div>
+        <h2 class="text-center">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_EDIT_FIELDS_WAIT')}}</h2>
+    </div>
+    <div class="global-error local-error" data-ng-show="showEditFieldsError">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{editFieldsErrorMessage}}</span>
+        <button class="close btn btn-link" data-ng-click="showEditFieldsError = false;"><i class="fa fa-times fa-inverse"></i></button>
+    </div>
+    <div data-ng-hide="loading || showFieldDetails || saveInProgress || showLoadingError">
+        <div class="title">
+            <h2>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</h2>
+            <button id="manage-fields-edit" data-ng-click="editClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">Edit</button>
+            <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">Save</button>
+            <button id="manage-fields-cancel" data-ng-click="cancelClicked($event)" data-ng-show="batchEdit" class="btn btn-secondary">Cancel</button>
+        </div>
+        <div data-ng-hide="batchEdit">
+            <div class="form-group">
+                <input data-ng-model="field" data-ng-keypress="keyEnterFilter($event)" class="form-control" placeholder="{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SEARCH_FEILD_PLACEHOLDER')}}"/>
+                <button id="manage-fields-search" data-ng-click="filterFields($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SEARCH_LABEL')}}</button>
+            </div>
+            <div class="form-group">
+                <select data-ng-options="s as s for s in sourcesToSelect" data-ng-model="source" data-ng-change="selectChanged($event, 'source')" class="form-control">
+                    <option value="">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SELECT_ALL_SOURCES')}}</option>
+                </select>
+                <select data-ng-options="c for c in categoriesToSelect" data-ng-model="category" data-ng-change="selectChanged($event, 'category')" class="form-control">
+                    <option value="">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SELECT_ALL_CATEGORIES')}}</option>
+                </select>
+                <label class="checkbox"><input type="checkbox" data-ng-change="filterFields($event)" data-ng-model="onlyShowErrorFields"/>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_CHECKBOX_ONLY_SHOW_ERROR_FIELDS')}}<span class="warning"></span></label>
+            </div>
+        </div>
+        <div class="fields-panel">
+            <div id="fieldsGrid" kendo-grid="grid"
+                 k-options="gridOptions"
+                 k-ng-delay="gridOptions"
+                 data-ng-show="!loading" class="fields-grid data-table" data-ng-class="{edit: batchEdit}">
+            </div>
+        </div>
+    </div>
+    <script id="fieldTemplate" type="text/x-kendo-tmpl">
+        <a data-ng-if="!batchEdit" href="\#" data-ng-click="fieldLinkClicked($event, dataItem)" title="{{dataItem.ColumnName}}">{{dataItem.ColumnName}}</a>
+        <span data-ng-if="batchEdit" title="{{dataItem.ColumnName}}">{{dataItem.ColumnName}}</span>
+    </script>
+    <script id="sourceTemplate" type="text/x-kendo-tmpl">
+        <span title="{{dataItem.SourceToDisplay}}">{{dataItem.SourceToDisplay}}</span>
+    </script>
+    <script id="displayNameTemplate" type="text/x-kendo-tmpl">
+        <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'DisplayName')" class='k-dirty'></span>
+        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" title="{{dataItem.DisplayName}}">{{dataItem.DisplayName}}</span>
+        <input type="text" data-ng-if="batchEdit" data-ng-model="dataItem.DisplayName" data-ng-change="valueChanged($event, dataItem, 'DisplayName', '#:DisplayName#')" class='form-control' data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" data-ng-click="textboxClicked($event)" />
+    </script>
+    <script id="tagsTemplate" type="text/x-kendo-tmpl">
+        <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'Tags')" class='k-dirty'></span>
+        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.Tags)}" title="{{dataItem.Tags}}">{{dataItem.Tags}}</span>
+        <select data-ng-if="batchEdit" data-ng-options="c for c in TagsOptions" data-ng-model="dataItem.Tags" data-ng-change="valueChanged($event, dataItem, 'Tags', '#:Tags#')" class="form-control tags" data-ng-class="{'warning': isEmpty(dataItem.Tags)}"></select>
+    </script>
+    <script id="categoryTemplate" type="text/x-kendo-tmpl">
+        <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'Category')" class='k-dirty'></span>
+        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.Category)}" title="{{dataItem.Category}}">{{dataItem.Category}}</span>
+        <span data-ng-if="batchEdit && !categoryEditable(dataItem)" data-ng-class="isEmpty(dataItem.Category) ? 'warning' : 'edit'" title="{{dataItem.Category}}">{{dataItem.Category}}</span>
+        <select data-ng-if="batchEdit && categoryEditable(dataItem)" data-ng-options="c for c in CategoryOptions" data-ng-model="dataItem.Category" data-ng-change="valueChanged($event, dataItem, 'Category', '#:Category#')" class="form-control" data-ng-class="{'warning': isEmpty(dataItem.Category)}"></select>
+    </script>
+    <script id="approvedUsageTemplate" type="text/x-kendo-tmpl">
+        <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'ApprovedUsage')" class='k-dirty'></span>
+        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.ApprovedUsage)}" title="{{dataItem.ApprovedUsage}}">{{dataItem.ApprovedUsage}}</span>
+        <select data-ng-if="batchEdit" data-ng-options="c for c in ApprovedUsageOptions" data-ng-model="dataItem.ApprovedUsage" data-ng-change="valueChanged($event, dataItem, 'ApprovedUsage', '#:ApprovedUsage#')" class="form-control" data-ng-class="{'warning': isEmpty(dataItem.ApprovedUsage)}"></select>
+    </script>
+    <script id="fundamentalTypeTemplate" type="text/x-kendo-tmpl">
+        <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'FundamentalType')" class='k-dirty'></span>
+        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.FundamentalType)}" title="{{dataItem.FundamentalType}}">{{dataItem.FundamentalType}}</span>
+        <select data-ng-if="batchEdit" data-ng-options="c for c in FundamentalTypeOptions" data-ng-model="dataItem.FundamentalType" data-ng-change="valueChanged($event, dataItem, 'FundamentalType', '#:FundamentalType#')" class="form-control" data-ng-class="{'warning': isEmpty(dataItem.FundamentalType)}"></select>
+    </script>
+    <div id="fieldDetails" class="field-details" data-ng-show="showFieldDetails"></div>
+</div>

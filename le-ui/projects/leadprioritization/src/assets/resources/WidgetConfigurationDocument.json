@@ -1,0 +1,153 @@
+{
+  "Applications": [
+    {
+      "ID": "PredictiveLeadScoring",
+      "Type": "ApplicationWidget",
+      "Version": "1",
+      "Widgets": [
+        {
+          "ID": "modelDetailsScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "modelDetailsWidget",
+              "Type": "ModelDetailsWidget",
+              "ScoreProperty": "RocScore",
+              "NameProperty": "DisplayName",
+              "StatusProperty": "Status",
+              "ExternalAttributesProperty": "ExternalAttributes",
+              "InternalAttributesProperty": "InternalAttributes",
+              "CreatedDateProperty": "ConstructionTime",
+              "TotalLeadsProperty": "TotalLeads",
+              "TestSetProperty": "TestingLeads",
+              "TrainingSetProperty": "TrainingLeads",
+              "TotalSuccessEventsProperty": "TotalConversions",
+              "ConversionRateProperty": "ConversionRate",
+              "LeadSourceProperty": "LeadSource",
+              "OpportunityProperty": "Opportunity",
+              "Widgets": []
+            },
+            {
+              "ID": "modelDetailsTabWidget",
+              "Type": "SimpleTabWidget",
+              "DefaultTab": 0,
+              "Tabs": [
+                {
+                  "ID": "modelDetailsAttributesTab",
+                  "TitleString": "TOP_PREDICTORS_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "modelDetailsAttributesWidget",
+                      "Type": "TopPredictorWidget"
+                    }
+                  ]
+                },
+                {
+                  "ID": "performanceTab",
+                  "TitleString": "PERFORMANCE_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "performanceTabWidget",
+                      "Type": "PerformanceTabWidget"
+                    }
+                  ]
+                },
+                {
+                  "ID": "modelDetailsLeadsTab",
+                  "TitleString": "LEADS_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "leadsTabWidget",
+                      "Type": "LeadsTabWidget"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ID": "modelListScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "modelListTileRepeater",
+              "Type": "RepeaterWidget",
+              "Sorts": [],
+              "Widgets": [
+                {
+                  "ID": "modelListTileWidget",
+                  "Type": "ModelListTileWidget",
+                  "NameProperty": "DisplayName",
+                  "StatusProperty": "Status",
+                  "CreatedDateProperty": "CreatedDate",
+                  "IncompleteProperty": "Incomplete",
+                  "Widgets": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ID": "modelListCreationHistoryWidget",
+          "Type": "ModelListCreationHistoryWidget",
+          "Widgets": []
+        },
+        {
+          "ID": "userManagementScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "userManagementWidget",
+              "Type": "UserManagementWidget",
+              "Widgets": []
+            }
+          ]
+        },
+        {
+          "ID": "adminInfoScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "adminInfoTabWidget",
+              "Type": "SimpleTabWidget",
+              "DefaultTab": 0,
+              "Tabs": [
+                {
+                  "ID": "adminInfoSummaryTab",
+                  "TitleString": "ADMIN_INFO_SUMMARY_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "adminInfoSummaryWidget",
+                      "Type": "AdminInfoSummaryWidget"
+                    }
+                  ]
+                },
+                {
+                  "ID": "adminInfoAlertsTab",
+                  "TitleString": "ADMIN_INFO_ALERTS_TAB_TITLE",
+                  "Widgets": [
+                    {
+                      "ID": "adminInfoAlertsWidget",
+                      "Type": "AdminInfoAlertsWidget"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ID": "manageFieldsScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "manageFieldsWidget",
+              "Type": "ManageFieldsWidget"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

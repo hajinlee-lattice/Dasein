@@ -1,0 +1,15 @@
+<div data-ng-controller="UserManagementController">
+    <header class="header">
+        <div class="page-title">
+            <div class="wrapper text-center">
+                <h1>{{ResourceUtility.getString('USER_MANAGEMENT_TITLE')}}</h1>
+            </div>
+        </div>
+    </header>
+    <div data-ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <section id="userManagementContainer">
+    </section>
+</div>

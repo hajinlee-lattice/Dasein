@@ -1,0 +1,6 @@
+<input type="hidden" name="InternalID" value="<%= currentPlay.InternalID %>"/>
+<%== $.View('assets/CommonAssets/views/renderers/BaseRenderer.ejs',{itemValue: booleanValue, renderType: RenderWorker.CHECKBOX_RENDERER}) %>
+<%
+var dynamicID = "checkBoxRenderer_" + new Date().getTime();
+%>
+<input type="checkbox" id="<%=dynamicID%>" value="" <% if (booleanValue) { %> checked <% } %> <% if (disabled) { %> disabled <% } %>/><label for="<%=dynamicID%>"></label>

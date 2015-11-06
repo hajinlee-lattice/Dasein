@@ -1,0 +1,31 @@
+<div class="panel panel-default" data-ng-controller="ModelListCreationHistoryWidgetController">
+    <div class="panel-body model-mgmt">
+        <div data-ng-if="showUploadModel" class="text-left"><p>
+            <button id="model-mgmt-import-model-btn" class="btn btn-primary" data-ng-click="importClicked()">{{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}</button>
+        </p></div>
+        <div class="table data-table">
+            <h4>{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</h4>
+            <table>
+                <thead>
+                  <tr>
+                    <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_NAME')}}</th>
+                    <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_INTERNAL_ID')}}</th>
+                    <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_CREATION_DATE')}}</th>
+                    <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_STATUS')}}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="model in models">
+                        <td>{{model.DisplayName}}</td>
+                        <td>{{model.Id}}</td>
+                        <td>{{model.CreatedDate}}</td>
+                        <td>{{model.Status}}&nbsp;
+                            <a data-ng-show="model.Status == 'Deleted'"
+                             href="#" data-ng-click="undoDeleteModel(model.Id)">{{ResourceUtility.getString('MODEL_LIST_MODEL_DELETED_UNDO_LABEL')}}</a>
+                         </td>
+                    </tr>
+                 </tbody>
+            </table>
+        </div>
+    </div>
+</div>

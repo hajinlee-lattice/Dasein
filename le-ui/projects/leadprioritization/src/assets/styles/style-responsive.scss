@@ -1,0 +1,724 @@
+@media (min-width: 768px) and (max-width: 980px) {
+    /*-*/
+    .prd-row .action {
+        right: 25px;
+    }
+
+    .hr-menu .brand{
+       
+    }
+
+    .hr-menu .horizontal-menu {
+        margin: 0;
+    }
+
+    .hr-menu .hr-top-nav {
+      
+        float: right;
+    }
+    .col-md-4 {
+
+    }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+    body{
+        margin-top:0 !important;
+    }
+
+    .form-signin {
+        margin:10px auto 0 auto;
+    }
+
+    .modal-dialog {
+        width:97%;
+        margin:10px 0 0 2%;
+    }
+
+    .responsive-hide {
+        display:none;
+    }
+
+    .header{
+        min-height: 68px
+
+    }
+
+    .merge-header{
+        margin-right: 0px !important;
+    }
+
+    .brand{
+        float: none;
+        margin:0;
+        z-index: 1005;
+    }
+    .brand a {
+        padding:4px 0 4px 8px;
+        line-height: 0
+    }
+
+    .brand a img {
+        width:70%;
+    }
+
+     .horizontal-menu {
+        padding:0;
+        margin:0 auto;
+     }
+
+     #global-nav {
+        top:38px;
+        left:16px;
+        border:0 !important;
+        box-shadow: none;
+        font-size:.8em;
+     }
+
+     .navbar-collapse {
+
+     }
+
+     .horizontal-menu .navbar-nav {
+        margin:0 auto;
+        padding:0;
+        font-size:0;/* collapsing whitespace */
+     }
+
+     .navbar-nav .open .dropdown-menu {
+        background:#fff;
+        position:absolute;
+     }
+
+     .horizontal-menu .navbar-nav>li {
+        padding:0;
+        margin:0;
+        font-size:11px;
+     }
+
+    .horizontal-menu .navbar-nav>li>a {
+        padding:4px 8px;
+        /* min-height:14px; */
+    }
+
+    .li-nav-personal {
+        position:absolute;
+        top:0;
+        right:0 !important;
+    }
+
+     .mdh-lt, .mdh-mid, .mdh-rt {
+        display:block;
+        overflow:hidden;
+        margin:0;
+    }
+
+    .h1-h2 {
+        position:absolute;
+        top:0;
+    }
+
+    .mdh-mid {
+        clear:both;
+    }
+
+    #base-datapoints {
+        position:relative;
+        top:0;
+        left:0;
+        right:auto;
+    }
+
+    #link-showmore {
+        top:0;
+        bottom:auto;
+        left:0;
+        margin:12px 0 0 80px;
+    }
+
+    .mdh-rt {
+        position:absolute;
+        top:10px;
+        left:70px;
+        right:auto;
+    }
+
+    .main-panel-body h1.h1-h2 {
+        font-size:1.4em;
+        margin-top:30px;
+    }
+
+    .h1-h2 .editable-input .form-control {
+        height:auto;
+    }
+
+    .h1-h2 .editable-input .editable-clear-x {
+        top:-1px;
+    }
+
+    .editable-submit {
+        font-size:.6em;
+    }
+
+    .editable-buttons {
+        display: block;
+        position:absolute;
+        top:55px;
+        right:0;
+    }
+
+    .mdh-lt {
+        text-align: center;
+    }
+
+    .model-details-header .panel-model-scorerating {
+        font-size:.8em;
+        float:none;
+        border:0;
+        display:inline-block;
+        margin:65px auto 0 auto
+    }
+
+    #more-datapoints {
+        margin-top:0;
+        top:0;
+    }
+
+    .threshold-explorer {
+        margin:0;
+    }
+
+    .threshold-tile {
+        margin:0 1px 0 0;
+        min-height:240px;
+        max-height:240px;
+        font-size:.8em;
+    }
+    
+    .value-pair {
+        margin-bottom:14px;
+    }
+
+    .bucket-percent,.bucket-section {
+        margin:0 3px;
+    }
+
+
+    /*-*/
+    .prd-row .action {
+        right: 25px;
+    }
+
+    .weather-full-info ul li {
+        width: 30%;
+        margin-bottom: 10px;
+    }
+
+
+    .hr-toggle {
+        background: #32D2C9;
+        color: rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        -webkit-border-radius: 50%;
+        height: 30px;
+        line-height: 0;
+        margin-top: 0;
+        position: relative;
+        width: 30px;
+        z-index: 10000;
+    }
+
+    .hr-top-nav {
+        display: inline-block;
+        float: right;
+        margin: 0;
+    }
+    .horizontal-menu {
+        width: 100%;
+    }
+
+    .horizontal-menu .navbar-nav > li {
+        display:inline-block;
+    }
+
+    /* ALL MODELS & DETAILS */
+
+    /* hiding elements not fit for small screen */
+    #threshold-explorer-table-slider, .lead-lines, .lead-lines-avg, .threshold-slider {
+        display:none;
+    }
+    /* end hide */
+    .mdh-lt, .mdh-mid, .mdh-rt {
+        display:block;
+        overflow:hidden;
+        margin:0;
+    }
+
+    .h1-h2 {
+        position:absolute;
+        top:0;
+    }
+
+    .mdh-mid {
+        clear:both;
+        text-align: center;
+    }
+
+    #base-datapoints {
+        position:relative;
+        top:0;
+        left:0;
+        right:auto;
+        display: inline-block;
+        margin:0 auto;
+    }
+
+    #link-showmore {
+        top:0;
+        bottom:auto;
+        left:0;
+        margin:12px 0 0 0;
+    }
+
+    .mdh-rt {
+        position:absolute;
+        top:10px;
+        left:2%;
+        width:96%;
+        right:auto;
+        text-align:center;
+    }
+
+    .main-panel-body h1.h1-h2 {
+        top:30px;
+        font-size:1.8em;
+        margin-top:16px;
+        width:90.5%;
+        text-align: center;
+        padding:14px 0 0 0;
+    }
+
+    .h1-h2 .editable-input .form-control {
+        height:auto;
+    }
+
+    .h1-h2 .editable-input .editable-clear-x {
+        top:-1px;
+    }
+
+    .editable-submit {
+        font-size:.45em;
+    }
+
+    .editable-buttons {
+        display: inline-block;
+        position:relative;
+        top:-12px;
+        right:auto;
+    }
+
+    .mdh-lt {
+        text-align: center;
+    }
+
+    .model-details-header .panel-model-scorerating {
+        font-size:.8em;
+        float:none;
+        border:0;
+        display:inline-block;
+        margin:65px auto 0 auto
+    }
+
+    #more-datapoints {
+        margin-top:0;
+        top:0;
+    }
+
+    .threshold-explorer {
+        margin:0;
+    }
+
+    .threshold-tile {
+        margin:0 1px 0 0;
+        min-height:240px;
+        max-height:240px;
+        font-size:.8em;
+    }
+    
+    .value-pair {
+        margin-bottom:14px;
+    }
+
+    .bucket-percent,.bucket-section {
+        margin:0 3px;
+    }
+
+
+}
+@media (max-width:767px){
+    .form-signin {
+        margin:10px auto 0 auto;
+    }
+
+    .modal-dialog {
+        width:97%;
+        margin:10px 0 0 2%;
+    }
+   
+
+}
+@media (max-width: 479px) {
+    body{
+        margin-top:0 !important;
+    }
+
+    .wrapper {
+       padding:0;
+    }
+
+    .main-panel-body {
+        min-height:auto;
+        padding:10px 10px;
+    }
+
+    .value-pair .title-label, .value-pair .title-value {
+        text-align: center !important;
+    }
+
+    .responsive-1 {
+        display:none;
+    }
+
+    #more-datapoints .value-pair {
+        margin-right:14px;
+    }
+
+    .form-signin {
+        margin:10px auto 0 auto;
+    }
+
+    .modal-dialog {
+        width:97%;
+        margin:10px 0 0 2%;
+    }
+
+    .responsive-hide {
+        display:none;
+    }
+
+    .header{
+        min-height: 68px
+
+    }
+
+    .merge-header{
+        margin-right: 0px !important;
+    }
+
+    .brand{
+        float: none;
+        margin:0;
+        z-index: 1005;
+    }
+    .brand a {
+        padding:4px 0 4px 8px;
+        line-height: 0
+    }
+
+    .brand a img {
+        width:70%;
+    }
+
+     .horizontal-menu {
+        padding:0;
+        margin:0 auto;
+     }
+
+     #global-nav {
+        top:38px;
+        left:16px;
+        border:0 !important;
+        box-shadow: none;
+        font-size:.8em;
+     }
+
+     .navbar-collapse {
+
+     }
+
+     .horizontal-menu .navbar-nav {
+        margin:0 auto;
+        padding:0;
+        font-size:0;/* collapsing whitespace */
+     }
+
+     .navbar-nav .open .dropdown-menu {
+        background:#fff;
+        position:absolute;
+     }
+
+     .horizontal-menu .navbar-nav>li {
+        padding:0;
+        margin:0;
+        font-size:11px;
+     }
+
+    .horizontal-menu .navbar-nav>li>a {
+        padding:4px 8px;
+        /* min-height:14px; */
+    }
+
+    .li-nav-personal {
+        position:absolute;
+        top:0;
+        right:0 !important;
+    }
+
+     .mdh-lt, .mdh-mid, .mdh-rt {
+        display:block;
+        overflow:hidden;
+        margin:0;
+    }
+
+    .h1-h2 {
+        position:absolute;
+        top:0;
+    }
+
+    .mdh-mid {
+        clear:both;
+    }
+
+    #base-datapoints {
+        position:relative;
+        top:0;
+        left:0;
+        right:auto;
+    }
+
+    #link-showmore {
+        top:0;
+        bottom:auto;
+        left:0;
+        margin:12px 0 0 80px;
+    }
+
+    .mdh-rt {
+        position:absolute;
+        top:10px;
+        left:70px;
+        right:auto;
+    }
+
+    .main-panel-body h1.h1-h2 {
+        font-size:1.4em;
+        margin-top:30px;
+    }
+
+    .h1-h2 .editable-input .form-control {
+        height:auto;
+    }
+
+    .h1-h2 .editable-input .editable-clear-x {
+        top:-1px;
+    }
+
+    .editable-submit {
+        font-size:.6em;
+    }
+
+    .editable-buttons {
+        display: block;
+        position:absolute;
+        top:55px;
+        right:0;
+    }
+
+    .mdh-lt {
+        text-align: center;
+    }
+
+    .model-details-header .panel-model-scorerating {
+        font-size:.8em;
+        float:none;
+        border:0;
+        display:inline-block;
+        margin:65px auto 0 auto
+    }
+
+    #more-datapoints {
+        margin-top:0;
+        top:0;
+    }
+
+    .threshold-explorer {
+        margin:0;
+    }
+
+    #threshold-explorer-table {
+
+    }
+
+    .threshold-tile {
+        margin:0 1px 0 0;
+        min-height:240px;
+        max-height:240px;
+        font-size:.8em;
+    }
+    
+    .value-pair {
+        margin-bottom:14px;
+    }
+
+    .bucket-percent,.bucket-section {
+        margin:0 3px;
+    }
+
+
+    /*-*/
+    .prd-row .action {
+        right: 25px;
+    }
+
+    .weather-full-info ul li {
+        width: 30%;
+        margin-bottom: 10px;
+    }
+
+
+    .hr-toggle {
+        background: #32D2C9;
+        color: rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        -webkit-border-radius: 50%;
+        height: 30px;
+        line-height: 0;
+        margin-top: 0;
+        position: relative;
+        width: 30px;
+        z-index: 10000;
+    }
+
+    .hr-top-nav {
+        display: inline-block;
+        float: right;
+        margin: 0;
+    }
+    .horizontal-menu {
+        width: 100%;
+    }
+
+    .horizontal-menu .navbar-nav > li {
+        display:inline-block;
+    }
+    /* ALL MODELS & DETAILS */
+
+    /* hiding elements not fit for small screen */
+    #threshold-explorer-table-slider, .lead-lines, .lead-lines-avg, .threshold-slider {
+        display:none;
+    }
+    /* end hide */
+    .mdh-lt, .mdh-mid, .mdh-rt {
+        display:block;
+        overflow:hidden;
+        margin:0;
+    }
+
+    .mdh-mid {
+        clear:both;
+        text-align: center;
+    }
+
+    #base-datapoints {
+        position:relative;
+        top:0;
+        left:0;
+        right:auto;
+        display: inline-block;
+        margin:0 auto;
+    }
+
+    #link-showmore {
+        top:0;
+        bottom:auto;
+        left:0;
+        margin:12px 0 0 0;
+    }
+
+    .mdh-rt {
+        position:absolute;
+        top:10px;
+        left:2%;
+        width:96%;
+        right:auto;
+        text-align:center;
+    }
+
+    .main-panel-body h1.h1-h2 {
+        position:absolute;
+        top:30px;
+        font-size:1.8em;
+        margin-top:16px;
+        width:85%;
+        text-align: center;
+        padding:14px 0 0 0;
+        line-height: 1.4em
+    }
+
+    .h1-h2 .editable-input .form-control {
+        height:auto;
+    }
+
+    .h1-h2 .editable-input .editable-clear-x {
+        top:-1px;
+    }
+
+    .editable-submit {
+        font-size:.45em;
+    }
+
+    .editable-buttons {
+        display: block;
+        position:absolute;
+        top:55px;
+        right:0;
+    }
+
+    .mdh-lt {
+        text-align: center;
+    }
+
+    .model-details-header .panel-model-scorerating {
+        font-size:.8em;
+        float:none;
+        border:0;
+        display:inline-block;
+        margin:95px auto 0 auto
+    }
+
+    #more-datapoints {
+        margin-top:0;
+        top:0;
+    }
+
+    .threshold-explorer {
+        margin:0;
+    }
+
+    .threshold-tile {
+        margin:0 1px 0 0;
+        min-height:240px;
+        max-height:240px;
+        font-size:.8em;
+    }
+    
+    .value-pair {
+        margin-bottom:14px;
+    }
+
+    .bucket-percent,.bucket-section {
+        margin:0 3px;
+    }
+}
+
+
