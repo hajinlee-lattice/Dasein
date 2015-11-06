@@ -6,6 +6,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.eclipse.jetty.client.HttpClient;
 import org.springframework.batch.item.ItemProcessor;
@@ -35,6 +37,8 @@ import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
         ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
+
+    private static final Log log = LogFactory.getLog(EaiProcessor.class);
 
     @Autowired
     private Configuration yarnConfiguration;
