@@ -7,15 +7,15 @@
 
     <properties>
         <component-name>liaison</component-name>
-        <le.common.version>2.0.15-SNAPSHOT</le.common.version>
-        <le.domain.version>2.0.15-SNAPSHOT</le.domain.version>
-        <le.remote.version>2.0.15-SNAPSHOT</le.remote.version>
+        <le.common.version>2.0.16-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.16-SNAPSHOT</le.domain.version>
+        <le.remote.version>2.0.16-SNAPSHOT</le.remote.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.15-SNAPSHOT</version>
+        <version>2.0.16-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
     
