@@ -10,8 +10,8 @@ from Operations.DantePageHelper import DantePageHelper
 if __name__ == '__main__':
     print '=====start to setUp Leads and Accounts Configuraion======'
     dp_c=DantePageHelper()
-    dp_c.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,True,True)
-    dp_c.SetDanteServiceURL('Account',DanteEnvironments.Sales_Force_DT_service,True,True)
+    dp_c.SetDanteServiceURL(D_Type='Lead',LatticeURL=DanteEnvironments.Sales_Force_DT_service,showlift=True,showScore=True,showRating=True)
+    dp_c.SetDanteServiceURL(D_Type='Account',LatticeURL=DanteEnvironments.Sales_Force_DT_service_Account,defaultTab='TalkingPoints',hasSalesPrism=True)
     print '=====End to setup leads and accounts configuration'
 
 

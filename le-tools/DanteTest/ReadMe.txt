@@ -10,6 +10,20 @@ For this project, we need install python 2.7 and following packages need be inst
 
 
 
+There are 3 py files for Dante UI cases:
+=========================================
+1.DanteUISmoke.py ---- In this file there are 2 Test class 
+	a. LeadInSFDCTest ----This class contains 6 cases for Leads Dante UI
+	b. AccountInSFDCTest---- This class contains 6 cases for Account Dante UI
+
+2. DanteUIFuntional.py -------There is 1 test class now
+	a. AccountInSFDCTest ------In this class, Some Functional cases for Account Dante UI 1.6.2 are created
+
+3. ProdDanteUISmoke.py ------Cases in this file are created for PROD somke verification
+	a. DanteDemoURLTest ---- somke cases for the PROD Dante UI by Dante Demo URL directly
+	b. DanteInSFDCTest ---- somke cases for the PROD Dante UI by Login SFDC to access Dante UI
+
+
 Following are the command to run test cases 
 ===========================================
 1. command for DanteUISmoke test in SFDC:

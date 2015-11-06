@@ -25,7 +25,7 @@ class DantePageHelper(object):
         self.salesforcelogin=sales_force_url
         self.dante_user=salesforce_user
         self.dante_pwd=salefore_pwd
-        print browertype
+        #print browertype
         self.browser_type=browertype
         self.sele_instance=Selenium2Library.Selenium2Library()
         self.Timeout='120s'
@@ -42,8 +42,20 @@ class DantePageHelper(object):
     def ClickLink(self,e_xpath):
         self.sele_instance.click_link(e_xpath)
 
+    def ClickElement(self,e_xpath):
+        self.sele_instance.click_element(e_xpath)
+
     def GetCountMatched(self,e_xpath):
         return self.sele_instance.get_matching_xpath_count(e_xpath)
+
+    def SelectOneIframe(self,e_xpath):
+         self.sele_instance.select_frame(e_xpath)
+
+    def UnselectIframe(self,):
+         self.sele_instance.unselect_frame()
+
+    def GetElementAttribute(self,attr_xpath):
+         self.sele_instance.get_element_attribute(attr_xpath)
 
     def LogInSaleForcePage(self):
         #print '===start to log in SalesForce==='
@@ -67,15 +79,14 @@ class DantePageHelper(object):
             self.sele_instance.click_link(DantePageHelper.DantePages["AllTabPage"]["AccountsLink"])
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["AccountListPage"]["ListPane"],self.Timeout)
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["AccountListPage"]["ViewSelector"],self.Timeout)
+            #print 'view exist==='
             self.sele_instance.select_from_list(DantePageHelper.DantePages["AccountListPage"]["ViewSelector"],DantePageHelper.DantePages["AccountListPage"]["OptionValue"])
+            #print 'DantePageHelper.DantePages["AccountListPage"]["OptionValue"]='+str(DantePageHelper.DantePages["AccountListPage"]["OptionValue"])
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["AccountListPage"]["ListPane"],self.Timeout)
-            self.sele_instance.select_frame(DantePageHelper.DantePages["AccountListPage"]["Iframe"])
-            #print 'selected frame'
-            #print DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"]
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"],self.Timeout)
-            self.sele_instance.unselect_frame()
             self.sele_instance.click_element(DantePageHelper.DantePages["AccountListPage"]["DanteLink"])
             Account_FullID=self.sele_instance.get_text(DantePageHelper.DantePages["AccountListPage"]["FullID"])
+            print str(Account_FullID)
             return Account_FullID
         elif (D_Type=='Contact'):
             self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["AllTabPage"]["ContactLink"],self.Timeout)
@@ -116,6 +127,39 @@ class DantePageHelper(object):
         return Full_ID
         print '===Have opened '+str(D_Type)+' Detail page==='
 
+    def GoToPlayDetailPage(self,Play_index,ISDetailPage=False):
+        print '======Go to one play detail page by click play======'
+        if ISDetailPage:
+            print 'select Dante detail iframe'
+            time.sleep(2)
+            self.sele_instance.select_frame(DantePageHelper.DantePages["AccountDetailPage"]["Iframe_1"])
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"],self.Timeout)
+        #account_Title = self.sele_instance.get_text(DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"])
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["PlayList"],self.Timeout)
+        play_count=self.sele_instance.get_matching_xpath_count(DantePageHelper.DantePages["VisualAccountPage"]["PlayList"])
+        if (int(play_count)<int(Play_index)):
+            print 'the specific play index: '+ str(Play_index) + ' out of scope, please make sure it is right'
+            return False
+        else:
+            play_dict={}
+            Play_Title_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["PlayTitle"]).replace('Play_Index_Temp',str(Play_index))
+            self.sele_instance.wait_until_page_contains_element(Play_Title_Xpath,self.Timeout)
+            play_title= self.sele_instance.get_text(Play_Title_Xpath)
+            #print str(play_title)
+            play_dict["P_Title"]=play_title
+            Play_Score_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["PlayScore"]).replace('Play_Index_Temp',str(Play_index))
+            self.sele_instance.wait_until_page_contains_element(Play_Score_Xpath,self.Timeout)
+            play_score= self.sele_instance.get_text(Play_Score_Xpath)
+            #print str(play_score)
+            play_dict["P_Score"]=play_score
+            time.sleep(1)
+            self.sele_instance.click_element(Play_Title_Xpath)
+            time.sleep(2)
+            print 'start to wait TP and BS links exist'
+            self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPHeaderArea"],self.Timeout)
+            print 'one play detail page be opened'
+            return play_dict
+
     def OpenConfigurePage(self,D_Type='Lead'):
         self.sele_instance.wait_until_page_contains_element('userNavLabel',self.Timeout)
         self.sele_instance.click_element('userNavLabel')
@@ -129,8 +173,8 @@ class DantePageHelper(object):
             self.sele_instance.wait_until_page_contains_element('Xpath=//a[contains(text(),"Lattice For Leads Configuration")]',self.Timeout)
             self.sele_instance.click_link('Xpath=//a[contains(text(),"Lattice For Leads Configuration")]')
         elif (D_Type=='Account'):
-            self.sele_instance.wait_until_page_contains_element('Xpath=//a[contains(text(),"Lattice For Accounts Configuration")]',self.Timeout)
-            self.sele_instance.click_link('Xpath=//a[contains(text(),"Lattice For Accounts Configuration")]')
+            self.sele_instance.wait_until_page_contains_element('Xpath=//a[contains(text(),"Lattice Account iFrame Settings")]',self.Timeout)
+            self.sele_instance.click_link('Xpath=//a[contains(text(),"Lattice Account iFrame Settings")]')
         else:
             return
         self.sele_instance.wait_until_page_contains_element('CS_Defn_View:CS_View:theDetailBlock:detailButtons:manage',self.Timeout)
@@ -138,7 +182,7 @@ class DantePageHelper(object):
         self.sele_instance.wait_until_page_contains_element('CS_list:CS_Form:theDetailPageBlock:thePageBlockButtons:edit',self.Timeout)
         self.sele_instance.click_button('CS_list:CS_Form:theDetailPageBlock:thePageBlockButtons:edit')
 
-    def SetDanteServiceURL(self,D_Type='Lead',LatticeURL=DanteEnvironments.Sales_Force_DT_service,showlift=True,showScore=True,showRating=True):
+    def SetDanteServiceURL(self,D_Type='Lead',LatticeURL=DanteEnvironments.Sales_Force_DT_service,showlift=True,showScore=True,showRating=True,defaultTab='TalkingPoints',hasSalesPrism=False):
         self.LogInSaleForcePage()
         self.OpenConfigurePage(D_Type)
         print '===end to open configuration page==='
@@ -152,20 +196,25 @@ class DantePageHelper(object):
                 self.sele_instance.select_checkbox(show_rating_id)
             else:
                 self.sele_instance.unselect_checkbox(show_rating_id)
-        elif (D_Type=='Account'):
-            lattice_url_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:lattice__url__c'
-            show_lift_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:lattice__show_lift__c'
-            show_score_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:lattice__show_score__c'
-            self.sele_instance.wait_until_page_contains_element(lattice_url_id,self.Timeout)
-        self.sele_instance.input_text(lattice_url_id,LatticeURL)
-        if showlift:
+            if showlift:
              self.sele_instance.select_checkbox(show_lift_id)
-        else:
-             self.sele_instance.unselect_checkbox(show_lift_id)
-        if showScore:
-             self.sele_instance.select_checkbox(show_score_id)
-        else:
-             self.sele_instance.unselect_checkbox(show_score_id)
+            else:
+                self.sele_instance.unselect_checkbox(show_lift_id)
+            if showScore:
+                self.sele_instance.select_checkbox(show_score_id)
+            else:
+                self.sele_instance.unselect_checkbox(show_score_id)
+        elif (D_Type=='Account'):
+            lattice_url_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:BaseURL__c'
+            default_Tab_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:DefaultTab__c'
+            hasSalesPrism_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:HasSalesPrism__c'
+            self.sele_instance.wait_until_page_contains_element(lattice_url_id,self.Timeout)
+            self.sele_instance.input_text(default_Tab_id,defaultTab)
+            if hasSalesPrism:
+                self.sele_instance.select_checkbox(hasSalesPrism_id)
+            else:
+                 self.sele_instance.unselect_checkbox(hasSalesPrism_id)
+        self.sele_instance.input_text(lattice_url_id,LatticeURL)
         self.sele_instance.click_button('CS_Edit:CS_Form:thePageBlock:thePageBlockButtons:save')
         self.sele_instance.wait_until_page_contains_element('CS_list:CS_Form:theDetailPageBlock:thePageBlockButtons:edit')
         self.Close_browser()
@@ -206,10 +255,13 @@ class DantePageHelper(object):
         print '===start to get info for play:==='
         result_dict={}
         if ISDetailPage:
+            print 'select iframe in detail page'
             self.sele_instance.select_frame(DantePageHelper.DantePages["AccountDetailPage"]["Iframe_1"])
-        self.sele_instance.select_frame(DantePageHelper.DantePages["AccountListPage"]["Iframe"])
+        #self.sele_instance.select_frame(DantePageHelper.DantePages["VisualAccountPage"]["Iframe_Play"])
+        #print str(DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"])
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"],self.Timeout)
         account_Title = self.sele_instance.get_text(DantePageHelper.DantePages["VisualAccountPage"]["LatticeTitle"])
+        #print str(account_Title)
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["PlayList"],self.Timeout)
         play_count=self.sele_instance.get_matching_xpath_count(DantePageHelper.DantePages["VisualAccountPage"]["PlayList"])
         result_dict["DisplayName"]=account_Title
@@ -232,30 +284,35 @@ class DantePageHelper(object):
         result_dict["Plays"]=plays_list
         if ISDetailPage:
             self.sele_instance.unselect_frame()
-        self.sele_instance.unselect_frame()
+        #self.sele_instance.unselect_frame()
         return result_dict
 
     def GetTalkingPointsForPlay(self,ISDetailPage=False):
         time.sleep(2)
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["PlayDetail"],self.Timeout)
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPHeaderArea"],self.Timeout)
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPLink"],self.Timeout)
+        print 'Talk points link exist in page'
+        self.sele_instance.click_link(DantePageHelper.DantePages["VisualAccountPage"]["TPLink"])
+        print 'start to select iframe for theIFrame'
+        time.sleep(5)
+        self.sele_instance.select_frame(DantePageHelper.DantePages["VisualAccountPage"]["Iframe_Play"])
+        print 'have selected iframe'
         TP_Result_List=self.GetTalkingPoints()
+        #print str(TP_Result_List)
         self.sele_instance.unselect_frame()
-        #Following logic to return play list page is a work around for bug ENG-7716, after it fixed ,those code can be removed.
+        print 'unselect iframe'
+        #time.sleep(5)
+        print '---start return play list---'
+        #unselect frame fun make all iframe be unselected, so we need to selected the first Iframe in detail page again
         if ISDetailPage:
-            self.sele_instance.unselect_frame()
-            self.sele_instance.reload_page()
+            print 'select detail iframe'
             self.sele_instance.select_frame(DantePageHelper.DantePages["AccountDetailPage"]["Iframe_1"])
-        else:
-            #print '---start return play list---'
-            self.sele_instance.click_element(DantePageHelper.DantePages["AccountListPage"]["DanteLink"])
-        self.sele_instance.select_frame(DantePageHelper.DantePages["AccountListPage"]["Iframe"])
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["BackToPlayList"],self.Timeout)
+        self.sele_instance.click_element(DantePageHelper.DantePages["VisualAccountPage"]["BackToPlayList"])
         return TP_Result_List
 
     def GetTalkingPoints(self):
-        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPLink"],self.Timeout)
-        #print 'Talk points lin exist in page'
-        self.sele_instance.click_link(DantePageHelper.DantePages["VisualAccountPage"]["TPLink"])
         self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPContentArea"],self.Timeout)
         #time.sleep(5)
         self.sele_instance.wait_until_page_contains_element('Xpath='+DantePageHelper.DantePages["VisualAccountPage"]["TPList"],self.Timeout)
@@ -271,22 +328,49 @@ class DantePageHelper(object):
             TalkPoint_dic["Title"]=TP_Title
             #print TP_Title
             if talkpoints_index>1:
-                #print 'click element for each title'
-                #print str(talkpoints_index)
                 self.sele_instance.click_element(TP_Title_Xpath)
             time.sleep(2)
             TPContent_Xpath=str(DantePageHelper.DantePages["VisualAccountPage"]["TPContent"]).replace('TP_Index_Temp',str(talkpoints_index))
             #print TPContent_Xpath
             self.sele_instance.wait_until_page_contains_element(TPContent_Xpath,self.Timeout)
             TP_Content= self.sele_instance.get_text(TPContent_Xpath)
-            #print '-------------------------'
-            #print TP_Content
-            #print '========================='
             TalkPoint_dic["Content"]=TP_Content
             TP_Result_List.append(TalkPoint_dic)
             #print TalkPoint_dic
         #print TP_Result_List
         return sorted(TP_Result_List)
+
+    def GetBuyingSignalForPlay(self,ISDetailPage=False):
+        time.sleep(2)
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["PlayDetail"],self.Timeout)
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPHeaderArea"],self.Timeout)
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["BSLink"],self.Timeout)
+        self.sele_instance.select_frame(DantePageHelper.DantePages["VisualAccountPage"]["Iframe_Play"])
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["TPContentArea"],self.Timeout)
+        self.sele_instance.wait_until_page_contains_element('Xpath='+DantePageHelper.DantePages["VisualAccountPage"]["TPList"],self.Timeout)
+        self.sele_instance.unselect_frame()
+        if ISDetailPage:
+            print 'select detail iframe'
+            self.sele_instance.select_frame(DantePageHelper.DantePages["AccountDetailPage"]["Iframe_1"])
+        print 'Buying Signals link exist in page'
+        self.sele_instance.click_link(DantePageHelper.DantePages["VisualAccountPage"]["BSLink"])
+        print 'start to select iframe for theIFrame'
+        time.sleep(2)
+        self.sele_instance.select_frame(DantePageHelper.DantePages["VisualAccountPage"]["Iframe_Play"])
+        #print 'have selected iframe'
+        BS_Result_List=self.GetBuyingSignalsInfo()
+        #print str(BS_Result_List)
+        self.sele_instance.unselect_frame()
+        #print 'unselect iframe'
+        #time.sleep(5)
+        print '---start return play list---'
+        #unselect frame fun make all iframe be unselected, so we need to selected the first Iframe in detail page again
+        if ISDetailPage:
+            print 'select detail iframe'
+            self.sele_instance.select_frame(DantePageHelper.DantePages["AccountDetailPage"]["Iframe_1"])
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["BackToPlayList"],self.Timeout)
+        self.sele_instance.click_element(DantePageHelper.DantePages["VisualAccountPage"]["BackToPlayList"])
+        return BS_Result_List
 
     def GetBuyingSignalsInfo(self):
         #self.sele_instance.()
@@ -339,6 +423,35 @@ class DantePageHelper(object):
         #print Internal_attrs_list
         Internal_info_dic["Attrs"]=sorted(Internal_attrs_list)
         return External_info_dic,Internal_info_dic
+
+    def GetActionsForPlay(self,ISPlayDetailPage=False,ISAccountDetailPage=False):
+        print '---Get all actions for account play---'
+        result_list=[]
+        xpath_action_list=DantePageHelper.DantePages["VisualAccountPage"]["ActionList_1"]
+        xpath_action_text=DantePageHelper.DantePages["VisualAccountPage"]["Action_Text_1"]
+        if ISPlayDetailPage:
+            xpath_action_list=DantePageHelper.DantePages["VisualAccountPage"]["ActionList_2"]
+            xpath_action_text=DantePageHelper.DantePages["VisualAccountPage"]["Action_Text_2"]
+        if ISAccountDetailPage:
+            print 'select iframe in detail page'
+            self.sele_instance.select_frame(DantePageHelper.DantePages["AccountDetailPage"]["Iframe_1"])
+        self.sele_instance.wait_until_page_contains_element(DantePageHelper.DantePages["VisualAccountPage"]["ActionButton"],self.Timeout)
+        actions_text= self.sele_instance.get_text(DantePageHelper.DantePages["VisualAccountPage"]["ActionButton"])
+        self.sele_instance.click_element(DantePageHelper.DantePages["VisualAccountPage"]["ActionButton"])
+        #print actions_text
+        action_count=self.sele_instance.get_matching_xpath_count(xpath_action_list)
+        #print str(action_count)
+        for action_index in range(1,int(action_count)+1):
+            xpath_action_link=str(xpath_action_text).replace('Action_Index_Temp',str(action_index))
+            #print xpath_action_link
+            self.sele_instance.wait_until_page_contains_element(xpath_action_link,self.Timeout)
+            text_action=self.sele_instance.get_text(xpath_action_link)
+            #print text_action
+            result_list.append(text_action)
+        if ISAccountDetailPage:
+            print 'unselect iframe in detail page'
+            self.sele_instance.unselect_frame()
+        return actions_text,action_count,sorted(result_list)
 
 
 
