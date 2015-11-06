@@ -15,7 +15,7 @@ var UserDropdown = function() {
     };
 
     this.toggleDropdown = function() {
-        element(by.css('a.nav-personal')).click();
+        element(by.className('nav-personal')).click();
         browser.waitForAngular();
     };
 };
