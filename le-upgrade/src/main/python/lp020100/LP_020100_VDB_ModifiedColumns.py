@@ -23,37 +23,31 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
       conn_mgr = appseq.getConnectionMgr()
       type = appseq.getText( 'template_type' )
       if type == 'MKTO':
-          conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange")
-          conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads")
-          conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads")
           conn_mgr.getQuery("Q_Timestamp_PushToDante")
           conn_mgr.getTable("Timestamp_PushToDante")
           conn_mgr.getQuery("Q_Dante_ContactSourceTable")
           conn_mgr.getQuery("Q_Dante_LeadSourceTable")
 
-          if not conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange") and conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads") and conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads") and conn_mgr.getQuery("Q_Timestamp_PushToDante") and conn_mgr.getTable("Timestamp_PushToDante") and conn_mgr.getQuery("Q_Dante_ContactSourceTable") and conn_mgr.getQuery("Q_Dante_LeadSourceTable"):
+          if not conn_mgr.getQuery("Q_Timestamp_PushToDante") and not conn_mgr.getTable("Timestamp_PushToDante") and not conn_mgr.getQuery("Q_Dante_ContactSourceTable") and not conn_mgr.getQuery("Q_Dante_LeadSourceTable"):
               return Applicability.cannotApplyFail
 
       elif type == 'ELQ':
-          conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange")
-          conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads")
-          conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads")
           conn_mgr.getQuery("Q_Timestamp_PushToDante")
           conn_mgr.getTable("Timestamp_PushToDante")
           conn_mgr.getQuery("Q_Dante_ContactSourceTable")
           conn_mgr.getQuery("Q_Dante_LeadSourceTable")
 
-          if not conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange") and conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads") and conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads") and conn_mgr.getQuery("Q_Timestamp_PushToDante") and conn_mgr.getTable("Timestamp_PushToDante") and conn_mgr.getQuery("Q_Dante_ContactSourceTable") and conn_mgr.getQuery("Q_Dante_LeadSourceTable"):
+          if not conn_mgr.getQuery("Q_Timestamp_PushToDante") and not conn_mgr.getTable("Timestamp_PushToDante") and not conn_mgr.getQuery("Q_Dante_ContactSourceTable") and not conn_mgr.getQuery("Q_Dante_LeadSourceTable"):
               return Applicability.cannotApplyFail
 
       else:
           conn_mgr.getSpec("Q_Timestamp_PushToDante")
           conn_mgr.getTable("Timestamp_PushToDante")
-          conn_mgr.getTable( 'SFDC_Opportunity')
+          conn_mgr.getTable("SFDC_Opportunity")
           conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           conn_mgr.getQuery("Q_SFDC_Lead_Score")
           conn_mgr.getQuery("Q_SFDC_Contact_Score")
-          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and conn_mgr.getTable("Timestamp_PushToDante") and conn_mgr.getTable( 'SFDC_Opportunity') and conn_mgr.getQuery("Q_SFDC_Lead_Score") and conn_mgr.getQuery("Q_SFDC_Contact_Score"):
+          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and not conn_mgr.getTable("Timestamp_PushToDante") and not conn_mgr.getTable( 'SFDC_Opportunity') and not conn_mgr.getQuery("Q_SFDC_Lead_Score") and not conn_mgr.getQuery("Q_SFDC_Contact_Score"):
               return Applicability.cannotApplyFail
 
       return  Applicability.canApply
@@ -67,31 +61,6 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
 
 
       if type == 'MKTO':
-          #Modify the Column in Q_Diagnostic_ExtractLeadsRange
-          query1 = conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange")
-          exp1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddHour"), LatticeFunctionIdentifier(ContainerElementName("Diagnostic_MAX_MKTO_ActivityRecord_ActivityDate")), LatticeFunctionExpressionConstant("-28", DataTypeInt))')
-          col1 = liaison.QueryColumnVDBImpl('Diagnostic_LowerLimitTime',exp1)
-
-          query1.updateColumn(col1)
-          conn_mgr.setQuery(query1)
-
-          #Modify the Column in Q_Diagnostic_DownloadedUnscoredLeads
-          query2 = conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads")
-          exp2 = liaison.ExpressionVDBImplGeneric('LatticeFunctionIdentifier(ContainerElementName("Const_TenantName"))')
-          col2 = liaison.QueryColumnVDBImpl('TenantName',exp2)
-
-          query2.appendColumn(col2)
-
-          conn_mgr.setQuery(query2)
-
-          #Modify the Column in Q_Diagnostic_MissingDownloadedLeads
-          query3 = conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads")
-          exp3 = liaison.ExpressionVDBImplGeneric('LatticeFunctionIdentifier(ContainerElementName("Const_TenantName"))')
-          col3 = liaison.QueryColumnVDBImpl('TenantName',exp3)
-
-          query3.appendColumn(col3)
-
-          conn_mgr.setQuery(query3)
 
           #Modify the Column in Q_Timestamp_PushToDante
           query4 = conn_mgr.getQuery("Q_Timestamp_PushToDante")
@@ -208,36 +177,6 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
           conn_mgr.setQuery(query7)
 
       elif type == 'ELQ':
-          #Modify the Columns in Q_Diagnostic_ExtractLeadsRange
-          query1 = conn_mgr.getQuery("Q_Diagnostic_ExtractLeadsRange")
-          exp1_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddHour"), LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("ELQ_Contact")), ContainerElementName("C_DateModified"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact")))), FunctionAggregationOperator("Max")), LatticeFunctionExpressionConstant("-28", DataTypeInt))')
-          col1_1 = liaison.QueryColumnVDBImpl('Diagnostic_LowerLimitTime',exp1_1)
-          query1.updateColumn(col1_1)
-
-          exp1_2 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("ConvertToString"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddDay"), LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("ELQ_Contact")), ContainerElementName("C_DateModified"))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact")))), FunctionAggregationOperator("Max")), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Multiply"), LatticeFunctionIdentifier(ContainerElementName("Const_DaysOfValidityForScore")), LatticeFunctionExpressionConstantScalar("-1", DataTypeInt))))')
-          col1_2 = liaison.QueryColumnVDBImpl('Diagnostic_RescoreThreshold',exp1_2)
-          query1.appendColumn(col1_2)
-
-          conn_mgr.setQuery(query1)
-
-          #Modify the Column in Q_Diagnostic_DownloadedUnscoredLeads
-          query2 = conn_mgr.getQuery("Q_Diagnostic_DownloadedUnscoredLeads")
-          exp2 = liaison.ExpressionVDBImplGeneric('LatticeFunctionIdentifier(ContainerElementName("Const_TenantName"))')
-          col2 = liaison.QueryColumnVDBImpl('TenantName',exp2)
-
-          query2.appendColumn(col2)
-
-          conn_mgr.setQuery(query2)
-
-          #Modify the Column in Q_Diagnostic_MissingDownloadedLeads
-          query3 = conn_mgr.getQuery("Q_Diagnostic_MissingDownloadedLeads")
-          exp3 = liaison.ExpressionVDBImplGeneric('LatticeFunctionIdentifier(ContainerElementName("Const_TenantName"))')
-          col3 = liaison.QueryColumnVDBImpl('TenantName',exp3)
-
-          query3.appendColumn(col3)
-
-          conn_mgr.setQuery(query3)
-
           #Modify the Column in Q_Timestamp_PushToDante
           query4 = conn_mgr.getQuery("Q_Timestamp_PushToDante")
           exp4_1 = liaison.ExpressionVDBImplGeneric('LatticeFunctionExpressionConstant("Now", DataTypeDateTime)')

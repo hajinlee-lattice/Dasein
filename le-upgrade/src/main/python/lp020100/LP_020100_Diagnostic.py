@@ -528,7 +528,56 @@ class LP_020100_Diagnostic(StepBase):
       fdt_ngs.append(ng)
       lgm.setLoadGroupFunctionality( 'FinalDailyTasks', etree.tostring(fdt_ngs) )
 
-      lgm.commit()
+    # Add to the consolidation
+    ce_ces_xml = lgm.getLoadGroupFunctionality('ConsolidateExtracts', 'ces')
+    ce_ces = etree.fromstring(ce_ces_xml)
+    ce_ws = ce_ces.find('ws')
+    if type == 'ELQ':
+      ce_ce_xml = '''
+      <ws>
+          <ce itn="ELQ_Contact_Diagnostic_Import" etr="1" sei="0" />
+          <ce itn="Info_PublicDomain_Import" etr="1" sei="0" />
+          <ce itn="ELQ_Contact_Validation_Import" etr="1" sei="0" />
+          <ce itn="LeadCache_Contact_Import" etr="3" sei="0" />
+          <ce itn="LeadCache_Lead_Import" etr="3" sei="0" />
+          <ce itn="Timestamp_DownloadedSFDC_Contacts_Import" etr="1" sei="0" />
+          <ce itn="Timestamp_DownloadedSFDC_Leads_Import" etr="1" sei="0" />
+          <ce itn="Timestamp_LoadScoredLeads_Import" etr="1" sei="0" />
+          <ce itn="Timestamp_PushToDante_Stage_Import" etr="1" sei="0" />
+      </ws>
+      '''
+    elif type == 'MKTO':
+      ce_ce_xml = '''
+      <ws>
+          <ce itn="MKTO_ActivityRecord_Diagnostic_Import" etr="1" sei="0" />
+          <ce itn="MKTO_LeadRecord_Diagnostic_Import" etr="1" sei="0" />
+          <ce itn="MKTO_LeadRecord_Validation_Import" etr="1" sei="0" />
+          <ce itn="MKTO_ActivityRecord_Validation_Import" etr="1" sei="0" />
+          <ce itn="LeadCache_Contact_Import" etr="3" sei="0" />
+          <ce itn="LeadCache_Lead_Import" etr="3" sei="0" />
+          <ce itn="Timestamp_DownloadedSFDC_Contacts_Import" etr="1" sei="0" />
+          <ce itn="Timestamp_DownloadedSFDC_Leads_Import" etr="1" sei="0" />
+          <ce itn="Timestamp_LoadScoredLeads_Import" etr="1" sei="0" />
+          <ce itn="Timestamp_PushToDante_Stage_Import" etr="1" sei="0" />
+      </ws>
+      '''
+    else:
+      ce_ce_xml = '''
+      <ws>
+            <ce itn="LeadCache_Contact_Import" etr="3" sei="0" />
+            <ce itn="LeadCache_Lead_Import" etr="3" sei="0" />
+            <ce itn="Timestamp_LoadScoredLeads_Import" etr="1" sei="0" />
+            <ce itn="Timestamp_PushToDante_Stage_Import" etr="1" sei="0" />
+            <ce itn="SFDC_Contact_Validation_Import" etr="1" sei="0" />
+            <ce itn="SFDC_Lead_Validation_Import" etr="1" sei="0" />
+      </ws>
+      '''
+    ce = etree.fromstring(ce_ce_xml)
+    ce_list = list(ce.iter('ce'))
+    for ce in ce_list:
+      ce_ws.append(ce)
+    lgm.setLoadGroupFunctionality( 'ConsolidateExtracts', etree.tostring(ce_ces) )
+
     # Begin visiDB part
 
     conn_mgr = appseq.getConnectionMgr()

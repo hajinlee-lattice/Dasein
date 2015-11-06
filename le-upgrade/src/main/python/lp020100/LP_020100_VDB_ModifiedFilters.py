@@ -30,7 +30,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           conn_mgr.getSpec("Q_Timestamp_PushToDestination")
           conn_mgr.getSpec("Q_Diagnostic_GetLeadRecordID")
 
-          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and conn_mgr.getSpec("Q_Dante_ContactSourceTable") and conn_mgr.getSpec("Q_LeadScoreForLeadDestination_Query")and conn_mgr.getSpec("Q_Timestamp_PushToDante")and conn_mgr.getSpec("Q_Timestamp_PushToDestination"):
+          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and not conn_mgr.getSpec("Q_Dante_ContactSourceTable") and not conn_mgr.getSpec("Q_LeadScoreForLeadDestination_Query")and not conn_mgr.getSpec("Q_Timestamp_PushToDante")and not conn_mgr.getSpec("Q_Timestamp_PushToDestination"):
               return Applicability.cannotApplyFail
 
       elif type == 'ELQ':
@@ -40,7 +40,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           conn_mgr.getSpec("Q_Timestamp_PushToDante")
           conn_mgr.getSpec("Q_Timestamp_PushToDestination")
 
-          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and conn_mgr.getSpec("Q_Dante_ContactSourceTable") and conn_mgr.getSpec("Q_ELQ_Contact_Score")and conn_mgr.getSpec("Q_Timestamp_PushToDante")and conn_mgr.getSpec("Q_Timestamp_PushToDestination"):
+          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and not conn_mgr.getSpec("Q_Dante_ContactSourceTable") and not conn_mgr.getSpec("Q_ELQ_Contact_Score")and not conn_mgr.getSpec("Q_Timestamp_PushToDante")and not conn_mgr.getSpec("Q_Timestamp_PushToDestination"):
               return Applicability.cannotApplyFail
       else:
           conn_mgr.getSpec("Q_Dante_LeadSourceTable")
@@ -48,7 +48,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           conn_mgr.getSpec("Q_SFDC_Lead_Score")
           conn_mgr.getSpec("Q_Timestamp_PushToDante")
           conn_mgr.getSpec("Q_Timestamp_PushToDestination")
-          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and conn_mgr.getSpec("Q_SFDC_Contact_Score") and conn_mgr.getSpec("Q_SFDC_Lead_Score")and conn_mgr.getSpec("Q_Timestamp_PushToDante")and conn_mgr.getSpec("Q_Timestamp_PushToDestination"):
+          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and not conn_mgr.getSpec("Q_SFDC_Contact_Score") and not conn_mgr.getSpec("Q_SFDC_Lead_Score")and not conn_mgr.getSpec("Q_Timestamp_PushToDante")and not conn_mgr.getSpec("Q_Timestamp_PushToDestination"):
               return Applicability.cannotApplyFail
 
       return  Applicability.canApply
@@ -72,7 +72,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("Dante_Stage_IsSelectedForDanteLead")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante_Stage")))))')
           filters_new1.append(filter1)
-          Q_Dante_LeadSourceTable._filters = filters_new1
+          Q_Dante_LeadSourceTable.filters_ = filters_new1
 
           #print Q_Dante_LeadSourceTable.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
@@ -81,7 +81,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Dante_ContactSourceTable = conn_mgr.getQuery("Q_Dante_ContactSourceTable")
           filter2 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("Dante_Stage_IsSelectedForDanteContact")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante_Stage")))))')
           filters_new2.append(filter2)
-          Q_Dante_ContactSourceTable._filters = filters_new2
+          Q_Dante_ContactSourceTable.filters_ = filters_new2
 
           #print Q_Dante_ContactSourceTable.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Dante_ContactSourceTable',Q_Dante_ContactSourceTable.SpecLatticeNamedElements())
@@ -90,7 +90,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_LeadScoreForLeadDestination_Query = conn_mgr.getQuery("Q_LeadScoreForLeadDestination_Query")
           filter3 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("MKTO_LeadRecord_ID_IsSelectedForPushToDestination")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante")))))')
           filters_new3.append(filter3)
-          Q_LeadScoreForLeadDestination_Query._filters = filters_new3
+          Q_LeadScoreForLeadDestination_Query.filters_ = filters_new3
 
           #print Q_LeadScoreForLeadDestination_Query.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_LeadScoreForLeadDestination_Query',Q_LeadScoreForLeadDestination_Query.SpecLatticeNamedElements())
@@ -99,7 +99,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Timestamp_PushToDante = conn_mgr.getQuery("Q_Timestamp_PushToDante")
           filter4 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante_Stage"))))')
           filters_new4.append(filter4)
-          Q_Timestamp_PushToDante._filters = filters_new4
+          Q_Timestamp_PushToDante.filters_ = filters_new4
 
           #print Q_Timestamp_PushToDante.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Timestamp_PushToDante',Q_Timestamp_PushToDante.SpecLatticeNamedElements())
@@ -108,7 +108,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Timestamp_PushToDestination = conn_mgr.getQuery("Q_Timestamp_PushToDestination")
           filter5 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("MKTO_LeadRecord_ID_IsSelectedForPushToDestination")),LatticeAddressSetSourceTable(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToDante")),LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante")))))')
           filters_new5.append(filter5)
-          Q_Timestamp_PushToDestination._filters = filters_new5
+          Q_Timestamp_PushToDestination.filters_ = filters_new5
           #print Q_Timestamp_PushToDestination.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Timestamp_PushToDestination',Q_Timestamp_PushToDestination.SpecLatticeNamedElements())
 
@@ -116,7 +116,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Diagnostic_GetLeadRecordID = conn_mgr.getQuery("Q_Diagnostic_GetLeadRecordID")
           filter6 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("Diagnostic_Filter_ExtractedLeadRecords"))')
           filters_new6.append(filter6)
-          Q_Diagnostic_GetLeadRecordID._filters = filters_new6
+          Q_Diagnostic_GetLeadRecordID.filters_ = filters_new6
 
           #print Q_Diagnostic_GetLeadRecordID.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Diagnostic_GetLeadRecordID',Q_Diagnostic_GetLeadRecordID.SpecLatticeNamedElements())
@@ -126,7 +126,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("Dante_Stage_IsSelectedForDanteLead")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante_Stage")))))')
           filters_new1.append(filter1)
-          Q_Dante_LeadSourceTable._filters = filters_new1
+          Q_Dante_LeadSourceTable.filters_ = filters_new1
 
           #print Q_Dante_LeadSourceTable.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
@@ -135,7 +135,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Dante_ContactSourceTable = conn_mgr.getQuery("Q_Dante_ContactSourceTable")
           filter2 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("Dante_Stage_IsSelectedForDanteContact")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante_Stage")))))')
           filters_new2.append(filter2)
-          Q_Dante_ContactSourceTable._filters = filters_new2
+          Q_Dante_ContactSourceTable.filters_ = filters_new2
 
           #print Q_Dante_ContactSourceTable.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Dante_ContactSourceTable',Q_Dante_ContactSourceTable.SpecLatticeNamedElements())
@@ -146,7 +146,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           filter3_2 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetSourceTable(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToDante")),LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante")))))')
           filters_new3.append(filter3_1)
           filters_new3.append(filter3_2)
-          Q_ELQ_Contact_Score._filters = filters_new3
+          Q_ELQ_Contact_Score.filters_ = filters_new3
 
           #print Q_ELQ_Contact_Score.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_LeadScoreForLeadDestination_Query',Q_ELQ_Contact_Score.SpecLatticeNamedElements())
@@ -155,7 +155,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Timestamp_PushToDante = conn_mgr.getQuery("Q_Timestamp_PushToDante")
           filter4 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante_Stage"))))')
           filters_new4.append(filter4)
-          Q_Timestamp_PushToDante._filters = filters_new4
+          Q_Timestamp_PushToDante.filters_ = filters_new4
 
           #print Q_Timestamp_PushToDante.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Timestamp_PushToDante',Q_Timestamp_PushToDante.SpecLatticeNamedElements())
@@ -164,7 +164,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Timestamp_PushToDestination = conn_mgr.getQuery("Q_Timestamp_PushToDestination")
           filter5 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("ELQ_Contact_ContactID_IsSelectedForPushToDestination")),LatticeAddressSetSourceTable(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToDante")),LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante")))))')
           filters_new5.append(filter5)
-          Q_Timestamp_PushToDestination._filters = filters_new5
+          Q_Timestamp_PushToDestination.filters_ = filters_new5
           #print Q_Timestamp_PushToDestination.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Timestamp_PushToDestination',Q_Timestamp_PushToDestination.SpecLatticeNamedElements())
 
@@ -173,7 +173,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Dante_LeadSourceTable")
           filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante_Stage"))))')
           filters_new1.append(filter1)
-          Q_Dante_LeadSourceTable._filters = filters_new1
+          Q_Dante_LeadSourceTable.filters_ = filters_new1
 
           #print Q_Dante_LeadSourceTable.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Dante_LeadSourceTable',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
@@ -182,7 +182,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_SFDC_Contact_Score = conn_mgr.getQuery("Q_SFDC_Contact_Score")
           filter2 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("SelectedForPushingToDestination_Contact"))')
           filters_new2.append(filter2)
-          Q_SFDC_Contact_Score._filters = filters_new2
+          Q_SFDC_Contact_Score.filters_ = filters_new2
           #print Q_SFDC_Contact_Score.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Dante_ContactSourceTable',Q_SFDC_Contact_Score.SpecLatticeNamedElements())
 
@@ -190,7 +190,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_SFDC_Lead_Score = conn_mgr.getQuery("Q_SFDC_Lead_Score")
           filter3 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("SelectedForPushingToDestination_Lead"))')
           filters_new3.append(filter3)
-          Q_SFDC_Lead_Score._filters = filters_new3
+          Q_SFDC_Lead_Score.filters_ = filters_new3
 
           #print Q_SFDC_Lead_Score.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_SFDC_Lead_Score',Q_SFDC_Lead_Score.SpecLatticeNamedElements())
@@ -199,7 +199,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Timestamp_PushToDante = conn_mgr.getQuery("Q_Timestamp_PushToDante")
           filter4 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetSourceTable(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToDante_Stage")),LatticeAddressExpressionAtomic(LatticeAddressAtomicNoKeys(ContainerElementName("Timestamp_PushToDante_Stage"))))')
           filters_new4.append(filter4)
-          Q_Timestamp_PushToDante._filters = filters_new4
+          Q_Timestamp_PushToDante.filters_ = filters_new4
 
           #print Q_Timestamp_PushToDante.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Timestamp_PushToDante',Q_Timestamp_PushToDante.SpecLatticeNamedElements())
@@ -208,7 +208,7 @@ class LP_020100_VDB_ModifiedFilters( StepBase ):
           Q_Timestamp_PushToDestination = conn_mgr.getQuery("Q_Timestamp_PushToDestination")
           filter5 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("SFDC_Lead_Contact_ID_IsSelectedForPushToDestination")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Timestamp_PushToDante")))))')
           filters_new5.append(filter5)
-          Q_Timestamp_PushToDestination._filters = filters_new5
+          Q_Timestamp_PushToDestination.filters_ = filters_new5
 
           #print Q_Timestamp_PushToDestination.SpecLatticeNamedElements()
           conn_mgr.setSpec('Q_Timestamp_PushToDestination',Q_Timestamp_PushToDestination.SpecLatticeNamedElements())

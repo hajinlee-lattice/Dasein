@@ -12,7 +12,7 @@ class LP_020100_DL_LoadCRMData( StepBase ):
   
   name        = 'LP_020100_DL_LoadCRMData.py'
   description = 'Reset logic of the LoadCRMData'
-  version     = '$Rev: 70508 $'
+  version     = '$Rev: 70712 $'
 
   def __init__( self, forceApply = False ):
     super( LP_020100_DL_LoadCRMData, self ).__init__( forceApply )

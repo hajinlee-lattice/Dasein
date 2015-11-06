@@ -12,13 +12,13 @@ print ''
 
 i = 0
 for f in q.getFilters():
-    print 'Filter {0}: {1}'.format( i, f.Definition() )
+    print 'Filter {0}: {1}'.format( i, f.definition() )
     print ''
     i += 1
 
 j = 0
 for e in q.getEntities():
-    print 'Entity {0}: {1}'.format( j, e.Definition() )
+    print 'Entity {0}: {1}'.format( j, e.definition() )
     print ''
     j += 1
 

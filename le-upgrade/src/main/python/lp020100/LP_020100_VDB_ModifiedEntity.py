@@ -26,7 +26,7 @@ class LP_020100_VDB_ModifiedEntity( StepBase ):
           conn_mgr.getSpec("Q_Dante_ContactSourceTable")
           conn_mgr.getSpec("Q_Dante_LeadSourceTable")
 
-          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and conn_mgr.getSpec("Q_Dante_ContactSourceTable"):
+          if not conn_mgr.getSpec("Q_Dante_LeadSourceTable") and not conn_mgr.getSpec("Q_Dante_ContactSourceTable"):
               return Applicability.cannotApplyFail
 
       else:

@@ -33,7 +33,7 @@ class LPCheckVersion( StepBase ):
     defn    = 'Undefined'
     try:
       exp_version = appseq.getConnectionMgr().getNamedExpression( 'Version' )
-      defn = exp_version.Object().Definition()
+      defn = exp_version.Object().definition()
       c = re.search( 'LatticeFunctionExpressionConstant\(\"PLS (.*?) Template:\".*LatticeFunctionExpressionConstant\(\"(.*?)\"', defn )
       if c:
         type = c.group(1)
