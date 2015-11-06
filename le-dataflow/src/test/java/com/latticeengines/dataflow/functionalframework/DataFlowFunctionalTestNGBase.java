@@ -25,12 +25,6 @@ import org.springframework.util.StringUtils;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
-import com.latticeengines.domain.exposed.metadata.PrimaryKey;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataflow-context.xml" })
@@ -38,7 +32,7 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFlowFunctionalTestNGBase.class);
-    
+
     public void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
@@ -72,29 +66,5 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
             }
         }
         assertEquals(numRows, expectedNumRows);
-    }
-
-    protected Table createTableFromDir(String tableName, String path, String lastModifiedColName) {
-        Tenant tenant = new Tenant();
-        tenant.setId("T1");
-        tenant.setName("T1");
-        Table table = new Table();
-        table.setTenant(tenant);
-        table.setName(tableName);
-        Extract extract = new Extract();
-        extract.setName("e1");
-        extract.setPath(path);
-        table.addExtract(extract);
-        PrimaryKey pk = new PrimaryKey();
-        Attribute pkAttr = new Attribute();
-        pkAttr.setName("Id");
-        pk.addAttribute("Id");
-        LastModifiedKey lmk = new LastModifiedKey();
-        Attribute lastModifiedColumn = new Attribute();
-        lastModifiedColumn.setName(lastModifiedColName);
-        lmk.addAttribute(lastModifiedColName);
-        table.setPrimaryKey(pk);
-        table.setLastModifiedKey(lmk);
-        return table;
     }
 }

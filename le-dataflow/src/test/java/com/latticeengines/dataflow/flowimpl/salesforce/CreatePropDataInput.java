@@ -23,7 +23,7 @@ public class CreatePropDataInput extends CascadingDataFlowBuilder {
 
         String groupby = addGroupBy("EventTable", //
                 new FieldList("Domain", "Company", "City", "State", "Country", "PropDataHash"), aggregation);
-        String withRowId = addRowId(groupby, "RowId", groupby);
+        String withRowId = addRowId(groupby, "RowId");
         return withRowId;
     }
 

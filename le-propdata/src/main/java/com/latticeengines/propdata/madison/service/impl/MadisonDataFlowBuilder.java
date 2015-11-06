@@ -16,10 +16,6 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 @Scope("prototype")
 public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
 
-    public MadisonDataFlowBuilder() {
-        super(false, false);
-    }
-
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         setDataFlowCtx(dataFlowCtx);

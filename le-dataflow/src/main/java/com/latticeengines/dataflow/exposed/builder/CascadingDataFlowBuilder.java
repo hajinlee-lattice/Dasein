@@ -61,14 +61,15 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 
-import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.Restriction;
-import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
-import com.latticeengines.common.exposed.query.SortEntry;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.Operation;
+import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
@@ -155,17 +156,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         public Node sort(Sort sort) {
-            // XXX TODO
-            return new Node(identifier, builder);
-        }
-
-        public Node sort(String column, boolean ascending) {
-            SingleReferenceLookup lookup = new SingleReferenceLookup("Score", ReferenceInterpretation.COLUMN);
-            SortEntry sortEntry = new SortEntry(lookup, false);
-            List<SortEntry> entries = new ArrayList<>();
-            entries.add(sortEntry);
-            Sort sort = new Sort(entries);
-            return sort(sort);
+            return new Node(builder.register(new SortOperation(identifier, sort, builder)), builder);
         }
 
         public Node filter(String expression, FieldList filterFieldList) {
@@ -186,8 +177,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addMD5(identifier, fieldsToApply, targetFieldName), builder);
         }
 
-        public Node addRowID(String targetFieldName, String tableName) {
-            return new Node(builder.addRowId(identifier, targetFieldName, tableName), builder);
+        public Node addRowID(String targetFieldName) {
+            return new Node(builder.addRowId(identifier, targetFieldName), builder);
         }
 
         public Node addJythonFunction(String scriptName, String functionName, FieldList fieldsToApply,
@@ -219,6 +210,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public Node stopList(Node rhs, String lhsFieldName, String rhsFieldName) {
             return new Node(builder.addStopListFilter(identifier, rhs.identifier, lhsFieldName, rhsFieldName), builder);
+        }
+
+        public Node merge(Node rhs) {
+            return new Node(builder.register(new MergeOperation(identifier, rhs.identifier, builder)), builder);
+        }
+
+        public Node limit(int count) {
+            return new Node(builder.register(new LimitOperation(identifier, count, builder)), builder);
         }
 
         public List<FieldMetadata> getSchema() {
@@ -255,23 +254,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private DataFlowStepListener dataFlowStepListener = new DataFlowStepListener();
 
-    public CascadingDataFlowBuilder() {
-        this(false, false);
-    }
-
     public void reset() {
         counter = 1;
         taps = new HashMap<>();
         pipesAndOutputSchemas = new HashMap<>();
         checkpoints = new HashMap<>();
-    }
-
-    public CascadingDataFlowBuilder(boolean local, boolean checkpoint) {
-        super(local, checkpoint);
-    }
-
-    public Flow<?> build(FlowDef flowDef) {
-        return null;
     }
 
     public Map<String, Tap> getSources() {
@@ -283,6 +270,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     // Typesafe
     public abstract Node constructFlowDefinition(DataFlowParameters parameters);
+
+    public String register(Operation operation) {
+        return register(operation.getOutputPipe(), operation.getOutputMetadata());
+    }
 
     private List<FieldMetadata> getFieldMetadata(Map<String, Field> fieldMap) {
         List<FieldMetadata> fields = new ArrayList<>(fieldMap.size());
@@ -676,6 +667,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return pipesAndOutputSchemas.get(identifier).getKey();
     }
 
+    public AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> getPipeAndMetadata(String identifier) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(identifier);
+        if (pipeAndMetadata == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { identifier });
+        }
+        return pipeAndMetadata;
+    }
+
     public Schema getSchema(String flowName, String identifier, DataFlowContext dataFlowCtx) {
 
         Schema schema = getSchemaFromFile(dataFlowCtx);
@@ -990,12 +989,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(each, newFm);
     }
 
-    protected String addRowId(String prior, String targetFieldName, String tableName) {
+    protected String addRowId(String prior, String targetFieldName) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-        Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowId(new Fields(targetFieldName), tableName), Fields.ALL);
+        Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowId(new Fields(targetFieldName), prior), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata rowIdFm = new FieldMetadata(Type.LONG, Long.class, targetFieldName, null);
         rowIdFm.setPropertyValue("logicalType", "rowid");
@@ -1033,10 +1032,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         String joined = addJoin(lhs, new FieldList(lhsJoinField), rhs, new FieldList(rhsJoinField), JoinType.OUTER);
-        String expression = String.format("%s == null", rhsJoinField);
-        if (lhsJoinField.equals(rhsJoinField)) {
+        if (getFieldNames(pmLhs.getValue()).contains(rhsJoinField)) {
             rhsJoinField = joinFieldName(rhs, rhsJoinField);
         }
+        String expression = String.format("%s == null", rhsJoinField);
         String filtered = addFilter(joined, expression, new FieldList(lhsJoinField, rhsJoinField));
         return filtered;
     }
@@ -1068,9 +1067,15 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
-        Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, SinkMode.REPLACE);
+        AvroScheme scheme = new AvroScheme(schema);
+        if (enforceGlobalOrdering()) {
+            scheme.setNumSinkParts(1);
+        }
+        engine.setEnforceGlobalOrdering(enforceGlobalOrdering());
+
+        Tap<?, ?, ?> sink = new Lfs(scheme, targetPath, SinkMode.REPLACE);
         if (!isLocal()) {
-            sink = new Hfs(new AvroScheme(schema), targetPath, SinkMode.REPLACE);
+            sink = new Hfs(scheme, targetPath, SinkMode.REPLACE);
         }
 
         Properties properties = new Properties();

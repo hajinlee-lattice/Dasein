@@ -1,25 +1,18 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 
-public class ConfigurationBag {
-    private List<HasOptionAndValue> bag;
+public class ConfigurationBag<T extends HasOptionAndValue> {
+    private List<T> bag;
 
-    public ConfigurationBag(List<HasOptionAndValue> bag) {
+    public ConfigurationBag(List<T> bag) {
         this.bag = bag;
     }
 
-    public List<HasOptionAndValue> getBag() {
+    public List<T> getBag() {
         return bag;
-    }
-
-    private HasOptionAndValue findOption(String optionName) {
-        for (HasOptionAndValue inner : bag) {
-            if (inner.getOption().equals(optionName)) {
-                return inner;
-            }
-        }
-        return null;
     }
 
     public String getString(String optionName, String dflt) {
@@ -48,9 +41,68 @@ public class ConfigurationBag {
             return dflt;
         }
         try {
-            return Double.parseDouble(optionName);
+            return Double.parseDouble(inner.getValue());
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to parse option %s as a double", optionName));
         }
+    }
+
+    public void setString(String optionName, String value) {
+        try {
+            T inner = createIfNecessary(optionName);
+            inner.setOption(optionName);
+            inner.setValue(value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setInt(String optionName, int value) {
+        try {
+            T inner = createIfNecessary(optionName);
+            inner.setOption(optionName);
+            inner.setValue(Integer.toString(value));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setDouble(String optionName, double value) {
+        try {
+            T inner = createIfNecessary(optionName);
+            inner.setOption(optionName);
+            inner.setValue(Double.toString(value));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private T createIfNecessary(String optionName) {
+        try {
+            T option = findOption(optionName);
+            if (option == null) {
+                option = classT().newInstance();
+                bag.add(option);
+            }
+            return option;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private T findOption(String optionName) {
+        for (T inner : bag) {
+            if (inner.getOption().equals(optionName)) {
+                return inner;
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<T> classT() {
+        Type[] typeArguments = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
+        Type type = typeArguments[0];
+        return (Class<T>) type;
     }
 }

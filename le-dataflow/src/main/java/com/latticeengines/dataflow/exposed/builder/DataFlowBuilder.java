@@ -29,18 +29,10 @@ public abstract class DataFlowBuilder {
 
     private boolean local;
     private boolean checkpoint;
+    private boolean enforceGlobalOrdering;
     private DataFlowContext dataFlowCtx;
 
     public abstract Table runFlow(DataFlowContext dataFlowCtx);
-
-    public DataFlowBuilder() {
-        this(false, false);
-    }
-
-    public DataFlowBuilder(boolean local, boolean checkpoint) {
-        this.local = local;
-        this.setCheckpoint(checkpoint);
-    }
 
     public boolean isLocal() {
         return local;
@@ -132,6 +124,14 @@ public abstract class DataFlowBuilder {
 
     public void setCheckpoint(boolean checkpoint) {
         this.checkpoint = checkpoint;
+    }
+
+    public boolean enforceGlobalOrdering() {
+        return enforceGlobalOrdering;
+    }
+
+    public void setEnforceGlobalOrdering(boolean enforceGlobalOrdering) {
+        this.enforceGlobalOrdering = enforceGlobalOrdering;
     }
 
     public DataFlowContext getDataFlowCtx() {

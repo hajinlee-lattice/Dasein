@@ -14,6 +14,7 @@ public abstract class ExecutionEngine {
 
     private String name;
     private boolean isDefault;
+    protected boolean enforceGlobalOrdering;
     private static Map<String, ExecutionEngine> engineRegistry = new HashMap<>();
     
     static {
@@ -59,4 +60,6 @@ public abstract class ExecutionEngine {
     public void setDefault(boolean isDefault) {
         this.isDefault = isDefault;
     }
+
+    public void setEnforceGlobalOrdering(boolean enforceGlobalOrdering) { this.enforceGlobalOrdering = enforceGlobalOrdering; }
 }

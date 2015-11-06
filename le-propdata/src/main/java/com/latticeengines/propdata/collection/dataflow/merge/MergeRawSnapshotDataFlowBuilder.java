@@ -14,10 +14,6 @@ public abstract class MergeRawSnapshotDataFlowBuilder extends CascadingDataFlowB
     protected static final String RAW_SOURCE = "RawSource";
     protected static final String SNAPSHOT_SOURCE = "SnapshotSource";
 
-    MergeRawSnapshotDataFlowBuilder() {
-        super(false, false);
-    }
-
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         setDataFlowCtx(dataFlowCtx);

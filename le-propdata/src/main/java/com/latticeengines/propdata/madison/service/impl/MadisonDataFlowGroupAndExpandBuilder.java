@@ -20,10 +20,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Scope("prototype")
 public class MadisonDataFlowGroupAndExpandBuilder extends CascadingDataFlowBuilder {
 
-    public MadisonDataFlowGroupAndExpandBuilder() {
-        super(false, false);
-    }
-
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         setDataFlowCtx(dataFlowCtx);

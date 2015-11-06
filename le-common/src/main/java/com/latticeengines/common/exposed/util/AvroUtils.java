@@ -66,6 +66,20 @@ public class AvroUtils {
         return AvroUtils.getSchema(config, new Path(first));
     }
 
+    public static List<GenericRecord> getDataFromGlob(Configuration configuration, String path) {
+        try {
+            List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
+            List<GenericRecord> output = new ArrayList<>();
+            for (String match : matches) {
+                output.addAll(AvroUtils.getData(configuration, new Path(match)));
+            }
+            return output;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     public static List<GenericRecord> getData(Configuration config, Path path) throws Exception {
         try (FileReader<GenericRecord> reader = getAvroFileReader(config, path)) {
             List<GenericRecord> data = new ArrayList<>();

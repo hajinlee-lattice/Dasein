@@ -23,19 +23,33 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     private ApplicationContext appContext;
 
     @Override
+    public Table executeNamedTransformation(DataFlowContext dataFlowCtx, DataFlowBuilder dataFlow) {
+        validateParameters(dataFlowCtx);
+
+        boolean doCheckpoint = dataFlowCtx.getProperty("CHECKPOINT", Boolean.class);
+
+        Configuration hadoopConfig = dataFlowCtx.getProperty("HADOOPCONF", Configuration.class);
+        // Ensure that we use the fatjars rather than the hadoop class path to
+        // resolve dependencies.
+        // This should eventually be set globally.
+        hadoopConfig.set("mapreduce.job.user.classpath.first", "true");
+        dataFlow.setLocal(hadoopConfig == null || hadoopConfig.get("fs.defaultFS").equals("file:///"));
+        dataFlow.setCheckpoint(doCheckpoint);
+        dataFlow.setEnforceGlobalOrdering(true);
+        return dataFlow.runFlow(dataFlowCtx);
+    }
+
+    @Override
     public Table executeNamedTransformation(DataFlowContext dataFlowCtx, String dataFlowBldrBeanName) {
-        validateParameters(dataFlowCtx, //
-                "TARGETTABLENAME",
-                "QUEUE", //
-                "TARGETPATH", //
-                "CUSTOMER", //
-                "FLOWNAME", //
-                "CHECKPOINT");
-        
+        validateParameters(dataFlowCtx);
+
         ApplicationContext ctx = dataFlowCtx.getProperty("APPCTX", ApplicationContext.class);
-        
+
         if (ctx != null) {
             appContext = ctx;
+        }
+        if (appContext == null) {
+            throw new RuntimeException("ApplicationContext cannot be null");
         }
 
         Object dataFlowBldrBean = appContext.getBean(dataFlowBldrBeanName);
@@ -45,16 +59,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         }
 
         DataFlowBuilder dataFlow = (DataFlowBuilder) dataFlowBldrBean;
-
-        boolean doCheckpoint = dataFlowCtx.getProperty("CHECKPOINT", Boolean.class);
-
-        Configuration hadoopConfig = dataFlowCtx.getProperty("HADOOPCONF", Configuration.class);
-        // Ensure that we use the fatjars rather than the hadoop class path to resolve dependencies.
-        // This should eventually be set globally.
-        hadoopConfig.set("mapreduce.job.user.classpath.first", "true");
-        dataFlow.setLocal(hadoopConfig == null || hadoopConfig.get("fs.defaultFS").equals("file:///"));
-        dataFlow.setCheckpoint(doCheckpoint);
-        return dataFlow.runFlow(dataFlowCtx);
+        return executeNamedTransformation(dataFlowCtx, dataFlow);
     }
 
     private void validateParameters(DataFlowContext dataFlowCtx, String... keys) {
@@ -68,7 +73,17 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         if (missingProps.size() > 0) {
             throw new LedpException(LedpCode.LEDP_26001, new String[] { StringUtils.join(missingProps, ", ") });
         }
-        
+
+    }
+
+    private void validateParameters(DataFlowContext dataFlowCtx) {
+        validateParameters(dataFlowCtx, //
+                "TARGETTABLENAME", //
+                "QUEUE", //
+                "TARGETPATH", //
+                "CUSTOMER", //
+                "FLOWNAME", //
+                "CHECKPOINT");
     }
 
 }

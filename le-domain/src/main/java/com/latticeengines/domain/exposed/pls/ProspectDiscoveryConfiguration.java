@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProspectDiscoveryConfiguration extends ConfigurationBag {
+public class ProspectDiscoveryConfiguration extends ConfigurationBag<ProspectDiscoveryOption> {
     @SuppressWarnings("unchecked")
     public ProspectDiscoveryConfiguration(List<ProspectDiscoveryOption> bag) {
         super(List.class.cast(bag));
@@ -24,5 +24,17 @@ public class ProspectDiscoveryConfiguration extends ConfigurationBag {
 
     public double getDouble(ProspectDiscoveryOptionName option, double dflt) {
         return super.getDouble(option.toString(), dflt);
+    }
+
+    public void setString(ProspectDiscoveryOptionName option, String value) {
+        super.setString(option.toString(), value);
+    }
+
+    public void setInt(ProspectDiscoveryOptionName option, int value) {
+        super.setInt(option.toString(), value);
+    }
+
+    public void setDouble(ProspectDiscoveryOptionName option, double value) {
+        super.setDouble(option.toString(), value);
     }
 }

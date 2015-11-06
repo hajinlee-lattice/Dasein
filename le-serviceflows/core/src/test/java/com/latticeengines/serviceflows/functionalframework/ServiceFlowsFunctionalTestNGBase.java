@@ -1,13 +1,11 @@
 package com.latticeengines.serviceflows.functionalframework;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -60,7 +58,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase<T extends DataFlowParamet
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/Output/" + getFlowBeanName());
+        HdfsUtils.rmdir(yarnConfiguration, getTargetDirectory());
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/checkpoints");
     }
 
@@ -106,7 +104,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase<T extends DataFlowParamet
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
         ctx.setProperty("ENGINE", "MR");
-        ctx.setProperty("TARGETPATH", "/tmp/Output/" + getFlowBeanName());
+        ctx.setProperty("TARGETPATH", getTargetDirectory());
         ctx.setProperty("TARGETTABLENAME", getFlowBeanName());
         ctx.setProperty("FLOWNAME", getFlowBeanName());
         ctx.setProperty("CHECKPOINT", true);
@@ -116,17 +114,16 @@ public abstract class ServiceFlowsFunctionalTestNGBase<T extends DataFlowParamet
         return ctx;
     }
 
+    private String getTargetDirectory() {
+        return "/tmp/Output/" + getFlowBeanName();
+    }
+
     protected List<GenericRecord> readTable(String avroFile) {
-        try {
-            List<String> matches = HdfsUtils.getFilesByGlob(yarnConfiguration, avroFile);
-            List<GenericRecord> output = new ArrayList<>();
-            for (String match : matches) {
-                output.addAll(AvroUtils.getData(yarnConfiguration, new Path(match)));
-            }
-            return output;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return AvroUtils.getDataFromGlob(yarnConfiguration, avroFile);
+    }
+
+    protected List<GenericRecord> readOutput() {
+        return readTable(getTargetDirectory() + "/*.avro");
     }
 
     /**

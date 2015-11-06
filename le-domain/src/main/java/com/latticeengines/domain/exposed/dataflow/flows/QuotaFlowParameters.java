@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.dataflow.flows;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
@@ -9,25 +7,24 @@ import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 
 public class QuotaFlowParameters extends DataFlowParameters {
-    private List<TargetMarket> targetMarkets;
+    private TargetMarket targetMarket;
     private Quota quota;
     private ProspectDiscoveryConfiguration configuration;
 
-    public QuotaFlowParameters(List<TargetMarket> targetMarkets, Quota quota,
-            ProspectDiscoveryConfiguration configuration) {
-        this.targetMarkets = targetMarkets;
+    public QuotaFlowParameters(TargetMarket targetMarket, Quota quota, ProspectDiscoveryConfiguration configuration) {
+        this.targetMarket = targetMarket;
         this.quota = quota;
         this.configuration = configuration;
     }
 
-    @JsonProperty("target_markets")
-    public List<TargetMarket> getTargetMarkets() {
-        return targetMarkets;
+    @JsonProperty("target_market")
+    public TargetMarket getTargetMarket() {
+        return targetMarket;
     }
 
-    @JsonProperty("target_markets")
-    public void setTargetMarkets(List<TargetMarket> targetMarkets) {
-        this.targetMarkets = targetMarkets;
+    @JsonProperty("target_market")
+    public void setTargetMarket(TargetMarket targetMarket) {
+        this.targetMarket = targetMarket;
     }
 
     @JsonProperty("quota")

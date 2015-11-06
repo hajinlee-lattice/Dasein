@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -9,27 +10,40 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Sort {
-    private List<SortEntry> entries;
+    private List<SingleReferenceLookup> lookups;
+    private boolean descending;
 
-    public Sort(List<SortEntry> entries) {
-        this.entries = entries;
+    public Sort(List<SingleReferenceLookup> lookups, boolean descending) {
+        this.lookups = lookups;
+        this.descending = descending;
     }
 
-    @JsonProperty("entries")
-    public List<SortEntry> getEntries() {
-        return entries;
+    public Sort(List<SingleReferenceLookup> lookups) {
+        this.lookups = lookups;
     }
 
-    @JsonProperty("entries")
-    public void setEntries(List<SortEntry> entries) {
-        this.entries = entries;
-    }
-
-    /**
-     * Serialization constructor
-     */
-    @Deprecated
     public Sort() {
+        this(new ArrayList<SingleReferenceLookup>());
+    }
+
+    @JsonProperty("lookups")
+    public List<SingleReferenceLookup> getLookups() {
+        return lookups;
+    }
+
+    @JsonProperty("lookups")
+    public void setLookups(List<SingleReferenceLookup> lookups) {
+        this.lookups = lookups;
+    }
+
+    @JsonProperty("descending")
+    public boolean getDescending() {
+        return descending;
+    }
+
+    @JsonProperty("descending")
+    public void setDescending(boolean descending) {
+        this.descending = descending;
     }
 
     @Override

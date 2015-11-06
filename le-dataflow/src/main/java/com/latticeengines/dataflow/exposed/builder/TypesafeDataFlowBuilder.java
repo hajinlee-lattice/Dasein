@@ -12,6 +12,7 @@ public abstract class TypesafeDataFlowBuilder<T extends DataFlowParameters> exte
     public abstract Node construct(T parameters);
 
     @Override
+    @SuppressWarnings("unchecked")
     public Node constructFlowDefinition(DataFlowParameters parameters) {
         T casted = null;
         try {
@@ -26,9 +27,10 @@ public abstract class TypesafeDataFlowBuilder<T extends DataFlowParameters> exte
 
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
-        throw new IllegalStateException("Not supported");
+         throw new IllegalStateException("Not supported");
     }
 
+    @SuppressWarnings("unchecked")
     private Class<T> classT() {
         Type[] typeArguments = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
         Type type = typeArguments[0];

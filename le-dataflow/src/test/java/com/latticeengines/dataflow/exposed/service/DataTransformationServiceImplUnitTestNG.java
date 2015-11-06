@@ -10,6 +10,6 @@ public class DataTransformationServiceImplUnitTestNG {
 
     @Test(groups = "unit", expectedExceptions = LedpException.class)
     public void validateParameters() {
-        new DataTransformationServiceImpl().executeNamedTransformation(new DataFlowContext(), "doesntMatterShouldThrowException");
+        new DataTransformationServiceImpl().executeNamedTransformation(new DataFlowContext(), "sampleDataFlowBuilder");
     }
 }
