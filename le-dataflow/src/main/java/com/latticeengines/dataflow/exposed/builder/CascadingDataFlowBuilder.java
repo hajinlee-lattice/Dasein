@@ -155,6 +155,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(identifier, builder);
         }
 
+        public Node sort(String field) {
+            return new Node(builder.register(new SortOperation(identifier, field, builder)), builder);
+        }
+
         public Node sort(Sort sort) {
             return new Node(builder.register(new SortOperation(identifier, sort, builder)), builder);
         }

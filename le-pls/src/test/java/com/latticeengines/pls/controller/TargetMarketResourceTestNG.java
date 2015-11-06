@@ -30,6 +30,7 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET.setDeliverProspectsFromExistingAccounts(DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS);
         TARGET_MARKET.setAccountFilter(ACCOUNT_FILTER);
         TARGET_MARKET.setContactFilter(CONTACT_FILTER);
+        TARGET_MARKET.setOffset(OFFSET);
 
         setUpMarketoEloquaTestEnvironment();
         cleanupTargetMarketDB();

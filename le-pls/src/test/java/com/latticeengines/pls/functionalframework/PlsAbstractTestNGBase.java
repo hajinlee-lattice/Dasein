@@ -68,7 +68,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String TEST_QUOTA_ID = "TEST_QUOTA_ID";
     protected static final Integer BALANCE = 100;
     protected static final Integer BALANCE_1 = 200;
-    
+
     protected static final TargetMarket TARGET_MARKET = new TargetMarket();
     protected static final String TEST_TARGET_MARKET_NAME = "TEST_TARGET_MARKET_NAME";
     protected static final Date CREATION_DATE = new Date();
@@ -84,6 +84,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final Boolean IS_DEFAULT = true;
     protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account", new ArrayList<Restriction>());
     protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact", new ArrayList<Restriction>());
+    protected static final Integer OFFSET = 1;
 
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_1 = new ProspectDiscoveryOption();
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_2 = new ProspectDiscoveryOption();
@@ -94,7 +95,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String DOUBLE_VALUE = "2.5";
     protected static final ProspectDiscoveryConfiguration PROSPECT_DISCOVERY_CONFIGURATION =
             new ProspectDiscoveryConfiguration(Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
-    
+
     protected static HashMap<AccessLevel, UserDocument> testingUserSessions;
     protected static List<Tenant> testingTenants;
     protected static Tenant mainTestingTenant;
@@ -102,7 +103,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
 
     @Autowired
     private InternalTestUserService internalTestUserService;
-    
+
     protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
 
     @Value("${pls.test.contract}")
@@ -110,13 +111,13 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
 
     protected RestTemplate restTemplate = new RestTemplate();
     protected RestTemplate magicRestTemplate = new RestTemplate();
-    
+
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase.getMagicAuthHeaderInterceptor();
     protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase.getStatusErrorHandler();
-    
-    protected List<ClientHttpRequestInterceptor> addAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader });
-    protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
+
+    protected List<ClientHttpRequestInterceptor> addAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader});
+    protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader});
 
     protected boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName,
             String lastName, String password) {
@@ -282,6 +283,6 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     }
 
     protected abstract String getRestAPIHostPort();
-    
-    
+
+
 }

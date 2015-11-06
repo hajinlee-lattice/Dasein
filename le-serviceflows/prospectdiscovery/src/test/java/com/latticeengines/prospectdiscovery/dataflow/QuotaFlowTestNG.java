@@ -1,24 +1,24 @@
 package com.latticeengines.prospectdiscovery.dataflow;
 
-import com.latticeengines.common.exposed.query.SingleReferenceLookup;
-import com.latticeengines.common.exposed.query.Sort;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.query.ReferenceInterpretation;
+import com.latticeengines.common.exposed.query.SingleReferenceLookup;
+import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
 public class QuotaFlowTestNG extends ServiceFlowsFunctionalTestNGBase<QuotaFlowParameters> {
@@ -44,7 +44,11 @@ public class QuotaFlowTestNG extends ServiceFlowsFunctionalTestNGBase<QuotaFlowP
         market.setModelId("M1");
         market.setNumProspectsDesired(3);
         market.setDeliverProspectsFromExistingAccounts(true);
-        market.setIntentSort(new Sort());
+        List<SingleReferenceLookup> lookups = new ArrayList<>();
+        lookups.add(new SingleReferenceLookup("Intent1", ReferenceInterpretation.COLUMN));
+        lookups.add(new SingleReferenceLookup("Intent2", ReferenceInterpretation.COLUMN));
+        market.setIntentSort(new Sort(lookups, false));
+        market.setOffset(1);
         ProspectDiscoveryConfiguration configuration = new ProspectDiscoveryConfiguration();
         configuration.setDouble(ProspectDiscoveryOptionName.IntentPercentage, 100);
         Quota quota = new Quota();

@@ -51,6 +51,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private Boolean deliverProspectsFromExistingAccounts;
     private Restriction accountFilter;
     private Restriction contactFilter;
+    private Integer offset;
 
     @Column(name = "NAME", nullable = false)
     @Override
@@ -264,4 +265,14 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
         this.deliverProspectsFromExistingAccounts = deliverProspectsFromExistingAccounts;
     }
 
+    @Column(name = "OFFSET", nullable = false)
+    @JsonProperty
+    public Integer getOffset() {
+        return this.offset;
+    }
+
+    @JsonProperty
+    public void setOffset(Integer offset) {
+        this.offset = offset;
+    }
 }

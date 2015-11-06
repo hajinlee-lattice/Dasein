@@ -13,9 +13,24 @@ import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 
 public class SortOperation extends Operation {
+    public SortOperation(String prior, String field, CascadingDataFlowBuilder builder) {
+        super(builder);
+
+        List<SingleReferenceLookup> lookups = new ArrayList<>();
+        SingleReferenceLookup lookup = new SingleReferenceLookup(field, ReferenceInterpretation.COLUMN);
+        lookups.add(lookup);
+        Sort sort = new Sort(lookups);
+
+        init(prior, sort, builder);
+    }
+
     public SortOperation(String prior, Sort sort, CascadingDataFlowBuilder builder) {
         super(builder);
 
+        init(prior, sort, builder);
+    }
+
+    private void init(String prior, Sort sort, CascadingDataFlowBuilder builder) {
         if (!builder.enforceGlobalOrdering()) {
             throw new RuntimeException("Builder must enforce global ordering in order to perform a sort operation");
         }

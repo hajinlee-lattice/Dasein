@@ -7,7 +7,6 @@ import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.query.ReferenceInterpretation;
-import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
@@ -26,6 +25,9 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         Node contact = addSource("FilteredContact");
         Node existingProspect = addSource("ExistingProspect");
         Node scores = addSource("Scores");
+        Node accountIntent = addSource("Intent");
+
+        account = account.innerJoin("Id", accountIntent, "Id");
 
         TargetMarket market = parameters.getTargetMarket();
         ProspectDiscoveryConfiguration configuration = parameters.getConfiguration();
@@ -43,7 +45,8 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         intent = intent.renamePipe("Intent");
         fit = fit.renamePipe("Fit");
 
-        intent = intent.filter(intentNotNull(market.getIntentSort()));
+        intent = intent.filter( //
+                getIntentExistsExpression(market.getIntentSort()), getFields(market.getIntentSort()));
 
         intent = intent.innerJoin(new FieldList("Id"), contact, new FieldList("AccountId"));
         fit = fit.innerJoin(new FieldList("Id"), contact, new FieldList("AccountId"));
@@ -78,13 +81,22 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         intent = intent.sort(market.getIntentSort());
         fit = fit.sort(fitSort(market));
 
+        intent = intent.addRowID("DeliveryOffset");
+        fit = fit.addRowID("DeliveryOffset");
+
         double intentRatio = configuration.getDouble(ProspectDiscoveryOptionName.IntentPercentage, 50.0) / 100.0;
         intent = intent.limit((int) (intentRatio * (double) market.getNumProspectsDesired()));
         fit = fit.limit((int) ((1.0 - intentRatio) * (double) market.getNumProspectsDesired()));
 
         merged = intent.merge(fit);
 
-        return merged;
+        merged = merged //
+                .addFunction(market.getOffset().toString(), new FieldList(), new FieldMetadata("MarketOffset",
+                        Integer.class));
+
+        merged = merged.sort("DeliveryOffset");
+
+        return merged.retain(new FieldList("Email", "IsIntent", "Id", "Score", "MarketOffset", "DeliveryOffset"));
     }
 
     private Node removePreviouslyGeneratedIntent(Node intent, TargetMarket market, Node existingProspect) {
@@ -122,8 +134,30 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         return new Sort(lookups, true);
     }
 
-    private Restriction intentNotNull(Sort intent) {
-        // TODO
-        return null;
+    private String getIntentExistsExpression(Sort intent) {
+        // TODO use zoltan
+        StringBuilder sb = new StringBuilder();
+        int size = intent.getLookups().size();
+        if (size == 0) {
+            return "true";
+        }
+        for (int i = 0; i < size; ++i) {
+            SingleReferenceLookup lookup = intent.getLookups().get(i);
+            sb.append(lookup.getReference().toString());
+            sb.append(" != ");
+            sb.append("0");
+            if (i != size - 1) {
+                sb.append(" && ");
+            }
+        }
+        return sb.toString();
+    }
+
+    private FieldList getFields(Sort sort) {
+        List<String> fields = new ArrayList<>();
+        for (SingleReferenceLookup lookup : sort.getLookups()) {
+            fields.add(lookup.getReference().toString());
+        }
+        return new FieldList(fields);
     }
 }
