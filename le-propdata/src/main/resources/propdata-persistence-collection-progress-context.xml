@@ -6,16 +6,15 @@
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-    <!-- DAOs for PropData -->
-    <bean id="propDataCollectionDest" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="propDataCollectionProgress" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://${propdata.collection.dest.host}:${propdata.collection.dest.port};databaseName=${propdata.collection.dest.db};" />
+        <property name="url" value="jdbc:sqlserver://${propdata.collection.progress.host}:${propdata.collection.progress.port};databaseName=${propdata.collection.progress.db};" />
         <property name="username" value="${propdata.collection.user}" />
         <property name="password" value="${propdata.collection.password.encrypted}" />
     </bean>
 
-    <bean id="sessionFactoryPropDataCollectionDest" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="propDataCollectionDest" />
+    <bean id="sessionFactoryPropDataCollectionProgress" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="propDataCollectionProgress" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata.collection" />
         <property name="hibernateProperties">
             <props>
@@ -25,12 +24,17 @@
             </props>
         </property>
     </bean>
-    <bean id="transactionManagerPropDataCollectionDest" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-          p:sessionFactory-ref="sessionFactoryPropDataCollectionDest">
-        <qualifier value="propDataCollectionDest" />
+    <bean id="transactionManagerPropDataCollectionProgress" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+          p:sessionFactory-ref="sessionFactoryPropDataCollectionProgress">
+        <qualifier value="propDataCollectionProgress" />
     </bean>
-    <tx:annotation-driven transaction-manager="transactionManagerPropDataCollectionDest" />
+    <tx:annotation-driven transaction-manager="transactionManagerPropDataCollectionProgress" />
 
-    <bean id="propDataCollectionJdbcTemplateDest" class="org.springframework.jdbc.core.JdbcTemplate"
-          p:dataSource-ref="propDataCollectionDest" />
+
+
+    <bean id="featureArchiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.FeatureArchiveProgressDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataCollectionProgress" />
+    </bean>
+
+
 </beans>

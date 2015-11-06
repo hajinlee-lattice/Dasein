@@ -43,6 +43,9 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
     // the test will first archive data between date[0] and date[1], the refresh by data between date[1] and date[2]
     abstract Date[] getDates();
 
+    // tow dates, between which there is no raw data in the test set
+    abstract Date[] getEmptyDataDates();
+
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
@@ -75,6 +78,18 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
         exportToDB(context);
 
         context = createNewProgress(dates[1], dates[2]);
+        context = importFromDB(context);
+        context = transformRawData(context);
+        exportToDB(context);
+
+        cleanupProgressTables();
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testWholeProgress")
+    public void testEmptyInput() {
+        Date[] dates = getEmptyDataDates();
+
+        CollectionJobContext context = createNewProgress(dates[0], dates[1]);
         context = importFromDB(context);
         context = transformRawData(context);
         exportToDB(context);

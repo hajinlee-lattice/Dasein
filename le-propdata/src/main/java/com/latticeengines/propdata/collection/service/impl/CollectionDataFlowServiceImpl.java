@@ -33,6 +33,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Value("${propdata.collection.mapred.reduce.tasks:8}")
     private int reduceTasks;
 
+    @Value("${propdata.collection.cascading.platform:mapred}")
+    private String cascadingPlatform;
+
     @Override
     public void executeTransformRawData(String sourceName, String rawDir, String mergeDataFlow) {
         executeMergeRawSnapshot(sourceName, rawDir, mergeDataFlow);
@@ -56,6 +59,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     private DataFlowContext commonContext(String sourceName, Map<String, String> sources) {
         DataFlowContext ctx = new DataFlowContext();
+        if ("tez".equalsIgnoreCase(cascadingPlatform)) {
+            ctx.setProperty("ENGINE", "TEZ");
+        }
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("CUSTOMER", sourceName);
         ctx.setProperty("RECORDNAME", sourceName);
@@ -70,6 +76,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     private Properties getJobProperties() {
         Properties jobProperties = new Properties();
+        jobProperties.put("mapreduce.job.user.classpath.first", "true");
         if (!useDefaultProperties) {
             jobProperties.put("mapred.reduce.tasks", String.valueOf(reduceTasks));
             jobProperties.put("mapred.tasktracker.map.tasks.maximum", "8");
@@ -78,6 +85,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
             jobProperties.put("mapred.output.compression.type", "BLOCK");
             jobProperties.put("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.BZip2Codec");
         }
+        jobProperties.put("mapred.mapper.new-api", "false");
         return jobProperties;
     }
 

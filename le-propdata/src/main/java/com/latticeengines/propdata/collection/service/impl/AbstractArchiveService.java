@@ -20,6 +20,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressBase;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
@@ -139,6 +141,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
         }
+
         if (progress.getRowsDownloadedToHdfs() > 0 && !importSnapshotDestData(progress)) {
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
@@ -166,13 +169,20 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         entityMgr.updateStatus(progress, ArchiveProgressStatus.TRANSFORMING);
         LoggingUtils.logInfo(log, progress, "Start transforming ...");
 
-        if (progress.getRowsDownloadedToHdfs() <= 0) {
-            LoggingUtils.logInfoWithDuration(log, progress, "Transformed.", startTime);
-            return refreshContextAndDBToStatus(response, progress, ArchiveProgressStatus.TRANSFORMED);
+        // merge raw and snapshot, then output most recent records
+        if (progress.getRowsDownloadedToHdfs() > 0 && !transformRawDataToMostRecent(progress)) {
+            response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
+            return response;
         }
 
-        // merge raw and snapshot, then output most recent records
-        if (!transformRawDataToMostRecent(progress)) {
+        // copy result to snapshot
+        try {
+            String snapshotDir = hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSourceTableName()).toString();
+            String srcDir = workflowDirsInHdfs() + "/Output";
+            HdfsUtils.rmdir(yarnConfiguration, snapshotDir);
+            HdfsUtils.copyFiles(yarnConfiguration, srcDir, snapshotDir);
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to copy data to Snapshot folder.", e);
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
         }
@@ -200,7 +210,8 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         LoggingUtils.logInfo(log, progress, "Start uploading ...");
 
         if (progress.getRowsDownloadedToHdfs() <= 0) {
-            LoggingUtils.logInfoWithDuration(log, progress, "Transformed.", startTime);
+            LoggingUtils.logInfoWithDuration(log, progress, "Uploaded.", startTime);
+            progress.setNumRetries(0);
             return refreshContextAndDBToStatus(response, progress, ArchiveProgressStatus.UPLOADED);
         }
 
@@ -215,7 +226,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
 
         try {
             LoggingUtils.logInfo(log, progress, "Create a clean stage table.");
-            dropJdbcTableIfExists(jdbcTemplateDest, stageTableName);
+            dropJdbcTableIfExists(stageTableName);
             jdbcTemplateDest.execute("SELECT TOP 0 * INTO " + stageTableName + " FROM " + destTable);
 
             long uploadStartTime = System.currentTimeMillis();
@@ -228,8 +239,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             progress.setRowsUploadedToSql(rowsUploaded);
             LoggingUtils.logInfoWithDuration(log, progress, "Uploaded " + rowsUploaded + " rows to stage table.", uploadStartTime);
         } catch (Exception e) {
-            LoggingUtils.logError(log, progress, "Failed to upload data to DB.", e);
-            updateStatusToFailed(progress, "Failed to upload data to DB.");
+            updateStatusToFailed(progress, "Failed to upload data to DB.", e);
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
         } finally {
@@ -238,25 +248,21 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
 
         try {
             LoggingUtils.logInfo(log, progress, "Rename dest table to back up table.");
-            dropJdbcTableIfExists(jdbcTemplateDest, bakTableName);
-            jdbcTemplateDest.execute("EXEC sp_rename '" + destTable + "', '" + bakTableName + "'");
+            swapTableNamesInDestDB(destTable, bakTableName);
 
             LoggingUtils.logInfo(log, progress, "Rename stage table to dest table.");
-            dropJdbcTableIfExists(jdbcTemplateDest, destTable);
-            jdbcTemplateDest.execute("EXEC sp_rename '" + stageTableName + "', '" + destTable + "'");
+            swapTableNamesInDestDB(stageTableName, destTable);
         } catch (Exception e) {
-            LoggingUtils.logError(log, progress, "Failed to swap stage and dest tables", e);
-            updateStatusToFailed(progress, "Failed to swap stage and dest tables");
+            updateStatusToFailed(progress, "Failed to swap stage and dest tables", e);
 
             LoggingUtils.logInfo(log, progress, "Restore backup table to dest table.");
-            dropJdbcTableIfExists(jdbcTemplateDest, destTable);
-            jdbcTemplateDest.execute("EXEC sp_rename '" + bakTableName + "', '" + destTable + "'");
+            swapTableNamesInDestDB(bakTableName, destTable);
 
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
         } finally {
             LoggingUtils.logInfo(log, progress, "Drop backup table");
-            dropJdbcTableIfExists(jdbcTemplateDest, bakTableName);
+            dropJdbcTableIfExists(bakTableName);
         }
 
         // finish
@@ -346,7 +352,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     private boolean importIncrementalRawDataAndUpdateProgress(Progress progress) {
         String targetDir = incrementalDataDirInHdfs(progress);
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
             return false;
         }
 
@@ -355,7 +361,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
 
         if (!importSrcDBBySqoop(getSourceTableName(), targetDir, customer, whereClause, progress)) {
-            updateStatusToFailed(progress, "Failed to import incremental data from DB.");
+            updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
             return false;
         }
 
@@ -377,8 +383,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
                 HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
             }
         } catch (Exception e) {
-            LoggingUtils.logError(log, progress, "Failed to upload avsc.", e);
-            updateStatusToFailed(progress, "Failed to upload avsc.");
+            updateStatusToFailed(progress, "Failed to upload avsc.", e);
             return false;
         }
 
@@ -388,14 +393,14 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     private boolean importSnapshotDestData(Progress progress) {
         String targetDir = hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSourceTableName()).toString();
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
             return false;
         }
 
         String customer = getSqoopCustomerName(progress) + "-downloadSnapshotData" ;
 
         if (!importDestDBBySqoop(getDestTableName(), targetDir, customer, progress)) {
-            updateStatusToFailed(progress, "Failed to import snapshot data from DB.");
+            updateStatusToFailed(progress, "Failed to import snapshot data from DB.", null);
             return false;
         }
 
@@ -437,7 +442,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         // prepare target dir in hdfs
         String targetDir = workflowDirsInHdfs();
         if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir);
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
             return false;
         }
 
@@ -445,8 +450,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         try {
             transformRawDataInternal(progress);
         } catch (Exception e) {
-            log.error("Failed to transform raw data for progress " + progress, e);
-            updateStatusToFailed(progress, "Failed to transform raw data.");
+            updateStatusToFailed(progress, "Failed to transform raw data.", e);
             return false;
         }
 
@@ -470,13 +474,19 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         return entityMgr.getProgressClass().getSimpleName() + "[" + progress.getRootOperationUID() + "]";
     }
 
-    private void dropJdbcTableIfExists(JdbcTemplate jdbcTemplate, String tableName) {
-        jdbcTemplate.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
+    private void dropJdbcTableIfExists(String tableName) {
+        jdbcTemplateDest.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
                 + tableName + "') AND type in (N'U')) DROP TABLE " + tableName);
     }
 
+    private void swapTableNamesInDestDB(String srcTable, String destTable) {
+        dropJdbcTableIfExists(destTable);
+        jdbcTemplateDest.execute("EXEC sp_rename '" + srcTable + "', '" + destTable + "'");
+    }
 
-    private void updateStatusToFailed(Progress progress, String errorMsg) {
+
+    private void updateStatusToFailed(Progress progress, String errorMsg, Exception e) {
+        LoggingUtils.logError(log, progress, "Failed to swap stage and dest tables", e);
         progress.setStatusBeforeFailed(progress.getStatus());
         progress.setErrorMessage(errorMsg);
         entityMgr.updateStatus(progress, ArchiveProgressStatus.FAILED);

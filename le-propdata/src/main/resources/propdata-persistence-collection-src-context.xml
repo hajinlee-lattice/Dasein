@@ -15,7 +15,7 @@
 
     <bean id="sessionFactoryPropDataCollectionSrc" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="propDataCollectionSrc" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata.collection" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
@@ -32,5 +32,4 @@
 
     <bean id="propDataCollectionJdbcTemplateSrc" class="org.springframework.jdbc.core.JdbcTemplate"
           p:dataSource-ref="propDataCollectionSrc" />
-
 </beans>

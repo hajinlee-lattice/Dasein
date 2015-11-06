@@ -15,8 +15,13 @@ final public class LoggingUtils {
         log.info(progressLogPrefix(progress) + message);
     }
 
-    public static <Progress extends ArchiveProgressBase> void logError(Logger log, Progress progress, String message, Exception e) {
-        log.error(progressLogPrefix(progress) + message, e);
+    public static <Progress extends ArchiveProgressBase> void logError(Logger log, Progress progress, String message,
+                                                                       Exception e) {
+        if (e == null) {
+            log.error(progressLogPrefix(progress) + message);
+        } else {
+            log.error(progressLogPrefix(progress) + message, e);
+        }
     }
 
     public static <Progress extends ArchiveProgressBase> void logInfoWithDuration(Logger log, Progress progress,

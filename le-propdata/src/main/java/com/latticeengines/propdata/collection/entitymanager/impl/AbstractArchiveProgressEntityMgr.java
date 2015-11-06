@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressBase;
@@ -26,7 +27,7 @@ public abstract class AbstractArchiveProgressEntityMgr<T extends ArchiveProgress
     }
 
     @Override
-    @Transactional(value = "propDataCollectionDest")
+    @Transactional(value = "propDataCollectionProgress")
     public T insertNewProgress(Date startDate, Date endDate, String creator)
             throws InstantiationException, IllegalAccessException {
         T newProgress = ArchiveProgressBase.constructByDates(startDate, endDate, getProgressClass());
@@ -36,7 +37,7 @@ public abstract class AbstractArchiveProgressEntityMgr<T extends ArchiveProgress
     }
 
     @Override
-    @Transactional(value = "propDataCollectionDest")
+    @Transactional(value = "propDataCollectionProgress")
     public void deleteProgressByRootOperationUid(String rootOperationUid) {
         T progress = progressDao.findByRootOperationUid(rootOperationUid);
         if (progress != null) {
@@ -45,27 +46,27 @@ public abstract class AbstractArchiveProgressEntityMgr<T extends ArchiveProgress
     }
 
     @Override
-    @Transactional(value = "propDataCollectionDest")
+    @Transactional(value = "propDataCollectionProgress")
     public T updateStatus(T progress, ArchiveProgressStatus status) {
         progress.setStatus(status);
         return updateProgress(progress);
     }
 
     @Override
-    @Transactional(value = "propDataCollectionDest")
+    @Transactional(value = "propDataCollectionProgress")
     public T updateProgress(T progress) {
         progressDao.update(progress);
         return progress;
     }
 
     @Override
-    @Transactional(value = "propDataCollectionDest", readOnly = true)
+    @Transactional(value = "propDataCollectionProgress", readOnly = true)
     public T findProgressByRootOperationUid(String rootOperationUid) {
         return progressDao.findByRootOperationUid(rootOperationUid);
     }
 
     @Override
-    @Transactional(value = "propDataCollectionDest", readOnly = true)
+    @Transactional(value = "propDataCollectionProgress", readOnly = true)
     public T findEarliestFailureUnderMaxRetry() {
         List<T> progresses = progressDao.findFailedProgresses();
         for (T progress: progresses) {

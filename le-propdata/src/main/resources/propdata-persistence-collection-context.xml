@@ -8,5 +8,6 @@
 
     <import resource="classpath:propdata-persistence-collection-src-context.xml"/>
     <import resource="classpath:propdata-persistence-collection-dest-context.xml"/>
+    <import resource="classpath:propdata-persistence-collection-progress-context.xml"/>
 
 </beans>
