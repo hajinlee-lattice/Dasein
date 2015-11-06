@@ -27,6 +27,9 @@
         <module>le-dataflow</module>
         <module>le-eai</module>
         <module>le-dataplatform</module>
+        <module>le-swlib</module>
+        <module>le-security</module>
+        <module>le-baton</module>
         <module>le-scoring</module>
     </modules>
 </project>
