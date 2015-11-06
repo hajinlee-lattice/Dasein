@@ -4,10 +4,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.workflow.build.AbstractStep;
+import com.latticeengines.workflow.exposed.build.AbstractStep;
+import com.latticeengines.workflow.exposed.build.BaseStepConfiguration;
 
 @Component("anotherSuccessfulStep")
-public class AnotherSuccessfulStep extends AbstractStep {
+public class AnotherSuccessfulStep extends AbstractStep<BaseStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(AnotherSuccessfulStep.class);
 

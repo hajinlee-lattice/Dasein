@@ -112,6 +112,13 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>*:spring-yarn-batch</artifact>
+                                    <excludes>
+                                        <exclude>org/springframework/yarn/batch/am/BatchAppmaster*</exclude>
+                                        <exclude>org/springframework/yarn/batch/support/YarnJobLauncher*</exclude>
+                                    </excludes>
+                                </filter>                                                               
                             </filters>
                         </configuration>
                         <executions>

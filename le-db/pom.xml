@@ -89,6 +89,7 @@
                                 <argument>com.latticeengines.domain.exposed.modeling.algorithm</argument>
                                 <argument>com.latticeengines.domain.exposed.pls</argument>
                                 <argument>com.latticeengines.domain.exposed.security</argument>
+                                <argument>com.latticeengines.domain.exposed.workflow</argument>
                             </arguments>
                         </configuration>
                     </execution>

@@ -14,7 +14,7 @@
 
     <import resource="classpath:db-context.xml"/>
 
-    <bean id="jobRegistryBeanPostProcessor" class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+    <bean id="jobRegistryBeanPostProcessor" class="com.latticeengines.workflow.core.CustomJobRegistryBeanPostProcessor">
         <property name="jobRegistry" ref="jobRegistry" />
     </bean>
 

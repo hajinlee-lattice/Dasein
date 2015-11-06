@@ -20,45 +20,45 @@
     <bean class="org.springframework.yarn.event.LoggingListener">
         <constructor-arg value="info" />
     </bean>
-    
-    <bean id="transactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
 
-    <bean id="jobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
-        <property name="transactionManager" ref="transactionManager" />
+    <bean id="appMasterTransactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
+
+    <bean id="appMasterJobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+        <property name="transactionManager" ref="appMasterTransactionManager" />
     </bean>
 
-    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
-        <property name="jobRepository" ref="jobRepository" />
+    <bean id="appMasterJobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="appMasterJobRepository" />
     </bean>
 
     <context:component-scan base-package="org.springframework.yarn.batch.am" />
     <bean id="yarnService" class="com.latticeengines.dataplatform.service.impl.YarnServiceImpl" />
 
-    <bean id="itemReader"
+    <bean id="appMasterItemReader"
         class="org.springframework.batch.item.file.FlatFileItemReader">
         <property name="resource" value="file:metadata.json" />
         <property name="lineMapper" value="#{itemProcessor.getLineMapper()}" />
     </bean>
-    
-    <bean id="itemWriter" class="com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerWriter" />
+
+    <bean id="appMasterItemWriter" class="com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerWriter" />
 
     <util:properties id="props">
         <prop key="jobName">singleContainerJob</prop>
     </util:properties>
 
-    <batch:job id="singleContainerJob" restartable="false">
+    <batch:job id="singleContainerJob" restartable="false" job-repository="appMasterJobRepository">
         <batch:step id="master">
-            <batch:tasklet transaction-manager="transactionManager">
-                <batch:chunk reader="itemReader"
-                    processor="itemProcessor" 
-                    writer="itemWriter"
-                    commit-interval="0" />
+            <batch:tasklet transaction-manager="appMasterTransactionManager">
+                <batch:chunk reader="appMasterItemReader"
+                    processor="itemProcessor"
+                    writer="appMasterItemWriter"
+                    commit-interval="2" />
             </batch:tasklet>
         </batch:step>
     </batch:job>
 
-    <yarn-batch:master job-name="singleContainerJob" jobs="singleContainerJob" />
-    
+    <yarn-batch:master job-name="singleContainerJob" jobs="singleContainerJob" job-launcher="appMasterJobLauncher"/>
+
     <import resource="classpath:dataplatform-yarn-config-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
 

@@ -5,12 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.workflow.build.AbstractWorkflow;
-import com.latticeengines.workflow.build.WorkflowBuilder;
-import com.latticeengines.workflow.core.Workflow;
+import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
+import com.latticeengines.workflow.exposed.build.Workflow;
+import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
+import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 
 @Component("sleepableWorkflow")
-public class SleepableWorkflow extends AbstractWorkflow {
+public class SleepableWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Autowired
     private SuccessfulStep successfulStep;
@@ -22,7 +23,7 @@ public class SleepableWorkflow extends AbstractWorkflow {
     private SleepableStep sleepableStep;
 
     @Bean
-    public Job buildSleepableWorkflow() throws Exception {
+    public Job sleepableWorkflowJob() throws Exception {
         return buildWorkflow();
     }
 

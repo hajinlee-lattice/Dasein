@@ -2,7 +2,9 @@ package com.latticeengines.workflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
@@ -27,11 +29,18 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.workflow.service.WorkflowId;
-import com.latticeengines.workflow.service.WorkflowService;
+import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
+import com.latticeengines.workflow.exposed.service.WorkflowService;
 
 @Component("workflowService")
 public class WorkflowServiceImpl implements WorkflowService {
+
+    private static final String WORKFLOW_SERVICE_UUID = "WorkflowServiceUUID";
+    private static final EnumSet<BatchStatus> TERMINAL_STATUS = EnumSet.of(BatchStatus.ABANDONED,
+            BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.STOPPED);
+    private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 24;
 
     @Autowired
     private JobExplorer jobExplorer;
@@ -50,21 +59,28 @@ public class WorkflowServiceImpl implements WorkflowService {
         return new ArrayList<String>(jobRegistry.getJobNames());
     }
 
-    // TODO start a yarn container and start workflow in it using simplejoblauncher
     @Override
-    public WorkflowId start(String workflowName) {
-        Job modelWorkflow = null;
+    public WorkflowId start(String workflowName, WorkflowConfiguration workflowConfiguration) {
+        Job workflow = null;
         try {
-            modelWorkflow = jobRegistry.getJob(workflowName);
+            workflow = jobRegistry.getJob(workflowName);
         } catch (NoSuchJobException e1) {
             throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowName });
         }
-        JobParameters parms = new JobParametersBuilder().addLong("time", System.currentTimeMillis())
-                .addString("testParameter", "testValue", false).toJobParameters();
 
+        JobParametersBuilder parmsBuilder = new JobParametersBuilder().addString(WORKFLOW_SERVICE_UUID, UUID
+                .randomUUID().toString());
+        if (workflowConfiguration != null) {
+            for (String configurationClassName : workflowConfiguration.getConfigRegistry().keySet()) {
+                parmsBuilder.addString(configurationClassName,
+                        workflowConfiguration.getConfigRegistry().get(configurationClassName));
+            }
+        }
+
+        JobParameters parms = parmsBuilder.toJobParameters();
         JobExecution jobExecution = null;
         try {
-            jobExecution = jobLauncher.run(modelWorkflow, parms);
+            jobExecution = jobLauncher.run(workflow, parms);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException e) {
             throw new LedpException(LedpCode.LEDP_28001, e, new String[] { workflowName });
@@ -96,8 +112,15 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public BatchStatus getStatus(WorkflowId workflowId) {
-        return jobExplorer.getJobExecution(workflowId.getId()).getStatus();
+    public WorkflowStatus getStatus(WorkflowId workflowId) {
+        JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
+        WorkflowStatus workflowStatus = new WorkflowStatus();
+        workflowStatus.setStatus(jobExecution.getStatus());
+        workflowStatus.setStartTime(jobExecution.getStartTime());
+        workflowStatus.setEndTime(jobExecution.getEndTime());
+        workflowStatus.setLastUpdated(jobExecution.getLastUpdated());
+
+        return workflowStatus;
     }
 
     private String getWorkflowName(WorkflowId workflowId) {
@@ -117,6 +140,28 @@ public class WorkflowServiceImpl implements WorkflowService {
                 TransformerUtils.invokerTransformer("getStepName"));
 
         return new ArrayList<String>(stepNames);
+    }
+
+    public WorkflowStatus waitForCompletion(WorkflowId workflowId) throws Exception {
+        return waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT);
+    }
+
+    public WorkflowStatus waitForCompletion(WorkflowId workflowId, long maxWaitTime) throws Exception {
+        WorkflowStatus status = null;
+        long start = System.currentTimeMillis();
+
+        // break label for inner loop
+        done: do {
+            status = getStatus(workflowId);
+            if (status == null) {
+                break;
+            } else if (TERMINAL_STATUS.contains(status.getStatus())) {
+                break done;
+            }
+            Thread.sleep(1000);
+        } while (System.currentTimeMillis() - start < maxWaitTime);
+
+        return status;
     }
 
 }

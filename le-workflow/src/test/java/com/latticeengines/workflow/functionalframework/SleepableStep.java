@@ -4,10 +4,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.workflow.build.AbstractStep;
+import com.latticeengines.workflow.exposed.build.AbstractStep;
+import com.latticeengines.workflow.exposed.build.BaseStepConfiguration;
 
 @Component("sleepableStep")
-public class SleepableStep extends AbstractStep {
+public class SleepableStep extends AbstractStep<BaseStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(SleepableStep.class);
 

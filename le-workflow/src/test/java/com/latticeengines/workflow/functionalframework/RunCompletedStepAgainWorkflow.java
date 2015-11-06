@@ -5,12 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.workflow.build.AbstractWorkflow;
-import com.latticeengines.workflow.build.WorkflowBuilder;
-import com.latticeengines.workflow.core.Workflow;
+import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
+import com.latticeengines.workflow.exposed.build.Workflow;
+import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
+import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 
 @Component("runCompletedStepAgainWorkflow")
-public class RunCompletedStepAgainWorkflow extends AbstractWorkflow {
+public class RunCompletedStepAgainWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Autowired
     private FailableWorkflow failableWorkflow;
@@ -19,7 +20,7 @@ public class RunCompletedStepAgainWorkflow extends AbstractWorkflow {
     private RunAgainWhenCompleteStep runAgainWhenCompleteStep;
 
     @Bean
-    public Job buildRunCompletedStepAgainWorkflow() throws Exception {
+    public Job runCompletedStepAgainWorkflowJob() throws Exception {
         return buildWorkflow();
     }
 

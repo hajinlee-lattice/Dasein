@@ -11,15 +11,21 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.workflow.core.DataPlatformInfrastructure;
+import com.latticeengines.workflow.exposed.service.WorkflowService;
 
 @ContextConfiguration(locations = { "classpath:test-workflow-context.xml" })
 public class WorkflowFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+
+    protected static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 5;
 
     @Autowired
     private JobRepository jobRepository;
 
     @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    protected WorkflowService workflowService;
 
     protected JobRepositoryTestUtils jobRepositoryTestUtils;
 

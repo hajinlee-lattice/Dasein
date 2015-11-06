@@ -14,11 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableBatchProcessing(modular = true)
-@Import(JobOperatorInfrastructure.class)
+@Import({AsyncInfrastructure.class, JobOperatorInfrastructure.class})
 public class DataPlatformInfrastructure implements BatchConfigurer {
 
     public static final String WORKFLOW_PREFIX = "WORKFLOW_";
@@ -28,6 +29,9 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private TaskExecutor simpleAsyncTaskExecutor;
 
     @Value("${db.datasource.type}")
     private String databaseType;
@@ -39,6 +43,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
         factory.setTransactionManager(getTransactionManager());
         factory.setDatabaseType(databaseType);
         factory.setTablePrefix(WORKFLOW_PREFIX);
+        factory.setValidateTransactionState(false);
         factory.afterPropertiesSet();
         return (JobRepository) factory.getObject();
     }
@@ -52,6 +57,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
     public JobLauncher getJobLauncher() throws Exception {
         SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
         jobLauncher.setJobRepository(getJobRepository());
+        jobLauncher.setTaskExecutor(simpleAsyncTaskExecutor);
         jobLauncher.afterPropertiesSet();
         return jobLauncher;
     }

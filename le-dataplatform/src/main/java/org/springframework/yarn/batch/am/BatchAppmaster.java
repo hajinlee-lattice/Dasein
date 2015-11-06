@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.util.RackResolver;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -42,11 +41,10 @@ import org.springframework.yarn.integration.ip.mind.binding.BaseObject;
 import org.springframework.yarn.integration.ip.mind.binding.BaseResponseObject;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.yarn.ProgressMonitor;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
-import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
+import com.latticeengines.dataplatform.exposed.yarn.runtime.ContainerRuntimeProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -61,10 +59,6 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     private Configuration yarnConfiguration;
 
     private List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
-
-    private LedpMetricsMgr ledpMetricsMgr = null;
-    
-    private ProgressMonitor monitor;
 
     private String priority;
 
@@ -86,16 +80,12 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
             ((AbstractLauncher) getLauncher()).addInterceptor(this);
         }
         RackResolver.init(getConfiguration());
-        monitor = new ProgressMonitor(super.getAllocator());
     }
 
     @Override
     public void setParameters(Properties parameters) {
         if (parameters == null) {
             return;
-        }
-        for (Map.Entry<Object, Object> parameter : parameters.entrySet()) {
-            log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
         }
         super.setParameters(parameters);
 
@@ -116,7 +106,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
     @Override
     public void submitApplication() {
-        log.info("Submitting application.");
+        log.info("Submitting application from custom BatchAppMaster.");
         registerAppmaster();
         start();
         ApplicationAttemptId appAttemptId = getApplicationAttemptId();
@@ -125,36 +115,22 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
             ((AbstractAllocator) getAllocator()).setApplicationAttemptId(appAttemptId);
         }
         final String appId = appAttemptId.getApplicationId().toString();
-        ledpMetricsMgr = LedpMetricsMgr.getInstance(appAttemptId.toString());
-        ledpMetricsMgr.setPriority(priority);
-        ledpMetricsMgr.setCustomer(customer);
-        final long appStartTime = System.currentTimeMillis();
-        ledpMetricsMgr.setAppStartTime(appStartTime);
 
         log.info("Application submitted with app id = " + appId);
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                AppInfo appInfo = yarnService.getApplication(appId);
-
-                String queue = appInfo.getQueue();
-                if (queue == null) {
-                    throw new LedpException(LedpCode.LEDP_12006);
-                }
-                ledpMetricsMgr.setQueue(queue);
-                ledpMetricsMgr.start();
-
-                long appSubmissionTime = appInfo.getStartTime();
-                log.info("App start latency = " + (appStartTime - appSubmissionTime));
-                ledpMetricsMgr.setAppSubmissionTime(appSubmissionTime);
-            }
-        }).start();
 
         for (PartitionHandler handler : partitionHandlers) {
             if (handler instanceof AbstractPartitionHandler) {
                 ((AbstractPartitionHandler) handler).setBatchAppmaster(this);
             }
+        }
+
+        Properties parameters = super.getParameters();
+        parameters.put(ContainerRuntimeProperty.APPLICATION_ID.name(), appId);
+        super.setParameters(parameters);
+
+        log.info("Launching job with parameters");
+        for (Map.Entry<Object, Object> parameter : parameters.entrySet()) {
+            log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
         }
 
         try {
@@ -169,7 +145,6 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
                 break;
             }
         }
-        ledpMetricsMgr.publishMetricsNow();
         notifyCompleted();
     }
 
@@ -177,7 +152,9 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     public void onApplicationEvent(AbstractYarnEvent event) {
         super.onApplicationEvent(event);
         if (event instanceof JobExecutionEvent) {
-            jobExecutions.add(((JobExecutionEvent) event).getJobExecution());
+            JobExecutionEvent jobExecutionEvent = (JobExecutionEvent) event;
+            JobExecution jobExecution = jobExecutionEvent.getJobExecution();
+            jobExecutions.add(jobExecution);
         }
     }
 
@@ -234,7 +211,6 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         if (getAppmasterService() instanceof SmartLifecycle) {
             ((SmartLifecycle) getAppmasterService()).start();
         }
-        monitor.start();
     }
 
     private void setRuntimeConfig(Properties parameters) throws IOException {
@@ -242,22 +218,13 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         File progressConfig = new File(System.getProperty("user.dir") + "/" + runtimeConfig);
         log.info(progressConfig.getAbsolutePath());
         List<String> lines = new ArrayList<>();
-        lines.add("host=" + monitor.getHost());
-        lines.add("port=" + Integer.toString(monitor.getPort()));
         FileUtils.writeLines(progressConfig, lines);
-        log.info("Writing runtime host: " + monitor.getHost() + " port: " + monitor.getPort());
     }
 
     @Override
     public void doStop() {
         super.doStop();
         cleanupJobDir();
-        monitor.stop();
-        
-        if (ledpMetricsMgr != null) {
-            ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
-            ledpMetricsMgr.publishMetricsNow();
-        }
     }
 
     private void cleanupJobDir() {

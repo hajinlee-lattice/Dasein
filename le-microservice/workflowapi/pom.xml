@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-workflowapi-microservice</artifactId>
+    <packaging>war</packaging>
+    <name>le-${component-name}</name>
+    <description>LE WORKFLOWAPI</description>
+
+    <properties>
+        <component-name>workflowapi-microservice</component-name>
+        <le.workflowapi.version>2.0.16-SNAPSHOT</le.workflowapi.version>
+        <le.microservice.version>2.0.16-SNAPSHOT</le.microservice.version>
+    </properties>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-microservice-parent</artifactId>
+        <version>2.0.16-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-workflowapi</artifactId>
+            <version>${le.workflowapi.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-workflowapi</artifactId>
+            <version>${le.workflowapi.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-microservice</artifactId>
+            <version>${le.microservice.version}</version>
+            <classifier>classes</classifier>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.30</version>
+        </dependency>
+    </dependencies>
+</project>
