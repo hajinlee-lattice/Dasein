@@ -44,5 +44,7 @@
         <module>le-admin</module>
         <module>le-release</module>
         <module>le-liaison</module>
+        <module>le-workflow</module>
+        <module>le-workflowapi</module>
     </modules>
 </project>
