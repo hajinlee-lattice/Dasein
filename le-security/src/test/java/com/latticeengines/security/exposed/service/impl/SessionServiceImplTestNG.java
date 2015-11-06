@@ -24,7 +24,7 @@ import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
 public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
-    
+
     private Ticket ticket;
     private Tenant tenant;
     private final String testUsername = "sessionservice_tester@test.lattice-engines.com";
@@ -34,16 +34,17 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @Autowired
     private SessionService sessionService;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         String passwd = DigestUtils.sha256Hex(adminPassword);
-        ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
+        ticket = globalAuthenticationService.authenticateUser(adminUsername,
+                passwd);
         assertNotNull(ticket);
         Session session = login(adminUsername, adminPassword);
         tenant = session.getTenant();
     }
-    
+
     @Test(groups = "functional", expectedExceptions = NullPointerException.class)
     public void attachNullTicket() {
         sessionService.attach(null);
@@ -57,7 +58,8 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "attach" })
     public void retrieve() {
-        Ticket t = new Ticket(ticket.getUniqueness() + "." + ticket.getRandomness());
+        Ticket t = new Ticket(ticket.getUniqueness() + "."
+                + ticket.getRandomness());
         Session session = sessionService.retrieve(t);
         assertNotNull(session);
         assertTrue(session.getRights().size() >= 4);
@@ -69,20 +71,17 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
     public void interpretGlobalAuthRights() {
         // rights in rights out
         List<GrantedRight> rightsIn = Arrays.asList(
-                GrantedRight.VIEW_PLS_CONFIGURATION,
-                GrantedRight.VIEW_PLS_MODELS
-        );
+                GrantedRight.VIEW_PLS_CONFIGURATIONS,
+                GrantedRight.VIEW_PLS_MODELS);
         AccessLevel levelIn;
-        List<GrantedRight> rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
+        List<GrantedRight> rightsOut = AccessLevel.INTERNAL_USER
+                .getGrantedRights();
         AccessLevel levelOut = AccessLevel.INTERNAL_USER;
         testInterpretGARights(rightsIn, null, rightsOut, levelOut);
 
-        rightsIn = Arrays.asList(
-                GrantedRight.VIEW_PLS_CONFIGURATION,
-                GrantedRight.VIEW_PLS_MODELS,
-                GrantedRight.VIEW_PLS_MODELS,
-                GrantedRight.EDIT_PLS_MODELS
-        );
+        rightsIn = Arrays.asList(GrantedRight.VIEW_PLS_CONFIGURATIONS,
+                GrantedRight.VIEW_PLS_MODELS, GrantedRight.VIEW_PLS_MODELS,
+                GrantedRight.EDIT_PLS_MODELS);
         rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
         levelOut = AccessLevel.INTERNAL_USER;
         testInterpretGARights(rightsIn, null, rightsOut, levelOut);
@@ -95,20 +94,20 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
         testInterpretGARights(rightsIn, levelIn, rightsOut, levelOut);
 
         // level + rights in level + rights out
-        rightsIn = Arrays.asList(
-                GrantedRight.VIEW_PLS_MODELS, GrantedRight.VIEW_PLS_CONFIGURATION);
+        rightsIn = Arrays.asList(GrantedRight.VIEW_PLS_MODELS,
+                GrantedRight.VIEW_PLS_CONFIGURATIONS);
         levelIn = AccessLevel.INTERNAL_USER;
         rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
         levelOut = AccessLevel.INTERNAL_USER;
         testInterpretGARights(rightsIn, levelIn, rightsOut, levelOut);
     }
 
-    private void testInterpretGARights(
-            List<GrantedRight> rightsIn, AccessLevel levelIn,
-            List<GrantedRight> rightsOut, AccessLevel levelOut
-    ) {
+    private void testInterpretGARights(List<GrantedRight> rightsIn,
+            AccessLevel levelIn, List<GrantedRight> rightsOut,
+            AccessLevel levelOut) {
         makeSureUserDoesNotExist(testUsername);
-        createUser(testUsername, testUsername, "Test", "Tester", generalPasswordHash);
+        createUser(testUsername, testUsername, "Test", "Tester",
+                generalPasswordHash);
 
         if (levelIn != null) {
             grantRight(levelIn.name(), tenant.getId(), testUsername);
