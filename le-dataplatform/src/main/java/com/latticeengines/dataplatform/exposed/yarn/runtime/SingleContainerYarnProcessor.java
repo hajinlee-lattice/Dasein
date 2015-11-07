@@ -93,7 +93,9 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     @Override
     public void beforeStep(StepExecution stepExecution) {
         String strAppId = stepExecution.getJobParameters().getString(ContainerRuntimeProperty.APPLICATION_ID.name());
-        appId = YarnUtils.appIdFromString(strAppId);
+        if (strAppId != null) {
+            appId = YarnUtils.appIdFromString(strAppId);
+        }
     }
 
     @Override
@@ -102,3 +104,4 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     }
 
 }
+
