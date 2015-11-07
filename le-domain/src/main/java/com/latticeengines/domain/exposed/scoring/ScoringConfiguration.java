@@ -9,49 +9,61 @@ public class ScoringConfiguration {
 
     private String customer;
 
+    private String uniqueKeyColumn;
+
     private String sourceDataDir;
 
     private String targetResultDir;
 
-    private List<String> modelGuids  = new ArrayList<>();
+    private List<String> modelGuids = new ArrayList<>();
 
     @JsonProperty("customer")
-    public String getCustomer(){
+    public String getCustomer() {
         return customer;
     }
 
     @JsonProperty("customer")
-    public void setCustomer(String customer){
+    public void setCustomer(String customer) {
         this.customer = customer;
     }
 
+    @JsonProperty("unique_key_column")
+    public String getUniqueKeyColumn() {
+        return uniqueKeyColumn;
+    }
+
+    @JsonProperty("unique_key_column")
+    public void setUniqueKeyColumn(String uniqueKeyColumn) {
+        this.uniqueKeyColumn = uniqueKeyColumn;
+    }
+
     @JsonProperty("source_data_dir")
-    public String getSourceDataDir(){
+    public String getSourceDataDir() {
         return sourceDataDir;
     }
 
     @JsonProperty("source_data_dir")
-    public void setSourceDataDir(String sourceDataDir){
+    public void setSourceDataDir(String sourceDataDir) {
         this.sourceDataDir = sourceDataDir;
     }
 
     @JsonProperty("target_result_dir")
-    public String getTargetResultDir(){
+    public String getTargetResultDir() {
         return targetResultDir;
     }
 
     @JsonProperty("target_result_dir")
-    public void setTargetResultDir(String targetResultDir){
+    public void setTargetResultDir(String targetResultDir) {
         this.targetResultDir = targetResultDir;
     }
 
     @JsonProperty("model_guids")
-    public List<String> getModelGuids(){
+    public List<String> getModelGuids() {
         return modelGuids;
     }
 
     @JsonProperty("model_guids")
-    public void setModelGuids(List<String> modelGuids){
+    public void setModelGuids(List<String> modelGuids) {
         this.modelGuids = modelGuids;
     }
 }
