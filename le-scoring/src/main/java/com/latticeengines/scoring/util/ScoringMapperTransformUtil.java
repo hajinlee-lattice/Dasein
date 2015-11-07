@@ -230,8 +230,7 @@ public class ScoringMapperTransformUtil {
         ObjectNode jsonObj = new ObjectMapper().createObjectNode();
         String leadId = jsonNode.get(ScoringDaemonService.UNIQUE_KEY_COLUMN).asText();
 
-        ArrayNode jsonArray = new ObjectMapper().createArrayNode();
-        jsonObj.set("value", jsonArray);
+        ArrayNode jsonArray = jsonObj.putArray("value");
         jsonObj.put("key", leadId);
 
         ObjectMapper mapper = new ObjectMapper();
