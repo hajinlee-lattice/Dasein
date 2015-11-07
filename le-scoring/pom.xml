@@ -336,12 +336,6 @@
             <version>${le.monitor.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.googlecode.json-simple</groupId>
-                    <artifactId>json-simple</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
