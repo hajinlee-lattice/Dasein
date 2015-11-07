@@ -68,7 +68,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), maxInputSplitSize);
         properties.setProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name(), minInputSplitSize);
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
-        properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.MIN_VALUE + "");
+        properties.setProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name(), scoringConfig.getUniqueKeyColumn());
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
 

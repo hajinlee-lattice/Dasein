@@ -14,8 +14,8 @@ import org.apache.avro.Schema.Field;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
-import org.json.simple.JSONObject;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
@@ -80,10 +80,9 @@ public class ScoringJobUtil {
         return modelUrlsToLocalize;
     }
 
-    @SuppressWarnings("unchecked")
     public static void generateDataTypeSchema(Schema schema, String dataTypeFilePath, Configuration config) {
         List<Field> fields = schema.getFields();
-        JSONObject jsonObj = new JSONObject();
+        ObjectNode jsonObj = new ObjectMapper().createObjectNode();
         for (Field field : fields) {
             String type = field.schema().getTypes().get(0).getName();
             if (type.equals("string") || type.equals("bytes"))
@@ -92,7 +91,7 @@ public class ScoringJobUtil {
                 jsonObj.put(field.name(), 0);
         }
         try {
-            HdfsUtils.writeToFile(config, dataTypeFilePath, jsonObj.toJSONString());
+            HdfsUtils.writeToFile(config, dataTypeFilePath, jsonObj.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

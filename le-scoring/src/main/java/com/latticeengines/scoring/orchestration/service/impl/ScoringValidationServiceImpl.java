@@ -46,7 +46,7 @@ public class ScoringValidationServiceImpl implements ScoringValidationService {
 
     private void validateLeadId(ScoringCommand scoringCommand) {
         if (!metadataService.checkIfColumnExists(scoringJdbcTemplate, scoringCommand.getTableName(),
-                ScoringDaemonService.LEAD_RECORD_LEAD_ID_COLUMN)) {
+                ScoringDaemonService.UNIQUE_KEY_COLUMN)) {
             throw new LedpException(LedpCode.LEDP_20003);
         }
     }

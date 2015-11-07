@@ -8,12 +8,14 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.fs.Path;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -42,7 +44,7 @@ public class ScoringMapperValidateUtilUnitTestNG {
 
     @Test(groups = "unit")
     public void testValidateLocalizedFiles() {
-        Map<String, JSONObject> mockModels = new HashMap<String, JSONObject>();
+        Map<String, JsonNode> mockModels = new HashMap<>();
 
         try {
             ScoringMapperValidateUtil.validateLocalizedFiles(true, true, mockModels);
@@ -51,7 +53,7 @@ public class ScoringMapperValidateUtilUnitTestNG {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20020);
         }
 
-        JSONObject obj = new JSONObject();
+        JsonNode obj = new ObjectMapper().createObjectNode();
         mockModels.put(MODEL_ID, obj);
 
         try {
@@ -76,31 +78,30 @@ public class ScoringMapperValidateUtilUnitTestNG {
 
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "unit")
-    public void testValidateDatatype() throws IOException, ParseException {
-        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
+    public void testValidateDatatype() throws IOException {
+        HashMap<String, JsonNode> models = new HashMap<>();
         URL modelUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
+                .getSystemResource("com/latticeengines/scoring/models/60fd2fa4-9868-464e-a534-3205f52c41f0");
         String modelFileName = modelUrl.getFile();
         Path modelPath = new Path(modelFileName);
-        JSONObject modelJsonObj = ScoringMapperTransformUtil.parseModelFiles(modelPath);
+        JsonNode modelJsonObj = ScoringMapperTransformUtil.parseModelFiles(modelPath);
         String modelGuid = modelPath.getName();
         models.put(modelGuid, modelJsonObj);
 
-        JSONObject datatype = null;
         URL datatypeUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/data/" + "datatype.avsc");
         String datatypeFileName = datatypeUrl.getFile();
         Path datatypePath = new Path(datatypeFileName);
-        datatype = ScoringMapperTransformUtil.parseDatatypeFile(datatypePath);
+        JsonNode datatype = ScoringMapperTransformUtil.parseDatatypeFile(datatypePath);
         try {
             ScoringMapperValidateUtil.validateDatatype(datatype, models.get(modelGuid), modelGuid);
         } catch (LedpException e1) {
+            System.out.println(ExceptionUtils.getStackTrace(e1));
             Assert.fail("It should pass the validation without throwing any exceptions.");
         }
 
         try {
-            ScoringMapperValidateUtil.validateDatatype(datatype, new JSONObject(), "fakeModelID");
+            ScoringMapperValidateUtil.validateDatatype(datatype, new ObjectMapper().createObjectNode(), "fakeModelID");
             Assert.fail("should have thrown exception.");
         } catch (LedpException e1) {
             assertTrue(e1.getCode() == LedpCode.LEDP_20001,
@@ -108,8 +109,8 @@ public class ScoringMapperValidateUtilUnitTestNG {
         }
 
         // datatype can only be 0 or 1
-        assertTrue(datatype.containsKey("SemrushRank"), "datatype contains the key 'SemrushRank'");
-        datatype.put("SemrushRank", 2l);
+        assertTrue(datatype.has("SemrushRank"), "datatype contains the key 'SemrushRank'");
+        ((ObjectNode) datatype).put("SemrushRank", 2l);
         try {
             ScoringMapperValidateUtil.validateDatatype(datatype, models.get(modelGuid), modelGuid);
             Assert.fail("should have thrown exception.");
@@ -117,10 +118,10 @@ public class ScoringMapperValidateUtilUnitTestNG {
             assertTrue(e1.getCode() == LedpCode.LEDP_20001, "Containing unknown datatype cannot pass the validation.");
         }
         // change the wrong value back to correct
-        datatype.put("SemrushRank", 0l);
+        ((ObjectNode) datatype).put("SemrushRank", 0l);
 
-        datatype.remove("PercentileModel");
-        assertFalse(datatype.containsKey("PercentileModel"), "datatype does not contain the key 'PercentileModel'");
+        ((ObjectNode) datatype).remove("PercentileModel");
+        assertFalse(datatype.has("PercentileModel"), "datatype does not contain the key 'PercentileModel'");
         try {
             ScoringMapperValidateUtil.validateDatatype(datatype, models.get(modelGuid), modelGuid);
             Assert.fail("should have thrown exception.");
@@ -128,8 +129,8 @@ public class ScoringMapperValidateUtilUnitTestNG {
             assertTrue(e1.getCode() == LedpCode.LEDP_20001, "Missing required column cannot pass the validation.");
         }
 
-        datatype.put("PercentileModel", 0l);
-        assertTrue(datatype.containsKey("PercentileModel"), "datatype contains the key 'PercentileModel'");
+        ((ObjectNode) datatype).put("PercentileModel", 0l);
+        assertTrue(datatype.has("PercentileModel"), "datatype contains the key 'PercentileModel'");
         try {
             ScoringMapperValidateUtil.validateDatatype(datatype, models.get(modelGuid), modelGuid);
             Assert.fail("should have thrown exception.");

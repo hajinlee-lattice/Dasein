@@ -194,6 +194,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name(), minInputSplitSize);
         properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
+        properties.setProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name(), ScoringDaemonService.UNIQUE_KEY_COLUMN);
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
 

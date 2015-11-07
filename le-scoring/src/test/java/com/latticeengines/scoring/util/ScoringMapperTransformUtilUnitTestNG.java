@@ -15,14 +15,14 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
@@ -35,17 +35,11 @@ public class ScoringMapperTransformUtilUnitTestNG {
     private final static String MODEL_PATH = "com/latticeengines/scoring/models/";
     private final static String PYTHON_PATH = "com/latticeengines/scoring/python/scoring.py";
     private final static String MODEL_SUPPORTED_FILE_PATH = "com/latticeengines/scoring/models/supportedFiles/";
-    private final static String MODEL_ID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
+    private final static String MODEL_ID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
     private final static String MODEL_NAME = "2Checkout_relaunch_PLSModel_2015-03-19_15-37";
     private final static String PROPER_TEST_RECORD = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
-            + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
-    private final static String IMPROPER_TEST_RECORD_WITH_FAKE_MODEL_ID = "{\"LeadID\": \"837395\", \"ModelingID\": 113881, \"PercentileModel\": null, "
-            + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 36, \"C_Job_Role1\": \"\", "
-            + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_SOME_RANDOM_MODEL_ID\"}";
-    private final static String IMPROPER_TEST_RECORD_WITH_NO_MODEL_GUID = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
-            + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
-            + "\"BusinessSocialPresence\": \"True\"}";
+            + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI\"}";
     private final static String IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID = "{\"ModelingID\": 113880, \"PercentileModel\": null, "
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
             + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
@@ -67,7 +61,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testProcessLocalizedFiles() throws IOException, ParseException {
+    public void testProcessLocalizedFiles() throws IOException {
 
         LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
@@ -78,29 +72,29 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testParseDatatypeFile() throws IOException, ParseException {
+    public void testParseDatatypeFile() throws IOException {
         URL url = ClassLoader.getSystemResource(DATA_PATH + "mock_datatype.avsc");
         String fileName = url.getFile();
         Path path = new Path(fileName);
-        JSONObject datatypeObj = ScoringMapperTransformUtil.parseDatatypeFile(path);
+        JsonNode datatypeObj = ScoringMapperTransformUtil.parseDatatypeFile(path);
         assertTrue(datatypeObj.size() == 7, "datatypeObj should have 7 objects");
-        assertTrue(datatypeObj.get("ModelingID").equals(new Long(1)), "parseDatatypeFile should be successful");
+        assertTrue(datatypeObj.get("ModelingID").asDouble() == 1L, "parseDatatypeFile should be successful");
     }
 
     @Test(groups = "unit")
-    public void testParseModelFiles() throws IOException, ParseException {
+    public void testParseModelFiles() throws IOException {
         String[] targetFiles = { "encoder.py", "pipeline.py", "pipelinefwk.py", "pipelinesteps.py", "scoringengine.py",
                 "STPipelineBinary.p" };
 
-        JSONObject modelJson = ScoringMapperTransformUtil.parseModelFiles(modelPath);
+        JsonNode modelJson = ScoringMapperTransformUtil.parseModelFiles(modelPath);
         Assert.assertNotNull(modelJson);
-        Assert.assertEquals(modelJson.get(ScoringDaemonService.AVERAGE_PROBABILITY), 0.011919253398255223);
+        Assert.assertEquals(modelJson.get(ScoringDaemonService.AVERAGE_PROBABILITY).asDouble(), 0.011919253398255223);
         Assert.assertNotNull(modelJson.get(ScoringDaemonService.BUCKETS));
         Assert.assertNotNull(modelJson.get(ScoringDaemonService.CALIBRATION));
         Assert.assertNotNull(modelJson.get(ScoringDaemonService.INPUT_COLUMN_METADATA));
         Assert.assertNotNull(modelJson.get(ScoringDaemonService.MODEL));
         Assert.assertNotNull(modelJson.get(SUMMARY));
-        Assert.assertEquals(modelJson.get(ScoringDaemonService.BUCKETS_NAME), MODEL_NAME);
+        Assert.assertEquals(modelJson.get(ScoringDaemonService.BUCKETS_NAME).asText(), MODEL_NAME);
         Assert.assertNotNull(modelJson.get(ScoringDaemonService.PERCENTILE_BUCKETS));
         for (int i = 0; i < targetFiles.length; i++) {
             System.out.println("Current target file is " + targetFiles[i]);
@@ -143,7 +137,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testTransformAndWriteLead() throws IOException, ParseException {
+    public void testTransformAndWriteLead() throws IOException {
 
         String expectedFileName = MODEL_ID + "-0";
         File expectedFile = new File(expectedFileName);
@@ -156,13 +150,14 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
         LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
-        ScoringMapperTransformUtil.transformAndWriteLead(PROPER_TEST_RECORD, modelInfoMap, leadFileBufferMap,
-                localizedFiles, 10000);
+        JsonNode jsonNode = new ObjectMapper().readTree(PROPER_TEST_RECORD);
+        ScoringMapperTransformUtil.transformAndWriteLead(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles,
+                10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
 
         Assert.assertNotNull(modelInfoMap);
         Assert.assertEquals(modelInfoMap.size(), 1);
         Assert.assertEquals(modelInfoMap.get(MODEL_ID).getModelId(),
-                "FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
+                "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
         Assert.assertEquals(modelInfoMap.get(MODEL_ID).getLeadNumber(), 1);
         Assert.assertNotNull(leadFileBufferMap);
         Assert.assertEquals(leadFileBufferMap.size(), 1);
@@ -179,45 +174,42 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Assert.assertTrue(expectedFile.delete());
     }
 
-    @Test(groups = "unit")
-    private boolean transformedLeadIsCorrect(String transformedString) throws ParseException {
+    private boolean transformedLeadIsCorrect(String transformedString) throws JsonProcessingException, IOException {
 
-        JSONParser parser = new JSONParser();
-        JSONObject j = (JSONObject) parser.parse(transformedString);
-        assertTrue(j.get("key").equals("837394"));
-        JSONArray arr = (JSONArray) j.get("value");
+        JsonNode j = new ObjectMapper().readTree(transformedString);
+        assertTrue(j.get("key").asText().equals("837394"));
+        ArrayNode arr = (ArrayNode) j.get("value");
         return (arr.size() == 194 && containsRightContents(arr));
     }
 
-    private boolean containsRightContents(JSONArray arr) {
+    private boolean containsRightContents(ArrayNode arr) {
         boolean result = true;
         for (int i = 0; i < arr.size() && result; i++) {
-            JSONObject obj = (JSONObject) arr.get(i);
-            String key = (String) obj.get("Key");
+            JsonNode obj = arr.get(i);
+            String key = obj.get("Key").asText();
             switch (key) {
             case "PercentileModel":
-                if (!((String) ((JSONObject) obj.get("Value")).get(LEAD_SERIALIZE_TYPE_KEY)).equals("String|")) {
+                if (!obj.get("Value").get(LEAD_SERIALIZE_TYPE_KEY).asText().equals("String|")) {
                     result = false;
                 }
                 break;
             case "FundingFiscalYear":
-                if (!((String) ((JSONObject) obj.get("Value")).get(LEAD_SERIALIZE_TYPE_KEY))
-                        .equals("Float|'123456789'")) {
+                if (!obj.get("Value").get(LEAD_SERIALIZE_TYPE_KEY).asText().equals("Float|'123456789'")) {
                     result = false;
                 }
                 break;
             case "BusinessFirmographicsParentEmployees":
-                if (!((String) ((JSONObject) obj.get("Value")).get(LEAD_SERIALIZE_TYPE_KEY)).equals("Float|'24'")) {
+                if (!obj.get("Value").get(LEAD_SERIALIZE_TYPE_KEY).asText().equals("Float|'24'")) {
                     result = false;
                 }
                 break;
             case "C_Job_Role1":
-                if (!((String) ((JSONObject) obj.get("Value")).get(LEAD_SERIALIZE_TYPE_KEY)).equals("String|''")) {
+                if (!obj.get("Value").get(LEAD_SERIALIZE_TYPE_KEY).asText().equals("String|''")) {
                     result = false;
                 }
                 break;
             case "BusinessSocialPresence":
-                if (!((String) ((JSONObject) obj.get("Value")).get(LEAD_SERIALIZE_TYPE_KEY)).equals("String|'True'")) {
+                if (!obj.get("Value").get(LEAD_SERIALIZE_TYPE_KEY).asText().equals("String|'True'")) {
                     result = false;
                 }
                 break;
@@ -239,32 +231,20 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testTransformAndWriteLeadWithNegativeCases() throws IOException, ParseException {
+    public void testTransformAndWriteLeadWithNegativeCases() throws IOException {
         Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
         LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
+
         try {
-            ScoringMapperTransformUtil.transformAndWriteLead(IMPROPER_TEST_RECORD_WITH_FAKE_MODEL_ID, modelInfoMap,
-                    leadFileBufferMap, localizedFiles, 10000);
-            Assert.fail("Should have thrown expcetion.");
-        } catch (LedpException e) {
-            Assert.assertEquals(e.getCode(), LedpCode.LEDP_20007);
-        }
-        try {
-            ScoringMapperTransformUtil.transformAndWriteLead(IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID, modelInfoMap,
-                    leadFileBufferMap, localizedFiles, 10000);
+            JsonNode jsonNode = new ObjectMapper().readTree(IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID);
+            ScoringMapperTransformUtil.transformAndWriteLead(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles,
+                    10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
             Assert.fail("Should have thrown expcetion.");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20003);
-        }
-        try {
-            ScoringMapperTransformUtil.transformAndWriteLead(IMPROPER_TEST_RECORD_WITH_NO_MODEL_GUID, modelInfoMap,
-                    leadFileBufferMap, localizedFiles, 10000);
-            Assert.fail("Should have thrown expcetion.");
-        } catch (LedpException e) {
-            Assert.assertEquals(e.getCode(), LedpCode.LEDP_20004);
         }
     }
 }

@@ -1,17 +1,18 @@
 package com.latticeengines.monitor.alerts.service.impl;
 
 import static org.testng.Assert.assertTrue;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PagerDutyTestUtils {
 
-    public static void confirmPagerDutyIncident(String result) throws ParseException {
-        JSONParser parser = new JSONParser();
-        JSONObject resultObj = (JSONObject) parser.parse(result);
-        assertTrue(resultObj.get("status").equals("success"));
+    public static void confirmPagerDutyIncident(String result) {
+        try {
+            JsonNode resultObj = new ObjectMapper().readTree(result);
+            assertTrue(resultObj.get("status").asText().equals("success"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

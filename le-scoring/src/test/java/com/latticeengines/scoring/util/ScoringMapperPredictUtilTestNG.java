@@ -17,24 +17,23 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 
 public class ScoringMapperPredictUtilTestNG {
 
-    private static final String MODEL_ID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
+    private static final String MODEL_ID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
 
     @Test(groups = "unit")
-    public void testProcessScoreFiles() throws IOException, ParseException {
+    public void testProcessScoreFiles() throws IOException {
         // copy over the score.txt file to the current directory
         URL scoreUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/results/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.jsonscoringoutputfile-0.txt");
+                .getSystemResource("com/latticeengines/scoring/results/60fd2fa4-9868-464e-a534-3205f52c41f0scoringoutputfile-0.txt");
         File dest = new File(System.getProperty("user.dir")
-                + "/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.jsonscoringoutputfile-0.txt");
+                + "/60fd2fa4-9868-464e-a534-3205f52c41f0scoringoutputfile-0.txt");
         try {
             FileUtils.copyURLToFile(scoreUrl, dest);
         } catch (IOException e) {
@@ -44,11 +43,11 @@ public class ScoringMapperPredictUtilTestNG {
 
         // parseModelFile
         URL url = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
+                .getSystemResource("com/latticeengines/scoring/models/60fd2fa4-9868-464e-a534-3205f52c41f0");
         String fileName = url.getFile();
         Path path = new Path(fileName);
-        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
-        JSONObject modelObj = ScoringMapperTransformUtil.parseModelFiles(path);
+        HashMap<String, JsonNode> models = new HashMap<>();
+        JsonNode modelObj = ScoringMapperTransformUtil.parseModelFiles(path);
         models.put(path.getName(), modelObj);
 
         // make up modelInfoMap
@@ -60,8 +59,7 @@ public class ScoringMapperPredictUtilTestNG {
         modelAndLeadInfo.setModelInfoMap(modelInfoMap);
         modelAndLeadInfo.setTotalleadNumber(10);
 
-        List<ScoreOutput> resultList = null;
-        resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndLeadInfo, models, 1000);
+        List<ScoreOutput> resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndLeadInfo, models, 1000);
 
         List<ScoreOutput> expectedResultList = new ArrayList<>();
         ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest", 4.88519256666,
@@ -227,7 +225,7 @@ public class ScoringMapperPredictUtilTestNG {
             same = false;
         } else {
             for (int i = 0; i < charSequence1.length(); i++) {
-                if (charSequence1.charAt(i) != charSequence1.charAt(i)) {
+                if (charSequence1.charAt(i) != charSequence2.charAt(i)) {
                     same = false;
                 }
             }

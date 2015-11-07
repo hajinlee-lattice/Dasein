@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,6 +32,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
@@ -143,7 +144,6 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     }
 
     // upload necessary files to the directory
-    @SuppressWarnings("unchecked")
     private void prepareDataForModeling() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, path);
         HdfsUtils.mkdir(yarnConfiguration, samplePath);
@@ -169,10 +169,10 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
 
         // make up the contents of diagnostics.json to let it pass the
         // validation step
-        JSONObject summaryObj = new JSONObject();
-        JSONObject sampleSizeObj = new JSONObject();
+        ObjectNode summaryObj = new ObjectMapper().createObjectNode();
+        ObjectNode sampleSizeObj = new ObjectMapper().createObjectNode();
         sampleSizeObj.put("SampleSize", 20000);
-        summaryObj.put("Summary", sampleSizeObj);
+        summaryObj.set("Summary", sampleSizeObj);
         String diagnosticFilePath = metadataPath + "diagnostics.json";
         HdfsUtils.writeToFile(yarnConfiguration, diagnosticFilePath, summaryObj.toString());
 

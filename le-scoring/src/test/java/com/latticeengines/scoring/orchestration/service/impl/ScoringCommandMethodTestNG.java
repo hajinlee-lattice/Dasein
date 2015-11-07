@@ -7,7 +7,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
 
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -91,7 +90,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testCleanTables() throws ParseException, NumberFormatException, InterruptedException {
+    public void testCleanTables() throws  NumberFormatException, InterruptedException {
         assertEquals(this.scoringCommandEntityMgr.findAll().size(), 0);
         assertEquals(this.scoringCommandResultEntityMgr.findAll().size(), 0);
         ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, inputTable, 0, 100,
@@ -148,7 +147,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testHandleJobFailed() throws ParseException {
+    public void testHandleJobFailed() {
         ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, inputTable, 0,
                 100, new Timestamp(System.currentTimeMillis()));
         this.scoringCommandEntityMgr.create(scoringCommand);

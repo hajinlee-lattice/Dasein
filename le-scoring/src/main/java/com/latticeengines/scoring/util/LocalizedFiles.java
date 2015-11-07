@@ -2,26 +2,26 @@ package com.latticeengines.scoring.util;
 
 import java.util.HashMap;
 
-import org.json.simple.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class LocalizedFiles {
-    private JSONObject datatype;
+    private JsonNode datatype;
     // key: modelGuid, value: model contents
-    private HashMap<String, JSONObject> models;
+    private HashMap<String, JsonNode> models;
 
-    public JSONObject getDatatype() {
+    public JsonNode getDatatype() {
         return this.datatype;
     }
 
-    public HashMap<String, JSONObject> getModels() {
+    public HashMap<String, JsonNode> getModels() {
         return this.models;
     }
 
-    public void setModels(HashMap<String, JSONObject> models) {
+    public void setModels(HashMap<String, JsonNode> models) {
         this.models = models;
     }
 
-    public void setDatatype(JSONObject datatype) {
+    public void setDatatype(JsonNode datatype) {
         this.datatype = datatype;
     }
 

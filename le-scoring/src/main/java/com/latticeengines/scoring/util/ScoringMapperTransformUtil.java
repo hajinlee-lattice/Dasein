@@ -22,12 +22,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
@@ -37,11 +38,11 @@ public class ScoringMapperTransformUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
 
-    public static LocalizedFiles processLocalizedFiles(Path[] paths) throws IOException, ParseException {
-        JSONObject datatype = null;
+    public static LocalizedFiles processLocalizedFiles(Path[] paths) throws IOException {
+        JsonNode datatype = null;
         // key: modelGuid, value: model contents
         // Note that not every model in the map might be used.
-        HashMap<String, JSONObject> models = new HashMap<String, JSONObject>();
+        HashMap<String, JsonNode> models = new HashMap<String, JsonNode>();
         LocalizedFiles localizedFiles = new LocalizedFiles();
         boolean scoringScriptProvided = false;
         boolean datatypeFileProvided = false;
@@ -54,9 +55,9 @@ public class ScoringMapperTransformUtil {
                 datatype = parseDatatypeFile(p);
             } else if (p.getName().equals("scoring.py")) {
                 scoringScriptProvided = true;
-            } else if (!p.getName().endsWith(".jar")){
+            } else if (!p.getName().endsWith(".jar")) {
                 String modelGuid = p.getName();
-                JSONObject modelJsonObj = parseModelFiles(p);
+                JsonNode modelJsonObj = parseModelFiles(p);
                 models.put(modelGuid, modelJsonObj);
             }
         }
@@ -70,48 +71,43 @@ public class ScoringMapperTransformUtil {
     }
 
     @VisibleForTesting
-    static JSONObject parseDatatypeFile(Path path) throws IOException, ParseException {
-
-        JSONObject datatypeObject = null;
-        String content = null;
-        content = FileUtils.readFileToString(new File(path.toString()));
-        JSONParser jsonParser = new JSONParser();
-        datatypeObject = (JSONObject) jsonParser.parse(content);
-        return datatypeObject;
+    static JsonNode parseDatatypeFile(Path path) throws IOException {
+        String content = FileUtils.readFileToString(new File(path.toString()));
+        JsonNode datatypeJsonNode = new ObjectMapper().readTree(content);
+        return datatypeJsonNode;
     }
 
     @VisibleForTesting
-    static JSONObject parseModelFiles(Path path) throws IOException, ParseException {
+    static JsonNode parseModelFiles(Path path) throws IOException {
 
         FileReader reader;
         reader = new FileReader(path.toString());
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
+        JsonNode jsonObject = new ObjectMapper().readTree(reader);
         // use the modelGuid to identify a model. It is a contact that when
         // mapper localizes the model, it changes its name to be the modelGuid
         String modelGuid = path.getName();
-        decodeSupportedFiles(modelGuid, (JSONObject) jsonObject.get(ScoringDaemonService.MODEL));
-        writeScoringScript(modelGuid, (JSONObject) jsonObject.get(ScoringDaemonService.MODEL));
+        decodeSupportedFiles(modelGuid, jsonObject.get(ScoringDaemonService.MODEL));
+        writeScoringScript(modelGuid, jsonObject.get(ScoringDaemonService.MODEL));
         log.info("modelName is " + jsonObject.get(ScoringDaemonService.MODEL_NAME));
         return jsonObject;
     }
 
-    private static void decodeSupportedFiles(String modelGuid, JSONObject modelObject) throws IOException {
+    private static void decodeSupportedFiles(String modelGuid, JsonNode modelObject) throws IOException {
 
-        JSONArray compressedSupportedFiles = (JSONArray) modelObject
+        ArrayNode compressedSupportedFiles = (ArrayNode) modelObject
                 .get(ScoringDaemonService.MODEL_COMPRESSED_SUPPORT_Files);
         for (int i = 0; i < compressedSupportedFiles.size(); i++) {
-            JSONObject compressedFile = (JSONObject) compressedSupportedFiles.get(i);
-            String compressedFileName = modelGuid + compressedFile.get("Key");
+            JsonNode compressedFile = compressedSupportedFiles.get(i);
+            String compressedFileName = modelGuid + compressedFile.get("Key").asText();
             log.info("compressedFileName is " + compressedFileName);
-            decodeBase64ThenDecompressToFile(String.valueOf(compressedFile.get("Value")), compressedFileName);
+            decodeBase64ThenDecompressToFile(compressedFile.get("Value").asText(), compressedFileName);
         }
 
     }
 
-    private static void writeScoringScript(String modelGuid, JSONObject modelObject) throws IOException {
+    private static void writeScoringScript(String modelGuid, JsonNode modelObject) throws IOException {
 
-        String scriptContent = String.valueOf(modelObject.get(ScoringDaemonService.MODEL_SCRIPT));
+        String scriptContent = modelObject.get(ScoringDaemonService.MODEL_SCRIPT).asText();
         String fileName = modelGuid + ScoringDaemonService.SCORING_SCRIPT_NAME;
         log.info("fileName is " + fileName);
         File file = new File(fileName);
@@ -130,8 +126,7 @@ public class ScoringMapperTransformUtil {
 
     public static ModelAndLeadInfo prepareLeadsForScoring(
             Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context,
-            LocalizedFiles localizedFiles, long leadFileThreshold) throws IOException, InterruptedException,
-            ParseException {
+            LocalizedFiles localizedFiles, long leadFileThreshold) throws IOException, InterruptedException {
 
         if (context == null || localizedFiles == null) {
             throw new NullPointerException("context and localizedFiles cannot be null.");
@@ -150,10 +145,14 @@ public class ScoringMapperTransformUtil {
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
         int leadNumber = 0;
+        ObjectMapper mapper = new ObjectMapper();
         while (context.nextKeyValue()) {
             leadNumber++;
-            transformAndWriteLead(context.getCurrentKey().datum().toString(), modelInfoMap, leadFileBufferMap,
-                    localizedFiles, leadFileThreshold);
+            String record = context.getCurrentKey().datum().toString();
+            JsonNode jsonNode = mapper.readTree(record);
+            String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
+            transformAndWriteLead(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles, leadFileThreshold,
+                    modelGuid);
         }
         Set<String> keySet = leadFileBufferMap.keySet();
         for (String key : keySet) {
@@ -168,50 +167,37 @@ public class ScoringMapperTransformUtil {
     }
 
     @VisibleForTesting
-    static void transformAndWriteLead(String leadString, Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap,
-            Map<String, BufferedWriter> leadFilebufferMap, LocalizedFiles localizedFiles, long leadFileThreshold)
-            throws ParseException, IOException {
-        JSONParser parser = new JSONParser();
-        JSONObject leadJsonObject = (JSONObject) parser.parse(leadString);
-
-        Set<String> modelGuidSet = localizedFiles.getModels().keySet();
+    static void transformAndWriteLead(JsonNode jsonNode, Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap,
+            Map<String, BufferedWriter> leadFilebufferMap, LocalizedFiles localizedFiles, long leadFileThreshold,
+            String modelGuid) throws IOException {
         // first step validation, to see whether the leadId is provided.
-        Object leadIdObj = leadJsonObject.get(ScoringDaemonService.LEAD_RECORD_LEAD_ID_COLUMN);
-        if (leadIdObj == null) {
-            throw new LedpException(LedpCode.LEDP_20003, new String[] { (String) leadIdObj });
-        }
-        // second step validation, to see whether the modelGuid is provided.
-        Object modelIdObj = leadJsonObject.get(ScoringDaemonService.MODEL_GUID);
-        if (modelIdObj == null) {
-            throw new LedpException(LedpCode.LEDP_20004, new String[] { (String) modelIdObj });
-        }
-        String modelId = String.valueOf(modelIdObj);
-        // third step validation, to see whether the model is localized.
-        String modelGuid = identifyModelGuid(String.valueOf(modelIdObj), modelGuidSet);
-        if (modelGuid.isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_20007, new String[] { modelGuid });
+        if (!jsonNode.has(ScoringDaemonService.UNIQUE_KEY_COLUMN)
+                || jsonNode.get(ScoringDaemonService.UNIQUE_KEY_COLUMN).isNull()) {
+            throw new LedpException(LedpCode.LEDP_20003);
         }
 
-        JSONObject modelContents = localizedFiles.getModels().get(modelGuid);
+        String uuid = UuidUtils.extractUuid(modelGuid);
+        JsonNode modelContents = localizedFiles.getModels().get(uuid);
         String leadFileName = "";
         BufferedWriter bw = null;
         // second step validation, to see if the metadata is valid
-        if (!modelInfoMap.containsKey(modelGuid)) { // this model is new, and
-                                                    // needs to be validated
-            ScoringMapperValidateUtil.validateDatatype(localizedFiles.getDatatype(), modelContents, modelId);
-            // if the validation passes, update the modelIdMap
-            ModelAndLeadInfo.ModelInfo modelInfo = new ModelAndLeadInfo.ModelInfo(modelId, 1L);
-            modelInfoMap.put(modelGuid, modelInfo);
 
-            leadFileName = modelGuid + "-0";
+        if (!modelInfoMap.containsKey(uuid)) { // this model is new, and
+                                               // needs to be validated
+            ScoringMapperValidateUtil.validateDatatype(localizedFiles.getDatatype(), modelContents, modelGuid);
+            // if the validation passes, update the modelIdMap
+            ModelAndLeadInfo.ModelInfo modelInfo = new ModelAndLeadInfo.ModelInfo(modelGuid, 1L);
+            modelInfoMap.put(uuid, modelInfo);
+
+            leadFileName = uuid + "-0";
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(leadFileName), true), "UTF8"));
             leadFilebufferMap.put(leadFileName, bw);
         } else {
-            long currentLeadNum = modelInfoMap.get(modelGuid).getLeadNumber() + 1;
-            modelInfoMap.get(modelGuid).setLeadNumber(currentLeadNum);
+            long currentLeadNum = modelInfoMap.get(uuid).getLeadNumber() + 1;
+            modelInfoMap.get(uuid).setLeadNumber(currentLeadNum);
             long indexOfFile = currentLeadNum / leadFileThreshold;
             StringBuilder leadFileBuilder = new StringBuilder();
-            leadFileBuilder.append(modelGuid).append('-').append(indexOfFile);
+            leadFileBuilder.append(uuid).append('-').append(indexOfFile);
             leadFileName = leadFileBuilder.toString();
             if (!leadFilebufferMap.containsKey(leadFileName)) {
                 // create new stream
@@ -220,7 +206,7 @@ public class ScoringMapperTransformUtil {
                 leadFilebufferMap.put(leadFileName, bw);
                 // close the previous stream
                 StringBuilder formerLeadFileBuilder = new StringBuilder();
-                formerLeadFileBuilder.append(modelGuid).append('-').append(indexOfFile - 1);
+                formerLeadFileBuilder.append(uuid).append('-').append(indexOfFile - 1);
                 String formerLeadFileName = formerLeadFileBuilder.toString();
                 if (leadFilebufferMap.containsKey(formerLeadFileName)) {
                     BufferedWriter formerLeadFileBw = leadFilebufferMap.get(formerLeadFileName);
@@ -231,49 +217,38 @@ public class ScoringMapperTransformUtil {
             }
         }
 
-        String transformedLead = transformLead(leadJsonObject, modelContents);
+        String transformedLead = transformLead(jsonNode, modelContents);
         writeLeadToFile(transformedLead, bw);
 
         return;
     }
 
-    private static String identifyModelGuid(String modelId, Set<String> modelGuidSet) {
-        String guid = "";
-        for (String modelGuid : modelGuidSet) {
-            if (modelId.contains(modelGuid)) {
-                guid = modelGuid;
-                break;
-            }
-        }
-        return guid;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static String transformLead(JSONObject leadJsonObject, JSONObject modelJsonObject) {
-        JSONArray metadata = (JSONArray) modelJsonObject.get(ScoringDaemonService.INPUT_COLUMN_METADATA);
+    public static String transformLead(JsonNode jsonNode, JsonNode modelJsonObject) {
+        ArrayNode metadata = (ArrayNode) modelJsonObject.get(ScoringDaemonService.INPUT_COLUMN_METADATA);
 
         // parse the avro file since it is in json format
-        JSONObject jsonObj = new JSONObject();
-        String leadId = String.valueOf(leadJsonObject.get(ScoringDaemonService.LEAD_RECORD_LEAD_ID_COLUMN));
+        ObjectNode jsonObj = new ObjectMapper().createObjectNode();
+        String leadId = jsonNode.get(ScoringDaemonService.UNIQUE_KEY_COLUMN).asText();
 
-        JSONArray jsonArray = new JSONArray();
-        jsonObj.put("value", jsonArray);
+        ArrayNode jsonArray = new ObjectMapper().createArrayNode();
+        jsonObj.set("value", jsonArray);
         jsonObj.put("key", leadId);
 
+        ObjectMapper mapper = new ObjectMapper();
         for (int i = 0; i < metadata.size(); i++) {
-            JSONObject columnObj = new JSONObject();
-            JSONObject serializedValueAndTypeObj = new JSONObject();
-            columnObj.put("Value", serializedValueAndTypeObj);
+            ObjectNode columnObj = mapper.createObjectNode();
+            ObjectNode serializedValueAndTypeObj = mapper.createObjectNode();
+            columnObj.set("Value", serializedValueAndTypeObj);
             String type = null;
             // get key
-            JSONObject obj = (JSONObject) metadata.get(i);
-            String key = String.valueOf(obj.get("Name"));
+            JsonNode obj = metadata.get(i);
+            String key = obj.get("Name").asText();
             columnObj.put("Key", key);
-            type = (Long) obj.get("ValueType") == 0 ? "Float" : "String";
+            type = obj.get("ValueType").asLong() == 0 ? "Float" : "String";
             // should treat sqoop null as empty
             String typeAndValue = "";
-            if (leadJsonObject.get(key) != null) {
-                String value = String.valueOf(leadJsonObject.get(key));
+            if (jsonNode.has(key) && !jsonNode.get(key).isNull()) {
+                String value = jsonNode.get(key).asText();
                 String processedValue = processBitValue(type, value);
                 typeAndValue = String.format("%s|\'%s\'", type, processedValue);
             } else {
@@ -312,11 +287,9 @@ public class ScoringMapperTransformUtil {
 
         File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
         String modelStr = FileUtils.readFileToString(modelFile);
-        JSONObject modelObject;
-        JSONParser parser = new JSONParser();
-        modelObject = (JSONObject) parser.parse((modelStr));
-        decodeSupportedFiles("e2e", (JSONObject) modelObject.get(ScoringDaemonService.MODEL));
-        writeScoringScript("e2e", (JSONObject) modelObject.get(ScoringDaemonService.MODEL));
+        JsonNode modelObject = new ObjectMapper().readTree(modelStr);
+        decodeSupportedFiles("e2e", modelObject.get(ScoringDaemonService.MODEL));
+        writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
     }
 
 }

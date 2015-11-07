@@ -7,7 +7,6 @@ public interface ScoringDaemonService {
 
     public static final String MODEL_GUID = "Model_GUID";
     public static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
-    public static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
     public static final String INPUT_COLUMN_METADATA = "InputColumnMetadata";
     public static final String MODEL = "Model";
     public static final String MODEL_NAME = "Name";
@@ -41,4 +40,5 @@ public interface ScoringDaemonService {
     public static final String COMMA = ",";
     
     public static final String SCORING_JOB_TYPE = "scoringJob";
+    public static final String UNIQUE_KEY_COLUMN = "LeadID";
 }
