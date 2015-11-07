@@ -3,11 +3,10 @@
 var ManageFields = function() {
     var helper = require('./helper.po');
 
-    var AllTagsOptions = ["Internal", "External"];
     var AllCategoryOptions = ["Lead Information", "Marketing Activity"];
     var AllStatisticalTypeOptions = ["interval", "nominal", "ordinal", "ratio"];
     var AllApprovedUsageOptions = ["None", "Model", "ModelAndAllInsights", "ModelAndModelInsights"];
-    var AllFundamentalTypeOptions = ["boolean", "currency", "numeric", "percentage", "year"];
+    var AllFundamentalTypeOptions = ["alpha", "boolean", "currency", "numeric", "percentage", "year"];
 
     this.testFilters = function(grid) {
         var table = grid.element(by.tagName('table'));
@@ -164,21 +163,13 @@ var ManageFields = function() {
         helper.elementExists(element(by.id("discard-edit-yes")), false);
 
         clickEditFieldsButton();
-        helper.elementExists(tr.all(by.tagName("td")).get(2).element(by.tagName("input")), true);
-        var tagsSelect = tr.all(by.tagName("td")).get(3).element(by.tagName("select"));
-        helper.elementExists(tagsSelect, true);
-        assertSelectOptions(tagsSelect, AllTagsOptions);
-        tagsSelect.element(by.css("option[selected]")).getText().then(function (selectedVal){
-            if (selectedVal == "Internal") {
+        var tds = tr.all(by.tagName("td"));
+        helper.elementExists(tds.get(2).element(by.tagName("input")), true);
+        tds.get(3).getText().then(function (tagsVal){
+            if (tagsVal == "Internal") {
                 assertCategorySelectExists(tr, AllCategoryOptions);
-                tagsSelect.element(by.css("option[label='External']")).click();
-                sleep(500);
-                assertCategorySelectNotExists(tr);
             } else {
                 assertCategorySelectNotExists(tr);
-                tagsSelect.element(by.css("option[label='Internal']")).click();
-                sleep(500);
-                assertCategorySelectExists(tr, AllCategoryOptions);
             }
 
             var approvedUsageSelect = tr.all(by.tagName("td")).get(5).element(by.tagName("select"));
@@ -189,8 +180,6 @@ var ManageFields = function() {
             assertSelectOptions(fundamentalTypeSelect, AllFundamentalTypeOptions);
 
             element(by.id("manage-fields-cancel")).click();
-            sleep(1000);
-            element(by.id("discard-edit-yes")).click();
             sleep(1000);
         });
     }
@@ -271,44 +260,6 @@ var ManageFields = function() {
         });
     };
 
-    this.testEditTags = function(grid) {
-        var table = grid.element(by.tagName('table'));
-        helper.elementExists(table, true);
-        var trs = table.element(by.tagName("tbody")).all(by.tagName("tr"));
-        trs.count().then(function (count) {
-            if (count > 0) {
-                sortColumnDesc(table, 3);
-                clickEditFieldsButton();
-                var tds = trs.get(0).all(by.tagName("td"));
-                tds.get(0).getText().then(function (fieldName) {
-                    var tagsSelect = tds.get(3).element(by.tagName("select"));
-                    tagsSelect.element(by.css("option[selected]")).getText().then(function (tags){
-                        if (AllTagsOptions.indexOf(tags) > -1) {
-                            var newTags = (tags == AllTagsOptions[0]) ? AllTagsOptions[1] : AllTagsOptions[0];
-                            tagsSelect.element(by.css("option[label='" + newTags + "']")).click();
-                            sleep(500);
-                            clickSaveFieldsButton();
-
-                            filterFields(fieldName);
-                            clickEditFieldLink(grid, fieldName);
-                            element(by.model('field.Tags')).element(by.css("option[selected]")).getText().then(function (editedValue){
-                                expect(newTags == editedValue).toBe(true);
-                                element(by.model('field.Tags')).element(by.css("option[label='" + tags + "']")).click();
-                                sleep(500);
-                                clickSaveFieldButton();
-
-                                clickEditFieldLink(grid, fieldName);
-                                element(by.model('field.Tags')).element(by.css("option[selected]")).getText().then(function (value){
-                                    expect(tags == value).toBe(true);
-                                });
-                            });
-                        }
-                    });
-                });
-            }
-        });
-    };
-
     this.testEditCategory = function(grid) {
         var table = grid.element(by.tagName('table'));
         helper.elementExists(table, true);
@@ -319,8 +270,7 @@ var ManageFields = function() {
                 clickEditFieldsButton();
                 var tds = trs.get(0).all(by.tagName("td"));
                 tds.get(0).getText().then(function (fieldName) {
-                    var tagsSelect = tds.get(3).element(by.tagName("select"));
-                    tagsSelect.element(by.css("option[selected]")).getText().then(function (tags){
+                    tds.get(3).getText().then(function (tags) {
                         if (tags == "Internal") {
                             var categorySelect = tds.get(4).element(by.tagName("select"));
                             categorySelect.element(by.css("option[selected]")).getText().then(function (category){

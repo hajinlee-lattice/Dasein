@@ -98,29 +98,6 @@ describe('manage fields tests', function () {
         loginPage.logout();
     });
 
-    it('should validate that you can edit tags', function () {
-        loginPage.loginAsSuperAdmin();
-
-        //==================================================
-        // Edit Tags and Roll Back
-        //==================================================
-        userDropdown.toggleDropdown();
-        browser.waitForAngular();
-        userDropdown.SetupLink.isPresent().then(function (present){
-            if (present) {
-                clickSetupLink();
-                var grid = element(by.id('fieldsGrid'));
-                grid.isDisplayed().then(function (displayed) {
-                    if (displayed) {
-                        manageFields.testEditTags(grid);
-                    }
-                });
-            }
-        });
-
-        loginPage.logout();
-    });
-
     it('should validate that you can edit category', function () {
         loginPage.loginAsSuperAdmin();
 

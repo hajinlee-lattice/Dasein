@@ -57,9 +57,7 @@
         <input type="text" data-ng-if="batchEdit" data-ng-model="dataItem.DisplayName" data-ng-change="valueChanged($event, dataItem, 'DisplayName', '#:DisplayName#')" class='form-control' data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" data-ng-click="textboxClicked($event)" />
     </script>
     <script id="tagsTemplate" type="text/x-kendo-tmpl">
-        <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'Tags')" class='k-dirty'></span>
-        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.Tags)}" title="{{dataItem.Tags}}">{{dataItem.Tags}}</span>
-        <select data-ng-if="batchEdit" data-ng-options="c for c in TagsOptions" data-ng-model="dataItem.Tags" data-ng-change="valueChanged($event, dataItem, 'Tags', '#:Tags#')" class="form-control tags" data-ng-class="{'warning': isEmpty(dataItem.Tags)}"></select>
+        <span title="{{dataItem.Tags}}">{{dataItem.Tags}}</span>
     </script>
     <script id="categoryTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'Category')" class='k-dirty'></span>

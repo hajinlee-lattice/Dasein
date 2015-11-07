@@ -32,10 +32,9 @@ public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
     @Autowired
     private VdbMetadataService vdbMetadataService;
 
-    private static final String tags[] = { "Internal", "External" };
     private static final String categories[] = { "Lead Information", "Marketing Activity" };
     private static final String approvedUsages[] = { "None", "Model", "ModelAndAllInsights", "ModelAndModelInsights" };
-    private static final String fundamentalTypes[] = { "boolean", "currency", "numeric", "percentage", "year" };
+    private static final String fundamentalTypes[] = { "alpha", "boolean", "currency", "numeric", "percentage", "year" };
     private static final String statisticalTypes[] = { "interval", "nominal", "ordinal", "ratio" };
 
     private static final Integer maxUpdatesCount = 5;
@@ -98,10 +97,6 @@ public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
             field.setDisplayName("DisplayName_FunTest_A");
         else
             field.setDisplayName("DisplayName_FunTest");
-        if ("Internal".equals(field.getTags()))
-            field.setTags("External");
-        else
-            field.setTags("Internal");
         if ("Lead Information".equals(field.getCategory()))
             field.setCategory("Marketing Activity");
         else
@@ -144,15 +139,6 @@ public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
         List<VdbMetadataField> fieldsUpdated;
         VdbMetadataField fieldUpdated;
         VdbMetadataField field = (VdbMetadataField)originalFields.get(0).clone();
-
-        // All values for Tag
-        for (String tag : tags) {
-            field.setTags(tag);
-            vdbMetadataService.UpdateField(tenant, field);
-            fieldsUpdated = vdbMetadataService.getFields(tenant);
-            fieldUpdated = getField(fieldsUpdated, field.getColumnName());
-            Assert.assertTrue(field.equals(fieldUpdated));
-        }
 
         // All values for Category
         for (String category : categories) {
@@ -198,7 +184,6 @@ public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
         for (int i = 0; i < maxCount; i++) {
             VdbMetadataField field = (VdbMetadataField)originalFields.get(i).clone();
             field.setDisplayName("DisplayName_FunTest_" + i);
-            field.setTags(tags[i % tags.length]);
             field.setCategory(categories[i % categories.length]);
             field.setApprovedUsage(approvedUsages[i % approvedUsages.length]);
             field.setFundamentalType(fundamentalTypes[i % fundamentalTypes.length]);
@@ -274,10 +259,7 @@ public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
     private String getFieldValue(Map<String, String> map, String key) {
         if (map.containsKey(key)) {
             String value = map.get(key);
-            if (VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE.equals(key) &&
-                    VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE.equalsIgnoreCase(value)) {
-                return null;
-            } else if (VdbMetadataConstants.ATTRIBUTE_NULL_VALUE.equalsIgnoreCase(value)) {
+            if (VdbMetadataConstants.ATTRIBUTE_NULL_VALUE.equalsIgnoreCase(value)) {
                 return null;
             } else {
                 return value;

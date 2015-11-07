@@ -71,10 +71,7 @@ public class VdbMetadataServiceImpl implements VdbMetadataService {
     private String getFieldValue(Map<String, String> map, String key) {
         if (map.containsKey(key)) {
             String value = map.get(key);
-            if (VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE.equals(key) &&
-                    VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE.equalsIgnoreCase(value)) {
-                return null;
-            } else if (VdbMetadataConstants.ATTRIBUTE_NULL_VALUE.equalsIgnoreCase(value)) {
+            if (VdbMetadataConstants.ATTRIBUTE_NULL_VALUE.equalsIgnoreCase(value)) {
                 return null;
             } else {
                 return value;
@@ -181,8 +178,7 @@ public class VdbMetadataServiceImpl implements VdbMetadataService {
             metadata.put(VdbMetadataConstants.ATTRIBUTE_APPROVED_USAGE, approvedUsage);
         }
         String fundamentalType = field.getFundamentalType();
-        if (fundamentalType != null && !fundamentalType.isEmpty() &&
-                !VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE.equalsIgnoreCase(fundamentalType)) {
+        if (fundamentalType != null && !fundamentalType.isEmpty()) {
             metadata.put(VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE, fundamentalType);
         }
         String description = field.getDescription() == null ? "" : field.getDescription();

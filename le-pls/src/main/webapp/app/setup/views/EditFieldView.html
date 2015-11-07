@@ -46,7 +46,7 @@
                        </tr>
                        <tr data-ng-class="shaded">
                            <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_TAGS')}}</td>
-                           <td><select class="form-control" data-ng-options="t as t for t in tagsToSelect" data-ng-model="field.Tags" data-ng-change="tagsChanged($event)"></select></td>
+                           <td><span>{{field.Tags}}<input type="hidden" data-ng-model="Tags"/></span></td>
                        </tr>
                        <tr>
                            <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_DISCRETIZATION')}}</td>

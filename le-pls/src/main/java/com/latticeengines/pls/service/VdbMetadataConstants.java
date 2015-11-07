@@ -26,7 +26,6 @@ public final class VdbMetadataConstants {
     public static final String ATTRIBUTE_STATISTICAL_TYPE = "StatisticalType";
 
     public static final String ATTRIBUTE_NULL_VALUE = "<NULL>";
-    public static final String ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE = "Unknown";
 
     @SuppressWarnings("serial")
     public static final Map<String, String> SOURCE_MAPPING = Collections.unmodifiableMap(

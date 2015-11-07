@@ -10,11 +10,10 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 ])
 
 .controller('ManageFieldsWidgetController', function ($scope, $rootScope, $timeout, StringUtility, ResourceUtility, SetupUtility, MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel) {
-    $scope.TagsOptions = ["Internal", "External"];
     $scope.CategoryOptions = ["Lead Information", "Marketing Activity"];
     $scope.StatisticalTypeOptions = ["interval", "nominal", "ordinal", "ratio"];
     $scope.ApprovedUsageOptions = ["None", "Model", "ModelAndAllInsights", "ModelAndModelInsights"];
-    $scope.FundamentalTypeOptions = ["boolean", "currency", "numeric", "percentage", "year"];
+    $scope.FundamentalTypeOptions = ["alpha", "boolean", "currency", "numeric", "percentage", "year"];
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
@@ -85,7 +84,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                             ColumnName: { type: "string", editable: false },
                             SourceToDisplay: { type: "string", editable: false },
                             DisplayName: { type: "string" },
-                            Tags: { type: "string" },
+                            Tags: { type: "string", editable: false },
                             Category: { type: "string" },
                             ApprovedUsage: { type: "string" },
                             FundamentalType: { type: "string" }
