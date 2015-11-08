@@ -47,17 +47,17 @@ public class ScoringMapperPredictUtilTestNG {
         String fileName = url.getFile();
         Path path = new Path(fileName);
         HashMap<String, JsonNode> models = new HashMap<>();
-        JsonNode modelObj = ScoringMapperTransformUtil.parseModelFiles(path);
-        models.put(path.getName(), modelObj);
+        JsonNode modelJsonObj = ScoringMapperTransformUtil.parseFileContentToJsonNode(path);
+        models.put(path.getName(), modelJsonObj);
 
         // make up modelInfoMap
-        Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
-        ModelAndLeadInfo.ModelInfo modelInfo = new ModelAndLeadInfo.ModelInfo(MODEL_ID, 10);
+        Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
+        ModelAndRecordInfo.ModelInfo modelInfo = new ModelAndRecordInfo.ModelInfo(MODEL_ID, 10);
         modelInfoMap.put(MODEL_ID, modelInfo);
         // make up modelAndLeadInfo
-        ModelAndLeadInfo modelAndLeadInfo = new ModelAndLeadInfo();
+        ModelAndRecordInfo modelAndLeadInfo = new ModelAndRecordInfo();
         modelAndLeadInfo.setModelInfoMap(modelInfoMap);
-        modelAndLeadInfo.setTotalleadNumber(10);
+        modelAndLeadInfo.setTotalRecordCountr(10);
 
         List<ScoreOutput> resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndLeadInfo, models, 1000);
 

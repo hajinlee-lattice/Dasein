@@ -18,6 +18,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.specific.SpecificDatumWriter;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,12 +43,12 @@ public class ScoringMapperPredictUtil {
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
 
     public static String evaluate(MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context,
-            Set<String> modelGuidSet) throws IOException, InterruptedException {
+            Set<String> uuidSet) throws IOException, InterruptedException {
 
         StringBuilder strs = new StringBuilder();
         // spawn python
         StringBuilder sb = new StringBuilder();
-        for (String modelGuid : modelGuidSet) {
+        for (String modelGuid : uuidSet) {
             sb.append(modelGuid + " ");
         }
 
@@ -59,31 +60,31 @@ public class ScoringMapperPredictUtil {
 
         Process p = Runtime.getRuntime().exec("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-        String line = "";
-        StringBuilder errors = new StringBuilder();
+        try (BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+            String line = "";
+            StringBuilder errors = new StringBuilder();
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 
-        while ((line = in.readLine()) != null) {
-            strs.append(line);
-            log.info("This is python info: " + line);
-            context.progress();
-        }
-        in.close();
-        while ((line = err.readLine()) != null) {
-            errors.append(line);
-            strs.append(line);
-            log.error("This is python error: " + line);
-            context.progress();
-        }
-        err.close();
-        int exitCode = p.waitFor();
-        log.info("The exit code for python is " + exitCode);
+                while ((line = in.readLine()) != null) {
+                    strs.append(line);
+                    log.info("This is python info: " + line);
+                    context.progress();
+                }
+            }
+            while ((line = err.readLine()) != null) {
+                errors.append(line);
+                strs.append(line);
+                log.error("This is python error: " + line);
+                context.progress();
+            }
 
-        if (errors.length() != 0) {
-            throw new LedpException(LedpCode.LEDP_20011, new String[] { errors.toString() });
-        }
+            int exitCode = p.waitFor();
+            log.info("The exit code for python is " + exitCode);
 
+            if (errors.length() != 0) {
+                throw new LedpException(LedpCode.LEDP_20011, new String[] { errors.toString() });
+            }
+        }
         return strs.toString();
     }
 
@@ -107,26 +108,26 @@ public class ScoringMapperPredictUtil {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/" + fileName);
     }
 
-    public static List<ScoreOutput> processScoreFiles(ModelAndLeadInfo modelAndLeadInfo, Map<String, JsonNode> models,
-            long leadFileThreshold) throws IOException {
-        Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = modelAndLeadInfo.getModelInfoMap();
-        Set<String> modelGuidSet = modelInfoMap.keySet();
+    public static List<ScoreOutput> processScoreFiles(ModelAndRecordInfo modelAndRecordInfo,
+            Map<String, JsonNode> models, long recordFileThreshold) throws IOException {
+        Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
+        Set<String> uuidSet = modelInfoMap.keySet();
         // list of HashMap<leadId: score>
         List<ScoreOutput> resultList = new ArrayList<ScoreOutput>();
-        for (String modelGuid : modelGuidSet) {
-            log.info("modelGuid is " + modelGuid);
+        for (String uuid : uuidSet) {
+            log.info("uuid is " + uuid);
             // key: leadID, value: list of raw scores for that lead
             Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
-            long value = modelInfoMap.get(modelGuid).getLeadNumber();
-            JsonNode model = models.get(modelGuid);
-            long remain = value / leadFileThreshold;
+            long value = modelInfoMap.get(uuid).getRecordCount();
+            JsonNode model = models.get(uuid);
+            long remain = value / recordFileThreshold;
             int totalRawScoreNumber = 0;
             for (int i = 0; i <= remain; i++) {
-                totalRawScoreNumber += readScoreFile(modelGuid, i, scores);
+                totalRawScoreNumber += readScoreFile(uuid, i, scores);
             }
-            List<String> duplicateLeadIdList = checkForDuplicateLeads(scores, totalRawScoreNumber, modelGuid);
-            if (duplicateLeadIdList != null && duplicateLeadIdList.size() > 0) {
-                String message = String.format("The duplicate leads for model %s are: %s\n", modelGuid,
+            List<String> duplicateLeadIdList = checkForDuplicateLeads(scores, totalRawScoreNumber, uuid);
+            if (!CollectionUtils.isEmpty(duplicateLeadIdList)) {
+                String message = String.format("The duplicate leads for model %s are: %s\n", uuid,
                         Arrays.toString(duplicateLeadIdList.toArray()));
                 log.warn(message);
             }
@@ -134,7 +135,7 @@ public class ScoringMapperPredictUtil {
             for (String key : keySet) {
                 List<Double> rawScoreList = scores.get(key);
                 for (Double rawScore : rawScoreList) {
-                    ScoreOutput result = getResult(modelInfoMap, modelGuid, key, model, rawScore);
+                    ScoreOutput result = getResult(modelInfoMap, uuid, key, model, rawScore);
                     resultList.add(result);
                 }
             }
@@ -161,10 +162,10 @@ public class ScoringMapperPredictUtil {
         return duplicateLeadsList;
     }
 
-    private static int readScoreFile(String modelGuid, int index, Map<String, List<Double>> scores) throws IOException {
+    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores) throws IOException {
 
         int rawScoreNum = 0;
-        String fileName = modelGuid + ScoringDaemonService.SCORING_OUTPUT_PREFIX + index + ".txt";
+        String fileName = uuid + ScoringDaemonService.SCORING_OUTPUT_PREFIX + index + ".txt";
         File f = new File(fileName);
         if (!f.exists()) {
             throw new LedpException(LedpCode.LEDP_20012, new String[] { fileName });
@@ -176,22 +177,21 @@ public class ScoringMapperPredictUtil {
             if (splitLine.length != 2) {
                 throw new LedpException(LedpCode.LEDP_20013);
             }
-            String leadId = splitLine[0];
+            String recordId = splitLine[0];
             Double rawScore = Double.parseDouble(splitLine[1]);
-            if (scores.containsKey(leadId)) {
-                scores.get(leadId).add(rawScore);
-                rawScoreNum++;
+            if (scores.containsKey(recordId)) {
+                scores.get(recordId).add(rawScore);
             } else {
-                List<Double> scoreListWithSameLeadId = new ArrayList<Double>();
-                scoreListWithSameLeadId.add(rawScore);
-                scores.put(leadId, scoreListWithSameLeadId);
-                rawScoreNum++;
+                List<Double> scoreListWithRecordId = new ArrayList<Double>();
+                scoreListWithRecordId.add(rawScore);
+                scores.put(recordId, scoreListWithRecordId);
             }
+            rawScoreNum++;
         }
         return rawScoreNum;
     }
 
-    private static ScoreOutput getResult(Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap, String modelGuid,
+    private static ScoreOutput getResult(Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap, String uuid,
             String leadId, JsonNode model, double score) {
         Double probability = null;
 
@@ -296,8 +296,8 @@ public class ScoringMapperPredictUtil {
         }
 
         Integer integerScore = (int) (probability != null ? Math.round(probability * 100) : Math.round(score * 100));
-        String modelName = modelInfoMap.get(modelGuid).getModelId();
-        ScoreOutput result = new ScoreOutput(leadId, bucket, lift, modelName, percentile, probability, score,
+        String modelGuid = modelInfoMap.get(uuid).getModelGuid();
+        ScoreOutput result = new ScoreOutput(leadId, bucket, lift, modelGuid, percentile, probability, score,
                 integerScore);
         return result;
 

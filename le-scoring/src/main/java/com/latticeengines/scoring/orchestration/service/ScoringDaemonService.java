@@ -41,4 +41,5 @@ public interface ScoringDaemonService {
     
     public static final String SCORING_JOB_TYPE = "scoringJob";
     public static final String UNIQUE_KEY_COLUMN = "LeadID";
+
 }

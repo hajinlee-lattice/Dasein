@@ -1,7 +1,7 @@
 package com.latticeengines.scoring.util;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
-import com.latticeengines.scoring.util.ModelAndLeadInfo.ModelInfo;
+import com.latticeengines.scoring.util.ModelAndRecordInfo.ModelInfo;
 
 public class ScoringMapperValidateUtil {
 
@@ -31,17 +31,21 @@ public class ScoringMapperValidateUtil {
         }
     }
 
-    public static void validateTransformation(ModelAndLeadInfo modelAndLeadInfo) {
-        long totalLeadsPasssed = modelAndLeadInfo.getTotalleadNumber();
-        long totalLeadsTransformed = 0;
+    public static void validateTransformation(ModelAndRecordInfo modelAndLeadInfo) {
+        long totalRecordCount = modelAndLeadInfo.getTotalRecordCount();
+        if (totalRecordCount == 0) {
+            log.error("The mapper gets zero record.");
+            throw new LedpException(LedpCode.LEDP_20015);
+        }
+        long totalRecordTransformed = 0;
         Map<String, ModelInfo> modelInfoMap = modelAndLeadInfo.getModelInfoMap();
         Set<String> modelGuidSet = modelInfoMap.keySet();
         for (String modelGuid : modelGuidSet) {
-            totalLeadsTransformed += modelInfoMap.get(modelGuid).getLeadNumber();
+            totalRecordTransformed += modelInfoMap.get(modelGuid).getRecordCount();
         }
-        if (totalLeadsPasssed != totalLeadsTransformed) {
-            throw new LedpException(LedpCode.LEDP_20010, new String[] { String.valueOf(totalLeadsPasssed),
-                    String.valueOf(totalLeadsTransformed) });
+        if (totalRecordCount != totalRecordTransformed) {
+            throw new LedpException(LedpCode.LEDP_20010, new String[] { String.valueOf(totalRecordCount),
+                    String.valueOf(totalRecordTransformed) });
         }
     }
 
@@ -62,10 +66,10 @@ public class ScoringMapperValidateUtil {
         }
     }
 
-    public static void validateDatatype(JsonNode datatype, JsonNode model, String modelId) {
+    public static void validateDatatype(JsonNode datatype, JsonNode model, String modelGuid) {
 
         List<String> datatypeFailures = new ArrayList<String>();
-        Map<String, List<String>> modelFailures = new Hashtable<String, List<String>>();
+        Map<String, List<String>> modelFailures = new HashMap<String, List<String>>();
         DatatypeValidationResult vf = new DatatypeValidationResult(datatypeFailures, modelFailures);
 
         Iterator<String> keySet = datatype.fieldNames();
@@ -80,9 +84,9 @@ public class ScoringMapperValidateUtil {
 
         // validate the datatype file with the model.json
         ArrayNode metadata = (ArrayNode) model.get(ScoringDaemonService.INPUT_COLUMN_METADATA);
-        List<String> msgs = validate(datatype, modelId, metadata);
+        List<String> msgs = validate(datatype, modelGuid, metadata);
         if (msgs.size() != 0) {
-            modelFailures.put(modelId, msgs);
+            modelFailures.put(modelGuid, msgs);
         }
 
         if (!vf.passDatatypeValidation()) {
@@ -91,29 +95,28 @@ public class ScoringMapperValidateUtil {
         }
     }
 
-    private static List<String> validate(JsonNode datatype, String modelID, ArrayNode metadata) {
+    private static List<String> validate(JsonNode datatype, String modelGuid, ArrayNode metadata) {
         List<String> toReturn = new ArrayList<String>();
         if (metadata != null) {
-            for (int i = 0; i < metadata.size(); i++) {
-                JsonNode obj = metadata.get(i);
+            for (JsonNode obj : metadata) {
                 String name = obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_NAME).asText();
-                Long purpose = obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_PURPOSE).asLong();
+                int purpose = obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_PURPOSE).asInt();
                 long type = obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_VALUETYPE).asLong();
-                if (purpose.intValue() != MetadataPurpose.FEATURE.value) {
+                if (purpose != MetadataPurpose.FEATURE.value) {
                     continue;
                 }
-                if (!datatype.has(name)) {
+                if (!datatype.has(name) || datatype.get(name).isNull()) {
                     String msg = String.format("Missing required column: %s ", name);
                     toReturn.add(msg);
                     continue;
                 }
                 if (datatype.get(name).asLong() != type) {
-                    String msg = String.format("%d does not match with %d ", type, datatype.get(name).asInt());
+                    String msg = String.format("%d does not match with %d ", type, datatype.get(name).asLong());
                     toReturn.add(msg);
                 }
             }
         } else {
-            String msg = String.format("%s does not contain %s. ", modelID, ScoringDaemonService.INPUT_COLUMN_METADATA);
+            String msg = String.format("%s does not contain %s. ", modelGuid, ScoringDaemonService.INPUT_COLUMN_METADATA);
             toReturn.add(msg);
         }
         return toReturn;

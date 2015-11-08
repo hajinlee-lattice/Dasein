@@ -76,7 +76,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         URL url = ClassLoader.getSystemResource(DATA_PATH + "mock_datatype.avsc");
         String fileName = url.getFile();
         Path path = new Path(fileName);
-        JsonNode datatypeObj = ScoringMapperTransformUtil.parseDatatypeFile(path);
+        JsonNode datatypeObj = ScoringMapperTransformUtil.parseFileContentToJsonNode(path);
         assertTrue(datatypeObj.size() == 7, "datatypeObj should have 7 objects");
         assertTrue(datatypeObj.get("ModelingID").asDouble() == 1L, "parseDatatypeFile should be successful");
     }
@@ -86,7 +86,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         String[] targetFiles = { "encoder.py", "pipeline.py", "pipelinefwk.py", "pipelinesteps.py", "scoringengine.py",
                 "STPipelineBinary.p" };
 
-        JsonNode modelJson = ScoringMapperTransformUtil.parseModelFiles(modelPath);
+        JsonNode modelJson = ScoringMapperTransformUtil.parseFileContentToJsonNode(modelPath);
         Assert.assertNotNull(modelJson);
         Assert.assertEquals(modelJson.get(ScoringDaemonService.AVERAGE_PROBABILITY).asDouble(), 0.011919253398255223);
         Assert.assertNotNull(modelJson.get(ScoringDaemonService.BUCKETS));
@@ -145,20 +145,20 @@ public class ScoringMapperTransformUtilUnitTestNG {
             expectedFile.delete();
             System.out.println("leadInputFile has been deleted.");
         }
-        Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
+        Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
         LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
         JsonNode jsonNode = new ObjectMapper().readTree(PROPER_TEST_RECORD);
-        ScoringMapperTransformUtil.transformAndWriteLead(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles,
-                10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
+        ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles,
+                10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI", ScoringDaemonService.UNIQUE_KEY_COLUMN);
 
         Assert.assertNotNull(modelInfoMap);
         Assert.assertEquals(modelInfoMap.size(), 1);
-        Assert.assertEquals(modelInfoMap.get(MODEL_ID).getModelId(),
+        Assert.assertEquals(modelInfoMap.get(MODEL_ID).getModelGuid(),
                 "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
-        Assert.assertEquals(modelInfoMap.get(MODEL_ID).getLeadNumber(), 1);
+        Assert.assertEquals(modelInfoMap.get(MODEL_ID).getRecordCount(), 1);
         Assert.assertNotNull(leadFileBufferMap);
         Assert.assertEquals(leadFileBufferMap.size(), 1);
         Assert.assertNotNull(leadFileBufferMap.get(expectedFileName));
@@ -232,7 +232,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
     @Test(groups = "unit")
     public void testTransformAndWriteLeadWithNegativeCases() throws IOException {
-        Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
+        Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
         LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
@@ -240,8 +240,8 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID);
-            ScoringMapperTransformUtil.transformAndWriteLead(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles,
-                    10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
+            ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles,
+                    10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI", ScoringDaemonService.UNIQUE_KEY_COLUMN);
             Assert.fail("Should have thrown expcetion.");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20003);

@@ -26,13 +26,13 @@ public class ScoringMapperValidateUtilUnitTestNG {
     @Test(groups = "unit")
     public void testValidateTransformation() {
         // make up modelInfoMap
-        Map<String, ModelAndLeadInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndLeadInfo.ModelInfo>();
-        ModelAndLeadInfo.ModelInfo modelInfo = new ModelAndLeadInfo.ModelInfo(MODEL_ID, 10);
+        Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
+        ModelAndRecordInfo.ModelInfo modelInfo = new ModelAndRecordInfo.ModelInfo(MODEL_ID, 10);
         modelInfoMap.put(MODEL_ID, modelInfo);
         // make up modelAndLeadInfo
-        ModelAndLeadInfo modelAndLeadInfo = new ModelAndLeadInfo();
+        ModelAndRecordInfo modelAndLeadInfo = new ModelAndRecordInfo();
         modelAndLeadInfo.setModelInfoMap(modelInfoMap);
-        modelAndLeadInfo.setTotalleadNumber(11);
+        modelAndLeadInfo.setTotalRecordCountr(11);
 
         try {
             ScoringMapperValidateUtil.validateTransformation(modelAndLeadInfo);
@@ -85,14 +85,14 @@ public class ScoringMapperValidateUtilUnitTestNG {
                 .getSystemResource("com/latticeengines/scoring/models/60fd2fa4-9868-464e-a534-3205f52c41f0");
         String modelFileName = modelUrl.getFile();
         Path modelPath = new Path(modelFileName);
-        JsonNode modelJsonObj = ScoringMapperTransformUtil.parseModelFiles(modelPath);
+        JsonNode modelJsonObj = ScoringMapperTransformUtil.parseFileContentToJsonNode(modelPath);
         String modelGuid = modelPath.getName();
         models.put(modelGuid, modelJsonObj);
 
         URL datatypeUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/data/" + "datatype.avsc");
         String datatypeFileName = datatypeUrl.getFile();
         Path datatypePath = new Path(datatypeFileName);
-        JsonNode datatype = ScoringMapperTransformUtil.parseDatatypeFile(datatypePath);
+        JsonNode datatype = ScoringMapperTransformUtil.parseFileContentToJsonNode(datatypePath);
         try {
             ScoringMapperValidateUtil.validateDatatype(datatype, models.get(modelGuid), modelGuid);
         } catch (LedpException e1) {

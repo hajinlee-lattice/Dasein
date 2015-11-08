@@ -20,9 +20,10 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 import com.latticeengines.scoring.util.LocalizedFiles;
-import com.latticeengines.scoring.util.ModelAndLeadInfo;
+import com.latticeengines.scoring.util.ModelAndRecordInfo;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
 import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
+import org.apache.hadoop.conf.Configuration;
 
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
@@ -32,55 +33,51 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
     @Override
     public void run(Context context) throws IOException, InterruptedException {
 
-        String leadInputQueueId = context.getConfiguration().get(ScoringProperty.LEAD_INPUT_QUEUE_ID.name());
-        String logDir = context.getConfiguration().get(ScoringProperty.LOG_DIR.name());
-        String tenantId = context.getConfiguration().get(ScoringProperty.TENANT_ID.name());
+        Configuration config = context.getConfiguration();
         @SuppressWarnings("deprecation")
         Path[] paths = context.getLocalCacheFiles();
-        long leadFileThreshold = context.getConfiguration().getLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(),
+        long recordFileThreshold = context.getConfiguration().getLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(),
                 DEFAULT_LEAD_FILE_THRESHOLD);
 
         try {
             // Store localized files
             LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(paths);
-
             long transformStartTime = System.currentTimeMillis();
-
-            ModelAndLeadInfo modelAndLeadInfo = ScoringMapperTransformUtil.prepareLeadsForScoring(context,
-                    localizedFiles, leadFileThreshold);
+            ModelAndRecordInfo modelAndRecordInfo = ScoringMapperTransformUtil.prepareRecordsForScoring(context,
+                    localizedFiles, recordFileThreshold);
 
             long transformEndTime = System.currentTimeMillis();
             long transformationTotalTime = transformEndTime - transformStartTime;
             log.info("The transformation takes " + (transformationTotalTime * 1.66667e-5) + " mins");
-            long totalLeadNumber = modelAndLeadInfo.getTotalleadNumber();
-            if (totalLeadNumber == 0) {
-                log.error("The mapper gets zero leads.");
-                throw new LedpException(LedpCode.LEDP_20015);
-            } else {
-                log.info("The mapper has transformed: " + totalLeadNumber + " leads.");
-                ScoringMapperPredictUtil.evaluate(context, modelAndLeadInfo.getModelInfoMap().keySet());
-                List<ScoreOutput> resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndLeadInfo,
-                        localizedFiles.getModels(), leadFileThreshold);
-                log.info("The mapper has scored: " + resultList.size() + " leads.");
-                if (totalLeadNumber != resultList.size()) {
-                    throw new LedpException(LedpCode.LEDP_20009, new String[] { String.valueOf(totalLeadNumber),
+
+            long totalRecordCount = modelAndRecordInfo.getTotalRecordCount();
+            log.info("The mapper has transformed: " + totalRecordCount + " records.");
+
+            ScoringMapperPredictUtil.evaluate(context, modelAndRecordInfo.getModelInfoMap().keySet());
+            List<ScoreOutput> resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndRecordInfo,
+                       localizedFiles.getModels(), recordFileThreshold);
+            log.info("The mapper has scored: " + resultList.size() + " records.");
+            if (totalRecordCount != resultList.size()) {
+                 throw new LedpException(LedpCode.LEDP_20009, new String[] { String.valueOf(totalRecordCount),
                             String.valueOf(resultList.size()) });
-                }
-
-                String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
-                log.info("outputDir: " + outputPath);
-                ScoringMapperPredictUtil.writeToOutputFile(resultList, context.getConfiguration(), outputPath);
-
-                long scoringEndTime = System.currentTimeMillis();
-                long scoringTotalTime = scoringEndTime - transformEndTime;
-                log.info("The scoring takes " + (scoringTotalTime * 1.66667e-5) + " mins");
             }
+
+             String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
+             log.info("outputDir: " + outputPath);
+             ScoringMapperPredictUtil.writeToOutputFile(resultList, context.getConfiguration(), outputPath);
+
+             long scoringEndTime = System.currentTimeMillis();
+             long scoringTotalTime = scoringEndTime - transformEndTime;
+             log.info("The scoring takes " + (scoringTotalTime * 1.66667e-5) + " mins");
+            
         } catch (Exception e) {
             String errorMessage = String
                     .format("TenantId=%s leadnputQueueId=%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
-                            tenantId, leadInputQueueId, e.getMessage(), ExceptionUtils.getStackTrace(e));
+                            config.get(ScoringProperty.TENANT_ID.name()),
+                            config.get(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()), e.getMessage(),
+                            ExceptionUtils.getStackTrace(e));
             log.error(errorMessage);
-            File logFile = new File(logDir + "/" + UUID.randomUUID() + ".err");
+            File logFile = new File(config.get(ScoringProperty.LOG_DIR.name()) + "/" + UUID.randomUUID() + ".err");
             FileUtils.writeStringToFile(logFile, errorMessage);
             throw new LedpException(LedpCode.LEDP_20014, e);
         }

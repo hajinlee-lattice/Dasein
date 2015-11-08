@@ -71,7 +71,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name(), scoringConfig.getUniqueKeyColumn());
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
-
+        properties.setProperty(ScoringProperty.MODEL_GUID.name(), commaJoiner.join(scoringConfig.getModelGuids()));
+        properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), String.valueOf(Long.MIN_VALUE));
         List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant,
                 customerBaseDir, scoringConfig.getModelGuids());
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));

@@ -5,5 +5,6 @@ public enum ScoringProperty {
     LEAD_INPUT_QUEUE_ID, //
     TENANT_ID, //
     LOG_DIR, //
-    UNIQUE_KEY_COLUMN; //
+    UNIQUE_KEY_COLUMN, //
+    MODEL_GUID; //
 }

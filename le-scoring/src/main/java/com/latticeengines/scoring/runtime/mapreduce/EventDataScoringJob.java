@@ -61,10 +61,15 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
     public void customize(Job mrJob, Properties properties) {
         try {
             Configuration config = mrJob.getConfiguration();
-            config.set(ScoringProperty.UNIQUE_KEY_COLUMN.name(), properties.getProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name()));
-            if (properties.containsKey(ScoringProperty.LEAD_INPUT_QUEUE_ID.name())) {
-                config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
+            config.set(ScoringProperty.UNIQUE_KEY_COLUMN.name(),
+                    properties.getProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name()));
+
+            if (properties.containsKey(ScoringProperty.MODEL_GUID.name())) {
+                config.set(ScoringProperty.MODEL_GUID.name(), properties.getProperty(ScoringProperty.MODEL_GUID.name()));
             }
+            config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(),
+                    properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
+
             config.set(ScoringProperty.TENANT_ID.name(), properties.getProperty(ScoringProperty.TENANT_ID.name()));
             config.set(ScoringProperty.LOG_DIR.name(), properties.getProperty(ScoringProperty.LOG_DIR.name()));
 
@@ -138,7 +143,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), args[8]);
         properties.setProperty(ScoringProperty.TENANT_ID.name(), args[9]);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), args[10]);
-
+        properties.setProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name(), args[11]);
         customize(job, properties);
         if (job.waitForCompletion(true)) {
             return 0;
