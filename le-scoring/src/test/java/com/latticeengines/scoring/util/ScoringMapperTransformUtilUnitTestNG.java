@@ -35,7 +35,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     private final static String MODEL_PATH = "com/latticeengines/scoring/models/";
     private final static String PYTHON_PATH = "com/latticeengines/scoring/python/scoring.py";
     private final static String MODEL_SUPPORTED_FILE_PATH = "com/latticeengines/scoring/models/supportedFiles/";
-    private final static String MODEL_ID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
+    private final static String UUID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
     private final static String MODEL_NAME = "2Checkout_relaunch_PLSModel_2015-03-19_15-37";
     private final static String PROPER_TEST_RECORD = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
@@ -52,7 +52,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setup() {
         datatypePath = new Path(ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc").getFile());
-        modelPath = new Path(ClassLoader.getSystemResource(MODEL_PATH + MODEL_ID).getFile());
+        modelPath = new Path(ClassLoader.getSystemResource(MODEL_PATH + UUID).getFile());
         pythonPath = new Path(ClassLoader.getSystemResource(PYTHON_PATH).getFile());
         localFilePaths = new ArrayList<Path>();
         localFilePaths.add(datatypePath);
@@ -68,7 +68,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Assert.assertNotNull(localizedFiles);
         Assert.assertNotNull(localizedFiles.getDatatype());
         Assert.assertEquals(localizedFiles.getModels().size(), 1);
-        Assert.assertNotNull(localizedFiles.getModels().get(MODEL_ID));
+        Assert.assertNotNull(localizedFiles.getModels().get(UUID));
     }
 
     @Test(groups = "unit")
@@ -87,6 +87,8 @@ public class ScoringMapperTransformUtilUnitTestNG {
                 "STPipelineBinary.p" };
 
         JsonNode modelJson = ScoringMapperTransformUtil.parseFileContentToJsonNode(modelPath);
+        ScoringMapperTransformUtil.decodeSupportedFilesToFile(UUID, modelJson.get(ScoringDaemonService.MODEL));
+        ScoringMapperTransformUtil.writeScoringScript(UUID, modelJson.get(ScoringDaemonService.MODEL));
         Assert.assertNotNull(modelJson);
         Assert.assertEquals(modelJson.get(ScoringDaemonService.AVERAGE_PROBABILITY).asDouble(), 0.011919253398255223);
         Assert.assertNotNull(modelJson.get(ScoringDaemonService.BUCKETS));
@@ -105,7 +107,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
     private boolean compareFiles(String fileName) throws IOException {
         boolean filesAreSame = false;
-        File newFile = new File(MODEL_ID + fileName);
+        File newFile = new File(UUID + fileName);
         URL url = ClassLoader.getSystemResource(MODEL_SUPPORTED_FILE_PATH + fileName);
         File oldFile = new File(url.getFile());
         filesAreSame = compareFilesLineByLine(newFile, oldFile);
@@ -139,7 +141,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     @Test(groups = "unit")
     public void testTransformAndWriteLead() throws IOException {
 
-        String expectedFileName = MODEL_ID + "-0";
+        String expectedFileName = UUID + "-0";
         File expectedFile = new File(expectedFileName);
         if (expectedFile.exists()) {
             expectedFile.delete();
@@ -156,9 +158,9 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
         Assert.assertNotNull(modelInfoMap);
         Assert.assertEquals(modelInfoMap.size(), 1);
-        Assert.assertEquals(modelInfoMap.get(MODEL_ID).getModelGuid(),
+        Assert.assertEquals(modelInfoMap.get(UUID).getModelGuid(),
                 "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
-        Assert.assertEquals(modelInfoMap.get(MODEL_ID).getRecordCount(), 1);
+        Assert.assertEquals(modelInfoMap.get(UUID).getRecordCount(), 1);
         Assert.assertNotNull(leadFileBufferMap);
         Assert.assertEquals(leadFileBufferMap.size(), 1);
         Assert.assertNotNull(leadFileBufferMap.get(expectedFileName));
