@@ -5,25 +5,26 @@ import java.util.UUID;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterMethod;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
-import com.latticeengines.scoring.runtime.mapreduce.ScoringComparisonAgainstModelingTestNG;
-import com.latticeengines.scoring.service.ScoringJobService;
 
-public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelingTestNG {
+public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImplTestNG {
 
-    protected static String customer = "Mulesoft_Relaunch_JobService";
+    @Value("${scoring.test.microservice.url}")
+    private String scoringMicroserviceUrl;
 
-    @Autowired
-    private ScoringJobService scoringJobService;
+    protected static String customer = "Mulesoft_Relaunch_Deployment";
+
+    private RestTemplate restTemplate = new RestTemplate();
 
     @Override
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(customer).toString();
         path = customerBaseDir + "/" + tenant;
@@ -34,11 +35,9 @@ public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelin
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + UUID.randomUUID() + "/scores";
     }
 
-    @Override
-    protected void prepareDataForScoring() throws Exception {
-        uuid = getUuid();
-        containerId = getContainerId();
-        System.out.println("uuid is " + uuid);
+    @Test(groups = "deployment")
+    public void modelScoreAndCompare() throws Exception {
+        super.modelScoreAndCompare();
     }
 
     @Override
@@ -49,17 +48,9 @@ public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelin
         scoringConfig.setTargetResultDir(scorePath);
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
         scoringConfig.setUniqueKeyColumn("ModelingID");
-        ApplicationId appId = scoringJobService.score(scoringConfig);
+        AppSubmission submission = restTemplate.postForObject(scoringMicroserviceUrl + "/scoringJobs", scoringConfig,
+                AppSubmission.class, new Object[] {});
+        ApplicationId appId = getApplicationId(submission.getApplicationIds().get(0));
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
     }
-
-    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
-    public void afterEachTest() {
-        try {
-            HdfsUtils.rmdir(yarnConfiguration, path);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
-
 }

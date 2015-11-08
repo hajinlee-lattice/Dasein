@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -61,24 +62,46 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
 
     private static final double EPS = 1e-6;
 
+    @Value("${dataplatform.customer.basedir}")
+    protected String customerBaseDir;
+
+    @Autowired
+    protected Configuration yarnConfiguration;
+
+    protected static String customer = "Mulesoft_Relaunch_Orchestration";
+
+    protected static String tenant;
+
+    @Autowired
+    protected ModelingService modelingService;
+
+    private String inputLeadsTable;
+
+    protected Model model;
+
+    protected String modelingModelPath;
+
+    protected String uuid;
+
+    protected String containerId;
+    
+    protected String path;
+
+    protected String dataPath;
+
+    protected String samplePath;
+
+    protected String metadataPath;
+
+    protected String scoringDataPath;
+
+    protected String scorePath;
+
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
     @Autowired
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
-
-    @Value("${dataplatform.customer.basedir}")
-    private String customerBaseDir;
-
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    private static final String customer = "Mulesoft_Relaunch";
-
-    private static String tenant;
-
-    @Value("${scoring.test.table}")
-    private String testInputTable;
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
@@ -91,31 +114,9 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
 
     @Autowired
     private MetadataService metadataService;
-
-    @Autowired
-    private ModelingService modelingService;
-
-    private String inputLeadsTable;
-
-    private Model model = null;
-
-    private String modelingModelPath;
-
-    private String modelGuid;
-
-    private String containerId;
-
-    private String scoringDataPath;
-
-    private String path;
-
-    private String dataPath;
-
-    private String samplePath;
-
-    private String metadataPath;
-
-    private String scorePath;
+    
+    @Value("${scoring.test.table}")
+    private String testInputTable;
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
@@ -144,7 +145,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     }
 
     // upload necessary files to the directory
-    private void prepareDataForModeling() throws Exception {
+    protected void prepareDataForModeling() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, path);
         HdfsUtils.mkdir(yarnConfiguration, samplePath);
         HdfsUtils.mkdir(yarnConfiguration, metadataPath);
@@ -183,7 +184,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
                 profileMulesoftScoringPath);
     }
 
-    private void modeling() throws Exception {
+    protected void modeling() throws Exception {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=0");
@@ -197,11 +198,11 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         submitModel();
     }
 
-    private void prepareDataForScoring() throws Exception {
-        modelGuid = getModelGuid();
+    protected void prepareDataForScoring() throws Exception {
+        uuid = getUuid();
         containerId = getContainerId();
-        System.out.println("modelGuid is " + modelGuid);
-        String modelId = "ms__" + modelGuid + "-PLS_model";
+        System.out.println("uuid is " + uuid);
+        String modelId = "ms__" + uuid + "-PLS_model";
 
         File scoringLeadFile = addColumnsToTestDataFile(modelId);
         scoringJdbcTemplate.execute(String.format("Update [%s] Set [%s] = '%s'", inputLeadsTable, ScoringDaemonService.MODEL_GUID, modelId));
@@ -211,16 +212,15 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         scoringLeadFile.delete();
     }
 
-    private String getModelGuid() throws Exception {
+    protected String getUuid() throws Exception {
         List<String> dirList = HdfsUtils.getFilesForDir(yarnConfiguration, modelingModelPath);
         assertTrue(dirList.size() == 1, "There should be only one model generated.");
-        String dir = dirList.get(0);
-        return dir.substring(dirList.get(0).lastIndexOf('/') + 1);
+        return UuidUtils.parseUuid(dirList.get(0));
     }
 
-    private String getContainerId() throws Exception {
+    protected String getContainerId() throws Exception {
         List<String> topDirs;
-        topDirs = HdfsUtils.getFilesForDir(yarnConfiguration, modelingModelPath + modelGuid);
+        topDirs = HdfsUtils.getFilesForDir(yarnConfiguration, modelingModelPath + uuid);
         String dir = topDirs.get(0);
         return dir.substring(dir.lastIndexOf("/") + 1);
     }
@@ -273,7 +273,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         return tenant;
     }
 
-    public void submitModel() throws Exception {
+    protected void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
 
@@ -290,7 +290,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         }
     }
 
-    private void scoring() throws Exception {
+    protected void scoring() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
                 0, 4352, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(scoringCommand);
@@ -311,7 +311,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
 
     private Map<String, Double> getModelingResults() throws Exception {
 
-        String modelingResultsPath = modelingModelPath + modelGuid + "/" + containerId;
+        String modelingResultsPath = modelingModelPath + uuid + "/" + containerId;
         System.out.println("modelingResultsPath is " + modelingResultsPath);
 
         HdfsFilenameFilter filter = new HdfsFilenameFilter() {
