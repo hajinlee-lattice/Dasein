@@ -95,8 +95,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             String dataTypeFilePath = inputDir + "/" + dataTypeFile;
             ScoringJobUtil.generateDataTypeSchema(schema, dataTypeFilePath, config);
 
-            String leadInputFileThreshold = properties.getProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name());
-            config.setLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(), Long.parseLong(leadInputFileThreshold));
+            String leadInputFileThreshold = properties.getProperty(ScoringProperty.RECORD_FILE_THRESHOLD.name());
+            config.setLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(), Long.parseLong(leadInputFileThreshold));
             config.set(MapReduceProperty.OUTPUT.name(), properties.getProperty(MapReduceProperty.OUTPUT.name()));
             mrJob.setInputFormatClass(AvroKeyInputFormat.class);
             mrJob.setOutputFormatClass(NullOutputFormat.class);
@@ -139,7 +139,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[4]);
         properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), args[5]);
         properties.setProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name(), args[6]);
-        properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), args[7]);
+        properties.setProperty(ScoringProperty.RECORD_FILE_THRESHOLD.name(), args[7]);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), args[8]);
         properties.setProperty(ScoringProperty.TENANT_ID.name(), args[9]);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), args[10]);

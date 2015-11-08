@@ -1,5 +1,7 @@
 package com.latticeengines.scoring.entitymanager.impl;
 
+import static org.testng.Assert.assertEquals;
+
 import java.sql.Timestamp;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import static org.testng.Assert.assertEquals;
 
 public class ScoringCommandStateEntityMgrImplTestNG extends ScoringFunctionalTestNGBase{
 

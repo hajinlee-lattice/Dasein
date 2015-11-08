@@ -1,8 +1,8 @@
 package com.latticeengines.scoring.orchestration.service.impl;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
@@ -29,8 +29,6 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringCommandLogService;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
-import com.latticeengines.scoring.orchestration.service.impl.ScoringManagerServiceImpl;
-import com.latticeengines.scoring.orchestration.service.impl.ScoringProcessorCallable;
 
 public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 

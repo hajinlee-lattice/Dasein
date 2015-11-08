@@ -15,9 +15,9 @@ import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
+import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 
 @Component("scoringJobServiceImpl")
@@ -39,7 +39,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private String minInputSplitSize;
 
     @Value("${scoring.mapper.threshold}")
-    private String leadFileThreshold;
+    private String recordFileThreshold;
 
     @Value("${scoring.mapper.logdir}")
     private String scoringMapperLogDir;
@@ -67,7 +67,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(MapReduceProperty.OUTPUT.name(), scoringConfig.getTargetResultDir());
         properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), maxInputSplitSize);
         properties.setProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name(), minInputSplitSize);
-        properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
+        properties.setProperty(ScoringProperty.RECORD_FILE_THRESHOLD.name(), recordFileThreshold);
         properties.setProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name(), scoringConfig.getUniqueKeyColumn());
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);

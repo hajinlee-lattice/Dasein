@@ -36,10 +36,10 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
-import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
+import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 
 @Component("scoringStepYarnProcessor")
@@ -67,7 +67,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private String targetRawTable;
 
     @Value("${scoring.mapper.threshold}")
-    private String leadFileThreshold;
+    private String recordFileThreshold;
 
     @Value("${scoring.mapper.logdir}")
     private String scoringMapperLogDir;
@@ -192,7 +192,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                 + "/scores");
         properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), maxInputSplitSize);
         properties.setProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name(), minInputSplitSize);
-        properties.setProperty(ScoringProperty.LEAD_FILE_THRESHOLD.name(), leadFileThreshold);
+        properties.setProperty(ScoringProperty.RECORD_FILE_THRESHOLD.name(), recordFileThreshold);
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), Long.toString(scoringCommand.getPid()));
         properties.setProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name(), ScoringDaemonService.UNIQUE_KEY_COLUMN);
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);

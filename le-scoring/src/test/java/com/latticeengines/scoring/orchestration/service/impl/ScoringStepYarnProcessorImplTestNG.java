@@ -1,8 +1,10 @@
 package com.latticeengines.scoring.orchestration.service.impl;
 
 import static org.testng.Assert.assertEquals;
+
 import java.net.URL;
 import java.sql.Timestamp;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;

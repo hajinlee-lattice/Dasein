@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandLogEntityMgr;
 import com.latticeengines.scoring.entitymanager.impl.ScoringCommandLogEntityMgrImpl;
-import com.latticeengines.scoring.orchestration.service.impl.ScoringCommandLogServiceImpl;
 
 public class ScoringCommandLogServiceImplUnitTestNG {
 

@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -23,7 +24,6 @@ import com.latticeengines.scoring.util.LocalizedFiles;
 import com.latticeengines.scoring.util.ModelAndRecordInfo;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
 import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
-import org.apache.hadoop.conf.Configuration;
 
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
@@ -36,7 +36,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         Configuration config = context.getConfiguration();
         @SuppressWarnings("deprecation")
         Path[] paths = context.getLocalCacheFiles();
-        long recordFileThreshold = context.getConfiguration().getLong(ScoringProperty.LEAD_FILE_THRESHOLD.name(),
+        long recordFileThreshold = context.getConfiguration().getLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(),
                 DEFAULT_LEAD_FILE_THRESHOLD);
 
         try {

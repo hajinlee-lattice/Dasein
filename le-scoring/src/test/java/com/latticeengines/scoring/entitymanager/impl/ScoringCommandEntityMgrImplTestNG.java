@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
+
 import java.sql.Timestamp;
 
 import org.springframework.beans.factory.annotation.Autowired;

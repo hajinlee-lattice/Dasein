@@ -18,7 +18,6 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringStepProcessor;
-import com.latticeengines.scoring.orchestration.service.impl.ScoringServiceValidationAspect;
 
 public class ScoringServiceValidationAspectTestNG extends ScoringFunctionalTestNGBase {
 
