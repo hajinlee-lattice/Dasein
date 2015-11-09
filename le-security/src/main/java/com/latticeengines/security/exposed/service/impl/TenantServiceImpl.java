@@ -63,6 +63,8 @@ public class TenantServiceImpl implements TenantService {
         } catch (IllegalArgumentException e) {
             if (!e.getMessage().contains("null entity")) {
                 throw e;
+            } else {
+                log.error(e);
             }
         }
         try {

@@ -1,7 +1,9 @@
 package com.latticeengines.security.exposed.service;
 
+import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -15,7 +17,8 @@ public interface InternalTestUserService {
 
     void deleteUserWithUsername(String username);
 
-    Map<AccessLevel, User> createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel();
+    Map<AccessLevel, User> createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(
+            List<Tenant> testingTenants);
 
     void logoutTicket(Ticket ticket);
 

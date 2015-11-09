@@ -1,14 +1,18 @@
 package com.latticeengines.security.exposed.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -22,7 +26,6 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     private static final String ADMIN_USERNAME = "bnguyen@lattice-engines.com";
     private static final String ADMIN_PASSWORD = "tahoe";
     private static final String ADMIN_PASSWORD_HASH = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
-    private static final String GENERAL_USERNAME = "lming@lattice-engines.com";
     private static final String GENERAL_PASSWORD = "admin";
     private static final String GENERAL_PASSWORD_HASH = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
     private static final String PASSWORD_TESTER = "pls-password-tester@test.lattice-engines.ext";
@@ -77,34 +80,40 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     }
 
     @Override
-    public Map<AccessLevel, User> createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel() {
+    public Map<AccessLevel, User> createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(List<Tenant> testingTenants) {
         if (shouldRecreateUserWithUsernameAndPassword(ADMIN_USERNAME, ADMIN_PASSWORD)) {
             globalUserManagementService.deleteUser("bnguyen");
             globalUserManagementService.deleteUser(ADMIN_USERNAME);
             createUser(ADMIN_USERNAME, ADMIN_USERNAME, "Super", "User", ADMIN_PASSWORD_HASH);
-        }
-
-        if (shouldRecreateUserWithUsernameAndPassword(GENERAL_USERNAME, GENERAL_PASSWORD)) {
-            globalUserManagementService.deleteUser("lming");
-            globalUserManagementService.deleteUser(GENERAL_USERNAME);
-            createUser(GENERAL_USERNAME, GENERAL_USERNAME, "General", "User", GENERAL_PASSWORD_HASH);
+            for (Tenant testingTenant: testingTenants) {
+                userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, testingTenant.getId(), ADMIN_USERNAME);
+            }
         }
 
         if (shouldRecreateUserWithUsernameAndPassword(PASSWORD_TESTER, PASSWORD_TESTER_PASSWORD)) {
             globalUserManagementService.deleteUser(PASSWORD_TESTER);
             createUser(PASSWORD_TESTER, PASSWORD_TESTER, "Lattice", "Tester", PASSWORD_TESTER_PASSWORD_HASH);
+            for (Tenant testingTenant: testingTenants) {
+                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testingTenant.getId(), ADMIN_USERNAME);
+            }
         }
 
         Map<AccessLevel, User> testingUsers = new HashMap<>();
 
         for (AccessLevel level : AccessLevel.values()) {
             User user = createATestUserIfNecessary(level);
+            for (Tenant testingTenant: testingTenants) {
+                userService.assignAccessLevel(level, testingTenant.getId(), user.getUsername());
+            }
             testingUsers.put(level, user);
         }
 
         if (shouldRecreateUserWithUsernameAndPassword(EXTERNAL_USER_USERNAME_1, GENERAL_PASSWORD)) {
             globalUserManagementService.deleteUser(EXTERNAL_USER_USERNAME_1);
             createUser(EXTERNAL_USER_USERNAME_1, EXTERNAL_USER_USERNAME_1, "Lattice", "Tester", GENERAL_PASSWORD_HASH);
+            for (Tenant testingTenant: testingTenants) {
+                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testingTenant.getId(), EXTERNAL_USER_USERNAME_1);
+            }
         }
 
         return testingUsers;
