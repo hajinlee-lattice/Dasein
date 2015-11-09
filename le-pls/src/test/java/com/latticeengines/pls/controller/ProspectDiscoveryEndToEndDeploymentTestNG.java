@@ -109,7 +109,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         createImportTablesInMetadataStore();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void runPipeline() throws Exception {
         importData();
         runDataFlow();
