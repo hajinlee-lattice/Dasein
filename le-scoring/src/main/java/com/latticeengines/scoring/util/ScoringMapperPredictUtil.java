@@ -42,11 +42,9 @@ public class ScoringMapperPredictUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
 
-    public static String evaluate(MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context,
+    public static void evaluate(MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context,
             Set<String> uuidSet) throws IOException, InterruptedException {
 
-        StringBuilder strs = new StringBuilder();
-        // spawn python
         StringBuilder sb = new StringBuilder();
         for (String modelGuid : uuidSet) {
             sb.append(modelGuid + " ");
@@ -58,22 +56,21 @@ public class ScoringMapperPredictUtil {
             throw new LedpException(LedpCode.LEDP_20002);
         }
 
+        // spawn python
         Process p = Runtime.getRuntime().exec("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
 
-        try (BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+        try (BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
             String line = "";
             StringBuilder errors = new StringBuilder();
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 
-                while ((line = in.readLine()) != null) {
-                    strs.append(line);
-                    log.info("This is python info: " + line);
-                    context.progress();
-                }
+            while ((line = in.readLine()) != null) {
+                log.info("This is python info: " + line);
+                context.progress();
             }
+
             while ((line = err.readLine()) != null) {
                 errors.append(line);
-                strs.append(line);
                 log.error("This is python error: " + line);
                 context.progress();
             }
@@ -85,7 +82,7 @@ public class ScoringMapperPredictUtil {
                 throw new LedpException(LedpCode.LEDP_20011, new String[] { errors.toString() });
             }
         }
-        return strs.toString();
+
     }
 
     public static void writeToOutputFile(List<ScoreOutput> resultList, Configuration yarnConfiguration,
