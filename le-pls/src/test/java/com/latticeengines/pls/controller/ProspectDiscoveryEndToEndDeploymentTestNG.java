@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -58,6 +59,7 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -93,6 +95,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     private Tenant tenant;
 
+    private List<String> modelGuids = new ArrayList<>();
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         restTemplate.setInterceptors(addMagicAuthHeaders);
@@ -104,8 +108,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         installServiceFlow();
         createImportTablesInMetadataStore();
     }
-    
-    @Test(groups = "deployment", enabled = false)
+
+    @Test(groups = "deployment", enabled = true)
     public void runPipeline() throws Exception {
         importData();
         runDataFlow();
@@ -114,6 +118,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         Table eventTable = createEventTableFromMatchResult(commandId, preMatchEventTableAndCreds);
         ModelingServiceExecutor.Builder bldr = sample(eventTable);
         profileAndModel(eventTable, bldr);
+        scoring(eventTable);
     }
 
     private void setupUsers() throws Exception {
@@ -124,7 +129,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
                 "User", //
                 adminPasswordHash);
     }
-    
+
     private ModelingServiceExecutor.Builder sample(Table eventTable) throws Exception {
         String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
         ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
@@ -148,7 +153,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     private void profileAndModel(Table eventTable, ModelingServiceExecutor.Builder bldr) throws Exception {
         String[] eventCols = new String[] { //
-                "Event_IsWon", //
+        "Event_IsWon", //
                 "Event_StageIsClosedWon", //
                 "Event_IsClosed", //
                 "Event_OpportunityCreated" //
@@ -171,14 +176,34 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
         for (String eventCol : eventCols) {
             bldr = bldr.targets(eventCol) //
-                       .metadataTable("EventTable-" + eventCol) //
-                       .keyColumn("Id") //
-                       .modelName("Model-" + eventCol);
+                    .metadataTable("EventTable-" + eventCol) //
+                    .keyColumn("Id") //
+                    .modelName("Model-" + eventCol);
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
             modelExecutor.writeMetadataFile();
             modelExecutor.profile();
-            modelExecutor.model();
+            String uuid = modelExecutor.model();
+            modelGuids.add("ms__" + uuid + "-PLS_model");
         }
+    }
+
+    private void scoring(Table eventTable) throws Exception {
+        String dataPath = String.format("%s%s/data/%s/samples", modelingServiceHdfsBaseDir, CUSTOMERSPACE, eventTable.getName());
+        System.out.println(dataPath);
+        String scorePath = modelingServiceHdfsBaseDir + CUSTOMERSPACE + "/scoring/" + UUID.randomUUID() + "/scores";
+        System.out.println(scorePath);
+        ScoringConfiguration scoringConfig = new ScoringConfiguration();
+        scoringConfig.setCustomer(CUSTOMERSPACE);
+        scoringConfig.setSourceDataDir(dataPath);
+        scoringConfig.setTargetResultDir(scorePath);
+        scoringConfig.setModelGuids(modelGuids);
+        System.out.println(modelGuids);
+        scoringConfig.setUniqueKeyColumn("Id");
+        System.out.println(scoringConfig);
+        AppSubmission submission = restTemplate.postForObject(microServiceHostPort + "/scoring/scoringJobs",
+                scoringConfig, AppSubmission.class, new Object[] {});
+        String appId = submission.getApplicationIds().get(0);
+        waitForAppId(appId);
     }
 
     private Table createEventTableFromMatchResult(Long commandId, //
@@ -213,7 +238,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         config.setCreds(preMatchEventTableAndCreds.getValue());
         config.setQuery(sb.toString());
         config.setCustomer(CUSTOMERSPACE);
-        config.setKeyCols(Arrays.<String>asList(new String[] { "Source_Id" }));
+        config.setKeyCols(Arrays.<String> asList(new String[] { "Source_Id" }));
         config.setTargetHdfsDir(hdfsTargetPath);
 
         AppSubmission submission = restTemplate.postForObject(url, config, AppSubmission.class);
@@ -537,7 +562,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             table.getLastModifiedKey().setLastModifiedTimestamp(date.minusYears(2).getMillis());
 
             restTemplate.postForObject(microServiceHostPort
-                    + "/metadata/customerspaces/{customerSpace}/importtables/{tableName}", table, String.class, urlVariables);
+                    + "/metadata/customerspaces/{customerSpace}/importtables/{tableName}", table, String.class,
+                    urlVariables);
         }
     }
 
@@ -575,7 +601,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         int maxTries = 1000;
         int i = 0;
         do {
-            String url = String.format(microServiceHostPort + "/modeling/jobs/%s", appId);
+            String url = String.format(microServiceHostPort + "/scoring/scoringJobs/%s", appId);
             status = restTemplate.getForObject(url, JobStatus.class);
             Thread.sleep(10000L);
             i++;

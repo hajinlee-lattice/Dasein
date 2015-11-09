@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
@@ -33,10 +32,7 @@ public class ModelResource {
 
     @Autowired
     private ModelingService modelingService;
-    
-    @Autowired
-    private JobService jobService;
-    
+
     public ModelResource() {
         // Need to set java.class.path in order for the Sqoop dynamic java
         // compilation to work
@@ -86,7 +82,7 @@ public class ModelResource {
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
     public JobStatus getJobStatus(@PathVariable String applicationId) {
-        return jobService.getJobStatus(applicationId);
+        return modelingService.getJobStatus(applicationId);
     }
 
     @RequestMapping(value = "/profiles", method = RequestMethod.POST, headers = "Accept=application/json")
