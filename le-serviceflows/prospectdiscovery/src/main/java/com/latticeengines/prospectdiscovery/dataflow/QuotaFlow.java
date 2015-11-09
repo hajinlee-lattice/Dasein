@@ -154,11 +154,13 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         for (int i = 0; i < size; ++i) {
             SingleReferenceLookup lookup = intent.getLookups().get(i);
             sb.append(lookup.getReference().toString());
-            sb.append(" != ");
-            sb.append("0");
+            sb.append(" != 0 && ");
+            sb.append(lookup.getReference().toString());
+            sb.append(" != null");
             if (i != size - 1) {
                 sb.append(" && ");
             }
+
         }
         return sb.toString();
     }
