@@ -76,7 +76,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     private Properties getJobProperties() {
         Properties jobProperties = new Properties();
-        jobProperties.put("mapreduce.job.user.classpath.first", "true");
         if (!useDefaultProperties) {
             jobProperties.put("mapred.reduce.tasks", String.valueOf(reduceTasks));
             jobProperties.put("mapred.tasktracker.map.tasks.maximum", "8");

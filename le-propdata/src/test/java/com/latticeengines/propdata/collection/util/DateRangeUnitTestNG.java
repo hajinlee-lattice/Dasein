@@ -1,14 +1,25 @@
 package com.latticeengines.propdata.collection.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class DateRangeUnitTestNG {
+
+    @Test(groups = {"unit"})
+    public void testTimeZone() throws Exception{
+        DateRange range = new DateRange("2015-01-01", "2015-01-02");
+        Assert.assertEquals("[2015-01-01 00:00:00 UTC - 2015-01-02 00:00:00 UTC]", range.toString());
+    }
 
     @Test(groups = {"unit"}, dataProvider = "numOfPeriodsDataProvider")
     public void testSplitDateRangeByNumberOfPeriods(DateRange dateRange, int numOfPeriods, List<DateRange> ranges) {

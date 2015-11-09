@@ -20,4 +20,6 @@ public interface ArchiveProgressEntityMgr<T> {
 
     T findEarliestFailureUnderMaxRetry();
 
+    T findProgressNotInFinalState();
+
 }

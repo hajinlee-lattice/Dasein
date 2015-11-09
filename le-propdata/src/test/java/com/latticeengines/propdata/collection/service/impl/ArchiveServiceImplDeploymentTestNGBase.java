@@ -43,9 +43,6 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
     // the test will first archive data between date[0] and date[1], the refresh by data between date[1] and date[2]
     abstract Date[] getDates();
 
-    // tow dates, between which there is no raw data in the test set
-    abstract Date[] getEmptyDataDates();
-
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
@@ -77,19 +74,9 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
         context = transformRawData(context);
         exportToDB(context);
 
+        testAutoDetermineDateRange();
+
         context = createNewProgress(dates[1], dates[2]);
-        context = importFromDB(context);
-        context = transformRawData(context);
-        exportToDB(context);
-
-        cleanupProgressTables();
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "testWholeProgress")
-    public void testEmptyInput() {
-        Date[] dates = getEmptyDataDates();
-
-        CollectionJobContext context = createNewProgress(dates[0], dates[1]);
         context = importFromDB(context);
         context = transformRawData(context);
         exportToDB(context);
@@ -105,7 +92,9 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
                 + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);
     }
 
-    private CollectionJobContext createNewProgress(Date startDate, Date endDate) {
+    protected void testAutoDetermineDateRange() { }
+
+    protected CollectionJobContext createNewProgress(Date startDate, Date endDate) {
         CollectionJobContext context = archiveService.startNewProgress(startDate, endDate, progressCreator);
         Progress progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, progressEntityMgr.getProgressClass());
         Assert.assertNotNull(progress, "Should have a progress in the job context.");
@@ -116,7 +105,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
         return context;
     }
 
-    private CollectionJobContext importFromDB(CollectionJobContext request) {
+    protected CollectionJobContext importFromDB(CollectionJobContext request) {
         CollectionJobContext response = archiveService.importFromDB(request);
 
         Progress progressInCtx =
@@ -129,7 +118,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
         return response;
     }
 
-    private CollectionJobContext transformRawData(CollectionJobContext request) {
+    protected CollectionJobContext transformRawData(CollectionJobContext request) {
         CollectionJobContext response = archiveService.transformRawData(request);
 
         Progress progressInCtx =
@@ -142,7 +131,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
         return response;
     }
 
-    private CollectionJobContext exportToDB(CollectionJobContext request) {
+    protected CollectionJobContext exportToDB(CollectionJobContext request) {
         CollectionJobContext response = archiveService.exportToDB(request);
 
         Progress progressInCtx =
@@ -157,13 +146,13 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
         return response;
     }
 
-    private void cleanupProgressTables() {
+    protected void cleanupProgressTables() {
         for (Progress progress: progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         }
     }
 
-    private void verifyUniqueness() {
+    protected void verifyUniqueness() {
         int maxMultiplicity = jdbcTemplateDest.queryForObject("SELECT TOP 1 COUNT(*) FROM " + destTableName() + " GROUP BY " +
                 StringUtils.join(uniqueColumns(), ",")+ " ORDER BY COUNT(*) DESC", Integer.class);
         Assert.assertEquals(maxMultiplicity, 1, "Each unique key should have one record.");

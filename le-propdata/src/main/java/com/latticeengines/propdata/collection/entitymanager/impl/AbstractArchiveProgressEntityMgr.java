@@ -1,11 +1,13 @@
 package com.latticeengines.propdata.collection.entitymanager.impl;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressBase;
@@ -17,7 +19,7 @@ public abstract class AbstractArchiveProgressEntityMgr<T extends ArchiveProgress
 
     ArchiveProgressDao<T> progressDao;
 
-    private static final int MAX_RETRIES = 5;
+    private static final int MAX_RETRIES = 3;
 
     abstract ArchiveProgressDao<T> getProgressDao();
 
@@ -76,5 +78,20 @@ public abstract class AbstractArchiveProgressEntityMgr<T extends ArchiveProgress
         }
         return null;
     }
+
+    @Override
+    @Transactional(value = "propDataCollectionProgress", readOnly = true)
+    public T findProgressNotInFinalState() {
+        Set<ArchiveProgressStatus> finalStatus = new HashSet<>(
+                Arrays.asList(ArchiveProgressStatus.UPLOADED, ArchiveProgressStatus.FAILED));
+        List<T> progresses = progressDao.findAll();
+        for (T progress: progresses) {
+            if (!finalStatus.contains(progress.getStatus())) {
+                return progress;
+            }
+        }
+        return null;
+    }
+
 
 }

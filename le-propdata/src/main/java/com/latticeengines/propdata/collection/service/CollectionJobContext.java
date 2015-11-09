@@ -3,10 +3,23 @@ package com.latticeengines.propdata.collection.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressBase;
+
 public class CollectionJobContext {
 
     public static final String PROGRESS_KEY = "Progress";
     public static final String APPLICATIONID_KEY = "ApplicationId";
+
+
+    public static <T extends ArchiveProgressBase> CollectionJobContext constructFromProgress(T progress) {
+        if (progress == null) {
+            return CollectionJobContext.NULL;
+        } else {
+            CollectionJobContext context = new CollectionJobContext();
+            context.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
+            return context;
+        }
+    }
 
     private Map<String, Object> properties = new HashMap<String, Object>();
 

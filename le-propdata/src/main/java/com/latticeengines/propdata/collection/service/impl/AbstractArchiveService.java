@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -30,6 +32,7 @@ import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.collection.service.CollectionJobContext;
+import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -70,6 +73,10 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplateDest")
     protected JdbcTemplate jdbcTemplateDest;
+
+    @Autowired
+    @Qualifier(value = "propDataCollectionJdbcTemplateSrc")
+    protected JdbcTemplate jdbcTemplateSrc;
 
     @Value("${propdata.collection.src.host}")
     private String srcHost;
@@ -272,14 +279,37 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
     }
 
     @Override
-    public CollectionJobContext findRetriableArchiveJob() {
+    public CollectionJobContext findJobToRetry() {
         Progress progress = entityMgr.findEarliestFailureUnderMaxRetry();
-        if (progress != null) {
-            CollectionJobContext context = new CollectionJobContext();
-            context.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
-            return context;
+        return CollectionJobContext.constructFromProgress(progress);
+    }
+
+    @Override
+    public CollectionJobContext findRunningJob() {
+        Progress progress = entityMgr.findProgressNotInFinalState();
+        return CollectionJobContext.constructFromProgress(progress);
+    }
+
+    @Override
+    public DateRange determineNewJobDateRange() {
+        Date latestInSrc, latestInDest;
+        try {
+            latestInSrc = jdbcTemplateSrc.queryForObject(
+                    "SELECT TOP 1 " + getSrcTableTimestampColumn() + " FROM " + getSourceTableName()
+                            + " ORDER BY " + getSrcTableTimestampColumn() + " DESC", Date.class);
+        } catch (EmptyResultDataAccessException e) {
+            latestInSrc = new Date(System.currentTimeMillis());
         }
-        return CollectionJobContext.NULL;
+
+        try {
+            latestInDest = jdbcTemplateDest.queryForObject(
+                    "SELECT TOP 1 " + getSrcTableTimestampColumn() + " FROM " + getDestTableName()
+                            + " ORDER BY " + getSrcTableTimestampColumn() + " DESC", Date.class);
+        } catch (EmptyResultDataAccessException e) {
+            latestInDest = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3650));
+        }
+
+        return new DateRange(latestInDest, latestInSrc);
     }
 
     private boolean checkProgressStatus(CollectionJobContext request,

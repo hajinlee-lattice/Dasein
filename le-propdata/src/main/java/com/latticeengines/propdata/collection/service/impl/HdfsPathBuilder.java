@@ -2,6 +2,7 @@ package com.latticeengines.propdata.collection.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,10 @@ public class HdfsPathBuilder {
 
     private static final String rawDataFlowType = "Raw";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+    static {
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     @Value("${propdata.hdfs.pod.id:Default}")
     private String podId;

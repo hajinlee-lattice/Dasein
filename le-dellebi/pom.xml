@@ -8,14 +8,12 @@
 
     <properties>
         <component-name>dellebi</component-name>
-        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <camel.version>2.14.0</camel.version>
         <cameljcifs.version>2.13.2</cameljcifs.version>
         <le.common.version>2.0.16-SNAPSHOT</le.common.version>
         <le.scheduler.version>2.0.16-SNAPSHOT</le.scheduler.version>
         <le.dataplatform.version>2.0.16-SNAPSHOT</le.dataplatform.version>
         <jetty.version>6.1.26</jetty.version>
-        <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <mysql.driver.version>5.1.35</mysql.driver.version>
     </properties>
 
@@ -239,19 +237,27 @@
             <artifactId>camel-jcifs</artifactId>
             <version>${cameljcifs.version}</version>
         </dependency>
-        
         <dependency>
             <groupId>org.apache.sqoop</groupId>
             <artifactId>sqoop</artifactId>
             <version>${sqoop.version}</version>
         </dependency>
-        
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro-mapred</artifactId>
+            <version>${avro.version}</version>
+            <classifier>hadoop2</classifier>
+        </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
             <version>4.0</version>
         </dependency>
-
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

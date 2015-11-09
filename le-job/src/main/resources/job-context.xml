@@ -27,4 +27,6 @@
     <import resource="classpath:dellebi-context.xml" />
     <import resource="classpath:remote-context.xml"/>
 
+    <import resource="classpath:propdata-collection-quartz-context.xml" />
+
 </beans>
