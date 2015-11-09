@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import java.util.Arrays;
+
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -9,6 +12,7 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.security.exposed.Constants;
 
 public class AdminResourceDeploymentTestNG extends PlsDeploymentTestNGBase{
 
@@ -34,6 +38,8 @@ public class AdminResourceDeploymentTestNG extends PlsDeploymentTestNGBase{
         userRegistration.setUser(AdminResourceTestNG.getUser());
         userRegistration.setCredentials(AdminResourceTestNG.getCreds());
 
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
         Boolean result = magicRestTemplate.postForObject(getDeployedRestAPIHostPort() + "/pls/admin/users",
                 userRegistrationWithTenant, Boolean.class);
         Assert.assertTrue(result);

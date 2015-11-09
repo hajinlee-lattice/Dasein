@@ -103,6 +103,9 @@ public class InternalResource extends InternalResourceBase {
     @Value("${pls.test.tenant.reg.json}")
     private String testTenangRegJson;
 
+    @Value("${pls.test.deployment.reset.by.admin:true}")
+    private boolean resetByAdminApi;
+
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")
@@ -233,8 +236,16 @@ public class InternalResource extends InternalResourceBase {
             }
         }
 
+        List<Tenant> testTenants = new ArrayList<>();
+        for (String tenantId: Ids) {
+            Tenant tenant = new Tenant();
+            tenant.setId(tenantId);
+            tenant.setName(tenant1Id);
+            testTenants.add(tenant);
+        }
+
         Map<AccessLevel, User> accessLevelToUsers = internalTestUserService
-                .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel();
+                .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(testTenants);
 
         // ==================================================
         // Reset password of password tester
@@ -296,17 +307,23 @@ public class InternalResource extends InternalResourceBase {
     }
 
     private void provisionThroughTenantConsole(String tupleId, String topology) throws IOException {
-        List<BasicNameValuePair> adHeaders = loginAd();
+        if (resetByAdminApi) {
+            List<BasicNameValuePair> adHeaders = loginAd();
 
-        String tenantToken = "${TENANT}";
-        String topologyToken = "${TOPOLOGY}";
-        String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
-        InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                "com/latticeengines/pls/controller/internal/" + testTenangRegJson);
-        String payload = IOUtils.toString(ins);
-        payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
-        HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/tenants/" + dlTenantName + "?contractId="
-                + dlTenantName, false, adHeaders, payload);
+            String tenantToken = "${TENANT}";
+            String topologyToken = "${TOPOLOGY}";
+            String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
+            InputStream ins = getClass().getClassLoader().getResourceAsStream(
+                    "com/latticeengines/pls/controller/internal/" + testTenangRegJson);
+            String payload = IOUtils.toString(ins);
+            payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
+            HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/tenants/" + dlTenantName + "?contractId="
+                    + dlTenantName, false, adHeaders, payload);
+        } else {
+            throw new RuntimeException(
+                    "We need to add the request tenant into ZK, but we do not have AD credentials in the environment. "
+                            + tupleId);
+        }
     }
 
     private List<BasicNameValuePair> loginAd() throws IOException {

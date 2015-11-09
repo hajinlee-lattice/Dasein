@@ -276,34 +276,15 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         if (usersInitialized) {
             return;
         }
-
         setTestingTenants();
-        
-        createUser(adminUsername, adminUsername, "Super", "User", adminPasswordHash);
-        createUser(generalUsername, generalUsername, "General", "User");
-
-        for (Tenant tenant : testingTenants) {
-            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
-            userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), generalUsername);
-            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), passwordTester);
-
-            for (AccessLevel level : AccessLevel.values()) {
-                User user = getTheTestingUserAtLevel(level);
-                if (user != null) {
-                    userService.assignAccessLevel(level, tenant.getId(), user.getUsername());
-                }
-            }
-        }
-
         loginTestingUsersToMainTenant();
-
         usersInitialized = true;
     }
 
     protected User getTheTestingUserAtLevel(AccessLevel level) {
         if (testingUsers == null || testingUsers.isEmpty()) {
             testingUsers = internalTestUserService
-                    .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel();
+                    .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(testingTenants);
         }
         return testingUsers.get(level);
     }

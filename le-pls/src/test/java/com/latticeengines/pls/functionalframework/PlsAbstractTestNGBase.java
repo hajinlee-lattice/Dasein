@@ -205,6 +205,9 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
         if (mainTestingTenant == null) {
             setTestingTenants();
         }
+
+        internalTestUserService.createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(testingTenants);
+
         if (testingUserSessions == null || testingUserSessions.isEmpty()) {
             testingUserSessions = new HashMap<>();
             for (AccessLevel level : AccessLevel.values()) {

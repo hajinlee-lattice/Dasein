@@ -19,6 +19,9 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     @Value("${pls.test.deployment.api}")
     private String deployedHostPort;
 
+    @Value("${pls.test.deployment.reset.by.admin:true}")
+    private boolean resetByAdminApi;
+
     @Override
     protected String getRestAPIHostPort() {
         return getDeployedRestAPIHostPort();
@@ -39,12 +42,14 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     }
 
     protected void resetTenantsViaTenantConsole() throws IOException {
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{ addMagicAuthHeader }));
-        String response = sendHttpPutForObject(magicRestTemplate, getRestAPIHostPort() + "/pls/internal/testtenants/", "", String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode json = mapper.readTree(response);
-        Assert.assertTrue(json.get("Success").asBoolean());
+        if (resetByAdminApi) {
+            addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+            magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+            String response = sendHttpPutForObject(magicRestTemplate, getRestAPIHostPort() + "/pls/internal/testtenants/", "", String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode json = mapper.readTree(response);
+            Assert.assertTrue(json.get("Success").asBoolean());
+        }
     }
 
     protected void deleteUserByRestCall(String username) {
