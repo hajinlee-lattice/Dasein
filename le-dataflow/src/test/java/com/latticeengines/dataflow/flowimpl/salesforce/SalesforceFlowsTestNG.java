@@ -41,17 +41,17 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
     @BeforeMethod(groups = "functional")
     public void setup() throws Exception {
-        createInitialEventTable.reset();
-        createPropDataInput.reset();
-        createFinalEventTable.reset();
         HdfsUtils.rmdir(config, "/tmp/PDTable");
         HdfsUtils.rmdir(config, "/tmp/EventTable");
         HdfsUtils.rmdir(config, "/tmp/TmpEventTable");
         HdfsUtils.rmdir(config, "/tmp/checkpoints");
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
-        opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
-        contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro").getPath();
-        opportunityContactRole = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/OpportunityContactRole.avro").getPath();
+        opportunity = ClassLoader
+                .getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
+        contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro")
+                .getPath();
+        opportunityContactRole = ClassLoader.getSystemResource(
+                "com/latticeengines/dataflow/exposed/service/impl/OpportunityContactRole.avro").getPath();
 
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
 
@@ -94,7 +94,8 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         verifyNumRows(config, "/tmp/TmpEventTable", 10787);
 
-        // Execute the second flow, with the output of the first flow as input into the second
+        // Execute the second flow, with the output of the first flow as input
+        // into the second
         sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
         ctx.setProperty("TARGETPATH", "/tmp/PDTable");
         ctx.setProperty("TARGETTABLENAME", "PDTable");
@@ -102,7 +103,8 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         dataTransformationService.executeNamedTransformation(ctx, "createPropDataInput");
         verifyNumRows(config, "/tmp/PDTable", 106);
 
-        // Execute the third flow, with the output of the first flow as input into the third
+        // Execute the third flow, with the output of the first flow as input
+        // into the third
         sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
         ctx.setProperty("TARGETPATH", "/tmp/EventTable");
         ctx.setProperty("TARGETTABLENAME", "EventTable");
@@ -114,13 +116,11 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
         dataTransformationService.executeNamedTransformation(ctx, "createFinalEventTable");
     }
-    
+
     @DataProvider(name = "checkpointProvider")
     public Object[][] getEngine() {
-        return new Object[][] {
-                { true }, //
-                { false }
-        };
+        return new Object[][] { { true }, //
+                { false } };
     }
 
 }

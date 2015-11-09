@@ -27,7 +27,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         Node scores = addSource("Scores");
         Node accountIntent = addSource("Intent");
 
-        account = account.innerJoin("Id", accountIntent, "Id");
+        account = account.leftOuterJoin("Id", accountIntent, "Id");
 
         TargetMarket market = parameters.getTargetMarket();
         ProspectDiscoveryConfiguration configuration = parameters.getConfiguration();
@@ -37,9 +37,12 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
 
         String scoreColumn = String.format("Score_%s", market.getModelId());
 
-        Node intent = account.filter(String.format("%s >= %f", scoreColumn, market.getIntentScoreThreshold()), //
+        double intentScoreThreshold = market.getIntentScoreThreshold() != null ? market.getIntentScoreThreshold() : 0;
+        double fitScoreThreshold = market.getFitScoreThreshold() != null ? market.getFitScoreThreshold() : 0;
+
+        Node intent = account.filter(String.format("%s >= %f", scoreColumn, intentScoreThreshold), //
                 new FieldList(scoreColumn));
-        Node fit = account.filter(String.format("%s >= %f", scoreColumn, market.getFitScoreThreshold()), //
+        Node fit = account.filter(String.format("%s >= %f", scoreColumn, fitScoreThreshold), //
                 new FieldList(scoreColumn));
 
         intent = intent.renamePipe("Intent");
@@ -84,9 +87,11 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         intent = intent.addRowID("DeliveryOffset");
         fit = fit.addRowID("DeliveryOffset");
 
-        double intentRatio = configuration.getDouble(ProspectDiscoveryOptionName.IntentPercentage, 50.0) / 100.0;
-        intent = intent.limit((int) (intentRatio * (double) market.getNumProspectsDesired()));
-        fit = fit.limit((int) ((1.0 - intentRatio) * (double) market.getNumProspectsDesired()));
+        if (market.getNumProspectsDesired() != null) {
+            double intentRatio = configuration.getDouble(ProspectDiscoveryOptionName.IntentPercentage, 50.0) / 100.0;
+            intent = intent.limit((int) (intentRatio * (double) market.getNumProspectsDesired()));
+            fit = fit.limit((int) ((1.0 - intentRatio) * (double) market.getNumProspectsDesired()));
+        }
 
         merged = intent.merge(fit);
 
@@ -95,32 +100,37 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
                         Integer.class));
 
         merged = merged.sort("DeliveryOffset");
-
+        merged = merged.rename(new FieldList(scoreColumn), new FieldList("Score"));
         return merged.retain(new FieldList("Email", "IsIntent", "Id", "Score", "MarketOffset", "DeliveryOffset"));
     }
 
     private Node removePreviouslyGeneratedIntent(Node intent, TargetMarket market, Node existingProspect) {
         // Remove intent generated prospects if they were generated more
         // than NumDaysBetweenIntentProspectResends days ago.
-        String removeUnmatchedExpression = String.format("!(Email == null && %s != null)",
-                joinFieldName("ExistingProspect", "Email"));
-        String dateExpression = String.format("%s == null || %dL - %s > %dL",
-                joinFieldName("ExistingProspect", "CreatedDate"), //
-                DateTime.now().getMillis(), //
-                joinFieldName("ExistingProspect", "CreatedDate"), //
-                (long) market.getNumDaysBetweenIntentProspectResends() * 24 * 360 * 1000);
+
+        if (market.getNumDaysBetweenIntentProspectResends() != null) {
+            String removeUnmatchedExpression = String.format("!(Email == null && %s != null)",
+                    joinFieldName("ExistingProspect", "Email"));
+            intent = intent.join(new FieldList("Email"), existingProspect, new FieldList("Email"), JoinType.OUTER)
+                    .filter(removeUnmatchedExpression,
+                            new FieldList("Email", joinFieldName("ExistingProspect", "Email")));
+            String dateExpression = String.format("%s == null || %dL - %s > %dL",
+                    joinFieldName("ExistingProspect", "CreatedDate"), //
+                    DateTime.now().getMillis(), //
+                    joinFieldName("ExistingProspect", "CreatedDate"), //
+                    (long) market.getNumDaysBetweenIntentProspectResends() * 24 * 360 * 1000);
+            intent = intent.filter(dateExpression, new FieldList(joinFieldName("ExistingProspect", "CreatedDate")));
+        } else {
+            intent = intent.stopList(existingProspect, "Email", "Email");
+        }
+
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("Score", "Score", Aggregation.AggregationType.MAX));
         aggregations.add(new Aggregation("AccountId", "AccountId", Aggregation.AggregationType.MAX));
-        return intent.join(new FieldList("Email"), existingProspect, new FieldList("Email"), JoinType.OUTER)
-                .filter(removeUnmatchedExpression, new FieldList("Email", joinFieldName("ExistingProspect", "Email")))
-                .filter(dateExpression, new FieldList(joinFieldName("ExistingProspect", "CreatedDate")))
-                .groupBy(new FieldList("Email"), aggregations);
+        return intent.groupBy(new FieldList("Email"), aggregations);
     }
 
     private Node removePreviouslyGeneratedFit(Node fit, Node existingProspect) {
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("Score", "Score", Aggregation.AggregationType.MAX));
         aggregations.add(new Aggregation("AccountId", "AccountId", Aggregation.AggregationType.MAX));
         return fit.stopList(existingProspect, "Email", "Email") //
                 .groupBy(new FieldList("Email"), aggregations);
@@ -159,5 +169,29 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
             fields.add(lookup.getReference().toString());
         }
         return new FieldList(fields);
+    }
+
+    @Override
+    public void validate(QuotaFlowParameters parameters) {
+        TargetMarket market = parameters.getTargetMarket();
+        if (market.getModelId() == null) {
+            throw new IllegalArgumentException(String.format("ModelID must be set for market with name %s",
+                    market.getName()));
+        }
+
+        if (market.getOffset() == null) {
+            throw new IllegalArgumentException(String.format("Market offset must be set for market with name %s",
+                    market.getName()));
+        }
+
+        if (market.getIntentSort() == null) {
+            throw new IllegalArgumentException(String.format("Intent sort must be set for market with name %s",
+                    market.getName()));
+        }
+
+        if (market.isDeliverProspectsFromExistingAccounts() == null) {
+            throw new IllegalArgumentException(String.format(
+                    "isDeliverProspectsFromExistingAccounts must be set for market with name %s", market.getName()));
+        }
     }
 }

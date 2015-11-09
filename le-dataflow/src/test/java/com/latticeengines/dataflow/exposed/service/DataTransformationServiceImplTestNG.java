@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.exposed.service;
 
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -33,7 +32,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
 
     @Autowired
     private DataTransformationService dataTransformationService;
-    
+
     @Autowired
     private CascadingDataFlowBuilder sampleDataFlowBuilder;
 
@@ -50,9 +49,6 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
 
     @BeforeMethod(groups = "functional")
     public void setup() throws Exception {
-        sampleDataFlowBuilder.reset();
-        tableWithExtractsDataFlowBuilder.reset();
-
         if (sampleDataFlowBuilder.isLocal()) {
             config.set("fs.defaultFS", "file:///");
             config.set("fs.default.name", "file:///");
@@ -64,11 +60,16 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         HdfsUtils.rmdir(config, "/tmp/avro");
 
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
-        opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
-        contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro").getPath();
-        extract1 = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file1").getPath() + "/*.avro";
-        extract2 = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file2").getPath() + "/*.avro";
-        extract3 = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file3").getPath() + "/*.avro";
+        opportunity = ClassLoader
+                .getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
+        contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro")
+                .getPath();
+        extract1 = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file1").getPath()
+                + "/*.avro";
+        extract2 = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file2").getPath()
+                + "/*.avro";
+        extract3 = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file3").getPath()
+                + "/*.avro";
 
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
 
@@ -78,13 +79,13 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         entries.add(new AbstractMap.SimpleEntry<>("file://" + extract1, "/tmp/avro"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + extract2, "/tmp/avro"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + extract3, "/tmp/avro"));
-        
+
         if (!sampleDataFlowBuilder.isLocal()) {
             lead = "/tmp/avro/Lead.avro";
             opportunity = "/tmp/avro/Opportunity.avro";
             FileSystem fs = FileSystem.get(config);
             doCopy(fs, entries);
-        } 
+        }
 
         if (!tableWithExtractsDataFlowBuilder.isLocal()) {
             extract1 = "/tmp/avro/file1.avro";
@@ -117,12 +118,11 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
 
     @DataProvider(name = "engineProvider")
     public Object[][] getEngine() {
-        return new Object[][] {
-                { "MR" }
-                //{ "TEZ"}
+        return new Object[][] { { "MR" }
+        // { "TEZ"}
         };
     }
-    
+
     @Test(groups = "functional", dataProvider = "engineProvider", enabled = true)
     public void executeNamedTransformationForTableSource(String engine) throws Exception {
         Map<String, Table> sources = new HashMap<>();
@@ -168,9 +168,9 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
         verifyNumRows(config, "/tmp/CombinedImportTable", 7);
     }
-    
+
     @Test(groups = "functional", dataProvider = "errorUseCaseProvider", //
-            dependsOnMethods = { "executeNamedTransformationForTableSource" })
+    dependsOnMethods = { "executeNamedTransformationForTableSource" })
     public void executeNamedTransformationForErrors(Table table, String message) throws Exception {
         Map<String, Table> sourceTables = new HashMap<>();
         sourceTables.put("Source", table);
@@ -185,7 +185,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", config);
         ctx.setProperty("ENGINE", "MR");
-        
+
         boolean exception = false;
         try {
             dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
@@ -194,21 +194,21 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
             assertEquals(e.getMessage(), message);
         }
         assertTrue(exception);
-        
+
     }
-    
+
     @DataProvider(name = "errorUseCaseProvider")
     public Object[][] getErrorUseCaseProvider() {
         Table tableNoName = new Table();
-        
+
         Table tableNoExtracts = new Table();
         tableNoExtracts.setName("tableNoExtract");
-        
+
         Table tableExtractNoName = new Table();
         tableExtractNoName.setName("tableExtractNoName");
         Extract tableExtractNoNameExtract = new Extract();
         tableExtractNoName.addExtract(tableExtractNoNameExtract);
-        
+
         Table tableExtractNoPath = new Table();
         tableExtractNoPath.setName("tableExtractNoPath");
         Extract tableExtractNoPathExtract = new Extract();
@@ -224,13 +224,11 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         PrimaryKey pk = new PrimaryKey();
         tableExtractNoPKAttribute.setPrimaryKey(pk);
 
-        return new Object[][] {
-                { tableNoName, "Table has no name." }, //
+        return new Object[][] { { tableNoName, "Table has no name." }, //
                 { tableNoExtracts, "Table tableNoExtract has no extracts." }, //
                 { tableExtractNoName, "Extract for table tableExtractNoName has no name." }, //
                 { tableExtractNoPath, "Extract extract1 for table tableExtractNoPath has no path." }, //
-                { tableExtractNoPKAttribute, "Primary key of table tableExtractNoPKAttribute has no attributes." }
-        };
+                { tableExtractNoPKAttribute, "Primary key of table tableExtractNoPKAttribute has no attributes." } };
     }
-    
+
 }

@@ -9,6 +9,9 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 public abstract class TypesafeDataFlowBuilder<T extends DataFlowParameters> extends CascadingDataFlowBuilder {
 
+    public void validate(T parameters) {
+    }
+
     public abstract Node construct(T parameters);
 
     @Override
@@ -22,12 +25,18 @@ public abstract class TypesafeDataFlowBuilder<T extends DataFlowParameters> exte
                     classT().getName(), parameters.getClass().getName()));
         }
 
+        try {
+            validate(casted);
+        } catch (Exception e) {
+            throw new RuntimeException("Flow failed validations", e);
+        }
+
         return construct(casted);
     }
 
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
-         throw new IllegalStateException("Not supported");
+        throw new IllegalStateException("Not supported");
     }
 
     @SuppressWarnings("unchecked")

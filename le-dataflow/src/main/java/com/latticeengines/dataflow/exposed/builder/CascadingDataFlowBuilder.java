@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
+import org.joda.time.DateTime;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -152,6 +153,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public Node filter(Restriction restriction) {
             // XXX TODO
+            // XXX TODO handle null restrictions
             return new Node(identifier, builder);
         }
 
@@ -557,6 +559,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
             if (seenFields.contains(fieldName)) {
                 fieldName = joinFieldName(rhs, fieldName);
+                if (seenFields.contains(fieldName)) {
+                    throw new RuntimeException(
+                            String.format(
+                                    "Cannot create joinFieldName %s from field name %s because a field with that name already exists.  Discard the field to avoid this error",
+                                    fieldName, originalFieldName));
+                }
             }
             seenFields.add(fieldName);
             FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
@@ -1050,6 +1058,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     @Override
     public Table runFlow(DataFlowContext dataFlowCtx) {
+        reset();
         setDataFlowCtx(dataFlowCtx);
 
         @SuppressWarnings("unchecked")
@@ -1089,7 +1098,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         AppProps.setApplicationJarClass(properties, getClass());
         FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
 
-        FlowDef flowDef = FlowDef.flowDef().setName(flowName) //
+        FlowDef flowDef = FlowDef.flowDef().setName(flowName + "_" + DateTime.now().getMillis()) //
                 .addSources(getSources()) //
                 .addTailSink(getPipeByIdentifier(lastOperator), sink);
 
