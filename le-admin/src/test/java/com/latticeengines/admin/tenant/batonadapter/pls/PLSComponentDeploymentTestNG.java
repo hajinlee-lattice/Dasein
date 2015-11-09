@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,8 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
     private final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
 
+    private final static Log log = LogFactory.getLog(PLSComponentDeploymentTestNG.class);
+
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
 
@@ -37,6 +41,7 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
+        log.info("Start tearing down public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase");
         super.tearDown();
         String PLSTenantId = String.format("%s.%s.%s",
                 contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
@@ -102,6 +107,7 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
             magicRestTemplate.delete(getPlsHostPort() + String.format("/pls/admin/tenants/%s", tenantId));
         } catch (Exception e) {
             // ignore
+            log.error(e);
         }
     }
 
