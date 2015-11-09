@@ -28,13 +28,13 @@ public class EaiZKServiceImpl implements EaiZKService {
 
     @Override
     public HttpClientConfig getHttpClientConfig(String customerSpace) {
-        try{
+        try {
             DocumentDirectory documentDirectory = getHttpClientConfigDocumentDirectory(customerSpace);
             int connectTimeout = Integer.valueOf(documentDirectory.getChild(CONNECT_TIMEOUT).getDocument().getData());
             int importTimeout = Integer.valueOf(documentDirectory.getChild(IMPORT_TIMEOUT).getDocument().getData());
             return new HttpClientConfig(connectTimeout, importTimeout);
-        }catch(Exception e){
-            throw new LedpException(LedpCode.LEDP_17005, e, new String[]{customerSpace});
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_17005, e, new String[] { customerSpace });
         }
     }
 
