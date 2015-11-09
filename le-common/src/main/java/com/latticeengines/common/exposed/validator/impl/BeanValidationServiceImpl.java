@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
-import com.latticeengines.common.exposed.expection.AnnotationValidationError;
+import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.common.exposed.validator.AnnotationValidator;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 

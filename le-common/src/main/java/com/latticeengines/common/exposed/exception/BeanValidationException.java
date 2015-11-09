@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.expection;
+package com.latticeengines.common.exposed.exception;
 
 public class BeanValidationException extends RuntimeException {
 

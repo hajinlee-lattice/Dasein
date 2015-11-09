@@ -12,7 +12,7 @@ import java.util.Set;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.expection.AnnotationValidationError;
+import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.common.exposed.validator.annotation.AllowedValues;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
