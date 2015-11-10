@@ -20,7 +20,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "CRM Credential Verification", description = "REST resource for CRM credential verification")
 @RestController
 @RequestMapping(value = "/credentials")
-@PreAuthorize("hasRole('View_PLS_Configuration')")
+@PreAuthorize("hasRole('View_PLS_Configurations')")
 public class CrmCredentialResource {
 
     @Autowired
@@ -32,7 +32,7 @@ public class CrmCredentialResource {
     @RequestMapping(value = "/{crmType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Verify CRM credential")
-    @PreAuthorize("hasRole('Edit_PLS_Configuration')")
+    @PreAuthorize("hasRole('Edit_PLS_Configurations')")
     public CrmCredential verifyCredential(@PathVariable String crmType,
             @RequestParam(value = "tenantId") String tenantId,
             @RequestParam(value = "isProduction", required = false) Boolean isProduction,

@@ -16,7 +16,7 @@ public class RightsUtilityUnitTestNG {
     @Test(groups = "unit")
     public void translate() {
         // from list of strings to map or rights data
-        List<String> rights = Arrays.asList("View_PLS_Models", "View_PLS_Users", "Edit_PLS_Users", "View_PLS_Reporting", "Edit_PLS_Configuration");
+        List<String> rights = Arrays.asList("View_PLS_Models", "View_PLS_Users", "Edit_PLS_Users", "View_PLS_Reporting", "Edit_PLS_Configurations");
         Map<String, EntityAccessRightsData> rightsDataMap = RightsUtilities.translateRights(rights);
         for (Map.Entry<String, EntityAccessRightsData> entry: rightsDataMap.entrySet()) {
             if (entry.getKey().equals("PLS_Models")) {
@@ -29,7 +29,7 @@ public class RightsUtilityUnitTestNG {
                 assertTrue(entry.getValue().isMayEdit());
                 assertFalse(entry.getValue().isMayCreate());
                 assertFalse(entry.getValue().isMayExecute());
-            } else if (entry.getKey().equals("PLS_Configuration")) {
+            } else if (entry.getKey().equals("PLS_Configurations")) {
                 assertFalse(entry.getValue().isMayView());
                 assertTrue(entry.getValue().isMayEdit());
                 assertFalse(entry.getValue().isMayCreate());

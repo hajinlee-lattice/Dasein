@@ -79,7 +79,7 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
                     EntityAccessRightsData rightsData = new EntityAccessRightsData();
                     rightsData.setMayView(true);
                     rightsDataMap.put("PLS_Models", rightsData);
-                    rightsDataMap.put("PLS_Configuration", rightsData);
+                    rightsDataMap.put("PLS_Configurations", rightsData);
                     rightsDataMap.put("PLS_Reporting", rightsData);
                     data.setRights(rightsDataMap);
 

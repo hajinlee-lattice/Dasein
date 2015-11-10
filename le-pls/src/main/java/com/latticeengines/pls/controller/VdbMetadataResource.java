@@ -32,7 +32,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "metadata", description = "REST resource for metadata in VisiDB")
 @RestController
 @RequestMapping(value = "/vdbmetadata")
-@PreAuthorize("hasRole('Edit_PLS_Configuration')")
+@PreAuthorize("hasRole('Edit_PLS_Configurations')")
 public class VdbMetadataResource {
 
     private static final Log log = LogFactory.getLog(VdbMetadataResource.class);
