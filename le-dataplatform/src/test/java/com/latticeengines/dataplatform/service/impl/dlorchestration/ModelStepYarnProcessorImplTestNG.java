@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -16,6 +15,7 @@ import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 

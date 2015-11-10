@@ -14,8 +14,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.service.impl.YarnServiceImpl;
-
 public class YarnServiceImplUnitTestNG {
 
     @Test(groups = "unit")

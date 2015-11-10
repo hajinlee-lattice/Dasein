@@ -11,8 +11,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl;
+import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;

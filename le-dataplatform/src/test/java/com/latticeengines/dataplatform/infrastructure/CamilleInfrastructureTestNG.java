@@ -3,11 +3,11 @@ package com.latticeengines.dataplatform.infrastructure;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.camille.exposed.interfaces.data.DataInterfacePublisher;
 import com.latticeengines.camille.exposed.interfaces.data.DataInterfaceSubscriber;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 
 public class CamilleInfrastructureTestNG extends DataPlatformInfrastructureTestNGBase {
 

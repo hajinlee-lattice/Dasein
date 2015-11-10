@@ -1,8 +1,10 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
