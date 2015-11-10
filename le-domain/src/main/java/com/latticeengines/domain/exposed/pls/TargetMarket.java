@@ -13,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
@@ -49,6 +51,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private String modelId;
     private String eventColumnName;
     private Boolean deliverProspectsFromExistingAccounts;
+    private Boolean isDefault;
     private Restriction accountFilter;
     private Restriction contactFilter;
     private Integer offset;
@@ -79,6 +82,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
 
     @JsonProperty
     @Column(name = "CREATION_DATE", nullable = false)
+    @Temporal(TemporalType.DATE)
     public Date getCreationDate() {
         return this.creationDate;
     }
@@ -181,13 +185,25 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     @JsonProperty
     @Transient
     public Sort getIntentSort() {
-        return intentSort;
+        return this.intentSort;
     }
 
+    @JsonProperty
     public void setIntentSort(Sort sort) {
         this.intentSort = sort;
     }
 
+    @JsonProperty
+    @Column(name = "INTENT_SORT", nullable = false)
+    public String getIntentSortString() {
+        return JsonUtils.serialize(this.intentSort);
+    }
+    
+    @JsonProperty
+    public void setIntentSortString(String intentSortStr) {
+        this.intentSort = JsonUtils.deserialize(intentSortStr, Sort.class);
+    }
+    
     @Column(name = "NUM_PROSPECTS_DESIRED", nullable = true)
     @JsonProperty
     public Integer getNumProspectsDesired() {
@@ -265,6 +281,17 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
         this.deliverProspectsFromExistingAccounts = deliverProspectsFromExistingAccounts;
     }
 
+    @Column(name="IS_DEFAULT")
+    @JsonProperty
+    public Boolean getIsDefault() {
+        return this.isDefault;
+    }
+
+    @JsonProperty
+    public void setIsDefault(Boolean isDefault) {
+        this.isDefault = isDefault;
+    }
+    
     @Column(name = "OFFSET", nullable = false)
     @JsonProperty
     public Integer getOffset() {
@@ -275,4 +302,5 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     public void setOffset(Integer offset) {
         this.offset = offset;
     }
+
 }

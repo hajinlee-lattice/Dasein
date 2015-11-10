@@ -32,14 +32,16 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET.setDeliverProspectsFromExistingAccounts(DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS);;
         TARGET_MARKET.setAccountFilter(ACCOUNT_FILTER);
         TARGET_MARKET.setContactFilter(CONTACT_FILTER);
+        TARGET_MARKET.setIsDefault(IS_DEFAULT);
         TARGET_MARKET.setOffset(OFFSET);
+        TARGET_MARKET.setIntentSort(SORT);
 
-        setUpMarketoEloquaTestEnvironment();
+        setupUsers();
         cleanupTargetMarketDB();
     }
 
     @Test(groups = { "functional" })
-    public void create_calledWithParameters_assertTargetMarketIsCreated() {
+    public void create_calledWithParameters_assertAllAttributesArePersisted() {
         setupSecurityContext(mainTestingTenant);
         assertNull(this.targetMarketEntityMgr
                 .findTargetMarketByName(TEST_TARGET_MARKET_NAME));
@@ -50,11 +52,22 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 .findTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
+        assertEquals(targetMarket.getDescription(), DESCRIPTION);
+        assertEquals(FORMAT.format(targetMarket.getCreationDate()), FORMAT.format(CREATION_DATE));
+        assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED);
+        assertEquals(targetMarket.getNumDaysBetweenIntentProspectResends(), NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS);
+        assertEquals(targetMarket.getIntentScoreThreshold(), INTENT_SCORE_THRESHOLD);
+        assertEquals(targetMarket.getFitScoreThreshold(), FIT_SCORE_THRESHOLD);
+        assertEquals(targetMarket.getModelId(), MODEL_ID);
+        assertEquals(targetMarket.getEventColumnName(), EVENT_COLUMN_NAME);
+        assertEquals(targetMarket.isDeliverProspectsFromExistingAccounts(), DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS);
+        assertEquals(targetMarket.getIsDefault(), IS_DEFAULT);
+        assertEquals(targetMarket.getOffset(), OFFSET);
         assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
         assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "create_calledWithParameters_assertTargetMarketIsCreated" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "create_calledWithParameters_assertAllAttributesArePersisted" })
     public void targetMarketCreatedInOneTenant_switchToAlternativeTenant_assertTargetMarketCannnotBeFound() {
         setupSecurityContext(ALTERNATIVE_TESTING_TENANT);
         

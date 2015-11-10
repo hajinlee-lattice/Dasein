@@ -3,6 +3,7 @@ package com.latticeengines.pls.functionalframework;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -29,7 +30,10 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.query.ExistsRestriction;
+import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.Restriction;
+import com.latticeengines.common.exposed.query.SingleReferenceLookup;
+import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -72,6 +76,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final TargetMarket TARGET_MARKET = new TargetMarket();
     protected static final String TEST_TARGET_MARKET_NAME = "TEST_TARGET_MARKET_NAME";
     protected static final Date CREATION_DATE = new Date();
+    protected static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     protected static final String DESCRIPTION = "The Target Market For Functional Tests";
     protected static final Integer NUM_PROPSPECTS_DESIRED = 100;
     protected static final Integer NUM_PROPSPECTS_DESIRED_1 = 200;
@@ -85,6 +90,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account", new ArrayList<Restriction>());
     protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact", new ArrayList<Restriction>());
     protected static final Integer OFFSET = 1;
+    protected static final Sort SORT = new Sort(Arrays.asList(new SingleReferenceLookup(1, ReferenceInterpretation.VALUE)));
 
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_1 = new ProspectDiscoveryOption();
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_2 = new ProspectDiscoveryOption();
