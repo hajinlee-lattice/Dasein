@@ -83,7 +83,7 @@ def verifyResult(operation,records):
         if r["latticeforleads__Score__c"] == None:
             r["latticeforleads__Score__c"]=0;
             passed=False;
-        if float(r["latticeforleads__Score__c"])-10<0 or float(r["latticeforleads__Score__c"])-100>0:
+        if float(r["latticeforleads__Score__c"]) - 0 < 0 or float(r["latticeforleads__Score__c"]) - 100 > 0:
             passed=False; 
         if not passed:
             results.append(r);
@@ -263,7 +263,8 @@ class EloquaRequest():
         return contacts;
 
 class MarketoRequest():
-    def __init__(self,base_url=PLSEnvironments.pls_MKTO_url, client_id=PLSEnvironments.pls_MKTO_Client_id, client_secret=PLSEnvironments.pls_MKTO_client_secret):
+    def __init__(self, base_url=PLSEnvironments.pls_MKTO_Client_url, client_id=PLSEnvironments.pls_MKTO_Client_id,
+                 client_secret=PLSEnvironments.pls_MKTO_client_secret):
         self.headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
         self.base_url=base_url;
         self.clinet_id=client_id;
@@ -398,6 +399,7 @@ class MarketoRequest():
                     print "Leads already exists - pick another one:    " + emailAddress;  
             else:
                 failed += 1;
+                print response
                 if failed>3:
                     break;
         return [lead_lists,sfdc_contacts,sfdc_leads]

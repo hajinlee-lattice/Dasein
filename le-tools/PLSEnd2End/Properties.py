@@ -11,51 +11,40 @@ class PLSEnvironments(object):
     
     # parser that read configuration properties from config.ini file
     parser = SafeConfigParser()
-    parser.read('config.ini')
-    
-    
-    #properties definition
-    pls_server=parser.get('BuildInfo', 'pls_server');    
-    pls_server_folder=parser.get('BuildInfo', 'install_dir');
-    pls_bard_1=parser.get('BuildInfo', 'tenant');
-    pls_bard_2=parser.get('BuildInfo', 'tenant_2');
-    pls_bard_3=parser.get('BuildInfo', 'tenant_3');
-    svn_location_local=parser.get('TestSetup', 'svn_location');
-    pls_version=parser.get('TestSetup', 'pls_version');
+    parser.read("config.ini")
 
-    
-    dl_server="https://bodcdevvint187.dev.lattice.local:8080/";
-    visidb_server="bodcdevvint187.dev.lattice.local";
-    
-    pls_tenant_console_url = "http://bodcdevvjty20.dev.lattice.local:8080/#/tenants/"
+    #properties definition
+    pls_bard_1 = "TestELQ_10_14"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+    pls_bard_2 = "TestMKTO_10_14"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+    pls_bard_3 = "TestSFDC_10_14"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+
+    pls_version = parser.get("TestSetup", "pls_version");
+    dante_server_name = parser.get("DanteInfo", "dante_server_name");
+    dante_server_db = parser.get("DanteInfo", "dante_server_db");
+    dante_server_user = parser.get("DanteInfo", "dante_server_user");
+    dante_server_pwd = parser.get("DanteInfo", "dante_server_pwd");
+    jams_server = "10.41.1.247"
+    dl_server_name = parser.get("DataLoaderVisidb", "dl_server_name");
+    visidb_server = parser.get("DataLoaderVisidb", "visidb_server_name");  # BODCDEVVINT187 or BODCDEVVINT207
+    pls_test_server = "http://%s.dev.lattice.local:5000" % visidb_server;
+
+    pls_tenant_console_url = "http://bodcdevvjty20.dev.lattice.local:8080"
     pls_tenant_console_user= "testuser1"
     pls_tenant_console_pwd = "Lattice1"
-    pls_url_1="https://%s/%s" % (pls_server, pls_bard_1);
-    pls_url_2="https://%s/%s" % (pls_server, pls_bard_2);
-    pls_url_3="https://%s/%s" % (pls_server, pls_bard_3);
-    pls_server_user="admin";
-    pls_server_pwd="admin";
-    
-    pls_pretzel="%s\\%s\\Pretzel\\Install\\bin\\PretzelAdminTool.exe " % (pls_server_folder, pls_bard_1[3:]);
-    pls_bardAdminTool_1="%s\\%s\\Bard\\Install\\bin\\BardAdminTool.exe " % (pls_server_folder, pls_bard_1[3:]);
-    pls_bardAdminTool_2="%s\\%s\\Bard2\\Install\\bin\\BardAdminTool.exe " % (pls_server_folder, pls_bard_2[4:]);
-    
-    pls_test_server = "http://%s:5000" % pls_server;
-    pls_install_dir = "%s\\%s" % (pls_server_folder, pls_bard_1[3:]);
-    pls_db_server = "%s\\SQL2012STD" % pls_server;
-    pls_db_ScoringDaemon= "SD_%s" % pls_bard_1[3:];
-    pls_db_Dante= "DT_%s" % pls_bard_1[3:];
-    
+    pls_model_url = "http://bodcdevhdpweb52.dev.lattice.local:8080"
+    pls_model_user = "bnguyen@lattice-engines.com"
+    pls_model_pwd = "tahoe"
+    pls_model_pwd_encryptd = "3ff74a580f8b39f039822455e92c2ef25658229622f16dc0f9918222c0be4900"
+
+    dl_server = "https://%s.dev.lattice.local:8080/" % dl_server_name;
     dl_server_user="richard.liu@lattice-engines.com";
-    dl_server_pwd="1";
-    dl_dlc_path="C:\\DLTools"
-#     dl_dlc_path="%s\\%s\\ScoringDaemon\\ScoringDaemon\\bin\\Services\\DataLoaderShim" % (pls_server_folder, pls_bard_1[3:]);
-    visidb_dlc_path = "D:\\performanceTest\\DLC"
-    
+    dl_server_pwd = "1";
+    dlc_path = "\\\\10.61.0.210\DevQA\share\Software\DLTools"
+
     visidb_server_user="admin";
     visidb_server_pwd="visid@t@b@se";
-    
-    template_location="\\\\%s\PLSTemplate" % visidb_server#"\\\\10.61.0.210\DevQA\share\PLSTemplate";
+
+    template_location = "\\\\%s.dev.lattice.local\PLSTemplate" % visidb_server  # "\\\\10.61.0.210\DevQA\share\PLSTemplate";
     visidb_data_folder="D:\\VisiDBData";
     visidb_data_bak="D:\\performanceTest\\dbbak";
     
@@ -65,11 +54,14 @@ class PLSEnvironments(object):
     pls_SFDC_key="oIogZVEFGbL3n0qiAp6F66TC";
     
     pls_ELQ_user="Matt.Sable";
-    pls_ELQ_pwd="Lattice1";
+    pls_ELQ_pwd = "Lattice2";
     pls_ELQ_company="TechnologyPartnerLatticeEngines";
     pls_ELQ_url="https://secure.p03.eloqua.com/API/REST/1.0";
-    
-    pls_MKTO_url="https://976-KKC-431.mktorest.com";
+
+    pls_MKTO_url = "https://na-sj02.marketo.com/soap/mktows/2_0"  #
+    pls_MKTO_Username = "latticeenginessandbox1_9026948050BD016F376AE6"
+    pls_MKTO_Password = "41802295835604145500BBDD0011770133777863CA58"
+    pls_MKTO_Client_url = "https://976-KKC-431.mktorest.com";
     pls_MKTO_Client_id = "868c37ad-905c-4562-be86-c6b1f39293f4";
     pls_MKTO_client_secret = "vBt3ZnFAU4eCyrtzOzRZfvkRQPfdDrUi";
     
@@ -90,15 +82,15 @@ class PLSEnvironments(object):
         driverName = "FreeTDS";
 
     connStr = "DRIVER={%s};" % driverName;
-    
-    SQL_JAMS_CFG = connStr + "SERVER=10.41.1.247;DATABASE=JAMSCFG;uid=dataloader_user;pwd=password";
-#    SQL_ScoringDaemon = connStr + "SERVER=10.41.1.207\SQL2012STD;DATABASE=SD_%s;uid=dataloader_prod;pwd=L@ttice2" % (pls_server, pls_bard_1[3:]);
+
+    SQL_JAMS_CFG = connStr + "SERVER=%s;DATABASE=JAMSCFG;uid=dataloader_user;pwd=password" % jams_server;
     SQL_ScoringDaemon = connStr + "SERVER=10.41.1.207\SQL2012STD;DATABASE=ScoringDaemon_QA;uid=dataloader_prod;pwd=L@ttice2";
     SQL_BasicDataForIntegrationTest = connStr + "SERVER=10.41.1.187\SQL2008;DATABASE=BasicDataForIntegrationTest;uid=dataloader_user;pwd=password";
-    SQL_conn_dataloader = connStr + "SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % visidb_server;
+    SQL_conn_dataloader = connStr + "SERVER=%s.dev.lattice.local\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % visidb_server;
     SQL_conn_pdMatch = connStr + "SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
     SQL_conn_leadscoring = connStr + "SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % "10.41.1.187";
-    SQL_conn_dante = connStr + "SERVER=%s\SQL2012STD;DATABASE=DT_%s;uid=dataloader_prod;pwd=L@ttice2;" % (pls_server,pls_bard_1[3:]);
+    SQL_conn_dante = connStr + "SERVER=%s.dev.lattice.local\SQL2012STD;;DATABASE=%s;uid=%s;pwd=%s;" % (
+        dante_server_name, dante_server_db, dante_server_user, dante_server_pwd);
     SQL_conn_SFDC_End2EndTest_Data = connStr + "SERVER=%s\Sql2008;DATABASE=PLS_SFDC_End2EndTest_Data;uid=dataloader_user;pwd=password;" % "10.41.1.187";
 
     #dataloader providers
@@ -125,45 +117,21 @@ class PLSEnvironments(object):
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_user;" + \
                         "Password=password;"
-    SQL_DanteDB_DataProvider = "Data Source=BODCDEVVQAP27.dev.lattice.local\SQL2012STD;"+ \
-                        "Initial Catalog=DT_ADEDTBDd72041nG28080n154;" + \
-                        "Persist Security Info=True;" + \
-                        "User ID=dataloader_prod;" + \
-                        "Password=L@ttice2;"
+    SQL_MultiTenant = "Data Source=10.41.1.250\QACLUSTER,62836;" + \
+                      "Initial Catalog=PLS_MultiTenant;" + \
+                      "Persist Security Info=True;" + \
+                      "User ID=dataplatformdev;" + \
+                      "Password=welcome;"
+    SQL_DanteDB_DataProvider = "Data Source=%s.dev.lattice.local\SQL2012STD;" % dante_server_name + \
+                               "Initial Catalog=%s;" % dante_server_db + \
+                               "Persist Security Info=True;" + \
+                               "User ID=%s;" % dante_server_user + \
+                               "Password=%s;" % dante_server_pwd
     SQL_LSSBard = "Data Source=10.41.1.207\SQL2012STD;" + \
                         "Initial Catalog=ScoringDaemon_QA;" + \
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_prod;" + \
-                        "Password=L@ttice2;"                   
-    SQL_ReportsDB_DataProvider_ELQ = "Data Source=%s\SQL2012STD;" % pls_server+ \
-                        "Initial Catalog=%s;" % pls_bard_1+ \
-                        "Persist Security Info=True;" + \
-                        "User ID=dataloader_prod;" + \
                         "Password=L@ttice2;"
-    
-    SQL_ReportsDB_DataProvider_MKTO = "Data Source=%s\SQL2012STD;" % pls_server+ \
-                        "Initial Catalog=%s;" % pls_bard_2+ \
-                        "Persist Security Info=True;" + \
-                        "User ID=dataloader_prod;" + \
-                        "Password=L@ttice2;"
-    SFDC_DataProvider = "URL=https://login.salesforce.com/services/Soap/u/29.0;" + \
-                        "User=apeters-widgettech@lattice-engines.com;Password=Happy2010;" + \
-                        "SecurityToken=oIogZVEFGbL3n0qiAp6F66TC;Version=29.0;Timeout=100;" + \
-                        "RetryTimesForTimeout=1;SleepTimeBeforeRetry=60;BatchSize=2000;"
-    Marketo_DataProvider = "URL=https://na-sj02.marketo.com/soap/mktows/2_0;" + \
-                            "UserID=latticeenginessandbox1_9026948050BD016F376AE6;EncryptionKey=41802295835604145500BBDD0011770133777863CA58;" + \
-                            "Timeout=10000;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;" + \
-                            "BatchSize=500;MaxSizeOfErrorBatch=25;"
-    
-    Eloqua_DataProvider = "URL=https://login.eloqua.com/id;" + \
-                            "Company=TechnologyPartnerLatticeEngines;Username=Matt.Sable;Password=Lattice1;" + \
-                            "APIType=SOAP;EntityType=Base;Timeout=300;RetryTimesForTimeout=3;" + \
-                            "SleepTimeBeforeRetry=60;BatchSize=200;MaxSizeOfErrorBatch=25;"
-    
-    EloquaBulk_DataProvider = "URL=https://login.eloqua.com/id;" + \
-                                "Company=TechnologyPartnerLatticeEngines;Username=Matt.Sable;Password=Lattice1;" + \
-                                "Timeout=100;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;BatchSize=2000;"
-                        
     mock_ELQ_ELQ_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
                         "Initial Catalog=PLS_ELQ_ELQ_ReleaseQA_20150930;" + \
                         "Persist Security Info=True;" + \
@@ -185,9 +153,9 @@ class PLSEnvironments(object):
                         "User ID=dataloader_user;" + \
                         "Password=password;"
     mock_SFDC_SFDC_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
-                        "Initial Catalog=PLS_SFDC_Dataset01;" + \
-                        "Persist Security Info=True;" + \
-                        "User ID=dataloader_user;" + \
+                                  "Initial Catalog=PLS_SFDC_Dataset01_20151028;" + \
+                                  "Persist Security Info=True;" + \
+                                  "User ID=dataloader_user;" + \
                         "Password=password;"
                         
     performance_ELQ_ELQ_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
@@ -210,21 +178,13 @@ class PLSEnvironments(object):
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_user;" + \
                         "Password=password;"
-                        
-                        
-   
     def __init__(self):
         '''
         Constructor
         '''
-   
-
-
 
 def main():
     pass
-    
-    
 
 if __name__ == '__main__':
     main()

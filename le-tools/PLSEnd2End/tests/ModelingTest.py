@@ -5,45 +5,35 @@ Created on Mar 12, 2015
 '''
 import unittest
 from Properties import PLSEnvironments
-from operations.TestHelpers import JamsRunner
-
 from operations import PlsOperations
-
+from operations.TestHelpers import LPConfigRunner
 
 
 class Test(unittest.TestCase):
 
-
     def testModelingEloqua(self):
+        lp = LPConfigRunner();
+        PlsOperations.runModelingLoadGroups(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ);
+        '''activate the inital model for the new tenant'''
+        if False == lp.lpActivateModel(PLSEnvironments.pls_bard_1):
+            print "there is no new model been activated"
+            assert False;
 
-        pls_bard = PLSEnvironments.pls_bard_1
-        bardAdminTool = PLSEnvironments.pls_bardAdminTool_1
-        marketting_app = PLSEnvironments.pls_marketing_app_ELQ
-        
-        # Step 4 - Run LoadGroups and activate Model  
-        PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
-#         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
-#         PlsOperations.activateModel(bardAdminTool,pls_bard);
-    
     def testModelingMarketo(self):
-        pls_bard = PLSEnvironments.pls_bard_2
-        marketting_app = PLSEnvironments.pls_marketing_app_MKTO
-        bardAdminTool = PLSEnvironments.pls_bardAdminTool_2
-        
-        # Step 4 - Run LoadGroups and activate Model  
-        PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
-#         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
-#         PlsOperations.activateModel(bardAdminTool,pls_bard);
+        lp = LPConfigRunner();
+        PlsOperations.runModelingLoadGroups(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO);
+        '''activate the inital model for the new tenant'''
+        if False == lp.lpActivateModel(PLSEnvironments.pls_bard_2):
+            print "there is no new model been activated"
+            assert False;
         
     def testModelingSFDC(self):
-        pls_bard = PLSEnvironments.pls_bard_3
-        marketting_app = PLSEnvironments.pls_marketing_app_SFDC
-#         bardAdminTool = PLSEnvironments.pls_bardAdminTool_3
-        
-        # Step 4 - Run LoadGroups and activate Model  
-        PlsOperations.runModelingLoadGroups(pls_bard, marketting_app);
-#         PlsOperations.updateModelingServiceSettings(bardAdminTool);        
-#         PlsOperations.activateModel(bardAdminTool,pls_bard);
+        lp = LPConfigRunner();
+        PlsOperations.runModelingLoadGroups(PLSEnvironments.pls_bard_3, PLSEnvironments.pls_marketing_app_SFDC);
+        '''activate the inital model for the new tenant'''
+        if False == lp.lpActivateModel(PLSEnvironments.pls_bard_3):
+            print "there is no new model been activated"
+            assert False;
 
 
 if __name__ == "__main__":

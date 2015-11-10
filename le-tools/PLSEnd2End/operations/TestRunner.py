@@ -28,9 +28,8 @@ __status__ = "Alpha"
 
 
 class SessionRunner(object):
-    
-    def __init__(self, host=PLSEnvironments.pls_test_server, logfile=None):
-        self.host = host
+    def __init__(self, logfile=None):
+        self.host = PLSEnvironments.pls_test_server
         self.activity_log = {}
         self.request_text = []
         if logfile is None:
@@ -298,7 +297,6 @@ class SessionRunner(object):
             return self.runCommandOnServer(cmd)
 
     def runCommandLocally(self, cmd, from_dir=None):
-        print cmd
         if from_dir is None:
             from_dir = os.getcwd()
         if from_dir.startswith("~"):
@@ -318,7 +316,6 @@ class SessionRunner(object):
     def runCommandOnServer(self, cmd):
         request_url = self.host + "/cmd"
         print request_url
-        print cmd
         logging.info(request_url)
         if type(cmd) == str or type(cmd) == list or type(cmd) == dict or type(cmd) == unicode:
             command_dict = {"commands": cmd}

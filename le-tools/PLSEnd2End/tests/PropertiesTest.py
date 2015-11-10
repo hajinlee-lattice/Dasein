@@ -11,14 +11,13 @@ from Properties import PLSEnvironments
 from operations.TestHelpers import JamsRunner
 from operations.PerformanceHelpers import PerformanceData
 from operations.PerformanceHelpers import VisiDBRollBack
-from operations.TestHelpers import DanteRunner
+from operations.TestHelpers import LPConfigRunner
 from operations.LeadCreator import SFDCRequest
 from operations.LeadCreator import EloquaRequest
 from operations.LeadCreator import MarketoRequest
 
 
 class Test(unittest.TestCase):
-
 
     def testPLSEnvironmentsPrint(self):
         print "the first try on this: ";
@@ -45,6 +44,50 @@ class Test(unittest.TestCase):
         sss = PLSEnvironments.pls_SFDC_url
         print sss[0:sss.find("services")]
 
+    def testLPTenantConsoleLogin(self):
+        lp = LPConfigRunner();
+        resp = lp.tenantConsoleLogin();
+        print resp;
+
+    def testLPModelLogin(self):
+        lp = LPConfigRunner();
+        resp = lp.modelLogin();
+        print resp;
+
+    def testLPNewTenantElq(self):
+        lp = LPConfigRunner();
+        resp = lp.addNewTenant("TestElq_10_26", "Eloqua", "10.41.1.247", "2.0", "BODCDEVVINT187", None);
+        print resp;
+
+    def testLPNewTenantMKTO(self):
+        lp = LPConfigRunner();
+        resp = lp.addNewTenant("TestMKTO_10_26_1", "Marketo", "10.41.1.247", "2.0", "BODCDEVVINT187", None);
+        print resp;
+
+    def testLPNewTenantSFDC(self):
+        lp = LPConfigRunner();
+        resp = lp.addNewTenant("TestSFDC_10_26_1", "SFDC", "10.41.1.247", "2.0", "BODCDEVVINT187", None);
+        print resp;
+
+    def testlpSFDCCredentials(self):
+        lp = LPConfigRunner();
+        resp = lp.lpSFDCCredentials("TestSFDC_10_16");
+        print resp;
+
+    def testlpElQCredentials(self):
+        lp = LPConfigRunner();
+        resp = lp.lpElQCredentials("TestElq_10_16");
+        print resp;
+
+    def testlpMKTOCredentials(self):
+        lp = LPConfigRunner();
+        resp = lp.lpMKTOCredentials("TestMKTO_10_29_70657");
+        print resp;
+
+    def testlpActivateModel(self):
+        lp = LPConfigRunner();
+        print lp.lpActivateModel("TestElq_10_13");
+
     def testAddAnonymousLeadsToElq(self):
         elq = EloquaRequest()
         resp = elq.addAnonymousContact()
@@ -59,11 +102,7 @@ class Test(unittest.TestCase):
         elq = EloquaRequest()
         resp = elq.addEloquaContactWithCountry("United States")
         print resp
-         
-    def testCheckDanteValue(self):
-        dr = DanteRunner()
-        danteLead="00Q8000001aCoGX"
-        dr.checkDanteValue(danteLead)
+
     def testaddLeadToMarketo(self):
         mkto = MarketoRequest();
         print mkto.addLeadToMarketo(3); 
@@ -81,7 +120,7 @@ class Test(unittest.TestCase):
     def testGetLaunchData(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
         pd.getLaunchData("aa");
-        
+
     def testGetPDMatchData(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
         pd.recordPDMatchData("aa",123);
@@ -89,12 +128,12 @@ class Test(unittest.TestCase):
     def testGetLeadScoringData(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
         pd.recordLeadScoringData("aa",123);
-        
+
     def testGetBardInData(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nY26263627n1");
 #         pd.recordBardInData("aa",123,"BulkScoring_PushToScoringDB");
         pd.recordBardInData("testGetBardInData",222,"PushToScoringDB");
-        
+
     def testGetDanteData(self):
         pd = PerformanceData(marketting_app = PLSEnvironments.pls_marketing_app_ELQ ,tenant_name = "BD_ADEDTBDd70064747nC26263627n1");
 #         pd.recordBardInData("aa",123,"BulkScoring_PushToScoringDB");

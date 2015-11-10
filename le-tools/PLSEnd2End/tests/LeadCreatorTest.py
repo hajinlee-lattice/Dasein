@@ -4,14 +4,8 @@ Created on Mar 18, 2015
 @author: smeng
 '''
 import unittest
-import requests
-import json
-import datetime
 from Properties import PLSEnvironments
 from operations.TestHelpers import JamsRunner
-from operations.PerformanceHelpers import PerformanceData
-from operations.PerformanceHelpers import VisiDBRollBack
-from operations.TestHelpers import DanteRunner
 from operations.LeadCreator import SFDCRequest
 from operations.LeadCreator import EloquaRequest
 from operations.LeadCreator import MarketoRequest
@@ -53,8 +47,13 @@ class Test(unittest.TestCase):
     def addEloquaContactInCN(self):
         elq = EloquaRequest()
         resp = elq.addEloquaContact(1,"CN")
-        print resp          
-    
+        print resp
+
+    def testaddEloquaContact(self):
+        elq = EloquaRequest()
+        resp = elq.addEloquaContact(3)
+        print resp
+
     def testaddLeadToMarketoInUS(self):
         mkto = MarketoRequest();
         print mkto.addLeadToMarketo(1,"United States");
@@ -76,7 +75,11 @@ class Test(unittest.TestCase):
     def testAddContactsToSFDC(self):
         sfdc = SFDCRequest();
         print sfdc.addContactsToSFDC(3)
-           
+
+    def testAddContactToSFDC(self):
+        sfdc = SFDCRequest();
+        print sfdc.addContactToSFDC(email="aKeL0FMkRwNS1d7uT3blcHDtJmnVZp25_vEWjX8@login2work.de")
+
     def testAddLeadsToSFDCInUS(self):
         sfdc = SFDCRequest();
         print sfdc.addLeadsToSFDC(1,"United States")

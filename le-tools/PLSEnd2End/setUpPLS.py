@@ -4,70 +4,24 @@ Created on Mar 25, 2015
 @author: smeng
 '''
 
-
-import sys
 from Properties import PLSEnvironments
-from operations import PerformanceHelpers
-from operations.TestHelpers import PLSConfigRunner
-from operations.TestHelpers import PLSConfigRunner
-from operations.TestHelpers import DLConfigRunner
-from operations.TestHelpers import PretzelRunner
+from operations.TestHelpers import LPConfigRunner
 from operations.TestRunner import SessionRunner
-from operations.TestHelpers import JamsRunner
-import logging
-
 
 def setUpPls():
-
-    ''' Refresh SVN for templates '''
-#     print "Refreshing SVN"
-#     runner = SessionRunner()
-#     print runner.runCommandLocally("svn update", PLSEnvironments.svn_location_local)
+    # ''' Refresh SVN for templates '''
+    # print "Refreshing SVN"
+    # runner = SessionRunner()
+    # if False == runner.runCommandLocally("svn update", PLSEnvironments.svn_location_local):
+    #     print "the svn updated failed, please check the really reasons and try again."
+    #     return False
 
     ''' configure Bard Tenant -- drop templates, configure DL.. '''
-#     configureBardTenant(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ)
-#     configureBardTenant(PLSEnvironments.pls_bard_3, PLSEnvironments.pls_marketing_app_SFDC)
-#     configureBardTenant(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
+    lp = LPConfigRunner();
 
-
-
-
-def configureBardTenant(tenant, marketting_app):
-
-    ''' Setting up properties '''
-    if tenant == PLSEnvironments.pls_bard_1:
-        pls_url = PLSEnvironments.pls_url_1
-    elif tenant == PLSEnvironments.pls_bard_2:
-        pls_url = PLSEnvironments.pls_url_2
-    elif tenant ==  PLSEnvironments.pls_bard_3:
-        pls_url = PLSEnvironments.pls_url_3
-    else:
-        logging.error("Tenant provided not found")
-        sys.exit("Invalid Tenant")
- 
-#     ''' Setup Pretzel '''
-#     print "Running Setup"
-#     pretzel = PretzelRunner();
-#     assert pretzel.setupPretzel(marketting_app)
-#     
-#     ''' Configure PLS Credentials '''
-#     print "for PLS Configuration from UI";
-#     plsUI = PLSConfigRunner(pls_url);
-#     print "==>    The PLS URL is: %s" % pls_url;
-#     plsUI.config(marketting_app);
-  
-    ''' configure dataLoader settings '''
-    print "configure dataloader settings"
-    dlConfig = DLConfigRunner();
-    dlConfig.configDLTables(tenant, marketting_app);
-    dlConfig.createMockDataProviders(tenant, marketting_app);
-    dlConfig.editMockRefreshDataSources(tenant, marketting_app);
-    dlConfig.loadCfgTables(tenant, marketting_app);
-#     PerformanceHelpers.createPerformanceDataProviders(tenant, marketting_app); 
-     
-#     print "for jams configurations"
-#     jams = JamsRunner();
-#     assert jams.setJamsTenant(tenant);
+    lp.init(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ)
+    lp.init(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
+    lp.init(PLSEnvironments.pls_bard_3, PLSEnvironments.pls_marketing_app_SFDC)
 
 if __name__ == '__main__':
     setUpPls()

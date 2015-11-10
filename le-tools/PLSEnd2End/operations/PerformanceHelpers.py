@@ -14,7 +14,6 @@ from selenium import webdriver
 
 import TestHelpers;
 from Properties import PLSEnvironments
-from operations.TestHelpers import JamsRunner
 from operations.TestRunner import SessionRunner
 from operations.TestHelpers import DLCRunner
 from operations import PlsOperations
@@ -26,7 +25,8 @@ ld_connection_string = PLSEnvironments.SQL_conn_leadscoring;
 pls_connection_string = PLSEnvironments.SQL_ScoringDaemon;
 
 
-def createPerformanceDataProviders(tenant, marketting_app,host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
+def createPerformanceDataProviders(tenant, marketting_app, host=PLSEnvironments.pls_test_server,
+                                   dlc_path=PLSEnvironments.dlc_path,
                       dl_server=PLSEnvironments.dl_server,
                       user=PLSEnvironments.dl_server_user,
                       password=PLSEnvironments.dl_server_pwd):
@@ -65,7 +65,10 @@ def createPerformanceDataProviders(tenant, marketting_app,host=PLSEnvironments.p
         print "Performance Mock %s" % marketting_app
         dlc.runDLCcommand(command, params)
         dlc.getStatus()
-def editPerformanceRefreshDataSources(tenant, marketting_app,host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
+
+
+def editPerformanceRefreshDataSources(tenant, marketting_app, host=PLSEnvironments.pls_test_server,
+                                      dlc_path=PLSEnvironments.dlc_path,
                                dl_server=PLSEnvironments.dl_server,
                                user=PLSEnvironments.dl_server_user,
                                password=PLSEnvironments.dl_server_pwd):
@@ -112,7 +115,9 @@ def editPerformanceRefreshDataSources(tenant, marketting_app,host=PLSEnvironment
         else:
             print "!!![%s] MARKETTING UP IS NOT SUPPORTED!!!" % marketting_app
 
-def editHourlyPerformanceRefreshDataSources(tenant, marketting_app,host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
+
+def editHourlyPerformanceRefreshDataSources(tenant, marketting_app, host=PLSEnvironments.pls_test_server,
+                                            dlc_path=PLSEnvironments.dlc_path,
                                dl_server=PLSEnvironments.dl_server,
                                user=PLSEnvironments.dl_server_user,
                                password=PLSEnvironments.dl_server_pwd):
@@ -477,7 +482,7 @@ class VisiDBRollBack(SessionRunner):
         self.dl_server=dl_server;
 #         self.dlUI = webdriver.Firefox();
         self.dlc_host = "http://%s:5000" % PLSEnvironments.visidb_server
-        self.dlc_path= PLSEnvironments.visidb_dlc_path
+        self.dlc_path = PLSEnvironments.dlc_path
         self.dl_user=PLSEnvironments.dl_server_user
         self.dl_pwd=PLSEnvironments.dl_server_pwd
         self.visidb_conn="ServerName=%s;UserID=%s;Password=%s;" % (PLSEnvironments.visidb_server,PLSEnvironments.visidb_server_user,PLSEnvironments.visidb_server_pwd)
