@@ -83,9 +83,15 @@
             <version>${cascading.version}</version>
         </dependency>
         <dependency>
-            <groupId>driven</groupId>
-            <artifactId>driven-plugin</artifactId>
-            <version>${cascading.driven.version}</version>
+            <groupId>cascading.avro</groupId>
+            <artifactId>avro-scheme</artifactId>
+            <version>${cascading.avro.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.avro</groupId>
+                    <artifactId>trevni-avro</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
          <dependency>
             <groupId>org.apache.camel</groupId>

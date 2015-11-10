@@ -57,7 +57,7 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=2048m ${argLine}</argLine>
+                                    <argLine>-Xmx2g -XX:MaxPermSize=2g ${argLine}</argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
