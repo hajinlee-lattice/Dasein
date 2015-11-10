@@ -18,7 +18,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "Tenant config", description = "REST resource for tenant config")
 @RestController
 @RequestMapping(value = "/config")
-@PreAuthorize("hasRole('View_PLS_Configuration')")
 public class TenantConfigResource {
 
     @Autowired
