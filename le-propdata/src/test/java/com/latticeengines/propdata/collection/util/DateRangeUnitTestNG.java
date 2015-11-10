@@ -1,13 +1,8 @@
 package com.latticeengines.propdata.collection.util;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;

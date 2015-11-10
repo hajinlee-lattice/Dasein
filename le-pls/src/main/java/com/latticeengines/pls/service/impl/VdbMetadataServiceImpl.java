@@ -17,8 +17,8 @@ import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
 import com.latticeengines.liaison.exposed.service.Query;
 import com.latticeengines.liaison.exposed.service.QueryColumn;
-import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.service.VdbMetadataService;
 
 @Component("vdbMetadataService")

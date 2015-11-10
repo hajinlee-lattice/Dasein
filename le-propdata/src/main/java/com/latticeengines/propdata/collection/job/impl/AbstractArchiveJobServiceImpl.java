@@ -3,8 +3,6 @@ package com.latticeengines.propdata.collection.job.impl;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
