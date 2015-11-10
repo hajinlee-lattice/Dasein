@@ -48,7 +48,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     private String metadataTable;
     private String provenanceProperties;
     private boolean parallelEnabled;
-    private int featuresThreshold;
+    private int featuresThreshold = 100;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
