@@ -26,11 +26,9 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
     public final String TARGET_PATH = "/tmp/DataFlowOperationTestOutput";
     public final boolean LOCAL = true;
 
-
     @Autowired
     private DataTransformationService dataTransformationService;
     private Configuration configuration = new Configuration();
-
 
     @BeforeMethod(groups = "functional")
     public void setup() throws Exception {
@@ -43,9 +41,10 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         HdfsUtils.rmdir(configuration, "/tmp/checkpoints");
         HdfsUtils.rmdir(configuration, "/tmp/avro");
 
-        String lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
-        String opportunity = ClassLoader
-                .getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
+        String lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro")
+                .getPath();
+        String opportunity = ClassLoader.getSystemResource(
+                "com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         String contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro")
                 .getPath();
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
@@ -105,7 +104,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         ctx.setProperty("FLOWNAME", "Flow");
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", configuration);
-        ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty("ENGINE", "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, builder);
     }
 }

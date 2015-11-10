@@ -10,10 +10,10 @@ import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 public class TezExecutionEngine extends ExecutionEngine {
-    
+
     public TezExecutionEngine() {
         setName("TEZ");
-        setDefault(false);
+        setDefault(true);
         register(this);
     }
 

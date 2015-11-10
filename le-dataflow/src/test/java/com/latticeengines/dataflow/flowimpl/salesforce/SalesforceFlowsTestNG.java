@@ -90,7 +90,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
         ctx.setProperty("CHECKPOINT", checkpoint);
         ctx.setProperty("HADOOPCONF", config);
-        ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty("ENGINE", "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         verifyNumRows(config, "/tmp/TmpEventTable", 10787);
 

@@ -2,6 +2,7 @@ package com.latticeengines.dataflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -23,20 +24,28 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     private ApplicationContext appContext;
 
     @Override
-    public Table executeNamedTransformation(DataFlowContext dataFlowCtx, DataFlowBuilder dataFlow) {
-        validateParameters(dataFlowCtx);
+    public Table executeNamedTransformation(DataFlowContext context, DataFlowBuilder dataFlow) {
+        validateParameters(context);
 
-        boolean doCheckpoint = dataFlowCtx.getProperty("CHECKPOINT", Boolean.class);
+        boolean doCheckpoint = context.getProperty("CHECKPOINT", Boolean.class);
 
-        Configuration hadoopConfig = dataFlowCtx.getProperty("HADOOPCONF", Configuration.class);
+        Configuration configuration = context.getProperty("HADOOPCONF", Configuration.class);
+
         // Ensure that we use the fatjars rather than the hadoop class path to
-        // resolve dependencies.
-        // This should eventually be set globally.
-        hadoopConfig.set("mapreduce.job.user.classpath.first", "true");
-        dataFlow.setLocal(hadoopConfig == null || hadoopConfig.get("fs.defaultFS").equals("file:///"));
+        // resolve dependencies. This should eventually be set globally.
+        configuration.setBoolean("mapreduce.job.user.classpath.first", true);
+
+        Properties properties = new Properties();
+        if (context.getProperty("JOBPROPERTIES", Properties.class) != null) {
+            properties.putAll(context.getProperty("JOBPROPERTIES", Properties.class));
+        }
+        properties.setProperty("mapred.mapper.new-api", "false");
+        context.setProperty("JOBPROPERTIES", properties);
+
+        dataFlow.setLocal(configuration == null || configuration.get("fs.defaultFS").equals("file:///"));
         dataFlow.setCheckpoint(doCheckpoint);
         dataFlow.setEnforceGlobalOrdering(true);
-        return dataFlow.runFlow(dataFlowCtx);
+        return dataFlow.runFlow(context);
     }
 
     @Override

@@ -20,12 +20,11 @@ public class ExecutionEngineUnitTestNG {
         ExecutionEngine engine = ExecutionEngine.get("TEZ");
         assertTrue(engine instanceof TezExecutionEngine);
     }
-    
+
     @Test(groups = "unit")
     public void getUnknownEngine() {
         ExecutionEngine engine = ExecutionEngine.get("ABC");
-        assertTrue(engine instanceof MapReduceExecutionEngine);
+        assertTrue(engine instanceof TezExecutionEngine);
     }
-    
-    
+
 }

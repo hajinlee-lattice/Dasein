@@ -114,7 +114,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty("ENGINE", "TEZ");
         ctx.setProperty("TARGETPATH", getTargetDirectory());
         ctx.setProperty("TARGETTABLENAME", getFlowBeanName());
         ctx.setProperty("FLOWNAME", getFlowBeanName());

@@ -13,7 +13,7 @@ public class MapReduceExecutionEngine extends ExecutionEngine {
 
     public MapReduceExecutionEngine() {
         setName("MR");
-        setDefault(true);
+        setDefault(false);
         register(this);
     }
 

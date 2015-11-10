@@ -118,9 +118,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
 
     @DataProvider(name = "engineProvider")
     public Object[][] getEngine() {
-        return new Object[][] { { "MR" }
-        // { "TEZ"}
-        };
+        return new Object[][] { { "MR" }, { "TEZ" } };
     }
 
     @Test(groups = "functional", dataProvider = "engineProvider", enabled = true)
@@ -164,7 +162,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("FLOWNAME", "TableWithExtractsDataFlow");
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", config);
-        ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty("ENGINE", "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
         verifyNumRows(config, "/tmp/CombinedImportTable", 7);
     }
@@ -184,7 +182,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("FLOWNAME", "TableWithExtractsDataFlow");
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", config);
-        ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty("ENGINE", "TEZ");
 
         boolean exception = false;
         try {
