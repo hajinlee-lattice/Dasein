@@ -23,6 +23,12 @@ public class ModelingMetadata {
     public static final String INTERVAL_STAT_TYPE = "interval";
     public static final String RATIO_STAT_TYPE = "ratio";
     public static final String CATEGORY_EXTENSION = "Category";
+    public static final String FT_ALPHA = "alpha";
+    public static final String FT_BOOLEAN = "boolean";
+    public static final String FT_CURRENCY = "currency";
+    public static final String FT_NUMERIC = "numeric";
+    public static final String FT_PERCENTAGE = "percentage";
+    public static final String FT_YEAR = "year";
 
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 
@@ -108,6 +114,7 @@ public class ModelingMetadata {
         private String displayName;
         @RequiredKeysInMap(keys = { CATEGORY_EXTENSION })
         private List<KV> extensions;
+        @AllowedValues(values = { FT_ALPHA, FT_BOOLEAN, FT_CURRENCY, FT_NUMERIC, FT_PERCENTAGE, FT_YEAR })
         private String fundamentalType;
         private List<DateTime> lastTimeSourceUpdated;
         private DateTime mostRecentUpdateDate;
