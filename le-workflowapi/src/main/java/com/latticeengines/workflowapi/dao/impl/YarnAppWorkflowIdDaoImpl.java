@@ -6,7 +6,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.YarnAppWorkflowId;
 import com.latticeengines.workflowapi.dao.YarnAppWorkflowIdDao;
 
@@ -23,7 +23,7 @@ public class YarnAppWorkflowIdDaoImpl extends BaseDaoImpl<YarnAppWorkflowId> imp
     }
 
     @Override
-    public WorkflowId findWorkflowIdByApplicationId(ApplicationId appId) {
+    public WorkflowExecutionId findWorkflowIdByApplicationId(ApplicationId appId) {
         Session session = sessionFactory.getCurrentSession();
         Query query = session.createQuery("from " + YarnAppWorkflowId.class.getSimpleName() + " Y where Y.yarnAppId=:anAppID");
         query.setString("anAppID", appId.toString());

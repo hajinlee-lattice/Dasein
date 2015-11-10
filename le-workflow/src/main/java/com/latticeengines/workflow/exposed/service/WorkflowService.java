@@ -2,7 +2,8 @@ package com.latticeengines.workflow.exposed.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 
@@ -10,18 +11,20 @@ public interface WorkflowService {
 
     List<String> getNames();
 
-    WorkflowId start(String workflowName, WorkflowConfiguration workflowConfiguration);
+    WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration);
 
-    WorkflowId restart(WorkflowId workflowId);
+    WorkflowExecutionId restart(WorkflowExecutionId workflowId);
 
-    void stop(WorkflowId workflowId);
+    WorkflowExecutionId restart(WorkflowInstanceId workflowId);
 
-    WorkflowStatus getStatus(WorkflowId workflowId);
+    void stop(WorkflowExecutionId workflowId);
 
-    List<String> getStepNames(WorkflowId workflowId);
+    WorkflowStatus getStatus(WorkflowExecutionId workflowId);
 
-    WorkflowStatus waitForCompletion(WorkflowId workflowId) throws Exception;
+    List<String> getStepNames(WorkflowExecutionId workflowId);
 
-    WorkflowStatus waitForCompletion(WorkflowId workflowId, long maxWaitTime) throws Exception;
+    WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId) throws Exception;
+
+    WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception;
 
 }

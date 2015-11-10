@@ -6,7 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
 // TODO bernard turn this into a real CLI
@@ -20,7 +20,7 @@ public class WorkflowApp {
         try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(springConfig)) {
             WorkflowService workflowService = (WorkflowService) context.getBean("workflowService");
 
-            WorkflowId workflowId = workflowService.start("dlOrchestrationWorkflow", null);
+            WorkflowExecutionId workflowId = workflowService.start("dlOrchestrationWorkflow", null);
             BatchStatus status = workflowService.waitForCompletion(workflowId).getStatus();
 
             log.info("Exit Status : " + status);

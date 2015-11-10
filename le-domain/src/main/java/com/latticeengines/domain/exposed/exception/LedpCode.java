@@ -245,12 +245,13 @@ public enum LedpCode {
     // le-workflow
     LEDP_28000("Workflow does not exist: {0}."), //
     LEDP_28001("Problem starting workflow: {0}."), //
-    LEDP_28002("Problem restarting workflow: {0}."), //
+    LEDP_28002("Problem restarting workflow, workflowId:{0} jobexecutionId:{1}."), //
     LEDP_28003("Problem stopping workflow: {0}."), //
     LEDP_28004("Problem creating table {0}."), //
     LEDP_28005("Problem creating event table from match result; commandId:{0}."), //
     LEDP_28006("Problem sampling event table:{0}."), //
-    LEDP_28007("Problem profiling and modeling event table:{0}.");
+    LEDP_28007("Problem profiling and modeling event table:{0}."), //
+    LEDP_28008("Step configuration failed validation with errors:{0} ... {1}.");
 
     private String message;
 

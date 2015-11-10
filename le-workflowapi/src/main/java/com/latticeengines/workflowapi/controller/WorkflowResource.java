@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -48,7 +48,7 @@ public class WorkflowResource {
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
     public String getWorkflowId(@PathVariable String applicationId) {
         log.info("getWorkflowId for applicationId:" + applicationId);
-        WorkflowId workflowId = workflowContainerService.getWorkflowId(YarnUtils.appIdFromString(applicationId));
+        WorkflowExecutionId workflowId = workflowContainerService.getWorkflowId(YarnUtils.appIdFromString(applicationId));
         return String.valueOf(workflowId.getId());
     }
 
@@ -56,7 +56,7 @@ public class WorkflowResource {
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted workflow")
     public WorkflowStatus getWorkflowStatus(@PathVariable String workflowId) {
-        return workflowService.getStatus(new WorkflowId(Long.valueOf(workflowId)));
+        return workflowService.getStatus(new WorkflowExecutionId(Long.valueOf(workflowId)));
     }
 
 }

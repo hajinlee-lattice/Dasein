@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
-import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.domain.exposed.workflow.YarnAppWorkflowId;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
@@ -46,7 +46,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         log.info("Running WorkflowProcessor with config:" + workflowConfig.toString());
         appContext = loadSoftwarePackages("workflowapi", softwareLibraryService, appContext);
 
-        WorkflowId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
         YarnAppWorkflowId yarnAppWorkflowId = new YarnAppWorkflowId(appId, workflowId);
         yarnAppWorkflowIdEntityMgr.create(yarnAppWorkflowId);
 

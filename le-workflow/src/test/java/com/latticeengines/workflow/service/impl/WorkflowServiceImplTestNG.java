@@ -10,7 +10,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.AnotherSuccessfulStep;
 import com.latticeengines.workflow.functionalframework.FailableStep;
@@ -51,7 +51,7 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testStart() throws Exception {
         failableStep.setFail(false);
-        WorkflowId workflowId = workflowService.start(failableWorkflow.name(), null);
+        WorkflowExecutionId workflowId = workflowService.start(failableWorkflow.name(), null);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
     }
@@ -59,7 +59,7 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testRestart() throws Exception {
         failableStep.setFail(true);
-        WorkflowId workflowId = workflowService.start(failableWorkflow.name(), null);
+        WorkflowExecutionId workflowId = workflowService.start(failableWorkflow.name(), null);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> stepNames = workflowService.getStepNames(workflowId);
         assertTrue(stepNames.contains(successfulStep.name()));
@@ -68,7 +68,7 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
         assertEquals(status, BatchStatus.FAILED);
 
         failableStep.setFail(false);
-        WorkflowId restartedWorkflowId = workflowService.restart(workflowId);
+        WorkflowExecutionId restartedWorkflowId = workflowService.restart(workflowId);
         status = workflowService.waitForCompletion(restartedWorkflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> restartedStepNames = workflowService.getStepNames(restartedWorkflowId);
         assertFalse(restartedStepNames.contains(successfulStep.name()));
@@ -87,7 +87,7 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testStop() throws Exception {
         sleepableStep.setSleepTime(100L);
-        WorkflowId workflowId = workflowService.start(sleepableWorkflow.name(), null);
+        WorkflowExecutionId workflowId = workflowService.start(sleepableWorkflow.name(), null);
         BatchStatus status = workflowService.getStatus(workflowId).getStatus();
         assertTrue(status.equals(BatchStatus.STARTING) || status.equals(BatchStatus.STARTED));
 

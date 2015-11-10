@@ -10,7 +10,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 
 public class RunStepAgainWhenCompleteTestNG extends WorkflowFunctionalTestNGBase {
 
@@ -29,7 +29,7 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowFunctionalTestNGBase
     @Test(groups = "functional", enabled = true)
     public void testRunCompletedStepAgainWorkflow() throws Exception {
         failableStep.setFail(true);
-        WorkflowId workflowId = workflowService.start(runCompletedStepAgainWorkflow.name(), null);
+        WorkflowExecutionId workflowId = workflowService.start(runCompletedStepAgainWorkflow.name(), null);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> stepNames = workflowService.getStepNames(workflowId);
         assertTrue(stepNames.contains(runAgainWhenCompleteStep.name()));
@@ -37,7 +37,7 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowFunctionalTestNGBase
         assertEquals(status, BatchStatus.FAILED);
 
         failableStep.setFail(false);
-        WorkflowId restartedWorkflowId = workflowService.restart(workflowId);
+        WorkflowExecutionId restartedWorkflowId = workflowService.restart(workflowId);
         status = workflowService.waitForCompletion(restartedWorkflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> restartedStepNames = workflowService.getStepNames(restartedWorkflowId);
         assertTrue(restartedStepNames.contains(runAgainWhenCompleteStep.name()));

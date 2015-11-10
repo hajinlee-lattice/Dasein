@@ -1,5 +1,7 @@
 package com.latticeengines.workflow.core;
 
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.batch.core.Job;
@@ -17,6 +19,11 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+import com.latticeengines.common.exposed.exception.AnnotationValidationError;
+import com.latticeengines.common.exposed.validator.BeanValidationService;
+import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.listener.LogJobListener;
@@ -31,6 +38,8 @@ public class WorkflowTranslator {
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
+
+    private BeanValidationService beanValidationService = new BeanValidationServiceImpl();
 
     @PostConstruct
     public void init() {
@@ -68,15 +77,34 @@ public class WorkflowTranslator {
                 JobParameters jobParameters = context.getStepContext().getStepExecution().getJobParameters();
                 step.setJobParameters(jobParameters);
 
-                ExecutionContext executionContext = context.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
+                ExecutionContext executionContext = context.getStepContext().getStepExecution().getJobExecution()
+                        .getExecutionContext();
                 step.setExecutionContext(executionContext);
 
                 if (!step.isDryRun()) {
-                    step.setup();
+                    boolean configurationWasSet = step.setup();
+                    if (configurationWasSet) {
+                        validateConfiguration(step);
+                    }
+
                     step.execute();
                 }
 
                 return RepeatStatus.FINISHED;
+            }
+
+            private void validateConfiguration(final AbstractStep<?> step) {
+                Set<AnnotationValidationError> validationErrors = beanValidationService
+                        .validate(step.getConfiguration());
+                if (validationErrors.size() > 0) {
+                    StringBuilder validationErrorStringBuilder = new StringBuilder();
+                    for (AnnotationValidationError annotationValidationError : validationErrors) {
+                        validationErrorStringBuilder.append(annotationValidationError.toString());
+                    }
+
+                    throw new LedpException(LedpCode.LEDP_28008, new String[] { step.getConfiguration().toString(),
+                            validationErrorStringBuilder.toString() });
+                }
             }
         };
     }

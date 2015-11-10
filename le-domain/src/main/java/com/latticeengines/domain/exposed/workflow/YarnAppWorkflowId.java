@@ -28,7 +28,7 @@ public class YarnAppWorkflowId implements HasPid {
         // default constructor
     }
 
-    public YarnAppWorkflowId(ApplicationId yarnAppId, WorkflowId workflowId) {
+    public YarnAppWorkflowId(ApplicationId yarnAppId, WorkflowExecutionId workflowId) {
         this.yarnAppId = yarnAppId.toString();
         this.workflowId = workflowId.getId();
     }
@@ -73,8 +73,8 @@ public class YarnAppWorkflowId implements HasPid {
 
     @JsonIgnore
     @Transient
-    public WorkflowId getAsWorkflowId() {
-        return new WorkflowId(workflowId);
+    public WorkflowExecutionId getAsWorkflowId() {
+        return new WorkflowExecutionId(workflowId);
     }
 
     @Override

@@ -39,6 +39,7 @@ import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGB
 public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBase {
 
     protected static final CustomerSpace CUSTOMERSPACE = CustomerSpace.parse("WFAPITests.WFAPITests.WFAPITests");
+    protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 40;
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(WorkflowApiFunctionalTestNGBase.class);

@@ -20,7 +20,7 @@ public class FailableWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     private AnotherSuccessfulStep anotherSuccessfulStep;
 
     @Autowired
-    private FailableStep failedStep;
+    private FailableStep failableStep;
 
     @Bean
     public Job failableWorkflowJob() throws Exception {
@@ -30,7 +30,7 @@ public class FailableWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder().next(successfulStep) //
-                .next(failedStep) //
+                .next(failableStep) //
                 .next(anotherSuccessfulStep) //
                 .build();
     }

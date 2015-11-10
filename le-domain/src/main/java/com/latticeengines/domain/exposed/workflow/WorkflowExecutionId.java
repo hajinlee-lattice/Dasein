@@ -1,22 +1,22 @@
 package com.latticeengines.domain.exposed.workflow;
 
-public class WorkflowId {
+public class WorkflowExecutionId {
 
-    private long id;
+    private long executionId;
 
-    public WorkflowId(long id) {
-        this.id = id;
+    public WorkflowExecutionId(long executionId) {
+        this.executionId = executionId;
     }
 
     public long getId() {
-        return id;
+        return executionId;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (id ^ (id >>> 32));
+        result = prime * result + (int) (executionId ^ (executionId >>> 32));
         return result;
     }
 
@@ -28,8 +28,8 @@ public class WorkflowId {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        WorkflowId other = (WorkflowId) obj;
-        if (id != other.id)
+        WorkflowExecutionId other = (WorkflowExecutionId) obj;
+        if (executionId != other.executionId)
             return false;
         return true;
     }

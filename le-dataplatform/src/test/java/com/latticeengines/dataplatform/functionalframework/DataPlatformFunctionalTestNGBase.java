@@ -339,15 +339,22 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return applicationId;
     }
 
-    public FinalApplicationStatus waitForStatus(ApplicationId applicationId,
-            FinalApplicationStatus... applicationStatuses) throws Exception {
-        return waitForStatus(applicationId.toString(), applicationStatuses);
+    public FinalApplicationStatus waitForStatus(ApplicationId applicationId, FinalApplicationStatus... applicationStatuses)
+    throws Exception {
+        return waitForStatus(applicationId.toString(), MAX_MILLIS_TO_WAIT, applicationStatuses);
     }
 
     public FinalApplicationStatus waitForStatus(String applicationId, FinalApplicationStatus... applicationStatuses)
+    throws Exception {
+        return waitForStatus(applicationId, MAX_MILLIS_TO_WAIT, applicationStatuses);
+    }
+
+    public FinalApplicationStatus waitForStatus(String applicationId, Long waitTimeInMillis, FinalApplicationStatus... applicationStatuses)
             throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
+        waitTimeInMillis = waitTimeInMillis == null ? MAX_MILLIS_TO_WAIT : waitTimeInMillis;
+        log.info(String.format("Waiting on %s for at most %dms.", applicationId, waitTimeInMillis));
 
         FinalApplicationStatus status = null;
         long start = System.currentTimeMillis();
@@ -364,7 +371,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 }
             }
             Thread.sleep(1000);
-        } while (System.currentTimeMillis() - start < MAX_MILLIS_TO_WAIT);
+        } while (System.currentTimeMillis() - start < waitTimeInMillis);
         return status;
     }
 

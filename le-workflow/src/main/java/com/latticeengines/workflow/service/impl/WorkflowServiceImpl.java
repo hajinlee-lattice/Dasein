@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -21,6 +23,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
+import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -29,7 +32,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.workflow.WorkflowId;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -37,6 +41,7 @@ import com.latticeengines.workflow.exposed.service.WorkflowService;
 @Component("workflowService")
 public class WorkflowServiceImpl implements WorkflowService {
 
+    private static final Log log = LogFactory.getLog(WorkflowServiceImpl.class);
     private static final String WORKFLOW_SERVICE_UUID = "WorkflowServiceUUID";
     private static final EnumSet<BatchStatus> TERMINAL_STATUS = EnumSet.of(BatchStatus.ABANDONED,
             BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.STOPPED);
@@ -60,7 +65,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowId start(String workflowName, WorkflowConfiguration workflowConfiguration) {
+    public WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration) {
         Job workflow = null;
         try {
             workflow = jobRegistry.getJob(workflowName);
@@ -85,25 +90,45 @@ public class WorkflowServiceImpl implements WorkflowService {
                 | JobParametersInvalidException e) {
             throw new LedpException(LedpCode.LEDP_28001, e, new String[] { workflowName });
         }
-        return new WorkflowId(jobExecution.getId());
+        return new WorkflowExecutionId(jobExecution.getId());
     }
 
     @Override
-    public WorkflowId restart(WorkflowId workflowId) {
+    public WorkflowExecutionId restart(WorkflowInstanceId workflowInstanceId) {
+        Long jobExecutionId = -1L;
+        List<Long> jobExecutions;
+        try {
+            jobExecutions = jobOperator.getExecutions(workflowInstanceId.getId());
+        } catch (NoSuchJobInstanceException e) {
+            throw new LedpException(LedpCode.LEDP_28002, e, new String[] { String.valueOf(workflowInstanceId.getId()),
+                    String.valueOf(workflowInstanceId.getId()) });
+        }
+
+        jobExecutionId = jobExecutions.get(0);
+        log.info(String.format("Restarting workflowId:%d from most recent jobExecutionId:%d.", workflowInstanceId.getId(),
+                jobExecutionId));
+        return restart(new WorkflowExecutionId(jobExecutionId));
+    }
+
+    @Override
+    public WorkflowExecutionId restart(WorkflowExecutionId workflowExecutionId) {
         Long id = 0L;
 
         try {
-            id = jobOperator.restart(workflowId.getId());
+            id = jobOperator.restart(workflowExecutionId.getId());
+            log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
+                    workflowExecutionId.getId(), id));
         } catch (JobInstanceAlreadyCompleteException | NoSuchJobExecutionException | NoSuchJobException
                 | JobRestartException | JobParametersInvalidException e) {
-            throw new LedpException(LedpCode.LEDP_28002, e, new String[] { getWorkflowName(workflowId) });
+            throw new LedpException(LedpCode.LEDP_28002, e, new String[] { String.valueOf(workflowExecutionId.getId()),
+                    String.valueOf(workflowExecutionId.getId()) });
         }
 
-        return new WorkflowId(id);
+        return new WorkflowExecutionId(id);
     }
 
     @Override
-    public void stop(WorkflowId workflowId) {
+    public void stop(WorkflowExecutionId workflowId) {
         try {
             jobOperator.stop(workflowId.getId());
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
@@ -112,7 +137,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowStatus getStatus(WorkflowId workflowId) {
+    public WorkflowStatus getStatus(WorkflowExecutionId workflowId) {
         JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
         WorkflowStatus workflowStatus = new WorkflowStatus();
         workflowStatus.setStatus(jobExecution.getStatus());
@@ -123,12 +148,12 @@ public class WorkflowServiceImpl implements WorkflowService {
         return workflowStatus;
     }
 
-    private String getWorkflowName(WorkflowId workflowId) {
+    private String getWorkflowName(WorkflowExecutionId workflowId) {
         return jobExplorer.getJobExecution(workflowId.getId()).getJobInstance().getJobName();
     }
 
     @Override
-    public List<String> getStepNames(WorkflowId workflowId) {
+    public List<String> getStepNames(WorkflowExecutionId workflowId) {
         JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
 
         return getStepNamesFromExecution(jobExecution);
@@ -142,11 +167,11 @@ public class WorkflowServiceImpl implements WorkflowService {
         return new ArrayList<String>(stepNames);
     }
 
-    public WorkflowStatus waitForCompletion(WorkflowId workflowId) throws Exception {
+    public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId) throws Exception {
         return waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT);
     }
 
-    public WorkflowStatus waitForCompletion(WorkflowId workflowId, long maxWaitTime) throws Exception {
+    public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception {
         WorkflowStatus status = null;
         long start = System.currentTimeMillis();
 

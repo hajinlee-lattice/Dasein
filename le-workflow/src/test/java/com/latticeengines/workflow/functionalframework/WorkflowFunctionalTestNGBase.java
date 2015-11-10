@@ -29,6 +29,10 @@ public class WorkflowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected JobRepositoryTestUtils jobRepositoryTestUtils;
 
+    protected boolean enableJobRepositoryCleanupBeforeTest() {
+        return false;
+    }
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() {
         jobRepositoryTestUtils = new JobRepositoryTestUtils(jobRepository, dataSource);
@@ -37,7 +41,9 @@ public class WorkflowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @BeforeMethod(enabled = true, firstTimeOnly = true, alwaysRun = true)
     public void beforeEachTest() {
-        jobRepositoryTestUtils.removeJobExecutions();
+        if (enableJobRepositoryCleanupBeforeTest()) {
+            jobRepositoryTestUtils.removeJobExecutions();
+        }
     }
 
 }
