@@ -198,7 +198,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
 
     protected BootstrapState waitUntilStateIsNotInitial(
             String contractId, String tenantId, String serviceName) {
-        return waitUntilStateIsNotInitial(contractId, tenantId, serviceName, 20);
+        return waitUntilStateIsNotInitial(contractId, tenantId, serviceName, 200);
     }
 
     protected BootstrapState waitUntilStateIsNotInitial(
