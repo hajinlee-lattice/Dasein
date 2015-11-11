@@ -54,7 +54,6 @@ def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
 
     start = time.time()
     lg_start_datetime = None
-    lg_status = None
     lg_last_succeed_date = None
     lg_last_fail_date = None
     lg_succeed = True
@@ -67,16 +66,17 @@ def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
             break
 
         returnDict = getLoadGroupStatus(dlc, tenant, load_group)
-        if returnDict["Start"] != "-":
+        if returnDict["Start"].strip() != "-":
             lg_start_datetime = datetime.strptime(returnDict["Start"], "%Y-%m-%d %H:%M:%S")
         if returnDict["Last Succeeded"] != "Never":
             lg_last_succeed_date = datetime.strptime(returnDict["Last Succeeded"], "%Y-%m-%d %H:%M:%S")
         if returnDict["Last Failed"] != "Never":
             lg_last_fail_date = datetime.strptime(returnDict["Last Failed"], "%Y-%m-%d %H:%M:%S")
-        if returnDict["State"] == "Launch Succeeded":
+        lg_status = returnDict["State"]
+        if lg_status == "Launch Succeeded":
             print "Load Group %s Launch Succeeded" % load_group
             break
-        if returnDict["State"] == "Idle":
+        if lg_status == "Idle":
             # Typicaly, judge the start time and finish time first
             if lg_start_datetime:
                 if lg_last_succeed_date and lg_last_succeed_date > lg_start_datetime:
@@ -108,6 +108,7 @@ def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
                             break
         print "Load Group %s status is: %s, will try again in %s seconds" % (load_group, lg_status, sleep_time)
         time.sleep(sleep_time)
+    print "Run load group %s cost: %s s" % (load_group, time.time() - start)
     return lg_succeed, launchid
 
 
@@ -121,7 +122,7 @@ def getLoadGroupStatus(dlc, tenant, load_group):
               }
     print "Get status of load group %s command return: %s" % (load_group, dlc.runDLCcommand(command, params))
     returnTxt = dlc.stdout
-    print returnTxt
+    # print returnTxt
 
     returnDict = {}
     for line in returnTxt.split("\n"):
