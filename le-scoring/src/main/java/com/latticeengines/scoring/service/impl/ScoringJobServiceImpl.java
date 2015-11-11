@@ -3,6 +3,7 @@ package com.latticeengines.scoring.service.impl;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +11,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
+import com.mysql.jdbc.StringUtils;
 
 @Component("scoringJobServiceImpl")
 public class ScoringJobServiceImpl implements ScoringJobService {
@@ -53,8 +58,38 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public ApplicationId score(ScoringConfiguration scoringConfig) {
+        validateScoringConfig(scoringConfig);
         Properties properties = generateCustomizedProperties(scoringConfig);
         return this.score(properties);
+    }
+
+    private void validateScoringConfig(ScoringConfiguration scoringConfig) {
+        if (StringUtils.isNullOrEmpty(scoringConfig.getCustomer())) {
+            throw new LedpException(LedpCode.LEDP_20022);
+        }
+
+        try {
+            if (StringUtils.isNullOrEmpty(scoringConfig.getSourceDataDir())
+                    || !HdfsUtils.fileExists(yarnConfiguration, scoringConfig.getSourceDataDir())) {
+                throw new LedpException(LedpCode.LEDP_20023);
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_20023, e);
+        }
+        try {
+            if (StringUtils.isNullOrEmpty(scoringConfig.getTargetResultDir())
+                    || HdfsUtils.fileExists(yarnConfiguration, scoringConfig.getTargetResultDir())) {
+                throw new LedpException(LedpCode.LEDP_20024);
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_20024, e);
+        }
+        if (StringUtils.isNullOrEmpty(scoringConfig.getUniqueKeyColumn())) {
+            throw new LedpException(LedpCode.LEDP_20025);
+        }
+        if (CollectionUtils.isEmpty(scoringConfig.getModelGuids())) {
+            throw new LedpException(LedpCode.LEDP_20026);
+        }
     }
 
     private Properties generateCustomizedProperties(ScoringConfiguration scoringConfig) {
@@ -73,8 +108,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
         properties.setProperty(ScoringProperty.MODEL_GUID.name(), commaJoiner.join(scoringConfig.getModelGuids()));
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), String.valueOf(Long.MIN_VALUE));
-        List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant,
-                customerBaseDir, scoringConfig.getModelGuids());
+        List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
+                scoringConfig.getModelGuids());
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));
         return properties;
     }
