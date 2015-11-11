@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports = function (grunt) {
     // version of our software. This should really be in the package.json
@@ -11,46 +11,55 @@ module.exports = function (grunt) {
 
         env: {
             dev: {
-                API_URL: 'http://localhost:8080',
-                API_PROXY: true,
                 NODE_ENV: 'development',
-                USE_PORT: 3000
+                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080'
             },
             integration: {
-                API_URL: 'http://bodcdevhdpweb53.dev.lattice.local:8080',
-                API_PROXY: true,
                 NODE_ENV: 'integration',
+                API_URL: 'http://bodcdevhdpweb53.dev.lattice.local:8080',
                 USE_PORT: 8080
             },
             qa: {
-                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
-                API_PROXY: true,
                 NODE_ENV: 'qa',
-                USE_PORT: 3000
+                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080'
             },
             stage: {
-                API_URL: 'https://app.lattice-engines.com',
-                API_PROXY: true,
                 NODE_ENV: 'stage',
+                API_URL: 'https://app.lattice-engines.com',
                 USE_PORT: 8080
             },
             prod: {
-                API_URL: 'https://app.lattice-engines.com',
-                API_PROXY: false,
                 NODE_ENV: 'production',
-                USE_PORT: 8080
+                API_URL: false,  // load balancer will handle api routing
+                USE_PORT: 80,
+                WHITELIST: [
+                    '10.0.0.1',
+                    '10.0.10.1'
+                ]
             }
         },
 
-        nodemon: {
-          default: {
-            script: './server.js'
-          }
+        run: {
+            node: {
+                args: [ './app.js' ]
+            },
+            nodemon: {
+                cmd: 'nodemon.cmd',
+                args: [ './app.js' ]
+            },
+            killnode: {
+                cmd: 'taskkill.exe',
+                args: [
+                    '/F',
+                    '/IM',
+                    'node.exe'
+                ]
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-concurrent');
-    grunt.loadNpmTasks('grunt-nodemon');
+    grunt.loadNpmTasks('grunt-run');
     grunt.loadNpmTasks('grunt-env');
 
     var defaultText = 'Run Express Server in Production';
@@ -59,10 +68,15 @@ module.exports = function (grunt) {
         'nodemon'
     ]);
 
+    grunt.registerTask('prod', defaultText, [
+        'env:prod',
+        'run:node'
+    ]);
+
     var devText = 'Run Express Server, using Local API Endpoints';
     grunt.registerTask('dev', devText, [
         'env:dev',
-        'nodemon'
+        'run:nodemon'
     ]);
 
     var qaText = 'Run Express Server, using API Endpoints on 52';
@@ -71,11 +85,8 @@ module.exports = function (grunt) {
         'nodemon'
     ]);
 
-    grunt.registerTask('init', [
-
-    ]);
-
-    grunt.registerTask('dist', [
-
+    var text = 'Kill all node.exe on windows';
+    grunt.registerTask('killnode', text, [
+        'run:killnode'
     ]);
 };

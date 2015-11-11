@@ -1,12 +1,7 @@
 {
   "name": "ProspectDiscovery",
   "version": "0.0.1",
-  "dependencies": {
-    "express": "^4.13.3",
-    "express-handlebars": "^2.0.1",
-    "body-parser": "^1.14.1",
-    "nodemon": "^1.4.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-nodemon": "^0.4.0",

@@ -2,7 +2,7 @@
 
 module.exports = function (grunt) {
 
-    var sourceDir = 'src/main/webapp';
+    var sourceDir = './';
     // Configurable paths for the application
     var appConfig = {
         app:  sourceDir,
