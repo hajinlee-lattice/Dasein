@@ -220,7 +220,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
         for (String tableName : tableNameList) {
             URL url = ClassLoader.getSystemResource(String.format(
-                    "com/latticeengines/eai/service/impl/salesforce/%s.avsc", tableName).toString());
+                    "com/latticeengines/eai/service/impl/salesforce/%s.json", tableName).toString());
             String str = FileUtils.readFileToString(new File(url.getFile()));
             Table table = JsonUtils.deserialize(str, Table.class);
             tables.add(table);

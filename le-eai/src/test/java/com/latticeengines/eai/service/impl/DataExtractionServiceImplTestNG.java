@@ -1,18 +1,23 @@
 package com.latticeengines.eai.service.impl;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
+import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -26,16 +31,18 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
-import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 import static org.mockito.Mockito.mock;
@@ -63,10 +70,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private String targetPath;
 
-    @Autowired
-    private EaiMetadataService eaiMetadataService;
-
-    private ImportConfiguration importConfig;
+    private EaiMetadataServiceImpl eaiMetadataService;
 
     private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
             "Opportunity", "OpportunityContactRole" });
@@ -91,9 +95,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
-        importConfig = createSalesforceImportConfig(customer);
-
-        EaiMetadataServiceImpl eaiMetadataService = mock(EaiMetadataServiceImpl.class);
+        eaiMetadataService = mock(EaiMetadataServiceImpl.class);
         when(eaiMetadataService.getLastModifiedKey(any(String.class), any(Table.class))).thenAnswer(
                 new Answer<LastModifiedKey>() {
 
@@ -119,9 +121,9 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = true)
     public void extractAndImport() throws Exception {
-
+        ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
@@ -139,9 +141,57 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         checkExtractsDirectoryExists(customer, tableNameList);
     }
 
+    @Test(groups = "functional", enabled = true)
+    public void testAttributeWithSemanticType() throws Exception {
+        ImportConfiguration importConfig = createSalesforceImportConfig(customer);
+        CamelContext camelContext = constructCamelContext(importConfig);
+        camelContext.start();
+
+        Table table = new Table();
+        table.setName("Account");
+        Attribute attr = new Attribute();
+        attr.setName("Id");
+        attr.setSemanticType("NewId");
+        attr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        attr.setDataSource("");
+        attr.setDataQuality("");
+        attr.setDescription("");
+        attr.setDisplayDiscretizationStrategy("");
+        attr.setDisplayName("");
+        attr.setCategory("");
+        attr.setDataType("");
+        attr.setFundamentalType("");
+        attr.setPhysicalName(attr.getName());
+        attr.setStatisticalType("");
+        attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+        table.setAttributes(Arrays.<Attribute> asList(new Attribute[] { attr }));
+        when(eaiMetadataService.getImportTables(any(String.class))).thenReturn(
+                Arrays.<Table> asList(new Table[] { table }));
+
+        importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
+        List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
+        assertFalse(tables.get(0).getNameAttributeMap().containsKey("Id"));
+        assertTrue(tables.get(0).getNameAttributeMap().containsKey("NewId"));
+
+        Thread.sleep(30000L);
+        checkDataExists(targetPath, Arrays.<String> asList(new String[] { "Account" }), 1);
+        System.out.println(importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class));
+        List<String> filesForTable = getFilesFromHdfs(targetPath, table.getName());
+        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(filesForTable.get(0)));
+        for (GenericRecord record : records) {
+            String name = String.valueOf(record.get("NewId"));
+            assertTrue(StringUtils.isNotEmpty(name));
+        }
+
+        dataExtractionService.cleanUpTargetPathData(importContext);
+        checkDataExists(targetPath, Arrays.<String> asList(new String[] { "Account" }), 0);
+        checkExtractsDirectoryExists(customer, Arrays.<String> asList(new String[] { "Account" }));
+    }
+
     @SuppressWarnings("deprecation")
     @Test(groups = "functional")
     public void interceptExceptionTest() throws Exception {
+        ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         CamelContext camelContext = constructCamelContext(importConfig);
         RouteDefinition route = camelContext.getRouteDefinitions().get(0);
         route.adviceWith(camelContext, new RouteBuilder() {
@@ -172,10 +222,12 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void setFilters() {
+    public void setFilters() throws IOException {
+        ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         SourceImportConfiguration sourceImportConfig = importConfig.getSourceConfigurations().get(0);
 
-        List<Table> tableMetadata = sourceImportConfig.getTables();
+        sourceImportConfig.setTables(getSalesforceTables(tableNameList));
+        List<Table> tableMetadata = getSalesforceTables(tableNameList);
         for (Table table : tableMetadata) {
             sourceImportConfig.setFilter(table.getName(), null);
             assertNull(sourceImportConfig.getFilter(table.getName()));

@@ -12,12 +12,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -29,7 +27,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Contact ID",
+        "PhysicalName": "Id",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -50,12 +49,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -67,7 +64,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Account ID",
+        "PhysicalName": "AccountId",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -88,12 +86,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -105,7 +101,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Email",
+        "PhysicalName": "Email",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -114,45 +111,6 @@
       },
       "display_name": "Email",
       "logical_type": "email",
-      "enum_values": ""
-    },
-    {
-      "name": "LastModifiedDate",
-      "length": 0,
-      "nullable": false,
-      "physicalDataType": "LONG",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "key": "Category",
-            "value": ""
-          },
-          {
-            "key": "DataType",
-            "value": ""
-          }
-        ],
-        "DataSource": [
-          "DerivedColumns"
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Last Modified Date",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Last Modified Date",
-      "logical_type": "datetime",
       "enum_values": ""
     },
     {
@@ -165,12 +123,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -183,7 +139,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Created Date",
+        "PhysicalName": "CreatedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -191,6 +148,44 @@
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Created Date",
+      "logical_type": "datetime",
+      "enum_values": ""
+    },
+    {
+      "name": "LastModifiedDate",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "LastModifiedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Modified Date",
       "logical_type": "datetime",
       "enum_values": ""
     }
@@ -211,6 +206,6 @@
     "attributes": [
       "LastModifiedDate"
     ],
-    "last_modified_ts": 1000000000000
+    "last_modified_ts": null
   }
 }

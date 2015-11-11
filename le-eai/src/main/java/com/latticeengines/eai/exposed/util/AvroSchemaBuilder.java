@@ -117,7 +117,11 @@ public class AvroSchemaBuilder {
         FieldBuilder<Schema> fieldBuilder;
 
         for (Attribute attr : table.getAttributes()) {
-            fieldBuilder = fieldAssembler.name(attr.getName());
+            if (StringUtils.isNotEmpty(attr.getSemanticType())) {
+                fieldBuilder = fieldAssembler.name(attr.getSemanticType());
+            } else {
+                fieldBuilder = fieldAssembler.name(attr.getName());
+            }
 
             fieldBuilder = fieldBuilder.prop("displayName", attr.getDisplayName());
 

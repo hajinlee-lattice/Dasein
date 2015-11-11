@@ -12,12 +12,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -29,7 +27,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Lead ID",
+        "PhysicalName": "Id",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -50,12 +49,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -67,7 +64,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Last Name",
+        "PhysicalName": "LastName",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -88,12 +86,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -105,7 +101,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "First Name",
+        "PhysicalName": "FirstName",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -126,12 +123,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -143,7 +138,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Salutation",
+        "PhysicalName": "Salutation",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -164,12 +160,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -181,7 +175,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Title",
+        "PhysicalName": "Title",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -202,12 +197,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -219,7 +212,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Company",
+        "PhysicalName": "Company",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -240,12 +234,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -257,7 +249,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Street",
+        "PhysicalName": "Street",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -278,12 +271,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -295,7 +286,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "City",
+        "PhysicalName": "City",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -316,12 +308,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -333,7 +323,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "State/Province",
+        "PhysicalName": "State",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -354,12 +345,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -371,7 +360,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Zip/Postal Code",
+        "PhysicalName": "PostalCode",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -392,12 +382,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -409,7 +397,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Country",
+        "PhysicalName": "Country",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -430,12 +419,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -447,7 +434,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Email",
+        "PhysicalName": "Email",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -468,12 +456,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -485,7 +471,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Website",
+        "PhysicalName": "Website",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -506,12 +493,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -523,7 +508,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Lead Source",
+        "PhysicalName": "LeadSource",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -544,12 +530,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -561,7 +545,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Status",
+        "PhysicalName": "Status",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -582,12 +567,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -599,7 +582,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Industry",
+        "PhysicalName": "Industry",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -620,12 +604,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -637,7 +619,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Annual Revenue",
+        "PhysicalName": "AnnualRevenue",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -658,12 +641,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -675,7 +656,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Employees",
+        "PhysicalName": "NumberOfEmployees",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -696,12 +678,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -713,7 +693,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Owner ID",
+        "PhysicalName": "OwnerId",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -734,12 +715,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -751,7 +730,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Converted",
+        "PhysicalName": "IsConverted",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -772,12 +752,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -789,7 +767,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Converted Opportunity ID",
+        "PhysicalName": "ConvertedOpportunityId",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -810,12 +789,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -828,7 +805,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Created Date",
+        "PhysicalName": "CreatedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -849,12 +827,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -867,7 +843,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Last Modified Date",
+        "PhysicalName": "LastModifiedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -895,6 +872,6 @@
     "attributes": [
       "LastModifiedDate"
     ],
-    "last_modified_ts": 1000000000000
+    "last_modified_ts": 1237387254000
   }
 }

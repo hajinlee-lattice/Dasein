@@ -47,7 +47,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     private StandaloneHttpServer httpServer;
 
-    private static final int PORT = 9002;
+    private static final int PORT = 8080;
 
     private String customer = this.getClass().getSimpleName();
 

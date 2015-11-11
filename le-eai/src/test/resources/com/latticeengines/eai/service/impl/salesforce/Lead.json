@@ -1,6 +1,6 @@
 {
-  "name": "Account",
-  "display_name": "Account",
+  "name": "Lead",
+  "display_name": "Lead",
   "attributes": [
     {
       "name": "Id",
@@ -12,14 +12,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -27,6 +27,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "Id",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -34,12 +35,160 @@
         ],
         "DisplayDiscretizationStrategy": ""
       },
-      "display_name": "Account ID",
+      "display_name": "Lead ID",
       "logical_type": "id",
       "enum_values": ""
     },
     {
-      "name": "Name",
+      "name": "LastName",
+      "length": 80,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "LastName",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Name",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "FirstName",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "FirstName",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "First Name",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Salutation",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Salutation",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Salutation",
+      "logical_type": "picklist",
+      "enum_values": "Mr_,Ms_,Mrs_,Dr_,Prof_,_"
+    },
+    {
+      "name": "Title",
+      "length": 128,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Title",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Title",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Company",
       "length": 255,
       "nullable": false,
       "physicalDataType": "STRING",
@@ -48,14 +197,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -63,6 +212,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "Company",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -70,48 +220,12 @@
         ],
         "DisplayDiscretizationStrategy": ""
       },
-      "display_name": "Account Name",
+      "display_name": "Company",
       "logical_type": "string",
       "enum_values": ""
     },
     {
-      "name": "Type",
-      "length": 40,
-      "nullable": true,
-      "physicalDataType": "STRING",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Account Type",
-      "logical_type": "picklist",
-      "enum_values": "Prospect,Customer___Direct,Customer___Channel,Channel_Partner___Reseller,Installation_Partner,Technology_Partner,Other,_"
-    },
-    {
-      "name": "BillingStreet",
+      "name": "Street",
       "length": 255,
       "nullable": true,
       "physicalDataType": "STRING",
@@ -120,14 +234,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -135,6 +249,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "Street",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -142,12 +257,12 @@
         ],
         "DisplayDiscretizationStrategy": ""
       },
-      "display_name": "Billing Street",
+      "display_name": "Street",
       "logical_type": "textarea",
       "enum_values": ""
     },
     {
-      "name": "BillingCity",
+      "name": "City",
       "length": 40,
       "nullable": true,
       "physicalDataType": "STRING",
@@ -156,14 +271,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -171,6 +286,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "City",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -178,12 +294,12 @@
         ],
         "DisplayDiscretizationStrategy": ""
       },
-      "display_name": "Billing City",
+      "display_name": "City",
       "logical_type": "string",
       "enum_values": ""
     },
     {
-      "name": "BillingState",
+      "name": "State",
       "length": 80,
       "nullable": true,
       "physicalDataType": "STRING",
@@ -192,14 +308,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -207,6 +323,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "State",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -214,12 +331,12 @@
         ],
         "DisplayDiscretizationStrategy": ""
       },
-      "display_name": "Billing State/Province",
+      "display_name": "State/Province",
       "logical_type": "string",
       "enum_values": ""
     },
     {
-      "name": "BillingPostalCode",
+      "name": "PostalCode",
       "length": 20,
       "nullable": true,
       "physicalDataType": "STRING",
@@ -228,14 +345,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -243,6 +360,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "PostalCode",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -250,12 +368,12 @@
         ],
         "DisplayDiscretizationStrategy": ""
       },
-      "display_name": "Billing Zip/Postal Code",
+      "display_name": "Zip/Postal Code",
       "logical_type": "string",
       "enum_values": ""
     },
     {
-      "name": "BillingCountry",
+      "name": "Country",
       "length": 80,
       "nullable": true,
       "physicalDataType": "STRING",
@@ -264,14 +382,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -279,6 +397,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "Country",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -286,8 +405,45 @@
         ],
         "DisplayDiscretizationStrategy": ""
       },
-      "display_name": "Billing Country",
+      "display_name": "Country",
       "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Email",
+      "length": 80,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Email",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Email",
+      "logical_type": "email",
       "enum_values": ""
     },
     {
@@ -300,14 +456,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -315,6 +471,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "Website",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -327,8 +484,8 @@
       "enum_values": ""
     },
     {
-      "name": "Sic",
-      "length": 20,
+      "name": "LeadSource",
+      "length": 40,
       "nullable": true,
       "physicalDataType": "STRING",
       "precision": 0,
@@ -336,14 +493,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -351,6 +508,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "LeadSource",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -358,9 +516,46 @@
         ],
         "DisplayDiscretizationStrategy": ""
       },
-      "display_name": "SIC Code",
-      "logical_type": "string",
-      "enum_values": ""
+      "display_name": "Lead Source",
+      "logical_type": "picklist",
+      "enum_values": "Web,Phone_Inquiry,Partner_Referral,Purchased_List,Other,POET,new_lead_source_test_06_27_2014,Test_Lead_source_up_to_40_characters___,PlayMaker,_"
+    },
+    {
+      "name": "Status",
+      "length": 40,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Status",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Status",
+      "logical_type": "picklist",
+      "enum_values": "Open___Not_Contacted,Working___Contacted,Closed___Converted,Closed___Not_Converted,Test_Status_added_062714,Test_status_added_up_to_40_characters_,_"
     },
     {
       "name": "Industry",
@@ -372,14 +567,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -387,6 +582,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "Industry",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -408,14 +604,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -423,6 +619,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "AnnualRevenue",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -444,14 +641,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -459,6 +656,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "NumberOfEmployees",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -471,114 +669,6 @@
       "enum_values": ""
     },
     {
-      "name": "Ownership",
-      "length": 40,
-      "nullable": true,
-      "physicalDataType": "STRING",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Ownership",
-      "logical_type": "picklist",
-      "enum_values": "Public,Private,Subsidiary,Other,_"
-    },
-    {
-      "name": "TickerSymbol",
-      "length": 20,
-      "nullable": true,
-      "physicalDataType": "STRING",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Ticker Symbol",
-      "logical_type": "string",
-      "enum_values": ""
-    },
-    {
-      "name": "Rating",
-      "length": 40,
-      "nullable": true,
-      "physicalDataType": "STRING",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Account Rating",
-      "logical_type": "picklist",
-      "enum_values": "Hot,Warm,Cold,_"
-    },
-    {
       "name": "OwnerId",
       "length": 18,
       "nullable": false,
@@ -588,14 +678,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -603,6 +693,7 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
+        "PhysicalName": "OwnerId",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -611,6 +702,80 @@
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Owner ID",
+      "logical_type": "reference",
+      "enum_values": ""
+    },
+    {
+      "name": "IsConverted",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "BOOLEAN",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "IsConverted",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Converted",
+      "logical_type": "boolean",
+      "enum_values": ""
+    },
+    {
+      "name": "ConvertedOpportunityId",
+      "length": 18,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "ConvertedOpportunityId",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Converted Opportunity ID",
       "logical_type": "reference",
       "enum_values": ""
     },
@@ -624,14 +789,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -640,6 +805,7 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "CreatedDate",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -661,14 +827,14 @@
       "properties": {
         "Extensions": [
           {
-            "Category": ""
+            "Category": null
           },
           {
-            "DataType": ""
+            "DataType": null
           }
         ],
         "DataSource": [
-          ""
+          "DerivedColumns"
         ],
         "Tags": [
           "Internal"
@@ -677,6 +843,7 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "LastModifiedDate",
         "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
@@ -687,116 +854,6 @@
       "display_name": "Last Modified Date",
       "logical_type": "datetime",
       "enum_values": ""
-    },
-    {
-      "name": "LastActivityDate",
-      "length": 0,
-      "nullable": true,
-      "physicalDataType": "LONG",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "dateFormat": "YYYY-MM-DD",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Last Activity",
-      "logical_type": "date",
-      "enum_values": ""
-    },
-    {
-      "name": "LastViewedDate",
-      "length": 0,
-      "nullable": true,
-      "physicalDataType": "LONG",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Last Viewed Date",
-      "logical_type": "datetime",
-      "enum_values": ""
-    },
-    {
-      "name": "AccountSource",
-      "length": 40,
-      "nullable": true,
-      "physicalDataType": "STRING",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Account Source",
-      "logical_type": "picklist",
-      "enum_values": "Web,Phone_Inquiry,Partner_Referral,Purchased_List,Other,POET,new_lead_source_test_06_27_2014,Test_Lead_source_up_to_40_characters___,PlayMaker,_"
     }
   ],
   "extracts": [],
@@ -815,6 +872,6 @@
     "attributes": [
       "LastModifiedDate"
     ],
-    "last_modified_ts": 1000000000000
+    "last_modified_ts": 1237387254000
   }
 }

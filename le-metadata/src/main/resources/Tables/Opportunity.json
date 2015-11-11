@@ -12,12 +12,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -29,7 +27,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Opportunity ID",
+        "PhysicalName": "Id",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -50,12 +49,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -67,7 +64,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Account ID",
+        "PhysicalName": "AccountId",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -88,12 +86,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -105,7 +101,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Stage",
+        "PhysicalName": "StageName",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -126,12 +123,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -143,7 +138,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Amount",
+        "PhysicalName": "Amount",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -164,12 +160,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -181,7 +175,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Lead Source",
+        "PhysicalName": "LeadSource",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -202,12 +197,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -219,7 +212,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Closed",
+        "PhysicalName": "IsClosed",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -240,12 +234,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -257,7 +249,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Won",
+        "PhysicalName": "IsWon",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -278,12 +271,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -296,7 +287,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Created Date",
+        "PhysicalName": "CreatedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -317,12 +309,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -335,7 +325,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Last Modified Date",
+        "PhysicalName": "LastModifiedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -363,6 +354,6 @@
     "attributes": [
       "LastModifiedDate"
     ],
-    "last_modified_ts": 1000000000000
+    "last_modified_ts": null
   }
 }

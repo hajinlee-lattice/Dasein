@@ -67,4 +67,8 @@ public class MarketoImportServiceImpl extends ImportService {
         }
     }
 
+    @Override
+    public void updateTableSchema(List<Table> tableMetadata) {
+    }
+
 }

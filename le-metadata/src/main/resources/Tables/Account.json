@@ -12,16 +12,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -29,7 +27,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Account ID",
+        "PhysicalName": "Id",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -50,16 +49,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -67,7 +64,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Account Name",
+        "PhysicalName": "Name",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -88,16 +86,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -105,7 +101,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Account Type",
+        "PhysicalName": "Type",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -126,16 +123,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -143,7 +138,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Billing Street",
+        "PhysicalName": "BillingStreet",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -164,16 +160,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -181,7 +175,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Billing City",
+        "PhysicalName": "BillingCity",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -202,16 +197,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -219,7 +212,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Billing State/Province",
+        "PhysicalName": "BillingState",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -240,16 +234,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -257,7 +249,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Billing Zip/Postal Code",
+        "PhysicalName": "BillingPostalCode",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -278,16 +271,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -295,7 +286,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Billing Country",
+        "PhysicalName": "BillingCountry",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -316,16 +308,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -333,7 +323,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Website",
+        "PhysicalName": "Website",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -354,16 +345,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -371,7 +360,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "SIC Code",
+        "PhysicalName": "Sic",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -392,16 +382,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -409,7 +397,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Industry",
+        "PhysicalName": "Industry",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -430,16 +419,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -447,7 +434,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Annual Revenue",
+        "PhysicalName": "AnnualRevenue",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -468,16 +456,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -485,7 +471,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Employees",
+        "PhysicalName": "NumberOfEmployees",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -497,6 +484,43 @@
       "enum_values": ""
     },
     {
+      "name": "Ownership",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Ownership",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Ownership",
+      "logical_type": "picklist",
+      "enum_values": "Public,Private,Subsidiary,Other,_"
+    },
+    {
       "name": "TickerSymbol",
       "length": 20,
       "nullable": true,
@@ -506,16 +530,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -523,7 +545,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Ticker Symbol",
+        "PhysicalName": "TickerSymbol",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -544,16 +567,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -561,7 +582,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Account Rating",
+        "PhysicalName": "Rating",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -582,16 +604,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -599,7 +619,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Owner ID",
+        "PhysicalName": "OwnerId",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -620,16 +641,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -638,7 +657,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Created Date",
+        "PhysicalName": "CreatedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -659,16 +679,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -677,7 +695,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Last Modified Date",
+        "PhysicalName": "LastModifiedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -698,16 +717,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -716,7 +733,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD",
-        "DisplayName": "Last Activity",
+        "PhysicalName": "LastActivityDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -725,6 +743,44 @@
       },
       "display_name": "Last Activity",
       "logical_type": "date",
+      "enum_values": ""
+    },
+    {
+      "name": "LastViewedDate",
+      "length": 0,
+      "nullable": true,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "LastViewedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Viewed Date",
+      "logical_type": "datetime",
       "enum_values": ""
     },
     {
@@ -737,16 +793,14 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": ""
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": ""
           }
         ],
         "DataSource": [
-          "DerivedColumns"
+          ""
         ],
         "Tags": [
           "Internal"
@@ -754,7 +808,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Account Source",
+        "PhysicalName": "AccountSource",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -782,6 +837,6 @@
     "attributes": [
       "LastModifiedDate"
     ],
-    "last_modified_ts": 1000000000000
+    "last_modified_ts": null
   }
 }

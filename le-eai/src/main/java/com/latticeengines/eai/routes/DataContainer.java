@@ -16,6 +16,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.camel.spi.TypeConverterRegistry;
 import org.apache.camel.spring.SpringCamelContext;
+import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -78,12 +79,17 @@ public class DataContainer {
     }
 
     public void setValueForAttribute(Attribute attribute, Object value) {
+        String attrName;
+        if (StringUtils.isNotEmpty(attribute.getSemanticType())) {
+            attrName = attribute.getSemanticType();
+        } else {
+            attrName = attribute.getName();
+        }
         if (value == null) {
-            record.put(attribute.getName(),
-                    AvroTypeConverter.getEmptyValue(Type.valueOf(attribute.getPhysicalDataType())));
+            record.put(attrName, AvroTypeConverter.getEmptyValue(Type.valueOf(attribute.getPhysicalDataType())));
         } else {
             Type type = Type.valueOf(attribute.getPhysicalDataType());
-            record.put(attribute.getName(),
+            record.put(attrName,
                     AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, attribute, value));
         }
     }

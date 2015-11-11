@@ -12,12 +12,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -29,7 +27,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Contact Role ID",
+        "PhysicalName": "Id",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -50,12 +49,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -67,7 +64,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Opportunity ID",
+        "PhysicalName": "OpportunityId",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -88,12 +86,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -105,7 +101,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Contact ID",
+        "PhysicalName": "ContactId",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -126,12 +123,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -143,7 +138,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Role",
+        "PhysicalName": "Role",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -164,12 +160,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -181,7 +175,8 @@
         "FundamentalType": "",
         "Description": "",
         "StatisticalType": "",
-        "DisplayName": "Primary",
+        "PhysicalName": "IsPrimary",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -202,12 +197,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -220,7 +213,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Created Date",
+        "PhysicalName": "CreatedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -241,12 +235,10 @@
       "properties": {
         "Extensions": [
           {
-            "key": "Category",
-            "value": ""
+            "Category": null
           },
           {
-            "key": "DataType",
-            "value": ""
+            "DataType": null
           }
         ],
         "DataSource": [
@@ -259,7 +251,8 @@
         "Description": "",
         "StatisticalType": "",
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
-        "DisplayName": "Last Modified Date",
+        "PhysicalName": "LastModifiedDate",
+        "DataQuality": "",
         "SemanticType": "",
         "ApprovedUsage": [
           ""
@@ -287,6 +280,6 @@
     "attributes": [
       "LastModifiedDate"
     ],
-    "last_modified_ts": 1000000000000
+    "last_modified_ts": 1341330034000
   }
 }

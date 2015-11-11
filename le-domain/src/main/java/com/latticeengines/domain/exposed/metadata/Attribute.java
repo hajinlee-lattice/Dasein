@@ -179,7 +179,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonProperty("enum_values")
     public void setCleanedUpEnumValuesAsString(String enumValues) {
         if (enumValues != null) {
-            setCleanedUpEnumValues(Arrays.<String>asList(enumValues.split(",")));
+            setCleanedUpEnumValues(Arrays.<String> asList(enumValues.split(",")));
         }
     }
 
@@ -260,36 +260,36 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public Map<String, Object> getProperties() {
         return properties;
     }
-    
+
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
-    
+
     @Transient
     @JsonIgnore
     public void setApprovedUsage(String approvedUsage) {
-        setApprovedUsage(Arrays.<String>asList(new String[] { approvedUsage }));
+        setApprovedUsage(Arrays.<String> asList(new String[] { approvedUsage }));
     }
-    
+
     @Transient
     @JsonIgnore
     public void setApprovedUsage(List<String> approvedUsage) {
         properties.put("ApprovedUsage", approvedUsage);
     }
-    
+
     @Transient
     @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getApprovedUsage() {
         return (List<String>) properties.get("ApprovedUsage");
     }
-    
+
     @Transient
     @JsonIgnore
     public void setStatisticalType(String statisticalType) {
         properties.put("StatisticalType", statisticalType);
     }
-    
+
     @Transient
     @JsonIgnore
     public String getStatisticalType() {
@@ -301,7 +301,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setFundamentalType(String fundamentalType) {
         properties.put("FundamentalType", fundamentalType);
     }
-    
+
     @Transient
     @JsonIgnore
     public String getFundamentalType() {
@@ -313,7 +313,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setDataQuality(String dataQuality) {
         properties.put("DataQuality", dataQuality);
     }
-    
+
     @Transient
     @JsonIgnore
     public String getDataQuality() {
@@ -323,15 +323,15 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setDataSource(String dataSource) {
-        setDataSource(Arrays.<String>asList(new String[] { dataSource }));
+        setDataSource(Arrays.<String> asList(new String[] { dataSource }));
     }
-    
+
     @Transient
     @JsonIgnore
     public void setDataSource(List<String> dataSource) {
         properties.put("DataSource", dataSource);
     }
-    
+
     @SuppressWarnings("unchecked")
     @Transient
     @JsonIgnore
@@ -344,7 +344,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setDisplayDiscretizationStrategy(String displayDiscretizationStrategy) {
         properties.put("DisplayDiscretizationStrategy", displayDiscretizationStrategy);
     }
-    
+
     @Transient
     @JsonIgnore
     public String getDisplayDiscretizationStrategy() {
@@ -356,19 +356,19 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setDescription(String description) {
         properties.put("Description", description);
     }
-    
+
     @Transient
     @JsonIgnore
     public String getDescription() {
         return (String) properties.get("Description");
     }
-    
+
     @Transient
     @JsonIgnore
     public void setTags(String tags) {
-        setTags(Arrays.<String>asList(new String[] { tags }));
+        setTags(Arrays.<String> asList(new String[] { tags }));
     }
-    
+
     @Transient
     @JsonIgnore
     public void setTags(List<String> tags) {
@@ -381,32 +381,43 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public List<String> getTags() {
         return (List<String>) properties.get("Tags");
     }
-    
+
+    @Transient
+    @JsonIgnore
+    public void setPhysicalName(String physicalName) {
+        properties.put("PhysicalName", physicalName);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getPhysicalName() {
+        return (String) properties.get("PhysicalName");
+    }
 
     @Transient
     @JsonIgnore
     public void setCategory(String category) {
         setExtensionValue("Category", category);
     }
-    
+
     @Transient
     @JsonIgnore
     public String getCategory() {
         return getExtensionValue("Category");
     }
-    
+
     @Transient
     @JsonIgnore
     public void setDataType(String dataType) {
         setExtensionValue("DataType", dataType);
     }
-    
+
     @Transient
     @JsonIgnore
     public String getDataType() {
         return getExtensionValue("DataType");
     }
-    
+
     @SuppressWarnings({ "unchecked" })
     private void setExtensionValue(String key, String value) {
         List<Map<String, String>> entries = (List<Map<String, String>>) properties.get("Extensions");
@@ -428,11 +439,11 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             properties.put("Extensions", entries);
         }
     }
-    
+
     @SuppressWarnings({ "unchecked" })
     private String getExtensionValue(String key) {
         List<Map<String, String>> entries = (List<Map<String, String>>) properties.get("Extensions");
-        
+
         if (entries != null) {
             for (Map<String, String> entry : entries) {
                 if (entry.containsKey(key)) {
@@ -448,13 +459,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setSemanticType(String semanticType) {
         properties.put("SemanticType", semanticType);
     }
-    
+
     @Transient
     @JsonIgnore
     public String getSemanticType() {
         return (String) properties.get("SemanticType");
     }
-    
+
     @Override
     @Transient
     @JsonIgnore

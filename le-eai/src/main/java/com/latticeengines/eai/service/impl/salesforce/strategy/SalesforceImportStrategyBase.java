@@ -144,6 +144,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 if (!nameAttrMap.containsKey(descField.getName())) {
                     continue;
                 }
+                Attribute attrFromImportTables = nameAttrMap.get(descField.getName());
                 Attribute attr = new Attribute();
                 String type = descField.getType();
                 attr.setName(descField.getName());
@@ -153,17 +154,18 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 attr.setScale(descField.getScale());
                 attr.setNullable(descField.isNillable());
 
-                attr.setApprovedUsage(Arrays.asList(new String[] { "" }));
-                attr.setDataSource(Arrays.asList(new String[] { "" }));
-                attr.setDataQuality("");
-                attr.setDescription("");
-                attr.setDisplayDiscretizationStrategy("");
-                attr.setDisplayName(descField.getLabel());
-                attr.setCategory("");
-                attr.setDataType("");
-                attr.setFundamentalType("");
-                attr.setSemanticType("");
-                attr.setStatisticalType("");
+                attr.setApprovedUsage(attrFromImportTables.getApprovedUsage());
+                attr.setDataSource(attrFromImportTables.getDataSource());
+                attr.setDataQuality(attrFromImportTables.getDataQuality());
+                attr.setDescription(attrFromImportTables.getDescription());
+                attr.setDisplayDiscretizationStrategy(attrFromImportTables.getDisplayDiscretizationStrategy());
+                attr.setDisplayName(attrFromImportTables.getDisplayName());
+                attr.setCategory(attrFromImportTables.getCategory());
+                attr.setDataType(attrFromImportTables.getDataType());
+                attr.setFundamentalType(attrFromImportTables.getFundamentalType());
+                attr.setPhysicalName(attr.getName());
+                attr.setSemanticType(attrFromImportTables.getSemanticType());
+                attr.setStatisticalType(attrFromImportTables.getStatisticalType());
                 attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
 
                 Schema.Type avroType = salesforceToAvroTypeConverter.convertTypeToAvro(type);
