@@ -97,7 +97,7 @@
             <id>shaded-yarn</id>
             <activation>
                 <file>
-                    <exists>shadedyarn.txt</exists>
+                    <exists>src/main/assembly/shadedyarn.txt</exists>
                 </file>
             </activation>
             <build>
