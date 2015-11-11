@@ -59,9 +59,9 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
-import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 
+import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -313,13 +313,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         if (isCheckpoint()) {
             Checkpoint ckpt = new Checkpoint(name, pipe);
-            DataFlowContext ctx = getDataFlowCtx();
-            String targetPath = String.format("/tmp/checkpoints/%s/%s/%s", //
-                    ctx.getProperty("CUSTOMER", String.class), //
-                    ctx.getProperty("FLOWNAME", String.class), //
-                    name);
-            Tap ckptTap = new Hfs(new SequenceFile(Fields.UNKNOWN), targetPath, SinkMode.REPLACE);
-            checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptTap));
+            Tap ckptSink = createCheckpointSink(name);
+            checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptSink));
             return register(ckpt, pipeAndMetadata.getValue());
         }
 
@@ -455,11 +450,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     protected String addSource(String sourceName, String sourcePath, boolean regex) {
-        Tap<?, ?, ?> tap = new GlobHfs(new AvroScheme(), sourcePath);
-        if (isLocal()) {
-            sourcePath = "file://" + sourcePath;
-            tap = new Lfs(new AvroScheme(), sourcePath);
-        }
+        Tap<?, ?, ?> tap = createTap(sourcePath);
 
         taps.put(sourceName, tap);
 
@@ -1078,18 +1069,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         } else {
             lastOperator = constructFlowDefinition(dataFlowCtx, sourcePaths);
         }
-
-        Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
-        AvroScheme scheme = new AvroScheme(schema);
-        if (enforceGlobalOrdering()) {
-            scheme.setNumSinkParts(1);
-        }
         engine.setEnforceGlobalOrdering(enforceGlobalOrdering());
 
-        Tap<?, ?, ?> sink = new Lfs(scheme, targetPath, SinkMode.REPLACE);
-        if (!isLocal()) {
-            sink = new Hfs(scheme, targetPath, SinkMode.REPLACE);
-        }
+        Tap<?, ?, ?> sink = createSink(lastOperator, targetPath);
 
         Properties properties = new Properties();
         if (jobProperties != null) {
@@ -1126,6 +1108,55 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return getTableMetadata(dataFlowCtx.getProperty("TARGETTABLENAME", String.class), //
                 targetPath, //
                 pipesAndOutputSchemas.get(lastOperator).getValue());
+    }
+
+    private Tap<?, ?, ?> createCheckpointSink(String name) {
+        DataFlowContext ctx = getDataFlowCtx();
+        String targetPath = String.format("/tmp/checkpoints/%s/%s/%s", //
+                ctx.getProperty("CUSTOMER", String.class), //
+                ctx.getProperty("FLOWNAME", String.class), //
+                name);
+        targetPath = getLocationPrefixedPath(targetPath);
+        return new Hfs(new SequenceFile(Fields.UNKNOWN), targetPath, SinkMode.REPLACE);
+    }
+
+    private Tap<?, ?, ?> createTap(String sourcePath) {
+        sourcePath = getLocationPrefixedPath(sourcePath);
+        return new GlobHfs(new AvroScheme(), sourcePath);
+    }
+
+    private Tap<?, ?, ?> createSink(String lastOperator, String targetPath) {
+        DataFlowContext context = getDataFlowCtx();
+        String flowName = context.getProperty("FLOWNAME", String.class);
+        Schema schema = getSchema(flowName, lastOperator, context);
+        AvroScheme scheme = new AvroScheme(schema);
+        if (enforceGlobalOrdering()) {
+            scheme.setNumSinkParts(1);
+        }
+
+        targetPath = getLocationPrefixedPath(targetPath);
+
+        Tap<?, ?, ?> sink = new Hfs(scheme, targetPath, SinkMode.REPLACE);
+        return sink;
+    }
+
+    private String getLocationPrefixedPath(String path) {
+        DataFlowContext context = getDataFlowCtx();
+        Configuration configuration = context.getRequiredProperty("HADOOPCONF", Configuration.class);
+
+        if (path.startsWith("file://")) {
+            path = path.substring(7);
+        } else if (path.startsWith("hdfs://")) {
+            String[] parts = path.split("/");
+            // skip over hdfs://hostname:port/
+            List<String> partsSkipped = new ArrayList<>();
+            for (int i = 3; i < parts.length; ++i) {
+                partsSkipped.add(parts[i]);
+            }
+            path = Joiner.on("/").join(partsSkipped);
+        }
+
+        return configuration.get("fs.defaultFS") + path;
     }
 
     public static class RegexFilter implements HdfsUtils.HdfsFileFilter {

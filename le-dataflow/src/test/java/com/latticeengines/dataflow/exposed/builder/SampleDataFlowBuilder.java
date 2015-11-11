@@ -43,10 +43,12 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
         aggregation.add(new Aggregation("NumberOfEmployees", "TotalEmployees", Aggregation.AggregationType.SUM));
         String lastAggregatedOperatorName = addGroupBy(createDomain, new FieldList("Domain"), aggregation);
 
+        String checkpoint = addCheckpoint(lastAggregatedOperatorName, "checkpoint");
+
         // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees)
         // TotalEmployees, HashCode(Domain) DomainHashCode
         // FROM T GROUP BY Domain
-        String domainConverted = addJythonFunction(lastAggregatedOperatorName, //
+        String domainConverted = addJythonFunction(checkpoint, //
                 "com/latticeengines/domain/exposed/transforms/python/encoder.py", //
                 "transform", //
                 new FieldList("Domain"), //
