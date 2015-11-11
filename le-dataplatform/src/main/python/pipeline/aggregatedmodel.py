@@ -32,7 +32,15 @@ MAX_INT = np.iinfo(np.int32).max
 def _parallel_predict_proba(models, X):
     proba = models[0].predict_proba(X)
     for i in (range(1, len(models))):
-        proba = np.add(proba, models[i].predict_proba(X))
+        preds = models[i].predict_proba(X)
+        
+        if proba.shape == preds.shape:
+            proba = np.add(proba, preds)
+        else:
+            minRows = min(len(proba), len(preds))
+            minCols = min(len(proba[0]), len(preds[0]))
+            proba = np.add(proba[0:minRows, 0:minCols], preds[0:minRows, 0:minCols])
+
     return proba
 
 class AggregatedModel(object):
@@ -106,7 +114,12 @@ class AggregatedModel(object):
         # Reduce
         proba = all_proba[0]
         for j in range(1, len(all_proba)):
-            proba = np.add(proba, all_proba[j])
-            
+            if proba.shape == all_proba[j].shape:
+                proba = np.add(proba, all_proba[j])
+            else:
+                minRows = min(len(proba), len(all_proba[j]))
+                minCols = min(len(proba[0]), len(all_proba[j][0]))
+                proba = np.add(proba[0:minRows, 0:minCols], all_proba[j][0:minRows, 0:minCols])
+                
         proba = np.divide(proba, self.n_models)
         return proba
