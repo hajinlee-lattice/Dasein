@@ -4,17 +4,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.config.services.ConfigService',
-    'mainApp.core.controllers.MainHeaderController',
     'mainApp.config.controllers.ManageCredentialsController',
     'mainApp.login.controllers.UpdatePasswordController',
-    'mainApp.userManagement.controllers.UserManagementController',
-    'mainApp.models.controllers.AdminInfoController',
-    'mainApp.models.controllers.ModelListController',
-    'mainApp.models.controllers.ModelDetailController',
-    'mainApp.models.controllers.ModelCreationHistoryController',
-    'mainApp.models.controllers.ActivateModelController',
-    'mainApp.core.services.FeatureFlagService',
-    'mainApp.setup.controllers.SetupController'
+    'mainApp.core.services.FeatureFlagService'
 ])
 
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {

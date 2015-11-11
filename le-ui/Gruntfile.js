@@ -58,7 +58,6 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-run');
     grunt.loadNpmTasks('grunt-env');
 

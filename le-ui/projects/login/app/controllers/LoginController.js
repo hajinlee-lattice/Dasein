@@ -134,7 +134,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     }
 
     function constructMainView() {
-        $http.get('./app/core/views/MainView.html').success(function (html) {
+        $http.get('./app/views/MainView.html').success(function (html) {
             var scope = $rootScope.$new();
             scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
             scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;

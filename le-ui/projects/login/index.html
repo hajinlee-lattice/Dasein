@@ -92,7 +92,9 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="/lib/js/d3.js"></script>
 <script src="/lib/js/jstorage.js"></script>
 <script src="lib/js/alasql.min.js"></script>
+<!--
 <script src="lib/js/FileSaver.js"></script>
+-->
 <script src="lib/js/kendo.all.min.js"></script>
 
 <!-- self-host vendors -->
@@ -100,30 +102,53 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="/app/vendor/ui-bootstrap-jpls-0.13.0.js"></script>
 
 <!-- common -->
-<script src="/app/directives/charts/ArcChartDirective.js"></script>
-<script src="/app/directives/ngEnterDirective.js"></script>
-<script src="/app/directives/ngQtipDirective.js"></script>
 <script src="/app/directives/helperMarkDirective.js"></script>
-<script src="/app/utilities/ExceptionOverrideUtility.js"></script>
-<script src="/app/utilities/URLUtility.js"></script>
-<script src="/app/utilities/ResourceUtility.js"></script>
+<script src="/app/directives/ngQtipDirective.js"></script>
+<script src="/app/directives/ngEnterDirective.js"></script>
 <script src="/app/utilities/FaultUtility.js"></script>
 <script src="/app/utilities/ConfigConstantUtility.js"></script>
+<script src="/app/utilities/URLUtility.js"></script>
+<script src="/app/utilities/ResourceUtility.js"></script>
 <script src="/app/utilities/EvergageUtility.js"></script>
-<script src="/app/utilities/AuthenticationUtility.js"></script>
-<script src="/app/utilities/SortUtility.js"></script>
-<script src="/app/utilities/WidgetConfigUtility.js"></script>
+<script src="/app/utilities/TimestampIntervalUtility.js"></script>
 <script src="/app/utilities/MetadataUtility.js"></script>
+<script src="/app/utilities/SortUtility.js"></script>
+<script src="/app/utilities/UnderscoreUtility.js"></script>
+<script src="/app/utilities/StringUtility.js"></script>
+<script src="/app/modals/SimpleModal.js"></script>
+
+<!-- app specific -->
+<script src="app/app.js"></script>
+<script src="app/utilities/BrowserStorageUtility.js"></script>
+<script src="app/utilities/ServiceErrorUtility.js"></script>
+<script src="app/utilities/NavUtility.js"></script>
+<script src="app/utilities/RightsUtility.js"></script>
+<script src="app/utilities/PasswordUtility.js"></script>
+<script src="app/services/HelpService.js"></script>
+<script src="app/services/ResourceStringsService.js"></script>
+<script src="app/services/SessionService.js"></script>
+<script src="app/services/WidgetService.js"></script>
+<script src="app/services/FeatureFlagService.js"></script>
+<script src="app/controllers/MainViewController.js"></script>
+<script src="app/services/LoginService.js"></script>
+<script src="app/services/ConfigService.js"></script>
+<script src="app/controllers/ManageCredentialsController.js"></script>
+<script src="app/modals/EnterCredentialsModal.js"></script>
+<script src="app/controllers/LoginController.js"></script>
+<script src="app/controllers/UpdatePasswordController.js"></script>
+<script src="app/modals/TenantSelectionModal.js"></script>
+
+<!--
+<script src="/app/directives/charts/ArcChartDirective.js"></script>
+<script src="/app/utilities/ExceptionOverrideUtility.js"></script>
+<script src="/app/utilities/WidgetConfigUtility.js"></script>
+<script src="/app/utilities/AuthenticationUtility.js"></script>
 <script src="/app/utilities/AnimationUtility.js"></script>
 <script src="/app/utilities/DateTimeFormatUtility.js"></script>
 <script src="/app/utilities/NumberUtility.js"></script>
 <script src="/app/utilities/AnalyticAttributeUtility.js"></script>
 <script src="/app/utilities/TrackingConstantsUtility.js"></script>
-<script src="/app/utilities/StringUtility.js"></script>
-<script src="/app/utilities/UnderscoreUtility.js"></script>
-<script src="/app/utilities/TimestampIntervalUtility.js"></script>
 <script src="/app/utilities/TenantIdParsingUtility.js"></script>
-<script src="/app/modals/SimpleModal.js"></script>
 <script src="/app/services/WidgetFrameworkService.js"></script>
 <script src="/app/services/PlayTileService.js"></script>
 <script src="/app/services/TopPredictorService.js"></script>
@@ -132,9 +157,9 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="/app/services/ModelAlertsService.js"></script>
 <script src="/app/services/ManageFieldsService.js"></script>
 <script src="/app/widgets/WidgetEventConstantUtility.js"></script>
+<script src="/app/widgets/repeaterWidget/RepeaterWidget.js"></script>
 <script src="/app/widgets/screenWidget/ScreenWidget.js"></script>
 <script src="/app/widgets/screenHeaderWidget/ScreenHeaderWidget.js"></script>
-<script src="/app/widgets/repeaterWidget/RepeaterWidget.js"></script>
 <script src="/app/widgets/leadDetailsTileWidget/LeadDetailsTileWidget.js"></script>
 <script src="/app/widgets/arcChartWidget/ArcChartWidget.js"></script>
 <script src="/app/widgets/collapsiblePanelWidget/CollapsiblePanelWidget.js"></script>
@@ -162,33 +187,11 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="/app/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidget.js"></script>
 <script src="/app/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
 <script src="/app/widgets/manageFieldsWidget/ManageFieldsWidget.js"></script>
-
+-->
 <!-- app specific -->
-<script src="app/app.js"></script>
-<script src="app/core/utilities/BrowserStorageUtility.js"></script>
-<script src="app/core/utilities/RightsUtility.js"></script>
-<script src="app/core/utilities/PasswordUtility.js"></script>
-<script src="app/core/utilities/ServiceErrorUtility.js"></script>
-<script src="app/core/utilities/NavUtility.js"></script>
-
-<script src="app/core/services/HelpService.js"></script>
-<script src="app/core/services/ResourceStringsService.js"></script>
-<script src="app/core/services/SessionService.js"></script>
-<script src="app/core/services/WidgetService.js"></script>
-<script src="app/core/services/FeatureFlagService.js"></script>
-<script src="app/login/services/LoginService.js"></script>
-<script src="app/config/services/ConfigService.js"></script>
-<script src="app/models/services/ModelService.js"></script>
-<script src="app/userManagement/services/UserManagementService.js"></script>
-<script src="app/setup/services/MetadataService.js"></script>
-
-<script src="app/login/controllers/LoginController.js"></script>
-<script src="app/login/controllers/UpdatePasswordController.js"></script>
-<script src="app/core/controllers/MainViewController.js"></script>
+<!--
 <script src="app/core/controllers/MainHeaderController.js"></script>
-<script src="app/config/controllers/ManageCredentialsController.js"></script>
-<script src="app/config/modals/EnterCredentialsModal.js"></script>
-<script src="app/userManagement/controllers/UserManagementController.js"></script>
+<script src="app/models/services/ModelService.js"></script>
 <script src="app/models/controllers/ModelListController.js"></script>
 <script src="app/models/controllers/ModelDetailController.js"></script>
 <script src="app/models/controllers/AdminInfoController.js"></script>
@@ -198,17 +201,17 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/models/modals/StaleModelModal.js"></script>
 <script src="app/models/modals/ImportModelModal.js"></script>
 <script src="app/models/modals/AddSegmentModal.js"></script>
-
-<script src="app/login/modals/TenantSelectionModal.js"></script>
+<script src="app/userManagement/controllers/UserManagementController.js"></script>
+<script src="app/userManagement/services/UserManagementService.js"></script>
 <script src="app/userManagement/modals/AddUserModal.js"></script>
 <script src="app/userManagement/modals/DeleteUserModal.js"></script>
 <script src="app/userManagement/modals/EditUserModal.js"></script>
-
 <script src="app/setup/utilities/SetupUtility.js"></script>
 <script src="app/setup/controllers/SetupController.js"></script>
 <script src="app/setup/controllers/ManageFieldsController.js"></script>
 <script src="app/setup/modals/DiscardEditFieldsModel.js"></script>
 <script src="app/setup/modals/EditFieldModel.js"></script>
+-->
 <!-- /build -->
 
 <!-- build:js inline -->

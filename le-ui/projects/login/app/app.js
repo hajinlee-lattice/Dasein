@@ -51,7 +51,7 @@ var mainApp = angular.module('mainApp', [
         } else {
             $scope.showFooter = false;
             // Create the Login View
-            $http.get('./app/login/views/LoginView.html').success(function (html) {
+            $http.get('./app/views/LoginView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
             });
@@ -119,7 +119,7 @@ var mainApp = angular.module('mainApp', [
         window.open("/lp/", "_self");
         return;
         ConfigService.GetWidgetConfigDocument().then(function(result) {
-            $http.get('./app/core/views/MainView.html').success(function (html) {
+            $http.get('./app/views/MainView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
             });
@@ -219,7 +219,7 @@ var mainApp = angular.module('mainApp', [
 
     function createMandatoryChangePasswordViewForLocale(locale) {
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
-            $http.get('./app/core/views/MainView.html').success(function (html) {
+            $http.get('./app/views/MainView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
                 scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
