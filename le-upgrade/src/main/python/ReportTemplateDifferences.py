@@ -52,7 +52,7 @@ def GetSpecsDictionary( tenant ):
         print 'Tenant \'{0}\' is not mapped to a DataLoader URL'.format( tenant )
         exit(10)
 
-    slne = conn_mgr.GetAllSpecs()
+    slne = conn_mgr.getAllSpecs()
 
     s1 = re.search( '^SpecLatticeNamedElements\((.*)\)$', slne )
     if not s1:
