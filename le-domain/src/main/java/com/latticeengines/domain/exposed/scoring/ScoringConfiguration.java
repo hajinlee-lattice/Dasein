@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class ScoringConfiguration {
 
@@ -65,5 +66,9 @@ public class ScoringConfiguration {
     @JsonProperty("model_guids")
     public void setModelGuids(List<String> modelGuids) {
         this.modelGuids = modelGuids;
+    }
+
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }
