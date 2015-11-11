@@ -140,29 +140,29 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(tables.size(), 2);
     }
     
-    @Test(groups = "functional", dataProvider = "urlTypes", enabled = true)
-    public void validateMetadata(String urlType) throws Exception {
+    @Test(groups = "functional", enabled = true)
+    public void validateMetadata() throws Exception {
         String metadataFile = ClassLoader.getSystemResource(
                 "com/latticeengines/metadata/controller/metadata.avsc").getPath();
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        String url = String.format("%s/metadata/customerspaces/%s/%s/t1/validations", //
-                getRestAPIHostPort(), CUSTOMERSPACE2, urlType);
+        String url = String.format("%s/metadata/customerspaces/%s/validations", //
+                getRestAPIHostPort(), CUSTOMERSPACE2);
         ModelingMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(new File(metadataFile)), ModelingMetadata.class);
         SimpleBooleanResponse response = restTemplate.postForObject(url, metadata, SimpleBooleanResponse.class);
         assertTrue(response.isSuccess());
     }
 
-    @Test(groups = "functional", dataProvider = "urlTypes", enabled = true)
-    public void validateMetadataForInvalidPayload(String urlType) throws Exception {
+    @Test(groups = "functional", enabled = true)
+    public void validateMetadataForInvalidPayload() throws Exception {
         String metadataFile = ClassLoader.getSystemResource(
                 "com/latticeengines/metadata/controller/invalidmetadata.avsc").getPath();
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        String url = String.format("%s/metadata/customerspaces/%s/%s/t1/validations", //
-                getRestAPIHostPort(), CUSTOMERSPACE2, urlType);
+        String url = String.format("%s/metadata/customerspaces/%s/validations", //
+                getRestAPIHostPort(), CUSTOMERSPACE2);
         ModelingMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(new File(metadataFile)), ModelingMetadata.class);
         SimpleBooleanResponse response = restTemplate.postForObject(url, metadata, SimpleBooleanResponse.class);
         assertFalse(response.isSuccess());

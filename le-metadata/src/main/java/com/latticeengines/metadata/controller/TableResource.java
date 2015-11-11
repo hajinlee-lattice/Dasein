@@ -77,13 +77,12 @@ public class TableResource {
         return tableResourceHelper.deleteTable(customerSpace, tableName, request);
     }
 
-    @RequestMapping(value = "/tables/{tableName}/validations", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/validations", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Validate metadata")
     public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
             @RequestBody ModelingMetadata metadata, //
             HttpServletRequest request) {
-        return tableResourceHelper.validateMetadata(customerSpace, tableName, metadata);
+        return tableResourceHelper.validateMetadata(customerSpace, metadata);
     }
 }

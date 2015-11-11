@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
@@ -25,6 +24,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}")
 public class ImportTableResource {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ImportTableResource.class);
 
     @Autowired
@@ -80,13 +80,4 @@ public class ImportTableResource {
         return tableResourceHelper.deleteTable(customerSpace, tableName, request);
     }
 
-    @RequestMapping(value = "/importtables/{tableName}/validations", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Validate metadata")
-    public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
-            @RequestBody ModelingMetadata metadata, //
-            HttpServletRequest request) {
-        return tableResourceHelper.validateMetadata(customerSpace, tableName, metadata);
-    }
 }

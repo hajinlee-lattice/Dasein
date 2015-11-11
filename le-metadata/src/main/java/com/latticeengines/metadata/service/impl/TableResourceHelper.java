@@ -83,7 +83,6 @@ public class TableResourceHelper {
     }
 
     public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
             @RequestBody ModelingMetadata metadata) {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         Map<String, Set<AnnotationValidationError>> validationErrors = mdService.validateTableMetadata(space, metadata);
