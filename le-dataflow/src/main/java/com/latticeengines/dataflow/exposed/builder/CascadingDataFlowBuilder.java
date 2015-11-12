@@ -27,6 +27,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.operation.Aggregator;
+import cascading.operation.Buffer;
 import cascading.operation.Function;
 import cascading.operation.NoOp;
 import cascading.operation.aggregator.Count;
@@ -35,6 +36,7 @@ import cascading.operation.aggregator.Last;
 import cascading.operation.aggregator.MaxValue;
 import cascading.operation.aggregator.MinValue;
 import cascading.operation.aggregator.Sum;
+import cascading.operation.buffer.FirstNBuffer;
 import cascading.operation.expression.ExpressionFilter;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.Not;
@@ -128,6 +130,26 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public Node groupBy(FieldList groupByFieldList, FieldList sortFieldList, List<Aggregation> aggregations) {
             return new Node(builder.addGroupBy(identifier, groupByFieldList, sortFieldList, aggregations), builder);
+        }
+
+        public Node groupByAndLimit(FieldList groupByFieldList, int count) {
+            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, new FirstNBuffer(count)), builder);
+        }
+
+        public Node groupByAndLimit(FieldList groupByFieldList, FieldList sortFieldList, int count, boolean descending) {
+            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, sortFieldList, new FirstNBuffer(
+                    count), descending), builder);
+        }
+
+        public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
+                boolean descending) {
+            return new Node(
+                    builder.addGroupByAndBuffer(identifier, groupByFieldList, sortFieldList, buffer, descending),
+                    builder);
+        }
+
+        public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer) {
+            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, buffer), builder);
         }
 
         public Node groupByAndExpand(FieldList groupByFieldList, String expandField, List<String> expandFormats, //
@@ -784,6 +806,32 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
 
         return register(groupby, fieldMetadata);
+    }
+
+    protected String addGroupByAndBuffer(String prior, FieldList groupByFields, Buffer buffer) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        if (pm == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
+        }
+        Pipe groupby = null;
+        groupby = new GroupBy(pm.getKey(), new Fields(groupByFields.getFields()));
+        groupby = new Every(groupby, buffer, Fields.RESULTS);
+
+        return register(groupby, pm.getValue());
+    }
+
+    protected String addGroupByAndBuffer(String prior, FieldList groupByFields, FieldList sortFields, Buffer buffer,
+            boolean descending) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        if (pm == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
+        }
+        Pipe groupby = null;
+        groupby = new GroupBy(pm.getKey(), new Fields(groupByFields.getFields()), new Fields(sortFields.getFields()),
+                descending);
+        groupby = new Every(groupby, buffer, Fields.RESULTS);
+
+        return register(groupby, pm.getValue());
     }
 
     protected String addGroupByAndFirst(String[] priors, Fields groupByFields, Fields sortFields) {

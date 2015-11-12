@@ -36,6 +36,7 @@ import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
@@ -81,7 +82,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final Integer NUM_PROPSPECTS_DESIRED = 100;
     protected static final Integer NUM_PROPSPECTS_DESIRED_1 = 200;
     protected static final Integer NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS = 10;
-    protected static final Double INTENT_SCORE_THRESHOLD = 0.5;
+    protected static final IntentScore INTENT_SCORE_THRESHOLD = IntentScore.LOW;
     protected static final Double FIT_SCORE_THRESHOLD =  0.3;
     protected static final String MODEL_ID = "MODEL_ID";
     protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
@@ -91,6 +92,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact", new ArrayList<Restriction>());
     protected static final Integer OFFSET = 1;
     protected static final Sort SORT = new Sort(Arrays.asList(new SingleReferenceLookup(1, ReferenceInterpretation.VALUE)));
+    protected static final Integer MAX_PROSPECTS_PER_ACCOUNT = 3;
 
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_1 = new ProspectDiscoveryOption();
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_2 = new ProspectDiscoveryOption();

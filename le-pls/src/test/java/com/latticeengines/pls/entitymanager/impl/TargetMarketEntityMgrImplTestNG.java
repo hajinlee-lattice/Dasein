@@ -35,6 +35,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET.setIsDefault(IS_DEFAULT);
         TARGET_MARKET.setOffset(OFFSET);
         TARGET_MARKET.setIntentSort(SORT);
+        TARGET_MARKET.setMaxProspectsPerAccount(MAX_PROSPECTS_PER_ACCOUNT);
 
         setupUsers();
         cleanupTargetMarketDB();
@@ -65,21 +66,22 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(targetMarket.getOffset(), OFFSET);
         assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
         assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
+        assertEquals(targetMarket.getMaxProspectsPerAccount(), MAX_PROSPECTS_PER_ACCOUNT);
     }
 
     @Test(groups = { "functional" }, dependsOnMethods = { "create_calledWithParameters_assertAllAttributesArePersisted" })
     public void targetMarketCreatedInOneTenant_switchToAlternativeTenant_assertTargetMarketCannnotBeFound() {
         setupSecurityContext(ALTERNATIVE_TESTING_TENANT);
-        
+
         TargetMarket targetMarket = this.targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
-        
+
         assertNull(targetMarket);
     }
-    
+
     @Test(groups = { "functional" }, dependsOnMethods = { "targetMarketCreatedInOneTenant_switchToAlternativeTenant_assertTargetMarketCannnotBeFound" })
     public void update_calledWithParameters_assertTargetMarketIsUpdated() {
         setupSecurityContext(mainTestingTenant);
-        
+
         TARGET_MARKET.setPid(null);
         TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
         this.targetMarketEntityMgr.updateTargetMarketByName(TARGET_MARKET, TEST_TARGET_MARKET_NAME);
@@ -89,7 +91,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
     }
-    
+
     @Test(groups = { "functional" }, dependsOnMethods = { "update_calledWithParameters_assertTargetMarketIsUpdated" })
     public void delete_calledWithParameters_assertTargetMarketIsDeleted() {
         setupSecurityContext(mainTestingTenant);

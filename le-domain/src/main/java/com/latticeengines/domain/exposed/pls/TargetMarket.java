@@ -6,6 +6,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -46,7 +48,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private Sort intentSort;
     private Integer numProspectsDesired;
     private Integer numDaysBetweenIntentProspectResends;
-    private Double intentScoreThreshold;
+    private IntentScore intentScoreThreshold;
     private Double fitScoreThreshold;
     private String modelId;
     private String eventColumnName;
@@ -55,6 +57,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private Restriction accountFilter;
     private Restriction contactFilter;
     private Integer offset;
+    private Integer maxProspectsPerAccount;
 
     @Column(name = "NAME", nullable = false)
     @Override
@@ -198,12 +201,12 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     public String getIntentSortString() {
         return JsonUtils.serialize(this.intentSort);
     }
-    
+
     @JsonProperty
     public void setIntentSortString(String intentSortStr) {
         this.intentSort = JsonUtils.deserialize(intentSortStr, Sort.class);
     }
-    
+
     @Column(name = "NUM_PROSPECTS_DESIRED", nullable = true)
     @JsonProperty
     public Integer getNumProspectsDesired() {
@@ -227,13 +230,14 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     }
 
     @JsonProperty
-    @Column(name = "INTENT_SCORE_THRESHOLD", nullable = true)
-    public Double getIntentScoreThreshold() {
-        return this.intentScoreThreshold;
+    @Column(name = "INTENT_SCORE_THRESHOLD", nullable = false)
+    @Enumerated(EnumType.STRING)
+    public IntentScore getIntentScoreThreshold() {
+        return intentScoreThreshold;
     }
 
     @JsonProperty
-    public void setIntentScoreThreshold(Double intentScoreThreshold) {
+    public void setIntentScoreThreshold(IntentScore intentScoreThreshold) {
         this.intentScoreThreshold = intentScoreThreshold;
     }
 
@@ -281,7 +285,18 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
         this.deliverProspectsFromExistingAccounts = deliverProspectsFromExistingAccounts;
     }
 
-    @Column(name="IS_DEFAULT")
+    @Column(name = "MAX_PROSPECTS_PER_ACCOUNT", nullable = true)
+    @JsonProperty
+    public Integer getMaxProspectsPerAccount() {
+        return this.maxProspectsPerAccount;
+    }
+
+    @JsonProperty
+    public void setMaxProspectsPerAccount(Integer maxProspectsPerAccount) {
+        this.maxProspectsPerAccount = maxProspectsPerAccount;
+    }
+
+    @Column(name = "IS_DEFAULT")
     @JsonProperty
     public Boolean getIsDefault() {
         return this.isDefault;
@@ -291,7 +306,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     public void setIsDefault(Boolean isDefault) {
         this.isDefault = isDefault;
     }
-    
+
     @Column(name = "OFFSET", nullable = false)
     @JsonProperty
     public Integer getOffset() {

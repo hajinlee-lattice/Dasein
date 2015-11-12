@@ -13,6 +13,7 @@ import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
@@ -24,7 +25,7 @@ public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsFunction
 
     private QuotaFlowParameters getStandardParameters() {
         TargetMarket market = new TargetMarket();
-        market.setIntentScoreThreshold(0.0);
+        market.setIntentScoreThreshold(IntentScore.LOW);
         market.setFitScoreThreshold(0.0);
         market.setNumDaysBetweenIntentProspectResends(null);
         market.setModelId("M1");

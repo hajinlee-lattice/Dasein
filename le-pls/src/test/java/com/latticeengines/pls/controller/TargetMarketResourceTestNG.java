@@ -33,6 +33,7 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET.setIsDefault(IS_DEFAULT);
         TARGET_MARKET.setOffset(OFFSET);
         TARGET_MARKET.setIntentSort(SORT);
+        TARGET_MARKET.setMaxProspectsPerAccount(MAX_PROSPECTS_PER_ACCOUNT);
 
         setupUsers();
         cleanupTargetMarketDB();

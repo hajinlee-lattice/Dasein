@@ -2,17 +2,21 @@ package com.latticeengines.prospectdiscovery.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
@@ -24,7 +28,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
 
     private QuotaFlowParameters getStandardParameters() {
         TargetMarket market = new TargetMarket();
-        market.setIntentScoreThreshold(0.0);
+        market.setIntentScoreThreshold(IntentScore.LOW);
         market.setFitScoreThreshold(0.0);
         market.setNumDaysBetweenIntentProspectResends(365);
         market.setModelId("M1");
@@ -52,13 +56,13 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
         List<GenericRecord> records = readOutput();
 
         List<GenericRecord> scores = readInput("Scores");
-        Assert.assertTrue(identicalSets(records, "Id", scores, "Id"));
+        Assert.assertTrue(identicalSets(records, "AccountId", scores, "Id"));
     }
 
     @Test(groups = "functional")
     public void testOnlyFitSent() {
         QuotaFlowParameters parameters = getStandardParameters();
-        parameters.getTargetMarket().setIntentScoreThreshold(100.0);
+        parameters.getTargetMarket().setIntentScoreThreshold(IntentScore.MAX);
 
         Table result = executeDataFlow(parameters);
 
@@ -68,7 +72,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
         List<GenericRecord> records = readOutput();
 
         List<GenericRecord> scores = readInput("Scores");
-        Assert.assertTrue(identicalSets(records, "Id", scores, "Id"));
+        Assert.assertTrue(identicalSets(records, "AccountId", scores, "Id"));
         Assert.assertTrue(allValuesEqual(records, "IsIntent", false));
     }
 
@@ -99,6 +103,44 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
 
         List<GenericRecord> records = readOutput();
         Assert.assertEquals(records.size(), 0);
+    }
+
+    @Test(groups = "functional")
+    public void testNoMoreThanOneProspectPerAccount() {
+        QuotaFlowParameters parameters = getStandardParameters();
+        parameters.getTargetMarket().setMaxProspectsPerAccount(1);
+
+        Table result = executeDataFlow(parameters);
+
+        Assert.assertEquals(result.getExtracts().size(), 1);
+        Assert.assertTrue(result.getAttributes().size() > 0);
+
+        List<GenericRecord> records = readOutput();
+
+        Map<String, Integer> histogram = histogram(records, "AccountId");
+
+        Assert.assertTrue(histogram.size() > 0);
+        Assert.assertTrue(Iterables.all(histogram.values(), new Predicate<Integer>() {
+
+            @Override
+            public boolean apply(Integer input) {
+                return input == 1;
+            }
+        }));
+    }
+
+    @Test(groups = "functional")
+    public void testLimitByBalance() {
+        QuotaFlowParameters parameters = getStandardParameters();
+        parameters.getQuota().setBalance(2);
+
+        Table result = executeDataFlow(parameters);
+
+        Assert.assertEquals(result.getExtracts().size(), 1);
+        Assert.assertTrue(result.getAttributes().size() > 0);
+
+        List<GenericRecord> records = readOutput();
+        Assert.assertEquals(records.size(), 2);
     }
 
     @Override

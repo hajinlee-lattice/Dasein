@@ -11,8 +11,10 @@ import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
+import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
+import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 
 @Component("quotaFlow")
@@ -31,17 +33,18 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
 
         TargetMarket market = parameters.getTargetMarket();
         ProspectDiscoveryConfiguration configuration = parameters.getConfiguration();
+        Quota quota = parameters.getQuota();
 
         account = account.filter(market.getAccountFilter());
         account = account.innerJoin("Id", scores, "Id");
 
         String scoreColumn = String.format("Score_%s", market.getModelId());
 
-        double intentScoreThreshold = market.getIntentScoreThreshold() != null ? market.getIntentScoreThreshold() : 0;
+        IntentScore intentScoreThreshold = market.getIntentScoreThreshold();
         double fitScoreThreshold = market.getFitScoreThreshold() != null ? market.getFitScoreThreshold() : 0;
 
-        Node intent = account.filter(String.format("%s >= %f", scoreColumn, intentScoreThreshold), //
-                new FieldList(scoreColumn));
+        Node intent = account.filter(getIntentAboveThresholdExpression(market.getIntentSort(), intentScoreThreshold),
+                getFields(market.getIntentSort()));
         Node fit = account.filter(String.format("%s >= %f", scoreColumn, fitScoreThreshold), //
                 new FieldList(scoreColumn));
 
@@ -84,8 +87,8 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         intent = intent.sort(market.getIntentSort());
         fit = fit.sort(fitSort(market));
 
-        intent = intent.addRowID("DeliveryOffset");
-        fit = fit.addRowID("DeliveryOffset");
+        intent = intent.addRowID("Offset");
+        fit = fit.addRowID("Offset");
 
         if (market.getNumProspectsDesired() != null) {
             double intentRatio = configuration.getDouble(ProspectDiscoveryOptionName.IntentPercentage, 50.0) / 100.0;
@@ -95,13 +98,20 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
 
         merged = intent.merge(fit);
 
-        merged = merged //
-                .addFunction(market.getOffset().toString(), new FieldList(), new FieldMetadata("MarketOffset",
-                        Integer.class));
+        merged = merged.addFunction(String.format("%dL", DateTime.now().getMillis()), new FieldList(),
+                new FieldMetadata("DeliveryDate", Long.class));
 
-        merged = merged.sort("DeliveryOffset");
+        if (market.getMaxProspectsPerAccount() != null) {
+            merged = merged.groupByAndLimit(new FieldList("AccountId"), market.getMaxProspectsPerAccount());
+        }
+
+        merged = merged.sort("Offset");
+        merged = merged.limit(quota.getBalance());
+
         merged = merged.rename(new FieldList(scoreColumn), new FieldList("Score"));
-        return merged.retain(new FieldList("Email", "IsIntent", "Id", "Score", "MarketOffset", "DeliveryOffset"));
+        merged = merged.retain(new FieldList("Email", "IsIntent", "AccountId", "Score", "DeliveryDate"));
+
+        return merged;
     }
 
     private Node removePreviouslyGeneratedIntent(Node intent, TargetMarket market, Node existingProspect) {
@@ -111,15 +121,17 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         if (market.getNumDaysBetweenIntentProspectResends() != null) {
             String removeUnmatchedExpression = String.format("!(Email == null && %s != null)",
                     joinFieldName("ExistingProspect", "Email"));
-            intent = intent.join(new FieldList("Email"), existingProspect, new FieldList("Email"), JoinType.OUTER)
+            intent = intent //
+                    .join(new FieldList("Email"), existingProspect, new FieldList("Email"), JoinType.OUTER) //
                     .filter(removeUnmatchedExpression,
                             new FieldList("Email", joinFieldName("ExistingProspect", "Email")));
-            String dateExpression = String.format("%s == null || %dL - %s > %dL",
-                    joinFieldName("ExistingProspect", "CreatedDate"), //
+
+            String dateExpression = String.format("%s == null || %dL - %s > %dL", //
+                    "DeliveryDate", //
                     DateTime.now().getMillis(), //
-                    joinFieldName("ExistingProspect", "CreatedDate"), //
+                    "DeliveryDate", //
                     (long) market.getNumDaysBetweenIntentProspectResends() * 24 * 360 * 1000);
-            intent = intent.filter(dateExpression, new FieldList(joinFieldName("ExistingProspect", "CreatedDate")));
+            intent = intent.filter(dateExpression, new FieldList("DeliveryDate"));
         } else {
             intent = intent.stopList(existingProspect, "Email", "Email");
         }
@@ -155,6 +167,27 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
             SingleReferenceLookup lookup = intent.getLookups().get(i);
             sb.append(lookup.getReference().toString());
             sb.append(" != 0 && ");
+            sb.append(lookup.getReference().toString());
+            sb.append(" != null");
+            if (i != size - 1) {
+                sb.append(" && ");
+            }
+
+        }
+        return sb.toString();
+    }
+
+    private String getIntentAboveThresholdExpression(Sort intent, IntentScore threshold) {
+        // TODO use zoltan
+        StringBuilder sb = new StringBuilder();
+        int size = intent.getLookups().size();
+        if (size == 0) {
+            return "true";
+        }
+        for (int i = 0; i < size; ++i) {
+            SingleReferenceLookup lookup = intent.getLookups().get(i);
+            sb.append(lookup.getReference().toString());
+            sb.append(String.format(" >= %d && ", threshold.getValue()));
             sb.append(lookup.getReference().toString());
             sb.append(" != null");
             if (i != size - 1) {
