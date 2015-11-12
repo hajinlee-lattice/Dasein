@@ -24,15 +24,11 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         Node removeNullAccountIds = removeNullEmailAddresses.filter( //
                 "AccountId != null && !AccountId.trim().isEmpty()", new FieldList("AccountId"));
 
-        FieldMetadata contactDomain = new FieldMetadata("ContactDomain", String.class);
-        contactDomain.setPropertyValue("length", "255");
-        contactDomain.setPropertyValue("logicalType", "domain");
-        contactDomain.setPropertyValue("displayName", "ContactDomain");
-
         Node retrieveDomains = removeNullAccountIds.addFunction( //
                 "Email.substring(Email.indexOf('@') + 1)", //
                 new FieldList("Email"), //
-                contactDomain);
+                new FieldMetadata("ContactDomain", String.class));
+        retrieveDomains = normalizeDomain(retrieveDomains, "ContactDomain");
 
         Node stopped = retrieveDomains.stopList(stoplist, "ContactDomain", "Domain");
 
@@ -65,17 +61,15 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 resolveTies, //
                 new FieldList("AccountId"));
 
-        // These domains may be null
         FieldMetadata domain = new FieldMetadata("Domain", String.class);
-        domain.setPropertyValue("length", "255");
-        domain.setPropertyValue("precision", "0");
-        domain.setPropertyValue("scale", "0");
         domain.setPropertyValue("logicalType", "domain");
         domain.setPropertyValue("displayName", "Domain");
         Node domainsForEachAccount = joinedWithAccounts.addFunction(
                 "Website != null && !Website.trim().isEmpty() ? Website : ContactDomain", //
                 new FieldList("Website", "ContactDomain"), //
                 domain);
+
+        domainsForEachAccount = normalizeDomain(domainsForEachAccount, "Domain");
 
         Node last = addIsWonEvent(domainsForEachAccount, opportunity);
         last = addStageClosedWonEvent(last, opportunity);
@@ -210,5 +204,12 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 .addFunction("Count != null && Count > 0 ? true : false", new FieldList("Count"), event) //
                 .checkpoint("addHasContacts") //
                 .retain(new FieldList(fieldsToRetain));
+    }
+
+    private Node normalizeDomain(Node last, String fieldName) {
+        final String normalizeDomain = "%s != null ? %s.replaceAll(\"^http://\", \"\").replaceAll(\"^www[.]\", \"\") : null";
+
+        return last.addFunction(String.format(normalizeDomain, fieldName, fieldName), new FieldList(fieldName),
+                new FieldMetadata(fieldName, String.class));
     }
 }
