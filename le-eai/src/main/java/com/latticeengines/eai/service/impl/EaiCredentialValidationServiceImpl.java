@@ -8,7 +8,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -26,9 +25,6 @@ public class EaiCredentialValidationServiceImpl implements EaiCredentialValidati
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
 
-    @Value("${eai.salesforce.loginurl}")
-    private String loginUrl;
-
     @Value("${eai.salesforce.clientid}")
     private String clientId;
 
@@ -36,33 +32,54 @@ public class EaiCredentialValidationServiceImpl implements EaiCredentialValidati
     private String clientSecret;
 
     @Override
-    public void validateCredential(String customerSpace, String crmType, SourceCredentialType sourceCredentialType) {
-        if (crmType.equals(CrmConstants.CRM_SFDC)) {
-            validateCrmCredential(customerSpace, sourceCredentialType);
+    public void validateSourceCredential(String customerSpace, String sourceType,
+            SourceCredentialType sourceCredentialType) {
+        if (sourceType.equals(CrmConstants.CRM_SFDC)) {
+            validateSourceCredential(customerSpace, sourceCredentialType);
+        } else {
+            throw new LedpException(LedpCode.LEDP_17008, new String[] { sourceType });
+        }
+    }
+
+    @VisibleForTesting
+    void validateSourceCredential(String customerSpace, SourceCredentialType sourceCredentialType) {
+        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace,
+                sourceCredentialType.isProduction());
+        try {
+            validateSourceCredential(customerSpace, crmCredential);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_17004, e, new String[] { customerSpace, CrmConstants.CRM_SFDC });
         }
     }
 
     @Override
-    public void validateCrmCredential(String customerSpace, SourceCredentialType sourceCredentialType) {
-        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace, sourceCredentialType.isProduction());
-        validateCrmCredential(customerSpace, crmCredential.getUserName(), crmCredential.getPassword());
+    public void validateSourceCredential(String customerSpace, String sourceType, CrmCredential crmCredential) {
+        if (sourceType.equals(CrmConstants.CRM_SFDC)) {
+            try {
+                validateSourceCredential(customerSpace, crmCredential);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_17004, e, new String[] { customerSpace, CrmConstants.CRM_SFDC });
+            }
+        } else {
+            throw new LedpException(LedpCode.LEDP_17008, new String[] { sourceType });
+        }
     }
 
     @VisibleForTesting
-    void validateCrmCredential(String customerSpace, String username, String password) {
+    void validateSourceCredential(String customerSpace, CrmCredential crmCredential) {
         SalesforceComponent salesforce = new SalesforceComponent();
         SalesforceLoginConfig loginConfig = new SalesforceLoginConfig();
         loginConfig.setClientId(clientId);
         loginConfig.setClientSecret(clientSecret);
-        loginConfig.setLoginUrl(loginUrl);
+        loginConfig.setLoginUrl(crmCredential.getUrl());
         salesforce.setLoginConfig(loginConfig);
-        loginConfig.setUserName(username);
-        loginConfig.setPassword(password);
+        loginConfig.setUserName(crmCredential.getUserName());
+        loginConfig.setPassword(crmCredential.getPassword());
 
         try {
             salesforce.start();
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_17004, new String[] { customerSpace });
+            throw new RuntimeException(e);
         } finally {
             salesforce.setConfig(new SalesforceEndpointConfig());
             try {

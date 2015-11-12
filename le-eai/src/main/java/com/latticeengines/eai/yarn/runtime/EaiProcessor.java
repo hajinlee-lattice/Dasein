@@ -115,7 +115,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
         loginConfig.setUserName(crmCredential.getUserName());
         loginConfig.setPassword(crmCredential.getPassword());
-
+        loginConfig.setLoginUrl(crmCredential.getUrl());
         HttpClientConfig httpClientConfig = eaiZKService.getHttpClientConfig(customerSpace);
         HttpClient httpClient = salesforce.getConfig().getHttpClient();
         httpClient.setConnectTimeout(httpClientConfig.getConnectTimeout());

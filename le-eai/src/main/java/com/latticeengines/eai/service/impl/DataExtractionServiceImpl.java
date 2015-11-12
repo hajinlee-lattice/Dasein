@@ -126,7 +126,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig) {
         String customerSpace = CustomerSpace.parse(importConfig.getCustomer()).toString();
         SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0).getSourceCredentialType();
-        eaiCredentialValidationService.validateCredential(customerSpace, CrmConstants.CRM_SFDC, sourceCredentialType);
+        eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC, sourceCredentialType);
 
         ApplicationId appId = null;
         boolean hasNonEaiJobSourceType = false;

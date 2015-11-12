@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
@@ -38,6 +39,12 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
 
     @Value("${eai.salesforce.password}")
     private String salesforcePasswd;
+
+    @Value("${eai.salesforce.production.loginurl}")
+    private String productionLoginUrl;
+
+    @Value("${eai.salesforce.sandbox.loginurl}")
+    private String sandboxLoginUrl;
 
     private String customer = "SFDC-Eai-Customer";
 
@@ -61,18 +68,22 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
-        eaiCredentialValidationService.validateCrmCredential(customerSpace, SourceCredentialType.PRODUCTION);
+        eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC,
+                SourceCredentialType.PRODUCTION);
     }
 
     @Test(groups = "functional")
     public void testVerifyCrmCredentialInSandbox() {
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
-        crmCredential.setUserName(salesforceUserName);
-        crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setUserName("tsanghavi@lattice-engines.com.sandbox2");
+        crmCredential.setPassword("Happy20105aGieJUACRPQ21CG3nUwn8iz");
+        crmCredential.setUrl(sandboxLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, false, crmCredential, true);
-        eaiCredentialValidationService.validateCrmCredential(customerSpace, SourceCredentialType.SANDBOX);
+        eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC,
+                SourceCredentialType.SANDBOX);
     }
 
     @Test(groups = "functional")
@@ -81,9 +92,11 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName("some bad username");
         crmCredential.setPassword("some bad password");
+        crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
         try {
-            eaiCredentialValidationService.validateCrmCredential(customerSpace, SourceCredentialType.PRODUCTION);
+            eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC,
+                    SourceCredentialType.PRODUCTION);
         } catch (LedpException e) {
             assertEquals(e.getCode(), LedpCode.LEDP_17004);
             assertTrue(e.getMessage().contains("Invalid"));

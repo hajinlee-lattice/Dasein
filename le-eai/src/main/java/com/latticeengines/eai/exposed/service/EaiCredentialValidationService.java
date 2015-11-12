@@ -1,11 +1,12 @@
 package com.latticeengines.eai.exposed.service;
 
+import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.source.SourceCredentialType;
 
 public interface EaiCredentialValidationService {
 
-    void validateCrmCredential(String customerSpace, SourceCredentialType sourceCredentialType);
+    void validateSourceCredential(String customerSpace, String crmType, SourceCredentialType sourceCredentialType);
 
-    void validateCredential(String customerSpace, String crmType, SourceCredentialType sourceCredentialType);
+    void validateSourceCredential(String customerSpace, String sourceType, CrmCredential crmCredential);
 
 }

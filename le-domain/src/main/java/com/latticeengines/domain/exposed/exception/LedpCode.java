@@ -85,10 +85,11 @@ public enum LedpCode {
     LEDP_17001("File import can only have one data source."), //
     LEDP_17002("No metadata for attribute {0}."), //
     LEDP_17003("Could not retrieve metadata of attributes {0} for table {1} from Endpoint."), //
-    LEDP_17004("{0}'s CRM Credential is Invalid. Cannot use this credential to establish connection to Salesforce."), //
+    LEDP_17004("{0}'s Source Credential is Invalid. Cannot use this credential to establish connection to {1}."), //
     LEDP_17005("Failed to retrieve HttpClientConfig from Zookeeper for Tenant {0}"), //
     LEDP_17006("Got NULL Value from Last Modified Key for Tenant {0}"), //
     LEDP_17007("Got NULL Value from Table {0} for Tenant {1}"), //
+    LEDP_17008("Unsupported Source Credential Check for Source Type {0}"), //
 
     // PLS 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
