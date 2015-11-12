@@ -73,6 +73,7 @@
                                     <forkMode>always</forkMode>
                                     <classpathDependencyExcludes>
                                         <classpathDependencyExcludes>${env.HADOOP_HOME}/etc/hadoop</classpathDependencyExcludes>
+                                        <classpathDependencyExcludes>${env.TEZ_HOME}/etc/tez</classpathDependencyExcludes>
                                     </classpathDependencyExcludes>
                                 </configuration>
                             </execution>

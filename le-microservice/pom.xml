@@ -73,7 +73,7 @@
                             <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
                             <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
                             <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${env.TEZ_HOME}/etc/tez</extraClasspath>
                             </webAppConfig>
                             <systemProperties>
                                 <systemProperty>

@@ -41,7 +41,7 @@
                                 <port>8085</port>
                             </httpConnector>
                             <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${env.TEZ_HOME}/etc/tez
                                 </extraClasspath>
                             </webAppConfig>
                             <systemProperties>
