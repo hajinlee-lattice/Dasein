@@ -10,17 +10,31 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 ])
 
 .controller('ManageFieldsWidgetController', function ($scope, $rootScope, $timeout, StringUtility, ResourceUtility, SetupUtility, MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel) {
-    $scope.CategoryOptions = ["Lead Information", "Marketing Activity"];
-    $scope.StatisticalTypeOptions = ["interval", "nominal", "ordinal", "ratio"];
-    $scope.ApprovedUsageOptions = ["None", "Model", "ModelAndAllInsights", "ModelAndModelInsights"];
-    $scope.FundamentalTypeOptions = ["alpha", "boolean", "currency", "numeric", "percentage", "year"];
-
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
     $scope.showFieldDetails = false;
     $scope.fieldAttributes = [];
 
-    loadFields();
+    getOptionsAndFields();
+
+    function getOptionsAndFields() {
+        $scope.loading = true;
+        MetadataService.GetOptions().then(function(result) {
+            if (result.Success) {
+                var options = result.ResultObj;
+                $scope.CategoryOptions = options.CategoryOptions;
+                $scope.ApprovedUsageOptions = options.ApprovedUsageOptions;
+                $scope.StatisticalTypeOptions = options.StatisticalTypeOptions;
+                $scope.FundamentalTypeOptions = options.FundamentalTypeOptions;
+
+                loadFields();
+            } else {
+                $scope.showLoadingError = true;
+                $scope.loadingError = result.ResultErrors;
+                $scope.loading = false;
+            }
+        });
+    }
 
     function loadFields() {
         $scope.loading = true;

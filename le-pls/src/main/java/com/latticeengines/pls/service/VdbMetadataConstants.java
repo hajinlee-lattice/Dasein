@@ -27,6 +27,11 @@ public final class VdbMetadataConstants {
 
     public static final String ATTRIBUTE_NULL_VALUE = "<NULL>";
 
+    public static final String CATEGORY_OPTIONS[] = { "Lead Information", "Marketing Activity" };
+    public static final String APPROVED_USAGE_OPTIONS[] = { "None", "Model", "ModelAndAllInsights", "ModelAndModelInsights" };
+    public static final String FUNDAMENTAL_TYPE_OPTIONS[] = { "alpha", "boolean", "currency", "numeric", "percentage", "year" };
+    public static final String STATISTICAL_TYPE_OPTIONS[] = { "interval", "nominal", "ordinal", "ratio" };
+
     @SuppressWarnings("serial")
     public static final Map<String, String> SOURCE_MAPPING = Collections.unmodifiableMap(
             new HashMap<String, String>() {{

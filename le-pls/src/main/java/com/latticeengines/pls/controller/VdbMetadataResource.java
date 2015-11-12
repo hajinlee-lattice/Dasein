@@ -2,7 +2,9 @@ package com.latticeengines.pls.controller;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,6 +25,7 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.service.VdbMetadataService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
@@ -42,6 +45,19 @@ public class VdbMetadataResource {
 
     @Autowired
     private VdbMetadataService vdbMetadataService;
+
+    @RequestMapping(value = "/options", method=RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get map of metadata attribute options")
+    public Map<String, String[]> getOptions(HttpServletRequest request) {
+        Map<String, String[]> map = new HashMap<String, String[]>();
+        map.put("CategoryOptions", VdbMetadataConstants.CATEGORY_OPTIONS);
+        map.put("ApprovedUsageOptions", VdbMetadataConstants.APPROVED_USAGE_OPTIONS);
+        map.put("FundamentalTypeOptions", VdbMetadataConstants.FUNDAMENTAL_TYPE_OPTIONS);
+        map.put("StatisticalTypeOptions", VdbMetadataConstants.STATISTICAL_TYPE_OPTIONS);
+
+        return map;
+    }
 
     @RequestMapping(value = "/fields", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

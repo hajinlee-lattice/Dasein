@@ -433,3 +433,4 @@ SETUP_MANAGE_FIELDS_DISCARD_EDIT_FIELDS_LABEL=Are you sure you want to discard c
 SETUP_MANAGE_FIELDS_GET_FIELDS_ERROR=We are unable to get fields at this time.
 SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR=We are unable to update field at this time.
 SETUP_MANAGE_FIELDS_UPDATE_FIELDS_ERROR=We are unable to update fields at this time.
+SETUP_MANAGE_FIELDS_GET_OPTIONS_ERROR=We are unable to get attribute options at this time.

@@ -8,6 +8,36 @@ angular.module('mainApp.setup.services.MetadataService', [
 
 .service('MetadataService', function ($http, $q, _, BrowserStorageUtility, RightsUtility, ResourceUtility, SessionService) {
 
+    this.GetOptions = function () {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/vdbmetadata/options?' + new Date().getTime(),
+            headers: {
+                'Content-Type': "application/json"
+            }
+        })
+        .success(function (data) {
+            var result = {
+                Success: true,
+                ResultObj: data,
+                ResultErrors: null
+            };
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_OPTIONS_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
     this.GetFields = function () {
         var deferred = $q.defer();
 
