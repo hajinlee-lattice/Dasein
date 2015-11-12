@@ -45,6 +45,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         }
 
         DataFlowContext ctx = new DataFlowContext();
+        ctx.setProperty("ENGINE", "MR");
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("CUSTOMER", "MadisonLogic");
         ctx.setProperty("TARGETPATH", targetPath + "/1");
@@ -64,6 +65,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         sources.put("MadisonLogic0", targetPath + "/1/*.avro");
 
         DataFlowContext ctx = new DataFlowContext();
+        ctx.setProperty("ENGINE", "MR");
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("CUSTOMER", "MadisonLogic");
         ctx.setProperty("TARGETPATH", targetPath + "/output");

@@ -11,7 +11,8 @@ import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
 import com.latticeengines.propdata.madison.dao.MadisonLogicDailyProgressDao;
 
-public class MadisonLogicDailyProgressDaoImpl extends BaseDaoImpl<MadisonLogicDailyProgress> implements MadisonLogicDailyProgressDao {
+public class MadisonLogicDailyProgressDaoImpl extends BaseDaoImpl<MadisonLogicDailyProgress> implements
+        MadisonLogicDailyProgressDao {
 
     @Override
     protected Class<MadisonLogicDailyProgress> getEntityClass() {
@@ -23,17 +24,30 @@ public class MadisonLogicDailyProgressDaoImpl extends BaseDaoImpl<MadisonLogicDa
     public MadisonLogicDailyProgress getNextAvailableDailyProgress() {
         Session session = getSessionFactory().getCurrentSession();
         Class<MadisonLogicDailyProgress> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where status = :status order by ID", entityClz.getSimpleName());
+        String queryStr = String.format(
+                "from %s where status = :status order by ID",
+                entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("status", MadisonLogicDailyProgressStatus.DEPIVOTED.getStatus());
         query.setMaxResults(1);
         List<MadisonLogicDailyProgress> list = query.list();
         if (!CollectionUtils.isEmpty(list)) {
             return list.get(0);
+        }
+
+        queryStr = String.format(
+                "from %s where status = :status and FileDate >= DATEADD(DAY, -7, GETDATE()) order by ID",
+                entityClz.getSimpleName());
+        query = session.createQuery(queryStr);
+        query.setString("status", MadisonLogicDailyProgressStatus.FAILED.getStatus());
+        query.setMaxResults(1);
+        list = query.list();
+        if (!CollectionUtils.isEmpty(list)) {
+            return list.get(0);
         } else {
             return null;
         }
-        
+
     }
 
 }

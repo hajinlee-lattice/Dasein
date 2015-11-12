@@ -60,8 +60,8 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         dailyProgress1 = new MadisonLogicDailyProgress();
         dailyProgress2 = new MadisonLogicDailyProgress();
 
-        importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
-        importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2");
+        importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1", MadisonLogicDailyProgressStatus.DEPIVOTED.getStatus());
+        importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2", MadisonLogicDailyProgressStatus.FAILED.getStatus());
 
         transformOutput1 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(yesterday);
         transformOutput2 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(today);
@@ -98,11 +98,11 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         HdfsUtils.rmdir(yarnConfiguration, importOutputDir2);
     }
 
-    private String setupProgress(Date date, MadisonLogicDailyProgress dailyProgress, String tableName) throws Exception {
+    private String setupProgress(Date date, MadisonLogicDailyProgress dailyProgress, String tableName, String status) throws Exception {
         dailyProgress.setCreateTime(date);
         dailyProgress.setFileDate(date);
         dailyProgress.setDestinationTable(tableName);
-        dailyProgress.setStatus(MadisonLogicDailyProgressStatus.DEPIVOTED.getStatus());
+        dailyProgress.setStatus(status);
         propDataMadisonEntityMgr.create(dailyProgress);
         return ((PropDataMadisonServiceImpl) propDataService).getHdfsDataflowIncrementalRawPathWithDate(date);
     }
@@ -118,7 +118,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     private void downloadFile(MadisonLogicDailyProgress dailyProgress, String outputDir) throws Exception {
 
         PropDataContext requestContext = new PropDataContext();
-        requestContext.setProperty(PropDataMadisonService.RECORD_KEY, dailyProgress);
+//        requestContext.setProperty(PropDataMadisonService.RECORD_KEY, dailyProgress);
         PropDataContext responseContext = propDataService.importFromDB(requestContext);
 
         Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
