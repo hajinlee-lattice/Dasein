@@ -47,7 +47,8 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     private StandaloneHttpServer httpServer;
 
-    private static final int PORT = 8080;
+    @Value("${eai.metadata.port}")
+    private int port;
 
     private String customer = this.getClass().getSimpleName();
 
@@ -88,7 +89,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         System.out.println(tables);
 
         httpServer = new StandaloneHttpServer();
-        httpServer.init(PORT);
+        httpServer.init(port);
         httpServer.addServlet(new MetadataServlet(tables), "/metadata/customerspaces/" + customerSpace + "/*");
         httpServer.start();
     }
