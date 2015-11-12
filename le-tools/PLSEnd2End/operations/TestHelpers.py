@@ -364,7 +364,7 @@ class LPConfigRunner(SessionRunner):
         dlConfig.editMockRefreshDataSources(tenant, marketting_app);
         dlConfig.loadCfgTables(tenant);
 
-    def lpGetModel(self, tenantName, authorization):
+    def lpGetModel(self, authorization):
         url = self.model_url + "/pls/modelsummaries/"
         header = {"Content-Type": "application/json", "Authorization": authorization};
         response = requests.get(url, headers=header);
@@ -375,7 +375,7 @@ class LPConfigRunner(SessionRunner):
     def lpActivateModel(self, tenantName, modelPriority=0):
         authorization = self.modelLogin();
         self.modelLoginAttach(tenantName, authorization);
-        models = self.lpGetModel(tenantName, authorization);
+        models = self.lpGetModel(authorization);
 
         if len(models) < modelPriority + 1:
             print "The existing models: %d is less than the expected: %d" % (len(models), modelPriority + 1)
