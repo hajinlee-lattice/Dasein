@@ -178,7 +178,8 @@ public class VdbMetadataServiceImpl implements VdbMetadataService {
             metadata.put(VdbMetadataConstants.ATTRIBUTE_APPROVED_USAGE, approvedUsage);
         }
         String fundamentalType = field.getFundamentalType();
-        if (fundamentalType != null && !fundamentalType.isEmpty()) {
+        if (fundamentalType != null && !fundamentalType.isEmpty() &&
+                !VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE.equalsIgnoreCase(fundamentalType)) {
             metadata.put(VdbMetadataConstants.ATTRIBUTE_FUNDAMENTAL_TYPE, fundamentalType);
         }
         String description = field.getDescription() == null ? "" : field.getDescription();

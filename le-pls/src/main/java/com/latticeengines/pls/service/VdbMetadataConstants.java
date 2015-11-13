@@ -22,6 +22,7 @@ public final class VdbMetadataConstants {
     public static final String ATTRIBUTE_APPROVED_USAGE = "ApprovedUsage";
     public static final String ATTRIBUTE_TAGS = "Tags";
     public static final String ATTRIBUTE_FUNDAMENTAL_TYPE = "FundamentalType";
+    public static final String ATTRIBUTE_FUNDAMENTAL_UNKNOWN_VALUE = "Unknown";
     public static final String ATTRIBUTE_DISPLAY_DISCRETIZATION = "DisplayDiscretizationStrategy";
     public static final String ATTRIBUTE_STATISTICAL_TYPE = "StatisticalType";
 
