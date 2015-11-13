@@ -20,3 +20,4 @@ from .LP_020100_VDB_ModifiedEntity import LP_020100_VDB_ModifiedEntity
 from .LP_020100_VDB_ModifiedColumns import LP_020100_VDB_ModifiedColumns
 from .LP_020100_Diagnostic import LP_020100_Diagnostic
 from .LP_020100_AddDataProvider import LP_020100_AddDataProvider
+from .LP_020100_DisableCreateBIQueries import LP_020100_DisableCreateBIQueries

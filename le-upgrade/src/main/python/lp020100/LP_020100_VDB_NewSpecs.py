@@ -1,8 +1,8 @@
 
 #
-# $LastChangedBy: mwilson $
-# $LastChangedDate: 2015-10-23 06:03:02 +0800 (Fri, 23 Oct 2015) $
-# $Rev: 70544 $
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
 #
 
 import os
@@ -13,7 +13,7 @@ class LP_020100_VDB_NewSpecs( StepBase ):
 
   name        = 'LP_020100_VDB_NewSpecs'
   description = 'Adds new specs to the visiDB template'
-  version     = '$Rev: 70544 $'
+  version     = '$Rev$'
 
 
   def __init__( self, forceApply = False ):

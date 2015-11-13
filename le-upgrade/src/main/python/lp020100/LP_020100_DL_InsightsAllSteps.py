@@ -1,8 +1,8 @@
 
 #
-# $LastChangedBy: VivianZhao $
-# $LastChangedDate: 2015-10-29 14:33:11 +0800 (Wed, 21 Oct 2015) $
-# $Rev: 70508 $
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
 #
 
 from lxml import etree
@@ -12,7 +12,7 @@ class LP_020100_DL_InsightsAllSteps( StepBase ):
   
   name        = 'LP_020100_DL_InsightsAllSteps'
   description = 'Reset logic of the InsightsAllSteps'
-  version     = '$Rev: 70508 $'
+  version     = '$Rev$'
 
   def __init__( self, forceApply = False ):
     super( LP_020100_DL_InsightsAllSteps, self ).__init__( forceApply )

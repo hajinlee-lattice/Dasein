@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os, sys
 import appsequence
 import lp020100
@@ -26,7 +28,7 @@ sequence.append(lp020100.LP_020100_VDB_ModifiedFilters())
 sequence.append(lp020100.LP_020100_VDB_ModifiedEntity())
 sequence.append(lp020100.LP_020100_VDB_ModifiedColumns())
 sequence.append(lp020100.LP_020100_Diagnostic())
+sequence.append(lp020100.LP_020100_DisableCreateBIQueries())
 sequence.append(appsequence.LPSetVersion('2.1.0'))
-
 app = appsequence.AppSequence(tenantFileName, resultsFileName, sequence, checkOnly)
 app.execute()

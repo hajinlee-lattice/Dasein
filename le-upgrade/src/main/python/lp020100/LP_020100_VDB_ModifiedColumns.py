@@ -1,8 +1,8 @@
 
 #
-# $LastChangedBy: YeTian $
-# $LastChangedDate: 2015-10-21 14:33:11 +0800 (Wed, 21 Oct 2015) $
-# $Rev: 70508 $
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
 #
 
 from lxml import etree
@@ -14,7 +14,7 @@ class LP_020100_VDB_ModifiedColumns( StepBase ):
   
   name        = 'LP_020100_VDB_ModifiedColumns'
   description = 'Upgrade Modified Specs from 2.0.1 to 2.1.0'
-  version     = '$Rev: 70508 $'
+  version     = '$Rev$'
   def __init__( self, forceApply = False ):
     super( LP_020100_VDB_ModifiedColumns, self ).__init__( forceApply )
 
