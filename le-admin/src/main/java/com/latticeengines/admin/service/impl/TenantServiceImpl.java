@@ -96,8 +96,9 @@ public class TenantServiceImpl implements TenantService {
         }
 
         List<SerializableDocumentDirectory> configSDirs = tenantRegistration.getConfigDirectories();
-        if (configSDirs == null)
+        if (configSDirs == null) {
             return true;
+        }
         Map<String, Map<String, String>> props = new HashMap<>();
         for (SerializableDocumentDirectory configSDir : configSDirs) {
             String serviceName = configSDir.getRootPath().substring(1);
@@ -216,8 +217,9 @@ public class TenantServiceImpl implements TenantService {
     public boolean danteIsEnabled(String contractId, String tenantId) {
         TenantDocument tenant = getTenant(contractId, tenantId);
         String str = tenant.getSpaceInfo().featureFlags;
-        if (!str.contains(danteFeatureFlag))
+        if (!str.contains(danteFeatureFlag)) {
             return false;
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         try {
