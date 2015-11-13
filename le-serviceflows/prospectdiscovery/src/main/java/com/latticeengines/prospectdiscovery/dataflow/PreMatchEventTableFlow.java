@@ -89,10 +89,6 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 "Event_IsClosed", "Event_OpportunityCreated", "HasContacts", "HasOpportunities") //
                 .addAll(accountSchema));
 
-        last = last.rename( //
-                new FieldList("BillingStreet", "BillingCity", "BillingState", "BillingCountry", "BillingPostalCode"), //
-                new FieldList("Street", "City", "State", "Country", "PostalCode"));
-
         return last;
     }
 

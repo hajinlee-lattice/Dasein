@@ -1,5 +1,6 @@
 package com.latticeengines.prospectdiscovery.dataflow;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
@@ -29,6 +30,15 @@ public class PreMatchEventTableFlowTestNG extends ServiceFlowsFunctionalTestNGBa
         for (GenericRecord record : outputTable) {
             Assert.assertTrue(record.get("Domain") == null || !record.equals("gmail.com"));
         }
+
+        Table schema = getOutputSchema();
+        List<String> fields = Arrays.asList(schema.getAttributeNames());
+        Assert.assertTrue(fields.contains("Domain"));
+        Assert.assertTrue(fields.contains("City"));
+        Assert.assertTrue(fields.contains("Street"));
+        Assert.assertTrue(fields.contains("State"));
+        Assert.assertTrue(fields.contains("Country"));
+        Assert.assertTrue(fields.contains("PostalCode"));
     }
 
     @Override

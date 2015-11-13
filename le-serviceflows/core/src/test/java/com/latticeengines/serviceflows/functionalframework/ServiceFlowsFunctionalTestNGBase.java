@@ -140,6 +140,11 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         return readTable(getTargetDirectory() + "/*.avro");
     }
 
+    protected Table getOutputSchema() {
+        return MetadataConverter.readMetadataFromAvroFile( //
+                yarnConfiguration, getTargetDirectory() + "/*.avro", null, null);
+    }
+
     protected List<GenericRecord> readInput(String source) {
         Map<String, String> paths = getSourcePaths();
         for (String key : paths.keySet()) {
