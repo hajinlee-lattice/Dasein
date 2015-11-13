@@ -208,8 +208,11 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
 
     private Node normalizeDomain(Node last, String fieldName) {
         final String normalizeDomain = "%s != null ? %s.replaceAll(\"^http://\", \"\").replaceAll(\"^www[.]\", \"\").replaceAll(\"/.*$\", \"\") : null";
-
-        return last.addFunction(String.format(normalizeDomain, fieldName, fieldName), new FieldList(fieldName),
-                new FieldMetadata(fieldName, String.class));
+        final String replaceNulls = "%s != null && %s.equals(\"NULL\") ? null : %s";
+        return last //
+                .addFunction(String.format(normalizeDomain, fieldName, fieldName), new FieldList(fieldName),
+                        new FieldMetadata(fieldName, String.class)) //
+                .addFunction(String.format(replaceNulls, fieldName, fieldName, fieldName), new FieldList(fieldName),
+                        new FieldMetadata(fieldName, String.class));
     }
 }
