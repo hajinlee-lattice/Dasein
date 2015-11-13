@@ -140,7 +140,7 @@
         "StatisticalType": "",
         "PhysicalName": "BillingStreet",
         "DataQuality": "",
-        "SemanticType": "",
+        "SemanticType": "Street",
         "ApprovedUsage": [
           ""
         ],

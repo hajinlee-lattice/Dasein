@@ -72,13 +72,17 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
         camelContext.start();
 
         Table account = SalesforceExtractAndImportUtil.createAccountWithNonExistingAttr();
+        boolean exception = false;
         try {
             salesforceImportStrategyBase.importMetadata(camelContext.createProducerTemplate(), account, "",
                     importContext);
         } catch (LedpException e) {
+            exception = true;
             assertEquals(e.getCode(), LedpCode.LEDP_17003);
             assertTrue(e.getMessage().contains("IsConverted, Company, NaicsCode, Salutation, Status"));
         }
+        
+        assertTrue(exception, "Exception should have been thrown.");
     }
 
 }
