@@ -13,14 +13,14 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class QuotaResourceTestNG extends PlsFunctionalTestNGBase {
 
-    private static final String PLS_QUOTA_URL = "pls/quota/";
+    private static final String PLS_QUOTA_URL = "pls/quotas/";
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         QUOTA.setId(TEST_QUOTA_ID);
         QUOTA.setBalance(BALANCE);
 
-        setUpMarketoEloquaTestEnvironment();
+        setupUsers();
         cleanupQuotaDB();
     }
 

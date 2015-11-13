@@ -12,7 +12,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalTestNGBase {
 
-    private static final String PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL = "pls/prospectdiscoveryconfiguration/";
+    private static final String PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL = "pls/prospectdiscoveryconfigs/";
     
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {

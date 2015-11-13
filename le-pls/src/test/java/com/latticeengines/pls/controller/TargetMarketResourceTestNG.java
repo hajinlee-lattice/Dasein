@@ -14,7 +14,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
 
-    private static final String PLS_TARGETMARKET_URL = "pls/targetmarket/";
+    private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {

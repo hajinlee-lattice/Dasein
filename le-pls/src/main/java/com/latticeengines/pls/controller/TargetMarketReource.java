@@ -16,9 +16,9 @@ import com.latticeengines.pls.service.TargetMarketService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "targetmarket", description = "REST resource for target market")
+@Api(value = "targetmarket", description = "REST resource for target markets")
 @RestController
-@RequestMapping("/targetmarket")
+@RequestMapping("/targetmarkets")
 @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
 public class TargetMarketReource {
 

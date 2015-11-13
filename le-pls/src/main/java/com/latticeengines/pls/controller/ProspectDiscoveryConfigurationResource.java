@@ -19,7 +19,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "prospectDiscoveryConfiguration", description = "REST resource for prospect discovery configurations")
 @RestController
-@RequestMapping("/prospectdiscoveryconfiguration")
+@RequestMapping("/prospectdiscoveryconfigs")
 @PreAuthorize("hasRole('View_PLS_Configurations')")
 public class ProspectDiscoveryConfigurationResource {
     

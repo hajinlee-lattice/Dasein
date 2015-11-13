@@ -14,9 +14,9 @@ import com.latticeengines.pls.service.QuotaService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "quota", description = "REST resource for quota object")
+@Api(value = "quota", description = "REST resource for quotas")
 @RestController
-@RequestMapping("/quota")
+@RequestMapping("/quotas")
 @PreAuthorize("hasRole('View_PLS_Quotas')")
 public class QuotaResource {
 

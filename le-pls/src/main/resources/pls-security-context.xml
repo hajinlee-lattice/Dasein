@@ -29,21 +29,21 @@
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>
     <security:http use-expressions="true"
-                   pattern="/pls/targetmarket/**"
+                   pattern="/pls/targetmarkets/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>
     <security:http use-expressions="true"
-                   pattern="/pls/quota/**"
+                   pattern="/pls/quotas/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>
     <security:http use-expressions="true"
-                   pattern="/pls/prospectdiscoveryconfiguration/**"
+                   pattern="/pls/prospectdiscoveryconfigs/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
