@@ -88,8 +88,9 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
             }
             log.info("Finished extract and import.");
 
-            eaiMetadataService.setLastModifiedTimeStamp(tableMetadata, importContext);
+            eaiMetadataService.updateTableSchema(tableMetadata, importContext);
             eaiMetadataService.registerTables(tableMetadata, importContext);
+            
         } catch (Exception e) {
             Thread.sleep(20000);
             dataExtractionService.cleanUpTargetPathData(importContext);

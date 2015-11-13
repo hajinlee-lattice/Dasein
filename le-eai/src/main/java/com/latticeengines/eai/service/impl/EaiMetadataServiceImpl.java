@@ -213,13 +213,29 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     }
 
     @Override
-    public void setLastModifiedTimeStamp(List<Table> tableMetadata, ImportContext importContext) {
-        @SuppressWarnings("unchecked")
-        Map<String, Long> map = importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class);
+    public void updateTableSchema(List<Table> tableMetadata, ImportContext importContext) {
         for (Table table : tableMetadata) {
-            LastModifiedKey lmk = table.getLastModifiedKey();
-            Long lastModifiedDateValue = map.get(table.getName());
-            lmk.setLastModifiedTimestamp(lastModifiedDateValue);
+            setLastModifiedTimeStamp(table, importContext);
+            useSemanticTypeAsAttrName(table);
         }
     }
+
+    @VisibleForTesting
+    void setLastModifiedTimeStamp(Table table, ImportContext importContext) {
+        @SuppressWarnings("unchecked")
+        Map<String, Long> map = importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class);
+        LastModifiedKey lmk = table.getLastModifiedKey();
+        Long lastModifiedDateValue = map.get(table.getName());
+        lmk.setLastModifiedTimestamp(lastModifiedDateValue);
+    }
+
+    @VisibleForTesting
+    void useSemanticTypeAsAttrName(Table table) {
+        for (Attribute attr : table.getAttributes()) {
+            if (StringUtils.isNotEmpty(attr.getSemanticType())) {
+                attr.setName(attr.getSemanticType());
+            }
+        }
+    }
+
 }

@@ -55,6 +55,4 @@ public abstract class ImportService {
         return context.getProperty(ImportProperty.PRODUCERTEMPLATE, ProducerTemplate.class);
     }
 
-    public abstract void updateTableSchema(List<Table> tableMetadata);
-
 }

@@ -65,10 +65,4 @@ public class FileImportServiceImpl extends ImportService {
             throw new LedpException(LedpCode.LEDP_17001);
         }
     }
-
-    @Override
-    public void updateTableSchema(List<Table> tableMetadata) {
-
-    }
-
 }

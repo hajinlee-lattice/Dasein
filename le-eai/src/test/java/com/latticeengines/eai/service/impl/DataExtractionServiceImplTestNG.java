@@ -33,6 +33,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -132,11 +133,13 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         camelContext.start();
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
-        for (Table table : tables) {
-            System.out.println(table);
-        }
 
         Thread.sleep(30000L);
+
+        new EaiMetadataServiceImpl().updateTableSchema(tables, importContext);
+        for (Table table : tables) {
+            System.out.println(JsonUtils.serialize(table));
+        }
         checkDataExists(targetPath, tableNameList, 1);
         System.out.println(importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class));
 
@@ -174,6 +177,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
+        new EaiMetadataServiceImpl().updateTableSchema(tables, importContext);
         assertFalse(tables.get(0).getNameAttributeMap().containsKey("Id"));
         assertTrue(tables.get(0).getNameAttributeMap().containsKey("NewId"));
 

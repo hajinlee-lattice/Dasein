@@ -1,7 +1,6 @@
 package com.latticeengines.eai.service;
 
 import java.util.List;
-
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -18,8 +17,6 @@ public interface EaiMetadataService {
 
     Table getTable(String customerSpace, String tableName);
 
-    void setLastModifiedTimeStamp(List<Table> tableMetadata, ImportContext importContext);
-
     void createImportTable(String customerSpace, Table table);
 
     void createImportTables(String customerSpace, List<Table> tables);
@@ -27,5 +24,7 @@ public interface EaiMetadataService {
     List<Table> getImportTables(String customerSpace);
 
     Table getImportTable(String customerSpace, String tableName);
+
+    void updateTableSchema(List<Table> tableMetadata, ImportContext importContext);
 
 }

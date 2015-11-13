@@ -91,7 +91,6 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             setFilters(sourceImportConfig, customerSpace);
 
             importService.importDataAndWriteToHdfs(sourceImportConfig, context);
-            importService.updateTableSchema(tableMetadata);
 
         }
         return tableMetadata;
