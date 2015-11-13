@@ -68,6 +68,9 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Value("${eai.salesforce.password}")
     private String salesforcePasswd;
 
+    @Value("${eai.salesforce.production.loginurl}")
+    private String productionLoginUrl;
+
     private String targetPath;
 
     private EaiMetadataServiceImpl eaiMetadataService;
@@ -93,6 +96,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
         eaiMetadataService = mock(EaiMetadataServiceImpl.class);

@@ -2,8 +2,10 @@ package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,9 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
     @Value("${eai.salesforce.password}")
     private String salesforcePasswd;
 
+    @Value("${eai.salesforce.production.loginurl}")
+    private String productionLoginUrl;
+
     private Tenant tenant;
 
     private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
@@ -76,6 +81,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
         tenant = createTenant(customerSpace);

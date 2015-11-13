@@ -70,6 +70,9 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     @Value("${eai.salesforce.password}")
     private String salesforcePasswd;
 
+    @Value("${eai.salesforce.production.loginurl}")
+    private String productionLoginUrl;
+
     private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
             "Opportunity", "OpportunityContactRole" });
 
@@ -93,6 +96,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
         crmCredential.setPassword(salesforcePasswd);
