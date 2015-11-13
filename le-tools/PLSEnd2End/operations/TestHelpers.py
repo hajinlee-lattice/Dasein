@@ -2,6 +2,7 @@
 # coding: utf-8
 
 # Base test framework test helpers
+import re
 
 __author__ = "Illya Vinnichenko"
 __copyright__ = "Copyright 2014"
@@ -363,6 +364,8 @@ class LPConfigRunner(SessionRunner):
         dlConfig.createMockDataProviders(tenant, marketting_app);
         dlConfig.editMockRefreshDataSources(tenant, marketting_app);
         dlConfig.loadCfgTables(tenant);
+        jamsRunner = JamsRunner()
+        jamsRunner.setJamsTenant(tenant)
 
     def lpGetModel(self, authorization):
         url = self.model_url + "/pls/modelsummaries/"
@@ -491,15 +494,16 @@ class LPConfigRunner(SessionRunner):
 
         return tenantBody;
 
-class DLConfigRunner(SessionRunner):  
+
+class DLConfigRunner(SessionRunner):
     def __init__(self, logfile=None, exception=False):
         super(DLConfigRunner, self).__init__(logfile);
         self.exception = exception;
 
     def editDataProviders(self, tenant, dp, connection_string, host=None, dlc_path=PLSEnvironments.dlc_path,
-                      dl_server=PLSEnvironments.dl_server,
-                      user=PLSEnvironments.dl_server_user,
-                      password=PLSEnvironments.dl_server_pwd):
+                          dl_server=PLSEnvironments.dl_server,
+                          user=PLSEnvironments.dl_server_user,
+                          password=PLSEnvironments.dl_server_pwd):
 
         dlc = DLCRunner(dlc_path=dlc_path)
         command = "Edit Data Provider"
@@ -508,14 +512,14 @@ class DLConfigRunner(SessionRunner):
                   "-p": password,
                   "-t": tenant,
                   "-v": "true"
-                 }
+                  }
         params["-cs"] = '"%s"' % connection_string
         params["-dpn"] = dp
         # print dp
         dlc.runDLCcommand(command, params)
         dlc.getStatus()
 
-    def configDLTables(self,tenant,marketting_app):
+    def configDLTables(self, tenant, marketting_app):
 
         self.editDataProviders(tenant, "SQL_PropDataForModeling", PLSEnvironments.SQL_PropDataForModeling);
         self.editDataProviders(tenant, "SQL_PropDataForScoring", PLSEnvironments.SQL_PropDataForScoring);
@@ -526,9 +530,9 @@ class DLConfigRunner(SessionRunner):
         self.editDataProviders(tenant, "SQL_LSSBard", PLSEnvironments.SQL_LSSBard);
 
     def createMockDataProviders(self, tenant, marketting_app, dlc_path=PLSEnvironments.dlc_path,
-                      dl_server=PLSEnvironments.dl_server,
-                      user=PLSEnvironments.dl_server_user,
-                      password=PLSEnvironments.dl_server_pwd):
+                                dl_server=PLSEnvironments.dl_server,
+                                user=PLSEnvironments.dl_server_user,
+                                password=PLSEnvironments.dl_server_pwd):
 
         dlc = DLCRunner(dlc_path=dlc_path)
         command = "New Data Provider"
@@ -538,7 +542,7 @@ class DLConfigRunner(SessionRunner):
                   "-t": tenant,
                   "-dpf": '"upload|validation extract|leaf extract|itc|fstable"',
                   "-v": "true"
-                 }
+                  }
         # Mock SFDC
         if PLSEnvironments.pls_marketing_app_ELQ == marketting_app:
             params["-cs"] = '"%s"' % PLSEnvironments.mock_ELQ_SFDC_DataProvider;
@@ -549,12 +553,12 @@ class DLConfigRunner(SessionRunner):
         elif PLSEnvironments.pls_marketing_app_SFDC == marketting_app:
             params["-cs"] = '"%s"' % PLSEnvironments.mock_SFDC_SFDC_DataProvider;
             params["-dpn"] = "mock_SFDC_DataProvider";
-            
+
         params["-dpt"] = "sqlserver"
         print "Mock SFDC"
         dlc.runDLCcommand(command, params)
         dlc.getStatus()
-    
+
         # Mock Marketting App
         if PLSEnvironments.pls_marketing_app_ELQ == marketting_app:
             params["-cs"] = '"%s"' % PLSEnvironments.mock_ELQ_ELQ_DataProvider;
@@ -562,16 +566,16 @@ class DLConfigRunner(SessionRunner):
         elif PLSEnvironments.pls_marketing_app_MKTO == marketting_app:
             params["-cs"] = '"%s"' % PLSEnvironments.mock_MKTO_MKTO_DataProvider;
             params["-dpn"] = "mock_MKTO_MKTO_DataProvider";
-            
+
         params["-dpt"] = "sqlserver"
         print "Mock %s" % marketting_app
         dlc.runDLCcommand(command, params)
         dlc.getStatus()
 
     def editMockRefreshDataSources(self, tenant, marketting_app, dlc_path=PLSEnvironments.dlc_path,
-                               dl_server=PLSEnvironments.dl_server,
-                               user=PLSEnvironments.dl_server_user,
-                               password=PLSEnvironments.dl_server_pwd):
+                                   dl_server=PLSEnvironments.dl_server,
+                                   user=PLSEnvironments.dl_server_user,
+                                   password=PLSEnvironments.dl_server_pwd):
 
         dlc = DLCRunner(dlc_path=dlc_path)
         command = "Edit Refresh Data Source"
@@ -580,9 +584,9 @@ class DLConfigRunner(SessionRunner):
                   "-p": password,
                   "-t": tenant,
                   "-f": "@recordcount(2000000)"
-                 }
-    
-        #LoadCRMDataForModeling
+                  }
+
+        # LoadCRMDataForModeling
         rds_list = ["SFDC_User", "SFDC_Contact", "SFDC_Lead", "SFDC_Opportunity", "SFDC_OpportunityContactRole"]
         for rds in rds_list:
             params["-g"] = "LoadCRMDataForModeling"
@@ -590,19 +594,19 @@ class DLConfigRunner(SessionRunner):
             params["-cn"] = "mock_SFDC_DataProvider"
             print "Updating Refresh Data Source %s for Mock_SFDC_DataProvider" % rds
             dlc.runDLCcommand(command, params)
-            #dlc.getStatus()
-    
-        #LoadMAPDataForModeling
+            # dlc.getStatus()
+
+        # LoadMAPDataForModeling
         if marketting_app == "ELQ":
             params["-g"] = "LoadMAPDataForModeling"
             params["-rn"] = "ELQ_Contact"
             params["-cn"] = "mock_ELQ_ELQ_DataProvider";
             print "Updating Refresh Data SourceELQ_Contact for mock_ELQ_ELQ_DataProvider"
             dlc.runDLCcommand(command, params)
-            #print dlc.getStatus()
-            
-    
-        #"LoadMAPDataForModeling_ActivityRecord_OtherThanNewLead": "ActivityRecord_OtherThanNewLead",
+            # print dlc.getStatus()
+
+
+        # "LoadMAPDataForModeling_ActivityRecord_OtherThanNewLead": "ActivityRecord_OtherThanNewLead",
         elif marketting_app == "MKTO":
             params["-cn"] = "mock_MKTO_MKTO_DataProvider"
             rds_dict = {"LoadMAPDataForModeling_ActivityRecord_NewLead": "ActivityRecord_NewLead",
@@ -612,8 +616,8 @@ class DLConfigRunner(SessionRunner):
                 params["-rn"] = rds_dict[lg]
                 print "Updating Refresh Data Source %s for Mock_Marketo_Data_Provider" % rds_dict[lg]
                 dlc.runDLCcommand(command, params)
-                #dlc.getStatus()
-                
+                # dlc.getStatus()
+
         elif marketting_app == PLSEnvironments.pls_marketing_app_SFDC:
             params["-g"] = "LoadCRMDataForModeling"
             params["-rn"] = "SFDC_Account"
@@ -623,46 +627,46 @@ class DLConfigRunner(SessionRunner):
         else:
             print "!!![%s] MARKETTING UP IS NOT SUPPORTED!!!" % marketting_app
 
-
     # Step 2.75
     def loadCfgTables(self, tenant, dlc_path=PLSEnvironments.dlc_path,
                       local=False, cp=True,
-                          dl_server=PLSEnvironments.dl_server,
-                          user=PLSEnvironments.dl_server_user,
-                          password=PLSEnvironments.dl_server_pwd):
+                      dl_server=PLSEnvironments.dl_server,
+                      user=PLSEnvironments.dl_server_user,
+                      password=PLSEnvironments.dl_server_pwd):
 
         dlc = DLCRunner(dlc_path=dlc_path)
         params = {"-s": dl_server,
                   "-u": user,
                   "-p": password,
                   "-t": tenant
-                 }
+                  }
 
         runLoadGroup(tenant, "ImportMetaData", sleep_time=30)
 
         runLoadGroup(tenant, "ImportCfgTables", sleep_time=30)
+
 
 class DanteRunner(SessionRunner):
     def __init__(self, SFDC_url=None, logfile=None, exception=False):
         super(DanteRunner, self).__init__(SFDC_url, logfile);
         self.exception = exception;
         if SFDC_url == None:
-            self.sfdc_url=PLSEnvironments.pls_SFDC_login_url;
+            self.sfdc_url = PLSEnvironments.pls_SFDC_login_url;
         else:
-            self.sfdc_url=SFDC_url;
+            self.sfdc_url = SFDC_url;
         self.sfdcUI = None
-     
-    def SFDCLogin(self): 
+
+    def SFDCLogin(self):
         self.sfdcUI = webdriver.Firefox();
         self.sfdcUI.get(self.sfdc_url);
-        time.sleep(15);       
+        time.sleep(15);
         self.sfdcUI.find_element_by_id("username").clear()
         self.sfdcUI.find_element_by_id("username").send_keys(PLSEnvironments.pls_SFDC_user)
         self.sfdcUI.find_element_by_id("password").clear()
         self.sfdcUI.find_element_by_id("password").send_keys(PLSEnvironments.pls_SFDC_pwd)
         self.sfdcUI.find_element_by_id("Login").click()
         time.sleep(30);
-     
+
     def setDanteConfigSettings(self):
         self.sfdcUI.find_element_by_id("userNav-arrow").click()
         self.sfdcUI.find_element_by_link_text("Setup").click()
@@ -673,32 +677,34 @@ class DanteRunner(SessionRunner):
         time.sleep(5);
         self.sfdcUI.find_element_by_xpath("//a[contains(@href, '/a06/o')]").click()
         time.sleep(20);
-        dt_url = "https://%s/DT_%s" % (PLSEnvironments.pls_server,PLSEnvironments.pls_bard_1[3:])
+        dt_url = "https://%s/DT_%s" % (PLSEnvironments.pls_server, PLSEnvironments.pls_bard_1[3:])
         self.sfdcUI.find_element_by_id("CS_list:CS_Form:theDetailPageBlock:thePageBlockButtons:edit").click()
         time.sleep(10);
-        self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockSection:latticeforleads__url__c").clear()
-        self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockSection:latticeforleads__url__c").send_keys(dt_url)
+        self.sfdcUI.find_element_by_id(
+            "CS_Edit:CS_Form:thePageBlock:thePageBlockSection:latticeforleads__url__c").clear()
+        self.sfdcUI.find_element_by_id(
+            "CS_Edit:CS_Form:thePageBlock:thePageBlockSection:latticeforleads__url__c").send_keys(dt_url)
         self.sfdcUI.find_element_by_id("CS_Edit:CS_Form:thePageBlock:thePageBlockButtons:save").click()
- 
-    def checkDanteValueFromUI(self,dante_lead):
+
+    def checkDanteValueFromUI(self, dante_lead):
         self.SFDCLogin()
         self.setDanteConfigSettings()
-        lead_url = "%s%s" % (PLSEnvironments.pls_SFDC_url[0:PLSEnvironments.pls_SFDC_url.find("services")],dante_lead)
+        lead_url = "%s%s" % (PLSEnvironments.pls_SFDC_url[0:PLSEnvironments.pls_SFDC_url.find("services")], dante_lead)
         time.sleep(10);
         print "the lead which you want to check is: %s" % lead_url
         self.sfdcUI.get(lead_url)
-        
-    def checkDanteValueFromDB(self,dante_lead):
+
+    def checkDanteValueFromDB(self, dante_lead):
         connection_string = PLSEnvironments.SQL_conn_dante;
-        query = "SELECT count(*)  FROM [LeadCache] where [Salesforce_ID]='%s' " % dante_lead; 
+        query = "SELECT count(*)  FROM [LeadCache] where [Salesforce_ID]='%s' " % dante_lead;
         result = self.getQuery(connection_string, query);
-        assert result[0][0]==1
+        assert result[0][0] == 1
 
     def checkDanteValues(self, dante_leads):
         for danteLead in dante_leads:
             self.checkDanteValue(danteLead.values()[0])
 
-    def checkDanteValue(self,dante_lead):
+    def checkDanteValue(self, dante_lead):
         self.checkDanteValueFromDB(dante_lead)
 
 
@@ -721,9 +727,9 @@ class UtilsRunner(SessionRunner):
                 schema_map[file_map[filename]].append(os.path.join(original_location, filename))
             else:
                 schema_map[file_map[filename]] = [os.path.join(original_location, filename)]
-                
+
             print schema_map[file_map[filename]];
-            
+
         return schema_map
 
     def relocateCsvFile(self, new_location, schema_map, tag, local=False, cp=True):
@@ -737,31 +743,29 @@ class UtilsRunner(SessionRunner):
                     self.cpFile(fname, new_directory, local)
         return relocation_map
 
+
 class JamsRunner(SessionRunner):
     def __init__(self, jams_conn=PLSEnvironments.SQL_JAMS_CFG, logfile=None, exception=False):
         super(JamsRunner, self).__init__(logfile)
         self.exception = exception
         self.connection_string = jams_conn;
 
-    def setJamsTenant(self,bard_name,queue_name=None):
-        # Wait for the leads to be scored
-        dlc = SessionRunner()
-        if queue_name == None:
-            queue = PLSEnvironments.pls_server[0:PLSEnvironments.pls_server.find(".")];  # @UndefinedVariable
-        else:
-            queue=queue_name;
-        query="exec AlterJAMSDanteCfg '%s', '%s'" % (bard_name,queue);
-#         print self.connection_string;
-#         print query;
-        results = dlc.execProc(self.connection_string, query);
-        print results;
-        print query;
-        print self.connection_string;
+    def setJamsTenant(self, tenant_name, queue_name=None, dante_db=PLSEnvironments.dante_server_db):
+        runner = SessionRunner()
+        if not queue_name:
+            queue_name = 'QATest' + re.search('\\d+$', PLSEnvironments.dante_server_name).group(0)
+        query = "exec AlterJAMSDanteCfg @Tenant='%s', @Queue='%s', @DanteDB='%s'" % (
+        tenant_name, queue_name, dante_db.split('_')[1]);
+        #       print self.connection_string;
+        #       print query;
+        results = runner.execProc(self.connection_string, query);
+        print "exec AlterJAMSDanteCfg: ", "Succeed" if results[0][0] == 1 else "Failed";
         return results[0][0];
-    def setJamsTenantCycles(self,bard_name,queue_name=None,cycle_times=3):
+
+    def setJamsTenant_TryMultiTimes(self, tenant_name, queue_name, dante_db, cycle_times=3):
         wait_cycle = 0
-        while(wait_cycle < cycle_times):
-            result = self.setJamsTenant(bard_name);
+        while (wait_cycle < cycle_times):
+            result = self.setJamsTenant(tenant_name, queue_name, dante_db);
             if 1 == result:
                 print "==>Jams set up successfully!";
                 return True;
@@ -770,9 +774,10 @@ class JamsRunner(SessionRunner):
             time.sleep(600)
         print "==>Jams set up failedd!";
         return False;
-    
+
+
 def main():
-    #basePretzelTest()
+    # basePretzelTest()
     DLCRunner().testRun()
 
 

@@ -42,7 +42,7 @@ class PLSEnvironments(object):
     dl_server = "https://%s.dev.lattice.local:8080/" % dl_server_name;
     dl_server_user = "richard.liu@lattice-engines.com";
     dl_server_pwd = "1";
-    dlc_path = "\\\\10.41.1.55\DevelopmentShare\TestAutomation\DLC"
+    dlc_path = "\\\\le-700086\Share\Builds\dl_2.9.0.9732n\DLC"
 
     visidb_server_user = "admin";
     visidb_server_pwd = "visid@t@b@se";
@@ -93,7 +93,7 @@ class PLSEnvironments(object):
     dl_database_instance, dl_database_user, dl_database_password);
     SQL_conn_pdMatch = connStr + "SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
     SQL_conn_leadscoring = connStr + "SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % "10.41.1.187";
-    SQL_conn_dante = connStr + "SERVER=%s.dev.lattice.local\SQL2012STD;;DATABASE=%s;uid=%s;pwd=%s;" % (
+    SQL_conn_dante = connStr + "SERVER=%s.dev.lattice.local\SQL2012STD;DATABASE=%s;uid=%s;pwd=%s;" % (
         dante_server_name, dante_server_db, dante_server_user, dante_server_pwd);
     SQL_conn_SFDC_End2EndTest_Data = connStr + "SERVER=%s\Sql2008;DATABASE=PLS_SFDC_End2EndTest_Data;uid=dataloader_user;pwd=password;" % "10.41.1.187";
 

@@ -227,16 +227,16 @@ def recordLaunchPerfData(perf_db_connection, tenant, loadGroup, launchData):
         return
     for row in launchData:
         try:
-            validate_start = row["validatestart"].strftime('%Y-%m-%d %X') if row["validatestart"] else 'null'
-            validate_end = row["validateend"].strftime('%Y-%m-%d %X') if row["validateend"] else 'null'
+            validate_start = row["validatestart"].strftime('%Y-%m-%d %X') if row["validatestart"] else '00:00:00'
+            validate_end = row["validateend"].strftime('%Y-%m-%d %X') if row["validateend"] else '00:00:00'
             validate_duration = (row["validateend"] - row["validatestart"]).seconds if (
                 row["validateend"] and row["validatestart"]) else 0
-            gbcp_start = row["generatebcpstart"].strftime('%Y-%m-%d %X') if row["generatebcpstart"] else 'null'
-            gbcp_end = row["generatebcpend"].strftime('%Y-%m-%d %X') if row["generatebcpend"] else 'null'
+            gbcp_start = row["generatebcpstart"].strftime('%Y-%m-%d %X') if row["generatebcpstart"] else '00:00:00'
+            gbcp_end = row["generatebcpend"].strftime('%Y-%m-%d %X') if row["generatebcpend"] else '00:00:00'
             gbcp_duration = (row["generatebcpend"] - row["generatebcpstart"]).seconds if (
                 row["generatebcpend"] and row["generatebcpstart"]) else 0
-            launch_start = row["launchstart"].strftime('%Y-%m-%d %X') if row["launchstart"] else 'null'
-            launch_end = row["launchend"].strftime('%Y-%m-%d %X') if row["launchend"] else 'null'
+            launch_start = row["launchstart"].strftime('%Y-%m-%d %X') if row["launchstart"] else '00:00:00'
+            launch_end = row["launchend"].strftime('%Y-%m-%d %X') if row["launchend"] else '00:00:00'
             launch_duration = (row["launchend"] - row["launchstart"]).seconds if (
                 row["launchend"] and row["launchstart"]) else 0
             group_duration = (row["launchend"] - row["validatestart"]).seconds if (
