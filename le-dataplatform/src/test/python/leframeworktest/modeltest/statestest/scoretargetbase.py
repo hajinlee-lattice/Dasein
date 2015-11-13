@@ -1,7 +1,7 @@
-import pandas as pd
-
-from testbase import TestBase
 from leframework.model.mediator import Mediator
+import pandas as pd
+from testbase import TestBase
+
 
 class ScoreTargetBase(TestBase):
 
@@ -12,4 +12,5 @@ class ScoreTargetBase(TestBase):
         mediator.schema["reserved"] = dict()
         mediator.schema["reserved"]["score"] = "Score"
         mediator.data = pd.DataFrame(scoreTarget, columns=["Score", "Target"])
+        mediator.algorithmProperties = { "calibration_width" : 1.0 }
         generator.setMediator(mediator)

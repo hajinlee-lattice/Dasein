@@ -17,6 +17,7 @@ from leframework.model.states.initialize import Initialize
 from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.namegenerator import NameGenerator
+from leframework.model.states.normalizationgenerator import NormalizationGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
 from leframework.model.states.predictorgenerator import PredictorGenerator
@@ -26,7 +27,6 @@ from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
-from leframework.model.states.normalizationgenerator import NormalizationGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -164,6 +164,7 @@ class LearningExecutor(Executor):
             mediator.pipeline = params["pipeline"]
             mediator.depivoted = parser.isDepivoted()
             mediator.provenanceProperties = parser.getProvenanceProperties()
+            mediator.algorithmProperties = parser.getAlgorithmProperties()
             mediator.metadata = params["metadata"]
             mediator.templateVersion = parser.templateVersion
             mediator.messages = []

@@ -23,8 +23,15 @@ class CalibrationGenerator(State, JsonGenBase):
             
         # get test size and range width 
         numTest = orderedScore.shape[0]
-        defaultRangeWidth = int(math.ceil(float(numTest) / 100))
-        self.logger.info("Generating calibration with test size: "+str(numTest)+" range width: "+str(defaultRangeWidth))
+        
+        algorithmProperties = self.mediator.algorithmProperties
+        
+        calibrationWidth = 1.0
+        if "calibration_width" in algorithmProperties:
+            calibrationWidth = float(algorithmProperties["calibration_width"])
+            
+        defaultRangeWidth = int(math.ceil(float(numTest) / 100)) * calibrationWidth
+        self.logger.info("Generating calibration with test size: %s range width: %s" % (str(numTest), str(defaultRangeWidth)))
         
         # calculate cumulative target count, sum of targets from 0 to i 
         cumulativeCount = [0] * (numTest + 1)  # add a sentinel at index 0
@@ -71,7 +78,7 @@ class CalibrationGenerator(State, JsonGenBase):
         # set last range's min to null 
         oldRange = calibrationRange.pop(len(calibrationRange) - 1) 
         calibrationRange.append((oldRange[0], None))
-        self.logger.info("number of calibration ranges before: "+str(len(calibrationRange)))
+        self.logger.info("number of calibration ranges before: %s" % str(len(calibrationRange)))
         # merge calibration ranges
         hasConflict = True 
         while (hasConflict):

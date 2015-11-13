@@ -1,14 +1,13 @@
 import logging
 import os
-import shutil
-import fastavro as avro
 from pandas import Series
+import shutil
 
+import fastavro as avro
 from leframework.codestyle import overrides
 from leframework.executor import Executor
 from leframework.model.statemachine import StateMachine
 from leframework.model.states.averageprobabilitygenerator import AverageProbabilityGenerator
-from leframework.model.states.normalizationgenerator import NormalizationGenerator
 from leframework.model.states.bucketgenerator import BucketGenerator
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
 from leframework.model.states.columnmetadatagenerator import ColumnMetadataGenerator
@@ -19,6 +18,7 @@ from leframework.model.states.initialize import Initialize
 from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.namegenerator import NameGenerator
+from leframework.model.states.normalizationgenerator import NormalizationGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
 from leframework.model.states.predictorgenerator import PredictorGenerator
@@ -28,6 +28,7 @@ from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
+
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -166,6 +167,7 @@ class AggregationExecutor(Executor):
             mediator.provenanceProperties = parser.getProvenanceProperties()
             mediator.metadata = params["metadata"]
             mediator.templateVersion = parser.templateVersion
+            mediator.algorithmProperties = parser.getAlgorithmProperties()
             mediator.messages = []
             stateMachine.run()
         else:
