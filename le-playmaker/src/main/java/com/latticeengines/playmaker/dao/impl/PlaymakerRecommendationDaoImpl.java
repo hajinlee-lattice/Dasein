@@ -26,8 +26,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, "
                 + "CASE WHEN PL.[Description] IS NOT NULL THEN PL.[Description] ELSE L.[Description] END AS Description, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
-                + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, " 
-                + "CASE WHEN L.[Likelihood] > 0 AND L.[Likelihood] < 2 THEN 1 ELSE FLOOR(L.[Likelihood]) END AS Likelihood, "
+                + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, "
+                + getLikelihood()
                 + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) AS ExpirationDate, "
                 + "L.[Monetary_Value] AS MonetaryValue, M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1 T.[Display_Name] + '|' + T.[Phone_Number] + '|' + T.[Email_Address] + '|' + "
@@ -50,7 +50,11 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return results;
     }
 
-    private void convertContacts(List<Map<String, Object>> results) {
+    protected String getLikelihood() {
+        return "CASE WHEN L.[Likelihood] > 0 AND L.[Likelihood] < 2 THEN 1 ELSE FLOOR(L.[Likelihood]) END AS Likelihood, ";
+    }
+
+    protected void convertContacts(List<Map<String, Object>> results) {
         if (CollectionUtils.isNotEmpty(results)) {
             for (Map<String, Object> record : results) {
                 String contacts = (String) record.get("Contacts");
@@ -86,12 +90,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return queryForObject(sql, source, Integer.class);
     }
 
-    private String getRecommendationFromWhereClause(int syncDestination) {
-        return "FROM [PreLead] L LEFT OUTER JOIN LaunchRun R "
-                + "ON L.[LaunchRun_ID] = R.[LaunchRun_ID]  AND R.Launch_Stage = 0 JOIN LEAccount A "
-                + "ON L.Account_ID = A.LEAccount_ID JOIN Play PL " + "ON L.Play_ID = PL.Play_ID JOIN Priority P "
-                + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C "
-                + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M "
+    protected String getRecommendationFromWhereClause(int syncDestination) {
+        return "FROM [PreLead] L WITH (NOLOCK) LEFT OUTER JOIN LaunchRun R WITH (NOLOCK) "
+                + "ON L.[LaunchRun_ID] = R.[LaunchRun_ID]  AND R.Launch_Stage = 0 JOIN LEAccount A WITH (NOLOCK) "
+                + "ON L.Account_ID = A.LEAccount_ID JOIN Play PL "
+                + "ON L.Play_ID = PL.Play_ID JOIN Priority P WITH (NOLOCK) "
+                + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C WITH (NOLOCK) "
+                + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M WITH (NOLOCK) "
                 + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID " + "WHERE L.Status = 2800 AND "
                 + "L.Synchronization_Destination in (" + getDestinationonValues(syncDestination) + ") "
                 + "AND DATEDIFF(s,'19700101 00:00:00:000',L.[Last_Modification_Date]) >= :start ";
@@ -178,7 +183,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getPlayFromWhereClause() {
-        return "FROM [Play] WHERE DATEDIFF(s,'19700101 00:00:00:000', [Last_Modification_Date]) >= :start ";
+        return "FROM [Play] WITH (NOLOCK) WHERE DATEDIFF(s,'19700101 00:00:00:000', [Last_Modification_Date]) >= :start ";
     }
 
     @Override
@@ -211,7 +216,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getAccountExtensionFromWhereClause() {
-        return "FROM [LEAccount_Extensions] E JOIN [LEAccount] A ON E.Item_ID = A.LEAccount_ID WHERE DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) >= :start ";
+        return "FROM [LEAccount_Extensions] E WITH (NOLOCK) JOIN [LEAccount] A WITH (NOLOCK) ON E.Item_ID = A.LEAccount_ID WHERE DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) >= :start ";
     }
 
     @Override

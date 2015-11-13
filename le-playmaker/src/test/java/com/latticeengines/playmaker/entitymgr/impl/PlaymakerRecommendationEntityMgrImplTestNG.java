@@ -173,7 +173,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         Assert.assertTrue(result.size() > 0);
     }
 
-    public static PlaymakerTenant getTennat() {
+    public PlaymakerTenant getTennat() {
         return PlaymakerTenantEntityMgrImplTestNG.getTenant();
     }
 
