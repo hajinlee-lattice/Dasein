@@ -34,13 +34,13 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
     @Autowired
     private RestTemplate restTemplate;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     private void setup() throws Exception {
         url = url + "/customerspaces/{customerSpace}/validateCredential/{sourceType}";
     }
 
     //test production
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void testValidCredential(){
         CrmCredential cred = new CrmCredential();
         cred.setUserName(salesforceUserName);
@@ -55,7 +55,7 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
     }
 
     //test sandbox
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void testValidSandboxCredential(){
         CrmCredential cred = new CrmCredential();
         cred.setUserName("tsanghavi@lattice-engines.com.sandbox2");
@@ -69,7 +69,7 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
         assertTrue(response.isSuccess());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void testInvalidCredential(){
         CrmCredential cred = new CrmCredential();
         cred.setUserName(salesforceUserName);
