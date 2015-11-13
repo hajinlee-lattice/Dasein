@@ -53,7 +53,7 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
     @Override
     public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName,
-                                                                int dataVersion, DocumentDirectory configDir) {
+            int dataVersion, DocumentDirectory configDir) {
         String dmDeployment = space.getTenantId();
         String contractExternalID = space.getContractId();
 
@@ -88,12 +88,11 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
         }
 
         String dataStoreLaunch = dataStorePath + "\\" + DLFolder.LAUNCH.toPath();
-        getChild(configDir, "DL", "DataStore_Launch").getDocument() .setData(dataStoreLaunch);
+        getChild(configDir, "DL", "DataStore_Launch").getDocument().setData(dataStoreLaunch);
         String dataStoreBackup = dataStorePath + "\\" + DLFolder.BACKUP.toPath();
-        getChild(configDir, "DL", "DataStore_Backup").getDocument() .setData(dataStoreBackup);
+        getChild(configDir, "DL", "DataStore_Backup").getDocument().setData(dataStoreBackup);
         String dataStoreStatus = dataStorePath + "\\" + DLFolder.STATUS.toPath();
-        getChild(configDir, "DL", "DataStore_Status").getDocument() .setData(dataStoreStatus);
-
+        getChild(configDir, "DL", "DataStore_Status").getDocument().setData(dataStoreStatus);
 
         int permStoreOpt = MASTER;
         if (permanentStoreOption.equals("Master")) {
@@ -130,13 +129,15 @@ public class VisiDBDLInstaller extends LatticeComponentInstaller {
                 response = dataLoaderService.createDLTenant(postRequest, dlUrl);
                 status = response.getStatus();
                 if (status != SUCCESS) {
-                    throw new LedpException(LedpCode.LEDP_18032, new String[]{StringEscapeUtils.escapeJava(response.getErrorMessage())});
+                    throw new LedpException(LedpCode.LEDP_18032, new String[] { StringEscapeUtils.escapeJava(response
+                            .getErrorMessage()) });
                 }
                 log.info("Tenant " + tenant + " has been successfully created in VisiDB/Dataloader");
             } else if (StringUtils.isEmpty(errorMessage) && status == SUCCESS) {
                 log.warn("Tenant " + tenant + " has already been installed in VisiDB/Dataloader");
             } else {
-                throw new LedpException(LedpCode.LEDP_18032, new String[] { StringEscapeUtils.escapeJava(errorMessage) });
+                throw new LedpException(LedpCode.LEDP_18032,
+                        new String[] { StringEscapeUtils.escapeJava(errorMessage) });
             }
             return configDir;
         } catch (Exception e) {

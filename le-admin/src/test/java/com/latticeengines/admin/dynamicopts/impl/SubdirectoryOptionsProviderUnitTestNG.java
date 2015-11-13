@@ -17,7 +17,7 @@ import com.latticeengines.admin.dynamicopts.OptionsProvider;
 public class SubdirectoryOptionsProviderUnitTestNG {
 
     final private String parent = "tmp";
-    final private String[] folders = {"folder1", "folder2"};
+    final private String[] folders = { "folder1", "folder2" };
 
     private String rootPath;
     private OptionsProvider provider;
@@ -28,7 +28,7 @@ public class SubdirectoryOptionsProviderUnitTestNG {
         rootPath = cwd.getCanonicalPath();
         Path parentDir = FileSystems.getDefault().getPath(rootPath, parent);
         FileUtils.forceMkdir(parentDir.toFile());
-        for (String folder: folders) {
+        for (String folder : folders) {
             Path dir = FileSystems.getDefault().getPath(rootPath, parent, folder);
             FileUtils.forceMkdir(dir.toFile());
         }
@@ -68,6 +68,5 @@ public class SubdirectoryOptionsProviderUnitTestNG {
         Thread.sleep(3000L);
         Assert.assertEquals(provider.getOptions().size(), folders.length + 1);
     }
-
 
 }

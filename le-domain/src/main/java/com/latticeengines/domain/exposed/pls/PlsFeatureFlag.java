@@ -7,10 +7,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
 
 public enum PlsFeatureFlag {
-    ACTIVATE_MODEL_PAGE("ActivateModelPage", "the page to manage model activities through segments."),
-    SYSTEM_SETUP_PAGE("SystemSetupPage", "System Setup page."),
-    ADMIN_ALERTS_TAB("AdminAlertsTab", "Alerts tab in the admin page."),
-    SETUP_PAGE("SetupPage", "Root flag for the whole Setup page.");
+    ACTIVATE_MODEL_PAGE("ActivateModelPage", "the page to manage model activities through segments."), SYSTEM_SETUP_PAGE(
+            "SystemSetupPage", "System Setup page."), ADMIN_ALERTS_TAB("AdminAlertsTab",
+            "Alerts tab in the admin page."), SETUP_PAGE("SetupPage", "Root flag for the whole Setup page.");
 
     private String name;
     private FeatureFlagDefinition definition;
@@ -26,13 +25,17 @@ public enum PlsFeatureFlag {
     PlsFeatureFlag(String name, String documentation) {
         this.name = name;
         this.definition = new FeatureFlagDefinition();
-        definition.displayName = name;
-        definition.documentation = documentation;
+        definition.setDisplayName(name);
+        definition.setDocumentation(documentation);
     }
 
-    public static PlsFeatureFlag fromName(String name) { return PlsFeatureFlag.valueOf(name.toUpperCase()); }
+    public static PlsFeatureFlag fromName(String name) {
+        return PlsFeatureFlag.valueOf(name.toUpperCase());
+    }
 
-    public static List<String> getNames() { return names; }
+    public static List<String> getNames() {
+        return names;
+    }
 
     @JsonValue
     public String getName() {
@@ -40,8 +43,12 @@ public enum PlsFeatureFlag {
     }
 
     @JsonValue
-    public FeatureFlagDefinition getDefinition() { return definition; }
+    public FeatureFlagDefinition getDefinition() {
+        return definition;
+    }
 
     @Override
-    public String toString() { return name; }
+    public String toString() {
+        return name;
+    }
 }

@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public interface TenantService {
-    
+
     boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration);
 
     Collection<TenantDocument> getTenants(String contractId);
@@ -25,7 +25,7 @@ public interface TenantService {
     BootstrapState getTenantOverallState(String contractId, String tenantId);
 
     boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties);
-    
+
     SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName);
 
     SpaceConfiguration getDefaultSpaceConfig();

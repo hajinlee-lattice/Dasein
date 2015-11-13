@@ -1,8 +1,10 @@
 package com.latticeengines.admin.controller;
 
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -20,7 +22,7 @@ public class ServiceResourceTestNG extends AdminFunctionalTestNGBase {
 
     @Autowired
     private TestLatticeComponent testLatticeComponent;
-    
+
     @Test(groups = "functional")
     public void testUpdateOptions() {
         String url = getRestHostPort() + String.format("/admin/services/%s/options", testLatticeComponent.getName());
@@ -36,5 +38,13 @@ public class ServiceResourceTestNG extends AdminFunctionalTestNGBase {
         ResponseEntity<Boolean> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Boolean.class);
         assertTrue(response.getBody());
     }
-    
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "functional")
+    public void testGetServicesWithProducts() {
+        Map response = restTemplate.getForObject(getRestHostPort() + "/admin/services/products", Map.class);
+        assertNotNull(response);
+        System.out.println(response.keySet());
+    }
+
 }

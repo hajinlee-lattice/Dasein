@@ -10,7 +10,7 @@ public class TestLatticeComponentUpgrader implements CustomerSpaceServiceUpgrade
 
     @Override
     public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion, int targetVersion,
-                                     DocumentDirectory source, Map<String, String> properties) {
+            DocumentDirectory source, Map<String, String> properties) {
         return null;
     }
 }

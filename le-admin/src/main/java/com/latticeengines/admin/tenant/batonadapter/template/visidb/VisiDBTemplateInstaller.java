@@ -53,7 +53,8 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
     }
 
     @Override
-    public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
+    public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName,
+            int dataVersion, DocumentDirectory configDir) {
         String dmDeployment = space.getTenantId();
         String contractExternalID = space.getContractId();
 
@@ -64,8 +65,8 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
         SerializableDocumentDirectory vdbdlConfig;
         try {
-            vdbdlConfig = tenantService.getTenantServiceConfig(
-                    contractExternalID, dmDeployment, VisiDBDLComponent.componentName);
+            vdbdlConfig = tenantService.getTenantServiceConfig(contractExternalID, dmDeployment,
+                    VisiDBDLComponent.componentName);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18038, "Cannot find the configuration of VisiDBDL component.", e);
         }
@@ -73,8 +74,8 @@ public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
         String version = vdbdlConfig.getNodeAtPath("/TemplateVersion").getData();
         File visiDBTemplate = new File(templateProvider.getTemplate(version, topology) + ".specs");
         if (!visiDBTemplate.exists()) {
-            throw new LedpException(LedpCode.LEDP_18038,
-                    new IOException("Cannot find VDB template at " + visiDBTemplate));
+            throw new LedpException(LedpCode.LEDP_18038, new IOException("Cannot find VDB template at "
+                    + visiDBTemplate));
         }
 
         try {

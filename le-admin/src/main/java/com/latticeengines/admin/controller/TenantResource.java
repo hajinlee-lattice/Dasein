@@ -53,8 +53,7 @@ public class TenantResource {
         return tenantService.createTenant(contractId, tenantId, registration);
     }
 
-    @RequestMapping(value = "/{tenantId}/services/{serviceName}",
-            method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Bootstrap a Lattice tenant service")
     public boolean bootstrapTenant(@PathVariable String tenantId, //
@@ -92,15 +91,12 @@ public class TenantResource {
 
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Delete tenant for a particular contract id")
-    public TenantDocument getTenant(@RequestParam(value = "contractId") String contractId,
-                                    @PathVariable String tenantId) {
+    @ApiOperation(value = "Get tenant for a particular contract id")
+    public TenantDocument getTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
         return tenantService.getTenant(contractId, tenantId);
     }
 
-
-    @RequestMapping(value = "/{tenantId}/services/{serviceName}",
-            method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get config for currently provisioned tenant service")
     public SerializableDocumentDirectory getServiceConfig(@RequestParam(value = "contractId") String contractId, //
@@ -111,8 +107,7 @@ public class TenantResource {
         return config;
     }
 
-    @RequestMapping(value = "/{tenantId}/services/{serviceName}/state",
-            method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}/state", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get state for tenant service")
     public BootstrapState getServiceState(@RequestParam(value = "contractId") String contractId, //
@@ -125,7 +120,7 @@ public class TenantResource {
     @ApiOperation(value = "Get list of available topologies")
     public List<String> getTopologies() {
         List<String> topologies = new ArrayList<>();
-        for (CRMTopology topology: CRMTopology.values()) {
+        for (CRMTopology topology : CRMTopology.values()) {
             topologies.add(topology.getName());
         }
         return topologies;
@@ -136,38 +131,33 @@ public class TenantResource {
     @ApiOperation(value = "Get list of available products")
     public List<String> getProducts() {
         List<String> products = new ArrayList<>();
-        for (LatticeProduct product: LatticeProduct.values()) {
+        for (LatticeProduct product : LatticeProduct.values()) {
             products.add(product.getName());
         }
         return products;
     }
 
-    @RequestMapping(value = "/{tenantId}/featureflags",
-            method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/featureflags", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get feature flags for a tenant")
     public FeatureFlagValueMap getFlags(@PathVariable String tenantId) {
         return featureFlagService.getFlags(tenantId);
     }
 
-    @RequestMapping(value = "/{tenantId}/featureflags",
-            method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/featureflags", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Set feature flags for a tenant")
-    public FeatureFlagValueMap setFlag(@PathVariable String tenantId,
-                                       @RequestBody FeatureFlagValueMap flags) {
-        for (Map.Entry<String, Boolean> flag: flags.entrySet()) {
+    public FeatureFlagValueMap setFlag(@PathVariable String tenantId, @RequestBody FeatureFlagValueMap flags) {
+        for (Map.Entry<String, Boolean> flag : flags.entrySet()) {
             featureFlagService.setFlag(tenantId, flag.getKey(), flag.getValue());
         }
         return featureFlagService.getFlags(tenantId);
     }
 
-    @RequestMapping(value = "/{tenantId}/featureflags/{flagId}",
-            method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/featureflags/{flagId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Remove a feature flag from a tenant")
-    public FeatureFlagValueMap removeFlag(@PathVariable String tenantId,
-                                          @PathVariable String flagId) {
+    public FeatureFlagValueMap removeFlag(@PathVariable String tenantId, @PathVariable String flagId) {
         featureFlagService.removeFlag(tenantId, flagId);
         return featureFlagService.getFlags(tenantId);
     }

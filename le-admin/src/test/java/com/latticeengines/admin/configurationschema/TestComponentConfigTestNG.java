@@ -15,12 +15,12 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
 
     @Override
-    @BeforeMethod(groups = {"unit", "functional"})
+    @BeforeMethod(groups = { "unit", "functional" })
     protected void setUp() throws Exception {
         super.setUp();
         this.component = new TestLatticeComponent();
         this.defaultJson = "testcomponent_default.json";
-        this.metadataJson = "testcomponent_metadata.json";  // optional
+        this.metadataJson = "testcomponent_metadata.json"; // optional
         this.expectedJson = "testcomponent_expected.json";
         setupPaths();
         // This is only required for the TestComponent
@@ -28,16 +28,21 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
     }
 
     @Test(groups = "unit")
-    public void testUnitMainFlow() { runUnitMainFlow(); }
+    public void testUnitMainFlow() {
+        runUnitMainFlow();
+    }
 
     @Test(groups = "functional")
-    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
+    public void testDefaultConfigurationFuncational() {
+        runFunctionalMainFlow();
+    }
 
     /*
-    ================================================================================
-        Test how you want to use the configuration
-    ================================================================================
-    */
+     * ==========================================================================
+     * ====== Test how you want to use the configuration
+     * ========================
+     * ========================================================
+     */
 
     /**
      * this test demonstrate how to get configuration using DocumentDirectory
@@ -62,8 +67,7 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
             throw new AssertionError("Config6 should be a json array.");
         }
         for (JsonNode node : aNode) {
-            Assert.assertTrue(node.asText().equals("string1")
-                    || node.asText().equals("string2"));
+            Assert.assertTrue(node.asText().equals("string1") || node.asText().equals("string2"));
         }
 
         int zero = Integer.valueOf(dir.getChild("ZeroNumber").getDocument().getData());

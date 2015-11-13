@@ -40,7 +40,7 @@ public class DataStoreProvider implements OptionsProvider {
     @Override
     public List<String> getOptions() {
         List<String> toReturn = new ArrayList<>();
-        for (String option: dirWatcher.getOptions()) {
+        for (String option : dirWatcher.getOptions()) {
             toReturn.add(dirWatcher.toRemoteAddr(option));
         }
         return toReturn;
@@ -56,7 +56,8 @@ public class DataStoreProvider implements OptionsProvider {
     }
 
     public String toOptionKey(String remoteAddr) {
-        return dirWatcher.toOptionKey(remoteAddr); }
+        return dirWatcher.toOptionKey(remoteAddr);
+    }
 
     public void createTenantFolder(String server, String dmDeployment) {
         FileSystem fs = FileSystems.getDefault();
@@ -79,9 +80,13 @@ public class DataStoreProvider implements OptionsProvider {
     public enum DLFolder {
         BACKUP("Backup"), LAUNCH("Launch"), STATUS("Status");
         private final String path;
+
         DLFolder(String path) {
             this.path = path;
         }
-        public String toPath(){ return path; }
+
+        public String toPath() {
+            return path;
+        }
     }
 }

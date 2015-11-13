@@ -20,11 +20,15 @@ public class BardJamsEntityMgrImpl implements BardJamsEntityMgr {
 
     @Override
     @Transactional(value = "bardJamsRequest")
-    public void create(BardJamsTenant request) { bardJamsRequestDao.create(request); }
+    public void create(BardJamsTenant request) {
+        bardJamsRequestDao.create(request);
+    }
 
     @Override
     @Transactional(value = "bardJamsRequest")
-    public void update(BardJamsTenant request) { bardJamsRequestDao.update(request); }
+    public void update(BardJamsTenant request) {
+        bardJamsRequestDao.update(request);
+    }
 
     @Override
     @Transactional(value = "bardJamsRequest")

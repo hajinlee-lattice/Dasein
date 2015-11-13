@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -24,6 +25,7 @@ import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -42,6 +44,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     @Value("${admin.upload.schema}")
     protected boolean uploadSchema;
 
+    protected Set<LatticeProduct> products;
+
     public static final String spaceConfigNode = PathConstants.SPACECONFIGURATION_NODE;
 
     public abstract boolean doRegistration();
@@ -51,6 +55,14 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     public abstract CustomerSpaceServiceUpgrader getUpgrader();
 
     public abstract String getVersionString();
+
+    public void setAssociatedProducts(Set<LatticeProduct> products) {
+        this.products = products;
+    }
+
+    public Set<LatticeProduct> getAssociatedProducts() {
+        return this.products;
+    }
 
     public final boolean register() {
         if (doRegistration()) {
@@ -70,15 +82,15 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     @PostConstruct
     public void postConstruct() {
         boolean needToRegister = Boolean.valueOf(System.getProperty("com.latticeengines.registerBootstrappers"));
-        if (needToRegister && !batonService.getRegisteredServices().contains(getName())) register();
+        if (needToRegister && !batonService.getRegisteredServices().contains(getName()))
+            register();
     }
 
     protected boolean uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson) {
         return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, this.getName());
     }
 
-    public static boolean
-    uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson, String serviceName) {
+    public static boolean uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson, String serviceName) {
         String podId = CamilleEnvironment.getPodId();
         Camille camille = CamilleEnvironment.getCamille();
 
@@ -88,7 +100,7 @@ public abstract class LatticeComponent implements HasName, GraphNode {
         try {
             camille.delete(defaultRootPath);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
         batonService.loadDirectory(dir, defaultRootPath);
 
@@ -98,7 +110,7 @@ public abstract class LatticeComponent implements HasName, GraphNode {
         try {
             camille.delete(metadataRootPath);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
         batonService.loadDirectory(dir, metadataRootPath);
 
@@ -112,17 +124,13 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     public static DocumentDirectory constructConfigDirectory(String defaultJson, String metadataJson) {
         try {
             String configStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson),
-                    "UTF-8"
-            );
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson), "UTF-8");
             String metaStr = null;
             if (metadataJson != null) {
                 metaStr = IOUtils.toString(
-                        Thread.currentThread().getContextClassLoader().getResourceAsStream(metadataJson),
-                        "UTF-8"
-                );
+                        Thread.currentThread().getContextClassLoader().getResourceAsStream(metadataJson), "UTF-8");
             }
-            SerializableDocumentDirectory sDir =  new SerializableDocumentDirectory(configStr, metaStr);
+            SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configStr, metaStr);
             return SerializableDocumentDirectory.deserialize(sDir);
         } catch (IOException e) {
             throw new AssertionError("Could not deserialize the input json to a directory.", e);
@@ -132,17 +140,13 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     public static DocumentDirectory constructMetadataDirectory(String defaultJson, String metadataJson) {
         try {
             String configStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson),
-                    "UTF-8"
-            );
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson), "UTF-8");
             String metaStr = null;
             if (metadataJson != null) {
                 metaStr = IOUtils.toString(
-                        Thread.currentThread().getContextClassLoader().getResourceAsStream(metadataJson),
-                        "UTF-8"
-                );
+                        Thread.currentThread().getContextClassLoader().getResourceAsStream(metadataJson), "UTF-8");
             }
-            SerializableDocumentDirectory sDir =  new SerializableDocumentDirectory(configStr, metaStr);
+            SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configStr, metaStr);
             return sDir.getMetadataAsDirectory();
         } catch (IOException e) {
             throw new AssertionError("Could not deserialize the input json to a directory.", e);
@@ -168,7 +172,9 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     }
 
     @Override
-    public List<? extends LatticeComponent> getChildren(){ return new ArrayList<>(dependencies); }
+    public List<? extends LatticeComponent> getChildren() {
+        return new ArrayList<>(dependencies);
+    }
 
     @Override
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
@@ -178,6 +184,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     }
 
     @Override
-    public void accept(Visitor visitor, VisitorContext ctx) { visitor.visit(this, ctx); }
+    public void accept(Visitor visitor, VisitorContext ctx) {
+        visitor.visit(this, ctx);
+    }
 
 }

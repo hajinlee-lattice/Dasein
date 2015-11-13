@@ -43,8 +43,8 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     public void tearDown() throws Exception {
         log.info("Start tearing down public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase");
         super.tearDown();
-        String PLSTenantId = String.format("%s.%s.%s",
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         deletePLSAdminUser(testAdminUsername);
         deletePLSTestTenant(PLSTenantId);
     }
@@ -53,8 +53,8 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     public void testInstallation() throws InterruptedException {
         String testAdminPassword = "admin";
 
-        String PLSTenantId = String.format("%s.%s.%s",
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -74,8 +74,8 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
 
         // idempotent test
-        Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, PLSComponent.componentName);
+        Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), contractId,
+                tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, PLSComponent.componentName);
         try {
             CamilleEnvironment.getCamille().delete(servicePath);
         } catch (Exception e) {
@@ -93,14 +93,15 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     }
 
     @Override
-    protected String getServiceName() { return PLSComponent.componentName; }
+    protected String getServiceName() {
+        return PLSComponent.componentName;
+    }
 
     private void deletePLSAdminUser(String username) {
         if (globalUserManagementService.getUserByUsername(username) != null) {
             globalUserManagementService.deleteUser(username);
         }
     }
-
 
     public void deletePLSTestTenant(String tenantId) {
         try {
@@ -119,14 +120,16 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         LoginDocument doc = plsRestTemplate.postForObject(getPlsHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        plsRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        plsRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         List<Tenant> tenants = doc.getResult().getTenants();
 
-        if (tenants == null || tenants.isEmpty()) { Assert.fail("No tenant for the login user " + username); }
+        if (tenants == null || tenants.isEmpty()) {
+            Assert.fail("No tenant for the login user " + username);
+        }
 
         Tenant tenant = null;
-        for (Tenant tenant1: doc.getResult().getTenants()) {
+        for (Tenant tenant1 : doc.getResult().getTenants()) {
             if (tenant1.getId().equals(tenantId)) {
                 tenant = tenant1;
                 break;

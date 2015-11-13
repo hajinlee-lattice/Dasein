@@ -36,7 +36,7 @@ public class FeatureFlagResource {
     @ResponseBody
     @ApiOperation(value = "Create a feature flag")
     public SimpleBooleanResponse defineFeatureFlag(@PathVariable String flagId, //
-                                                   @RequestBody FeatureFlagDefinition definition) {
+            @RequestBody FeatureFlagDefinition definition) {
         featureFlagService.defineFlag(flagId, definition);
         return SimpleBooleanResponse.successResponse();
     }

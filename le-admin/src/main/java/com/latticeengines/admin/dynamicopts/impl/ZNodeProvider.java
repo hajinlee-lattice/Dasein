@@ -25,7 +25,7 @@ public class ZNodeProvider implements OptionsProvider, MutableOptionsProvider {
 
     private static final Log log = LogFactory.getLog(ZNodeProvider.class);
 
-    public ZNodeProvider(Path path){
+    public ZNodeProvider(Path path) {
         this.zNodePath = path;
         this.camille = CamilleEnvironment.getCamille();
     }
@@ -49,7 +49,7 @@ public class ZNodeProvider implements OptionsProvider, MutableOptionsProvider {
     }
 
     @Override
-    public void setOptions(List<String> options){
+    public void setOptions(List<String> options) {
         try {
             if (!this.camille.exists(this.zNodePath)) {
                 this.camille.create(this.zNodePath, ZooDefs.Ids.OPEN_ACL_UNSAFE);

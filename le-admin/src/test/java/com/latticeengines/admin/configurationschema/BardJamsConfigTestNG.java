@@ -24,10 +24,14 @@ public class BardJamsConfigTestNG extends ConfigurationSchemaTestNGBase {
     }
 
     @Test(groups = "unit")
-    public void testUnitMainFlow() { runUnitMainFlow(); }
+    public void testUnitMainFlow() {
+        runUnitMainFlow();
+    }
 
     @Test(groups = "functional")
-    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
+    public void testDefaultConfigurationFuncational() {
+        runFunctionalMainFlow();
+    }
 
     /*
      * ==========================================================================

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,13 +21,14 @@ import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
-    
+
     @Autowired
     private ComponentOrchestrator orchestrator;
 
@@ -61,9 +63,8 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
         component3.setDependencies(Collections.singleton(component5));
         component4.setDependencies(Collections.singleton(component5));
 
-        orchestrator = new ComponentOrchestrator(Arrays.asList(
-                (LatticeComponent) component1, component2, component3, component4, component5, component6
-        ));
+        orchestrator = new ComponentOrchestrator(Arrays.asList((LatticeComponent) component1, component2, component3,
+                component4, component5, component6));
     }
 
     @AfterMethod(groups = "functional")
@@ -74,16 +75,29 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
     @Test(groups = "functional")
     public void getServiceNames() throws Exception {
         orchestrator = new ComponentOrchestrator(originalComponents);
-        for (String name : Arrays.asList(
-                "BardJams", "PLS", "DLTemplate", "VisiDBDL", "Dante", "VisiDBTemplate")) {
+        for (String name : Arrays.asList("BardJams", "PLS", "DLTemplate", "VisiDBDL", "Dante", "VisiDBTemplate")) {
             Assert.assertTrue(orchestrator.getServiceNames().contains(name));
         }
     }
 
     @Test(groups = "functional")
+    public void testGetServiceNamesWithProducts() {
+        orchestrator = new ComponentOrchestrator(originalComponents);
+        Map<String, Set<LatticeProduct>> serviceProductsMap = orchestrator.getServiceNamesWithProducts();
+        Set<String> serviceNameSet = serviceProductsMap.keySet();
+        Assert.assertTrue(serviceNameSet.containsAll(orchestrator.getServiceNames()));
+        for (String serviceName : serviceNameSet) {
+            Set<LatticeProduct> products = serviceProductsMap.get(serviceName);
+            LatticeComponent component = orchestrator.getComponent(serviceName);
+            Assert.assertNotNull(products);
+            Assert.assertEquals(products, component.getAssociatedProducts());
+        }
+    }
+
+    @Test(groups = "functional")
     public void constructByComponents() throws Exception {
-        for (String name : Arrays.asList(
-                "Component1", "Component2", "Component3", "Component4", "Component5", "Component6")) {
+        for (String name : Arrays.asList("Component1", "Component2", "Component3", "Component4", "Component5",
+                "Component6")) {
             Assert.assertTrue(orchestrator.getServiceNames().contains(name));
         }
     }
@@ -100,7 +114,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
             state = tenantService.getTenantServiceState(TestContractId, TestTenantId, "Component1");
             numOfRetries--;
             Thread.sleep(500L);
-        } while(numOfRetries > 0 && !state.state.equals(BootstrapState.State.OK));
+        } while (numOfRetries > 0 && !state.state.equals(BootstrapState.State.OK));
         Assert.assertNotNull(state);
         Assert.assertEquals(state.state, BootstrapState.State.OK);
     }
@@ -117,7 +131,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
             state = tenantService.getTenantServiceState(TestContractId, TestTenantId, "Component4");
             numOfRetries--;
             Thread.sleep(500L);
-        } while(numOfRetries > 0 && !state.state.equals(BootstrapState.State.ERROR));
+        } while (numOfRetries > 0 && !state.state.equals(BootstrapState.State.ERROR));
         Assert.assertNotNull(state);
         Assert.assertEquals(state.state, BootstrapState.State.ERROR);
     }
@@ -131,18 +145,17 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
             state = tenantService.getTenantServiceState(TestContractId, TestTenantId, "Component1");
             numOfRetries--;
             Thread.sleep(500L);
-        } while(numOfRetries > 0 && !state.state.equals(BootstrapState.State.OK));
+        } while (numOfRetries > 0 && !state.state.equals(BootstrapState.State.OK));
         Assert.assertNotNull(state);
         Assert.assertEquals(state.state, BootstrapState.State.OK);
     }
-
 
     @Test(groups = "functional")
     public void orchestrationWithDependencies() throws Exception {
         try {
             deleteTenant(TestContractId, TestTenantId);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
         createTenant(TestContractId, TestTenantId);
 
@@ -166,8 +179,8 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
                     int numOfRetries = 30;
                     BootstrapState state;
                     do {
-                        state = batonService.getTenantServiceBootstrapState(
-                                TestContractId, TestTenantId, componentName);
+                        state = batonService
+                                .getTenantServiceBootstrapState(TestContractId, TestTenantId, componentName);
                         numOfRetries--;
                         try {
                             Thread.sleep(200L);
@@ -182,16 +195,16 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
             states.put(component.getName(), future);
         }
 
-        for(Map.Entry<String, Future<BootstrapState>> entry : states.entrySet()) {
+        for (Map.Entry<String, Future<BootstrapState>> entry : states.entrySet()) {
             switch (entry.getKey()) {
-                case "Component1":
-                    Assert.assertEquals(entry.getValue().get().state, BootstrapState.State.INITIAL);
-                    break;
-                case "Component4":
-                    Assert.assertEquals(entry.getValue().get().state, BootstrapState.State.ERROR);
-                    break;
-                default:
-                    Assert.assertEquals(entry.getValue().get().state, BootstrapState.State.OK);
+            case "Component1":
+                Assert.assertEquals(entry.getValue().get().state, BootstrapState.State.INITIAL);
+                break;
+            case "Component4":
+                Assert.assertEquals(entry.getValue().get().state, BootstrapState.State.ERROR);
+                break;
+            default:
+                Assert.assertEquals(entry.getValue().get().state, BootstrapState.State.OK);
             }
         }
     }

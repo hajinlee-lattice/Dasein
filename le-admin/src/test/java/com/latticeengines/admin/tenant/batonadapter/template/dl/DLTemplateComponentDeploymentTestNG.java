@@ -67,7 +67,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
         visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
     }
 
-    @AfterClass(groups = {"deployment"})
+    @AfterClass(groups = { "deployment" })
     @Override
     public void tearDown() throws Exception {
         visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
@@ -75,14 +75,13 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
         super.tearDown();
     }
 
-    public void installDLTemplate(){
+    public void installDLTemplate() {
         Map<String, Map<String, String>> properties = new HashMap<>();
         DocumentDirectory confDir = visiDBDLComponentTestNG.constructVisiDBDLInstaller();
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(confDir);
         properties.put(VisiDBDLComponent.componentName, sDir.flatten());
 
-        sDir = new SerializableDocumentDirectory(
-                batonService.getDefaultConfiguration(getServiceName()));
+        sDir = new SerializableDocumentDirectory(batonService.getDefaultConfiguration(getServiceName()));
         properties.put(getServiceName(), sDir.flatten());
         orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties);
     }

@@ -35,7 +35,7 @@ public class DynamicOptionsServiceImplTestNG extends AbstractTestNGSpringContext
 
         dynamicOptionsService.bind(sDir);
 
-        for (SerializableDocumentDirectory.Node node: sDir.getNodes()){
+        for (SerializableDocumentDirectory.Node node : sDir.getNodes()) {
             Assert.assertEquals(node.getData(), "Marketo");
             SerializableDocumentDirectory.Metadata metadata = node.getMetadata();
             Assert.assertNotNull(metadata);
@@ -61,7 +61,7 @@ public class DynamicOptionsServiceImplTestNG extends AbstractTestNGSpringContext
 
         dynamicOptionsService.bind(doc);
 
-        for (SelectableConfigurationField node: doc.getNodes()){
+        for (SelectableConfigurationField node : doc.getNodes()) {
             if (node.getNode().equals("/Topology")) {
                 Assert.assertEquals(node.getOptions().size(), CRMTopology.values().length);
             } else {

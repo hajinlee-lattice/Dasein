@@ -44,7 +44,9 @@ public class TemplateProvider implements OptionsProvider {
     }
 
     @Override
-    public List<String> getOptions() { return dirWatcher.getOptions(); }
+    public List<String> getOptions() {
+        return dirWatcher.getOptions();
+    }
 
     public String getTemplate(String version, CRMTopology topology) {
         return absoluteRoot + "/" + version + "/" + templateMap.get(topology);

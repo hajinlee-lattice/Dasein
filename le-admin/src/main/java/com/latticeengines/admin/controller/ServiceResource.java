@@ -1,7 +1,10 @@
 package com.latticeengines.admin.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.service.ServiceService;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -42,6 +46,13 @@ public class ServiceResource {
         return new ArrayList<>(serviceService.getRegisteredServices());
     }
 
+    @RequestMapping(value = "/products", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of services and their associated products")
+    public Map<String, Set<LatticeProduct>> getServicesWithProducts() {
+        return new HashMap<>(serviceService.getRegisteredServicesWithProducts());
+    }
+
     @RequestMapping(value = "{serviceName}/default", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get default config for a service")
@@ -54,11 +65,12 @@ public class ServiceResource {
     @RequestMapping(value = "{serviceName}/options", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
-    public SelectableConfigurationDocument getServiceOptionalConfigs(
-            @PathVariable String serviceName, @RequestParam(value = "include_dynamic_opts") boolean includeDynamicOpts) {
-        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields(serviceName, includeDynamicOpts);
+    public SelectableConfigurationDocument getServiceOptionalConfigs(@PathVariable String serviceName,
+            @RequestParam(value = "include_dynamic_opts") boolean includeDynamicOpts) {
+        SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields(serviceName,
+                includeDynamicOpts);
         if (doc == null) {
-            throw new LedpException(LedpCode.LEDP_19102, new String[]{serviceName});
+            throw new LedpException(LedpCode.LEDP_19102, new String[] { serviceName });
         }
         return dynamicOptionsService.bind(doc);
     }
@@ -67,7 +79,7 @@ public class ServiceResource {
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
     public Boolean patchServiceOptionalConfigs(@PathVariable String serviceName,
-                                               @RequestBody SelectableConfigurationField patch) {
+            @RequestBody SelectableConfigurationField patch) {
         return serviceService.patchOptions(serviceName, patch);
     }
 }

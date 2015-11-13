@@ -19,7 +19,9 @@ public class DanteComponentDeploymentTestNG extends BatonAdapterDeploymentTestNG
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException {
-        if (danteSkipped) { return; }
+        if (danteSkipped) {
+            return;
+        }
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -28,27 +30,31 @@ public class DanteComponentDeploymentTestNG extends BatonAdapterDeploymentTestNG
         bootstrap(confDir);
         // wait a while, then test your installation
         BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, getServiceName());
-        Assert.assertTrue(BootstrapState.State.OK.equals(state.state)
-                || BootstrapState.State.INITIAL.equals(state.state), state.errorMessage);
+        Assert.assertTrue(
+                BootstrapState.State.OK.equals(state.state) || BootstrapState.State.INITIAL.equals(state.state),
+                state.errorMessage);
 
         // idempotent test
         deleteDanteTenantFromZK();
         bootstrap(confDir);
         state = waitUntilStateIsNotInitial(contractId, tenantId, getServiceName());
         try {
-            Assert.assertTrue(BootstrapState.State.OK.equals(state.state)
-                    || BootstrapState.State.INITIAL.equals(state.state), state.errorMessage);
+            Assert.assertTrue(
+                    BootstrapState.State.OK.equals(state.state) || BootstrapState.State.INITIAL.equals(state.state),
+                    state.errorMessage);
         } catch (AssertionError e) {
             Assert.fail("Idempotent test failed.", e);
         }
     }
 
     @Override
-    protected String getServiceName() { return DanteComponent.componentName; }
+    protected String getServiceName() {
+        return DanteComponent.componentName;
+    }
 
     private void deleteDanteTenantFromZK() {
-        Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, getServiceName());
+        Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), contractId,
+                tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, getServiceName());
         try {
             CamilleEnvironment.getCamille().delete(servicePath);
         } catch (Exception e) {

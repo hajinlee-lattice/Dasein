@@ -19,6 +19,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 @Component
@@ -32,11 +33,12 @@ public class ComponentOrchestrator {
 
     private static final long TIMEOUT = 180000L;
     private static final long WAIT_INTERVAL = 1000L;
-    private static final int NUM_RETRIES = (int) (TIMEOUT/WAIT_INTERVAL);
+    private static final int NUM_RETRIES = (int) (TIMEOUT / WAIT_INTERVAL);
 
     private static final Log log = LogFactory.getLog(ComponentOrchestrator.class);
 
-    public ComponentOrchestrator() {}
+    public ComponentOrchestrator() {
+    }
 
     public ComponentOrchestrator(List<LatticeComponent> components) {
         this.components = components;
@@ -51,7 +53,7 @@ public class ComponentOrchestrator {
         }
     }
 
-    public List<LatticeComponent> getComponents(){
+    public List<LatticeComponent> getComponents() {
         return components;
     }
 
@@ -66,7 +68,19 @@ public class ComponentOrchestrator {
         }
     }
 
-    public Set<String> getServiceNames() { return componentMap.keySet(); }
+    public Set<String> getServiceNames() {
+        return componentMap.keySet();
+    }
+
+    public Map<String, Set<LatticeProduct>> getServiceNamesWithProducts() {
+        Map<String, Set<LatticeProduct>> serviceProductsMap = new HashMap<String, Set<LatticeProduct>>();
+        Set<String> serviceNameSet = componentMap.keySet();
+        for (String serviceName : serviceNameSet) {
+            Set<LatticeProduct> products = componentMap.get(serviceName).getAssociatedProducts();
+            serviceProductsMap.put(serviceName, products);
+        }
+        return serviceProductsMap;
+    }
 
     public LatticeComponent getComponent(String serviceName) {
         if (componentMap.containsKey(serviceName)) {
@@ -77,22 +91,28 @@ public class ComponentOrchestrator {
     }
 
     public void orchestrate(String contractId, String tenantId, String spaceId,
-                            Map<String, Map<String, String>> properties) {
+            Map<String, Map<String, String>> properties) {
         OrchestratorVisitor visitor = new OrchestratorVisitor(contractId, tenantId, spaceId, properties);
         TopologicalTraverse traverser = new TopologicalTraverse();
         traverser.traverse(components, visitor);
-    }
 
+        // TODO
+        // add while loop to check the status of each component from zookeeper,
+        // and use email service to send out email.
+        // set up certain timeout, say 24 hours.
+    }
 
     private static class OrchestratorVisitor implements Visitor {
         public Set<String> failed = new HashSet<>();
         public final String contractId;
         public final String tenantId;
         public final String spaceId;
-        public final Map<String, Map<String, String>> properties; // serviceName -> bootstrapProerties
+        public final Map<String, Map<String, String>> properties; // serviceName
+                                                                  // ->
+                                                                  // bootstrapProerties
 
-        public OrchestratorVisitor(
-                String contractId, String tenantId, String spaceId, Map<String, Map<String, String>> properties) {
+        public OrchestratorVisitor(String contractId, String tenantId, String spaceId,
+                Map<String, Map<String, String>> properties) {
             this.contractId = contractId;
             this.tenantId = tenantId;
             this.spaceId = spaceId;
@@ -107,9 +127,9 @@ public class ComponentOrchestrator {
                 log.info("Attempt to install component " + component.getName());
 
                 List<? extends LatticeComponent> dependencies = component.getChildren();
-                for(LatticeComponent dependency : dependencies) {
-                    if (this.failed.contains(dependency.getName()) ||
-                            !(batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId,
+                for (LatticeComponent dependency : dependencies) {
+                    if (this.failed.contains(dependency.getName())
+                            || !(batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId,
                                     dependency.getName())).state.equals(BootstrapState.State.OK)) {
                         // dependency not satisfied
                         failed.add(component.getName());
@@ -126,7 +146,8 @@ public class ComponentOrchestrator {
                     int numOfRetries = NUM_RETRIES;
                     BootstrapState state;
                     do {
-                        state = batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId, component.getName());
+                        state = batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId,
+                                component.getName());
                         if (numOfRetries-- % 10 == 0) {
                             log.info(String.format("Bootstrap status of [%s] is %s, %d out of %d retries remained.",
                                     component.getName(), state.state.toString(), numOfRetries, NUM_RETRIES));
@@ -136,7 +157,7 @@ public class ComponentOrchestrator {
                         } catch (InterruptedException e) {
                             break;
                         }
-                    } while(numOfRetries > 0 && state.state.equals(BootstrapState.State.INITIAL));
+                    } while (numOfRetries > 0 && state.state.equals(BootstrapState.State.INITIAL));
 
                     if (!state.state.equals(BootstrapState.State.OK)) {
                         failed.add(component.getName());

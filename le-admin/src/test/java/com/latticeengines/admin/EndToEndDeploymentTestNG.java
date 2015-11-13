@@ -134,9 +134,9 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         loginAD();
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
-        //TODO: skip Dante until it becomes idempotent
+        // TODO: skip Dante until it becomes idempotent
         danteSkipped = true;
 
         cleanup();
@@ -145,21 +145,22 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ==================================================
-     * BEGIN: Verify main test tenant
-     * ==================================================
+     * ================================================== BEGIN: Verify main
+     * test tenant ==================================================
      */
 
-    //==================================================
+    // ==================================================
     // verify ZK states
-    //==================================================
+    // ==================================================
 
     @Test(groups = "deployment")
-    public void verifyZKStatesInMainTestTenant() { verifyZKState(); }
+    public void verifyZKStatesInMainTestTenant() {
+        verifyZKState();
+    }
 
-    //==================================================
+    // ==================================================
     // verify tenant truly exists
-    //==================================================
+    // ==================================================
 
     @Test(groups = "deployment")
     public void verifyJAMSMainTestTenantExists() throws Exception {
@@ -176,9 +177,9 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         verifyVisiDBDLTenantExists();
     }
 
-    //==================================================
+    // ==================================================
     // verify cross component workflows
-    //==================================================
+    // ==================================================
 
     @Test(groups = "deployment", dependsOnMethods = "verifyPLSMainTestTenantExists")
     public void verifyPLSTenantKnowsTopologyInMainTestTenant() throws Exception {
@@ -186,15 +187,13 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ==================================================
-     * END: Verify main test tenant
-     * ==================================================
+     * ================================================== END: Verify main test
+     * tenant ==================================================
      */
 
     /**
-     * ==================================================
-     * BEGIN: Tenant creation methods
-     * ==================================================
+     * ================================================== BEGIN: Tenant creation
+     * methods ==================================================
      */
 
     private void provisionEndToEndTestTenants() {
@@ -207,8 +206,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     private void provisionEndToEndTestTenant1() {
         // TenantInfo
         TenantProperties tenantProperties = new TenantProperties();
-        tenantProperties.description =
-                "A test tenant across all component provisioned by tenant console through deployment tests.";
+        tenantProperties.description = "A test tenant across all component provisioned by tenant console through deployment tests.";
         tenantProperties.displayName = tenantName;
         TenantInfo tenantInfo = new TenantInfo(tenantProperties);
 
@@ -224,15 +222,15 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         spaceConfiguration.setTopology(CRMTopology.ELOQUA);
 
         // BARDJAMS
-        SerializableDocumentDirectory jamsConfig
-                = serviceService.getDefaultServiceConfig(BardJamsComponent.componentName);
+        SerializableDocumentDirectory jamsConfig = serviceService
+                .getDefaultServiceConfig(BardJamsComponent.componentName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
         jamsConfig.applyMetadata(metaDir);
         jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
 
         // PLS
         SerializableDocumentDirectory PLSconfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
-        for (SerializableDocumentDirectory.Node node: PLSconfig.getNodes()) {
+        for (SerializableDocumentDirectory.Node node : PLSconfig.getNodes()) {
             if (node.getNode().contains("SuperAdminEmails")) {
                 node.setData("[\"bnguyen@lattice-engines.com\"]");
             } else if (node.getNode().contains("LatticeAdminEmails")) {
@@ -247,18 +245,18 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 
         // VDB Template
-        SerializableDocumentDirectory vdbTplConfig =
-                serviceService.getDefaultServiceConfig(VisiDBTemplateComponent.componentName);
+        SerializableDocumentDirectory vdbTplConfig = serviceService
+                .getDefaultServiceConfig(VisiDBTemplateComponent.componentName);
         vdbTplConfig.setRootPath("/" + VisiDBTemplateComponent.componentName);
 
         // DL Template
-        SerializableDocumentDirectory dlTplConfig =
-                serviceService.getDefaultServiceConfig(DLTemplateComponent.componentName);
+        SerializableDocumentDirectory dlTplConfig = serviceService
+                .getDefaultServiceConfig(DLTemplateComponent.componentName);
         dlTplConfig.setRootPath("/" + DLTemplateComponent.componentName);
 
         // Dante
-        SerializableDocumentDirectory danteConfig =
-                serviceService.getDefaultServiceConfig(DanteComponent.componentName);
+        SerializableDocumentDirectory danteConfig = serviceService
+                .getDefaultServiceConfig(DanteComponent.componentName);
         danteConfig.setRootPath("/" + DanteComponent.componentName);
 
         // Combine configurations
@@ -271,7 +269,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         configDirs.add(danteConfig);
 
         // Orchestrate tenant
-        TenantRegistration reg =  new TenantRegistration();
+        TenantRegistration reg = new TenantRegistration();
         reg.setContractInfo(new ContractInfo(new ContractProperties()));
         reg.setTenantInfo(tenantInfo);
         reg.setSpaceInfo(spaceInfo);
@@ -282,16 +280,15 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         boolean created = restTemplate.postForObject(url, reg, Boolean.class);
         Assert.assertTrue(created);
     }
+
     /**
-     * ==================================================
-     * END: Tenant creation methods
-     * ==================================================
+     * ================================================== END: Tenant creation
+     * methods ==================================================
      */
 
     /**
-     * ==================================================
-     * BEGIN: Tenant verification methods
-     * ==================================================
+     * ================================================== BEGIN: Tenant
+     * verification methods ==================================================
      */
     private void verifyZKState() {
         ExecutorService executor = Executors.newFixedThreadPool(6);
@@ -304,13 +301,12 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             Future<BootstrapState> future = executor.submit(new Callable<BootstrapState>() {
                 @Override
                 public BootstrapState call() throws Exception {
-                    if (component.toLowerCase().contains("test") ||
-                            (danteSkipped && component.equals(DanteComponent.componentName)) ||
-                            (plsSkipped && component.equals(PLSComponent.componentName)) ||
-                            (vdbdlSkipped && component.equals(VisiDBDLComponent.componentName)) ||
-                            (vdbTplSkipped && component.equals(VisiDBTemplateComponent.componentName)) ||
-                            (jamsSkipped && component.equals(BardJamsComponent.componentName))
-                    ) {
+                    if (component.toLowerCase().contains("test")
+                            || (danteSkipped && component.equals(DanteComponent.componentName))
+                            || (plsSkipped && component.equals(PLSComponent.componentName))
+                            || (vdbdlSkipped && component.equals(VisiDBDLComponent.componentName))
+                            || (vdbTplSkipped && component.equals(VisiDBTemplateComponent.componentName))
+                            || (jamsSkipped && component.equals(BardJamsComponent.componentName))) {
                         return BootstrapState.constructOKState(1);
                     } else {
                         return waitUntilStateIsNotInitial(contractId, tenantId, component, 600);
@@ -329,17 +325,15 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             BootstrapState state = null;
             try {
                 state = result.get();
-            } catch (InterruptedException|ExecutionException e) {
-                msg.append(String.format(
-                        "Could not successfully get the bootstrap state of %s \n", serviceName));
+            } catch (InterruptedException | ExecutionException e) {
+                msg.append(String.format("Could not successfully get the bootstrap state of %s \n", serviceName));
             }
-            boolean thisIsOK = (state != null && state.state.equals(BootstrapState.State.OK)) ||
-                    (BootstrapState.State.INITIAL.equals(state.state) &&
-                            DanteComponent.componentName.equals(serviceName));
+            boolean thisIsOK = (state != null && state.state.equals(BootstrapState.State.OK))
+                    || (BootstrapState.State.INITIAL.equals(state.state) && DanteComponent.componentName
+                            .equals(serviceName));
             if (!thisIsOK && state != null) {
-                msg.append(String.format(
-                        "The bootstrap state of %s is not OK, but rather %s : %s.\n",
-                        serviceName, state.state, state.errorMessage));
+                msg.append(String.format("The bootstrap state of %s is not OK, but rather %s : %s.\n", serviceName,
+                        state.state, state.errorMessage));
             }
             allOK = allOK && thisIsOK;
         }
@@ -352,12 +346,13 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     private void verifyPLSTenantExists() {
-        if (plsSkipped) return;
+        if (plsSkipped)
+            return;
 
         // check non-zero users
-        final String PLSTenantId =
-                String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-        List<User> users  = userService.getUsers(PLSTenantId);
+        final String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        List<User> users = userService.getUsers(PLSTenantId);
         Assert.assertFalse(users.isEmpty());
 
         final String username = "bnguyen@lattice-engines.com";
@@ -368,13 +363,14 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     private void verifyVisiDBDLTenantExists() throws IOException {
-        if (vdbdlSkipped) return;
+        if (vdbdlSkipped)
+            return;
 
         visiDBDLComponentDeploymentTestNG.verifyTenant(tenantId, dlUrl);
         // verify permstore and datastore
         String url = String.format("%s/admin/internal/datastore/", getRestHostPort());
-        Assert.assertEquals(
-                magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class).size(), 3);
+        Assert.assertEquals(magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class).size(),
+                3);
     }
 
     @SuppressWarnings("unused")
@@ -382,12 +378,12 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         // if (danteSkipped) return;
     }
 
-
     private void verifyPLSTenantKnowsTopology() {
-        if (plsSkipped) return;
+        if (plsSkipped)
+            return;
 
-        String PLSTenantId =
-                String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         RestTemplate plsRestTemplate = plsComponentDeploymentTestNG.plsRestTemplate;
         String response = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
                 String.class);
@@ -399,16 +395,15 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             Assert.fail("Failed to parse topology from PLS.", e);
         }
     }
+
     /**
-     * ==================================================
-     * END: Tenant verification methods
-     * ==================================================
+     * ================================================== END: Tenant
+     * verification methods ==================================================
      */
 
     /**
-     * ==================================================
-     * BEGIN: Tenant clean up methods
-     * ==================================================
+     * ================================================== BEGIN: Tenant clean up
+     * methods ==================================================
      */
     public void cleanup() throws Exception {
         try {
@@ -423,8 +418,8 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     private void deletePLSTenants() {
-        String PLSTenantId = String.format("%s.%s.%s",
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         plsComponentDeploymentTestNG.deletePLSTestTenant(PLSTenantId);
         try {
             // let GA recover from error deletion
@@ -455,8 +450,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ==================================================
-     * END: Tenant clean up methods
-     * ==================================================
+     * ================================================== END: Tenant clean up
+     * methods ==================================================
      */
 }

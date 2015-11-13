@@ -60,13 +60,15 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
         register(zkPath, productProvider);
     }
 
-    private void register(Path path, OptionsProvider provider) { optionMap.put(path, provider); }
+    private void register(Path path, OptionsProvider provider) {
+        optionMap.put(path, provider);
+    }
 
     @Override
     public SelectableConfigurationDocument bind(SelectableConfigurationDocument doc) {
         String component = doc.getComponent();
         Path rootPath = new Path("/" + component);
-        for (SelectableConfigurationField field: doc.getNodes()) {
+        for (SelectableConfigurationField field : doc.getNodes()) {
             Path fullPath = rootPath.append(new Path(field.getNode()));
             if (optionMap.containsKey(fullPath)) {
                 OptionsProvider provider = optionMap.get(fullPath);
@@ -78,7 +80,7 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
     @Override
     public SerializableDocumentDirectory bind(SerializableDocumentDirectory sDir) {
-        for (SerializableDocumentDirectory.Node node: sDir) {
+        for (SerializableDocumentDirectory.Node node : sDir) {
             Path fullPath = new Path(sDir.getRootPath()).append(node.path);
             if (optionMap.containsKey(fullPath)) {
                 OptionsProvider provider = optionMap.get(fullPath);
@@ -108,8 +110,10 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
     private void bindToNode(SerializableDocumentDirectory.Node node, List<String> options) {
         SerializableDocumentDirectory.Metadata metadata = node.getMetadata();
-        if (metadata == null) metadata = new SerializableDocumentDirectory.Metadata();
-        if (metadata.getType() == null || !metadata.getType().equals("options")) metadata.setType("options");
+        if (metadata == null)
+            metadata = new SerializableDocumentDirectory.Metadata();
+        if (metadata.getType() == null || !metadata.getType().equals("options"))
+            metadata.setType("options");
         metadata.setOptions(options);
         node.setMetadata(metadata);
     }

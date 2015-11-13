@@ -9,12 +9,14 @@ public class EnumOptionsProvider implements OptionsProvider {
 
     private final List<String> options = new ArrayList<>();
 
-    public EnumOptionsProvider(Class<? extends Enum<?>> enumClz){
-        for (Enum<?> item: enumClz.getEnumConstants()) {
+    public EnumOptionsProvider(Class<? extends Enum<?>> enumClz) {
+        for (Enum<?> item : enumClz.getEnumConstants()) {
             options.add(item.toString());
         }
     }
 
     @Override
-    public List<String> getOptions() { return options; }
+    public List<String> getOptions() {
+        return options;
+    }
 }

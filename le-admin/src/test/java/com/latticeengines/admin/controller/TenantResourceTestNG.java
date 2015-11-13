@@ -56,8 +56,9 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional", timeOut = 10000)
     public void getServiceState() throws InterruptedException {
-        String url = getRestHostPort() + String.format("/admin/tenants/%s/services/%s/state?contractId=%s",
-                TestTenantId, testLatticeComponent.getName(), TestContractId);
+        String url = getRestHostPort()
+                + String.format("/admin/tenants/%s/services/%s/state?contractId=%s", TestTenantId,
+                        testLatticeComponent.getName(), TestContractId);
         bootstrap(TestContractId, TestTenantId, testLatticeComponent.getName());
 
         BootstrapState state;
@@ -72,10 +73,11 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void getServiceConfig() {
-        String url = getRestHostPort() + String.format("/admin/tenants/%s/services/%s/?contractId=%s",
-                TestTenantId, testLatticeComponent.getName(), TestContractId);
-        SerializableDocumentDirectory dir =
-                restTemplate.getForObject(url, SerializableDocumentDirectory.class, new HashMap<>());
+        String url = getRestHostPort()
+                + String.format("/admin/tenants/%s/services/%s/?contractId=%s", TestTenantId,
+                        testLatticeComponent.getName(), TestContractId);
+        SerializableDocumentDirectory dir = restTemplate.getForObject(url, SerializableDocumentDirectory.class,
+                new HashMap<>());
         Assert.assertNotNull(dir);
     }
 

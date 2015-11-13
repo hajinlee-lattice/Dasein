@@ -16,7 +16,7 @@ public class FeatureFlagResourceTestNG extends AdminFunctionalTestNGBase {
     @Autowired
     private FeatureFlagService featureFlagService;
 
-     @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional")
     public void beforeMethod() {
         featureFlagService.undefineFlag(FLAG_ID);
     }
@@ -30,8 +30,7 @@ public class FeatureFlagResourceTestNG extends AdminFunctionalTestNGBase {
     public void defineAndRemoveFlag() {
         loginAD();
         String url = getRestHostPort() + "/admin/featureflags/" + FLAG_ID;
-        ResponseDocument<?> response = restTemplate.postForObject(url, FLAG_DEFINITION,
-                ResponseDocument.class);
+        ResponseDocument<?> response = restTemplate.postForObject(url, FLAG_DEFINITION, ResponseDocument.class);
         Assert.assertTrue(response.isSuccess(), "should be able to define a new flag.");
 
         url = getRestHostPort() + "/admin/featureflags";

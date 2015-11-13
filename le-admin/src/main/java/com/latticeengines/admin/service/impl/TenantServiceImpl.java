@@ -62,7 +62,8 @@ public class TenantServiceImpl implements TenantService {
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public TenantServiceImpl() {}
+    public TenantServiceImpl() {
+    }
 
     @PostConstruct
     protected void uploadDefaultSpaceConfigAndSchemaByJson() {
@@ -84,8 +85,8 @@ public class TenantServiceImpl implements TenantService {
         final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
         final SpaceConfiguration spaceConfig = tenantRegistration.getSpaceConfig();
 
-        boolean tenantCreationSuccess =
-                tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo, spaceInfo);
+        boolean tenantCreationSuccess = tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo,
+                spaceInfo);
 
         tenantCreationSuccess = tenantCreationSuccess && setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
@@ -95,23 +96,27 @@ public class TenantServiceImpl implements TenantService {
         }
 
         List<SerializableDocumentDirectory> configSDirs = tenantRegistration.getConfigDirectories();
-        if (configSDirs == null) return true;
+        if (configSDirs == null)
+            return true;
         Map<String, Map<String, String>> props = new HashMap<>();
-        for (SerializableDocumentDirectory configSDir: configSDirs) {
+        for (SerializableDocumentDirectory configSDir : configSDirs) {
             String serviceName = configSDir.getRootPath().substring(1);
             Map<String, String> flatDir = configSDir.flatten();
             props.put(serviceName, flatDir);
         }
 
-        //as a short term patch, waking up Dante's .NET App Pool is necessary for it to pick up the bootstrap command.
+        // as a short term patch, waking up Dante's .NET App Pool is necessary
+        // for it to pick up the bootstrap command.
         danteComponent.wakeUpAppPool();
 
+        // change components in orchestrator based on selected product
+        // retrieve mappings from Camille
         final Map<String, Map<String, String>> orchestratorProps = props;
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                orchestrator.orchestrate(
-                        contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, orchestratorProps);
+                orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                        orchestratorProps);
             }
         });
 
@@ -122,7 +127,7 @@ public class TenantServiceImpl implements TenantService {
     public Collection<TenantDocument> getTenants(String contractId) {
         Collection<TenantDocument> tenants = tenantEntityMgr.getTenants(contractId);
         if (tenants != null) {
-            for (TenantDocument doc :  tenants) {
+            for (TenantDocument doc : tenants) {
                 String cId = doc.getSpace().getContractId();
                 String tId = doc.getSpace().getTenantId();
                 doc.setBootstrapState(getTenantOverallState(cId, tId));
@@ -152,7 +157,7 @@ public class TenantServiceImpl implements TenantService {
         final String podId = CamilleEnvironment.getPodId();
         final Camille camille = CamilleEnvironment.getCamille();
         Set<String> components = serviceService.getRegisteredServices();
-        BootstrapState state =  null;
+        BootstrapState state = null;
         for (String serviceName : components) {
             Path tenantServiceStatePath = PathBuilder.buildCustomerSpaceServicePath(podId, contractId, tenantId,
                     CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
@@ -183,10 +188,9 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName)
-    {
-        SerializableDocumentDirectory rawDir =
-                tenantEntityMgr.getTenantServiceConfig(contractId, tenantId, serviceName);
+    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
+        SerializableDocumentDirectory rawDir = tenantEntityMgr
+                .getTenantServiceConfig(contractId, tenantId, serviceName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadataIgnoreOptionsValidation(metaDir);
         return rawDir;
@@ -204,15 +208,16 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean setupSpaceConfiguration(String contractId, String tenantId, SpaceConfiguration spaceConfig) {
-        return batonService.setupSpaceConfiguration(contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, spaceConfig);
+        return batonService.setupSpaceConfiguration(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                spaceConfig);
     }
 
     @Override
     public boolean danteIsEnabled(String contractId, String tenantId) {
         TenantDocument tenant = getTenant(contractId, tenantId);
         String str = tenant.getSpaceInfo().featureFlags;
-        if (!str.contains(danteFeatureFlag)) return false;
+        if (!str.contains(danteFeatureFlag))
+            return false;
 
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -223,17 +228,15 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2,
-                                                       String serviceName) {
+    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {
         if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR)) {
-            return BootstrapState.constructErrorState(
-                    0, 0, "At least one of the components encountered an error : " + serviceName);
+            return BootstrapState.constructErrorState(0, 0, "At least one of the components encountered an error : "
+                    + serviceName);
         }
 
         if (state1.state.equals(BootstrapState.State.MIGRATED) || state2.state.equals(BootstrapState.State.MIGRATED)) {
             return BootstrapState.constructMigratedState();
         }
-
 
         if (state1.state.equals(BootstrapState.State.INITIAL) || state2.state.equals(BootstrapState.State.INITIAL)) {
             return BootstrapState.createInitialState();

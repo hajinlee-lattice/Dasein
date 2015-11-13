@@ -1,6 +1,8 @@
 package com.latticeengines.admin.tenant.batonadapter.template.visidb;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -13,13 +15,14 @@ import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 @Component
 public class VisiDBTemplateComponent extends LatticeComponent {
-    
+
     private LatticeComponentInstaller installer = new VisiDBTemplateInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBTemplateUpgrader();
     public static final String componentName = "VisiDBTemplate";
@@ -40,8 +43,11 @@ public class VisiDBTemplateComponent extends LatticeComponent {
     private boolean dryrun;
 
     @PostConstruct
-    public void setDependencies(){
+    public void setDependenciesAndProducts() {
         dependencies = Collections.singleton(visiDBDLComponent);
+        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
+        productSet.add(LatticeProduct.LPA);
+        super.setAssociatedProducts(productSet);
     }
 
     @Override
@@ -57,9 +63,9 @@ public class VisiDBTemplateComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
-        ((VisiDBTemplateInstaller)installer).setTenantService(tenantService);
-        ((VisiDBTemplateInstaller)installer).setTemplateProvider(templateProvider);
-        ((VisiDBTemplateInstaller)installer).setDataloaderService(dataLoaderService);
+        ((VisiDBTemplateInstaller) installer).setTenantService(tenantService);
+        ((VisiDBTemplateInstaller) installer).setTemplateProvider(templateProvider);
+        ((VisiDBTemplateInstaller) installer).setDataloaderService(dataLoaderService);
         return installer;
     }
 

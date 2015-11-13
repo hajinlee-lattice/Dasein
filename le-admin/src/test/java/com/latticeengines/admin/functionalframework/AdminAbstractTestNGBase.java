@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +31,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
@@ -47,9 +50,8 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 /**
- * This is the base class of functional tests
- * In BeforeClass, we delete and create one test tenant
- * In AfterClass, we delete the test tenant
+ * This is the base class of functional tests In BeforeClass, we delete and
+ * create one test tenant In AfterClass, we delete the test tenant
  */
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
@@ -80,10 +82,11 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
             "");
 
-    public AdminAbstractTestNGBase() {}
+    public AdminAbstractTestNGBase() {
+    }
 
     abstract protected String getRestHostPort();
-    
+
     protected void bootstrap(String contractId, String tenantId, String serviceName) {
         CustomerSpace space = new CustomerSpace();
         space.setContractId(contractId);
@@ -104,31 +107,29 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         Map<String, String> bootstrapProperties = sDir.flatten();
 
         loginAD();
-        String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s",
-                getRestHostPort(), tenantId, serviceName, contractId);
+        String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s", getRestHostPort(), tenantId,
+                serviceName, contractId);
         restTemplate.put(url, bootstrapProperties, new HashMap<>());
     }
-    
+
     protected void deleteTenant(String contractId, String tenantId) throws Exception {
-        String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
+        String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
         restTemplate.delete(url, new HashMap<>());
     }
 
-    protected void createTenant(
-            String contractId, String tenantId) throws Exception {
+    protected void createTenant(String contractId, String tenantId) throws Exception {
         createTenant(contractId, tenantId, true);
     }
 
-    protected void createTenant(
-            String contractId, String tenantId, boolean refreshContract) throws Exception {
+    protected void createTenant(String contractId, String tenantId, boolean refreshContract) throws Exception {
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
-        props.displayName =  tenantId + ": Tenant for testing";
+        props.displayName = tenantId + ": Tenant for testing";
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
 
         ContractInfo contractInfo = new ContractInfo(new ContractProperties());
-        TenantInfo tenantInfo = new TenantInfo(
-                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
+        TenantInfo tenantInfo = new TenantInfo(new TenantProperties(spaceInfo.properties.displayName,
+                spaceInfo.properties.description));
 
         SpaceConfiguration spaceConfig = tenantService.getDefaultSpaceConfig();
 
@@ -141,11 +142,8 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         createTenant(contractId, tenantId, refreshContract, reg);
     }
 
-    protected void createTenant (
-            String contractId, String tenantId,
-            boolean refreshContract, TenantRegistration tenantRegistration)
-            throws Exception
-    {
+    protected void createTenant(String contractId, String tenantId, boolean refreshContract,
+            TenantRegistration tenantRegistration) throws Exception {
 
         if (ContractLifecycleManager.exists(contractId)) {
             if (refreshContract) {
@@ -160,9 +158,9 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         Boolean created = restTemplate.postForObject(url, tenantRegistration, Boolean.class);
         Assert.assertTrue(created);
     }
-    
+
     @SuppressWarnings("unchecked")
-    protected void loginAD(){
+    protected void loginAD() {
         Credentials creds = new Credentials();
         creds.setUsername(ADTesterUsername);
         creds.setPassword(ADTesterPassword);
@@ -171,7 +169,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         String token = map.get("Token");
         assertNotNull(token);
         addAuthHeader.setAuthValue(token);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
     }
 
     public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
@@ -196,13 +194,12 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         }
     }
 
-    protected BootstrapState waitUntilStateIsNotInitial(
-            String contractId, String tenantId, String serviceName) {
+    protected BootstrapState waitUntilStateIsNotInitial(String contractId, String tenantId, String serviceName) {
         return waitUntilStateIsNotInitial(contractId, tenantId, serviceName, 200);
     }
 
-    protected BootstrapState waitUntilStateIsNotInitial(
-            String contractId, String tenantId, String serviceName, int numOfRetries) {
+    protected BootstrapState waitUntilStateIsNotInitial(String contractId, String tenantId, String serviceName,
+            int numOfRetries) {
         BootstrapState state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
         while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0) {
             numOfRetries--;
@@ -229,10 +226,15 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         Assert.assertFalse(permStoreExists);
     }
 
-    private static FeatureFlagDefinition newFlagDefinition() {
+    protected static FeatureFlagDefinition newFlagDefinition() {
         FeatureFlagDefinition definition = new FeatureFlagDefinition();
-        definition.displayName = "TestFlag";
-        definition.documentation = "This flag is for functional test.";
+        definition.setDisplayName(FLAG_ID);
+        definition.setDocumentation("This flag is for functional test.");
+        Set<LatticeProduct> testProdSet = new HashSet<LatticeProduct>();
+        testProdSet.add(LatticeProduct.LPA);
+        testProdSet.add(LatticeProduct.PD);
+        definition.setAvailableProducts(testProdSet);
+        definition.setConfigurable(true);
         return definition;
     }
 
@@ -240,8 +242,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         undefineFeatureFlagByRestCall(FLAG_ID);
 
         String url = getRestHostPort() + "/admin/featureflags/" + flagId;
-        ResponseDocument<?> response = restTemplate.postForObject(url, definition,
-                ResponseDocument.class);
+        ResponseDocument<?> response = restTemplate.postForObject(url, definition, ResponseDocument.class);
         Assert.assertTrue(response.isSuccess(), "should be able to define a new flag.");
     }
 

@@ -8,20 +8,24 @@ import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 public class SpaceConfigTestNG extends ConfigurationSchemaTestNGBase {
 
     @Override
-    @BeforeMethod(groups = {"unit", "functional"})
+    @BeforeMethod(groups = { "unit", "functional" })
     protected void setUp() throws Exception {
         super.setUp();
         this.component = new TestLatticeComponent();
         this.defaultJson = "space_default.json";
-        this.metadataJson = "space_metadata.json";  // optional
+        this.metadataJson = "space_metadata.json"; // optional
         this.expectedJson = "space_expected.json";
         setupPaths();
         uploadDirectory();
     }
 
     @Test(groups = "unit")
-    public void testUnitMainFlow() { runUnitMainFlow(); }
+    public void testUnitMainFlow() {
+        runUnitMainFlow();
+    }
 
     @Test(groups = "functional")
-    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
+    public void testDefaultConfigurationFuncational() {
+        runFunctionalMainFlow();
+    }
 }

@@ -1,5 +1,10 @@
 package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,6 +14,7 @@ import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwritter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
@@ -35,6 +41,13 @@ public class VisiDBDLComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBDLUpgrader();
     public static final String componentName = "VisiDBDL";
 
+    @PostConstruct
+    public void setProducts() {
+        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
+        productSet.add(LatticeProduct.LPA);
+        super.setAssociatedProducts(productSet);
+    }
+
     @Override
     public boolean doRegistration() {
         if (uploadSchema) {
@@ -47,7 +60,9 @@ public class VisiDBDLComponent extends LatticeComponent {
     }
 
     @Override
-    public String getName() { return componentName; }
+    public String getName() {
+        return componentName;
+    }
 
     @Override
     public void setName(String name) {
@@ -57,9 +72,9 @@ public class VisiDBDLComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
-        ((VisiDBDLInstaller)installer).setTenantService(tenantService);
-        ((VisiDBDLInstaller)installer).setDataStoreProvider(dataStoreProvider);
-        ((VisiDBDLInstaller)installer).setDataloaderService(dataLoaderService);
+        ((VisiDBDLInstaller) installer).setTenantService(tenantService);
+        ((VisiDBDLInstaller) installer).setDataStoreProvider(dataStoreProvider);
+        ((VisiDBDLInstaller) installer).setDataloaderService(dataLoaderService);
         return installer;
     }
 

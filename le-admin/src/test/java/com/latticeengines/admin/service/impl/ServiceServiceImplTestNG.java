@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
-    
+
     @Autowired
     private ServiceService serviceService;
 
@@ -32,11 +32,14 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     private TestLatticeComponent testLatticeComponent;
 
     @BeforeMethod(groups = "functional")
-    public void beforeMethod() { testLatticeComponent.doRegistration(); }
+    public void beforeMethod() {
+        testLatticeComponent.doRegistration();
+    }
 
     @AfterMethod(groups = "functional")
-    public void afterMethod() { testLatticeComponent.doRegistration(); }
-
+    public void afterMethod() {
+        testLatticeComponent.doRegistration();
+    }
 
     @Test(groups = "functional")
     public void testGetSelectableFields() throws Exception {
@@ -60,7 +63,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         doc.setComponent("TestComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
         field.setNode("/nonode");
-        field.setOptions(Arrays.asList("1","2"));
+        field.setOptions(Arrays.asList("1", "2"));
 
         SerializableDocumentDirectory conf = serviceService.getDefaultServiceConfig("TestComponent");
         Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 3);
@@ -74,7 +77,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         doc.setComponent("NoComponent");
         SelectableConfigurationField field = new SelectableConfigurationField();
         field.setNode("/Config1");
-        field.setOptions(Arrays.asList("1","2"));
+        field.setOptions(Arrays.asList("1", "2"));
 
         SerializableDocumentDirectory conf = serviceService.getDefaultServiceConfig("TestComponent");
         Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 3);
@@ -82,8 +85,8 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         serviceService.patchOptions("NoComponent", field);
     }
 
-    @Test(groups = "functional",
-            dependsOnMethods = {"testPatchOptionsToNonExistingService", "testPatchOptionsToNonExistingNode"})
+    @Test(groups = "functional", dependsOnMethods = { "testPatchOptionsToNonExistingService",
+            "testPatchOptionsToNonExistingNode" })
     public void testPatchOptions() throws Exception {
         SelectableConfigurationDocument doc = new SelectableConfigurationDocument();
         doc.setComponent("TestComponent");
@@ -99,7 +102,6 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
 
         Assert.assertEquals(conf.getNodeAtPath("/Config1").getMetadata().getOptions().size(), 2);
     }
-
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
     public void testPatchDefaultConfigToNonExistingNode() throws Exception {

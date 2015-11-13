@@ -30,18 +30,18 @@ public class ConfigurationSchemaTestNGBase {
     protected Camille camille;
     protected String podId;
     protected String defaultJson, expectedJson; // required
-    protected String metadataJson;              // optional
+    protected String metadataJson; // optional
     protected Path defaultRootPath, metadataRootPath;
     protected LatticeComponent component;
 
-    @BeforeMethod(groups = {"unit", "functional"})
+    @BeforeMethod(groups = { "unit", "functional" })
     protected void setUp() throws Exception {
         CamilleTestEnvironment.start();
         camille = CamilleEnvironment.getCamille();
         podId = CamilleEnvironment.getPodId();
     }
 
-    @AfterMethod(groups = {"unit", "functional"})
+    @AfterMethod(groups = { "unit", "functional" })
     protected void tearDown() throws Exception {
         CamilleTestEnvironment.stop();
     }
@@ -76,7 +76,9 @@ public class ConfigurationSchemaTestNGBase {
     }
 
     protected void setupPaths() {
-        if (this.component == null) { throw new AssertionError("Must define component before setting up paths."); }
+        if (this.component == null) {
+            throw new AssertionError("Must define component before setting up paths.");
+        }
         this.defaultRootPath = PathBuilder.buildServiceDefaultConfigPath(podId, this.component.getName());
         this.metadataRootPath = PathBuilder.buildServiceConfigSchemaPath(podId, this.component.getName());
     }
@@ -95,9 +97,7 @@ public class ConfigurationSchemaTestNGBase {
     public static void assertSerializableDirAndJsonAreEqual(SerializableDocumentDirectory sDir, String jsonFile) {
         try {
             String jsonStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(jsonFile),
-                    "UTF-8"
-            );
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream(jsonFile), "UTF-8");
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode oNode = objectMapper.valueToTree(sDir);
             Assert.assertEquals(removeDataVersion(oNode), objectMapper.readTree(jsonStr));
@@ -106,10 +106,10 @@ public class ConfigurationSchemaTestNGBase {
         }
     }
 
-
-    private static JsonNode removeDataVersion(ObjectNode oNode){
+    private static JsonNode removeDataVersion(ObjectNode oNode) {
         ObjectMapper mapper = new ObjectMapper();
-        if (oNode.has("Version")) oNode.remove("Version");
+        if (oNode.has("Version"))
+            oNode.remove("Version");
         if (oNode.has("Children")) {
             ArrayNode newChildren = new ArrayNode(mapper.getNodeFactory());
             for (JsonNode child : oNode.get("Children")) {

@@ -19,11 +19,11 @@
                 </div>
                 <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
                     <span class="node">Created at</span> :
-                    {{ tenantInfo.properties.created | date : "yyyy-MM-dd" }}
+                    {{ tenantInfo.properties.created | date : "yyyy-MM-dd HH:mm:ss Z" }}
                 </div>
                 <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
                     <span class="node">Last modified</span> :
-                    {{ tenantInfo.properties.lastModified | date : "yyyy-MM-dd" }}
+                    {{ tenantInfo.properties.lastModified | date : "yyyy-MM-dd HH:mm:ss Z" }}
                 </div>
             </div>
             <form ng-if="!readonly" class="row form-inline">
@@ -49,12 +49,15 @@
                 <div class="row form-inline">
                     <div class="col col-md-12 col-sm-12 col-xs-12">
                         <label class="control-label">
-                            Product
+                            Products
                         </label>
-                        <select class="form-control"
-                                ng-options="option for option in availableProducts"
-                                ng-model="spaceConfig.Product">
-                        </select>
+                        <div ng-repeat="product in availableProducts">
+                            <div class="action-checkbox">
+                                <input id="{{product}}" type="checkbox" value="{{product}}" ng-checked="selectedProducts.indexOf(product) > -1" ng-click="toggleSelection(product)" />
+                                <label for="{{product}}"></label>
+                                {{product}}
+                            </div>
+                        </div>
                     </div>
                     <div class="col col-md-12 col-sm-12 col-xs-12">
                         <label class="control-label">
@@ -78,8 +81,10 @@
             </form>
             <form ng-if="readonly" class="row form-inline">
                 <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
-                    <span class="node">Product</span> :
-                    {{ spaceConfig.Product }}
+                    <span class="node">Products</span> :
+                        <div ng-repeat="product in spaceConfig.Products" class="selected-item">
+                            {{ product }}
+                        </div>
                 </div>
                 <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
                     <span class="node">Topology</span> :

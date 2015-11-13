@@ -51,7 +51,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     private DocumentDirectory vdbdlConfig;
     private SerializableDocumentDirectory jamsConfig;
 
-    @BeforeClass(groups = {"functional", "deployment"})
+    @BeforeClass(groups = { "functional", "deployment" })
     @Override
     public void setup() throws Exception {
         super.setup();
@@ -65,18 +65,20 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
     }
 
-    @AfterClass(groups = {"functional", "deployment"})
+    @AfterClass(groups = { "functional", "deployment" })
     public void tearDown() throws Exception {
         try {
             deleteTenant(contractId, tenantId);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
         deleteBardJamsTenant(tenantId);
     }
 
-    @BeforeMethod(groups = {"functional", "deployment"})
-    public void beforeMethod() { deleteBardJamsTenant(tenantId); }
+    @BeforeMethod(groups = { "functional", "deployment" })
+    public void beforeMethod() {
+        deleteBardJamsTenant(tenantId);
+    }
 
     @Test(groups = "deployment")
     public void testInstallation() {
@@ -87,8 +89,8 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
         // idempotent test
-        Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, BardJamsComponent.componentName);
+        Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), contractId,
+                tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, BardJamsComponent.componentName);
         try {
             CamilleEnvironment.getCamille().delete(servicePath);
         } catch (Exception e) {
@@ -118,7 +120,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         verifyTenantCRUD(tenant);
     }
 
-    public void orchestrateVisiDBAndBardJams(){
+    public void orchestrateVisiDBAndBardJams() {
         Map<String, Map<String, String>> properties = new HashMap<>();
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(vdbdlConfig);
         sDir.setRootPath("/" + VisiDBDLComponent.componentName);
@@ -163,13 +165,18 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         BardJamsTenant newTenant = bardJamsEntityMgr.findByTenant(tenant);
         Assert.assertNotNull(newTenant);
     }
+
     public void deleteBardJamsTenant(String tenant) {
         BardJamsTenant existingTenant = bardJamsEntityMgr.findByTenant(tenant);
-        if (existingTenant != null) { bardJamsEntityMgr.delete(existingTenant); }
+        if (existingTenant != null) {
+            bardJamsEntityMgr.delete(existingTenant);
+        }
         existingTenant = bardJamsEntityMgr.findByTenant(tenant);
         Assert.assertNull(existingTenant);
     }
 
     @Override
-    protected String getServiceName() { return BardJamsComponent.componentName; }
+    protected String getServiceName() {
+        return BardJamsComponent.componentName;
+    }
 }

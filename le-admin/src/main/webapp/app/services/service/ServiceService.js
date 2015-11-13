@@ -110,5 +110,28 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
 
         return defer.promise;
     };
+    
+    this.GetAvailableProducts = function() {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'GET',
+            url: '/admin/tenants/products'
+        }).success(function (data) {
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function (err, status) {
+            SessionUtility.handleAJAXError(err, status);
+        });
+
+        return defer.promise;
+    };
+    
 
 });

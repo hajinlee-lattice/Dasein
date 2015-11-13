@@ -8,9 +8,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum LatticeProduct {
-    LPA("Lead Prioritization"),
-    PD("Prospect Discovery"),
-    BIS("Buyer Insights");
+    LPA("Lead Prioritization"), PD("Prospect Discovery");
 
     private String name;
     private static Map<String, LatticeProduct> lookup = new HashMap<>();
@@ -27,11 +25,17 @@ public enum LatticeProduct {
         }
     }
 
-    LatticeProduct(String name) { this.name = name; }
+    LatticeProduct(String name) {
+        this.name = name;
+    }
 
-    public static LatticeProduct fromName(String name) { return lookup.get(name); }
+    public static LatticeProduct fromName(String name) {
+        return lookup.get(name);
+    }
 
-    public static List<String> getNames() { return names; }
+    public static List<String> getNames() {
+        return names;
+    }
 
     @JsonValue
     public String getName() {
@@ -39,5 +43,7 @@ public enum LatticeProduct {
     }
 
     @Override
-    public String toString() { return name; }
+    public String toString() {
+        return name;
+    }
 }

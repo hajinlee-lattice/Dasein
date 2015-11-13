@@ -22,18 +22,23 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
         this.mountMap = mountMap;
     }
 
-    public String toRemoteAddr(String key) { return mountMap.getProperty(key); }
+    public String toRemoteAddr(String key) {
+        return mountMap.getProperty(key);
+    }
 
     public String toOptionKey(String remoteAddr) {
-        for(Map.Entry<Object, Object> entry: mountMap.entrySet()){
+        for (Map.Entry<Object, Object> entry : mountMap.entrySet()) {
             if ((entry.getValue()).equals(remoteAddr)) {
                 return (String) entry.getKey();
             }
         }
-        throw new RuntimeException(String.format("The remote address %s is not registered as an option key.", remoteAddr));
+        throw new RuntimeException(String.format("The remote address %s is not registered as an option key.",
+                remoteAddr));
     }
 
-    public String getAbsoluteRoot() { return this.absoluteRoot; }
+    public String getAbsoluteRoot() {
+        return this.absoluteRoot;
+    }
 
     private static Properties loadMountMap(String path) {
         Properties props = new Properties();
@@ -55,6 +60,5 @@ public class MountedDirectoryOptionsProvider extends SubdirectoryOptionsProvider
         }
         return props;
     }
-
 
 }

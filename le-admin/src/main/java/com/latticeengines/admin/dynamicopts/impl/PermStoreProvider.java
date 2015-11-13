@@ -37,9 +37,13 @@ public class PermStoreProvider implements OptionsProvider {
     }
 
     @Override
-    public List<String> getOptions() { return dirWatcher.getOptions(); }
+    public List<String> getOptions() {
+        return dirWatcher.getOptions();
+    }
 
-    public String toRemoteAddr(String folder) { return dirWatcher.toRemoteAddr(folder); }
+    public String toRemoteAddr(String folder) {
+        return dirWatcher.toRemoteAddr(folder);
+    }
 
     public void createVDBFolder(String option, String visiDBServerName, String tenant) {
         Path absoluteRoot = FileSystems.getDefault().getPath(mountRoot, psPath);

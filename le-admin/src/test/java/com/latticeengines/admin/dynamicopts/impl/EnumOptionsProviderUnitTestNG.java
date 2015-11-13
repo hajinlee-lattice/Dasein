@@ -20,15 +20,17 @@ public class EnumOptionsProviderUnitTestNG {
     }
 
     private enum MyEnum {
-        OPTION1("Option1"),
-        OPTION2("Option2"),
-        OPTION3("Option3");
+        OPTION1("Option1"), OPTION2("Option2"), OPTION3("Option3");
 
         private String name;
 
-        MyEnum(String name) { this.name = name; }
+        MyEnum(String name) {
+            this.name = name;
+        }
 
         @Override
-        public String toString() { return this.name; }
+        public String toString() {
+            return this.name;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -39,7 +41,14 @@ public class ServiceServiceImpl implements ServiceService {
     private ComponentOrchestrator orchestrator;
 
     @Override
-    public Set<String> getRegisteredServices() { return orchestrator.getServiceNames(); }
+    public Set<String> getRegisteredServices() {
+        return orchestrator.getServiceNames();
+    }
+
+    @Override
+    public Map<String, Set<LatticeProduct>> getRegisteredServicesWithProducts() {
+        return orchestrator.getServiceNamesWithProducts();
+    }
 
     @Override
     public SerializableDocumentDirectory getDefaultServiceConfig(String serviceName) {
@@ -52,7 +61,8 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public SelectableConfigurationDocument getSelectableConfigurationFields(String serviceName, boolean includeDynamicOpts) {
+    public SelectableConfigurationDocument getSelectableConfigurationFields(String serviceName,
+            boolean includeDynamicOpts) {
         if (getRegisteredServices().contains(serviceName)) {
             LatticeComponent component = orchestrator.getComponent(serviceName);
             SerializableDocumentDirectory confDir = component.getSerializableDefaultConfiguration();
@@ -129,8 +139,8 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public Boolean patchDefaultConfigWithOptions(String serviceName, SelectableConfigurationField field) {
         if (!field.defaultIsValid()) {
-            throw new LedpException(LedpCode.LEDP_19104, new String[]{field.getDefaultOption(),
-                    field.getOptions().toString()});
+            throw new LedpException(LedpCode.LEDP_19104, new String[] { field.getDefaultOption(),
+                    field.getOptions().toString() });
         }
 
         try {
@@ -139,7 +149,8 @@ public class ServiceServiceImpl implements ServiceService {
             return true;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_19101, String.format(
-                    "Failed to patch default configuration for node %s in component %s", field.getNode(), serviceName), e);
+                    "Failed to patch default configuration for node %s in component %s", field.getNode(), serviceName),
+                    e);
         }
     }
 
@@ -169,4 +180,3 @@ public class ServiceServiceImpl implements ServiceService {
         conf.applyMetadata(metaDir);
     }
 }
-

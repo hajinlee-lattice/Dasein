@@ -2,6 +2,10 @@ package com.latticeengines.admin.tenant.batonadapter.dante;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
@@ -30,6 +35,13 @@ public class DanteComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new DanteInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new DanteUpgrader();
+
+    @PostConstruct
+    public void setProducts() {
+        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
+        productSet.add(LatticeProduct.LPA);
+        super.setAssociatedProducts(productSet);
+    }
 
     @Override
     public String getName() {
@@ -56,7 +68,7 @@ public class DanteComponent extends LatticeComponent {
     public String getVersionString() {
         return null;
     }
-    
+
     @Override
     public boolean doRegistration() {
         String defaultJson = "dante_default.json";
@@ -68,10 +80,11 @@ public class DanteComponent extends LatticeComponent {
 
     public void wakeUpAppPool() {
         String[] hosts = danteHosts.split(",");
-        for (String host: hosts) {
+        for (String host : hosts) {
             if (StringUtils.isNotEmpty(host) && host.contains(":\\\\")) {
                 try {
-                    HttpClientWithOptionalRetryUtils.sendGetRequest(host, false, Collections.<BasicNameValuePair>emptyList());
+                    HttpClientWithOptionalRetryUtils.sendGetRequest(host, false,
+                            Collections.<BasicNameValuePair> emptyList());
                     LOGGER.info("Wake up BIS server by sending a GET to " + host);
                 } catch (IOException e) {
                     LOGGER.error("Waking up BIS server at " + host + " failed", e);
@@ -79,6 +92,5 @@ public class DanteComponent extends LatticeComponent {
             }
         }
     }
-
 
 }

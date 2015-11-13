@@ -14,28 +14,33 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 public class PLSConfigTestNG extends ConfigurationSchemaTestNGBase {
 
     @Override
-    @BeforeMethod(groups = {"unit", "functional"})
+    @BeforeMethod(groups = { "unit", "functional" })
     protected void setUp() throws Exception {
         super.setUp();
         this.component = new TestLatticeComponent();
         this.defaultJson = "pls_default.json";
-        this.metadataJson = "pls_metadata.json";  // optional
+        this.metadataJson = "pls_metadata.json"; // optional
         this.expectedJson = "pls_expected.json";
         setupPaths();
         uploadDirectory();
     }
 
     @Test(groups = "unit")
-    public void testUnitMainFlow() { runUnitMainFlow(); }
+    public void testUnitMainFlow() {
+        runUnitMainFlow();
+    }
 
     @Test(groups = "functional")
-    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
+    public void testDefaultConfigurationFuncational() {
+        runFunctionalMainFlow();
+    }
 
     /*
-    ================================================================================
-        Test how you want to use the configuration
-    ================================================================================
-    */
+     * ==========================================================================
+     * ====== Test how you want to use the configuration
+     * ========================
+     * ========================================================
+     */
 
     /**
      * this test demonstrate how to get configuration using DocumentDirectory

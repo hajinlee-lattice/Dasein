@@ -124,7 +124,7 @@ public class VisiDBDLComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         deleteVisiDBDLTenantWithRetry(tenant);
     }
 
-    public InstallResult deleteVisiDBDLTenantWithRetry(String tenant){
+    public InstallResult deleteVisiDBDLTenantWithRetry(String tenant) {
         DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenant, "3");
         InstallResult response = dataLoaderService.deleteDLTenant(request, dlUrl, true);
         return response;

@@ -7,7 +7,8 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 /**
- * This is a dummy upgrader for functional tests, the true upgrader resides in Dante project
+ * This is a dummy upgrader for functional tests, the true upgrader resides in
+ * Dante project
  */
 public class DanteUpgrader implements CustomerSpaceServiceUpgrader {
 

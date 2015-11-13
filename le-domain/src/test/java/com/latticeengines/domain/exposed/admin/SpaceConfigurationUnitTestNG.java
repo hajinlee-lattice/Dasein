@@ -33,7 +33,7 @@ public class SpaceConfigurationUnitTestNG {
 
     @Test(groups = "unit")
     public void testProductList() throws IOException {
-        List<LatticeProduct> products = Arrays.asList(LatticeProduct.BIS, LatticeProduct.LPA, LatticeProduct.PD);
+        List<LatticeProduct> products = Arrays.asList(LatticeProduct.LPA, LatticeProduct.PD);
         SpaceConfiguration configuration = new SpaceConfiguration();
         configuration.setProducts(products);
 
@@ -45,7 +45,7 @@ public class SpaceConfigurationUnitTestNG {
         SerializableDocumentDirectory sDir = configuration.toSerializableDocumentDirectory();
         SpaceConfiguration constructed = new SpaceConfiguration(sDir.getDocumentDirectory());
         Assert.assertEquals(constructed.getProducts().size(), products.size());
-        for (LatticeProduct product: products) {
+        for (LatticeProduct product : products) {
             Assert.assertTrue(constructed.getProducts().contains(product));
         }
 
@@ -54,8 +54,8 @@ public class SpaceConfigurationUnitTestNG {
         constructed = new SpaceConfiguration(sDir.getDocumentDirectory());
         Assert.assertTrue(constructed.getProducts().isEmpty());
 
-        dir.add(new Path("/Products"), new Document("[\"" + LatticeProduct.LPA.getName() + "\",\""
-                + LatticeProduct.BIS.getName() + "\"]"));
+        dir.add(new Path("/Products"),
+                new Document("[\"" + LatticeProduct.LPA.getName() + "\",\"" + LatticeProduct.PD.getName() + "\"]"));
         constructed = new SpaceConfiguration(sDir.getDocumentDirectory());
         Assert.assertEquals(constructed.getProducts().size(), 2);
     }

@@ -17,9 +17,9 @@ import com.latticeengines.security.exposed.Constants;
 import junit.framework.Assert;
 
 /**
- * besides the same setup and teardown as AdminFunctionalTestNGBase,
- * we also register the testing component's installer,
- * in case it has not been registered already by ServiceServiceImpl
+ * besides the same setup and teardown as AdminFunctionalTestNGBase, we also
+ * register the testing component's installer, in case it has not been
+ * registered already by ServiceServiceImpl
  */
 public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTestNGBase {
 
@@ -30,7 +30,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
     @Value("${pls.api.hostport}")
     private String plsHostPort;
 
-    @BeforeClass(groups = {"deployment", "functional"})
+    @BeforeClass(groups = { "deployment", "functional" })
     public void setup() throws Exception {
         serviceName = getServiceName();
         contractId = TestContractId + serviceName + "Tenant";
@@ -40,38 +40,40 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
         try {
             deleteTenant(contractId, tenantId);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
         createTenant(contractId, tenantId);
 
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
     }
 
-    @AfterClass(groups = {"deployment", "functional"}, alwaysRun = true)
+    @AfterClass(groups = { "deployment", "functional" }, alwaysRun = true)
     public void tearDown() throws Exception {
         try {
             deleteTenant(contractId, tenantId);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
     }
 
-    @Test(groups = {"deployment", "functional"})
+    @Test(groups = { "deployment", "functional" })
     public void testGetDefaultConfig() throws Exception {
         verifyDefaultConfig();
     }
 
     protected abstract String getServiceName();
 
-    protected void bootstrap(DocumentDirectory confDir) { super.bootstrap(contractId, tenantId, serviceName, confDir); }
+    protected void bootstrap(DocumentDirectory confDir) {
+        super.bootstrap(contractId, tenantId, serviceName, confDir);
+    }
 
     private void verifyDefaultConfig() {
         loginAD();
         String url = String.format("%s/admin/services/%s/default", getRestHostPort(), serviceName);
-        SerializableDocumentDirectory serializableDir =
-                restTemplate.getForObject(url, SerializableDocumentDirectory.class);
+        SerializableDocumentDirectory serializableDir = restTemplate.getForObject(url,
+                SerializableDocumentDirectory.class);
         Assert.assertNotNull(serializableDir);
 
         DocumentDirectory dir = SerializableDocumentDirectory.deserialize(serializableDir);
@@ -83,10 +85,12 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
         Assert.assertNotNull(serializableDir);
     }
 
-    protected String getPlsHostPort() { return plsHostPort; }
+    protected String getPlsHostPort() {
+        return plsHostPort;
+    }
 
-    public BootstrapState waitForSuccess(String componentName) throws InterruptedException{
-        long numOfRetries = TIMEOUT/WAIT_INTERVAL;
+    public BootstrapState waitForSuccess(String componentName) throws InterruptedException {
+        long numOfRetries = TIMEOUT / WAIT_INTERVAL;
         BootstrapState state;
         do {
             state = batonService.getTenantServiceBootstrapState(contractId, tenantId, componentName);

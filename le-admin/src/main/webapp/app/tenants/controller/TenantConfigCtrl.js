@@ -41,7 +41,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.availableTopologies = ["Marketo"];
     $scope.availableDLAddresses = ["http://bodcdevvint207.dev.lattice.local:8081"];
     $scope.services = [];
+    updateAvailableProducts();
     updateSpaceConfigurationOptions();
+
 
     //==================================================
     // initialization
@@ -51,6 +53,8 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     });
     $scope.components = [];
     $scope.isValid = {valid: true};
+    $scope.selectedProducts=[];
+
 
     if ($scope.new) {
         constructNewPage();
@@ -73,6 +77,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     // other definitions
     //==================================================
     $scope.onSaveClick = function(){
+        $scope.spaceConfig.Products = $scope.selectedProducts;
         var infos = {
             CustomerSpaceInfo: $scope.spaceInfo,
             TenantInfo: $scope.tenantInfo
@@ -93,6 +98,16 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         var derivedValue = TenantUtility.calcDerivation($scope.components, derivation, $scope);
         data.callback(derivedValue);
     });
+    
+    $scope.toggleSelection = function toggleSelection(product) {
+        var idx = $scope.selectedProducts.indexOf(product);
+        if (idx > -1) {
+          $scope.selectedProducts.splice(idx, 1);
+        }
+        else {
+          $scope.selectedProducts.push(product);
+        }
+      };
 
     function constructNewPage() {
         $scope.spaceInfo = {
@@ -311,8 +326,17 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         });
     }
 
+    // get $scope.availableProducts through REST call
+    function updateAvailableProducts() {
+        ServiceService.GetAvailableProducts().then(function(result1) {
+            if (result1.success) {
+                $scope.availableProducts = result1.resultObj;
+            }
+        });
+    }
+
     function updateSpaceConfigurationOptions() {
-        ServiceService.GetSpaceConfigOptions().then(function(result){
+        ServiceService.GetSpaceConfigOptions().then(function(result) {
             if(result.success) {
                 var options = result.resultObj;
                 _.each(options.Nodes, function(node){
@@ -320,9 +344,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                         case "DL_Address":
                             $scope.availableDLAddresses = node.Options;
                             break;
-                        case "Product":
-                            $scope.availableProducts = node.Options;
-                            break;
+//                        case "Product":
+//                            $scope.availableProducts = node.Options;
+//                            break;
                         case "Topology":
                             $scope.availableTopologies = node.Options;
                             break;

@@ -69,14 +69,14 @@ public class DefaultConfigOverwritter {
         }
     }
 
-
     public void overwriteDefaultConfigInPLS() {
         ObjectMapper mapper = new ObjectMapper();
         List<String> adminEmailList = new ArrayList<>();
         if (isToBeOverwritten(plsSuperAdmins)) {
             List<String> emailList = new ArrayList<>();
-            for (String email: Arrays.asList(plsSuperAdmins.split(listDelimiter))) {
-                if (!StringUtils.isEmpty(email)) emailList.add(email);
+            for (String email : Arrays.asList(plsSuperAdmins.split(listDelimiter))) {
+                if (!StringUtils.isEmpty(email))
+                    emailList.add(email);
             }
             try {
                 serviceService.patchDefaultConfig(PLSComponent.componentName, "/SuperAdminEmails",
@@ -89,8 +89,9 @@ public class DefaultConfigOverwritter {
 
         if (isToBeOverwritten(plsLatticeAdmins)) {
             List<String> emailList = new ArrayList<>();
-            for (String email: Arrays.asList(plsLatticeAdmins.split(listDelimiter))) {
-                if (!StringUtils.isEmpty(email)) emailList.add(email);
+            for (String email : Arrays.asList(plsLatticeAdmins.split(listDelimiter))) {
+                if (!StringUtils.isEmpty(email))
+                    emailList.add(email);
             }
             emailList.removeAll(adminEmailList);
             try {
@@ -119,7 +120,6 @@ public class DefaultConfigOverwritter {
             overwriteVdbServernameConfig();
         }
     }
-
 
     private void overwritePermstoreConfig() {
         SelectableConfigurationField patch = new SelectableConfigurationField();

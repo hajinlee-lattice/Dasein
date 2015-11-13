@@ -29,8 +29,8 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     private final BatonService batonService = new BatonServiceImpl();
 
     @Override
-    public boolean createTenant(String contractId, String tenantId,
-                                ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo customerSpaceInfo) {
+    public boolean createTenant(String contractId, String tenantId, ContractInfo contractInfo, TenantInfo tenantInfo,
+            CustomerSpaceInfo customerSpaceInfo) {
         return batonService.createTenant(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
                 contractInfo, tenantInfo, customerSpaceInfo);
     }
@@ -42,7 +42,8 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     @Override
     public boolean deleteTenant(String contractId, String tenantId) {
         boolean success = batonService.deleteTenant(contractId, tenantId);
-        LOGGER.info(String.format("Deleting tenant %s with contract %s, success = %s", tenantId, contractId, String.valueOf(success)));
+        LOGGER.info(String.format("Deleting tenant %s with contract %s, success = %s", tenantId, contractId,
+                String.valueOf(success)));
         return success;
     }
 
@@ -60,9 +61,9 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
         Camille c = CamilleEnvironment.getCamille();
         try {
-            DocumentDirectory dir = c.getDirectory(PathBuilder
-                    .buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), contractId,
-                            tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName));
+            DocumentDirectory dir = c.getDirectory(PathBuilder.buildCustomerSpaceServicePath(
+                    CamilleEnvironment.getPodId(), contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                    serviceName));
             return new SerializableDocumentDirectory(dir);
         } catch (Exception e) {
             LOGGER.error(e);

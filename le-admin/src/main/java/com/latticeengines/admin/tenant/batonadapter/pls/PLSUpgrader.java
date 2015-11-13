@@ -7,7 +7,8 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 /**
- * This is a dummy upgrader for functional tests, the true upgrader resides on PLS server
+ * This is a dummy upgrader for functional tests, the true upgrader resides on
+ * PLS server
  */
 public class PLSUpgrader implements CustomerSpaceServiceUpgrader {
 

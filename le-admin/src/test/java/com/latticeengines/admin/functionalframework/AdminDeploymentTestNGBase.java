@@ -21,7 +21,7 @@ public class AdminDeploymentTestNGBase extends AdminAbstractTestNGBase {
         return remoteHostPort.endsWith("/") ? remoteHostPort.substring(0, remoteHostPort.length() - 1) : remoteHostPort;
     }
 
-    @BeforeClass(groups = {"deployment"} )
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         loginAD();
 
@@ -33,21 +33,21 @@ public class AdminDeploymentTestNGBase extends AdminAbstractTestNGBase {
         try {
             deleteTenant(TestContractId, TestTenantId);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
         createTenant(TestContractId, TestTenantId);
 
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
     }
 
-    @AfterClass(groups = {"deployment"})
+    @AfterClass(groups = { "deployment" })
     public void tearDown() throws Exception {
         try {
             deleteTenant(TestContractId, TestTenantId);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
     }
 

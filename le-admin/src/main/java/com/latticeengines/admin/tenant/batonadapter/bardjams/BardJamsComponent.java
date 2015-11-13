@@ -1,6 +1,8 @@
 package com.latticeengines.admin.tenant.batonadapter.bardjams;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -15,6 +17,7 @@ import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
@@ -40,8 +43,11 @@ public class BardJamsComponent extends LatticeComponent {
     public static final String componentName = "BardJams";
 
     @PostConstruct
-    public void setDependencies(){
+    public void setDependenciesAndProducts() {
         dependencies = Collections.singleton(visiDBDLComponent);
+        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
+        productSet.add(LatticeProduct.LPA);
+        super.setAssociatedProducts(productSet);
     }
 
     @Override
@@ -85,13 +91,13 @@ public class BardJamsComponent extends LatticeComponent {
     }
 
     public static BardJamsTenant getTenantFromDocDir(DocumentDirectory dir, String tenantId,
-                                                     SpaceConfiguration spaceConfig, DocumentDirectory vdbdlConfig) {
+            SpaceConfiguration spaceConfig, DocumentDirectory vdbdlConfig) {
         BardJamsTenant tenant = new BardJamsTenant();
         dir.makePathsLocal();
 
-        //==================================================
+        // ==================================================
         // hardcoded
-        //==================================================
+        // ==================================================
         tenant.setTenantType(dir.getChild("TenantType").getDocument().getData());
         tenant.setDlUser(dir.getChild("DL_User").getDocument().getData());
         tenant.setDlPassword(dir.getChild("DL_Password").getDocument().getData());
@@ -113,16 +119,15 @@ public class BardJamsComponent extends LatticeComponent {
         tenant.setStatus(BardJamsTenantStatus.NEW.getStatus());
         tenant.setDanteStatus(BardJamsTenantStatus.NEW.getStatus());
 
-        //==================================================
+        // ==================================================
         // derived
-        //==================================================
+        // ==================================================
         tenant.setTenant(tenantId);
 
         tenant.setDlTenantName(getDataWithFailover(dir.getChild("DL_TenantName").getDocument().getData(), tenantId));
         dir.getChild("DL_TenantName").getDocument().setData(tenant.getDlTenantName());
 
-        tenant.setDlUrl(getDataWithFailover(dir.getChild("DL_URL").getDocument().getData(),
-                spaceConfig.getDlAddress()));
+        tenant.setDlUrl(getDataWithFailover(dir.getChild("DL_URL").getDocument().getData(), spaceConfig.getDlAddress()));
         dir.getChild("DL_URL").getDocument().setData(tenant.getDlUrl());
 
         tenant.setDanteManifestPath(getDataWithFailover(dir.getChild("DanteManifestPath").getDocument().getData(),
@@ -137,12 +142,11 @@ public class BardJamsComponent extends LatticeComponent {
                 vdbdlConfig.get("/DL/DataStore_Backup").getDocument().getData()));
         dir.getChild("Data_ArchivePath").getDocument().setData(tenant.getDataArchivePath());
 
-        //==================================================
+        // ==================================================
         // configurable
-        //==================================================
+        // ==================================================
         tenant.setAgentName(dir.getChild("Agent_Name").getDocument().getData());
 
         return tenant;
     }
-
 }

@@ -33,21 +33,22 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
     protected String hostPort;
 
     @Override
-    protected String getRestHostPort() { return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort; }
+    protected String getRestHostPort() {
+        return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
+    }
 
     protected void cleanupZK() {
-        if (ZKIsClean) return;
+        if (ZKIsClean)
+            return;
 
         log.info("Checking the sanity of contracts and tenants in ZK.");
 
         boolean ZKHasIssues = false;
 
         try {
-            for (TenantDocument tenantDocument: batonService.getTenants(null)) {
-                if (tenantDocument.getContractInfo() == null ||
-                        tenantDocument.getTenantInfo() == null ||
-                        tenantDocument.getSpaceInfo() == null ||
-                        tenantDocument.getSpaceConfig() == null) {
+            for (TenantDocument tenantDocument : batonService.getTenants(null)) {
+                if (tenantDocument.getContractInfo() == null || tenantDocument.getTenantInfo() == null
+                        || tenantDocument.getSpaceInfo() == null || tenantDocument.getSpaceConfig() == null) {
                     ZKHasIssues = true;
                     break;
                 }
@@ -75,7 +76,7 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
                     log.warn("Getting Contract Documents error.");
                 }
 
-                for (AbstractMap.SimpleEntry<Document, Path> entry: contractDocs) {
+                for (AbstractMap.SimpleEntry<Document, Path> entry : contractDocs) {
                     String contractId = entry.getValue().getSuffix();
                     ContractInfo contractInfo = null;
                     try {
@@ -101,21 +102,20 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
                             try {
                                 tenantDocs = camille.getChildren(PathBuilder.buildTenantsPath(podId, contractId));
                             } catch (Exception e) {
-                                log.warn(String.format(
-                                        "Getting Tenant Documents for contract %s error.", contractId));
+                                log.warn(String.format("Getting Tenant Documents for contract %s error.", contractId));
                             }
 
-                            for (AbstractMap.SimpleEntry<Document, Path> tenantEntry: tenantDocs) {
+                            for (AbstractMap.SimpleEntry<Document, Path> tenantEntry : tenantDocs) {
                                 String tenantId = tenantEntry.getValue().getSuffix();
 
                                 try {
                                     TenantDocument tenantDocument = batonService.getTenant(contractId, tenantId);
-                                    if (tenantDocument.getContractInfo() == null ||
-                                            tenantDocument.getTenantInfo() == null ||
-                                            tenantDocument.getSpaceInfo() == null ||
-                                            tenantDocument.getSpaceConfig() == null) {
-                                        throw new Exception("Tenant: " + contractId + "-"
-                                                + tenantId + " does not have a fully valid TenantDocument.");
+                                    if (tenantDocument.getContractInfo() == null
+                                            || tenantDocument.getTenantInfo() == null
+                                            || tenantDocument.getSpaceInfo() == null
+                                            || tenantDocument.getSpaceConfig() == null) {
+                                        throw new Exception("Tenant: " + contractId + "-" + tenantId
+                                                + " does not have a fully valid TenantDocument.");
                                     }
                                 } catch (Exception e) {
                                     log.warn("Found a bad tenant: " + contractId + "-" + tenantId + ". Deleting it ...");
@@ -136,7 +136,7 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
 
         ZKHasIssues = false;
         try {
-            for (TenantDocument tenantDocument: batonService.getTenants(null)) {
+            for (TenantDocument tenantDocument : batonService.getTenants(null)) {
                 Assert.assertNotNull(tenantDocument.getContractInfo());
                 Assert.assertNotNull(tenantDocument.getTenantInfo());
                 Assert.assertNotNull(tenantDocument.getSpaceInfo());
@@ -151,7 +151,7 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
         ZKIsClean = true;
     }
 
-    @BeforeClass(groups = {"functional"} )
+    @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         cleanupZK();
         loginAD();
@@ -162,21 +162,21 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
         try {
             deleteTenant(TestContractId, TestTenantId);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
         createTenant(TestContractId, TestTenantId);
 
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
     }
-    
-    @AfterClass(groups = {"functional"})
+
+    @AfterClass(groups = { "functional" })
     public void tearDown() throws Exception {
         try {
             deleteTenant(TestContractId, TestTenantId);
         } catch (Exception e) {
-            //ignore
+            // ignore
         }
     }
 

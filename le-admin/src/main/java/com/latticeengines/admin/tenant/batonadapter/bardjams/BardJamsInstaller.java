@@ -32,7 +32,8 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
     }
 
     @Override
-    protected DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
+    protected DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName,
+            int dataVersion, DocumentDirectory configDir) {
 
         BardJamsTenant tenant = pupulateTenant(space, configDir);
         BardJamsTenant oldTenant = bardJamsEntityMgr.findByTenant(tenant);
@@ -92,7 +93,7 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
         String status = newTenant.getStatus().trim();
         if (BardJamsTenantStatus.NEW.getStatus().equals(status)) {
             Exception e = new IllegalStateException("The status of tenant " + tenant.getTenant()
-                    + " remains NEW after " + String.valueOf(TIMEOUT /1000.) + " seconds.");
+                    + " remains NEW after " + String.valueOf(TIMEOUT / 1000.) + " seconds.");
             throw new LedpException(LedpCode.LEDP_18027, e);
         }
         return isSuccessful;
@@ -102,8 +103,8 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
         String contractId = space.getContractId();
         String tenantId = space.getTenantId();
         TenantDocument tenant = tenantService.getTenant(contractId, tenantId);
-        DocumentDirectory vdbdlConfig = SerializableDocumentDirectory.deserialize(
-                tenantService.getTenantServiceConfig(contractId, tenantId, VisiDBDLComponent.componentName));
+        DocumentDirectory vdbdlConfig = SerializableDocumentDirectory.deserialize(tenantService.getTenantServiceConfig(
+                contractId, tenantId, VisiDBDLComponent.componentName));
         vdbdlConfig.makePathsLocal();
         return BardJamsComponent.getTenantFromDocDir(configDir, tenantId, tenant.getSpaceConfig(), vdbdlConfig);
     }

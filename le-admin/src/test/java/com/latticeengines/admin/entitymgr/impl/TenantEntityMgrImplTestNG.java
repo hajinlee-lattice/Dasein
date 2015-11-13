@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
@@ -28,8 +28,7 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
         BootstrapState state;
         int numTries = 0;
         do {
-            state = tenantEntityMgr.getTenantServiceState(
-                    TestContractId, TestTenantId, testLatticeComponent.getName());
+            state = tenantEntityMgr.getTenantServiceState(TestContractId, TestTenantId, testLatticeComponent.getName());
             Thread.sleep(1000L);
             numTries++;
         } while (state.state != BootstrapState.State.OK && numTries < 10);

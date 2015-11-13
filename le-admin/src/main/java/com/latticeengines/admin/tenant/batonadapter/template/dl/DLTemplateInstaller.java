@@ -1,6 +1,5 @@
 package com.latticeengines.admin.tenant.batonadapter.template.dl;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,7 +36,9 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
 
     private static final int SUCCESS = 3;
 
-    public DLTemplateInstaller() { super(DLTemplateComponent.componentName); }
+    public DLTemplateInstaller() {
+        super(DLTemplateComponent.componentName);
+    }
 
     public void setTenantService(TenantService tenantService) {
         this.tenantService = tenantService;
@@ -53,7 +54,7 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
 
     @Override
     public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName,
-                                                                int dataVersion, DocumentDirectory configDir) {
+            int dataVersion, DocumentDirectory configDir) {
         String dmDeployment = space.getTenantId();
         String contractExternalID = space.getContractId();
 
@@ -64,8 +65,8 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
 
         SerializableDocumentDirectory vdbdlConfig;
         try {
-            vdbdlConfig = tenantService.getTenantServiceConfig(
-                    contractExternalID, dmDeployment, VisiDBDLComponent.componentName);
+            vdbdlConfig = tenantService.getTenantServiceConfig(contractExternalID, dmDeployment,
+                    VisiDBDLComponent.componentName);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18038, "Cannot find the configuration of VisiDBDL component.", e);
         }
@@ -73,8 +74,8 @@ public class DLTemplateInstaller extends LatticeComponentInstaller {
         String version = vdbdlConfig.getNodeAtPath("/TemplateVersion").getData();
         File dataloaderTemplate = new File(templateProvider.getTemplate(version, topology) + ".config");
         if (!dataloaderTemplate.exists()) {
-            throw new LedpException(LedpCode.LEDP_18038,
-                    new IOException("Cannot find DL template at " + dataloaderTemplate));
+            throw new LedpException(LedpCode.LEDP_18038, new IOException("Cannot find DL template at "
+                    + dataloaderTemplate));
         }
         try {
             String str = BOMUtils.toString(new FileInputStream(dataloaderTemplate));
