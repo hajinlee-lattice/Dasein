@@ -67,18 +67,21 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
         path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
 
-
         path = path.append(new Path("/SpaceConfiguration"));
         if (!camille.exists(path)) {
             camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         }
 
         Path topologyPath = path.append(new Path("/Topology"));
-        if (camille.exists(topologyPath)) { camille.delete(topologyPath); }
+        if (camille.exists(topologyPath)) {
+            camille.delete(topologyPath);
+        }
         camille.create(topologyPath, new Document("SFDC"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         Path dlAddressPath = path.append(new Path("/DL_Address"));
-        if (camille.exists(dlAddressPath)) { camille.delete(dlAddressPath); }
+        if (camille.exists(dlAddressPath)) {
+            camille.delete(dlAddressPath);
+        }
         camille.create(dlAddressPath, new Document(defaultDataLoaderUrl), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         PLSTenantId = String.format("%s.%s.%s", contractId, tenantId, spaceId);
@@ -119,8 +122,12 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         removeFlagDefinition(flagId);
         removeFlagDefinition(noDefaultFlagId);
 
-        FeatureFlagClient.setDefinition(flagId, new FeatureFlagDefinition());
-        FeatureFlagClient.setDefinition(noDefaultFlagId, new FeatureFlagDefinition());
+        FeatureFlagDefinition f1 = new FeatureFlagDefinition();
+        f1.setConfigurable(true);
+        FeatureFlagDefinition f2 = new FeatureFlagDefinition();
+        f2.setConfigurable(true);
+        FeatureFlagClient.setDefinition(flagId, f1);
+        FeatureFlagClient.setDefinition(noDefaultFlagId, f2);
 
         // overwrite a flag
         testOverwriteFlag(flagId, true);
@@ -131,7 +138,6 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         removeFlagDefinition(flagId);
         removeFlagDefinition(noDefaultFlagId);
     }
-
 
     @Test(groups = "functional")
     public void testDataloaderRelatedFeatureFlags() throws Exception {
@@ -162,9 +168,11 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private void verifyFlagMatchDefault(FeatureFlagValueMap flags, String flagId) {
         FeatureFlagValueMap defaultFlags = defaultFeatureFlagProvider.getDefaultFlags();
-        Assert.assertEquals(flags.containsKey(flagId), defaultFlags.containsKey(flagId),
-                String.format("%s exists in either tenant flags (%s) or default flags (%s), not both",
-                        flagId, flags.containsKey(flagId), defaultFlags.containsKey(flagId)));
+        Assert.assertEquals(
+                flags.containsKey(flagId),
+                defaultFlags.containsKey(flagId),
+                String.format("%s exists in either tenant flags (%s) or default flags (%s), not both", flagId,
+                        flags.containsKey(flagId), defaultFlags.containsKey(flagId)));
         if (flags.containsKey(flagId)) {
             Assert.assertEquals(flags.get(flagId), defaultFlags.get(flagId));
         }
