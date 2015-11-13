@@ -118,7 +118,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         Table eventTable = createEventTableFromMatchResult(commandId, preMatchEventTableAndCreds);
         ModelingServiceExecutor.Builder bldr = sample(eventTable);
         profileAndModel(eventTable, bldr);
-        scoring(eventTable);
+        //scoring(eventTable);
     }
 
     private void setupUsers() throws Exception {
@@ -153,7 +153,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     private void profileAndModel(Table eventTable, ModelingServiceExecutor.Builder bldr) throws Exception {
         String[] eventCols = new String[] { //
-        "Event_IsWon", //
+                "Event_IsWon", //
                 "Event_StageIsClosedWon", //
                 "Event_IsClosed", //
                 "Event_OpportunityCreated" //
@@ -525,6 +525,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setUrl("https://login.salesforce.com");
         crmCredentialZKService.writeToZooKeeper("sfdc", CUSTOMERSPACE, true, crmCredential, true);
 
         Camille camille = CamilleEnvironment.getCamille();
@@ -601,7 +602,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         int maxTries = 1000;
         int i = 0;
         do {
-            String url = String.format(microServiceHostPort + "/scoring/scoringJobs/%s", appId);
+            String url = String.format(microServiceHostPort + "/modeling/jobs/%s", appId);
             status = restTemplate.getForObject(url, JobStatus.class);
             Thread.sleep(10000L);
             i++;
