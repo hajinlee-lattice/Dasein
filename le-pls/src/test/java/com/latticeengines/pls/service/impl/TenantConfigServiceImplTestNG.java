@@ -169,8 +169,8 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
     private void verifyFlagMatchDefault(FeatureFlagValueMap flags, String flagId) {
         FeatureFlagValueMap defaultFlags = defaultFeatureFlagProvider.getDefaultFlags();
         Assert.assertEquals(
-                flags.containsKey(flagId),
-                defaultFlags.containsKey(flagId),
+                flags.containsKey(flagId), //
+                defaultFlags.containsKey(flagId), //
                 String.format("%s exists in either tenant flags (%s) or default flags (%s), not both", flagId,
                         flags.containsKey(flagId), defaultFlags.containsKey(flagId)));
         if (flags.containsKey(flagId)) {
