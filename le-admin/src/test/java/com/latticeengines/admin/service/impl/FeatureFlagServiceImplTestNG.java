@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinit
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
 
 public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
 
@@ -38,7 +39,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         FeatureFlagDefinitionMap defaultFeatureFlagMap = featureFlagService.getDefinitions();
         Assert.assertNotNull(defaultFeatureFlagMap);
         System.out.println(defaultFeatureFlagMap.keySet());
-        Assert.assertEquals(defaultFeatureFlagMap.size(), LatticeFeatureFlag.values().length);
+        Assert.assertEquals(defaultFeatureFlagMap.size(), LatticeFeatureFlag.values().length
+                + PlsFeatureFlag.values().length);
         FeatureFlagDefinition danteFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.DANTE.getName());
         Assert.assertNotNull(danteFeatureFlag);
         FeatureFlagDefinition quotaFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.QUOTA.getName());
