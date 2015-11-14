@@ -55,13 +55,19 @@ class LP_020100_DisableCreateBIQueries( StepBase ):
         queries = []
 
         if template_type == 'SFDC':
-            q_unpivot = conn_mgr.getQuery('Q_Unpivot_By_SFDC_Lead_Contact_ID_PLS_Scoring_Incremental')
-            queries.append(q_unpivot)
+            try:
+                q_unpivot = conn_mgr.getQuery('Q_Unpivot_By_SFDC_Lead_Contact_ID_PLS_Scoring_Incremental')
+                queries.append(q_unpivot)
+            except UnknownVisiDBSpec:
+                pass
         else:
-            q_unpivot_contact = conn_mgr.getQuery('Q_Unpivot_By_SFDC_Contact_ID_PLS_Scoring_Incremental')
-            q_unpivot_lead = conn_mgr.getQuery('Q_Unpivot_By_SFDC_Lead_ID_PLS_Scoring_Incremental')
-            queries.append(q_unpivot_contact)
-            queries.append(q_unpivot_lead)
+            try:
+                q_unpivot_contact = conn_mgr.getQuery('Q_Unpivot_By_SFDC_Contact_ID_PLS_Scoring_Incremental')
+                q_unpivot_lead = conn_mgr.getQuery('Q_Unpivot_By_SFDC_Lead_ID_PLS_Scoring_Incremental')
+                queries.append(q_unpivot_contact)
+                queries.append(q_unpivot_lead)
+            except UnknownVisiDBSpec:
+                pass
 
         for q in queries:
             cols = q.getColumns()
