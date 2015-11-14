@@ -1,3 +1,7 @@
+Internal_LP_ELQ_200_210_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Internal_LP_ELQ_200_210_2,https://dataloader-prod.lattice-engines.com/DataLoader_PLS/
+Internal_LP_MKTO_200_210_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Internal_LP_MKTO_200_210_2,https://dataloader-prod.lattice-engines.com/DataLoader_PLS/
 MW_Devel_BIQuery_20151009,https://10.41.1.187:8080/
 MW_Devel_MKTOLeadTest_20151104,https://10.41.1.187:8080/
 Tmpl_LP_Trunk_ELQ_Main,https://10.41.1.187:8080/
