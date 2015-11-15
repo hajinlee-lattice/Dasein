@@ -11,6 +11,8 @@ import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.latticeengines.common.exposed.exception.AnnotationValidationError;
+import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -21,6 +23,9 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
 @Aspect
 public class ModelingServiceValidationAspect {
+
+    @Autowired
+    private BeanValidationService beanValidationService;
 
     @Autowired
     private MetadataService metadataService;
@@ -84,6 +89,15 @@ public class ModelingServiceValidationAspect {
         }
         if (!isElementValidInPath(config.getTable())) {
             throw new LedpException(LedpCode.LEDP_10007, new String[] { config.getTable() });
+        }
+        Set<AnnotationValidationError> validationErrors;
+        try {
+            validationErrors = beanValidationService.validate(config);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_15013);
+        }
+        if (validationErrors.size() != 0) {
+            throw new LedpException(LedpCode.LEDP_15012);
         }
     }
 

@@ -107,6 +107,12 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
 
     @Test(groups = "functional")
     public void validateCreateSamples() {
+        validateSamplingConfigCustomerField();
+        validateSamplingConfigTableField();
+        validateSamplingConfigNotNullFields();
+    }
+
+    private void validateSamplingConfigCustomerField() {
         SamplingConfiguration config = new SamplingConfiguration();
         config.setCustomer("{Dell}");
         LedpException ex = null;
@@ -117,6 +123,33 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
         }
         Assert.assertTrue(ex instanceof LedpException);
         Assert.assertEquals(ex.getCode(), LedpCode.LEDP_10007);
+    }
+
+    private void validateSamplingConfigTableField() {
+        SamplingConfiguration config = new SamplingConfiguration();
+        config.setCustomer("Dell");
+        config.setTable("");
+        LedpException ex = null;
+        try {
+            modelingService.createSamples(config);
+        } catch (LedpException ex2) {
+            ex = ex2;
+        }
+        Assert.assertTrue(ex instanceof LedpException);
+        Assert.assertEquals(ex.getCode(), LedpCode.LEDP_10007);
+    }
+
+    private void validateSamplingConfigNotNullFields() {
+        SamplingConfiguration config = new SamplingConfiguration();
+        config.setTable("Table");
+        LedpException ex = null;
+        try {
+            modelingService.createSamples(config);
+        } catch (LedpException ex2) {
+            ex = ex2;
+        }
+        Assert.assertTrue(ex instanceof LedpException);
+        Assert.assertEquals(ex.getCode(), LedpCode.LEDP_15012);
     }
 
     @Test(groups = "functional")

@@ -140,8 +140,4 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         return modelingJob;
     }
 
-    @Override
-    public ApplicationId submitParallelMRJob(ModelingJob modelingJob) {
-        return null;
-    }
 }
