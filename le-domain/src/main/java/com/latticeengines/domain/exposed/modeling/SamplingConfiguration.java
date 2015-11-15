@@ -9,13 +9,16 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class SamplingConfiguration {
 
     private List<SamplingElement> samplingElements = new ArrayList<SamplingElement>();
+    @NotNull
     private String customer;
+    @NotNull
     private String table;
     private int trainingPercentage = 80;
     private int testPercentage = 20;

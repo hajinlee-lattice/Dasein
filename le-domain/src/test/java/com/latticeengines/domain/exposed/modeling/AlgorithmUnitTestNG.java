@@ -27,5 +27,6 @@ public class AlgorithmUnitTestNG {
         Properties algorithmProps = deserializedAlgorithm.getAlgorithmProps();
         assertEquals(algorithmProps.getProperty("SAMPLESIZE"), "1000");
         assertEquals(algorithmProps.getProperty("NUMITERS"), "100");
+        assertEquals(deserializedAlgorithm.getMapperSize(), "1");
     }
 }
