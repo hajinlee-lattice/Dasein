@@ -39,7 +39,7 @@ public class AvroUtils {
             GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
             reader = DataFileReader.openReader(input, fileReader);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Getting avro file reader from path: " + path.toString(), e);
         }
         return reader;
     }
