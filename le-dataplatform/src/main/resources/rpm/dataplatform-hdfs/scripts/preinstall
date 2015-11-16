@@ -9,6 +9,8 @@ hdfs dfs -rm -f -r /app/dataflowapi
 hdfs dfs -mkdir -p /app/dataflowapi/lib
 hdfs dfs -rm -f -r /app/eai
 hdfs dfs -mkdir -p /app/eai/lib
+hdfs dfs -rm -f -r /app/workflowapi
+hdfs dfs -mkdir -p /app/workflowapi/lib
 hdfs dfs -mkdir -p /app/db
 hdfs dfs -mkdir -p /app/security
 

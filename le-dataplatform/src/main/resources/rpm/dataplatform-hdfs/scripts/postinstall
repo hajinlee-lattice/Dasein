@@ -15,7 +15,7 @@ su -l yarn -c 'hdfs dfs -mkdir /datascientist'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/playmaker /app'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/datascientist /'
-for microservice in 'dataflowapi' 'eai'
+for microservice in 'dataflowapi' 'eai' 'workflowapi'
 do
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$microservice/lib"
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$microservice.properties /app/$microservice"
