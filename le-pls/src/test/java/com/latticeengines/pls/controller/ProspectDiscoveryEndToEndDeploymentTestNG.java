@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller;
 
 import static org.testng.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +28,8 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.LogOutputStream;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.hadoop.conf.Configuration;
@@ -471,7 +475,12 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
         CommandLine cmdLine = CommandLine.parse(command);
         DefaultExecutor executor = new DefaultExecutor();
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        PumpStreamHandler psh = new PumpStreamHandler(stdout);
+        executor.setStreamHandler(psh);
         executor.execute(cmdLine);
+        
+        System.out.println(new String(stdout.toByteArray()));
 
         HdfsUtils.rmdir(yarnConfiguration, //
                 String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, "dataflowapi"));
@@ -672,6 +681,18 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
                 && status.getStatus() != FinalApplicationStatus.FAILED);
 
         assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
+    }
+    
+    static class CollectingLogOutputStream extends LogOutputStream {
+        private final List<String> lines = new LinkedList<String>();
+        
+        @Override 
+        protected void processLine(String line, int level) {
+            lines.add(line);
+        }   
+        public List<String> getLines() {
+            return lines;
+        }
     }
 
 }
