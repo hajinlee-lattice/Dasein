@@ -10,7 +10,7 @@ public enum LatticeFeatureFlag {
     DANTE("Dante", "Dante"), //
     QUOTA("Quota", "Quota"), //
     TARGET_MARKET("TargetMarket", "Target Market"), //
-    USE_EAI_VALIDATE_CREDENTIAL("ValidateCreds", "Use Eai to valiate source credentials");
+    USE_EAI_VALIDATE_CREDENTIAL("ValidateCredsUsingEai", "Use Eai to valiate source credentials");
 
     private String name;
     private String documentation;
