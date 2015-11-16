@@ -1137,6 +1137,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+
+        log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
         log.info("Using hadoop fs.defaultFS = " + config.get("fs.defaultFS"));
         try {
             List<String> files = HdfsUtils.getFilesForDir(config, "/app/dataflow/lib/");
