@@ -154,17 +154,26 @@ public class ModelingServiceExecutor {
                 modelingServiceHostPort + builder.getModelSubmissionUrl(), model, AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for modeling: %s", appId));
-        JobStatus status = waitForAppId(appId);
+        JobStatus status = waitForModelingAppId(appId);
         String resultDir = status.getResultDirectory();
         return UuidUtils.parseUuid(resultDir);
     }
-
+    
+    
     private JobStatus waitForAppId(String appId) throws Exception {
+        return waitForAppId(appId, builder.getRetrieveJobStatusUrl());
+    }
+
+    private JobStatus waitForModelingAppId(String appId) throws Exception {
+        return waitForAppId(appId, builder.getModelingJobStatusUrl());
+    }
+
+    private JobStatus waitForAppId(String appId, String jobStatusUrl) throws Exception {
         JobStatus status;
         int maxTries = 60;
         int i = 0;
         do {
-            String url = String.format(modelingServiceHostPort + builder.getRetrieveJobStatusUrl(), appId);
+            String url = String.format(modelingServiceHostPort + jobStatusUrl, appId);
             status = restTemplate.getForObject(url, JobStatus.class);
             Thread.sleep(10000L);
             i++;
@@ -216,8 +225,9 @@ public class ModelingServiceExecutor {
         private String profileSubmissionUrl = "/rest/profile";
         private String retrieveFeaturesUrl = "/rest/features";
         private String retrieveJobStatusUrl = "/rest/getJobStatus/%s";
-
+        private String modelingJobStatusUrl = "/rest/getJobStatus/%s";
         private String hdfsDirToSample;
+
 
         public Builder() {
         }
@@ -339,6 +349,11 @@ public class ModelingServiceExecutor {
 
         public Builder hdfsDirToSample(String hdfsDirToSample) {
             this.setHdfsDirToSample(hdfsDirToSample);
+            return this;
+        }
+        
+        public Builder retrieveModelingJobStatusUrl(String modelingJobStatusUrl) {
+            this.setModelingJobStatusUrl(modelingJobStatusUrl);
             return this;
         }
 
@@ -532,6 +547,14 @@ public class ModelingServiceExecutor {
 
         public void setLoadSubmissionUrl(String loadSubmissionUrl) {
             this.loadSubmissionUrl = loadSubmissionUrl;
+        }
+
+        public void setModelingJobStatusUrl(String modelingJobStatusUrl) {
+            this.modelingJobStatusUrl = modelingJobStatusUrl;
+        }
+        
+        public String getModelingJobStatusUrl() {
+            return modelingJobStatusUrl;
         }
 
     }

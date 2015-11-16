@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -13,14 +14,20 @@ import java.sql.ResultSet;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
+
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.zookeeper.ZooDefs;
@@ -109,7 +116,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         createImportTablesInMetadataStore();
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void runPipeline() throws Exception {
         importData();
         runDataFlow();
@@ -138,6 +145,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
                 .modelSubmissionUrl("/modeling/models") //
                 .retrieveFeaturesUrl("/modeling/features") //
                 .retrieveJobStatusUrl("/modeling/jobs/%s") //
+                .retrieveModelingJobStatusUrl("/modeling/modelingjobs/%s") //
                 .modelingServiceHostPort(microServiceHostPort) //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .customer(CUSTOMERSPACE) //
@@ -401,10 +409,60 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         }
 
     }
+    
+    private String getVersionFromPomXmlFile() throws Exception {
+        Collection<File> files = FileUtils.listFiles(new File("."), new IOFileFilter() {
+
+            @Override
+            public boolean accept(File file) {
+                return file.getName().equals("pom.xml");
+            }
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.equals("le-pls");
+            }
+            
+        }, null);
+        
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+        XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(files.iterator().next()));
+        StringBuilder content = null;
+        String version = null;
+        while (reader.hasNext() && version == null) {
+            int event = reader.next();
+
+            switch (event) {
+            case XMLStreamConstants.START_ELEMENT:
+                if ("version".equalsIgnoreCase(reader.getLocalName())) {
+                    content = new StringBuilder();
+                }
+                break;
+
+            case XMLStreamConstants.CHARACTERS:
+                if (content != null) {
+                    content.append(reader.getText().trim());
+                }
+                break;
+
+            case XMLStreamConstants.END_ELEMENT:
+                if (content != null) {
+                    version = content.toString();
+                }
+                content = null;
+                break;
+
+            case XMLStreamConstants.START_DOCUMENT:
+                break;
+            }
+        }
+        
+        return version;
+    }
 
     private void installServiceFlow() throws Exception {
         String mavenHome = System.getProperty("MVN_HOME");
-        String version = System.getProperty("ARTIFACT_VERSION");
+        String version = getVersionFromPomXmlFile();
         // Retrieve the service flow jar file from the maven repository
         String command = "%s/bin/mvn -DgroupId=com.latticeengines " + "-DartifactId=le-serviceflows-prospectdiscovery "
                 + "-Dversion=%s -Dclassifier=shaded -Ddest=%s.jar dependency:get";
