@@ -44,7 +44,7 @@ module.exports = function (grunt) {
                 args: [ './app.js' ]
             },
             nodemon: {
-                cmd: 'nodemon.cmd',
+                cmd: 'nodemon',
                 args: [ './app.js' ]
             },
             killnode: {
