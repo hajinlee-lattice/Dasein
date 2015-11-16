@@ -28,14 +28,23 @@ public class FeatureFlagResourceTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void defineAndRemoveFlag() {
+        String url = getRestHostPort() + "/admin/featureflags/";
         loginAD();
-        String url = getRestHostPort() + "/admin/featureflags/" + FLAG_ID;
+
+        FeatureFlagDefinitionMap flagMap = restTemplate.getForObject(url, FeatureFlagDefinitionMap.class);
+        Assert.assertNotNull(flagMap);
+        int featureFlagDefNum = flagMap.size();
+        System.out.println(featureFlagDefNum);
+        Assert.assertFalse(flagMap.containsKey(FLAG_ID));
+
+        url = getRestHostPort() + "/admin/featureflags/" + FLAG_ID;
         ResponseDocument<?> response = restTemplate.postForObject(url, FLAG_DEFINITION, ResponseDocument.class);
         Assert.assertTrue(response.isSuccess(), "should be able to define a new flag.");
 
         url = getRestHostPort() + "/admin/featureflags";
-        FeatureFlagDefinitionMap flagMap = restTemplate.getForObject(url, FeatureFlagDefinitionMap.class);
+        flagMap = restTemplate.getForObject(url, FeatureFlagDefinitionMap.class);
         Assert.assertTrue(flagMap.containsKey(FLAG_ID));
+        Assert.assertEquals(featureFlagDefNum + 1, flagMap.size());
 
         url = getRestHostPort() + "/admin/featureflags/" + FLAG_ID;
         restTemplate.delete(url);
