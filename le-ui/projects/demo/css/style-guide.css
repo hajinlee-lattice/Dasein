@@ -21,12 +21,9 @@ samp {
 }
 
 pre {
-  white-space: pre;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-code {
+	white-space: pre;
+	white-space: pre-wrap;
+	word-wrap: break-word;
 	background: #f1f1f1;
 	padding: 1em;
 	border: #ddd solid 1px;
