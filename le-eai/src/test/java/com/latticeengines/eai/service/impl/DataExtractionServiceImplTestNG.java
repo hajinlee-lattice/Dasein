@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.metadata.util.EaiMetadataUtil;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 import static org.mockito.Mockito.mock;
@@ -171,6 +172,9 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         attr.setPhysicalName(attr.getName());
         attr.setStatisticalType("");
         attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+        LastModifiedKey lmk = EaiMetadataUtil.createLastModifiedKey();
+        lmk.setLastModifiedTimestamp(1000000000000L);
+        table.setLastModifiedKey(lmk);
         table.setAttributes(Arrays.<Attribute> asList(new Attribute[] { attr }));
         when(eaiMetadataService.getImportTables(any(String.class))).thenReturn(
                 Arrays.<Table> asList(new Table[] { table }));

@@ -29,7 +29,6 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -127,7 +126,6 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
         JobInfo jobInfo = setupJob(template, table);
 
         PrimaryKey pk = EaiMetadataUtil.createPrimaryKey();
-        LastModifiedKey lk = EaiMetadataUtil.createLastModifiedKey();
 
         try {
             SObjectDescription desc = template.requestBodyAndHeader("direct:getDescription", jobInfo,
@@ -193,13 +191,11 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 }
                 if (attr.getLogicalDataType().equals("id")) {
                     pk.addAttribute(attr.getName());
-                } else if (attr.getName().equals("LastModifiedDate")) {
-                    lk.addAttribute(attr.getName());
                 }
                 newTable.addAttribute(attr);
             }
             newTable.setPrimaryKey(pk);
-            newTable.setLastModifiedKey(lk);
+            newTable.setLastModifiedKey(table.getLastModifiedKey());
 
             Schema schema = AvroSchemaBuilder.createSchema(newTable.getName(), newTable);
             newTable.setSchema(schema);
