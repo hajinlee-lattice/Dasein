@@ -18,11 +18,11 @@ class DanteEnvironments(object):
     Dante_DB_Name = parser.get('Dante_DB', 'Dante_DB_Name')
     # Configuration for sales force
     Sales_Force_URL = parser.get('Sales_Force', 'Sales_Force_URL')
-    Sales_Force_User = parser.get('Sales_Force', 'Sales_Force_User')
-    Sales_Force_PWD = parser.get('Sales_Force', 'Sales_Force_PWD')
+    Sales_Force_User_Lead = parser.get('Sales_Force', 'sales_force_user_lead')
+    Sales_Force_PWD_Lead = parser.get('Sales_Force', 'sales_force_pwd_lead')
     Sales_Force_User_Account = parser.get('Sales_Force', 'Sales_Force_User_Account')
     Sales_Force_PWD_Account = parser.get('Sales_Force', 'Sales_Force_PWD_Account')
-    Sales_Force_DT_service = parser.get('Sales_Force', 'Sales_Force_DT_service')
+    Sales_Force_DT_service = parser.get('Sales_Force', 'sales_force_dt_service_lead')
     Sales_Force_DT_service_Account = parser.get('Sales_Force', 'Sales_Force_DT_service_Account')
     Browser_Type = parser.get('Sales_Force', 'Browser_Type')
 

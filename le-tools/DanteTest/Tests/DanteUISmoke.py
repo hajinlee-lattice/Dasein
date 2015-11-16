@@ -7,14 +7,14 @@ class LeadInSFDCTest(unittest.TestCase):
 
     def testcase_1_LeadDetailPage(self):
         print '----test  case for Lead Detail page----'
-        dp_L_Detail=DantePageHelper()
-        ddh_ld=DanteDataHelper()
-        dp_L_Detail.LogInSaleForcePage()
-        full_ID=dp_L_Detail.OpenDetailPage('Lead')
-        lead_dic=ddh_ld.ParseLeadScore(full_ID)
-        Lead_infos_page=dp_L_Detail.GetScoreInfo('Lead',True)
+        page_Lead_Detail=DantePageHelper()
+        danteData_DB=DanteDataHelper()
+        page_Lead_Detail.LogInSaleForcePage()
+        full_ID=page_Lead_Detail.OpenDetailPage('Lead')
+        lead_dic=danteData_DB.ParseLeadScore(full_ID)
+        Lead_infos_page=page_Lead_Detail.GetScoreInfo('Lead',True)
         #print Lead_infos_page
-        dp_L_Detail.Close_browser()
+        page_Lead_Detail.Close_browser()
         assert str(Lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(Lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
         #assert str(Lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
         assert str(Lead_infos_page[1])==str(lead_dic["Score"]), 'Score in page is: "'+str(Lead_infos_page[1])+'", but should be: "'+str(lead_dic["Score"])+'"'
@@ -23,14 +23,14 @@ class LeadInSFDCTest(unittest.TestCase):
 
     def testcase_2_LeadListPage(self):
         print '----test  case for Lead list page----'
-        dp_L_List=DantePageHelper()
-        ddh_ll=DanteDataHelper()
-        dp_L_List.LogInSaleForcePage()
-        full_ID=dp_L_List.OpenDanteListPage('Lead')
-        lead_dic=ddh_ll.ParseLeadScore(full_ID)
-        lead_infos_page=dp_L_List.GetScoreInfo('Lead')
+        page_Lead_Detail=DantePageHelper()
+        danteData_DB=DanteDataHelper()
+        page_Lead_Detail.LogInSaleForcePage()
+        full_ID=page_Lead_Detail.OpenDanteListPage('Lead')
+        lead_dic=danteData_DB.ParseLeadScore(full_ID)
+        lead_infos_page=page_Lead_Detail.GetScoreInfo('Lead')
         #print lead_infos_page
-        dp_L_List.Close_browser()
+        page_Lead_Detail.Close_browser()
         assert str(lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
         #assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
         assert str(lead_infos_page[1])==str(lead_dic["Score"]), 'Score in page is: "'+str(lead_infos_page[1])+'", but should be: "'+str(lead_dic["Score"])+'"'
@@ -39,14 +39,14 @@ class LeadInSFDCTest(unittest.TestCase):
 
     def testcase_3_ContactListPage(self):
         print '----test  case for Contact list page----'
-        dp_C_List=DantePageHelper()
-        ddh_cl=DanteDataHelper()
-        dp_C_List.LogInSaleForcePage()
-        full_ID=dp_C_List.OpenDanteListPage('Contact')
-        lead_dic=ddh_cl.ParseLeadScore(full_ID)
-        lead_infos_page=dp_C_List.GetScoreInfo('Contact')
+        page_Contact_List=DantePageHelper()
+        danteData_DB=DanteDataHelper()
+        page_Contact_List.LogInSaleForcePage()
+        full_ID=page_Contact_List.OpenDanteListPage('Contact')
+        lead_dic=danteData_DB.ParseLeadScore(full_ID)
+        lead_infos_page=page_Contact_List.GetScoreInfo('Contact')
         #print Lead_infos_page
-        dp_C_List.Close_browser()
+        page_Contact_List.Close_browser()
         assert str(lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
         #assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
         assert str(lead_infos_page[1])==str(lead_dic["Score"]), 'Score in page is: "'+str(lead_infos_page[1])+'", but should be: "'+str(lead_dic["Score"])+'"'
@@ -56,14 +56,14 @@ class LeadInSFDCTest(unittest.TestCase):
     def testcase_4_ContactDetailPage(self):
         print '----test  case for Contact Detail page----'
         #print 'This case is blocked by the bug ENG-7677'
-        dp_C_Detail=DantePageHelper()
-        ddh_cd=DanteDataHelper()
-        dp_C_Detail.LogInSaleForcePage()
-        full_ID=dp_C_Detail.OpenDetailPage('Contact')
-        lead_dic=ddh_cd.ParseLeadScore(full_ID)
-        Lead_infos_page=dp_C_Detail.GetScoreInfo('Contact',True)
+        page_Contact_Detail=DantePageHelper()
+        danteData_DB=DanteDataHelper()
+        page_Contact_Detail.LogInSaleForcePage()
+        full_ID=page_Contact_Detail.OpenDetailPage('Contact')
+        lead_dic=danteData_DB.ParseLeadScore(full_ID)
+        Lead_infos_page=page_Contact_Detail.GetScoreInfo('Contact',True)
         #print Lead_infos_page
-        dp_C_Detail.Close_browser()
+        page_Contact_Detail.Close_browser()
         assert str(Lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(Lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
         #assert str(Lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(Lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
         assert str(Lead_infos_page[1])==str(lead_dic["Score"]), 'Score in page is: "'+str(Lead_infos_page[1])+'", but should be: "'+str(lead_dic["Score"])+'"'
@@ -72,30 +72,30 @@ class LeadInSFDCTest(unittest.TestCase):
 
     def testcase_5_LeadDanteWithoutScore(self):
         print '----test  case for Lead list page without score be configured----'
-        dp_L_List_No_Score=DantePageHelper()
-        dp_L_List_No_Score.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,False,False)
-        ddh_ll=DanteDataHelper()
-        dp_L_List_No_Score.LogInSaleForcePage()
-        full_ID=dp_L_List_No_Score.OpenDanteListPage('Lead')
-        lead_dic=ddh_ll.ParseLeadScore(full_ID)
-        lead_infos_page=dp_L_List_No_Score.GetScoreInfo('Lead')
-        dp_L_List_No_Score.Close_browser()
-        dp_L_List_No_Score.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,True,True)
+        page_Lead_List_No_Score=DantePageHelper()
+        page_Lead_List_No_Score.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,False,False)
+        danteData_DB=DanteDataHelper()
+        page_Lead_List_No_Score.LogInSaleForcePage()
+        full_ID=page_Lead_List_No_Score.OpenDanteListPage('Lead')
+        lead_dic=danteData_DB.ParseLeadScore(full_ID)
+        lead_infos_page=page_Lead_List_No_Score.GetScoreInfo('Lead')
+        page_Lead_List_No_Score.Close_browser()
+        page_Lead_List_No_Score.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,True,True)
         assert str(lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
         #assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
         assert str(lead_infos_page[1])=='', 'Score in page is: "'+str(lead_infos_page[1])+'", but should be: ""'
 
     def testcase_6_LeadDanteWithRate(self):
         print '----test  case for Lead list page without Rate be configured----'
-        dp_L_List_Rate=DantePageHelper()
-        dp_L_List_Rate.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,False,True)
-        ddh_ll=DanteDataHelper()
-        dp_L_List_Rate.LogInSaleForcePage()
-        full_ID=dp_L_List_Rate.OpenDanteListPage('Lead')
-        lead_dic=ddh_ll.ParseLeadScore(full_ID)
-        lead_infos_page=dp_L_List_Rate.GetScoreInfo('Lead')
-        dp_L_List_Rate.Close_browser()
-        dp_L_List_Rate.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,True,True)
+        page_Lead_List_Rate=DantePageHelper()
+        page_Lead_List_Rate.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,False,True)
+        danteData_DB=DanteDataHelper()
+        page_Lead_List_Rate.LogInSaleForcePage()
+        full_ID=page_Lead_List_Rate.OpenDanteListPage('Lead')
+        lead_dic=danteData_DB.ParseLeadScore(full_ID)
+        lead_infos_page=page_Lead_List_Rate.GetScoreInfo('Lead')
+        page_Lead_List_Rate.Close_browser()
+        page_Lead_List_Rate.SetDanteServiceURL('Lead',DanteEnvironments.Sales_Force_DT_service,True,True,True)
         assert str(lead_infos_page[0])==str(lead_dic["Title"]),'Display Name in Lead Dante Page is not right, actually is: "'+str(lead_infos_page[0])+'" ,but expected should be: "'+str(lead_dic["Title"])+'" '
         #assert str(lead_infos_page[1])=="Lead Scoring Model", 'Score Title in Page: "'+str(lead_infos_page[1])+'" is not equal: "Lead Scoring Model"'
         assert str(lead_infos_page[1])==lead_dic["Rate"], 'Score in page is: "'+str(lead_infos_page[1])+'", but should be: "'+str(lead_dic["Rate"])+'"'
@@ -104,13 +104,13 @@ class AccountInSFDCTest(unittest.TestCase):
 
     def testcase_1_AccountListPage(self):
         print '----test case for account list page----'
-        dp_A_list=DantePageHelper(salesforce_user=DanteEnvironments.Sales_Force_User_Account,salefore_pwd=DanteEnvironments.Sales_Force_PWD_Account)
-        ddh_AL=DanteDataHelper()
-        dp_A_list.LogInSaleForcePage()
-        full_ID=dp_A_list.OpenDanteListPage('Account')
-        #account_dict=ddh_AL.ParseAccountsPlay(full_ID)
-        result_dict=dp_A_list.GetAccountPlay()
-        dp_A_list.Close_browser()
+        page_Account_List=DantePageHelper(salesforce_user=DanteEnvironments.Sales_Force_User_Account,salefore_pwd=DanteEnvironments.Sales_Force_PWD_Account)
+        #danteData_DB=DanteDataHelper()
+        page_Account_List.LogInSaleForcePage()
+        full_ID=page_Account_List.OpenDanteListPage('Account')
+        #account_dict=danteData_DB.ParseAccountsPlay(full_ID)
+        result_dict=page_Account_List.GetAccountPlay()
+        page_Account_List.Close_browser()
         playlist=result_dict["Plays"]
         play_count=len(playlist)
         assert play_count>0,'No play be displayed in Dante UI'
@@ -122,13 +122,13 @@ class AccountInSFDCTest(unittest.TestCase):
 
     def testcase_2_AccountDetailPage(self):
         print '----test case for account detail page----'
-        dp_A_Detail=DantePageHelper(salesforce_user=DanteEnvironments.Sales_Force_User_Account,salefore_pwd=DanteEnvironments.Sales_Force_PWD_Account)
+        page_Account_Detail=DantePageHelper(salesforce_user=DanteEnvironments.Sales_Force_User_Account,salefore_pwd=DanteEnvironments.Sales_Force_PWD_Account)
         #ddh_AD=DanteDataHelper()
-        dp_A_Detail.LogInSaleForcePage()
-        full_ID=dp_A_Detail.OpenDetailPage('Account')
+        page_Account_Detail.LogInSaleForcePage()
+        full_ID=page_Account_Detail.OpenDetailPage('Account')
         #account_dict=ddh_AD.ParseAccountsPlay(full_ID)
-        result_dict=dp_A_Detail.GetAccountPlay(True)
-        dp_A_Detail.Close_browser()
+        result_dict=page_Account_Detail.GetAccountPlay(True)
+        page_Account_Detail.Close_browser()
         playlist=result_dict["Plays"]
         play_count=len(playlist)
         assert play_count>0,'No play be displayed in Dante UI'

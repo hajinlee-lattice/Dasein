@@ -21,7 +21,7 @@ def ParseYaml(filepath):
 class DantePageHelper(object):
     PageLocator=ParseYaml(DanteEnvironments.Conf_file_Dante_Page)
     DantePages=PageLocator["DantePage"]
-    def __init__(self,sales_force_url=DanteEnvironments.Sales_Force_URL,salesforce_user=DanteEnvironments.Sales_Force_User,salefore_pwd=DanteEnvironments.Sales_Force_PWD,browertype=DanteEnvironments.Browser_Type):
+    def __init__(self,sales_force_url=DanteEnvironments.Sales_Force_URL,salesforce_user=DanteEnvironments.Sales_Force_User_Lead,salefore_pwd=DanteEnvironments.Sales_Force_PWD_Lead,browertype=DanteEnvironments.Browser_Type):
         self.salesforcelogin=sales_force_url
         self.dante_user=salesforce_user
         self.dante_pwd=salefore_pwd
