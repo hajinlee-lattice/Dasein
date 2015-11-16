@@ -11,9 +11,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -33,12 +36,11 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
-        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, spaceId);
+        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
         try {
             camille.delete(path);
         } catch (Exception ex) {
-            //  ignore
+            // ignore
         }
         camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
     }
@@ -46,20 +48,25 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     @AfterClass(groups = { "functional" })
     public void afterClass() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
-        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, spaceId);
+        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
         camille.delete(path);
     }
 
     @Test(groups = "functional")
-    public void verifyCredential() {
-        // sfdc
+    public void verifyCredentialUsingEai() {
+        // sfdc production
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        FeatureFlagDefinition def = new FeatureFlagDefinition();
+        def.setConfigurable(true);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
+        FeatureFlagClient.setEnabled(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), true);
+
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
-        CrmCredential newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId,
-                Boolean.TRUE, crmCredential);
+        CrmCredential newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE,
+                crmCredential);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
 
         // beware that password might change for this sandbox user
@@ -67,8 +74,41 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setUserName("tsanghavi@lattice-engines.com.sandbox2");
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("5aGieJUACRPQ21CG3nUwn8iz");
-        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE,
+        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE, crmCredential);
+        Assert.assertEquals(newCrmCredential.getOrgId(), "00DM0000001dg3uMAA");
+        FeatureFlagClient.removeFromSpace(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "verifyCredentialUsingEai")
+    public void getCredentialUsingEai() {
+        CrmCredential newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
+        Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
+        Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010oIogZVEFGbL3n0qiAp6F66TC");
+        crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
+
+        newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE);
+        Assert.assertEquals(newCrmCredential.getOrgId(), "00DM0000001dg3uMAA");
+        Assert.assertEquals(newCrmCredential.getPassword(), "Happy20105aGieJUACRPQ21CG3nUwn8iz");
+        crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "getCredentialUsingEai")
+    public void verifyCredentialUsingDL() {
+        // sfdc
+        CrmCredential crmCredential = new CrmCredential();
+        crmCredential.setUserName("apeters-widgettech@lattice-engines.com");
+        crmCredential.setPassword("Happy2010");
+        crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
+        CrmCredential newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE,
                 crmCredential);
+        Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
+
+        // beware that password might change for this sandbox user
+        crmCredential = new CrmCredential();
+        crmCredential.setUserName("tsanghavi@lattice-engines.com.sandbox2");
+        crmCredential.setPassword("Happy2010");
+        crmCredential.setSecurityToken("5aGieJUACRPQ21CG3nUwn8iz");
+        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE, crmCredential);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00DM0000001dg3uMAA");
 
         // marketo
@@ -97,7 +137,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         boolean encounteredException = false;
         try {
-             crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE, crmCredential);
+            crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE, crmCredential);
         } catch (Exception e) {
             encounteredException = true;
         }
@@ -116,8 +156,8 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertTrue(encounteredException, "Wrong password should cause exception while validating sfdcsandbox.");
     }
 
-    @Test(groups = "functional", dependsOnMethods = "verifyCredential")
-    public void getCredential() {
+    @Test(groups = "functional", dependsOnMethods = "verifyCredentialUsingDL")
+    public void getCredentialUsingDL() {
         CrmCredential newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
         Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
@@ -129,7 +169,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(newCrmCredential.getPassword(), "Lattice2");
     }
 
-    @Test(groups = "functional", dependsOnMethods = "getCredential")
+    @Test(groups = "functional", dependsOnMethods = "getCredentialUsingDL")
     public void removeCredentials() {
         crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, true);
         crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, false);

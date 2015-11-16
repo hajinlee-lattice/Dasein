@@ -1,16 +1,28 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
@@ -32,6 +44,9 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     @Autowired
     CrmCredentialZKService crmCredentialZKService;
+
+    @Value("${pls.microservice.rest.endpoint.hostport}")
+    private String microServiceUrl;
 
     @Override
     public CrmCredential verifyCredential(String crmType, String tenantId, Boolean isProduction,
@@ -55,11 +70,57 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         String orgId = getSfdcOrgId(crmCredential, isProduction);
         newCrmCredential.setOrgId(orgId);
         crmCredential.setOrgId(orgId);
-        String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
-        dataLoaderService.verifyCredentials(crmType, crmCredential, isProduction, dlUrl);
+
+        FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(tenantId);
+        if (!useEaiToValidate(flags)) {
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
+            dataLoaderService.verifyCredentials(crmType, crmCredential, isProduction, dlUrl);
+        } else {
+            validateCredentialsUsingEai(tenantId, crmType, crmCredential, isProduction);
+        }
         writeToZooKeeper(crmType, tenantId, isProduction, crmCredential, true);
 
         return newCrmCredential;
+    }
+
+    @VisibleForTesting
+    boolean useEaiToValidate(FeatureFlagValueMap flags) {
+        return flags.containsKey(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName())
+                && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName()));
+    }
+
+    @VisibleForTesting
+    void validateCredentialsUsingEai(String tenantId, String crmType, CrmCredential crmCredential, Boolean isProduction) {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        RestTemplate restTemplate = new RestTemplate();
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("customerSpace", customerSpace.toString());
+        uriVariables.put("sourceType", CrmConstants.CRM_SFDC);
+
+        String url = "https://login.salesforce.com";
+        if (!isProduction) {
+            url = url.replace("://login", "://test");
+        }
+
+        crmCredential.setUrl(url);
+        String password = crmCredential.getPassword();
+        if (!StringUtils.isEmpty(crmCredential.getSecurityToken())) {
+            password += crmCredential.getSecurityToken();
+        }
+
+        try {
+            crmCredential.setPassword(CipherUtils.encrypt(password));
+            ResponseDocument<?> response = SimpleBooleanResponse.emptyFailedResponse(Collections.<String> emptyList());
+            response = restTemplate.postForObject(microServiceUrl
+                    + "/eai/validatecredential/customerspaces/{customerSpace}/sourcetypes/{sourceType}", crmCredential,
+                    SimpleBooleanResponse.class, uriVariables);
+            if (!response.isSuccess()) {
+                throw new RuntimeException("Validation Failed!");
+            }
+            crmCredential.setPassword(password);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18030, e);
+        }
     }
 
     private CrmCredential updateMarketoConfig(String crmType, String tenantId, CrmCredential crmCredential) {
