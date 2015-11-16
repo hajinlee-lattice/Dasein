@@ -15,13 +15,13 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "validateCredential", description = "REST resource for importing data into Lattice")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}")
+@RequestMapping("/validatecredential/customerspaces/{customerSpace}")
 public class SourceCredentialResource {
 
     @Autowired
     private SourceCredentialResourceHelper sourceCredentialResourceHelper;
 
-    @RequestMapping(value = "/validateCredential/{sourceType}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/sourcetypes/{sourceType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create an import data job")
     public SimpleBooleanResponse verifySourceCredential(@PathVariable String customerSpace,

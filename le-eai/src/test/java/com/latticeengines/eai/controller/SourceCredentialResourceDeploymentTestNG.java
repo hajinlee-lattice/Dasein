@@ -2,13 +2,17 @@ package com.latticeengines.eai.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertFalse;
+
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -36,15 +40,15 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
 
     @BeforeClass(groups = "deployment")
     private void setup() throws Exception {
-        url = url + "/customerspaces/{customerSpace}/validateCredential/{sourceType}";
+        url = url + "/validatecredential/customerspaces/{customerSpace}/sourcetypes/{sourceType}";
     }
 
     //test production
     @Test(groups = "deployment", enabled = true)
-    public void testValidCredential(){
+    public void testValidCredential() throws Exception{
         CrmCredential cred = new CrmCredential();
         cred.setUserName(salesforceUserName);
-        cred.setPassword(salesforcePasswd);
+        cred.setPassword(CipherUtils.encrypt(salesforcePasswd));
         cred.setUrl(productionLoginUrl);
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", "somecustomer");
@@ -56,10 +60,10 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
 
     //test sandbox
     @Test(groups = "deployment", enabled = true)
-    public void testValidSandboxCredential(){
+    public void testValidSandboxCredential() throws Exception{
         CrmCredential cred = new CrmCredential();
         cred.setUserName("tsanghavi@lattice-engines.com.sandbox2");
-        cred.setPassword("Happy20105aGieJUACRPQ21CG3nUwn8iz");
+        cred.setPassword(CipherUtils.encrypt("Happy20105aGieJUACRPQ21CG3nUwn8iz"));
         cred.setUrl(sandboxLoginUrl);
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", "somecustomer");
@@ -70,10 +74,10 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void testInvalidCredential(){
+    public void testInvalidCredential() throws Exception{
         CrmCredential cred = new CrmCredential();
         cred.setUserName(salesforceUserName);
-        cred.setPassword(salesforcePasswd + "abc");
+        cred.setPassword(salesforcePasswd + "ab");
         cred.setUrl(productionLoginUrl);
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("customerSpace", "somecustomer");
