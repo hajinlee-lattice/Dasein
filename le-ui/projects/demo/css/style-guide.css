@@ -1,0 +1,33 @@
+.title {
+    margin: 40px 0 10px;
+    padding-bottom: 10px;
+    border-bottom: #ddd solid 3px;
+ }
+
+ .grid .row {
+ 	margin-bottom: 1em;
+ }
+ .grid .row > div {
+ 	background: #f1f1f1;
+ 	padding: 4px;
+ }
+
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, serif;
+  font-size: 1em;
+}
+
+pre {
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+code {
+	background: #f1f1f1;
+	padding: 1em;
+	border: #ddd solid 1px;
+}

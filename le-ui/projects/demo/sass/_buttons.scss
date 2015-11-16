@@ -1,0 +1,65 @@
+button.button, a.button {
+	display: block;
+    padding: 0.8em;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: $pearl-white;
+	@include media(">medium") {
+        display: inline-block;
+        padding: 0.5em 1em;
+    }
+    &.blue-button {
+		background-color: $saphire;
+		&:hover {
+			background-color: $saphire-two;
+		}
+		&:active {
+			background-color: $saphire-three;
+		}
+	}
+    &.orange-button {
+		background-color: $amber;
+		&:hover {
+			background-color: $amber-two;
+		}
+		&:active {
+			background-color: $amber-three;
+		}
+	}
+    &.white-button {
+		color: $black-titanium;
+		background-color: $pearl-white;
+		border-color: $silver;
+		&:hover {
+			background-color: $white-gold;
+		}
+		&:active {
+			background-color: $palladium;
+		}
+	}
+    &.gray-button {
+		color: $silver;
+		background-color: $black-titanium;
+		&:hover {
+			background-color: $onyx;
+		}
+		&:active {
+			background-color: $jet;
+		}
+	}
+}
