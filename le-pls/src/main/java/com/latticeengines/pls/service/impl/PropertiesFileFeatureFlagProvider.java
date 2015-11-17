@@ -19,13 +19,13 @@ public class PropertiesFileFeatureFlagProvider implements DefaultFeatureFlagProv
     private FeatureFlagValueMap flags = new FeatureFlagValueMap();
     private FeatureFlagDefinitionMap flagDefinitions = new FeatureFlagDefinitionMap();
 
-    @Value("${ff.PlsTestFlag:None}")
+    @Value("${pls.ff.plstestflag:None}")
     private String plsTestFlag;
 
-    @Value("${ff.SetupPage:None}")
+    @Value("${pls.ff.setuppage:None}")
     private String setupPage;
 
-    @Value("${ff.AdminAlertsTab:None}")
+    @Value("${pls.ff.adminalertstab:None}")
     private String adminAlertsTab;
 
     @Override
