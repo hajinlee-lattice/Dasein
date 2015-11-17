@@ -323,7 +323,7 @@
             <version>${le.domain.version}</version>
             <classifier>intf</classifier>
         </dependency>
-                <dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
