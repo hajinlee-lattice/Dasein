@@ -4,7 +4,7 @@ rm -rf /opt/jetty/webapps/ROOT.war
 rm -rf /etc/ledp/oauth2.properties
 rm -rf /opt/jetty/bin/jetty.sh
 rm -rf /home/yarn/.bashrc
-
+rm -rf /tmp/jetty-*
 adduser yarn
 groupadd yarn
 mkdir -p /var/log/ledp

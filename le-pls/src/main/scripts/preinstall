@@ -8,6 +8,7 @@ rm -rf /opt/jetty/start.ini
 rm -rf /opt/jetty/etc/jetty.xml
 rm -rf /opt/jetty/etc/jetty-rewrite.xml
 rm -rf /home/yarn/.bashrc
+rm -rf /tmp/jetty-*
 adduser yarn
 groupadd yarn
 mkdir -p /var/log/ledp
