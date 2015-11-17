@@ -17,7 +17,7 @@ class LP_020100_DisableCreateBIQueries( StepBase ):
 
     ## Add 5 to the maximum number of columns desired to account for 2 entities, a boundary,
     ## AttributeName and AttributeValue
-    MAX_COLS    = 55
+    MAX_COLS    = 6
 
 
     def __init__( self, forceApply = False ):
