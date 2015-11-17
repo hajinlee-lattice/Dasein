@@ -18,9 +18,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.functionalframework.StandaloneHttpServer;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.SourceCredentialValidationServlet;
 import com.latticeengines.pls.service.CrmCredentialService;
 
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
@@ -33,6 +35,10 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     private final String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
     private final String fullId = String.format("%s.%s.%s", contractId, tenantId, spaceId);
 
+    private StandaloneHttpServer httpServer;
+
+    private CustomerSpace customerSpace;
+
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
@@ -43,6 +49,14 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
             // ignore
         }
         camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
+        customerSpace = CustomerSpace.parse(tenantId);
+
+        ((CrmCredentialServiceImpl) crmService).setMicroServiceUrl("http://localhost:8082");
+        httpServer = new StandaloneHttpServer();
+        httpServer.init();
+        httpServer.addServlet(new SourceCredentialValidationServlet(), "/eai/validatecredential/customerspaces/"
+                + customerSpace.toString() + "/*");
+        httpServer.start();
     }
 
     @AfterClass(groups = { "functional" })
@@ -50,12 +64,12 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
         camille.delete(path);
+        httpServer.stop();
     }
 
     @Test(groups = "functional")
     public void verifyCredentialUsingEai() {
         // sfdc production
-        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
         FeatureFlagDefinition def = new FeatureFlagDefinition();
         def.setConfigurable(true);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);

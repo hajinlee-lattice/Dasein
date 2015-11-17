@@ -76,21 +76,20 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             dataLoaderService.verifyCredentials(crmType, crmCredential, isProduction, dlUrl);
         } else {
-            validateCredentialsUsingEai(tenantId, crmType, crmCredential, isProduction);
+            validateCredentialUsingEai(tenantId, crmType, crmCredential, isProduction);
         }
         writeToZooKeeper(crmType, tenantId, isProduction, crmCredential, true);
 
         return newCrmCredential;
     }
 
-    @VisibleForTesting
-    boolean useEaiToValidate(FeatureFlagValueMap flags) {
+    private boolean useEaiToValidate(FeatureFlagValueMap flags) {
         return flags.containsKey(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName())
                 && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName()));
     }
 
     @VisibleForTesting
-    void validateCredentialsUsingEai(String tenantId, String crmType, CrmCredential crmCredential, Boolean isProduction) {
+    void validateCredentialUsingEai(String tenantId, String crmType, CrmCredential crmCredential, Boolean isProduction) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
         RestTemplate restTemplate = new RestTemplate();
         Map<String, String> uriVariables = new HashMap<>();
@@ -191,6 +190,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     @Override
     public void removeCredentials(String crmType, String tenantId, Boolean isProduction) {
         crmCredentialZKService.removeCredentials(crmType, tenantId, isProduction);
+    }
+
+    @VisibleForTesting
+    void setMicroServiceUrl(String microServiceUrl) {
+        this.microServiceUrl = microServiceUrl;
     }
 
 }
