@@ -48,6 +48,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         self.assertTrue(modelDict["Summary"].has_key("ConstructionInfo"))
         self.assertTrue(len(modelDict["Summary"]["SegmentChart"]) > 0)
         self.assertTrue(len(modelDict["PercentileBuckets"]) > 0)
+        self.assertTrue(len(modelDict["NormalizationBuckets"]) > 0)
         predictors = modelDict["Summary"]["Predictors"]
         self.assertTrue(len(predictors) > 0)
         

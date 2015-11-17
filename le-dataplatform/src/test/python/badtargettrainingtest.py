@@ -33,6 +33,8 @@ class BadTargetTrainingTest(TrainingTestBase):
             else: self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
+        self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
+        self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
         
         self.__assertTopPredictors(jsonDict)
         

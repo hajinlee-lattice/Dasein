@@ -21,7 +21,9 @@ class PD344TrainingTest(TrainingTestBase):
 
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
-
+        self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
+        self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
+        
         for index in range(0, len(jsonDict["Model"]["CompressedSupportFiles"])):
             entry = jsonDict["Model"]["CompressedSupportFiles"][index]
             fileName = "./results/" + entry["Key"] + ".gz"

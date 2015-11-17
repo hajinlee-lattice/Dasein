@@ -46,9 +46,11 @@ class MulesoftProfilingThenTrainTest(TrainingTestBase):
         jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         
         rocScore = jsonDict["Summary"]["RocScore"]
-        
-        print str(rocScore)+" HAHA"
+
         self.assertTrue(rocScore > 0.7)
+        self.assertTrue(jsonDict["Model"]["Script"] is not None)
+        self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
+        self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
         
         for k in jsonDict["InputColumnMetadata"]:
             if k["Name"] == "MKTOLead_SpamIndicator":

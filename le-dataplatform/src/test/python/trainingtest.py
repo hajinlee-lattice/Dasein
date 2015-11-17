@@ -36,7 +36,9 @@ class TrainingTest(TrainingTestBase):
             else: self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
-
+        self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
+        self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
+        
         # Test the scoring engine using the generated pipeline that was deserialized
         inputColumns = pipeline.getPipeline()[3].getModelInputColumns()
         value = [ random() for _ in range(len(inputColumns))]
