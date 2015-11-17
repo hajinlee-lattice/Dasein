@@ -83,12 +83,13 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     private static final String CUSTOMERSPACE = "DemoContract.DemoTenant.Production";
     private CustomerSpace customerSpace;
-    private String salesforceUserName = "rgonzalez2@lattice-engines.com";
-    private String salesforcePasswd = "Welcome123JYJz57SnYag3YWQ5caQxIP04b";
-    // private String salesforceUserName =
-    // "apeters-widgettech@lattice-engines.com";
-    // private String salesforcePasswd = "Happy2010oIogZVEFGbL3n0qiAp6F66TC";
-
+    
+    @Value("${pls.test.sfdc.user.name}")
+    private String salesforceUserName;
+    
+    @Value("${pls.test.sfdc.passwd.encrypted}")
+    private String salesforcePasswd;
+    
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microServiceHostPort;
 
