@@ -1,5 +1,10 @@
 "use strict";
 
+/*
+            Lattice Engines Express Server
+    See Gruntfile.js to define environment variables
+*/
+
 const path        = require('path');
 const exphbs      = require('express-handlebars');
 const request     = require('request');
@@ -58,17 +63,27 @@ class Server {
     setAppRoutes(routes) {
         routes.forEach(route => {
             const dir = this.options.root + route.path;
-
+            console.log('path:',dir);
             // set up the static routes for app files
-            if (route.static) {
-                Object.keys(route.static).forEach(path => {
-                    this.app.use(path, this.express.static(dir + route.static[path]));
+            if (route.folders) {
+                Object.keys(route.folders).forEach(folder => {
+                    console.log('folder:',folder,route.folders[folder]);
+                    this.app.use(
+                        folder, 
+                        this.express.static(dir + route.folders[folder])
+                    );
                 });
             }
 
             // users will see the desired render page when entering these routes
-            if (route.render) {
-                this.app.get(route.routes, (req, res) => res.render(dir + '/' + route.render));
+            if (route.pages) {
+                Object.keys(route.pages).forEach(page => {
+                    console.log('page:',page,route.pages[page]);
+                    this.app.get(
+                        page, 
+                        (req, res) => res.render(dir + '/' + route.pages[page])
+                    );
+                });
             }
         });
     }
@@ -108,8 +123,9 @@ class Server {
         const options = this.options;
         const server = this.app.listen(options.USE_PORT, () => {
             console.log(
-                'listening port:', options.USE_PORT + ',', 'env:', options.ENV,
-                '\nproxy api:', options.API_URL
+                'listening port:', options.USE_PORT + ',', 
+                'environment:', options.ENV, '\n' +
+                'proxy api:', options.API_URL
             );
         });
     }

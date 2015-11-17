@@ -1,0 +1,10 @@
+<%== $.View('assets/CommonAssets/views/renderers/BaseRenderer.ejs',{itemValue: value, renderType: RenderWorker.TEXT_INPUT_RENDERER}) %>
+<input type="hidden" name="InputRestriction" value="<%= InputRestriction %>"/>
+<div class="text-input">
+    <input 
+        type="text" 
+        name="<%=name%>" 
+        value="<%=value%>" 
+        maxlength="<%=maxlength%>"
+        <%= readonly === true ? 'readonly' : ''%>/>
+</div>

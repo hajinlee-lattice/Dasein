@@ -1,65 +1,68 @@
 "use strict";
 
-const root = '/projects';
-
 module.exports = [
     {
-        path: root + '/common',
-        static: {
+        path: '/projects/common',
+        folders: {
             '/app': '/app',
             '/assets': '/assets',
             '/lib': '/lib'
         }
     },{
-        path: root + '/login',
-        render: 'index.html',
-        routes: [
-            '/',
-            '/index',
-            '/login/',
-            '/login/index'
-        ],
-        static: {
+        path: '/projects/login',
+        pages: {
+            '/': 'index.html',
+            '/index': 'index.html',
+            '/login/': 'index.html',
+            '/login/index': 'index.html'
+        },
+        folders: {
             '/login/app': '/app',
             '/login/assets': '/assets',
             '/login/lib': '/lib',
             '/login/help': '/help'
         }
     },{
-        path: root + '/prospectdiscovery',
-        render: 'index.html',
-        routes: [
-            '/pd/',
-            '/pd/index'
-        ],
-        static: {
+        path: '/projects/prospectdiscovery',
+        pages: {
+            '/pd/': 'index.html',
+            '/pd/index': 'index.html'
+        },
+        folders: {
             '/pd/app': '/app',
             '/pd/assets': '/assets',
             '/pd/lib': '/lib'
         }
     },{
-        path: root + '/leadprioritization',
-        render: 'index.html',
-        routes: [
-            '/lp/',
-            '/lp/index'
-        ],
-        static: {
+        path: '/projects/leadprioritization',
+        pages: {
+            '/lp/': 'index.html',
+            '/lp/index': 'index.html'
+        },
+        folders: {
             '/lp/app': '/app',
             '/lp/assets': '/assets',
             '/lp/lib': '/lib'
         }
     },{
-        path: root + '/demo',
-        render: 'index.html',
-        routes: [
-            '/demo/',
-            '/demo/index'
-        ],
-        static: {
-            '/demo/app': '/app',
-            '/demo/assets': '/assets',
-            '/demo/lib': '/lib'
+        path: '/projects/demo',
+        pages: {
+            '/demo/': 'index.html',
+            '/demo/index': 'index.html',
+            '/demo/index.html': 'index.html',
+            '/demo/colors.html': 'colors.html',
+            '/demo/forms.html': 'forms.html',
+            '/demo/grid.html': 'grid.html',
+            '/demo/links.html': 'links.html',
+            '/demo/lists.html': 'lists.html',
+            '/demo/typography.html': 'typography.html',
+            '/demo/downloads.html': 'downloads.html'
+        },
+        folders: {
+            '/demo/js': '/js',
+            '/demo/css': '/css',
+            '/demo/img': '/img',
+            '/demo/fonts': '/fonts'
         }
     }
 ];

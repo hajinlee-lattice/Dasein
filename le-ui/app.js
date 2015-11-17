@@ -1,5 +1,10 @@
 "use strict";
 
+/*
+       Lattice Engines Express Server Application
+    See Gruntfile.js to define environment variables
+*/
+
 const Server    = require('./server/server');
 const routes    = require('./server/routes');
 const express   = require('express');

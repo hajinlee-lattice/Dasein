@@ -1,0 +1,56 @@
+<div id="loginMainView" class="fillSpace login-main-view">
+    <div id="loginHeader" class="login-header-container">
+        <div id="loginHeaderMessage" class="login-header-message is-hidden"> </div>
+    </div>
+    <div id="loginFormPanel" class="login-form-parent-container">
+        <div id="loginForm" class="login-form-container">
+            <div id="loginLogo" class="login-logo-container">
+                <img src="assets/le_logo.png"/> 
+            </div>
+            <div id="loginInputSection" class="login-input-section">
+                <div>
+                    <input type="text" id="username" name="username" autocomplete="off" title="<%= ResourceUtil.getString('LOGIN_USERNAME') %>" placeholder="<%= ResourceUtil.getString('LOGIN_USERNAME') %>" class="placeholder login-text-input"/>
+                </div>
+                <div>
+                    <input type="password" id="password" name="password" autocomplete="off" title="<%= ResourceUtil.getString('LOGIN_PASSWORD') %>" placeholder="<%= ResourceUtil.getString('LOGIN_PASSWORD') %>" class="placeholder login-text-input"/>
+                </div>
+            </div>
+            <div id="forgotPasswordSection" class="is-hidden">
+                <p id="forgotPasswordMessage" class="forgot-password-heading"><%= ResourceUtil.getString('LOGIN_FORGOT_PASSWORD_INSTRUCTIONS') %></p>
+                <div>
+                    <input type="text" id="forgotPasswordUsername" name="forgotPasswordUsername" autocomplete="off" title="<%= ResourceUtil.getString('LOGIN_USERNAME') %>" placeholder="<%= ResourceUtil.getString('LOGIN_USERNAME') %>" class="placeholder login-text-input"/>
+                </div>
+            </div>
+            <div id="loginLinkSection" class="login-link-section">
+                <span id="loginButtonContainer" class="login-button-container">
+                    <button type="button" name="loginButton" id="loginButton" class="btn btn-primary login-button"><%= ResourceUtil.getString('LOGIN_LABEL') %></button>
+                    <button type="button" name="resetPasswordButton" id="resetPasswordButton" class="btn btn-primary reset-password-button is-hidden"><%= ResourceUtil.getString('LOGIN_FORGOT_PASSWORD_RESET_BUTTON_LABEL') %></button>
+                </span>
+                <span id="forgotPasswordContainer" class="forgot-password-container">
+                    <a href="#" id="forgotPasswordLink" class="login-link"><%= ResourceUtil.getString('LOGIN_FORGOT_PASSWORD_LABEL') %></a>
+                    <a href="#" id="returnToLoginLink" class="login-link is-hidden"><%= ResourceUtil.getString('LOGIN_FORGOT_PASSWORD_RETURN_TO_LOGIN') %></a>
+                </span>
+            </div>
+            <div id="forgotPasswordFooterSection" class="login-message-section is-hidden">
+                <%= ResourceUtil.getString('LOGIN_FORGOT_PASSWORD_INSTRUCTIONS_2') %>
+            </div>
+            <div id="loginMessageSection" class="login-message-section">&nbsp;</div>
+        </div>
+        <div id="loginFooterSection" class="login-footer-section">
+            <div id="loginLatticeLogo" class="login-lattice-logo-container">
+                <img src="assets/CommonAssets/images/login_lattice_white.png"/>
+            </div>
+        </div>
+    </div>
+
+    <div class="loginMainFooterContent">
+        <div id="loginCopyRight" class="bold">
+            <%= ResourceUtil.getString('LOGIN_COPYRIGHT', [(new Date()).getFullYear()] ) %>
+        </div>
+        <div id="loginPrivacyPolicy">
+            <a href="#" class="main-header-link login-privacy-link">
+               <%= ResourceUtil.getString('HEADER_PRIVACY_POLICY') %>
+            </a>
+        </div>
+    </div>
+</div>

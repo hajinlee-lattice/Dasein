@@ -26,7 +26,30 @@ var mainApp = angular.module('mainApp', [
     $httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
     $httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
 }])
-
+/*
+.config(['$routeProvider', function($routeProvider) {
+    $routeProvider
+        .when('/', {
+            controller: 'MainController'
+        })
+        .when('/Credentials', {
+            templateUrl: './app/views/LoginView.html'
+            //controller: 'MainViewController'
+        })
+        .when('/ForgotPassword', {
+            templateUrl: './app/views/LoginView.html'
+            //controller: 'MainViewController'
+        })
+        .when('/UserManagement', {
+            templateUrl: './app/userManagement/views/UserManagementView.html', 
+            //controller: 'MainController'
+            //template: 'GOODBYE'
+        })
+        .otherwise({
+            redirectTo: '/'
+        });
+}])
+*/
 .controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
     TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
     $scope.showFooter = true;
@@ -51,6 +74,8 @@ var mainApp = angular.module('mainApp', [
         } else {
             $scope.showFooter = false;
             // Create the Login View
+            //window.location.hash = '/cred';
+            //return;
             $http.get('./app/views/LoginView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
@@ -116,14 +141,14 @@ var mainApp = angular.module('mainApp', [
     };
     
     $scope.getWidgetConfigDoc = function () {
-        window.open("/lp/", "_self");
-        return;
-        ConfigService.GetWidgetConfigDocument().then(function(result) {
+        //window.open("/lp/", "_self");
+        //return;
+        //ConfigService.GetWidgetConfigDocument().then(function(result) {
             $http.get('./app/views/MainView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
             });
-        });
+        //});
     };
 
     function startObservingUserActivtyThroughMouseAndKeyboard() {
@@ -232,7 +257,7 @@ var mainApp = angular.module('mainApp', [
 mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
   return {
     request: function (config) {
-      console.log('authInterceptor req',config);
+      //console.log('authInterceptor req',config);
       config.headers = config.headers || {};
       if (BrowserStorageUtility.getTokenDocument()) {
         config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
@@ -240,7 +265,7 @@ mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserSto
       return config;
     },
     response: function (response) {
-      console.log('authInterceptor res',response);
+      //console.log('authInterceptor res',response);
       if (response.status === 401) {
         // handle the case where the user is not authenticated
       }
