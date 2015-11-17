@@ -13,8 +13,8 @@ hdfs dfs -rm -f -r /app/playmaker
 hdfs dfs -rm -f -r /app/security
 hdfs dfs -rm -f -r /app/workflowapi
 
-hdfs dfs -mkdir -p /app/workflowapi/lib
 hdfs dfs -mkdir -p /app/db
 hdfs dfs -mkdir -p /app/eai/lib
 hdfs dfs -mkdir -p /app/security
 hdfs dfs -mkdir -p /app/dataflowapi/lib
+hdfs dfs -mkdir -p /app/workflowapi/lib

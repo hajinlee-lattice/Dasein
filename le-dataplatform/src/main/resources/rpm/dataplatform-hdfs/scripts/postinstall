@@ -12,7 +12,8 @@ rm /tmp/app/playmaker/evmodel/*.pyo
 rm /tmp/datascientist/*.pyc
 rm /tmp/datascientist/*.pyo
 su -l yarn -c 'hdfs dfs -mkdir /datascientist'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/dataplatform.properties /app/dataplatform'
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/hadoop-metrics2.properties /app/dataplatform'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/playmaker /app'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/datascientist /'
 for microservice in 'dataflowapi' 'eai' 'workflowapi'
