@@ -20,7 +20,7 @@ do
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$microservice/lib"
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$microservice.properties /app/$microservice"
 done
-for service in 'db' 'security'
+for service in 'db' 'security' 'eai' 'dataflowapi' 'workflowapi'
 do
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$service.properties /app/$service"
 done
