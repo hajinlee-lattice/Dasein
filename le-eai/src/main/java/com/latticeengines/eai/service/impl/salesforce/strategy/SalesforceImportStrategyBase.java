@@ -194,7 +194,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 }
                 newTable.addAttribute(attr);
             }
-            newTable.setPrimaryKey(pk);
+            newTable.setPrimaryKey(table.getPrimaryKey());
             newTable.setLastModifiedKey(table.getLastModifiedKey());
 
             Schema schema = AvroSchemaBuilder.createSchema(newTable.getName(), newTable);

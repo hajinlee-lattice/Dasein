@@ -24,7 +24,6 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
@@ -35,6 +34,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
+import com.latticeengines.domain.exposed.functionalframework.StandaloneHttpServer;
 
 @ContextConfiguration(locations = { "classpath:dataplatform-dlorchestration-quartz-context.xml" })
 public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase {

@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.functionalframework;
+package com.latticeengines.domain.exposed.functionalframework;
 
 import javax.servlet.http.HttpServlet;
 
