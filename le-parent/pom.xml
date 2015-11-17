@@ -276,7 +276,7 @@
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
                                         <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
-                                        <additionalClasspathElement>${env.TEZ_HOME}/etc/tez</additionalClasspathElement>
+                                        <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                 </configuration>
                             </execution>
@@ -329,7 +329,7 @@
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
                                         <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
-                                        <additionalClasspathElement>${env.TEZ_HOME}/etc/tez</additionalClasspathElement>
+                                        <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                     <runOrder>
                                         alphabetical
@@ -391,7 +391,7 @@
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
                                         <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
-                                        <additionalClasspathElement>${env.TEZ_HOME}/etc/tez</additionalClasspathElement>
+                                        <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                 </configuration>
                             </execution>
