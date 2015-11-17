@@ -19,6 +19,8 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 
 @Component("quotaFlow")
 public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
+    public static final String LatticeAccountID = "LatticeAccountID";
+    public static final String DeliveryDate = "DeliveryDate";
 
     @Override
     public Node construct(QuotaFlowParameters parameters) {
@@ -29,14 +31,13 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         Node scores = addSource("Scores");
         Node accountIntent = addSource("Intent");
 
-        account = account.leftOuterJoin("Id", accountIntent, "Id");
+        account = account.leftOuterJoin(LatticeAccountID, accountIntent, LatticeAccountID);
 
         TargetMarket market = parameters.getTargetMarket();
         ProspectDiscoveryConfiguration configuration = parameters.getConfiguration();
         Quota quota = parameters.getQuota();
 
-        account = account.filter(market.getAccountFilter());
-        account = account.innerJoin("Id", scores, "Id");
+        account = account.innerJoin(LatticeAccountID, scores, LatticeAccountID);
 
         String scoreColumn = String.format("Score_%s", market.getModelId());
 
@@ -54,8 +55,8 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         intent = intent.filter( //
                 getIntentExistsExpression(market.getIntentSort()), getFields(market.getIntentSort()));
 
-        intent = intent.innerJoin(new FieldList("Id"), contact, new FieldList("AccountId"));
-        fit = fit.innerJoin(new FieldList("Id"), contact, new FieldList("AccountId"));
+        intent = intent.innerJoin(new FieldList(LatticeAccountID), contact, new FieldList(LatticeAccountID));
+        fit = fit.innerJoin(new FieldList(LatticeAccountID), contact, new FieldList(LatticeAccountID));
 
         intent = removePreviouslyGeneratedIntent(intent, market, existingProspect);
         fit = removePreviouslyGeneratedFit(fit, existingProspect);
@@ -67,17 +68,16 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
 
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation("IsIntent", "IsIntent", Aggregation.AggregationType.MAX));
-        aggregations.add(new Aggregation("AccountId", "AccountId", Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, Aggregation.AggregationType.MAX));
         Node deduped = merged //
                 .groupBy(new FieldList("Email"), aggregations) //
                 .filter("Email != null", new FieldList("Email"));
 
         // Reconsitute account columns
-        Node joined = deduped.innerJoin("AccountId", account, "Id");
+        Node joined = deduped.innerJoin(LatticeAccountID, account, LatticeAccountID);
 
         if (!market.isDeliverProspectsFromExistingAccounts()) {
-            Node existingAccount = addSource("ExistingAccount");
-            joined = joined.stopList(existingAccount, "Id", "Id");
+            joined = joined.stopList(existingProspect, LatticeAccountID, LatticeAccountID);
         }
 
         // Split again
@@ -98,18 +98,21 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
 
         merged = intent.merge(fit);
 
+        if (merged.getFieldNames().contains(DeliveryDate)) {
+            merged = merged.discard(new FieldList(DeliveryDate));
+        }
         merged = merged.addFunction(String.format("%dL", DateTime.now().getMillis()), new FieldList(),
-                new FieldMetadata("DeliveryDate", Long.class));
+                new FieldMetadata(DeliveryDate, Long.class));
 
         if (market.getMaxProspectsPerAccount() != null) {
-            merged = merged.groupByAndLimit(new FieldList("AccountId"), market.getMaxProspectsPerAccount());
+            merged = merged.groupByAndLimit(new FieldList(LatticeAccountID), market.getMaxProspectsPerAccount());
         }
 
         merged = merged.sort("Offset");
         merged = merged.limit(quota.getBalance());
 
         merged = merged.rename(new FieldList(scoreColumn), new FieldList("Score"));
-        merged = merged.retain(new FieldList("Email", "IsIntent", "AccountId", "Score", "DeliveryDate"));
+        merged = merged.retain(new FieldList("Email", "IsIntent", LatticeAccountID, "Score", DeliveryDate));
 
         return merged;
     }
@@ -127,23 +130,23 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
                             new FieldList("Email", joinFieldName("ExistingProspect", "Email")));
 
             String dateExpression = String.format("%s == null || %dL - %s > %dL", //
-                    "DeliveryDate", //
+                    DeliveryDate, //
                     DateTime.now().getMillis(), //
-                    "DeliveryDate", //
+                    DeliveryDate, //
                     (long) market.getNumDaysBetweenIntentProspectResends() * 24 * 360 * 1000);
-            intent = intent.filter(dateExpression, new FieldList("DeliveryDate"));
+            intent = intent.filter(dateExpression, new FieldList(DeliveryDate));
         } else {
             intent = intent.stopList(existingProspect, "Email", "Email");
         }
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("AccountId", "AccountId", Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, Aggregation.AggregationType.MAX));
         return intent.groupBy(new FieldList("Email"), aggregations);
     }
 
     private Node removePreviouslyGeneratedFit(Node fit, Node existingProspect) {
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("AccountId", "AccountId", Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, Aggregation.AggregationType.MAX));
         return fit.stopList(existingProspect, "Email", "Email") //
                 .groupBy(new FieldList("Email"), aggregations);
     }
@@ -157,7 +160,6 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
     }
 
     private String getIntentExistsExpression(Sort intent) {
-        // TODO use zoltan
         StringBuilder sb = new StringBuilder();
         int size = intent.getLookups().size();
         if (size == 0) {
@@ -178,7 +180,6 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
     }
 
     private String getIntentAboveThresholdExpression(Sort intent, IntentScore threshold) {
-        // TODO use zoltan
         StringBuilder sb = new StringBuilder();
         int size = intent.getLookups().size();
         if (size == 0) {

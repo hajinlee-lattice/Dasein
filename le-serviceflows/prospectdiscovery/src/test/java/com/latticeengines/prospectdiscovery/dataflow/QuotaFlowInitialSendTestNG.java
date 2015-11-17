@@ -56,7 +56,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
         List<GenericRecord> records = readOutput();
 
         List<GenericRecord> scores = readInput("Scores");
-        Assert.assertTrue(identicalSets(records, "AccountId", scores, "Id"));
+        Assert.assertTrue(identicalSets(records, QuotaFlow.LatticeAccountID, scores, QuotaFlow.LatticeAccountID));
     }
 
     @Test(groups = "functional")
@@ -72,7 +72,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
         List<GenericRecord> records = readOutput();
 
         List<GenericRecord> scores = readInput("Scores");
-        Assert.assertTrue(identicalSets(records, "AccountId", scores, "Id"));
+        Assert.assertTrue(identicalSets(records, QuotaFlow.LatticeAccountID, scores, QuotaFlow.LatticeAccountID));
         Assert.assertTrue(allValuesEqual(records, "IsIntent", false));
     }
 
@@ -117,7 +117,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
 
         List<GenericRecord> records = readOutput();
 
-        Map<String, Integer> histogram = histogram(records, "AccountId");
+        Map<String, Integer> histogram = histogram(records, QuotaFlow.LatticeAccountID);
 
         Assert.assertTrue(histogram.size() > 0);
         Assert.assertTrue(Iterables.all(histogram.values(), new Predicate<Integer>() {
