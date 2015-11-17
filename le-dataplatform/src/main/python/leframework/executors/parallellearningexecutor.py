@@ -46,6 +46,11 @@ class ParallelLearningExecutor(Executor):
                     realColNameToRecord[sqlcolname] = [record]
         return (metadata, realColNameToRecord)
     
+            
+    @overrides(Executor)
+    def loadData(self):
+        return True, False
+    
     @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):
         training = parser.createList(trainingFile, postProcessClf)

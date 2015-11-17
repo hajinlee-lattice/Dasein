@@ -99,6 +99,10 @@ class AggregationExecutor(Executor):
         return (metadata, realColNameToRecord)
 
     @overrides(Executor)
+    def loadData(self):
+        return False, True
+    
+    @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):
         test = parser.createList(testFile, postProcessClf)
         return (None, test)

@@ -11,6 +11,11 @@ class DataProfilingExecutor(Executor):
         '''
         Constructor
         '''
+            
+    @overrides(Executor)
+    def loadData(self):
+        return True, True
+    
     @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):
         training = parser.createList(trainingFile, postProcessClf)

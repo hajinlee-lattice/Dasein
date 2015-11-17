@@ -18,6 +18,9 @@ class Executor(object):
     @abstractmethod
     def postProcessClassifier(self, clf, params): pass
 
+    def loadData(self):
+        return True, True
+    
     def writeToHdfs(self, hdfs, params):
         # Copy the model data files from local to hdfs
         modelLocalDir = params["modelLocalDir"]
