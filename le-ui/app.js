@@ -13,7 +13,7 @@ const options   = {
     API_URL:    process.env.API_URL     || false,
     PROXY_IP:   process.env.PROXY_IP    || false,
     WHITELIST:  process.env.WHITELIST   || false,
-    root:       __dirname + '\\projects'
+    root:       __dirname 
 }
 
 const server = new Server(express, app, options);
