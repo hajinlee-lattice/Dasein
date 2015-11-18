@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
 import org.testng.Assert;
@@ -139,7 +141,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testTransformAndWriteLead() throws IOException {
+    public void testTransformAndWriteLead() throws IOException, DecoderException {
 
         String expectedFileName = UUID + "-0";
         File expectedFile = new File(expectedFileName);
@@ -176,10 +178,11 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Assert.assertTrue(expectedFile.delete());
     }
 
-    private boolean transformedLeadIsCorrect(String transformedString) throws JsonProcessingException, IOException {
+    private boolean transformedLeadIsCorrect(String transformedString) throws JsonProcessingException, IOException, DecoderException {
 
         JsonNode j = new ObjectMapper().readTree(transformedString);
-        assertTrue(j.get("key").asText().equals("837394"));
+        String recordId = new String(Hex.decodeHex(j.get("key").asText().toCharArray()), "UTF8");
+        assertTrue(recordId.equals("837394"));
         ArrayNode arr = (ArrayNode) j.get("value");
         return (arr.size() == 194 && containsRightContents(arr));
     }

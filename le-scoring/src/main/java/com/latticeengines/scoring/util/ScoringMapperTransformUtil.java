@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +17,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -24,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,7 +66,8 @@ public class ScoringMapperTransformUtil {
                 String uuid = p.getName();
                 JsonNode modelJsonObj = parseFileContentToJsonNode(p);
                 // use the uuid to identify a model. It is a contact that when
-                // mapper localizes the model, it changes its name to be the uuid
+                // mapper localizes the model, it changes its name to be the
+                // uuid
                 decodeSupportedFilesToFile(uuid, modelJsonObj.get(ScoringDaemonService.MODEL));
                 writeScoringScript(uuid, modelJsonObj.get(ScoringDaemonService.MODEL));
                 log.info("modelName is " + modelJsonObj.get(ScoringDaemonService.MODEL_NAME));
@@ -87,7 +92,8 @@ public class ScoringMapperTransformUtil {
     @VisibleForTesting
     static void decodeSupportedFilesToFile(String uuid, JsonNode modelObject) throws IOException {
 
-        ArrayNode compressedSupportedFiles = (ArrayNode) modelObject.get(ScoringDaemonService.MODEL_COMPRESSED_SUPPORT_Files);
+        ArrayNode compressedSupportedFiles = (ArrayNode) modelObject
+                .get(ScoringDaemonService.MODEL_COMPRESSED_SUPPORT_Files);
         for (JsonNode compressedFile : compressedSupportedFiles) {
             String compressedFileName = uuid + compressedFile.get("Key").asText();
             log.info("compressedFileName is " + compressedFileName);
@@ -107,8 +113,8 @@ public class ScoringMapperTransformUtil {
     }
 
     private static void decodeBase64ThenDecompressToFile(String value, String fileName) throws IOException {
-        try(FileOutputStream stream = new FileOutputStream(fileName)){
-            try(InputStream gzis = new GZIPInputStream(new Base64InputStream(IOUtils.toInputStream(value)))){
+        try (FileOutputStream stream = new FileOutputStream(fileName)) {
+            try (InputStream gzis = new GZIPInputStream(new Base64InputStream(IOUtils.toInputStream(value)))) {
                 IOUtils.copy(gzis, stream);
             }
         }
@@ -134,15 +140,15 @@ public class ScoringMapperTransformUtil {
         while (context.nextKeyValue()) {
             String record = context.getCurrentKey().datum().toString();
             JsonNode jsonNode = mapper.readTree(record);
-            if(CollectionUtils.isEmpty(modelGuids)){
+            if (CollectionUtils.isEmpty(modelGuids)) {
                 String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
                 transformAndWriteRecord(jsonNode, modelInfoMap, recordFileBufferMap, localizedFiles, leadFileThreshold,
-                    modelGuid, uniqueKeyColumn);
+                        modelGuid, uniqueKeyColumn);
                 recordNumber++;
-            }else{
-                for(String modelGuid : modelGuids){
-                    transformAndWriteRecord(jsonNode, modelInfoMap, recordFileBufferMap, localizedFiles, leadFileThreshold,
-                            modelGuid, uniqueKeyColumn);
+            } else {
+                for (String modelGuid : modelGuids) {
+                    transformAndWriteRecord(jsonNode, modelInfoMap, recordFileBufferMap, localizedFiles,
+                            leadFileThreshold, modelGuid, uniqueKeyColumn);
                     recordNumber++;
                 }
             }
@@ -166,7 +172,7 @@ public class ScoringMapperTransformUtil {
             String modelGuid, String uniqueKeyColumn) throws IOException {
         // first step validation, to see whether the leadId is provided.
         if (!jsonNode.has(uniqueKeyColumn) || jsonNode.get(uniqueKeyColumn).isNull()) {
-            throw new LedpException(LedpCode.LEDP_20003);
+            throw new LedpException(LedpCode.LEDP_20003, new String[] { uniqueKeyColumn });
         }
 
         String uuid = UuidUtils.extractUuid(modelGuid);
@@ -183,7 +189,8 @@ public class ScoringMapperTransformUtil {
             modelInfoMap.put(uuid, modelInfo);
 
             recordFileName = uuid + "-0";
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), "UTF8"));
+            bw = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), "UTF8"));
             recordFilebufferMap.put(recordFileName, bw);
         } else {
             long currentLeadNum = modelInfoMap.get(uuid).getRecordCount() + 1;
@@ -215,7 +222,8 @@ public class ScoringMapperTransformUtil {
 
     }
 
-    public static String transformRecord(JsonNode jsonNode, JsonNode modelJsonObject, String uniqueKeyColumn) {
+    public static String transformRecord(JsonNode jsonNode, JsonNode modelJsonObject, String uniqueKeyColumn)
+            throws UnsupportedEncodingException {
         ArrayNode metadata = (ArrayNode) modelJsonObject.get(ScoringDaemonService.INPUT_COLUMN_METADATA);
 
         // parse the avro file since it is in json format
@@ -223,7 +231,7 @@ public class ScoringMapperTransformUtil {
         String recordId = jsonNode.get(uniqueKeyColumn).asText();
 
         ArrayNode jsonArray = jsonObj.putArray("value");
-        jsonObj.put("key", recordId);
+        jsonObj.put("key", StringUtils.byteToHexString(recordId.getBytes("UTF8")));
 
         ObjectMapper mapper = new ObjectMapper();
         for (JsonNode objKey : metadata) {
@@ -273,11 +281,15 @@ public class ScoringMapperTransformUtil {
 
     public static void main(String[] args) throws Exception {
 
-        File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
-        String modelStr = FileUtils.readFileToString(modelFile);
-        JsonNode modelObject = new ObjectMapper().readTree(modelStr);
-        decodeSupportedFilesToFile("e2e", modelObject.get(ScoringDaemonService.MODEL));
-        writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
+//        File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
+//        String modelStr = FileUtils.readFileToString(modelFile);
+//        JsonNode modelObject = new ObjectMapper().readTree(modelStr);
+//        decodeSupportedFilesToFile("e2e", modelObject.get(ScoringDaemonService.MODEL));
+//        writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
+        String s  = StringUtils.byteToHexString("fd6be1aa-95aa-45b2-adbb-3125a01acf84".getBytes("UTF8"));
+        System.out.println(s);
+        System.out.println(new String(Hex.decodeHex(s.toCharArray()), "UTF8"));
+        
     }
 
 }

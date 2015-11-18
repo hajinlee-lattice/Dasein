@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -28,7 +29,7 @@ public class ScoringMapperPredictUtilTestNG {
     private static final String MODEL_ID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
 
     @Test(groups = "unit")
-    public void testProcessScoreFiles() throws IOException {
+    public void testProcessScoreFiles() throws IOException, DecoderException {
         // copy over the score.txt file to the current directory
         URL scoreUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/results/60fd2fa4-9868-464e-a534-3205f52c41f0scoringoutputfile-0.txt");

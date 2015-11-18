@@ -18,6 +18,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.specific.SpecificDatumWriter;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -106,7 +108,7 @@ public class ScoringMapperPredictUtil {
     }
 
     public static List<ScoreOutput> processScoreFiles(ModelAndRecordInfo modelAndRecordInfo,
-            Map<String, JsonNode> models, long recordFileThreshold) throws IOException {
+            Map<String, JsonNode> models, long recordFileThreshold) throws IOException, DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
         Set<String> uuidSet = modelInfoMap.keySet();
         // list of HashMap<leadId: score>
@@ -159,7 +161,7 @@ public class ScoringMapperPredictUtil {
         return duplicateLeadsList;
     }
 
-    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores) throws IOException {
+    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores) throws IOException, DecoderException {
 
         int rawScoreNum = 0;
         String fileName = uuid + ScoringDaemonService.SCORING_OUTPUT_PREFIX + index + ".txt";
@@ -174,7 +176,7 @@ public class ScoringMapperPredictUtil {
             if (splitLine.length != 2) {
                 throw new LedpException(LedpCode.LEDP_20013);
             }
-            String recordId = splitLine[0];
+            String recordId = (new String(Hex.decodeHex(splitLine[0].toCharArray()), "UTF-8"));;
             Double rawScore = Double.parseDouble(splitLine[1]);
             if (scores.containsKey(recordId)) {
                 scores.get(recordId).add(rawScore);
