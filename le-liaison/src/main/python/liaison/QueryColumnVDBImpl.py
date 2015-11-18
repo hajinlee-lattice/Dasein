@@ -50,6 +50,12 @@ class QueryColumnVDBImpl(QueryColumn):
             name = c_no_metadata.group(1)
             expression = ExpressionVDBImplFactory.Create( c_no_metadata.group(2) )
 
+        c_no_metadata_alt = re.search( '^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(\w*)\"\), (LatticeFunction.*)\), SpecExtractDetails\(empty\)\)$', defn )
+
+        if c_no_metadata_alt:
+            name = c_no_metadata_alt.group(1)
+            expression = ExpressionVDBImplFactory.Create( c_no_metadata_alt.group(2) )
+
         c_fcnbndry = re.search( '^SpecQueryNamedFunctionEntityFunctionBoundary$', defn )
 
         if c_fcnbndry:
@@ -82,7 +88,11 @@ class QueryColumnVDBImpl(QueryColumn):
                         break
 
                 if not metadata_is_extracted:
-                    raise MaudeStringError( 'Unsupported metadata type: {0}'.format(sed) )
+                    md_found = re.search( '^SpecExtractDetail\(.*?\)(, SpecExtractDetail\(.*|$)', sed )
+                    if md_found:
+                        sed = md_found.group(1)[2:]
+                    else:
+                        raise MaudeStringError( 'Unsupported metadata type: {0}'.format(sed) )
 
                 if sed == '':
                     break
