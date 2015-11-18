@@ -12,9 +12,50 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
   name = 'LP_020100_DL_PushToLeadDestination'
   description = 'Reset logic of the PushToLeadDestination'
   version = '$Rev$'
+  _scoreDateField = ''
+  _scoreField = ''
 
   def __init__(self, forceApply=False):
     super(LP_020100_DL_PushToLeadDestination, self).__init__(forceApply)
+
+  def getScoreField(self):
+    return self._scoreField
+
+  def getScoreDateField(self):
+    return self._scoreDateField
+
+  def setScoreField(self, str):
+    self._scoreField = str
+
+  def setScoreDateField(self, str):
+    self._scoreDateField = str
+
+
+  def parseScoreField(selfs, str, type):
+    if type == 'MKTO':
+      s = re.search('<cm scn=\"Score\" tcn=\"(.*?)\"/>', str)
+    elif type == 'ELQ':
+      s = re.search('<cm scn=\"C_Lattice_Predictive_Score1\" tcn=\"(.*?)\"/>', str)
+    else:
+      s = re.search('<cm scn=\"C_Lattice_Predictive_Score1\" tcn=\"(.*?)\"/>', str)
+
+    if not s:
+      print "Error get the Score Field failed"
+      return None
+    return s.group(1)
+
+  def parseScoreDateField(self, str, type):
+    if type == 'MKTO':
+      s = re.search('<cm scn=\"Score_Date_Time\" tcn=\"(.*?)\"/>', str)
+    elif type == 'ELQ':
+      s = re.search('<cm scn=\"C_Lattice_LastScoreDate1\" tcn=\"(.*?)\"/>', str)
+    else:
+      s = re.search('<cm scn=\"C_Lattice_LastScoreDate1\" tcn=\"(.*?)\"/>', str)
+
+    if not s:
+      print "Error get the Score Field failed"
+      return None
+    return s.group(1)
 
   def getApplicability(self, appseq):
 
@@ -32,6 +73,14 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
 
     if hasModPTLD and hasStep1 and hasStep2 and hasStep3 and hasStep4:
       return Applicability.alreadyAppliedPass
+
+    ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
+
+    self.setScoreField(self.parseScoreField(ptld_lbo_xml, type))
+    self.setScoreDateField(self.parseScoreDateField(ptld_lbo_xml, type))
+
+    if not self.getScoreField() or not self.getScoreDateField():
+      return Applicability.cannotApplyPass
 
     return Applicability.canApply
 
@@ -51,13 +100,15 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
                  'scn="MKTO_LeadRecord_ID" tcn="Id" /><cm scn="Score_Date_Time" ' \
                  'tcn="latticeforleads__Last_Score_Date__c" /><cm scn="Score" tcn="latticeforleads__Score__c" ' \
                  '/></cms><kcs><kc k="Id" /></kcs></lssbardout></lssbardouts>'
+
     elif type == 'ELQ':
       step1xml = '<lssbardouts><lssbardout n="Q_ELQ_Contact_Score" adid="True" w="Workspace" sn="Bard_LeadScoreStage" ' \
                  'qn="Q_ELQ_Contact_Score" bdp="SQL_LSSBard" dp="Eloqua_Bulk_DataProvider" tn="Contact" er="4" ' \
                  'ad="True" mfc="2" ntr="1" nob="5" eo="1" mkc="LeadID"><cms><cm scn="ContactID" tcn="ContactID" ' \
-                 '/><cm scn="C_Lattice_Predictive_Score1" tcn="C_Lattice_Predictive_Score1" /><cm ' \
-                 'scn="C_Lattice_LastScoreDate1" tcn="C_Lattice_LastScoreDate1" /></cms><kcs><kc k="ContactID" ' \
+                 '/><cm scn="C_Lattice_Predictive_Score1" tcn="latticeforleads__Score__c" /><cm ' \
+                 'scn="C_Lattice_LastScoreDate1" tcn="latticeforleads__Last_Score_Date__c" /></cms><kcs><kc k="ContactID" ' \
                  '/></kcs></lssbardout></lssbardouts>'
+
     else:
       step1xml = '<lssbardouts><lssbardout n="Q_SFDC_Lead_Contact_Score" adid="True" w="Workspace" ' \
                  'sn="Bard_LeadScoreStage" qn="Q_SFDC_Lead_Score" bdp="SQL_LSSBard" dp="SFDC_DataProvider" ' \
@@ -65,6 +116,9 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
                  'scn="SFDC_Lead_Contact_ID" tcn="Id" /><cm scn="C_Lattice_Predictive_Score1" ' \
                  'tcn="latticeforleads__Score__c" /><cm scn="C_Lattice_LastScoreDate1" ' \
                  'tcn="latticeforleads__Last_Score_Date__c" /></cms><kcs><kc k="Id" /></kcs></lssbardout></lssbardouts>'
+
+    step1xml = step1xml.replace('latticeforleads__Score__c', self.getScoreField())
+    step1xml = step1xml.replace('latticeforleads__Last_Score_Date__c', self.getScoreDateField())
     lgm.setLoadGroupFunctionality('LoadScoredLeads_Step1', step1xml)
 
     lgm.createLoadGroup('LoadScoredLeads_Step2', 'OperationalProcess\Standard', 'LoadScoredLeads_Step2', True, False)
@@ -168,9 +222,9 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
                  '/><fsColumnMappings><fsColumnMapping queryColumnName="ContactID" fsColumnName="ContactID" ' \
                  'formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" ' \
                  '/><fsColumnMapping queryColumnName="C_Lattice_LastScoreDate1" ' \
-                 'fsColumnName="C_Lattice_LastScoreDate1" formatter="" type="0" ignoreType="0" ignoreOptions="0" ' \
+                 'fsColumnName="latticeforleads__Last_Score_Date__c" formatter="" type="0" ignoreType="0" ignoreOptions="0" ' \
                  'formatColumnName="False" charsToFormat="" /><fsColumnMapping ' \
-                 'queryColumnName="C_Lattice_Predictive_Score1" fsColumnName="C_Lattice_Predictive_Score1" ' \
+                 'queryColumnName="C_Lattice_Predictive_Score1" fsColumnName="latticeforleads__Score__c" ' \
                  'formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" ' \
                  '/></fsColumnMappings><excludeColumns /><validationQueries /><constantRows /><kcs><kc n="ContactID" ' \
                  '/></kcs><fut dn="" d="" n="" iet="False" iets="False" t="1" /></targetQuery></targetQueries>'
@@ -202,6 +256,9 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
                  'ignoreOptions="0" formatColumnName="False" charsToFormat="" /></fsColumnMappings><excludeColumns ' \
                  '/><validationQueries /><constantRows /><kcs><kc n="Id" /></kcs><fut dn="" d="" n="" iet="False" ' \
                  'iets="False" t="1" /></targetQuery></targetQueries>'
+
+    step4xml = step4xml.replace('latticeforleads__Score__c', self.getScoreField())
+    step4xml = step4xml.replace('latticeforleads__Last_Score_Date__c', self.getScoreDateField())
     lgm.setLoadGroupFunctionality('PushLeadsInDanteToDestination', step4xml)
 
     step5xml = ''
