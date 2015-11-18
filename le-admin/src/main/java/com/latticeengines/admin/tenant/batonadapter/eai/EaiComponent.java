@@ -1,42 +1,32 @@
-package com.latticeengines.admin.tenant.batonadapter.pls;
+package com.latticeengines.admin.tenant.batonadapter.eai;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwritter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
-@Component("plsComponent")
-public class PLSComponent extends LatticeComponent {
-    public static final String componentName = "PLS";
+@Component
+public class EaiComponent extends LatticeComponent {
 
-    @Value("${admin.pls.dryrun}")
+    @Value("${admin.eai.dryrun}")
     private boolean dryrun;
 
-    @Autowired
-    private DefaultConfigOverwritter overwritter;
-
-    @Autowired
-    private TenantService tenantService;
-
-    private LatticeComponentInstaller installer = new PLSInstaller();
-    private CustomerSpaceServiceUpgrader upgrader = new PLSUpgrader();
+    private LatticeComponentInstaller installer = new EaiInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new EaiUpgrader();
+    public static final String componentName = "Eai";
 
     @PostConstruct
     public void setProducts() {
         Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.LPA);
         productSet.add(LatticeProduct.PD);
         super.setAssociatedProducts(productSet);
     }
@@ -52,9 +42,15 @@ public class PLSComponent extends LatticeComponent {
     }
 
     @Override
+    public boolean doRegistration() {
+        String defaultJson = "eai_default.json";
+        String metadataJson = "eai_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+    }
+
+    @Override
     public CustomerSpaceServiceInstaller getInstaller() {
-        installer.setDryrun(false);
-        ((PLSInstaller) installer).setTenantService(tenantService);
+        installer.setDryrun(dryrun);
         return installer;
     }
 
@@ -65,18 +61,7 @@ public class PLSComponent extends LatticeComponent {
 
     @Override
     public String getVersionString() {
-        return null;
+        return "1.0";
     }
 
-    @Override
-    public boolean doRegistration() {
-        if (uploadSchema) {
-            String defaultJson = "pls_default.json";
-            String metadataJson = "pls_metadata.json";
-            uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-            overwritter.overwriteDefaultConfigInPLS();
-        }
-
-        return dryrun;
-    }
 }

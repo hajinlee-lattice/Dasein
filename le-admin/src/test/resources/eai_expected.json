@@ -1,0 +1,31 @@
+{
+  "RootPath": "/",
+  "Nodes": [
+    {
+      "Node": "SalesforceEndpointConfig",
+      "Children": [
+        {
+          "Node": "HttpClient",
+          "Children": [
+            {
+              "Node": "ConnectTimeout",
+              "Data": "60000",
+              "Metadata": {
+                "Type": "number",
+                "Required": true
+              }
+            },
+            {
+              "Node": "ImportTimeout",
+              "Data": "3600000",
+              "Metadata": {
+                "Type": "number",
+                "Required": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

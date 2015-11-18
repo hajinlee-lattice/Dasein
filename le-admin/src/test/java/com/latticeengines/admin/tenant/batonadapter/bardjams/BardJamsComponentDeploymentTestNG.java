@@ -58,7 +58,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         spaceConfig = tenantService.getTenant(contractId, tenantId).getSpaceConfig();
         spaceConfig.setDlAddress(dlUrl);
         tenantService.setupSpaceConfiguration(contractId, tenantId, spaceConfig);
-        vdbdlConfig = visiDBDLComponentDeploymentTestNG.constructVisiDBDLInstaller();
+        vdbdlConfig = visiDBDLComponentDeploymentTestNG.getVisiDBDLDocumentDirectory();
         jamsConfig = serviceService.getDefaultServiceConfig(BardJamsComponent.componentName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(BardJamsComponent.componentName);
         jamsConfig.applyMetadata(metaDir);

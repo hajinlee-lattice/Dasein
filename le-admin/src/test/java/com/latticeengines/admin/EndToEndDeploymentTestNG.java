@@ -240,7 +240,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
         // VisiDBDL
-        DocumentDirectory confDir = visiDBDLComponentDeploymentTestNG.constructVisiDBDLInstaller();
+        DocumentDirectory confDir = visiDBDLComponentDeploymentTestNG.getVisiDBDLDocumentDirectory();
         SerializableDocumentDirectory vdbdlConfig = new SerializableDocumentDirectory(confDir);
         vdbdlConfig.setRootPath("/" + VisiDBDLComponent.componentName);
 

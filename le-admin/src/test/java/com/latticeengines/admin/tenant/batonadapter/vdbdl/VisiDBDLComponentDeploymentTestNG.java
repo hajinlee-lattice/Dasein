@@ -80,7 +80,7 @@ public class VisiDBDLComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         super.tearDown();
     }
 
-    public DocumentDirectory constructVisiDBDLInstaller() {
+    public DocumentDirectory getVisiDBDLDocumentDirectory() {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
         // modify the default config
@@ -104,7 +104,7 @@ public class VisiDBDLComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         // record original number of files in permStore
         String url = String.format("%s/admin/internal/", getRestHostPort());
 
-        bootstrap(constructVisiDBDLInstaller());
+        bootstrap(getVisiDBDLDocumentDirectory());
         BootstrapState state = waitForSuccess(getServiceName());
 
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);

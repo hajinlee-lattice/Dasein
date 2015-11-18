@@ -1,5 +1,6 @@
-package com.latticeengines.admin.tenant.batonadapter.pls;
+package com.latticeengines.admin.tenant.batonadapter.metadata;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,34 +10,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwritter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
-@Component("plsComponent")
-public class PLSComponent extends LatticeComponent {
-    public static final String componentName = "PLS";
+@Component
+public class MetadataComponent extends LatticeComponent {
 
-    @Value("${admin.pls.dryrun}")
+    @Value("${admin.metadata.dryrun}")
     private boolean dryrun;
 
     @Autowired
-    private DefaultConfigOverwritter overwritter;
+    private PLSComponent plsComponent;
 
-    @Autowired
-    private TenantService tenantService;
+    private LatticeComponentInstaller installer = new MetadataInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new MetadataUpgrader();
 
-    private LatticeComponentInstaller installer = new PLSInstaller();
-    private CustomerSpaceServiceUpgrader upgrader = new PLSUpgrader();
+    public static final String componentName = "Metadata";
 
     @PostConstruct
-    public void setProducts() {
+    public void setDependencies() {
+        dependencies = Collections.singleton(plsComponent);
         Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.LPA);
         productSet.add(LatticeProduct.PD);
         super.setAssociatedProducts(productSet);
     }
@@ -52,9 +50,16 @@ public class PLSComponent extends LatticeComponent {
     }
 
     @Override
+    public boolean doRegistration() {
+        String defaultJson = "metadata_default.json";
+        String metadataJson = "metadata_metadata.json";
+        uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        return dryrun;
+    }
+
+    @Override
     public CustomerSpaceServiceInstaller getInstaller() {
-        installer.setDryrun(false);
-        ((PLSInstaller) installer).setTenantService(tenantService);
+        installer.setDryrun(dryrun);
         return installer;
     }
 
@@ -68,15 +73,4 @@ public class PLSComponent extends LatticeComponent {
         return null;
     }
 
-    @Override
-    public boolean doRegistration() {
-        if (uploadSchema) {
-            String defaultJson = "pls_default.json";
-            String metadataJson = "pls_metadata.json";
-            uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-            overwritter.overwriteDefaultConfigInPLS();
-        }
-
-        return dryrun;
-    }
 }

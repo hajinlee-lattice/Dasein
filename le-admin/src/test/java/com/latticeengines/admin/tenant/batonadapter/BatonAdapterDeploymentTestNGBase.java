@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.security.exposed.Constants;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 
 /**
  * besides the same setup and teardown as AdminFunctionalTestNGBase, we also
@@ -54,7 +54,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
         try {
             deleteTenant(contractId, tenantId);
         } catch (Exception e) {
-            // ignore
+            System.out.println(e);
         }
     }
 

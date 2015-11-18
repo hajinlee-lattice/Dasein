@@ -77,7 +77,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
 
     public void installDLTemplate() {
         Map<String, Map<String, String>> properties = new HashMap<>();
-        DocumentDirectory confDir = visiDBDLComponentTestNG.constructVisiDBDLInstaller();
+        DocumentDirectory confDir = visiDBDLComponentTestNG.getVisiDBDLDocumentDirectory();
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(confDir);
         properties.put(VisiDBDLComponent.componentName, sDir.flatten());
 

@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
 @Component
@@ -43,19 +44,17 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     public void tearDown() throws Exception {
         log.info("Start tearing down public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase");
         super.tearDown();
+        tearDown(contractId, tenantId);
+    }
+
+    public void tearDown(String contractId, String tenantId) throws Exception {
         String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         deletePLSAdminUser(testAdminUsername);
         deletePLSTestTenant(PLSTenantId);
     }
 
-    @Test(groups = "deployment")
-    public void testInstallation() throws InterruptedException {
-        String testAdminPassword = "admin";
-
-        String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-
+    public DocumentDirectory getPLSDocumentDirectory() {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
 
@@ -65,9 +64,18 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
         node = confDir.get(new Path("/LatticeAdminEmails"));
         node.getDocument().setData("[ ]");
+        return confDir;
+    }
+
+    @Test(groups = "deployment")
+    public void testInstallation() throws InterruptedException {
+        String testAdminPassword = "admin";
+
+        String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
 
         // send to bootstrapper message queue
-        bootstrap(confDir);
+        bootstrap(getPLSDocumentDirectory());
         // wait a while, then test your installation
         BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
@@ -81,7 +89,7 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         } catch (Exception e) {
             // ignore
         }
-        bootstrap(confDir);
+        bootstrap(getPLSDocumentDirectory());
         state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
         try {
             Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
@@ -105,9 +113,11 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
     public void deletePLSTestTenant(String tenantId) {
         try {
+            addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+            magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
             magicRestTemplate.delete(getPlsHostPort() + String.format("/pls/admin/tenants/%s", tenantId));
         } catch (Exception e) {
-            // ignore
+            System.out.println(e);
             log.error(e);
         }
     }
