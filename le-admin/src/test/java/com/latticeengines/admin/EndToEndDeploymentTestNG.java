@@ -28,6 +28,8 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
+import com.latticeengines.admin.tenant.batonadapter.eai.EaiComponent;
+import com.latticeengines.admin.tenant.batonadapter.metadata.MetadataComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
@@ -306,7 +308,9 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                             || (plsSkipped && component.equals(PLSComponent.componentName))
                             || (vdbdlSkipped && component.equals(VisiDBDLComponent.componentName))
                             || (vdbTplSkipped && component.equals(VisiDBTemplateComponent.componentName))
-                            || (jamsSkipped && component.equals(BardJamsComponent.componentName))) {
+                            || (jamsSkipped && component.equals(BardJamsComponent.componentName))
+                            || component.equals(EaiComponent.componentName)
+                            || component.equals(MetadataComponent.componentName)) {
                         return BootstrapState.constructOKState(1);
                     } else {
                         return waitUntilStateIsNotInitial(contractId, tenantId, component, 600);
