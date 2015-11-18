@@ -1,0 +1,877 @@
+{
+  "name": "Lead",
+  "display_name": "Lead",
+  "attributes": [
+    {
+      "name": "Id",
+      "length": 18,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Id",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Lead ID",
+      "logical_type": "id",
+      "enum_values": ""
+    },
+    {
+      "name": "LastName",
+      "length": 80,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "LastName",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Name",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "FirstName",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "FirstName",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "First Name",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Salutation",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Salutation",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Salutation",
+      "logical_type": "picklist",
+      "enum_values": "Mr_,Ms_,Mrs_,Dr_,Prof_,_"
+    },
+    {
+      "name": "Title",
+      "length": 128,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Title",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Title",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Company",
+      "length": 255,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Company",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Company",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Street",
+      "length": 255,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Street",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Street",
+      "logical_type": "textarea",
+      "enum_values": ""
+    },
+    {
+      "name": "City",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "City",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "City",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "State",
+      "length": 80,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "State",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "State/Province",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "PostalCode",
+      "length": 20,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "PostalCode",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Zip/Postal Code",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Country",
+      "length": 80,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Country",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Country",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Email",
+      "length": 80,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Email",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Email",
+      "logical_type": "email",
+      "enum_values": ""
+    },
+    {
+      "name": "Website",
+      "length": 255,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Website",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Website",
+      "logical_type": "url",
+      "enum_values": ""
+    },
+    {
+      "name": "LeadSource",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "LeadSource",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Lead Source",
+      "logical_type": "picklist",
+      "enum_values": "Web,Phone_Inquiry,Partner_Referral,Purchased_List,Other,POET,new_lead_source_test_06_27_2014,Test_Lead_source_up_to_40_characters___,PlayMaker,_"
+    },
+    {
+      "name": "Status",
+      "length": 40,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Status",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Status",
+      "logical_type": "picklist",
+      "enum_values": "Open___Not_Contacted,Working___Contacted,Closed___Converted,Closed___Not_Converted,Test_Status_added_062714,Test_status_added_up_to_40_characters_,_"
+    },
+    {
+      "name": "Industry",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Industry",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Industry",
+      "logical_type": "picklist",
+      "enum_values": "Agriculture,Apparel,Banking,Biotechnology,Chemicals,Communications,Construction,Consulting,Education,Electronics,Energy,Engineering,Entertainment,Environmental,Finance,Food___Beverage,Government,Healthcare,Hospitality,Insurance,Machinery,Manufacturing,Media,Not_For_Profit,Recreation,Retail,Shipping,Technology,Telecommunications,Transportation,Utilities,Other,_"
+    },
+    {
+      "name": "AnnualRevenue",
+      "length": 0,
+      "nullable": true,
+      "physicalDataType": "DOUBLE",
+      "precision": 18,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "AnnualRevenue",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Annual Revenue",
+      "logical_type": "currency",
+      "enum_values": ""
+    },
+    {
+      "name": "NumberOfEmployees",
+      "length": 0,
+      "nullable": true,
+      "physicalDataType": "INT",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "NumberOfEmployees",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Employees",
+      "logical_type": "int",
+      "enum_values": ""
+    },
+    {
+      "name": "OwnerId",
+      "length": 18,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "OwnerId",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Owner ID",
+      "logical_type": "reference",
+      "enum_values": ""
+    },
+    {
+      "name": "IsConverted",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "BOOLEAN",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "IsConverted",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Converted",
+      "logical_type": "boolean",
+      "enum_values": ""
+    },
+    {
+      "name": "ConvertedOpportunityId",
+      "length": 18,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "ConvertedOpportunityId",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Converted Opportunity ID",
+      "logical_type": "reference",
+      "enum_values": ""
+    },
+    {
+      "name": "CreatedDate",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "CreatedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Created Date",
+      "logical_type": "datetime",
+      "enum_values": ""
+    },
+    {
+      "name": "LastModifiedDate",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "LastModifiedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Modified Date",
+      "logical_type": "datetime",
+      "enum_values": ""
+    }
+  ],
+  "extracts": [],
+  "primary_key": {
+    "attributesAsStr": "Id",
+    "name": "PK_ID",
+    "display_name": "Primary key for the identity column(s)",
+    "attributes": [
+      "Id"
+    ]
+  },
+  "last_modified_key": {
+    "attributesAsStr": "LastModifiedDate",
+    "name": "LK_LUD",
+    "display_name": "Last Modified Key to hold column containing last modified timestamp",
+    "attributes": [
+      "LastModifiedDate"
+    ],
+    "last_modified_ts": null
+  }
+}

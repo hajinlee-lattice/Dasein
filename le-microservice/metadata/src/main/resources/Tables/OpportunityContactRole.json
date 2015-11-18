@@ -1,0 +1,285 @@
+{
+  "name": "OpportunityContactRole",
+  "display_name": "Opportunity Contact Role",
+  "attributes": [
+    {
+      "name": "Id",
+      "length": 18,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Id",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Contact Role ID",
+      "logical_type": "id",
+      "enum_values": ""
+    },
+    {
+      "name": "OpportunityId",
+      "length": 18,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "OpportunityId",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Opportunity ID",
+      "logical_type": "reference",
+      "enum_values": ""
+    },
+    {
+      "name": "ContactId",
+      "length": 18,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "ContactId",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Contact ID",
+      "logical_type": "reference",
+      "enum_values": ""
+    },
+    {
+      "name": "Role",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Role",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Role",
+      "logical_type": "picklist",
+      "enum_values": "Business_User,Decision_Maker,Economic_Buyer,Economic_Decision_Maker,Evaluator,Executive_Sponsor,Influencer,Technical_Buyer,Other,_"
+    },
+    {
+      "name": "IsPrimary",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "BOOLEAN",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "IsPrimary",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Primary",
+      "logical_type": "boolean",
+      "enum_values": ""
+    },
+    {
+      "name": "CreatedDate",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "CreatedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Created Date",
+      "logical_type": "datetime",
+      "enum_values": ""
+    },
+    {
+      "name": "LastModifiedDate",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": null
+          },
+          {
+            "DataType": null
+          }
+        ],
+        "DataSource": [
+          "DerivedColumns"
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "LastModifiedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Modified Date",
+      "logical_type": "datetime",
+      "enum_values": ""
+    }
+  ],
+  "extracts": [],
+  "primary_key": {
+    "attributesAsStr": "Id",
+    "name": "PK_ID",
+    "display_name": "Primary key for the identity column(s)",
+    "attributes": [
+      "Id"
+    ]
+  },
+  "last_modified_key": {
+    "attributesAsStr": "LastModifiedDate",
+    "name": "LK_LUD",
+    "display_name": "Last Modified Key to hold column containing last modified timestamp",
+    "attributes": [
+      "LastModifiedDate"
+    ],
+    "last_modified_ts": null
+  }
+}
