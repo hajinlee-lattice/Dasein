@@ -92,6 +92,7 @@ public class ModelingServiceExecutor {
                 config, AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for load: %s", appId));
+        System.out.println(String.format("App id for load: %s", appId));
         waitForAppId(appId);
     }
 
@@ -109,6 +110,7 @@ public class ModelingServiceExecutor {
                 modelingServiceHostPort + builder.getSampleSubmissionUrl(), samplingConfig, AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for sampling: %s", appId));
+        System.out.println(String.format("App id for sampling: %s", appId));
         waitForAppId(appId);
     }
 
@@ -124,6 +126,7 @@ public class ModelingServiceExecutor {
                 modelingServiceHostPort + builder.getProfileSubmissionUrl(), config, AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for profile: %s", appId));
+        System.out.println(String.format("App id for profile: %s", appId));
         waitForAppId(appId);
     }
 
@@ -154,6 +157,7 @@ public class ModelingServiceExecutor {
                 modelingServiceHostPort + builder.getModelSubmissionUrl(), model, AppSubmission.class);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for modeling: %s", appId));
+        System.out.println(String.format("App id for modeling: %s", appId));
         JobStatus status = waitForModelingAppId(appId);
         String resultDir = status.getResultDirectory();
         return UuidUtils.parseUuid(resultDir);

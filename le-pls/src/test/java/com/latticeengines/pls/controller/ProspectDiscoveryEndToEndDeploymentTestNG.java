@@ -652,7 +652,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         int maxTries = 1000;
         int i = 0;
         do {
-            String url = String.format(microServiceHostPort + "/propdata/matchcommands/%s?matchClient=PD131",
+            String url = String.format(microServiceHostPort + "/propdata/matchcommands/%s?matchClient=PD130",
                     commands.getPid());
             status = restTemplate.getForObject(url, Map.class);
             System.out.println("Status = " + status.get("Status"));
