@@ -176,7 +176,7 @@ public class ScoringMapperPredictUtil {
             if (splitLine.length != 2) {
                 throw new LedpException(LedpCode.LEDP_20013);
             }
-            String recordId = (new String(Hex.decodeHex(splitLine[0].toCharArray()), "UTF-8"));;
+            String recordId = new String(Hex.decodeHex(splitLine[0].toCharArray()), "UTF-8");
             Double rawScore = Double.parseDouble(splitLine[1]);
             if (scores.containsKey(recordId)) {
                 scores.get(recordId).add(rawScore);
@@ -211,9 +211,8 @@ public class ScoringMapperPredictUtil {
             }
         }
 
-        Object averageProbabilityObj = model.get(ScoringDaemonService.AVERAGE_PROBABILITY);
-        Double averageProbability = averageProbabilityObj == null ? null : Double.parseDouble(averageProbabilityObj
-                .toString());
+        JsonNode averageProbabilityObj = model.get(ScoringDaemonService.AVERAGE_PROBABILITY);
+        Double averageProbability = averageProbabilityObj.isNull() ? null : averageProbabilityObj.asDouble();
         Double lift = averageProbability != null && averageProbability != 0 ? (double) probability / averageProbability
                 : null;
 
