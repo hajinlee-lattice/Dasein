@@ -115,13 +115,12 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
     protected DataFlowContext createDataFlowContext(DataFlowParameters parameters) {
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
         ctx.setProperty("ENGINE", "TEZ");
         ctx.setProperty("TARGETPATH", getTargetDirectory());
         ctx.setProperty("TARGETTABLENAME", getFlowBeanName());
         ctx.setProperty("FLOWNAME", getFlowBeanName());
-        ctx.setProperty("CHECKPOINT", true);
+        ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("SOURCETABLES", getSources());
         ctx.setProperty("CUSTOMER", "customer");
         ctx.setProperty("PARAMETERS", parameters);
