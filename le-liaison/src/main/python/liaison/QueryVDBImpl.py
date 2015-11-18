@@ -81,6 +81,13 @@ class QueryVDBImpl(Query):
                 isMatchedTopLevel = True
 
         if not isMatchedTopLevel:
+            s3 = re.search( '^LatticeAddressSetPushforward\(LatticeAddressExpressionAtomic\((.*?)\), (LatticeAddressSetPi\(.*?\)), (LatticeAddressExpressionAtomic\(.*\))\)$', las_spec )
+            if s3:
+                lasm = '({0})'.format( s3.group(2) )
+                lae = '({0})'.format( s3.group(3) )
+                isMatchedTopLevel = True
+
+        if not isMatchedTopLevel:
             raise MaudeStringError( las_spec )
 
         

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys, datetime, time, requests, re
 from liaison import *
 
