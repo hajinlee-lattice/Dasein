@@ -65,8 +65,14 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Override
     public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
+        String metadataUrl = context.getProperty(ImportProperty.METADATAURL, String.class);
+        
+        if (metadataUrl != null) {
+            eaiMetadataService.setMetadataUrl(metadataUrl);
+        }
+        
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
-        String customerSpace = CustomerSpace.parse(importConfig.getCustomer()).toString();
+        String customerSpace = importConfig.getCustomerSpace().toString();
         context.setProperty(ImportProperty.CUSTOMER, customerSpace);
 
         String targetPath = createTargetPath(customerSpace);
@@ -123,7 +129,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Override
     public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig) {
-        String customerSpace = CustomerSpace.parse(importConfig.getCustomer()).toString();
+        String customerSpace = importConfig.getCustomerSpace().toString();
         SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0).getSourceCredentialType();
         eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC, sourceCredentialType);
 
@@ -150,7 +156,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     private EaiJob createJob(ImportConfiguration importConfig) {
         EaiJob eaiJob = new EaiJob();
-        String customerSpace = CustomerSpace.parse(importConfig.getCustomer()).toString();
+        String customerSpace = importConfig.getCustomerSpace().toString();
 
         eaiJob.setClient("eaiClient");
         eaiJob.setCustomer(customerSpace);

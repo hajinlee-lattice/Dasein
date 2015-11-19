@@ -1,5 +1,8 @@
 package com.latticeengines.eai.controller;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,9 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
-
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
@@ -20,13 +20,13 @@ import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
 public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestNGBase{
 
-    @Value("${eai.service.test.url}")
+    @Value("${eai.test.service.url}")
     private String url;
 
-    @Value("${eai.salesforce.username}")
+    @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
 
-    @Value("${eai.salesforce.password}")
+    @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
     @Value("${eai.salesforce.production.loginurl}")

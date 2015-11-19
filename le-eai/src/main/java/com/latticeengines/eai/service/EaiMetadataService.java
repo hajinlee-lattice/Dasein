@@ -1,6 +1,7 @@
 package com.latticeengines.eai.service;
 
 import java.util.List;
+
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -26,5 +27,7 @@ public interface EaiMetadataService {
     Table getImportTable(String customerSpace, String tableName);
 
     void updateTableSchema(List<Table> tableMetadata, ImportContext importContext);
+
+    void setMetadataUrl(String metadataUrl);
 
 }

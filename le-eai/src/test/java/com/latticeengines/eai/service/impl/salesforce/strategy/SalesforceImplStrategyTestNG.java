@@ -10,10 +10,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -37,27 +33,20 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
 
     private String customer = "SFDC-Eai-ImportMetadata-Customer";
 
-    @Value("${eai.salesforce.username}")
+    @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
 
-    @Value("${eai.salesforce.password}")
+    @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
-        BatonService baton = new BatonServiceImpl();
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
-        spaceInfo.properties = new CustomerSpaceProperties();
-        spaceInfo.properties.displayName = "";
-        spaceInfo.properties.description = "";
-        spaceInfo.featureFlags = "";
-        baton.createTenant(customer, customer, "defaultspaceId", spaceInfo);
+        initZK(customer);
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
-
     }
 
     @AfterClass(groups = "functional")

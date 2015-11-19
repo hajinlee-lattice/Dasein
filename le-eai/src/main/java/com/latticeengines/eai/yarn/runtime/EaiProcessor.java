@@ -74,11 +74,11 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
-
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
         log.info("Routes are:" + camelContext.getRoutes());
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
+        importContext.setProperty(ImportProperty.METADATAURL, importConfig.getProperty(ImportProperty.METADATAURL));
         log.info("Starting extract and import.");
         try {
             List<Table> tableMetadata = dataExtractionService.extractAndImport(importConfig, importContext);
@@ -101,7 +101,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
     }
 
     private CamelContext constructCamelContext(ImportConfiguration importConfig) throws Exception {
-        String customerSpace = importConfig.getCustomer();
+        String customerSpace = importConfig.getCustomerSpace().toString();
         SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0).getSourceCredentialType();
         CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace, sourceCredentialType.isProduction());
 

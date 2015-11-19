@@ -1,7 +1,7 @@
 package com.latticeengines.eai.service.impl;
 
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,10 +34,10 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
     @Autowired
     private EaiCredentialValidationService eaiCredentialValidationService;
 
-    @Value("${eai.salesforce.username}")
+    @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
 
-    @Value("${eai.salesforce.password}")
+    @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
     @Value("${eai.salesforce.production.loginurl}")

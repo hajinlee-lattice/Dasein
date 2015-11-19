@@ -1,14 +1,17 @@
 package com.latticeengines.eai.service.impl;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
@@ -28,9 +31,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -47,10 +47,6 @@ import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.metadata.util.EaiMetadataUtil;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.any;
-
 public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
@@ -64,10 +60,10 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private ImportContext importContext;
 
-    @Value("${eai.salesforce.username}")
+    @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
 
-    @Value("${eai.salesforce.password}")
+    @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
     @Value("${eai.salesforce.production.loginurl}")
@@ -89,8 +85,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
-                .toString());
+        cleanupCamilleAndHdfs(customer);
+
         crmCredentialZKService.removeCredentials(customer, customer, true);
         targetPath = dataExtractionService.createTargetPath(customer);
         initZK(customer);
@@ -121,10 +117,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     private void cleanUp() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
-                .toString());
-        Camille camille = CamilleEnvironment.getCamille();
-        camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
+        cleanupCamilleAndHdfs(customer);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -132,11 +125,13 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
+        
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
+        importContext.setProperty(ImportProperty.METADATAURL, mockMetadataUrl);
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
 
-        Thread.sleep(30000L);
-
+        waitForCamelMessagesToComplete(camelContext);
+        
         new EaiMetadataServiceImpl().updateTableSchema(tables, importContext);
         for (Table table : tables) {
             System.out.println(JsonUtils.serialize(table));
@@ -185,7 +180,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertFalse(tables.get(0).getNameAttributeMap().containsKey("Id"));
         assertTrue(tables.get(0).getNameAttributeMap().containsKey("NewId"));
 
-        Thread.sleep(30000L);
+        waitForCamelMessagesToComplete(camelContext);
+        
         checkDataExists(targetPath, Arrays.<String> asList(new String[] { "Account" }), 1);
         System.out.println(importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class));
         List<String> filesForTable = getFilesFromHdfs(targetPath, table.getName());

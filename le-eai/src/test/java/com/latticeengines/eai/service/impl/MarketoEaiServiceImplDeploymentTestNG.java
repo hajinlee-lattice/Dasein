@@ -146,7 +146,7 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
         marketoImportConfig.setFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
         marketoImportConfig.setProperties(props);
         ImportConfiguration importConfig = new ImportConfiguration();
-        importConfig.setCustomer(customer);
+        importConfig.setCustomerSpace(CustomerSpace.parse(customer));
         importConfig.addSourceConfiguration(marketoImportConfig);
 
         ApplicationId appId = eaiService.extractAndImport(importConfig);
@@ -171,7 +171,7 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
         props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
         fileImportConfig.setProperties(props);
         ImportConfiguration importConfig = new ImportConfiguration();
-        importConfig.setCustomer(customer);
+        importConfig.setCustomerSpace(CustomerSpace.parse(customer));
         importConfig.addSourceConfiguration(fileImportConfig);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);

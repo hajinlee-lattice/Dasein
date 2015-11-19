@@ -237,5 +237,10 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
             }
         }
     }
+    
+    @Override
+    public void setMetadataUrl(String metadataUrl) {
+        this.metadataUrl = metadataUrl;
+    }
 
 }

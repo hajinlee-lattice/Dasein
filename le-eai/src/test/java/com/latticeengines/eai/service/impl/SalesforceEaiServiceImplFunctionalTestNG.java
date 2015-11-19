@@ -14,13 +14,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.functionalframework.StandaloneHttpServer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -49,17 +46,14 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     private StandaloneHttpServer httpServer;
 
-    @Value("${eai.metadata.port}")
-    private int port;
-
     private String customer = this.getClass().getSimpleName();
 
     private String customerSpace = CustomerSpace.parse(customer).toString();
 
-    @Value("${eai.salesforce.username}")
+    @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
 
-    @Value("${eai.salesforce.password}")
+    @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
     @Value("${eai.salesforce.production.loginurl}")
@@ -72,9 +66,8 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-
+        cleanupCamilleAndHdfs(customer);
         targetPath = dataExtractionService.createTargetPath(customer);
-        HdfsUtils.rmdir(yarnConfiguration, targetPath);
 
         initZK(customer);
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
@@ -92,28 +85,24 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         tenantService.registerTenant(tenant);
 
         List<Table> tables = getSalesforceTables(tableNameList);
-        System.out.println(tables);
 
         httpServer = new StandaloneHttpServer();
-        httpServer.init(port);
+        httpServer.init(mockPort);
         httpServer.addServlet(new MetadataServlet(tables), "/metadata/customerspaces/" + customerSpace + "/*");
         httpServer.start();
     }
 
     @AfterClass(groups = "functional")
     public void cleanup() throws Exception {
+        cleanupCamilleAndHdfs(customer);
         httpServer.stop();
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
-                .toString());
-        Camille camille = CamilleEnvironment.getCamille();
-        camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
         tenantService.discardTenant(tenant);
-
     }
 
     @Test(groups = "functional")
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
+        importConfig.setProperty(ImportProperty.METADATAURL, mockMetadataUrl);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
 
         assertNotNull(appId);

@@ -25,6 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.client.YarnClient;
@@ -37,8 +38,8 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -47,6 +48,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -93,11 +95,34 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
     @Autowired
     protected TenantService tenantService;
+    
+    @Value("${eai.test.metadata.url}")
+    protected String mockMetadataUrl;
+    
+    @Value("${eai.test.metadata.port}")
+    protected int mockPort;
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
+    }
+    
+    protected void waitForCamelMessagesToComplete(CamelContext camelContext) throws Exception {
+        while (camelContext.getInflightRepository().size() > 0) {
+            Thread.sleep(5000L);
+        }
+    }
+    
+    protected void cleanupCamilleAndHdfs(String customer) throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, //
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer).toString());
+        Camille camille = CamilleEnvironment.getCamille();
+        try {
+            camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
+        } catch (Exception e) {
+            log.warn(e);
+        }
     }
 
     protected void initZK(String customer) throws Exception {
@@ -191,7 +216,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     }
 
     protected CamelContext constructCamelContext(ImportConfiguration importConfig) throws Exception {
-        String tenantId = importConfig.getCustomer();
+        String tenantId = importConfig.getCustomerSpace().toString();
         CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, tenantId, true);
 
         SalesforceLoginConfig loginConfig = salesforce.getLoginConfig();
@@ -208,10 +233,10 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         ImportConfiguration importConfig = new ImportConfiguration();
         SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
         salesforceConfig.setSourceType(SourceType.SALESFORCE);
-        // salesforceConfig.setTables(tables);
 
+        importConfig.setProperty(ImportProperty.METADATAURL, mockMetadataUrl);
         importConfig.addSourceConfiguration(salesforceConfig);
-        importConfig.setCustomer(customer);
+        importConfig.setCustomerSpace(CustomerSpace.parse(customer));
         return importConfig;
     }
 

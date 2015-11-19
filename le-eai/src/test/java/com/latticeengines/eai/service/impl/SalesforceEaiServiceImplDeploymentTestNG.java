@@ -13,10 +13,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.yarn.am.AppmasterServiceClient;
-import org.springframework.yarn.integration.ip.mind.MindAppmasterServiceClient;
-import org.springframework.yarn.integration.ip.mind.binding.BaseObject;
-import org.springframework.yarn.integration.ip.mind.binding.BaseResponseObject;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -33,8 +29,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.source.SourceCredentialType;
-import com.latticeengines.eai.appmaster.service.AppMasterServiceResponse;
-import com.latticeengines.eai.appmaster.service.AppmasterServiceRequest;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.DataExtractionService;
@@ -59,15 +53,12 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     private DataExtractionService dataExtractionService;
 
     @Autowired
-    private AppmasterServiceClient appmasterServiceClient;
-
-    @Autowired
     private EaiMetadataService eaiMetadataService;
 
-    @Value("${eai.salesforce.username}")
+    @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
 
-    @Value("${eai.salesforce.password}")
+    @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
     @Value("${eai.salesforce.production.loginurl}")
@@ -127,11 +118,6 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
-        BaseObject request = new AppmasterServiceRequest();
-        Thread.sleep(22000);
-        BaseResponseObject response = ((MindAppmasterServiceClient) appmasterServiceClient).doMindRequest(request);
-        log.info(((AppMasterServiceResponse) response));
-
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
