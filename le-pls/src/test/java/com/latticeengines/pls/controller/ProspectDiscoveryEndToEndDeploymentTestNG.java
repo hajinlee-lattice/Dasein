@@ -489,7 +489,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         pkg.setModule("dataflowapi");
         pkg.setGroupId("com.latticeengines");
         pkg.setArtifactId("le-serviceflows-prospectdiscovery");
-        pkg.setVersion("2.0.13-SNAPSHOT");
+        pkg.setVersion(version);
         pkg.setInitializerClass("com.latticeengines.prospectdiscovery.Initializer");
         File localFile = new File(jarFileName + ".jar");
         try {
@@ -504,15 +504,18 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         ImportConfiguration importConfig = setupSalesforceImportConfig();
         String url = microServiceHostPort + "/eai/importjobs";
         AppSubmission submission = restTemplate.postForObject(url, importConfig, AppSubmission.class);
-        waitForAppId(submission.getApplicationIds().get(0).toString());
+        String appId = submission.getApplicationIds().get(0).toString();
+        System.out.println(String.format("App id for import: %s", appId));
+        waitForAppId(appId);
     }
 
     private void runDataFlow() throws Exception {
         DataFlowConfiguration dataFlowConfig = setupPreMatchTableDataFlow();
         String url = microServiceHostPort + "/dataflowapi/dataflows/";
-
         AppSubmission submission = restTemplate.postForObject(url, dataFlowConfig, AppSubmission.class);
-        waitForAppId(submission.getApplicationIds().get(0).toString());
+        String appId = submission.getApplicationIds().get(0).toString();
+        System.out.println(String.format("App id for data flow: %s", appId));
+        waitForAppId(appId);
     }
 
     private DataFlowConfiguration setupPreMatchTableDataFlow() throws Exception {
@@ -642,7 +645,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         salesforceConfig.setSourceType(SourceType.SALESFORCE);
 
         importConfig.addSourceConfiguration(salesforceConfig);
-        importConfig.setCustomer(CUSTOMERSPACE);
+        importConfig.setCustomerSpace(CustomerSpace.parse(CUSTOMERSPACE));
         return importConfig;
     }
 
