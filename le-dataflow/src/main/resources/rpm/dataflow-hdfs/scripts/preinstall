@@ -1,10 +1,11 @@
 #!/bin/bash
 echo 'Running Preinstall'
-if [ ! -d "/tmp/app/dataflow" ]; then
+if [ -d "/tmp/app/dataflow" ]; then
     rm -rf /tmp/app/dataflow/le-dataflow*-shaded.jar
 else
     mkdir -p /tmp/app/dataflow
 fi
 hdfs dfs -mkdir -p /app/dataflow/lib
 hdfs dfs -rm -f /app/dataflow/lib/le-dataflow*-shaded.jar
+hdfs dfs -rm -f /app/dataflow/dataflow.properties
 

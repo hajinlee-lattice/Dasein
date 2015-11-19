@@ -1,6 +1,6 @@
 #!/bin/bash
 echo 'Running Preinstall'
-if [ ! -d "/tmp/app/dataflow" ]; then
+if [ -d "/tmp/app/dataflow" ]; then
     rm -rf /tmp/app/dataflow/le-dellebi*-shaded.jar
 else
     mkdir -p /tmp/app/dataflow
