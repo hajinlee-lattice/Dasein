@@ -6,6 +6,7 @@
 
 from lxml import etree
 from appsequence import Applicability, StepBase
+import re
 
 
 class LP_020100_DL_PushToLeadDestination(StepBase):
@@ -60,8 +61,17 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
   def getApplicability(self, appseq):
 
     lgm = appseq.getLoadGroupMgr()
+    type = appseq.getText('template_type')
 
     if not lgm.hasLoadGroup('PushToLeadDestination'):
+      return Applicability.cannotApplyFail
+
+    ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
+
+    self.setScoreField(self.parseScoreField(ptld_lbo_xml, type))
+    self.setScoreDateField(self.parseScoreDateField(ptld_lbo_xml, type))
+
+    if not self.getScoreField() or not self.getScoreDateField():
       return Applicability.cannotApplyFail
 
     ptldxml = lgm.getLoadGroupFunctionality('PushToLeadDestination', 'ngs')
@@ -74,14 +84,6 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
     if hasModPTLD and hasStep1 and hasStep2 and hasStep3 and hasStep4:
       return Applicability.alreadyAppliedPass
 
-    ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
-
-    self.setScoreField(self.parseScoreField(ptld_lbo_xml, type))
-    self.setScoreDateField(self.parseScoreDateField(ptld_lbo_xml, type))
-
-    if not self.getScoreField() or not self.getScoreDateField():
-      return Applicability.cannotApplyPass
-
     return Applicability.canApply
 
   def apply(self, appseq):
@@ -91,10 +93,12 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
     lgm = appseq.getLoadGroupMgr()
     type = appseq.getText('template_type')
 
+    conn_mgr = appseq.getConnectionMgr()
+    tenantName = conn_mgr.getTenantName()
     lgm.createLoadGroup('LoadScoredLeads_Step1', 'OperationalProcess\Standard', 'LoadScoredLeads_Step1', True, False)
     step1xml = ''
     if type == 'MKTO':
-      step1xml = '<lssbardouts><lssbardout n="Q_MKTO_Leads_Score" adid="True" w="Workspace" sn="Bard_LeadScoreStage" ' \
+      step1xml = '<lssbardouts><lssbardout n="Q_MKTO_Leads_Score" deid="__DeploymentID__" adid="True" w="Workspace" sn="Bard_LeadScoreStage" ' \
                  'qn="Q_LeadScoreForLeadDestination_Query" bdp="SQL_LSSBard" dp="Marketo_DataProvider" ' \
                  'tn="LeadRecord" er="4" ad="True" mfc="2" ntr="1" nob="5" eo="1" mkc="LeadID"><cms><cm ' \
                  'scn="MKTO_LeadRecord_ID" tcn="Id" /><cm scn="Score_Date_Time" ' \
@@ -102,7 +106,7 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
                  '/></cms><kcs><kc k="Id" /></kcs></lssbardout></lssbardouts>'
 
     elif type == 'ELQ':
-      step1xml = '<lssbardouts><lssbardout n="Q_ELQ_Contact_Score" adid="True" w="Workspace" sn="Bard_LeadScoreStage" ' \
+      step1xml = '<lssbardouts><lssbardout n="Q_ELQ_Contact_Score" deid="__DeploymentID__" adid="True" w="Workspace" sn="Bard_LeadScoreStage" ' \
                  'qn="Q_ELQ_Contact_Score" bdp="SQL_LSSBard" dp="Eloqua_Bulk_DataProvider" tn="Contact" er="4" ' \
                  'ad="True" mfc="2" ntr="1" nob="5" eo="1" mkc="LeadID"><cms><cm scn="ContactID" tcn="ContactID" ' \
                  '/><cm scn="C_Lattice_Predictive_Score1" tcn="latticeforleads__Score__c" /><cm ' \
@@ -110,7 +114,7 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
                  '/></kcs></lssbardout></lssbardouts>'
 
     else:
-      step1xml = '<lssbardouts><lssbardout n="Q_SFDC_Lead_Contact_Score" adid="True" w="Workspace" ' \
+      step1xml = '<lssbardouts><lssbardout n="Q_SFDC_Lead_Contact_Score" deid="__DeploymentID__" adid="True" w="Workspace" ' \
                  'sn="Bard_LeadScoreStage" qn="Q_SFDC_Lead_Score" bdp="SQL_LSSBard" dp="SFDC_DataProvider" ' \
                  'tn="Contact" er="4" ad="False" mfc="10" ntr="3" nob="5" eo="1" mkc="LeadID"><cms><cm ' \
                  'scn="SFDC_Lead_Contact_ID" tcn="Id" /><cm scn="C_Lattice_Predictive_Score1" ' \
@@ -119,6 +123,7 @@ class LP_020100_DL_PushToLeadDestination(StepBase):
 
     step1xml = step1xml.replace('latticeforleads__Score__c', self.getScoreField())
     step1xml = step1xml.replace('latticeforleads__Last_Score_Date__c', self.getScoreDateField())
+    step1xml = step1xml.replace('__DeploymentID__', tenantName)
     lgm.setLoadGroupFunctionality('LoadScoredLeads_Step1', step1xml)
 
     lgm.createLoadGroup('LoadScoredLeads_Step2', 'OperationalProcess\Standard', 'LoadScoredLeads_Step2', True, False)

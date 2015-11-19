@@ -64,7 +64,7 @@ class LP_020100_Diagnostic(StepBase):
     type = appseq.getText('template_type')
 
     if not lgm.hasLoadGroup('PushToLeadDestination_Step1'):
-      return Applicability.cannotApplyPass
+      return Applicability.cannotApplyFail
 
     ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
 
@@ -88,7 +88,7 @@ class LP_020100_Diagnostic(StepBase):
         <targetQueries />
         <targetQuerySequences />
         <rdss>
-          <rds n="MKTO_ActivityRecord_Validation" w="Workspace" sn="MKTO_ActivityRecord_Validation" cn="Marketo_DataProvider" u="False" ss="" tn="ActivityRecord" nmo="1" f="@recordCOUNT(100000) AND&#xD;&#xA;activityDateTime &gt; #Diagnostic_LowerLimitTime AND activityDateTime &lt; #Diagnostic_UpperLimitTime AND&#xD;&#xA;activityType in ('New Lead','Click Link','Visit Webpage','Interesting Moment','Open Email','Email Bounced Soft','Fill Out Form','Unsubscribe Email','Click Email')" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="1">
+          <rds n="MKTO_ActivityRecord_Validation" w="Workspace" sn="MKTO_ActivityRecord_Validation" cn="Marketo_DataProvider" u="False" ss="" tn="ActivityRecord" nmo="1" f="@recordCOUNT(5000) AND&#xD;&#xA;activityDateTime &gt; #Diagnostic_LowerLimitTime AND activityDateTime &lt; #Diagnostic_UpperLimitTime AND&#xD;&#xA;activityType in ('New Lead','Click Link','Visit Webpage','Interesting Moment','Open Email','Email Bounced Soft','Fill Out Form','Unsubscribe Email','Click Email')" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="1">
             <ts>
               <t n="Diagnostic_LowerLimitTime" t="1" qn="Q_Diagnostic_ExtractLeadsRange" cn="Diagnostic_LowerLimitTime" m="0">
                 <schemas />
@@ -153,7 +153,7 @@ class LP_020100_Diagnostic(StepBase):
       <targetQueries />
       <targetQuerySequences />
       <rdss>
-        <rds n="ELQ_Contact_Validation" w="Workspace" sn="ELQ_Contact_Validation" cn="Eloqua_Bulk_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@recordCOUNT(10000) AND&#xD;&#xA;((C_DateModified &gt; #Diagnostic_LowerLimitTime AND C_DateModified &lt; #Diagnostic_UpperLimitTime AND C_Lattice_LastScoreDate1 &lt; #Diagnostic_RescoreThreshold) OR ( C_DateModified &gt; #Diagnostic_LowerLimitTime AND C_DateModified &lt; #Diagnostic_UpperLimitTime AND C_Lattice_Predictive_Score1 = 0 ))" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="1">
+        <rds n="ELQ_Contact_Validation" w="Workspace" sn="ELQ_Contact_Validation" cn="Eloqua_Bulk_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@recordCOUNT(1000) AND&#xD;&#xA;(C_DateModified &gt; #Diagnostic_LowerLimitTime AND C_DateModified &lt; #Diagnostic_UpperLimitTime AND (C_Lattice_LastScoreDate1 &lt; #Diagnostic_RescoreThreshold OR C_Lattice_Predictive_Score1 = 0 ))" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="1">
           <ts>
             <t n="Diagnostic_LowerLimitTime" t="1" qn="Q_Diagnostic_ExtractLeadsRange" cn="Diagnostic_LowerLimitTime" m="0">
               <schemas />
@@ -204,7 +204,7 @@ class LP_020100_Diagnostic(StepBase):
         <targetQueries />
         <targetQuerySequences />
         <rdss>
-          <rds n="SFDC_Contact_Validation" w="Workspace" sn="SFDC_Contact_Validation" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="LastModifiedDate&gt; #Diagnostic_LowerLimitTime_Contact AND LastModifiedDate&lt; #Diagnostic_UpperLimitTime_Contact AND ( latticeforleads__Last_Score_Date__c &lt; #Diagnostic_RescoreThreshold_Contact OR latticeforleads__Last_Score_Date__c = null ) AND @RecordCOUNT(10000)" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="2">
+          <rds n="SFDC_Contact_Validation" w="Workspace" sn="SFDC_Contact_Validation" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="LastModifiedDate&gt; #Diagnostic_LowerLimitTime_Contact AND LastModifiedDate&lt; #Diagnostic_UpperLimitTime_Contact AND ( latticeforleads__Last_Score_Date__c &lt; #Diagnostic_RescoreThreshold_Contact OR latticeforleads__Last_Score_Date__c = null ) AND @RecordCOUNT(1000)" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="2">
             <ts>
               <t n="Diagnostic_LowerLimitTime_Contact" t="1" qn="Q_Diagnostic_ExtractLeadsRange" cn="Diagnostic_LowerLimitTime_Contact" m="0">
                 <schemas />
@@ -227,7 +227,7 @@ class LP_020100_Diagnostic(StepBase):
               <mc cn="latticeforleads__Score__c" />
             </mcs>
           </rds>
-          <rds n="SFDC_Lead_Validation" w="Workspace" sn="SFDC_Lead_Validation" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="LastModifiedDate&gt; #Diagnostic_LowerLimitTime_Lead AND LastModifiedDate&lt; #Diagnostic_UpperLimitTime_Lead AND ( latticeforleads__Last_Score_Date__c &lt; #Diagnostic_RescoreThreshold_Lead OR latticeforleads__Last_Score_Date__c  = null ) AND @RecordCOUNT(10000)" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="2">
+          <rds n="SFDC_Lead_Validation" w="Workspace" sn="SFDC_Lead_Validation" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="LastModifiedDate&gt; #Diagnostic_LowerLimitTime_Lead AND LastModifiedDate&lt; #Diagnostic_UpperLimitTime_Lead AND ( latticeforleads__Last_Score_Date__c &lt; #Diagnostic_RescoreThreshold_Lead OR latticeforleads__Last_Score_Date__c  = null ) AND @RecordCOUNT(1000)" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="2">
             <ts>
               <t n="Diagnostic_LowerLimitTime_Lead" t="1" qn="Q_Diagnostic_ExtractLeadsRange" cn="Diagnostic_LowerLimitTime_Lead" m="0">
                 <schemas />
@@ -1192,391 +1192,320 @@ class LP_020100_Diagnostic(StepBase):
       specs = 'SpecLatticeNamedElements(('
       specs += tenantNameSpec
       specs += 'SpecLatticeNamedElement(SpecLatticeSourceTable(SpecLatticeSourceTableColumnSet((' \
-               'SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Contact_Validation")), ContainerElementName("Id"))), ' \
-               'DataTypeVarChar(50), SpecFieldTypeAttribute(LatticeAddressAtomicIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Contact_ID")), SpecConstructiveIsConstructive, ' \
-               'FunctionAggregationOperator("Combine")), SpecColumnContentContainerElementName(' \
-               'ContainerElementName("Id")), SpecEndpointTypeNone, SpecDefaultValueNullNoRTrim, ' \
-               'SpecKeyAggregation(SpecColumnAggregationRuleFunction("Combine")), ' \
-               'SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Combine"))), ' \
-               'SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Contact_Validation")), ContainerElementName(' \
-               '"CreatedDate"))), DataTypeDateTime, SpecFieldTypeMetric(FunctionAggregationOperator(' \
-               '"Max")), SpecColumnContentContainerElementName(ContainerElementName("CreatedDate")), ' \
-               'SpecEndpointTypeNone, SpecDefaultValueNull, SpecKeyAggregation(' \
-               'SpecColumnAggregationRuleFunction("Max")), SpecEquivalenceAggregation(' \
-               'SpecColumnAggregationRuleFunction("Max"))), SpecLatticeSourceTableColumn(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact_Validation")), ' \
-               'ContainerElementName("LastModifiedDate"))), DataTypeDateTime, SpecFieldTypeMetric(' \
-               'FunctionAggregationOperator("Max")), SpecColumnContentContainerElementName(' \
-               'ContainerElementName("LastModifiedDate")), SpecEndpointTypeNone, ' \
-               'SpecDefaultValueNull, SpecKeyAggregation(SpecColumnAggregationRuleFunction("Max")), ' \
-               'SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Max"))), ' \
-               'SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Contact_Validation")), ContainerElementName(' \
-               '"latticeforleads__Score__c"))), DataTypeInt, SpecFieldTypeMetric, ' \
-               'SpecColumnContentContainerElementName(ContainerElementName("")), ' \
-               'SpecEndpointTypeNone, SpecDefaultValue(""), SpecKeyAggregation(' \
-               'SpecColumnAggregationRuleDefault), SpecEquivalenceAggregation(' \
-               'SpecColumnAggregationRuleDefault)), SpecLatticeSourceTableColumn(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact_Validation")), ' \
-               'ContainerElementName("latticeforleads__Last_Score_Date__c"))), DataTypeDateTime, ' \
-               'SpecFieldTypeMetric, SpecColumnContentContainerElementName(ContainerElementName("")), ' \
-               'SpecEndpointTypeNone, SpecDefaultValue(""), SpecKeyAggregation(' \
-               'SpecColumnAggregationRuleDefault), SpecEquivalenceAggregation(' \
-               'SpecColumnAggregationRuleDefault)))), SpecKeys(empty), SpecDescription(""), ' \
-               'SpecMaximalIsMaximal, SpecKeyAggregation(SpecColumnAggregationRuleMostRecent), ' \
-               'SpecEquivalenceAggregation(SpecColumnAggregationRuleMostRecent)), ' \
-               'ContainerElementName("SFDC_Contact_Validation")), SpecLatticeNamedElement(' \
-               'SpecLatticeSourceTable(SpecLatticeSourceTableColumnSet((SpecLatticeSourceTableColumn(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead_Validation")), ' \
-               'ContainerElementName("Id"))), DataTypeVarChar(50), SpecFieldTypeAttribute(' \
-               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")), ' \
-               'SpecConstructiveIsConstructive, FunctionAggregationOperator("Combine")), ' \
-               'SpecColumnContentContainerElementName(ContainerElementName("Id")), ' \
-               'SpecEndpointTypeNone, SpecDefaultValueNullNoRTrim, SpecKeyAggregation(' \
-               'SpecColumnAggregationRuleFunction("Combine")), SpecEquivalenceAggregation(' \
-               'SpecColumnAggregationRuleFunction("Combine"))), SpecLatticeSourceTableColumn(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead_Validation")), ' \
-               'ContainerElementName("CreatedDate"))), DataTypeDateTime, SpecFieldTypeMetric(' \
-               'FunctionAggregationOperator("Max")), SpecColumnContentContainerElementName(' \
-               'ContainerElementName("CreatedDate")), SpecEndpointTypeNone, SpecDefaultValueNull, ' \
-               'SpecKeyAggregation(SpecColumnAggregationRuleFunction("Max")), ' \
-               'SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Max"))), ' \
-               'SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Validation")), ContainerElementName(' \
-               '"LastModifiedDate"))), DataTypeDateTime, SpecFieldTypeMetric(' \
-               'FunctionAggregationOperator("Max")), SpecColumnContentContainerElementName(' \
-               'ContainerElementName("LastModifiedDate")), SpecEndpointTypeNone, ' \
-               'SpecDefaultValueNull, SpecKeyAggregation(SpecColumnAggregationRuleFunction("Max")), ' \
-               'SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Max"))), ' \
-               'SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Validation")), ContainerElementName(' \
-               '"latticeforleads__Score__c"))), DataTypeInt, SpecFieldTypeMetric(' \
-               'FunctionAggregationOperator("Sum")), SpecColumnContentContainerElementName(' \
-               'ContainerElementName("latticeforleads__Score__c")), SpecEndpointTypeNone, ' \
-               'SpecDefaultValueNull, SpecKeyAggregation(SpecColumnAggregationRuleFunction("Sum")), ' \
-               'SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Sum"))), ' \
-               'SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Validation")), ContainerElementName(' \
-               '"latticeforleads__Last_Score_Date__c"))), DataTypeDateTime, SpecFieldTypeMetric(' \
-               'FunctionAggregationOperator("Max")), SpecColumnContentContainerElementName(' \
-               'ContainerElementName("latticeforleads__Last_Score_Date__c")), SpecEndpointTypeNone, ' \
-               'SpecDefaultValueNull, SpecKeyAggregation(SpecColumnAggregationRuleFunction("Max")), ' \
-               'SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Max"))))), ' \
-               'SpecKeys(empty), SpecDescription(""), SpecMaximalIsMaximal, SpecKeyAggregation(' \
-               'SpecColumnAggregationRuleMostRecent), SpecEquivalenceAggregation(' \
-               'SpecColumnAggregationRuleMostRecent)), ContainerElementName("SFDC_Lead_Validation")), ' \
-               'SpecLatticeNamedElement(SpecLatticeImportTable(SpecSourceAggregationRuleMostRecent(' \
-               'SpecTotalOrderEffectiveDate), SpecColumnBindings((SpecColumnBinding(' \
-               'ContainerElementName("CreatedDate"), DataTypeDateTime), SpecColumnBinding(' \
-               'ContainerElementName("Id"), DataTypeNVarChar(36)), SpecColumnBinding(' \
-               'ContainerElementName("LastModifiedDate"), DataTypeDateTime), SpecColumnBinding(' \
-               'ContainerElementName("latticeforleads__Last_Score_Date__c"), DataTypeDateTime), ' \
-               'SpecColumnBinding(ContainerElementName("latticeforleads__Score__c"), DataTypeInt))), ' \
-               'SpecSourceFilterNone), ContainerElementName("SFDC_Contact_Validation_Import")), ' \
-               'SpecLatticeNamedElement(SpecLatticeImportTable(SpecSourceAggregationRuleMostRecent(' \
-               'SpecTotalOrderEffectiveDate), SpecColumnBindings((SpecColumnBinding(' \
-               'ContainerElementName("CreatedDate"), DataTypeDateTime), SpecColumnBinding(' \
-               'ContainerElementName("Id"), DataTypeNVarChar(36)), SpecColumnBinding(' \
-               'ContainerElementName("LastModifiedDate"), DataTypeDateTime), SpecColumnBinding(' \
-               'ContainerElementName("latticeforleads__Last_Score_Date__c"), DataTypeDateTime), ' \
-               'SpecColumnBinding(ContainerElementName("latticeforleads__Score__c"), DataTypeInt))), ' \
-               'SpecSourceFilterNone), ContainerElementName("SFDC_Lead_Validation_Import")), ' \
-               'SpecLatticeNamedElement(SpecLatticeExtract(SpecColumnBindings((SpecColumnBinding(' \
-               'ContainerElementName("CreatedDate"), 1000000000000000000000000000006), ' \
-               'SpecColumnBinding(ContainerElementName("Id"), 1000000000000000000000000000011), ' \
-               'SpecColumnBinding(ContainerElementName("LastModifiedDate"), ' \
-               '1000000000000000000000000000020), SpecColumnBinding(ContainerElementName(' \
-               '"latticeforleads__Last_Score_Date__c"), 1000000000000000000000000000025), ' \
-               'SpecColumnBinding(ContainerElementName("latticeforleads__Score__c"), ' \
-               '1000000000000000000000000000030))), SpecImportDate("2015-11-04 03:51:31"), ' \
-               'SpecEffectiveDate("2015-11-04 03:51:31"), SpecExtractDetails((SpecExtractDetail(' \
-               '"TableName", "SFDC_Contact_Validation_Import"), SpecExtractDetail("Rows", "0")))), ' \
-               'ContainerElementName("SFDC_Contact_Validation_Import_Extract_2")), ' \
-               'SpecLatticeNamedElement(SpecLatticeExtract(SpecColumnBindings((SpecColumnBinding(' \
-               'ContainerElementName("CreatedDate"), 1000000000000000000000000000040), ' \
-               'SpecColumnBinding(ContainerElementName("Id"), 1000000000000000000000000000045), ' \
-               'SpecColumnBinding(ContainerElementName("LastModifiedDate"), ' \
-               '1000000000000000000000000000054), SpecColumnBinding(ContainerElementName(' \
-               '"latticeforleads__Last_Score_Date__c"), 1000000000000000000000000000059), ' \
-               'SpecColumnBinding(ContainerElementName("latticeforleads__Score__c"), ' \
-               '1000000000000000000000000000064))), SpecImportDate("2015-11-04 03:51:31"), ' \
-               'SpecEffectiveDate("2015-11-04 03:51:31"), SpecExtractDetails((SpecExtractDetail(' \
-               '"TableName", "SFDC_Lead_Validation_Import"), SpecExtractDetail("Rows", "0")))), ' \
-               'ContainerElementName("SFDC_Lead_Validation_Import_Extract_2")), ' \
+               'SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
+               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact_Validation")),ContainerElementName(' \
+               '"Id"))),DataTypeVarChar(50),SpecFieldTypeAttribute(LatticeAddressAtomicIdentifier(' \
+               'ContainerElementName("SFDC_Lead_Contact_ID")),SpecConstructiveIsConstructive,' \
+               'FunctionAggregationOperator("Combine")),SpecColumnContentContainerElementName(ContainerElementName(' \
+               '"Id")),SpecEndpointTypeNone,SpecDefaultValueNullNoRTrim,SpecKeyAggregation(' \
+               'SpecColumnAggregationRuleFunction("Combine")),SpecEquivalenceAggregation(' \
+               'SpecColumnAggregationRuleFunction("Combine"))),SpecLatticeSourceTableColumn(' \
+               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
+               'ContainerElementName("SFDC_Contact_Validation")),ContainerElementName("CreatedDate"))),' \
+               'DataTypeDateTime,SpecFieldTypeMetric(FunctionAggregationOperator("Max")),' \
+               'SpecColumnContentContainerElementName(ContainerElementName("CreatedDate")),SpecEndpointTypeNone,' \
+               'SpecDefaultValueNull,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Max")),' \
+               'SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Max"))),SpecLatticeSourceTableColumn(' \
+               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
+               'ContainerElementName("SFDC_Contact_Validation")),ContainerElementName("LastModifiedDate"))),' \
+               'DataTypeDateTime,SpecFieldTypeMetric(FunctionAggregationOperator("Max")),' \
+               'SpecColumnContentContainerElementName(ContainerElementName("LastModifiedDate")),SpecEndpointTypeNone,' \
+               'SpecDefaultValueNull,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Max")),' \
+               'SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Max"))),SpecLatticeSourceTableColumn(' \
+               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
+               'ContainerElementName("SFDC_Contact_Validation")),ContainerElementName("latticeforleads__Score__c"))),' \
+               'DataTypeInt,SpecFieldTypeMetric,SpecColumnContentContainerElementName(ContainerElementName("")),' \
+               'SpecEndpointTypeNone,SpecDefaultValue(""),SpecKeyAggregation(SpecColumnAggregationRuleDefault),' \
+               'SpecEquivalenceAggregation(SpecColumnAggregationRuleDefault)),SpecLatticeSourceTableColumn(' \
+               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
+               'ContainerElementName("SFDC_Contact_Validation")),ContainerElementName(' \
+               '"latticeforleads__Last_Score_Date__c"))),DataTypeDateTime,SpecFieldTypeMetric,' \
+               'SpecColumnContentContainerElementName(ContainerElementName("")),SpecEndpointTypeNone,' \
+               'SpecDefaultValue(""),SpecKeyAggregation(SpecColumnAggregationRuleDefault),SpecEquivalenceAggregation(' \
+               'SpecColumnAggregationRuleDefault)))),SpecKeys(empty),SpecDescription(""),SpecMaximalIsMaximal,' \
+               'SpecKeyAggregation(SpecColumnAggregationRuleMostRecent),SpecEquivalenceAggregation(' \
+               'SpecColumnAggregationRuleMostRecent)),ContainerElementName("SFDC_Contact_Validation")),' \
+               'SpecLatticeNamedElement(SpecLatticeSourceTable(SpecLatticeSourceTableColumnSet((' \
+               'SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
+               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead_Validation")),ContainerElementName(' \
+               '"Id"))),DataTypeVarChar(50),SpecFieldTypeAttribute(LatticeAddressAtomicIdentifier(' \
+               'ContainerElementName("SFDC_Lead_Contact_ID")),SpecConstructiveIsConstructive,' \
+               'FunctionAggregationOperator("Combine")),SpecColumnContentContainerElementName(ContainerElementName(' \
+               '"Id")),SpecEndpointTypeNone,SpecDefaultValueNullNoRTrim,SpecKeyAggregation(' \
+               'SpecColumnAggregationRuleFunction("Combine")),SpecEquivalenceAggregation(' \
+               'SpecColumnAggregationRuleFunction("Combine"))),SpecLatticeSourceTableColumn(' \
+               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
+               'ContainerElementName("SFDC_Lead_Validation")),ContainerElementName("CreatedDate"))),DataTypeDateTime,' \
+               'SpecFieldTypeMetric(FunctionAggregationOperator("Max")),SpecColumnContentContainerElementName(' \
+               'ContainerElementName("CreatedDate")),SpecEndpointTypeNone,SpecDefaultValueNull,SpecKeyAggregation(' \
+               'SpecColumnAggregationRuleFunction("Max")),SpecEquivalenceAggregation(' \
+               'SpecColumnAggregationRuleFunction("Max"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"SFDC_Lead_Validation")),ContainerElementName("LastModifiedDate"))),DataTypeDateTime,' \
+               'SpecFieldTypeMetric(FunctionAggregationOperator("Max")),SpecColumnContentContainerElementName(' \
+               'ContainerElementName("LastModifiedDate")),SpecEndpointTypeNone,SpecDefaultValueNull,' \
+               'SpecKeyAggregation(SpecColumnAggregationRuleFunction("Max")),SpecEquivalenceAggregation(' \
+               'SpecColumnAggregationRuleFunction("Max"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"SFDC_Lead_Validation")),ContainerElementName("latticeforleads__Score__c"))),DataTypeInt,' \
+               'SpecFieldTypeMetric(FunctionAggregationOperator("Sum")),SpecColumnContentContainerElementName(' \
+               'ContainerElementName("latticeforleads__Score__c")),SpecEndpointTypeNone,SpecDefaultValueNull,' \
+               'SpecKeyAggregation(SpecColumnAggregationRuleFunction("Sum")),SpecEquivalenceAggregation(' \
+               'SpecColumnAggregationRuleFunction("Sum"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"SFDC_Lead_Validation")),ContainerElementName("latticeforleads__Last_Score_Date__c"))),' \
+               'DataTypeDateTime,SpecFieldTypeMetric(FunctionAggregationOperator("Max")),' \
+               'SpecColumnContentContainerElementName(ContainerElementName("latticeforleads__Last_Score_Date__c")),' \
+               'SpecEndpointTypeNone,SpecDefaultValueNull,SpecKeyAggregation(SpecColumnAggregationRuleFunction(' \
+               '"Max")),SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Max"))))),SpecKeys(empty),' \
+               'SpecDescription(""),SpecMaximalIsMaximal,SpecKeyAggregation(SpecColumnAggregationRuleMostRecent),' \
+               'SpecEquivalenceAggregation(SpecColumnAggregationRuleMostRecent)),ContainerElementName(' \
+               '"SFDC_Lead_Validation")),SpecLatticeNamedElement(SpecLatticeImportTable(' \
+               'SpecSourceAggregationRuleMostRecent(SpecTotalOrderEffectiveDate),SpecColumnBindings((' \
+               'SpecColumnBinding(ContainerElementName("CreatedDate"),DataTypeDateTime),SpecColumnBinding(' \
+               'ContainerElementName("Id"),DataTypeNVarChar(36)),SpecColumnBinding(ContainerElementName(' \
+               '"LastModifiedDate"),DataTypeDateTime),SpecColumnBinding(ContainerElementName(' \
+               '"latticeforleads__Last_Score_Date__c"),DataTypeDateTime),SpecColumnBinding(ContainerElementName(' \
+               '"latticeforleads__Score__c"),DataTypeInt))),SpecSourceFilterNone),ContainerElementName(' \
+               '"SFDC_Contact_Validation_Import")),SpecLatticeNamedElement(SpecLatticeImportTable(' \
+               'SpecSourceAggregationRuleMostRecent(SpecTotalOrderEffectiveDate),SpecColumnBindings((' \
+               'SpecColumnBinding(ContainerElementName("CreatedDate"),DataTypeDateTime),SpecColumnBinding(' \
+               'ContainerElementName("Id"),DataTypeNVarChar(36)),SpecColumnBinding(ContainerElementName(' \
+               '"LastModifiedDate"),DataTypeDateTime),SpecColumnBinding(ContainerElementName(' \
+               '"latticeforleads__Last_Score_Date__c"),DataTypeDateTime),SpecColumnBinding(ContainerElementName(' \
+               '"latticeforleads__Score__c"),DataTypeInt))),SpecSourceFilterNone),ContainerElementName(' \
+               '"SFDC_Lead_Validation_Import")),SpecLatticeNamedElement(SpecLatticeExtract(SpecColumnBindings((' \
+               'SpecColumnBinding(ContainerElementName("CreatedDate"),1000000000000000000000000000006),' \
+               'SpecColumnBinding(ContainerElementName("Id"),1000000000000000000000000000011),SpecColumnBinding(' \
+               'ContainerElementName("LastModifiedDate"),1000000000000000000000000000020),SpecColumnBinding(' \
+               'ContainerElementName("latticeforleads__Last_Score_Date__c"),1000000000000000000000000000025),' \
+               'SpecColumnBinding(ContainerElementName("latticeforleads__Score__c"),' \
+               '1000000000000000000000000000030))),SpecImportDate("2015-11-19 10:59:29"),SpecEffectiveDate(' \
+               '"2015-11-19 10:59:29"),SpecExtractDetails((SpecExtractDetail("TableName",' \
+               '"SFDC_Contact_Validation_Import"),SpecExtractDetail("Rows","0")))),ContainerElementName(' \
+               '"SFDC_Contact_Validation_Import_Extract_2")),SpecLatticeNamedElement(SpecLatticeExtract(' \
+               'SpecColumnBindings((SpecColumnBinding(ContainerElementName("CreatedDate"),' \
+               '1000000000000000000000000000040),SpecColumnBinding(ContainerElementName("Id"),' \
+               '1000000000000000000000000000045),SpecColumnBinding(ContainerElementName("LastModifiedDate"),' \
+               '1000000000000000000000000000054),SpecColumnBinding(ContainerElementName(' \
+               '"latticeforleads__Last_Score_Date__c"),1000000000000000000000000000059),SpecColumnBinding(' \
+               'ContainerElementName("latticeforleads__Score__c"),1000000000000000000000000000064))),SpecImportDate(' \
+               '"2015-11-19 10:59:29"),SpecEffectiveDate("2015-11-19 10:59:29"),SpecExtractDetails((' \
+               'SpecExtractDetail("TableName","SFDC_Lead_Validation_Import"),SpecExtractDetail("Rows","0")))),' \
+               'ContainerElementName("SFDC_Lead_Validation_Import_Extract_2")),SpecLatticeNamedElement(' \
+               'SpecLatticeBinder(SpecBoundName(ContainerElementName("SFDC_Contact_Validation_Import_Extract_2"),' \
+               'NameTypeExtract),SpecBoundName(ContainerElementName("SFDC_Contact_Validation_Import"),' \
+               'NameTypeImportTable)),ContainerElementName(' \
+               '"Binder_E2I_T_SFDC_Contact_Validation_Import_Extract_2_SFDC_Contact_Validation_Import")),' \
                'SpecLatticeNamedElement(SpecLatticeBinder(SpecBoundName(ContainerElementName(' \
-               '"SFDC_Contact_Validation_Import_Extract_2"), NameTypeExtract), SpecBoundName(' \
-               'ContainerElementName("SFDC_Contact_Validation_Import"), NameTypeImportTable)), ' \
-               'ContainerElementName(' \
-               '"Binder_E2I_T_SFDC_Contact_Validation_Import_Extract_2_SFDC_Contact_Validation_Import' \
-               '")), SpecLatticeNamedElement(SpecLatticeBinder(SpecBoundName(ContainerElementName(' \
-               '"SFDC_Lead_Validation_Import_Extract_2"), NameTypeExtract), SpecBoundName(' \
-               'ContainerElementName("SFDC_Lead_Validation_Import"), NameTypeImportTable)), ' \
-               'ContainerElementName(' \
-               '"Binder_E2I_T_SFDC_Lead_Validation_Import_Extract_2_SFDC_Lead_Validation_Import")), ' \
+               '"SFDC_Lead_Validation_Import_Extract_2"),NameTypeExtract),SpecBoundName(ContainerElementName(' \
+               '"SFDC_Lead_Validation_Import"),NameTypeImportTable)),ContainerElementName(' \
+               '"Binder_E2I_T_SFDC_Lead_Validation_Import_Extract_2_SFDC_Lead_Validation_Import")),' \
                'SpecLatticeNamedElement(SpecLatticeBinder(SpecBoundName(ContainerElementName(' \
-               '"SFDC_Contact_Validation_Import"), NameTypeImportTable), SpecBoundName(' \
-               'ContainerElementName("SFDC_Contact_Validation"), NameTypeSourceTable)), ' \
-               'ContainerElementName(' \
-               '"Binder_I2S_T_SFDC_Contact_Validation_Import_SFDC_Contact_Validation")), ' \
-               'SpecLatticeNamedElement(SpecLatticeBinder(SpecBoundName(ContainerElementName(' \
-               '"SFDC_Lead_Validation_Import"), NameTypeImportTable), SpecBoundName(' \
-               'ContainerElementName("SFDC_Lead_Validation"), NameTypeSourceTable)), ' \
-               'ContainerElementName(' \
-               '"Binder_I2S_T_SFDC_Lead_Validation_Import_SFDC_Lead_Validation")), ' \
-               'SpecLatticeNamedElement(SpecLatticeFunction(LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"), ' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact_Validation")), ' \
-               'ContainerElementName("Id"))), LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Validation")), ContainerElementName("Id")))), ' \
-               'LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Contact_ID")))), FunctionAggregationOperator(' \
-               '"None")), DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, ' \
-               'SpecDefaultValueNull, SpecDescription("")), ContainerElementName(' \
-               '"Diagnostic_Alias_Id")), SpecLatticeNamedElement(SpecLatticeFunction(' \
+               '"SFDC_Contact_Validation_Import"),NameTypeImportTable),SpecBoundName(ContainerElementName(' \
+               '"SFDC_Contact_Validation"),NameTypeSourceTable)),ContainerElementName(' \
+               '"Binder_I2S_T_SFDC_Contact_Validation_Import_SFDC_Contact_Validation")),SpecLatticeNamedElement(' \
+               'SpecLatticeBinder(SpecBoundName(ContainerElementName("SFDC_Lead_Validation_Import"),' \
+               'NameTypeImportTable),SpecBoundName(ContainerElementName("SFDC_Lead_Validation"),' \
+               'NameTypeSourceTable)),ContainerElementName(' \
+               '"Binder_I2S_T_SFDC_Lead_Validation_Import_SFDC_Lead_Validation")),SpecLatticeNamedElement(' \
+               'SpecLatticeFunction(LatticeFunctionExpressionTransform(LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"SFDC_Contact_Validation")),ContainerElementName("Id"))),LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"SFDC_Lead_Validation")),ContainerElementName("Id")))),LatticeAddressSetPi(' \
+               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
+               '"SFDC_Lead_Contact_ID")))),FunctionAggregationOperator("None")),DataTypeUnknown,' \
+               'SpecFunctionTypeMetric,SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),' \
+               'ContainerElementName("Diagnostic_Alias_Id")),SpecLatticeNamedElement(SpecLatticeFunction(' \
                'LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementName(' \
-               '"SFDC_LastModifiedDate")), LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
-               'LatticeAddressAtomicAll)), FunctionAggregationOperator("Max")), DataTypeUnknown, ' \
-               'SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, ' \
-               'SpecDescription("")), ContainerElementName("Diagnostic_Alias_Max_ModifiedDate")), ' \
+               '"SFDC_LastModifiedDate")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicAll)),FunctionAggregationOperator("Max")),DataTypeUnknown,SpecFunctionTypeMetric,' \
+               'SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),ContainerElementName(' \
+               '"Diagnostic_Alias_Max_ModifiedDate")),SpecLatticeNamedElement(SpecLatticeFunction(' \
+               'LatticeFunctionExpressionTransform(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier(' \
+               '"IsNull"),LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
+               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact_Validation")),ContainerElementName(' \
+               '"latticeforleads__Score__c"))),LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
+               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead_Validation")),ContainerElementName(' \
+               '"latticeforleads__Score__c")))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))),' \
+               'FunctionAggregationOperator("None")),DataTypeUnknown,SpecFunctionTypeMetric,' \
+               'SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),ContainerElementName(' \
+               '"Diagnostic_Alias_Score")),SpecLatticeNamedElement(SpecLatticeFunction(' \
+               'LatticeFunctionExpressionTransform(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier(' \
+               '"IsNull"),LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
+               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact_Validation")),ContainerElementName(' \
+               '"latticeforleads__Last_Score_Date__c"))),LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"SFDC_Lead_Validation")),ContainerElementName("latticeforleads__Last_Score_Date__c")))),' \
+               'LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(' \
+               'ContainerElementName("SFDC_Lead_Contact_ID")))),FunctionAggregationOperator("None")),DataTypeUnknown,' \
+               'SpecFunctionTypeMetric,SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),' \
+               'ContainerElementName("Diagnostic_Alias_ScoreDate")),SpecLatticeNamedElement(SpecLatticeFunction(' \
+               'LatticeFunctionExpressionTransform(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier(' \
+               '"IsNull"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),' \
+               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("NOT"),LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("IsNullValue"),LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"Timestamp_PushToScoring")),ContainerElementName("SFDC_Lead_Contact_ID"))))),' \
+               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Less"),LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_Alias_ScoreDate")),LatticeFunctionExpressionConstantScalar("1900-01-01",' \
+               'DataTypeDateTime)),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_Validate_ScoringRange")))),LatticeFunctionExpressionConstantScalar("FALSE",DataTypeBit)),' \
+               'LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(' \
+               'ContainerElementName("Entity_Diagnostic_Alias_Id")))),FunctionAggregationOperator("Max")),' \
+               'DataTypeUnknown,SpecFunctionTypeMetric,SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,' \
+               'SpecDescription("")),ContainerElementName("Diagnostic_IsFailedScoringLeads")),' \
                'SpecLatticeNamedElement(SpecLatticeFunction(LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"), ' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact_Validation")), ' \
-               'ContainerElementName("latticeforleads__Score__c"))), LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Validation")), ContainerElementName(' \
-               '"latticeforleads__Score__c")))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
-               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))), ' \
-               'FunctionAggregationOperator("None")), DataTypeUnknown, SpecFunctionTypeMetric, ' \
-               'SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription("")), ' \
-               'ContainerElementName("Diagnostic_Alias_Score")), SpecLatticeNamedElement(' \
-               'SpecLatticeFunction(LatticeFunctionExpressionTransform(LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("IsNull"), LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Contact_Validation")), ContainerElementName(' \
-               '"latticeforleads__Last_Score_Date__c"))), LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Validation")), ContainerElementName(' \
-               '"latticeforleads__Last_Score_Date__c")))), LatticeAddressSetPi(' \
+               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier(' \
+               '"NOT"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNullValue"),' \
+               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_Alias_Id")))),LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("IsNullValue"),LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"Timestamp_Downloaded_Lead_Contact")),ContainerElementName("SFDC_Lead_Contact_ID"))))),' \
+               'LatticeFunctionExpressionConstantScalar("FALSE",DataTypeBit)),LatticeAddressSetPi(' \
                'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID")))), FunctionAggregationOperator("None")), DataTypeUnknown, ' \
-               'SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, ' \
-               'SpecDescription("")), ContainerElementName("Diagnostic_Alias_ScoreDate")), ' \
-               'SpecLatticeNamedElement(SpecLatticeFunction(LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"), ' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"), ' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("NOT"), ' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNullValue"), ' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToScoring")), ' \
-               'ContainerElementName("SFDC_Lead_Contact_ID"))))), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("Less"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("IsNull"), LatticeFunctionIdentifier(' \
-               'ContainerElementName("Diagnostic_Alias_ScoreDate")), ' \
-               'LatticeFunctionExpressionConstantScalar("1900-01-01", DataTypeDateTime)), ' \
-               'LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_Validate_ScoringRange")))), LatticeFunctionExpressionConstantScalar(' \
-               '"FALSE", DataTypeBit)), LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
-               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))), ' \
-               'FunctionAggregationOperator("Max")), DataTypeUnknown, SpecFunctionTypeMetric, ' \
-               'SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription("")), ' \
-               'ContainerElementName("Diagnostic_IsFailedScoringLeads")), SpecLatticeNamedElement(' \
+               '"Entity_Diagnostic_Alias_Id")))),FunctionAggregationOperator("Max")),DataTypeUnknown,' \
+               'SpecFunctionTypeMetric,SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),' \
+               'ContainerElementName("Diagnostic_IsMissingDownloadedLeads")),SpecLatticeNamedElement(' \
                'SpecLatticeFunction(LatticeFunctionExpressionTransform(LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("IsNull"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("AND"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("NOT"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("IsNullValue"), LatticeFunctionIdentifier(' \
-               'ContainerElementName("Diagnostic_Alias_Id")))), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("IsNullValue"), LatticeFunctionIdentifier(' \
-               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
-               'ContainerElementName("Timestamp_Downloaded_Lead_Contact")), ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID"))))), LatticeFunctionExpressionConstantScalar("FALSE", ' \
-               'DataTypeBit)), LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
-               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))), ' \
-               'FunctionAggregationOperator("Max")), DataTypeUnknown, SpecFunctionTypeMetric, ' \
-               'SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription("")), ' \
-               'ContainerElementName("Diagnostic_IsMissingDownloadedLeads")), ' \
-               'SpecLatticeNamedElement(SpecLatticeFunction(LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"), ' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"), ' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Greater"), ' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName(' \
-               '"Timestamp_Downloaded_Lead_Contact")), ContainerElementName(' \
-               '"Days_SinceLastScoreAtTimeOfDownload"))), LatticeFunctionExpressionConstant("14000", ' \
-               'DataTypeInt)), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Less"), ' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"), ' \
-               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_Alias_ScoreDate")), ' \
-               'LatticeFunctionExpressionConstantScalar("1900-01-01", DataTypeDateTime)), ' \
-               'LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_Validate_ScoringRange")))), LatticeFunctionExpressionConstantScalar(' \
-               '"FALSE", DataTypeBit)), LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
-               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))), ' \
-               'FunctionAggregationOperator("Max")), DataTypeUnknown, SpecFunctionTypeMetric, ' \
-               'SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription("")), ' \
-               'ContainerElementName("Diagnostic_IsUnscored_New/ModifiedLeads")), ' \
+               'LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier(' \
+               '"Greater"),LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
+               'LatticeSourceTableIdentifier(ContainerElementName("Timestamp_Downloaded_Lead_Contact")),' \
+               'ContainerElementName("Days_SinceLastScoreAtTimeOfDownload"))),LatticeFunctionExpressionConstant(' \
+               '"14000",DataTypeInt)),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Less"),' \
+               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionIdentifier(' \
+               'ContainerElementName("Diagnostic_Alias_ScoreDate")),LatticeFunctionExpressionConstantScalar(' \
+               '"1900-01-01",DataTypeDateTime)),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_Validate_ScoringRange")))),LatticeFunctionExpressionConstantScalar("FALSE",DataTypeBit)),' \
+               'LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(' \
+               'ContainerElementName("Entity_Diagnostic_Alias_Id")))),FunctionAggregationOperator("Max")),' \
+               'DataTypeUnknown,SpecFunctionTypeMetric,SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,' \
+               'SpecDescription("")),ContainerElementName("Diagnostic_IsUnscored_New/ModifiedLeads")),' \
                'SpecLatticeNamedElement(SpecLatticeFunction(LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("AddDay"), LatticeFunctionIdentifier(' \
-               'ContainerElementName("Diagnostic_Alias_Max_ModifiedDate")), ' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Multiply"), ' \
-               'LatticeFunctionIdentifier(ContainerElementName("Const_DaysOfValidityForScore")), ' \
-               'LatticeFunctionExpressionConstant("-1", DataTypeInt))), DataTypeUnknown, ' \
-               'SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, ' \
-               'SpecDescription("")), ContainerElementName("Diagnostic_Validate_ScoringRange")), ' \
-               'SpecLatticeNamedElement(SpecLatticeQuery(LatticeAddressSetPushforward(' \
-               'LatticeAddressExpressionFromLAS(LatticeAddressSetMeet((LatticeAddressSetFcn(' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("OR"), ' \
-               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_IsFailedScoringLeads")), ' \
-               'LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_IsUnscored_New/ModifiedLeads"))), LatticeAddressSetPi(' \
+               'LatticeFunctionOperatorIdentifier("AddDay"),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_Alias_Max_ModifiedDate")),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier(' \
+               '"Multiply"),LatticeFunctionIdentifier(ContainerElementName("Const_DaysOfValidityForScore")),' \
+               'LatticeFunctionExpressionConstant("-1",DataTypeInt))),DataTypeUnknown,SpecFunctionTypeMetric,' \
+               'SpecFunctionSourceTypeCalculation,SpecDefaultValueNull,SpecDescription("")),ContainerElementName(' \
+               '"Diagnostic_Validate_ScoringRange")),SpecLatticeNamedElement(SpecLatticeQuery(' \
+               'LatticeAddressSetPushforward(LatticeAddressExpressionFromLAS(LatticeAddressSetMeet((' \
+               'LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("OR"),' \
+               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_IsFailedScoringLeads")),' \
+               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_IsUnscored_New/ModifiedLeads"))),' \
+               'LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(' \
+               'ContainerElementName("SFDC_Lead_Contact_ID")))))))),LatticeAddressSetMeet((LatticeAddressSetFcn(' \
+               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("OR"),LatticeFunctionIdentifier(' \
+               'ContainerElementName("Diagnostic_IsFailedScoringLeads")),LatticeFunctionIdentifier(' \
+               'ContainerElementName("Diagnostic_IsUnscored_New/ModifiedLeads"))),LatticeAddressSetPi(' \
                'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID")))))))), LatticeAddressSetMeet((LatticeAddressSetFcn(' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("OR"), ' \
-               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_IsFailedScoringLeads")), ' \
-               'LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_IsUnscored_New/ModifiedLeads"))), LatticeAddressSetPi(' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID"))))))), LatticeAddressExpressionMeet((' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID")))))), SpecQueryNamedFunctions(' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName("LeadID"), ' \
-               'LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Contact_ID")))) ' \
-               'SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(' \
-               'ContainerElementName("TenantName"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Const_TenantName"))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"LeadScore"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_Alias_Score"))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"LastScoreDate"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_Alias_ScoreDate"))) SpecQueryNamedFunctionExpression(' \
-               'ContainerElementName("ModifiedDate"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"SFDC_LastModifiedDate"))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"CreatedDate"), LatticeFunctionIdentifier(ContainerElementName("SFDC_CreatedDate"))) ' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName("IsFailedScoringLeads"), ' \
+               '"SFDC_Lead_Contact_ID"))))))),LatticeAddressExpressionMeet((LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))))),' \
+               'SpecQueryNamedFunctions(SpecQueryNamedFunctionExpression(ContainerElementName("LeadID"),' \
+               'LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
+               '"SFDC_Lead_Contact_ID")))) SpecQueryNamedFunctionEntityFunctionBoundary ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("TenantName"),LatticeFunctionIdentifier(' \
+               'ContainerElementName("Const_TenantName"))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
+               '"LeadScore"),LatticeFunctionIdentifier(ContainerElementName("Diagnostic_Alias_Score"))) ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("LastScoreDate"),LatticeFunctionIdentifier(' \
+               'ContainerElementName("Diagnostic_Alias_ScoreDate"))) SpecQueryNamedFunctionExpression(' \
+               'ContainerElementName("ModifiedDate"),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"SFDC_LastModifiedDate"))) SpecQueryNamedFunctionExpression(ContainerElementName("CreatedDate"),' \
+               'LatticeFunctionIdentifier(ContainerElementName("SFDC_CreatedDate"))) ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("IsFailedScoringLeads"),' \
                'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_IsFailedScoringLeads"))) ' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"IsDownloadedButMissScoringLeads"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_IsUnscored_New/ModifiedLeads")))), SpecQueryResultSetAll), ' \
-               'ContainerElementName("Q_Diagnostic_DownloadedUnscoredLeads")), ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("IsDownloadedButMissScoringLeads"),' \
+               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_IsUnscored_New/ModifiedLeads")))),' \
+               'SpecQueryResultSetAll),ContainerElementName("Q_Diagnostic_DownloadedUnscoredLeads")),' \
                'SpecLatticeNamedElement(SpecLatticeQuery(LatticeAddressSetPushforward(' \
-               'LatticeAddressExpressionFromLAS(LatticeAddressSetMeet(empty)), LatticeAddressSetMeet(' \
-               'empty), LatticeAddressExpressionMeet(empty)), SpecQueryNamedFunctions(' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"Diagnostic_LowerLimitTime_Contact"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("AddHour"), LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact")), ' \
-               'ContainerElementName("LastModifiedDate"))), LatticeAddressSetPi(' \
+               'LatticeAddressExpressionFromLAS(LatticeAddressSetMeet(empty)),LatticeAddressSetMeet(empty),' \
+               'LatticeAddressExpressionMeet(empty)),SpecQueryNamedFunctions(SpecQueryNamedFunctionExpression(' \
+               'ContainerElementName("Diagnostic_LowerLimitTime_Contact"),LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("AddHour"),LatticeFunctionExpressionTransform(' \
+               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
+               'ContainerElementName("SFDC_Contact")),ContainerElementName("LastModifiedDate"))),LatticeAddressSetPi(' \
                'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Contact")))), FunctionAggregationOperator("Max")), ' \
-               'LatticeFunctionExpressionConstant("-28", DataTypeInt))) ' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"Diagnostic_UpperLimitTime_Contact"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("AddHour"), LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact")), ' \
-               'ContainerElementName("LastModifiedDate"))), LatticeAddressSetPi(' \
+               '"SFDC_Contact")))),FunctionAggregationOperator("Max")),LatticeFunctionExpressionConstant("-28",' \
+               'DataTypeInt))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
+               '"Diagnostic_UpperLimitTime_Contact"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier(' \
+               '"AddHour"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"SFDC_Contact")),ContainerElementName("LastModifiedDate"))),LatticeAddressSetPi(' \
                'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Contact")))), FunctionAggregationOperator("Max")), ' \
-               'LatticeFunctionExpressionConstant("-4", DataTypeInt))) ' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"Diagnostic_RescoreThreshold_Contact"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("AddDay"), LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Contact")), ' \
-               'ContainerElementName("LastModifiedDate"))), LatticeAddressSetPi(' \
+               '"SFDC_Contact")))),FunctionAggregationOperator("Max")),LatticeFunctionExpressionConstant("-4",' \
+               'DataTypeInt))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
+               '"Diagnostic_RescoreThreshold_Contact"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier(' \
+               '"AddDay"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(' \
+               'ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(' \
+               '"SFDC_Contact")),ContainerElementName("LastModifiedDate"))),LatticeAddressSetPi(' \
                'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Contact")))), FunctionAggregationOperator("Max")), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("Multiply"), LatticeFunctionIdentifier(' \
-               'ContainerElementName("Const_DaysOfValidityForScore")), ' \
-               'LatticeFunctionExpressionConstantScalar("-1", DataTypeInt)))) ' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"Diagnostic_LowerLimitTime_Lead"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("AddHour"), LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead")), ' \
-               'ContainerElementName("LastModifiedDate"))), LatticeAddressSetPi(' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead")))), FunctionAggregationOperator("Max")), ' \
-               'LatticeFunctionExpressionConstant("-28", DataTypeInt))) ' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"Diagnostic_UpperLimitTime_Lead"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("AddHour"), LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead")), ' \
-               'ContainerElementName("LastModifiedDate"))), LatticeAddressSetPi(' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead")))), FunctionAggregationOperator("Max")), ' \
-               'LatticeFunctionExpressionConstant("-4", DataTypeInt))) ' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"Diagnostic_RescoreThreshold_Lead"), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("AddDay"), LatticeFunctionExpressionTransform(' \
-               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
-               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead")), ' \
-               'ContainerElementName("LastModifiedDate"))), LatticeAddressSetPi(' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead")))), FunctionAggregationOperator("Max")), LatticeFunctionExpression(' \
-               'LatticeFunctionOperatorIdentifier("Multiply"), LatticeFunctionIdentifier(' \
-               'ContainerElementName("Const_DaysOfValidityForScore")), ' \
-               'LatticeFunctionExpressionConstantScalar("-1", DataTypeInt))))), ' \
-               'SpecQueryResultSetAll), ContainerElementName("Q_Diagnostic_ExtractLeadsRange")), ' \
-               'SpecLatticeNamedElement(SpecLatticeQuery(LatticeAddressSetPushforward(' \
-               'LatticeAddressExpressionFromLAS(LatticeAddressSetMeet((LatticeAddressSetFcn(' \
-               'LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_IsMissingDownloadedLeads")), LatticeAddressSetPi(' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID")))))))), LatticeAddressSetMeet((LatticeAddressSetFcn(' \
-               'LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_IsMissingDownloadedLeads")), LatticeAddressSetPi(' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID"))))))), LatticeAddressExpressionMeet((' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID")))))), SpecQueryNamedFunctions(' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName("LeadID"), ' \
-               'LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(' \
-               'ContainerElementName("SFDC_Lead_Contact_ID")))) ' \
-               'SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(' \
-               'ContainerElementName("TenantName"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Const_TenantName"))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"LeadScore"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_Alias_Score"))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"LastScoreDate"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_Alias_ScoreDate"))) SpecQueryNamedFunctionExpression(' \
-               'ContainerElementName("ModifiedDate"), LatticeFunctionIdentifier(ContainerElementName(' \
-               '"SFDC_LastModifiedDate"))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
-               '"CreatedDate"), LatticeFunctionIdentifier(ContainerElementName("SFDC_CreatedDate"))) ' \
-               'SpecQueryNamedFunctionExpression(ContainerElementName("IsMissingDownloadedLeads"), ' \
-               'LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_IsMissingDownloadedLeads")))), SpecQueryResultSetAll), ' \
-               'ContainerElementName("Q_Diagnostic_MissingDownloadedLeads")), ' \
-               'SpecLatticeNamedElement(SpecLatticeAliasDeclaration(LatticeAddressSetFcn(' \
-               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("OR"), ' \
-               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_IsFailedScoringLeads")), ' \
-               'LatticeFunctionIdentifier(ContainerElementName(' \
-               '"Diagnostic_IsUnscored_New/ModifiedLeads"))), LatticeAddressSetPi(' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID")))))), ContainerElementName(' \
-               '"Diagnostic_DownloadedUnscoredLeads")), SpecLatticeNamedElement(' \
-               'SpecLatticeAliasDeclaration(LatticeAddressSetFcn(LatticeFunctionIdentifier(' \
-               'ContainerElementName("Diagnostic_IsMissingDownloadedLeads")), LatticeAddressSetPi(' \
-               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
-               '"SFDC_Lead_Contact_ID")))))), ContainerElementName(' \
-               '"Diagnostic_MissingDownloadedLeads"))'
+               '"SFDC_Contact")))),FunctionAggregationOperator("Max")),LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("Multiply"),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Const_DaysOfValidityForScore")),LatticeFunctionExpressionConstantScalar("-1",DataTypeInt)))) ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("Diagnostic_LowerLimitTime_Lead"),' \
+               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddHour"),' \
+               'LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
+               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead")),ContainerElementName(' \
+               '"LastModifiedDate"))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead")))),FunctionAggregationOperator(' \
+               '"Max")),LatticeFunctionExpressionConstant("-28",DataTypeInt))) SpecQueryNamedFunctionExpression(' \
+               'ContainerElementName("Diagnostic_UpperLimitTime_Lead"),LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("AddHour"),LatticeFunctionExpressionTransform(' \
+               'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(' \
+               'ContainerElementName("SFDC_Lead")),ContainerElementName("LastModifiedDate"))),LatticeAddressSetPi(' \
+               'LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead")))),' \
+               'FunctionAggregationOperator("Max")),LatticeFunctionExpressionConstant("-4",DataTypeInt))) ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("Diagnostic_RescoreThreshold_Lead"),' \
+               'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddDay"),' \
+               'LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(' \
+               'LatticeSourceTableIdentifier(ContainerElementName("SFDC_Lead")),ContainerElementName(' \
+               '"LastModifiedDate"))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead")))),FunctionAggregationOperator(' \
+               '"Max")),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Multiply"),' \
+               'LatticeFunctionIdentifier(ContainerElementName("Const_DaysOfValidityForScore")),' \
+               'LatticeFunctionExpressionConstantScalar("-1",DataTypeInt))))),SpecQueryResultSetAll),' \
+               'ContainerElementName("Q_Diagnostic_ExtractLeadsRange")),SpecLatticeNamedElement(SpecLatticeQuery(' \
+               'LatticeAddressSetPushforward(LatticeAddressExpressionFromLAS(LatticeAddressSetMeet((' \
+               'LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_IsMissingDownloadedLeads")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))))))),' \
+               'LatticeAddressSetMeet((LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_IsMissingDownloadedLeads")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID"))))))),' \
+               'LatticeAddressExpressionMeet((LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(' \
+               'ContainerElementName("SFDC_Lead_Contact_ID")))))),SpecQueryNamedFunctions(' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("LeadID"),' \
+               'LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(ContainerElementName(' \
+               '"SFDC_Lead_Contact_ID")))) SpecQueryNamedFunctionEntityFunctionBoundary ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("TenantName"),LatticeFunctionIdentifier(' \
+               'ContainerElementName("Const_TenantName"))) SpecQueryNamedFunctionExpression(ContainerElementName(' \
+               '"LeadScore"),LatticeFunctionIdentifier(ContainerElementName("Diagnostic_Alias_Score"))) ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("LastScoreDate"),LatticeFunctionIdentifier(' \
+               'ContainerElementName("Diagnostic_Alias_ScoreDate"))) SpecQueryNamedFunctionExpression(' \
+               'ContainerElementName("ModifiedDate"),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"SFDC_LastModifiedDate"))) SpecQueryNamedFunctionExpression(ContainerElementName("CreatedDate"),' \
+               'LatticeFunctionIdentifier(ContainerElementName("SFDC_CreatedDate"))) ' \
+               'SpecQueryNamedFunctionExpression(ContainerElementName("IsMissingDownloadedLeads"),' \
+               'LatticeFunctionIdentifier(ContainerElementName("Diagnostic_IsMissingDownloadedLeads")))),' \
+               'SpecQueryResultSetAll),ContainerElementName("Q_Diagnostic_MissingDownloadedLeads")),' \
+               'SpecLatticeNamedElement(SpecLatticeAliasDeclaration(LatticeAddressSetFcn(LatticeFunctionExpression(' \
+               'LatticeFunctionOperatorIdentifier("OR"),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_IsFailedScoringLeads")),LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_IsUnscored_New/ModifiedLeads"))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))))),' \
+               'ContainerElementName("Diagnostic_DownloadedUnscoredLeads")),SpecLatticeNamedElement(' \
+               'SpecLatticeAliasDeclaration(LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_IsMissingDownloadedLeads")),LatticeAddressSetPi(LatticeAddressExpressionAtomic(' \
+               'LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))))),' \
+               'ContainerElementName("Diagnostic_MissingDownloadedLeads")),SpecLatticeNamedElement(' \
+               'SpecLatticeAliasDeclaration(LatticeAddressAtomicFTOA(LatticeFunctionIdentifier(ContainerElementName(' \
+               '"Diagnostic_Alias_Id")),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(' \
+               'ContainerElementName("Diagnostic_Alias_Id"))))),ContainerElementName("Entity_Diagnostic_Alias_Id"))'
       specs += '))'
 
       specs = specs.replace('latticeforleads__Score__c', self.getScoreField())
