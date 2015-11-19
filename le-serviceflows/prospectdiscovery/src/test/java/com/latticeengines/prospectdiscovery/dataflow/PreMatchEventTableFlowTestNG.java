@@ -22,7 +22,7 @@ public class PreMatchEventTableFlowTestNG extends ServiceFlowsFunctionalTestNGBa
         Assert.assertTrue(result.getAttributes().size() > 0);
 
         List<GenericRecord> outputTable = readTable(result.getExtracts().get(0).getPath() + "/*.avro");
-        List<GenericRecord> accountTable = readTable(getSourcePaths().get("Account"));
+        List<GenericRecord> accountTable = readTable(sourcePaths.get("Account"));
 
         Assert.assertTrue(identicalSets(outputTable, "Id", accountTable, "Id"));
 

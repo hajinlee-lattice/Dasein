@@ -1,13 +1,19 @@
 package com.latticeengines.serviceflows.functionalframework;
 
+import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -32,6 +38,10 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceflows-context.xml" })
 public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+    private boolean local = Boolean.parseBoolean( //
+            System.getenv("SERVICEFLOWS_LOCAL") == null ? "true" : System.getenv("SERVICEFLOWS_LOCAL"));
+
+    private static final Log log = LogFactory.getLog(ServiceFlowsFunctionalTestNGBase.class);
 
     @Autowired
     private DataTransformationService dataTransformationService;
@@ -40,10 +50,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
     private ApplicationContext appContext;
 
     protected Configuration yarnConfiguration = new Configuration();
-
-    protected ServiceFlowsFunctionalTestNGBase() {
-        yarnConfiguration.set("fs.defaultFS", "file:///");
-    }
+    protected Map<String, String> sourcePaths = new HashMap<>();
 
     protected abstract String getFlowBeanName();
 
@@ -68,8 +75,46 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
 
     @BeforeTest(groups = "functional")
     public void setup() throws Exception {
+        if (local) {
+            yarnConfiguration.set("fs.defaultFS", "file:///");
+            log.info("Running locally");
+        } else {
+            log.info("Running in hadoop cluster");
+            if (yarnConfiguration.get("fs.defaultFS").equals("file:///")) {
+                throw new RuntimeException(
+                        "fs.defaultFS is still set to file:///.  $HADOOP_HOME/etc/hadoop is likely not in the classpath");
+            }
+        }
+
         HdfsUtils.rmdir(yarnConfiguration, getTargetDirectory());
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/checkpoints");
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/avro");
+
+        try {
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Resource[] resources = resolver.getResources(getDirectory() + "/*/*.avro");
+            sourcePaths = new HashMap<>();
+            for (Resource resource : resources) {
+                String path = resource.getFile().getAbsolutePath();
+                String[] parts = path.split("\\/");
+                sourcePaths.put(parts[parts.length - 2], path);
+            }
+
+            if (!local) {
+                List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
+                Map<String, String> modifiedSourcePaths = new HashMap<>();
+                for (String key : sourcePaths.keySet()) {
+                    String hdfsDestination = "/tmp/avro/" + key + ".avro";
+                    entries.add(new AbstractMap.SimpleEntry<>(sourcePaths.get(key), hdfsDestination));
+                    modifiedSourcePaths.put(key, hdfsDestination);
+                }
+                copy(entries);
+                sourcePaths = modifiedSourcePaths;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     protected Table executeDataFlow() throws Exception {
@@ -85,7 +130,6 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
     protected Map<String, Table> getSources() {
         Map<String, Table> sources = new HashMap<>();
 
-        Map<String, String> sourcePaths = getSourcePaths();
         for (String key : sourcePaths.keySet()) {
             String path = sourcePaths.get(key);
             String idColumn = getIdColumnName(key);
@@ -96,20 +140,19 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         return sources;
     }
 
-    protected Map<String, String> getSourcePaths() {
+    private void copy(List<AbstractMap.SimpleEntry<String, String>> entries) {
         try {
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources(getDirectory() + "/*/*.avro");
-            Map<String, String> sourcePaths = new HashMap<>();
-            for (Resource resource : resources) {
-                String path = resource.getFile().getAbsolutePath();
-                String[] parts = path.split("\\/");
-                sourcePaths.put(parts[parts.length - 2], path);
+            for (AbstractMap.SimpleEntry<String, String> e : entries) {
+                HdfsUtils.copyLocalToHdfs(yarnConfiguration, e.getKey(), e.getValue());
             }
-            return sourcePaths;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected Path getDestinationPath(String destPath, Resource res) throws IOException {
+        Path dest = new Path(destPath, res.getFilename());
+        return dest;
     }
 
     protected DataFlowContext createDataFlowContext(DataFlowParameters parameters) {
@@ -145,7 +188,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
     }
 
     protected List<GenericRecord> readInput(String source) {
-        Map<String, String> paths = getSourcePaths();
+        Map<String, String> paths = sourcePaths;
         for (String key : paths.keySet()) {
             if (key.equals(source)) {
                 return AvroUtils.getDataFromGlob(yarnConfiguration, paths.get(key));

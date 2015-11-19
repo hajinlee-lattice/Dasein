@@ -266,5 +266,4 @@ public class HdfsUtils {
             return fs.getFileChecksum(new Path(path));
         }
     }
-
 }

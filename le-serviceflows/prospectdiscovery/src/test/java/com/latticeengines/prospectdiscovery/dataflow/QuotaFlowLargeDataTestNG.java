@@ -29,7 +29,7 @@ public class QuotaFlowLargeDataTestNG extends ServiceFlowsFunctionalTestNGBase {
         market.setFitScoreThreshold(0.0);
         market.setNumDaysBetweenIntentProspectResends(null);
         market.setModelId("M1");
-        market.setNumProspectsDesired(100000);
+        market.setNumProspectsDesired(1000000);
         market.setDeliverProspectsFromExistingAccounts(true);
         List<SingleReferenceLookup> lookups = new ArrayList<>();
         lookups.add(new SingleReferenceLookup("Intent1", ReferenceInterpretation.COLUMN));
@@ -39,7 +39,7 @@ public class QuotaFlowLargeDataTestNG extends ServiceFlowsFunctionalTestNGBase {
         ProspectDiscoveryConfiguration configuration = new ProspectDiscoveryConfiguration();
         configuration.setDouble(ProspectDiscoveryOptionName.IntentPercentage, 50);
         Quota quota = new Quota();
-        quota.setBalance(100000);
+        quota.setBalance(1000000);
         return new QuotaFlowParameters(market, quota, configuration);
     }
 
@@ -50,8 +50,9 @@ public class QuotaFlowLargeDataTestNG extends ServiceFlowsFunctionalTestNGBase {
         Assert.assertEquals(result.getExtracts().size(), 1);
         Assert.assertTrue(result.getAttributes().size() > 0);
 
-        List<GenericRecord> records = readOutput();
-        Assert.assertEquals(records.size(), 100000);
+        List<GenericRecord> accounts = readInput("AccountMaster");
+        List<GenericRecord> output = readOutput();
+        Assert.assertEquals(output.size(), accounts.size());
     }
 
     @Override
