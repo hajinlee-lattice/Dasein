@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +16,6 @@ import java.util.zip.GZIPInputStream;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.codec.binary.Base64InputStream;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -280,15 +278,11 @@ public class ScoringMapperTransformUtil {
     }
 
     public static void main(String[] args) throws Exception {
-
-//        File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
-//        String modelStr = FileUtils.readFileToString(modelFile);
-//        JsonNode modelObject = new ObjectMapper().readTree(modelStr);
-//        decodeSupportedFilesToFile("e2e", modelObject.get(ScoringDaemonService.MODEL));
-//        writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
-        String s  = StringUtils.byteToHexString("fd6be1aa-95aa-45b2-adbb-3125a01acf84".getBytes("UTF8"));
-        System.out.println(s);
-        System.out.println(new String(Hex.decodeHex(s.toCharArray()), "UTF8"));
+        File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
+        String modelStr = FileUtils.readFileToString(modelFile);
+        JsonNode modelObject = new ObjectMapper().readTree(modelStr);
+        decodeSupportedFilesToFile("e2e", modelObject.get(ScoringDaemonService.MODEL));
+        writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
         
     }
 
