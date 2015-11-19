@@ -373,6 +373,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         visiDBDLComponentDeploymentTestNG.verifyTenant(tenantId, dlUrl);
         // verify permstore and datastore
         String url = String.format("%s/admin/internal/datastore/", getRestHostPort());
+        log.info(magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class));
         Assert.assertEquals(magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class).size(),
                 3);
     }
@@ -418,7 +419,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
         deleteVisiDBDLTenants();
         deleteBardJamesTenant();
-        deletePLSTenants();
+        // deletePLSTenants();
     }
 
     private void deletePLSTenants() {
