@@ -63,7 +63,7 @@ class QueryColumn(object):
         return self.statistical_type_
 
     def setStatisticalType(self, st):
-        if st is not None and st not in [ 'nominal', 'ratio', 'ordinal', 'interval' ]:
+        if st is not None and st.lower() not in [ 'nominal', 'ratio', 'ordinal', 'interval' ]:
             raise UnknownMetadataValue(st)
         self.statistical_type_ = st
 
@@ -79,7 +79,7 @@ class QueryColumn(object):
         return self.fundamental_type_
 
     def setFundamentalType(self, ft):
-        if ft is not None and ft not in [ 'alpha', 'numeric', 'currency', 'percentage', 'boolean', 'year' ]:
+        if ft is not None and ft.lower() not in [ 'alpha', 'numeric', 'currency', 'percentage', 'boolean', 'year' ]:
             raise UnknownMetadataValue(ft)
         self.fundamental_type_ = ft
 
