@@ -1,29 +1,19 @@
 package com.latticeengines.domain.exposed.eai;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 
-public class ImportConfiguration implements HasName {
-    private String name;
-    private String customer;
+public class ImportConfiguration extends BasePayloadConfiguration {
+
     private List<SourceImportConfiguration> sourceConfigurations = new ArrayList<>();
-
-    @Override
-    @JsonProperty("name")
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    @JsonProperty("name")
-    public void setName(String name) {
-        this.name = name;
-    }
+    private Map<String, String> properties = new HashMap<>();
 
     @JsonProperty("sources")
     public List<SourceImportConfiguration> getSourceConfigurations() {
@@ -40,18 +30,29 @@ public class ImportConfiguration implements HasName {
         sourceConfigurations.add(sourceConfiguration);
     }
     
+    @JsonProperty("properties")
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    @JsonProperty("properties")
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+    
+    @JsonIgnore
+    public void setProperty(String key, String value) {
+        properties.put(key, value);
+    }
+    
+    @JsonIgnore
+    public String getProperty(String key) {
+        return properties.get(key);
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
-
-    @JsonProperty("customer")
-    public String getCustomer() {
-        return customer;
-    }
-
-    @JsonProperty("customer")
-    public void setCustomer(String customer) {
-        this.customer = customer;
-    }
+    
 }

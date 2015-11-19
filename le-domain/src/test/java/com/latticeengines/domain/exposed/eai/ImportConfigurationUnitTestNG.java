@@ -8,6 +8,7 @@ import java.util.List;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -21,7 +22,7 @@ public class ImportConfigurationUnitTestNG {
         tables.add(activity);
         ImportConfiguration importConfig = new ImportConfiguration();
         importConfig.setName("Extraction-" + System.currentTimeMillis());
-        importConfig.setCustomer("C1");
+        importConfig.setCustomerSpace(CustomerSpace.parse("C1.C1.Production"));
         
         SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
         marketoImportConfig.setSourceType(SourceType.MARKETO);
