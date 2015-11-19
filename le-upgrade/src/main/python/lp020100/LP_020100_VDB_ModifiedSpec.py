@@ -61,9 +61,15 @@ class LP_020100_VDB_ModifiedSpec( StepBase ):
               '					ContainerElementName("Dante_Stage_IsSelectedForDanteLead")'\
               '				)'\
               '			),'\
-              '			LatticeAddressSetIdentifier('\
-              '				ContainerElementName("Alias_AllLeadID")'\
-              '			)'\
+              '			LatticeAddressSetPi('\
+              '      LatticeAddressExpressionAtomic('\
+              '        LatticeAddressAtomicIdentifier('\
+              '         ContainerElementName('\
+              '           "Timestamp_PushToDante_Stage"'\
+              '         ) '\
+              '       ) '\
+              '     ) '\
+              '    ) '\
               '		)'\
               '	),'\
               '	ContainerElementName("SelectedForDante")'\
@@ -84,10 +90,15 @@ class LP_020100_VDB_ModifiedSpec( StepBase ):
               '					ContainerElementName("Dante_Stage_IsSelectedForDanteLead")'\
               '				)'\
               '			),'\
-              '			LatticeAddressSetIdentifier('\
-              '				ContainerElementName("Alias_AllLeadID")'\
-              '			)'\
-              '		)'\
+              '			LatticeAddressSetPi('\
+              '      LatticeAddressExpressionAtomic('\
+              '        LatticeAddressAtomicIdentifier('\
+              '         ContainerElementName('\
+              '           "Timestamp_PushToDante_Stage"'\
+              '         ) '\
+              '       ) '\
+              '     ) '\
+              '    ) '\
               '	),'\
               '	ContainerElementName("SelectedForDante")'\
               '))'
