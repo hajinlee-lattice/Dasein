@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -33,7 +34,7 @@ public class ImportData extends BaseFitModelStep<BaseFitModelStepConfiguration> 
         salesforceConfig.setSourceType(SourceType.SALESFORCE);
 
         importConfig.addSourceConfiguration(salesforceConfig);
-        importConfig.setCustomer(configuration.getCustomerSpace());
+        importConfig.setCustomerSpace(CustomerSpace.parse(configuration.getCustomerSpace()));
         return importConfig;
     }
 
