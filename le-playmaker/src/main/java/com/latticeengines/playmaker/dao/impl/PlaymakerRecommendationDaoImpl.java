@@ -29,7 +29,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, "
                 + getLikelihood()
                 + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) AS ExpirationDate, "
-                + "L.[Monetary_Value] AS MonetaryValue, M.ISO4217_ID AS MonetaryValueIso4217ID, "
+                + "CASE WHEN L.[Monetary_Value] <= 1 THEN L.[Monetary_Value] * PL.[Avg_Revenue_Per_Account] ELSE L.[Monetary_Value] END AS MonetaryValue, "
+                + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1 T.[Display_Name] + '|' + T.[Phone_Number] + '|' + T.[Email_Address] + '|' + "
                 + " T.[Address_Street_1] + '|' + T.[City] + '|' + T.[State_Province] + '|' + T.[Country]+ '|' + T.[Zip] "
                 + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
