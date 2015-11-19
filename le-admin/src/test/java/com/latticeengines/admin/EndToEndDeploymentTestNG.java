@@ -424,11 +424,12 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     private void deletePLSTenants() {
         String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-        plsComponentDeploymentTestNG.deletePLSTestTenant(PLSTenantId);
         try {
+            plsComponentDeploymentTestNG.deletePLSTestTenant(PLSTenantId);
             // let GA recover from error deletion
             Thread.sleep(5000L);
         } catch (Exception e) {
+            log.warn("Deleting PLSTestTenant " + tenantId + " encountered an exception.", e);
             // ignore
         }
     }
