@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
 
     def testLPNewTenantElq(self):
         lp = LPConfigRunner();
-        resp = lp.addNewTenant("TestElq_10_26", "Eloqua", "10.41.1.247", "2.0", "BODCDEVVINT187", None);
+        resp = lp.addNewTenant("TestElq_11_16", "Eloqua", "10.41.1.247", "2.0", "BODCDEVVINT187", None);
         print resp;
 
     def testLPNewTenantMKTO(self):
@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
 
     def testlpActivateModel(self):
         lp = LPConfigRunner();
-        print lp.lpActivateModel("TestElq_10_13");
+        print lp.lpActivateModel("TestSFDC_201_1112");
 
     def testAddAnonymousLeadsToElq(self):
         elq = EloquaRequest()

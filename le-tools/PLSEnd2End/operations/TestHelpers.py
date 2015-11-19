@@ -338,6 +338,7 @@ class LPConfigRunner(SessionRunner):
     def init(self, tenant, marketting_app):
         ''' configure dataLoader settings '''
         print "add new tenant: %s via tenant console" % tenant
+        created=False;
         if marketting_app == PLSEnvironments.pls_marketing_app_ELQ:
             if True == self.addNewTenant(tenant, "Eloqua", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                          PLSEnvironments.dl_server_name):
@@ -345,6 +346,7 @@ class LPConfigRunner(SessionRunner):
                 time.sleep(300);
                 self.lpSFDCCredentials(tenant)
                 self.lpElQCredentials(tenant);
+                created=True;
         elif marketting_app == PLSEnvironments.pls_marketing_app_MKTO:
             if True == self.addNewTenant(tenant, "Marketo", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                          PLSEnvironments.dl_server_name):
@@ -352,20 +354,26 @@ class LPConfigRunner(SessionRunner):
                 time.sleep(300);
                 self.lpSFDCCredentials(tenant)
                 self.lpMKTOCredentials(tenant)
+                created=True;
         else:
             if True == self.addNewTenant(tenant, "SFDC", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                          PLSEnvironments.dl_server_name):
                 print "Credentials will be input after 5 minutes."
                 time.sleep(300);
                 self.lpSFDCCredentials(tenant)
+                created=True;
         print "configure dataloader settings"
-        dlConfig = DLConfigRunner();
-        dlConfig.configDLTables(tenant, marketting_app);
-        dlConfig.createMockDataProviders(tenant, marketting_app);
-        dlConfig.editMockRefreshDataSources(tenant, marketting_app);
-        dlConfig.loadCfgTables(tenant);
-        jamsRunner = JamsRunner()
-        jamsRunner.setJamsTenant(tenant)
+        if created:
+            dlConfig = DLConfigRunner();
+            dlConfig.configDLTables(tenant, marketting_app);
+            dlConfig.createMockDataProviders(tenant, marketting_app);
+            dlConfig.editMockRefreshDataSources(tenant, marketting_app);
+            dlConfig.loadCfgTables(tenant);
+            jamsRunner = JamsRunner()
+            jamsRunner.setJamsTenant(tenant)
+        else:
+            print "Failed to add new tenant: %s via tenant console" % tenant
+            assert False
 
     def lpGetModel(self, authorization):
         url = self.model_url + "/pls/modelsummaries/"
@@ -402,7 +410,7 @@ class LPConfigRunner(SessionRunner):
         ConfigDirectories = []
 
         SpaceConfig["Product"] = "Lead Prioritization";
-        SpaceConfig["Products"] = ["Lead Prioritization", "Buyer Insights"];
+        SpaceConfig["Products"] = ["Lead Prioritization"];
         SpaceConfig["Topology"] = topology;
         SpaceConfig["DL_Address"] = "http://%s.dev.lattice.local:8081" % dlServer;
 
@@ -648,7 +656,7 @@ class DLConfigRunner(SessionRunner):
 
 class DanteRunner(SessionRunner):
     def __init__(self, SFDC_url=None, logfile=None, exception=False):
-        super(DanteRunner, self).__init__(SFDC_url, logfile);
+        super(DanteRunner, self).__init__(logfile);
         self.exception = exception;
         if SFDC_url == None:
             self.sfdc_url = PLSEnvironments.pls_SFDC_login_url;
@@ -694,18 +702,19 @@ class DanteRunner(SessionRunner):
         print "the lead which you want to check is: %s" % lead_url
         self.sfdcUI.get(lead_url)
 
-    def checkDanteValueFromDB(self, dante_lead):
+    def checkDanteValueFromDB(self, tenantName, dante_lead):
         connection_string = PLSEnvironments.SQL_conn_dante;
-        query = "SELECT count(*)  FROM [LeadCache] where [Salesforce_ID]='%s' " % dante_lead;
+        query = "SELECT count(*)  FROM [LeadCache] where [Customer_ID]='%s' and [Salesforce_ID]='%s' " % (tenantName, dante_lead);
+        print query
         result = self.getQuery(connection_string, query);
-        assert result[0][0] == 1
+        assert result[0][0] == 1,result[0][0]
 
     def checkDanteValues(self, dante_leads):
         for danteLead in dante_leads:
             self.checkDanteValue(danteLead.values()[0])
 
-    def checkDanteValue(self, dante_lead):
-        self.checkDanteValueFromDB(dante_lead)
+    def checkDanteValue(self,tenantName, dante_lead):
+        self.checkDanteValueFromDB(tenantName, dante_lead)
 
 
 class UtilsRunner(SessionRunner):

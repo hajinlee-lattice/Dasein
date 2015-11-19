@@ -73,7 +73,7 @@ def getActivityTypes(leads_number=3,conn=PLSEnvironments.SQL_BasicDataForIntegra
     return getMetaData("meta_activityType", leads_number, conn);
 
 def verifyResult(operation,records):
-    results = [{}]
+    results = []
     for r in records[1:]:
         print r;
         passed = True;
@@ -242,7 +242,7 @@ class EloquaRequest():
         
     
     def getEloquaContact(self,contact_ids={}):
-        contacts = [{}]
+        contacts = []
         for k in contact_ids.keys():
             response = self.getContact(k);
             if len(response.text)>0:
@@ -250,17 +250,26 @@ class EloquaRequest():
                 results = {};
                 results["id"]=k;
                 results["email"]=result["emailAddress"];
-                
-                if float(result["fieldValues"][-11]["value"]) > 0:
-                    results["latticeforleads__Last_Score_Date__c"] =  time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(float(result["fieldValues"][-10]["value"]))) ;
-                    results["latticeforleads__Score__c"] = result["fieldValues"][-11]["value"];
-                else:
-                    results["latticeforleads__Last_Score_Date__c"] =  None ;
-                    results["latticeforleads__Score__c"] = result["fieldValues"][-11]["value"];
+
+                results["latticeforleads__Score__c"],results["latticeforleads__Last_Score_Date__c"] = self.getScore(result["fieldValues"])
                 print "==>    %s    %s    %s    %s" % (k, results["email"], results["latticeforleads__Score__c"],results["latticeforleads__Last_Score_Date__c"])
                 contacts.append(results);
             
         return contacts;
+
+    def getScore(self, fields=[{}]):
+        score=None;
+        score_date=None;
+        for field in fields:
+            if field["id"]=="100207":
+                score=field["value"]
+                continue
+            elif field["id"]=="100208":
+                score_date=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(float(field["value"]))) ;
+                continue
+            if score_date != None and score != None:
+                break;
+        return score,score_date;
 
 class MarketoRequest():
     def __init__(self, base_url=PLSEnvironments.pls_MKTO_Client_url, client_id=PLSEnvironments.pls_MKTO_Client_id,
@@ -405,7 +414,7 @@ class MarketoRequest():
         return [lead_lists,sfdc_contacts,sfdc_leads]
     
     def getLeadFromMarketo(self,lead_ids={}):
-        leads = [{}]
+        leads = []
         for k in lead_ids.keys():
             response=self.getLead(k);
             if response.status_code == 200:
@@ -474,7 +483,7 @@ class SFDCRequest():
         response = requests.get(request_url,headers = self.headers);
         return response;
     def getRecords(self,sobjects,record_ids={}):
-        records = [{}]
+        records = []
         for k in record_ids.keys():
             response=self.getRecord(sobjects,k);            
             if response.status_code == 200:
