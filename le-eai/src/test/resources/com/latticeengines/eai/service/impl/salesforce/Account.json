@@ -77,43 +77,6 @@
       "enum_values": ""
     },
     {
-      "name": "Type",
-      "length": 40,
-      "nullable": true,
-      "physicalDataType": "STRING",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "PhysicalName": "Type",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Account Type",
-      "logical_type": "picklist",
-      "enum_values": "Prospect,Customer___Direct,Customer___Channel,Channel_Partner___Reseller,Installation_Partner,Technology_Partner,Other,_"
-    },
-    {
       "name": "BillingStreet",
       "length": 255,
       "nullable": true,
@@ -336,43 +299,6 @@
       "enum_values": ""
     },
     {
-      "name": "Sic",
-      "length": 20,
-      "nullable": true,
-      "physicalDataType": "STRING",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "PhysicalName": "Sic",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "SIC Code",
-      "logical_type": "string",
-      "enum_values": ""
-    },
-    {
       "name": "Industry",
       "length": 40,
       "nullable": true,
@@ -556,43 +482,6 @@
       "display_name": "Ticker Symbol",
       "logical_type": "string",
       "enum_values": ""
-    },
-    {
-      "name": "Rating",
-      "length": 40,
-      "nullable": true,
-      "physicalDataType": "STRING",
-      "precision": 0,
-      "scale": 0,
-      "properties": {
-        "Extensions": [
-          {
-            "Category": ""
-          },
-          {
-            "DataType": ""
-          }
-        ],
-        "DataSource": [
-          ""
-        ],
-        "Tags": [
-          "Internal"
-        ],
-        "FundamentalType": "",
-        "Description": "",
-        "StatisticalType": "",
-        "PhysicalName": "Rating",
-        "DataQuality": "",
-        "SemanticType": "",
-        "ApprovedUsage": [
-          ""
-        ],
-        "DisplayDiscretizationStrategy": ""
-      },
-      "display_name": "Account Rating",
-      "logical_type": "picklist",
-      "enum_values": "Hot,Warm,Cold,_"
     },
     {
       "name": "OwnerId",
