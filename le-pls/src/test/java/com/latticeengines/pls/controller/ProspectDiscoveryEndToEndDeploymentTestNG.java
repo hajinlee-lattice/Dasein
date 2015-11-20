@@ -90,6 +90,9 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     @Value("${pls.test.sfdc.passwd.encrypted}")
     private String salesforcePasswd;
     
+    @Value("${pls.test.sfdc.securitytoken}")
+    private String salesforceSecurityToken;
+    
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microServiceHostPort;
 
@@ -596,6 +599,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setSecurityToken(salesforceSecurityToken);
         crmCredential.setUrl("https://login.salesforce.com");
         crmCredentialZKService.writeToZooKeeper("sfdc", CUSTOMERSPACE, true, crmCredential, true);
 
