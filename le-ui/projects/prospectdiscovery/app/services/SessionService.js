@@ -5,6 +5,7 @@ angular.module('mainApp.core.services.SessionService', [
 .service('SessionService', function (BrowserStorageUtility, ResourceUtility) {
     
     this.ClearSession = function () {
+        alert('CLEAR SESSION'); return;
         BrowserStorageUtility.clear(false);
         ResourceUtility.clearResourceStrings();
         window.location.reload();

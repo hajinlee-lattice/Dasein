@@ -6,61 +6,6 @@ angular.module('mainApp.config.services.ConfigService', [
     'mainApp.core.services.SessionService'
 ])
 .service('ConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, URLUtility, SessionService) {
-    
-    this.GetWidgetConfigDocument = function () {
-        var deferred = $q.defer();
-        var result = null;
-        
-        // Check cache first
-        var cachedConfigDoc = BrowserStorageUtility.getWidgetConfigDocument();
-        if (cachedConfigDoc != null && cachedConfigDoc.Timestamp > new Date().getTime()) {
-            result = {
-                success: true,
-                resultObj: cachedConfigDoc,
-                resultErrors: null
-            };
-            deferred.resolve(result);
-            return deferred.promise;
-        }
-        
-        var test = URLUtility.GetBaseUrl();
-        var webServer = "assets/resources/WidgetConfigurationDocument.json";
-        
-        $http({
-            method: 'GET', 
-            url: webServer
-        })
-        .success(function(data, status, headers, config) {
-            if (data == null) {
-                result = {
-                    success: false,
-                    resultObj: null,
-                    resultErrors: null
-                };
-                deferred.resolve(result);
-                return;
-            }
-            
-            BrowserStorageUtility.setWidgetConfigDocument(data);
-            result = {
-                success: true,
-                resultObj: data,
-                resultErrors: null
-            };
-            deferred.resolve(result);
-        })
-        .error(function(data, status, headers, config) {
-            result = {
-                success: false,
-                resultObj: null,
-                resultErrors: null
-            };
-            deferred.resolve(result);
-        });
-        
-        return deferred.promise;
-    };
-    
     this.GetCurrentTopology = function () {
         var deferred = $q.defer();
         var tenant = BrowserStorageUtility.getClientSession().Tenant.Identifier;

@@ -10,28 +10,24 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
 .service('ManageCredentialsService', function (StringUtility) {
 
     this.ValidateCredentials = function (type, credentials) {
+        console.log('ValidateCredentials');
+
         if (StringUtility.IsEmptyString(type) || credentials == null) {
+            console.log('credentials == null');
             return false;
         }
+
         var isValid = false;
         switch (type) {
             case "sfdc":
                 isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.Password);
-                break;
-            case "eloqua":
-                isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.Password) &&
-                    !StringUtility.IsEmptyString(credentials.Company);
-                break;
-            case "marketo":
-                isValid = !StringUtility.IsEmptyString(credentials.UserName) && !StringUtility.IsEmptyString(credentials.Password) &&
-                    !StringUtility.IsEmptyString(credentials.Url);
                 break;
         }
         return isValid;
     };
 })
 
-.controller('ManageCredentialsController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, ConfigService, ManageCredentialsService) {
+.controller('ManageCredentialsController', function ($scope, $rootScope, $location, ResourceUtility, BrowserStorageUtility, ConfigService, ManageCredentialsService) {
     $scope.ResourceUtility = ResourceUtility;
     
     $scope.crmProductionComplete = false;
@@ -66,8 +62,12 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
         this.UserName = username || null;
         this.Company = company || null;
     }
-    
+    $scope.loading = false;
+    getSFDCCredentials();
+
+    /*
     ConfigService.GetCurrentTopology().then(function(result) {
+        console.log('GetCurrentTopology', result);
         $scope.loading = false;
         if (result.success === true) {
             if (typeof result.resultObj === "string" && result.resultObj.toLowerCase() === "marketo") {
@@ -79,6 +79,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
             if ($scope.isMarketo || $scope.isEloqua) {
                 var mapType = $scope.isMarketo ? "marketo" : "eloqua";
                 ConfigService.GetCurrentCredentials(mapType).then(function(result) {
+                    console.log('GetCurrentCredentials', result);
                     if (result != null && result.success === true) {
                         var returned = result.resultObj;
                         $scope.mapCredentials = new Credentials(returned.Url, returned.SecurityToken, returned.OrgId, returned.Password, returned.UserName, returned.Company);
@@ -98,8 +99,9 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
         }
 
     });
-
+    */
     function getSFDCCredentials() {
+        console.log('getSFDCCredentials');
         ConfigService.GetCurrentCredentials("sfdc", true).then(function(result) {
             if (result != null && result.success === true) {
                 var returned = result.resultObj;
@@ -134,6 +136,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
                     $scope.crmProductionError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
                     $scope.crmProductionComplete = true;
+                    window.location.hash = '#/import/process';
                 } else {
                     $scope.crmProductionError = result.resultErrors;
                 }
@@ -164,49 +167,4 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
             $scope.crmSandboxError = ResourceUtility.getString("SYSTEM_SETUP_REQUIRED_FIELDS_ERROR");
         }
     };
-    
-    $scope.marketoSaveClicked = function () {
-        $scope.mapError = "";
-        if (ManageCredentialsService.ValidateCredentials("marketo", $scope.mapCredentials)) {
-            if ($scope.mapSaveInProgress) {
-                return;
-            }
-            $scope.mapSaveInProgress = true;
-            ConfigService.ValidateApiCredentials("marketo", $scope.mapCredentials, false).then(function(result) {
-                $scope.mapSaveInProgress = false;
-                if (result == null) {
-                    $scope.mapError = ResourceUtility.getString("SYSTEM_ERROR");
-                } else if (result.success === true) {
-                    $scope.mapComplete = true;
-                } else {
-                    $scope.mapError = result.resultErrors;
-                }
-            });
-        } else {
-            $scope.mapError = ResourceUtility.getString("SYSTEM_SETUP_REQUIRED_FIELDS_ERROR");
-        }
-    };
-    
-    $scope.eloquaSaveClicked = function () {
-        $scope.mapError = "";
-        if (ManageCredentialsService.ValidateCredentials("eloqua", $scope.mapCredentials)) {
-            if ($scope.mapSaveInProgress) {
-                return;
-            }
-            $scope.mapSaveInProgress = true;
-            ConfigService.ValidateApiCredentials("eloqua", $scope.mapCredentials, false).then(function(result) {
-                $scope.mapSaveInProgress = false;
-                if (result == null) {
-                    $scope.mapError = ResourceUtility.getString("SYSTEM_ERROR");
-                } else if (result.success === true) {
-                    $scope.mapComplete = true;
-                } else {
-                    $scope.mapError = result.resultErrors;
-                }
-            });
-        } else {
-            $scope.mapError = ResourceUtility.getString("SYSTEM_SETUP_REQUIRED_FIELDS_ERROR");
-        }
-    };
-    
 });

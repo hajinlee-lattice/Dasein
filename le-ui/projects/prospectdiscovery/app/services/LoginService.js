@@ -57,6 +57,7 @@ angular.module('mainApp.login.services.LoginService', [
         .success(function(data, status, headers, config) {
             var result = false;
             if (data != null && data.Success === true) {
+                console.log('attach success');
                 BrowserStorageUtility.setSessionDocument(data.Result);
                 data.Result.User.Tenant = tenant;
                 result = data;
@@ -65,12 +66,14 @@ angular.module('mainApp.login.services.LoginService', [
                 });
             }
             if (result.Result.User.AccessLevel === null) {
+                console.log('attach fail');
                 status = 401;
                 SessionService.HandleResponseErrors(data, status);
                 deferred.resolve(result);
             }
         })
         .error(function(data, status, headers, config) {
+            console.log('attach error',status,data,headers,config);
             return;
             SessionService.HandleResponseErrors(data, status);
             deferred.resolve(data);
@@ -125,6 +128,7 @@ angular.module('mainApp.login.services.LoginService', [
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();
+                alert('service logout');
                 window.open("/", "_self");
 
                 //window.location.reload();

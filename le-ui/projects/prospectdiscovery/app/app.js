@@ -17,27 +17,23 @@ var mainApp = angular.module('mainApp', [
 
 .config(['$routeProvider', function($routeProvider) {
     $routeProvider
-        .when('/', {
-            templateUrl: './app/views/MainView.html', 
+        .when('/', { 
+            templateUrl: './app/main/MainView.html' 
         })
-        .when('/import/form', {
-            templateUrl: './app/views/import/form.html',
-            controller: 'MainViewController'
+        .when('/import', { 
+            templateUrl: './app/import/form.html' 
         })
-        .when('/import/process', {
-            templateUrl: './app/views/import/process.html',
-            controller: 'MainViewController'
+        .when('/import/process', { 
+            templateUrl: './app/import/process.html' 
         })
-        .when('/import/ready', {
-            templateUrl: './app/views/import/ready.html',
-            controller: 'MainViewController'
+        .when('/import/ready', { 
+            templateUrl: './app/import/ready.html' 
         })
-        .when('/market/summary', {
-            templateUrl: './app/views/market/summary.html',
-            controller: 'MainViewController'
+        .when('/markets', { 
+            templateUrl: './app/markets/TargetMarketView.html' 
         })
-        .otherwise({
-            template: 'no.'
+        .otherwise({ 
+            template: '/' 
         });
 }])
 
@@ -68,20 +64,25 @@ var mainApp = angular.module('mainApp', [
 
     ResourceStringsService.GetExternalResourceStringsForLocale().then(function(result) {
         var previousSession = BrowserStorageUtility.getClientSession();
-        //var loginDocument = BrowserStorageUtility.getLoginDocument();
+        var loginDocument = BrowserStorageUtility.getLoginDocument();
+
         console.log('init',hasSessionTimedOut(),previousSession);
+
         if (previousSession != null && !hasSessionTimedOut()) {
-            //alert('logged in');
+            $http.get('./app/main/MainHeaderView.html').success(function (html) {
+                var scope = $rootScope.$new();
+                $compile($("#mainHeaderView").html(html))(scope);
+            });
+
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
-            //alert('redirecting to login');
             return window.open('/','_self');
         }
     });
 
     $scope.$on("LoggedIn", function() {
-        //startObservingUserActivtyThroughMouseAndKeyboard();
-        //startCheckingIfSessionIsInactive();
+        startObservingUserActivtyThroughMouseAndKeyboard();
+        startCheckingIfSessionIsInactive();
     });
     
     $scope.refreshPreviousSession = function (tenant) {
@@ -126,7 +127,6 @@ var mainApp = angular.module('mainApp', [
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
             $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
             $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
-            $scope.getWidgetConfigDoc();
         });
     };
     
@@ -136,19 +136,9 @@ var mainApp = angular.module('mainApp', [
         }
         HelpService.OpenPrivacyPolicy();
     };
-    
-    $scope.getWidgetConfigDoc = function () {
-        //window.open("/lp/", "_self");
-        return;
-        //ConfigService.GetWidgetConfigDocument().then(function(result) {
-            $http.get('./app/views/MainView.html').success(function (html) {
-                var scope = $rootScope.$new();
-                $compile($("#mainView").html(html))(scope);
-            });
-        //});
-    };
 
     function startObservingUserActivtyThroughMouseAndKeyboard() {
+        console.log('startObservingUserActivtyThroughMouseAndKeyboard');
         $(this).mousemove(function (e) {
             if (!warningModalInstance) {
                 refreshSessionLastActiveTimeStamp();
@@ -162,11 +152,16 @@ var mainApp = angular.module('mainApp', [
     }
 
     function startCheckingIfSessionIsInactive() {
+        console.log('startCheckingIfSessionIsInactive');
         refreshSessionLastActiveTimeStamp();
-        inactivityCheckingId = setInterval(checkIfSessionIsInactiveEveryInterval, TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS); // 1 minute
+        inactivityCheckingId = setInterval(
+            checkIfSessionIsInactiveEveryInterval, 
+            TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS
+        ); // 1 minute
     }
 
     function checkIfSessionIsInactiveEveryInterval() {
+        //console.log('checkIfSessionIsInactiveEveryInterval');
         if (Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >= TIME_INTERVAL_INACTIVITY_BEFORE_WARNING) {
             if (!warningModalInstance) {
                 cancelCheckingIfSessionIsInactiveAndSetIdToNull();
@@ -175,26 +170,35 @@ var mainApp = angular.module('mainApp', [
             $timeout(callWhenWarningModalExpires, TIME_INTERVAL_WARNING_BEFORE_LOGOUT);
         }
     }
-    /*
+    
     function mustUserChangePassword(loginDocument) {
-        return loginDocument.MustChangePassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
-    }
-    */
-    function refreshSessionLastActiveTimeStamp() {
-        BrowserStorageUtility.setSessionLastActiveTimestamp(Date.now());
+        var isTimedOut = loginDocument.MustChangePassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
+
+        console.log('mustUserChangePassword?',isTimedOut);
+        return isTimedOut;
     }
     
+    
     function hasSessionTimedOut() {
-        return Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >=
+        var isTimedOut = Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >=
             TIME_INTERVAL_INACTIVITY_BEFORE_WARNING + TIME_INTERVAL_WARNING_BEFORE_LOGOUT;
+
+        console.log('hasSessionTimedOut?',isTimedOut);
+        return isTimedOut;
+    }
+
+    function refreshSessionLastActiveTimeStamp() {
+        //console.log('refreshSessionLastActiveTimeStamp');
+        BrowserStorageUtility.setSessionLastActiveTimestamp(Date.now());
     }
 
     function openWarningModal() {
+        console.log('openWarningModal');
         warningModalInstance = $modal.open({
             animation: true,
             backdrop: false,
             scope: $scope,
-            templateUrl: 'app/core/views/WarningModal.html'
+            templateUrl: 'app/views/WarningModal.html'
         });
 
         $scope.refreshSession = function() {
@@ -204,16 +208,19 @@ var mainApp = angular.module('mainApp', [
     }
     
     function cancelCheckingIfSessionIsInactiveAndSetIdToNull() {
+        console.log('cancelCheckingIfSessionIsInactiveAndSetIdToNull');
         clearInterval(inactivityCheckingId);
         inactivityCheckingId = null;
     }
 
     function stopObservingUserInteractionBasedOnMouseAndKeyboard() {
+        console.log('stopObservingUserInteractionBasedOnMouseAndKeyboard');
         $(this).off("mousemove");
         $(this).off("keypress");
     }
     
     function callWhenWarningModalExpires() {
+        console.log('callWhenWarningModalExpires');
         if (hasSessionTimedOut()) {
             $scope.sessionExpired = true;
             /** This line is actually necessary. Otherwise, user doesn't get properly logged out when tenant selection modal is up */
@@ -230,47 +237,33 @@ var mainApp = angular.module('mainApp', [
         }
     }
 
-    function hideTenantSelectionModal() {
-        $("#modalContainer").modal('hide');
-    }
-
     function closeWarningModalAndSetInstanceToNull() {
+        console.log('closeWarningModalAndSetInstanceToNull');
         warningModalInstance.close();
         warningModalInstance = null;
-    }
-
-    function createMandatoryChangePasswordViewForLocale(locale) {
-        ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
-            $http.get('./app/views/MainView.html').success(function (html) {
-                var scope = $rootScope.$new();
-                scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
-                scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
-                $compile($("#mainView").html(html))(scope);
-            });
-        });
     }
 });
 
 mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
-  return {
-    request: function (config) {
-      //console.log('authInterceptor req',config);
-      config.headers = config.headers || {};
-      if (BrowserStorageUtility.getTokenDocument()) {
-        config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
-      }
-      return config;
-    },
-    response: function (response) {
-      //console.log('authInterceptor res',response);
-      if (response.status === 401) {
-        // handle the case where the user is not authenticated
-      }
-      return response || $q.when(response);
-    }
-  };
+    return {
+        request: function (config) {
+            //console.log('authInterceptor req',config);
+            config.headers = config.headers || {};
+            if (BrowserStorageUtility.getTokenDocument()) {
+                config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
+            }
+            return config;
+        },
+        response: function (response) {
+            //console.log('authInterceptor res',response);
+            if (response.status === 401) {
+                // handle the case where the user is not authenticated
+            }
+            return response || $q.when(response);
+        }
+    };
 });
 
 mainApp.config(function ($httpProvider) {
-  $httpProvider.interceptors.push('authInterceptor');
+    $httpProvider.interceptors.push('authInterceptor');
 });

@@ -35,14 +35,11 @@
     <!-- /build -->
 
 </head>
-<body data-ng-controller="MainController" class="blue-background">
+<body data-ng-controller="MainController" style="background:#f5f5f5;">
     <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
     <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-    
-    <div id="mainHeaderView" data-ng-controller="MainHeaderController"></div>
-    
+    <div id="mainHeaderView"></div>
     <div id="mainContentView" data-ng-view class="container"></div>
-    
     <div class="footer" data-ng-show="showFooter">
         © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
     </div>
@@ -122,17 +119,18 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/utilities/NavUtility.js"></script>
 <script src="app/utilities/RightsUtility.js"></script>
 <script src="app/utilities/PasswordUtility.js"></script>
+<script src="app/services/LoginService.js"></script>
 <script src="app/services/ResourceStringsService.js"></script>
 <script src="app/services/SessionService.js"></script>
 <script src="app/services/FeatureFlagService.js"></script>
-<script src="app/controllers/MainHeaderController.js"></script>
-<script src="app/controllers/MainViewController.js"></script>
 <script src="app/services/ConfigService.js"></script>
 <script src="app/services/HelpService.js"></script>
+<script src="app/main/MainHeaderController.js"></script>
+<script src="app/main/MainViewController.js"></script>
+<script src="app/import/ManageCredentialsController.js"></script>
 <script src="/app/modals/SimpleModal.js"></script>
-<script src="app/controllers/ManageCredentialsController.js"></script>
-<script src="app/services/LoginService.js"></script>
-
+<script src="app/markets/TargetMarketController.js"></script>
+<script src="app/markets/TargetMarketService.js"></script>
 <!--
 <script src="app/services/WidgetService.js"></script>
 <script src="app/modals/TenantSelectionModal.js"></script>

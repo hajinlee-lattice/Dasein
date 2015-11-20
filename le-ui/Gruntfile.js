@@ -31,7 +31,7 @@ module.exports = function (grunt) {
             prod: {
                 NODE_ENV: 'production',
                 API_URL: false,  // load balancer will handle api routing
-                USE_PORT: 80,
+                USE_PORT: 8080,
                 WHITELIST: [
                     '10.0.0.1',
                     '10.0.10.1'
@@ -69,12 +69,18 @@ module.exports = function (grunt) {
 
     grunt.registerTask('prod', defaultText, [
         'env:prod',
-        'run:node'
+        'run:nodemon'
     ]);
 
     var devText = 'Run Express Server, using Local API Endpoints';
     grunt.registerTask('dev', devText, [
         'env:dev',
+        'run:nodemon'
+    ]);
+
+    var qaText = 'Run Express Server, using API Endpoints on 52';
+    grunt.registerTask('stage', qaText, [
+        'env:stage',
         'run:nodemon'
     ]);
 

@@ -13,8 +13,6 @@
                     <li><a href="#" data-ng-click="updatePasswordClicked($event)" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
                     <li data-ng-if="showUserManagement" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
                     <li data-ng-if="showSystemSetup" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="systemSetupClicked($event)">{{ResourceUtility.getString('HEADER_SYSTEM_SETUP')}}</a></li>
-                    <li data-ng-if="showModelCreationHistoryDropdown" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="showModelCreationHistory($event)">{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</a></li>
-                    <li data-ng-if="showActivateModel" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="activateModelClicked($event)">{{ResourceUtility.getString('HEADER_ACTIVATE_MODEL')}}</a></li>
                     <li data-ng-if="showSetup" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="setupClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_FIELDS')}}</a></li>
                     <li><a href="#" data-ng-click="logoutClicked($event)">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
                 </ul>
