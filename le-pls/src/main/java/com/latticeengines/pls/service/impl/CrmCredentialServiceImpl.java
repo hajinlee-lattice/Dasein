@@ -76,6 +76,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             dataLoaderService.verifyCredentials(crmType, crmCredential, isProduction, dlUrl);
         } else {
+            log.info("Using Eai Service to validate sfdc credentials");
             validateCredentialUsingEai(tenantId, crmType, crmCredential, isProduction);
         }
         writeToZooKeeper(crmType, tenantId, isProduction, crmCredential, true);
@@ -83,7 +84,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         return newCrmCredential;
     }
 
-    private boolean useEaiToValidate(FeatureFlagValueMap flags) {
+    @Override
+    public boolean useEaiToValidate(FeatureFlagValueMap flags) {
         return flags.containsKey(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName())
                 && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName()));
     }

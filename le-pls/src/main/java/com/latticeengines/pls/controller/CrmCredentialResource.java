@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.service.CrmConfigService;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.pls.service.TenantConfigService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -29,6 +31,9 @@ public class CrmCredentialResource {
     @Autowired
     private CrmConfigService crmConfigService;
 
+    @Autowired
+    private TenantConfigService tenantConfigService;
+
     @RequestMapping(value = "/{crmType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Verify CRM credential")
@@ -41,11 +46,13 @@ public class CrmCredentialResource {
 
         CrmCredential newCrmCredential = crmCredentialService.verifyCredential(crmType, tenantId, isProduction,
                 crmCredential);
-        
-        if ((verifyOnly == null || !verifyOnly) && (isProduction == null || isProduction)) {
-            CrmConfig crmConfig = new CrmConfig();
-            crmConfig.setCrmCredential(newCrmCredential);
-            crmConfigService.config(crmType, tenantId, crmConfig);
+        FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(tenantId);
+        if (!crmCredentialService.useEaiToValidate(flags)) {
+            if ((verifyOnly == null || !verifyOnly) && (isProduction == null || isProduction)) {
+                CrmConfig crmConfig = new CrmConfig();
+                crmConfig.setCrmCredential(newCrmCredential);
+                crmConfigService.config(crmType, tenantId, crmConfig);
+            }
         }
 
         return newCrmCredential;
