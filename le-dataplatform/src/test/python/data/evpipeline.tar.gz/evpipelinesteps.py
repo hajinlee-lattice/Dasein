@@ -1,10 +1,16 @@
 import encoder
 import numpy as np
 import pandas as pd
+import random as rd
+from os import urandom
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
 import statsmodels.tsa.ar_model as am
- 
+
+from pipelinefwk import PipelineStep
+from pipelinefwk import get_logger
+from __builtin__ import True
+
 logger = get_logger("evpipeline")
  
 def get_predicted_revenue(row, colList):
