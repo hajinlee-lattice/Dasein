@@ -15,10 +15,9 @@ class LP_020100_DisableCreateBIQueries( StepBase ):
     description = 'Disable CreateBIQueries; limit existing BI queries to 50 attributes'
     version     = '$Rev$'
 
-    ## Add 5 to the maximum number of columns desired to account for 2 entities, a boundary,
+    ## Add 12 to the maximum number of columns desired to account for 2 entities, a boundary,
     ## AttributeName and AttributeValue
     MAX_COLS    = 12
-
 
     def __init__( self, forceApply = False ):
         super( LP_020100_DisableCreateBIQueries, self ).__init__( forceApply )
@@ -38,19 +37,13 @@ class LP_020100_DisableCreateBIQueries( StepBase ):
 
         return Applicability.cannotApplyPass
 
-
     def apply( self, appseq ):
         template_type = appseq.getText( 'template_type' )
         conn_mgr = appseq.getConnectionMgr()
         lg_mgr = appseq.getLoadGroupMgr()
-        
-        ias_ngs_xml = lg_mgr.getLoadGroupFunctionality( 'InsightsAllSteps', 'ngs' )
-        ias_ngs = etree.fromstring( ias_ngs_xml )
-        for ng in ias_ngs:
-            if ng.get('n') == 'CreateBIQueries':
-                ias_ngs.remove( ng )
 
-        lg_mgr.setLoadGroupFunctionality( 'InsightsAllSteps', etree.tostring(ias_ngs) )
+        ias_ngs_xml = '<ngs><ng n="UpdateDanteTimestamp_Step1"/><ng n="UpdateDanteTimestamp_Step2"/></ngs>'
+        lg_mgr.setLoadGroupFunctionality( 'InsightsAllSteps', ias_ngs_xml )
 
         queries = []
 
@@ -77,3 +70,4 @@ class LP_020100_DisableCreateBIQueries( StepBase ):
             conn_mgr.setQuery(q)
         
         return True
+
