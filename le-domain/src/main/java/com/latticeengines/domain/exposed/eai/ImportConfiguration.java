@@ -24,12 +24,12 @@ public class ImportConfiguration extends BasePayloadConfiguration {
     public void setSourceConfigurations(List<SourceImportConfiguration> sourceConfigurations) {
         this.sourceConfigurations = sourceConfigurations;
     }
-    
+
     @JsonIgnore
     public void addSourceConfiguration(SourceImportConfiguration sourceConfiguration) {
         sourceConfigurations.add(sourceConfiguration);
     }
-    
+
     @JsonProperty("properties")
     public Map<String, String> getProperties() {
         return properties;
@@ -39,12 +39,12 @@ public class ImportConfiguration extends BasePayloadConfiguration {
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
-    
+
     @JsonIgnore
     public void setProperty(String key, String value) {
         properties.put(key, value);
     }
-    
+
     @JsonIgnore
     public String getProperty(String key) {
         return properties.get(key);
@@ -54,5 +54,5 @@ public class ImportConfiguration extends BasePayloadConfiguration {
     public String toString() {
         return JsonUtils.serialize(this);
     }
-    
+
 }

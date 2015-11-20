@@ -13,7 +13,7 @@ public class EaiMetadataServiceImplUnitTestNG {
         EaiMetadataServiceImpl eaiMetadataService = new EaiMetadataServiceImpl();
         Table table = new Table();
         String path = "hdfs://localhost:9000/Pods/Default/Contracts/Salesforce-Eai/Tenants/Salesforce-Eai/Spaces/Production/Data/Tables/Lead/Extracts/2015-10-12-15-09-36/Lead-2015-10-12.avro";
-        eaiMetadataService.addExtractToTable(table, path);
+        eaiMetadataService.addExtractToTable(table, path, 2000L);
         System.out.println(JsonUtils.serialize(table.getExtracts().get(0)));
         assertTrue(table.getExtracts().get(0).getPath().contains("Lead-2015-10-12.avro"));
         assertTrue(table.getExtracts().get(0).getPath().startsWith("/Pods"));

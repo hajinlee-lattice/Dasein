@@ -28,6 +28,9 @@ public class SetLastModifiedDateProcessor implements Processor {
         ExtractDataXmlHandler handler = context.getApplicationContext().getBean(beanName, ExtractDataXmlHandler.class);
 
         @SuppressWarnings("unchecked")
+        Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
+        processedRecordsMap.put(table.getName(), handler.getProcessedRecords());
+        @SuppressWarnings("unchecked")
         Map<String, Long> lastModifiedDateMap = importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class);
         lastModifiedDateMap.put(table.getName(), handler.getLmkValue());
     }

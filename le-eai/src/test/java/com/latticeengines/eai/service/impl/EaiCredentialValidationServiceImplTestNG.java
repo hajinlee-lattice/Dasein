@@ -40,6 +40,9 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
     @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
+    @Value("${eai.test.salesforce.securitytoken}")
+    private String salesforceSecurityToken;
+
     @Value("${eai.salesforce.production.loginurl}")
     private String productionLoginUrl;
 
@@ -68,6 +71,7 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setSecurityToken(salesforceSecurityToken);
         crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
         eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC,
@@ -79,7 +83,8 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName("tsanghavi@lattice-engines.com.sandbox2");
-        crmCredential.setPassword("Happy20105aGieJUACRPQ21CG3nUwn8iz");
+        crmCredential.setPassword("Happy2010");
+        crmCredential.setSecurityToken("5aGieJUACRPQ21CG3nUwn8iz");
         crmCredential.setUrl(sandboxLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, false, crmCredential, true);
         eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC,
@@ -92,6 +97,7 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName("some bad username");
         crmCredential.setPassword("some bad password");
+        crmCredential.setSecurityToken("badtoken");
         crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
         try {

@@ -35,6 +35,7 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
     private Long extractionTimestamp;
     private Table table;
     private Long tenantId;
+    private Long processedRecords;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -134,7 +135,18 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-        
+
+    }
+
+    @Column(name = "PROCESSED_RECORDS", unique = false, nullable = false)
+    @JsonProperty("processed_records")
+    public Long getProcessedRecords() {
+        return processedRecords;
+    }
+
+    @JsonProperty("processed_records")
+    public void setProcessedRecords(long processedRecords) {
+        this.processedRecords = processedRecords;
     }
 
 }

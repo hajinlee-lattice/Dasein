@@ -66,11 +66,11 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @Override
     public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
         String metadataUrl = context.getProperty(ImportProperty.METADATAURL, String.class);
-        
+
         if (metadataUrl != null) {
             eaiMetadataService.setMetadataUrl(metadataUrl);
         }
-        
+
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
         String customerSpace = importConfig.getCustomerSpace().toString();
         context.setProperty(ImportProperty.CUSTOMER, customerSpace);
@@ -78,6 +78,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         String targetPath = createTargetPath(customerSpace);
         context.setProperty(ImportProperty.TARGETPATH, targetPath);
         context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
+        context.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
         context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
         List<Table> tableMetadata = eaiMetadataService.getImportTables(customerSpace);
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
@@ -130,8 +131,10 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @Override
     public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig) {
         String customerSpace = importConfig.getCustomerSpace().toString();
-        SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0).getSourceCredentialType();
-        eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC, sourceCredentialType);
+        SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0)
+                .getSourceCredentialType();
+        eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC,
+                sourceCredentialType);
 
         ApplicationId appId = null;
         boolean hasNonEaiJobSourceType = false;

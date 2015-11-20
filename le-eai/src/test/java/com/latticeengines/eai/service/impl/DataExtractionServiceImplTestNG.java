@@ -66,6 +66,9 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
+    @Value("${eai.test.salesforce.securitytoken}")
+    private String salesforceSecurityToken;
+
     @Value("${eai.salesforce.production.loginurl}")
     private String productionLoginUrl;
 
@@ -90,10 +93,12 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         crmCredentialZKService.removeCredentials(customer, customer, true);
         targetPath = dataExtractionService.createTargetPath(customer);
         initZK(customer);
+
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setSecurityToken(salesforceSecurityToken);
         crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
@@ -125,19 +130,20 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
-        
+
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         importContext.setProperty(ImportProperty.METADATAURL, mockMetadataUrl);
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
 
         waitForCamelMessagesToComplete(camelContext);
-        
-        new EaiMetadataServiceImpl().updateTableSchema(tables, importContext);
+
         for (Table table : tables) {
+            new EaiMetadataServiceImpl().useSemanticTypeAsAttrName(table);
             System.out.println(JsonUtils.serialize(table));
         }
         checkDataExists(targetPath, tableNameList, 1);
         System.out.println(importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class));
+        System.out.println(importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class));
 
         dataExtractionService.cleanUpTargetPathData(importContext);
         checkDataExists(targetPath, tableNameList, 0);
@@ -176,12 +182,12 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
-        new EaiMetadataServiceImpl().updateTableSchema(tables, importContext);
+        new EaiMetadataServiceImpl().useSemanticTypeAsAttrName(tables.get(0));
         assertFalse(tables.get(0).getNameAttributeMap().containsKey("Id"));
         assertTrue(tables.get(0).getNameAttributeMap().containsKey("NewId"));
 
         waitForCamelMessagesToComplete(camelContext);
-        
+
         checkDataExists(targetPath, Arrays.<String> asList(new String[] { "Account" }), 1);
         System.out.println(importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class));
         List<String> filesForTable = getFilesFromHdfs(targetPath, table.getName());

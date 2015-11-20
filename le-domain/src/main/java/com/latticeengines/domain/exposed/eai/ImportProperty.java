@@ -13,5 +13,6 @@ public class ImportProperty extends BaseProperty {
     public static final String FILEURLPROPERTIES = "fileUrlProperties";
     public static final String EXTRACT_PATH = "extractPaths";
     public static final String LAST_MODIFIED_DATE = "lastModifiedDate";
+    public static final String PROCESSED_RECORDS = "processedRecords";
     public static final String METADATAURL = "metadataUrl";
 }

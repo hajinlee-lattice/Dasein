@@ -3,11 +3,13 @@ package com.latticeengines.eai.service.impl;
 import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -74,7 +76,11 @@ public class EaiCredentialValidationServiceImpl implements EaiCredentialValidati
         loginConfig.setLoginUrl(crmCredential.getUrl());
         salesforce.setLoginConfig(loginConfig);
         loginConfig.setUserName(crmCredential.getUserName());
-        loginConfig.setPassword(crmCredential.getPassword());
+        String password = crmCredential.getPassword();
+        if (!StringUtils.isEmpty(crmCredential.getSecurityToken())) {
+            password += crmCredential.getSecurityToken();
+        }
+        loginConfig.setPassword(password);
 
         try {
             salesforce.start();

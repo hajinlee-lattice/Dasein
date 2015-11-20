@@ -1,6 +1,7 @@
 package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -61,6 +63,9 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
+    @Value("${eai.test.salesforce.securitytoken}")
+    private String salesforceSecurityToken;
+
     @Value("${eai.salesforce.production.loginurl}")
     private String productionLoginUrl;
 
@@ -87,6 +92,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setSecurityToken(salesforceSecurityToken);
         crmCredential.setUrl(productionLoginUrl);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
@@ -126,6 +132,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         List<Table> tablesBeforeExtract = tables;
         List<Table> tablesAfterExtract = eaiMetadataService.getTables(customerSpace);
         checkLastModifiedTimestampChanged(true, tablesBeforeExtract, tablesAfterExtract);
+        checkExtract(tablesAfterExtract);
 
         HdfsUtils.rmdir(yarnConfiguration, targetPath);
         importConfig.getSourceConfigurations().get(0).setSourceCredentialType(SourceCredentialType.SANDBOX);
@@ -139,7 +146,16 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         tablesAfterExtract = eaiMetadataService.getTables(customerSpace);
         checkLastModifiedTimestampInRecords(tablesBeforeExtract);
         checkLastModifiedTimestampChanged(false, tablesBeforeExtract, tablesAfterExtract);
+        checkExtract(tablesAfterExtract);
 
+    }
+
+    private void checkExtract(List<Table> tablesAfterExtract) {
+        for (Table table : tablesAfterExtract) {
+            for (Extract extract : table.getExtracts()) {
+                assertTrue(extract.getProcessedRecords() >= 0);
+            }
+        }
     }
 
     private void checkLastModifiedTimestampChanged(boolean changed, List<Table> tablesBeforeExtract,

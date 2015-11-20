@@ -6,6 +6,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -90,7 +91,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
             eaiMetadataService.updateTableSchema(tableMetadata, importContext);
             eaiMetadataService.registerTables(tableMetadata, importContext);
-            
+
         } catch (Exception e) {
             Thread.sleep(20000);
             dataExtractionService.cleanUpTargetPathData(importContext);
@@ -102,8 +103,10 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     private CamelContext constructCamelContext(ImportConfiguration importConfig) throws Exception {
         String customerSpace = importConfig.getCustomerSpace().toString();
-        SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0).getSourceCredentialType();
-        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace, sourceCredentialType.isProduction());
+        SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0)
+                .getSourceCredentialType();
+        CrmCredential crmCredential = crmCredentialZKService.getCredential(CrmConstants.CRM_SFDC, customerSpace,
+                sourceCredentialType.isProduction());
 
         SalesforceLoginConfig loginConfig = salesforce.getLoginConfig();
 
@@ -115,7 +118,11 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
         }
 
         loginConfig.setUserName(crmCredential.getUserName());
-        loginConfig.setPassword(crmCredential.getPassword());
+        String password = crmCredential.getPassword();
+        if (!StringUtils.isEmpty(crmCredential.getSecurityToken())) {
+            password += crmCredential.getSecurityToken();
+        }
+        loginConfig.setPassword(password);
         loginConfig.setLoginUrl(crmCredential.getUrl());
         HttpClientConfig httpClientConfig = eaiZKService.getHttpClientConfig(customerSpace);
         HttpClient httpClient = salesforce.getConfig().getHttpClient();

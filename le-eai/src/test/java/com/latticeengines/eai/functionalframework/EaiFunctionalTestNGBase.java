@@ -19,6 +19,7 @@ import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.testng.AbstractCamelTestNGSpringContextTests;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -95,10 +96,10 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
     @Autowired
     protected TenantService tenantService;
-    
+
     @Value("${eai.test.metadata.url}")
     protected String mockMetadataUrl;
-    
+
     @Value("${eai.test.metadata.port}")
     protected int mockPort;
 
@@ -107,13 +108,13 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
     }
-    
+
     protected void waitForCamelMessagesToComplete(CamelContext camelContext) throws Exception {
         while (camelContext.getInflightRepository().size() > 0) {
             Thread.sleep(5000L);
         }
     }
-    
+
     protected void cleanupCamilleAndHdfs(String customer) throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, //
                 PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer).toString());
@@ -221,7 +222,11 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
         SalesforceLoginConfig loginConfig = salesforce.getLoginConfig();
         loginConfig.setUserName(crmCredential.getUserName());
-        loginConfig.setPassword(crmCredential.getPassword());
+        String password = crmCredential.getPassword();
+        if (!StringUtils.isEmpty(crmCredential.getSecurityToken())) {
+            password += crmCredential.getSecurityToken();
+        }
+        loginConfig.setPassword(password);
 
         CamelContext camelContext = new SpringCamelContext(applicationContext);
         camelContext.addRoutes(salesforceRouteConfig);

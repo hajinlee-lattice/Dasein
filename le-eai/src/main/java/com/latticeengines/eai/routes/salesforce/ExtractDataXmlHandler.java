@@ -20,9 +20,9 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     private Map<String, Attribute> tableAttributeMap;
     private String currentQname;
     private Attribute attr;
-    private int processedRecords = 0;
-    private int errorRecords = 0;
-    private int totalRecords = 0;
+    private long processedRecords = 0;
+    private long errorRecords = 0;
+    private long totalRecords = 0;
     private DataContainer dataContainer;
     private String lmk;
     private long lmkValue;
@@ -90,6 +90,10 @@ public class ExtractDataXmlHandler extends DefaultHandler {
 
     public Long getLmkValue() {
         return lmkValue;
+    }
+
+    public long getProcessedRecords() {
+        return processedRecords;
     }
 
     public String initialize(SpringCamelContext context, Table table) {

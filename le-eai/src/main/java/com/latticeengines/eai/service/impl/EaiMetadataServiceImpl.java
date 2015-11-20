@@ -63,14 +63,6 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     public void registerTables(List<Table> tablesMetadataFromImport, ImportContext importContext) {
         String customer = importContext.getProperty(ImportProperty.CUSTOMER, String.class);
         String customerSpace = CustomerSpace.parse(customer).toString();
-
-        @SuppressWarnings("unchecked")
-        Map<String, String> targetPaths = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
-
-        for (Table table : tablesMetadataFromImport) {
-            addTenantToTable(table, customerSpace);
-            addExtractToTable(table, targetPaths.get(table.getName()));
-        }
         updateTables(customerSpace, tablesMetadataFromImport);
     }
 
@@ -182,10 +174,11 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     }
 
     @VisibleForTesting
-    void addExtractToTable(Table table, String path) {
+    void addExtractToTable(Table table, String path, long processedRecords) {
         Extract e = new Extract();
         e.setName(StringUtils.substringAfterLast(path, "/"));
         e.setPath(PathUtils.stripoutProtocal(path));
+        e.setProcessedRecords(processedRecords);
         String dateTime = StringUtils.substringBetween(path, "/Extracts/", "/");
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         try {
@@ -213,8 +206,19 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     }
 
     @Override
-    public void updateTableSchema(List<Table> tableMetadata, ImportContext importContext) {
-        for (Table table : tableMetadata) {
+    public void updateTableSchema(List<Table> tablesMetadataFromImport, ImportContext importContext) {
+        String customer = importContext.getProperty(ImportProperty.CUSTOMER, String.class);
+        String customerSpace = CustomerSpace.parse(customer).toString();
+        @SuppressWarnings("unchecked")
+        Map<String, String> targetPathsMap = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
+        // setProcessedRecords(table, importContext);
+
+        for (Table table : tablesMetadataFromImport) {
+            addTenantToTable(table, customerSpace);
+            addExtractToTable(table, targetPathsMap.get(table.getName()), processedRecordsMap.get(table.getName()));
             setLastModifiedTimeStamp(table, importContext);
             useSemanticTypeAsAttrName(table);
         }
@@ -237,10 +241,15 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
             }
         }
     }
-    
+
     @Override
     public void setMetadataUrl(String metadataUrl) {
         this.metadataUrl = metadataUrl;
+    }
+
+    @VisibleForTesting
+    void setTenantService(TenantService tenantService) {
+        this.tenantService = tenantService;
     }
 
 }

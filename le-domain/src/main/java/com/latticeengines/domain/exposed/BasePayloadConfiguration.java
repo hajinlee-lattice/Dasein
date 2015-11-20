@@ -9,7 +9,7 @@ public class BasePayloadConfiguration implements HasName {
 
     private String name;
     private CustomerSpace customerSpace;
-    
+
     @Override
     @JsonProperty("name")
     public String getName() {
@@ -31,7 +31,7 @@ public class BasePayloadConfiguration implements HasName {
     public void setCustomerSpace(CustomerSpace customerSpace) {
         this.customerSpace = customerSpace;
     }
-    
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

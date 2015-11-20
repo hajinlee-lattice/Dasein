@@ -39,6 +39,9 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
     @Value("${eai.test.salesforce.password}")
     private String salesforcePasswd;
 
+    @Value("${eai.test.salesforce.securitytoken}")
+    private String salesforceSecurityToken;
+
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
         initZK(customer);
@@ -46,6 +49,7 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
+        crmCredential.setSecurityToken(salesforceSecurityToken);
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
     }
 
@@ -70,7 +74,7 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
             assertEquals(e.getCode(), LedpCode.LEDP_17003);
             assertTrue(e.getMessage().contains("IsConverted, Company, NaicsCode, Salutation, Status"));
         }
-        
+
         assertTrue(exception, "Exception should have been thrown.");
     }
 
