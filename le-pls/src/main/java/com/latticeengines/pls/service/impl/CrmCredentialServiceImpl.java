@@ -103,9 +103,6 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
         crmCredential.setUrl(url);
         String password = crmCredential.getPassword();
-        if (!StringUtils.isEmpty(crmCredential.getSecurityToken())) {
-            password += crmCredential.getSecurityToken();
-        }
 
         try {
             crmCredential.setPassword(CipherUtils.encrypt(password));
