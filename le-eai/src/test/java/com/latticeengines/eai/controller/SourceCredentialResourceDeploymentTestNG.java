@@ -68,7 +68,7 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
     public void testValidSandboxCredential() throws Exception {
         CrmCredential cred = new CrmCredential();
         cred.setUserName("tsanghavi@lattice-engines.com.sandbox2");
-        cred.setPassword(CipherUtils.encrypt(salesforcePasswd));
+        cred.setPassword(CipherUtils.encrypt("Happy2010"));
         cred.setSecurityToken("5aGieJUACRPQ21CG3nUwn8iz");
         cred.setUrl(sandboxLoginUrl);
         Map<String, String> uriVariables = new HashMap<>();
