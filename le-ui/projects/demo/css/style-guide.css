@@ -1,8 +1,17 @@
+.main-content {
+	margin-bottom: 4em;
+}
 .title {
     margin: 40px 0 10px;
     padding-bottom: 10px;
+    color: #467dba;
+    font-weight: bold;
     border-bottom: #ddd solid 3px;
  }
+
+.style-guide h5 {
+	margin-top: 1em;
+}
 
  .grid .row {
  	margin-bottom: 1em;
@@ -17,14 +26,14 @@ kbd,
 pre,
 samp {
   font-family: monospace, serif;
-  font-size: 1em;
+  font-size: 14px;
 }
 
 pre {
 	white-space: pre;
 	white-space: pre-wrap;
 	word-wrap: break-word;
-	background: #f1f1f1;
+	background: #fff;
 	padding: 1em;
 	border: #ddd solid 1px;
 }

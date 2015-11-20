@@ -19,7 +19,7 @@
 
     <script src="js/modernizr.js"></script>
 </head>
-<body>
+<body class="style-guide">
 
     <div id="outer-wrap">
     <div id="inner-wrap">
@@ -31,13 +31,14 @@
                 <li><a href="typography.html">Typography</a></li>
                 <li><a href="lists.html">Lists</a></li>
                 <li><a href="links.html">Links &amp; Buttons</a></li>
-                <li><a href="grid.html">Grid</a></li>
                 <li class="active"><a href="forms.html">Forms</a></li>
-                <li class="divider"><a href="downloads.html">Downloads</a></li>
+                <li><a href="tables.html">Data Tables</a></li>
+                <li><a href="grid.html">Grids</a></li>
+                
             </ul>
         </nav>
         <section id="main" class="main-content" role="main">
-            <a id="openNav" class="nav-button" href="#nav">Menu</a>
+            <a id="openNav" class="button white-button nav-button" href="#nav">Menu</a>
             <div class="container row">
                 <div class="columns twelve">
                     <h2 class="title">Forms</h2>
@@ -45,9 +46,126 @@
             </div>
             <div class="container row">
                 <div class="columns twelve">
-                    Form content goes here
+                    <h3 class="title">Basic Example</h3>
                 </div>
             </div>
+            <div class="container row">
+                <div class="columns twelve">   
+
+                    <form>
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputPassword1">Password</label>
+                        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputFile">File input</label>
+                        <input type="file" id="exampleInputFile">
+                        <p class="help-block">Example block-level help text here.</p>
+                      </div>
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox"> Check me out
+                        </label>
+                      </div>
+                      <button type="submit" class="button blue-button">Submit</button>
+                    </form>
+
+                </div>
+            </div>
+            <div class="container row">
+                <div class="columns twelve">
+                    <h3 class="title">Radios &amp; Checkboxes</h3>
+                </div>
+            </div>
+            <div class="container row">
+                <div class="columns twelve">
+                    
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" value="">
+                        Option one is this and that&mdash;be sure to include why it's great
+                      </label>
+                    </div>
+                    <div class="checkbox disabled">
+                      <label>
+                        <input type="checkbox" value="" disabled>
+                        Option two is disabled
+                      </label>
+                    </div>
+
+                    <div class="radio">
+                      <label>
+                        <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
+                        Option one is this and that&mdash;be sure to include why it's great
+                      </label>
+                    </div>
+                    <div class="radio">
+                      <label>
+                        <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+                        Option two can be something else and selecting it will deselect option one
+                      </label>
+                    </div>
+                    <div class="radio disabled">
+                      <label>
+                        <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled>
+                        Option three is disabled
+                      </label>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="container row">
+                <div class="columns twelve">
+                    <h3 class="title">Error &amp; Success Messaging</h3>
+                </div>
+            </div>
+            <div class="container row">
+                <div class="columns twelve">
+                    <div class="form-group has-success">
+                          <label class="control-label" for="inputSuccess1">Input with success</label>
+                          <input type="text" class="form-control" id="inputSuccess1" aria-describedby="helpBlock2">
+                          <span id="helpBlock2" class="help-block">A block of help text that breaks onto a new line and may extend beyond one line.</span>
+                        </div>
+                        <div class="form-group has-warning">
+                          <label class="control-label" for="inputWarning1">Input with warning</label>
+                          <input type="text" class="form-control" id="inputWarning1">
+                        </div>
+                        <div class="form-group has-error">
+                          <label class="control-label" for="inputError1">Input with error</label>
+                          <input type="text" class="form-control" id="inputError1">
+                        </div>
+                        <div class="has-success">
+                          <div class="checkbox">
+                            <label>
+                              <input type="checkbox" id="checkboxSuccess" value="option1">
+                              Checkbox with success
+                            </label>
+                          </div>
+                        </div>
+                        <div class="has-warning">
+                          <div class="checkbox">
+                            <label>
+                              <input type="checkbox" id="checkboxWarning" value="option1">
+                              Checkbox with warning
+                            </label>
+                          </div>
+                        </div>
+                        <div class="has-error">
+                          <div class="checkbox">
+                            <label>
+                              <input type="checkbox" id="checkboxError" value="option1">
+                              Checkbox with error
+                            </label>
+                          </div>
+                        </div>
+                </div>
+            </div>
+
         </section><!-- End #main -->
     </div><!-- End #innerWrap -->
     </div><!-- End #outerWrap -->
