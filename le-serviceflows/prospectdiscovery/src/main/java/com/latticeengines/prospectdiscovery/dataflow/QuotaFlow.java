@@ -16,6 +16,8 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 
 @Component("quotaFlow")
 public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
@@ -36,13 +38,15 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         TargetMarket market = parameters.getTargetMarket();
         ProspectDiscoveryConfiguration configuration = parameters.getConfiguration();
         Quota quota = parameters.getQuota();
+        TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
 
         account = account.innerJoin(LatticeAccountID, scores, LatticeAccountID);
 
         String scoreColumn = String.format("Score_%s", market.getModelId());
 
-        IntentScore intentScoreThreshold = market.getIntentScoreThreshold();
-        double fitScoreThreshold = market.getFitScoreThreshold() != null ? market.getFitScoreThreshold() : 0;
+        IntentScore intentScoreThreshold = IntentScore.valueOf( //
+                marketConfiguration.getString(TargetMarketDataFlowOptionName.IntentScoreThreshold));
+        double fitScoreThreshold = marketConfiguration.getDouble(TargetMarketDataFlowOptionName.FitScoreThreshold);
 
         Node intent = account.filter(getIntentAboveThresholdExpression(market.getIntentSort(), intentScoreThreshold),
                 getFields(market.getIntentSort()));
@@ -76,7 +80,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         // Reconsitute account columns
         Node joined = deduped.innerJoin(LatticeAccountID, account, LatticeAccountID);
 
-        if (!market.isDeliverProspectsFromExistingAccounts()) {
+        if (!marketConfiguration.getBoolean(TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts, true)) {
             joined = joined.stopList(existingProspect, LatticeAccountID, LatticeAccountID);
         }
 
@@ -104,8 +108,10 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         merged = merged.addFunction(String.format("%dL", DateTime.now().getMillis()), new FieldList(),
                 new FieldMetadata(DeliveryDate, Long.class));
 
-        if (market.getMaxProspectsPerAccount() != null) {
-            merged = merged.groupByAndLimit(new FieldList(LatticeAccountID), market.getMaxProspectsPerAccount());
+        Integer maxProspectsPerAccount = marketConfiguration.get(TargetMarketDataFlowOptionName.MaxProspectsPerAccount,
+                null, Integer.class);
+        if (maxProspectsPerAccount != null) {
+            merged = merged.groupByAndLimit(new FieldList(LatticeAccountID), maxProspectsPerAccount);
         }
 
         merged = merged.sort("Offset");
@@ -121,7 +127,11 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         // Remove intent generated prospects if they were generated more
         // than NumDaysBetweenIntentProspectResends days ago.
 
-        if (market.getNumDaysBetweenIntentProspectResends() != null) {
+        TargetMarketDataFlowConfiguration dataFlowConfiguration = market.getDataFlowConfiguration();
+        Integer numDaysBetweenResends = dataFlowConfiguration.get(
+                TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, null, Integer.class);
+
+        if (numDaysBetweenResends != null) {
             String removeUnmatchedExpression = String.format("!(Email == null && %s != null)",
                     joinFieldName("ExistingProspect", "Email"));
             intent = intent //
@@ -133,7 +143,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
                     DeliveryDate, //
                     DateTime.now().getMillis(), //
                     DeliveryDate, //
-                    (long) market.getNumDaysBetweenIntentProspectResends() * 24 * 360 * 1000);
+                    (long) numDaysBetweenResends * 24 * 360 * 1000);
             intent = intent.filter(dateExpression, new FieldList(DeliveryDate));
         } else {
             intent = intent.stopList(existingProspect, "Email", "Email");
@@ -225,9 +235,5 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
                     market.getName()));
         }
 
-        if (market.isDeliverProspectsFromExistingAccounts() == null) {
-            throw new IllegalArgumentException(String.format(
-                    "isDeliverProspectsFromExistingAccounts must be set for market with name %s", market.getName()));
-        }
     }
 }

@@ -1,27 +1,27 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,22 +42,18 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private Long pid;
     private String name;
     private String description;
-    private Date creationDate;
+    private Long creationTimestamp;
     private Tenant tenant;
     private Long tenantId;
     private Sort intentSort;
     private Integer numProspectsDesired;
-    private Integer numDaysBetweenIntentProspectResends;
-    private IntentScore intentScoreThreshold;
-    private Double fitScoreThreshold;
     private String modelId;
     private String eventColumnName;
-    private Boolean deliverProspectsFromExistingAccounts;
     private Boolean isDefault;
     private Restriction accountFilter;
     private Restriction contactFilter;
     private Integer offset;
-    private Integer maxProspectsPerAccount;
+    private List<TargetMarketDataFlowOption> rawDataFlowConfiguration = new ArrayList<>();
 
     @Column(name = "NAME", nullable = false)
     @Override
@@ -84,15 +80,27 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     }
 
     @JsonProperty
-    @Column(name = "CREATION_DATE", nullable = false)
-    @Temporal(TemporalType.DATE)
-    public Date getCreationDate() {
-        return this.creationDate;
+    @Column(name = "CREATION_TIMESTAMP", nullable = false)
+    public Long getCreationTimestamp() {
+        return this.creationTimestamp;
     }
 
     @JsonProperty
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
+    public void setCreationTimestamp(Long creationDate) {
+        this.creationTimestamp = creationDate;
+    }
+
+    @JsonIgnore
+    @Transient
+    public DateTime getCreationTimestampObject() {
+        return new DateTime(creationTimestamp, DateTimeZone.UTC);
+    }
+
+    @JsonIgnore
+    @Transient
+    public void setCreationTimestampObject(DateTime creationTimestamp) {
+        DateTime utc = creationTimestamp.toDateTime(DateTimeZone.UTC);
+        this.creationTimestamp = utc.getMillis();
     }
 
     @Id
@@ -218,40 +226,6 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
         this.numProspectsDesired = numProspectsDesired;
     }
 
-    @Column(name = "NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS", nullable = true)
-    @JsonProperty
-    public Integer getNumDaysBetweenIntentProspectResends() {
-        return this.numDaysBetweenIntentProspectResends;
-    }
-
-    @JsonProperty
-    public void setNumDaysBetweenIntentProspectResends(Integer numDaysBetweenIntentProspectResends) {
-        this.numDaysBetweenIntentProspectResends = numDaysBetweenIntentProspectResends;
-    }
-
-    @JsonProperty
-    @Column(name = "INTENT_SCORE_THRESHOLD", nullable = false)
-    @Enumerated(EnumType.STRING)
-    public IntentScore getIntentScoreThreshold() {
-        return intentScoreThreshold;
-    }
-
-    @JsonProperty
-    public void setIntentScoreThreshold(IntentScore intentScoreThreshold) {
-        this.intentScoreThreshold = intentScoreThreshold;
-    }
-
-    @Column(name = "FIT_SCORE_THRESHOLD", nullable = true)
-    @JsonProperty
-    public Double getFitScoreThreshold() {
-        return this.fitScoreThreshold;
-    }
-
-    @JsonProperty
-    public void setFitScoreThreshold(Double fitScoreThreshold) {
-        this.fitScoreThreshold = fitScoreThreshold;
-    }
-
     @Column(name = "MODEL_ID", nullable = true)
     @JsonProperty
     public String getModelId() {
@@ -272,28 +246,6 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     @JsonProperty
     public void setEventColumnName(String eventColumnName) {
         this.eventColumnName = eventColumnName;
-    }
-
-    @Column(name = "DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS", nullable = false)
-    @JsonProperty
-    public Boolean isDeliverProspectsFromExistingAccounts() {
-        return this.deliverProspectsFromExistingAccounts;
-    }
-
-    @JsonProperty
-    public void setDeliverProspectsFromExistingAccounts(Boolean deliverProspectsFromExistingAccounts) {
-        this.deliverProspectsFromExistingAccounts = deliverProspectsFromExistingAccounts;
-    }
-
-    @Column(name = "MAX_PROSPECTS_PER_ACCOUNT", nullable = true)
-    @JsonProperty
-    public Integer getMaxProspectsPerAccount() {
-        return this.maxProspectsPerAccount;
-    }
-
-    @JsonProperty
-    public void setMaxProspectsPerAccount(Integer maxProspectsPerAccount) {
-        this.maxProspectsPerAccount = maxProspectsPerAccount;
     }
 
     @Column(name = "IS_DEFAULT")
@@ -318,4 +270,25 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
         this.offset = offset;
     }
 
+    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "targetMarket", fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public List<TargetMarketDataFlowOption> getRawDataFlowConfiguration() {
+        return rawDataFlowConfiguration;
+    }
+
+    public void setRawDataFlowConfiguration(List<TargetMarketDataFlowOption> rawDataFlowConfiguration) {
+        this.rawDataFlowConfiguration = rawDataFlowConfiguration;
+    }
+
+    @Transient
+    @JsonIgnore
+    public TargetMarketDataFlowConfiguration getDataFlowConfiguration() {
+        return new TargetMarketDataFlowConfiguration(rawDataFlowConfiguration);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setDataFlowConfiguration(TargetMarketDataFlowConfiguration configuration) {
+        this.rawDataFlowConfiguration = configuration.getBag();
+    }
 }

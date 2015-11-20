@@ -18,10 +18,34 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
 public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsFunctionalTestNGBase {
+
+    protected QuotaFlowParameters getStandardParameters() {
+        TargetMarket market = new TargetMarket();
+        TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
+        marketConfiguration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.LOW.toString());
+        marketConfiguration.setDouble(TargetMarketDataFlowOptionName.FitScoreThreshold, 20.0);
+        marketConfiguration.set(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, 365);
+        marketConfiguration.setBoolean(TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts, true);
+
+        market.setModelId("M1");
+        market.setNumProspectsDesired(3);
+        List<SingleReferenceLookup> lookups = new ArrayList<>();
+        lookups.add(new SingleReferenceLookup("Intent1", ReferenceInterpretation.COLUMN));
+        lookups.add(new SingleReferenceLookup("Intent2", ReferenceInterpretation.COLUMN));
+        market.setIntentSort(new Sort(lookups, true));
+        market.setOffset(1);
+        ProspectDiscoveryConfiguration configuration = new ProspectDiscoveryConfiguration();
+        configuration.setDouble(ProspectDiscoveryOptionName.IntentPercentage, 100);
+        Quota quota = new Quota();
+        quota.setBalance(100);
+        return new QuotaFlowParameters(market, quota, configuration);
+    }
 
     @Test(groups = "functional")
     public void test() throws Exception {
@@ -40,7 +64,9 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsFunctio
         QuotaFlowParameters parameters = getStandardParameters();
         // This should filter out everything so that only the single contact
         // that was never sent out is sent.
-        parameters.getTargetMarket().setNumDaysBetweenIntentProspectResends(null);
+        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+                .getDataFlowConfiguration();
+        dataFlowConfiguration.set(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, null);
         Table result = executeDataFlow(parameters);
 
         Assert.assertEquals(result.getExtracts().size(), 1);
@@ -56,7 +82,10 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsFunctio
     @Test(groups = "functional")
     public void testFilterExistingAccounts() {
         QuotaFlowParameters parameters = getStandardParameters();
-        parameters.getTargetMarket().setDeliverProspectsFromExistingAccounts(false);
+        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+                .getDataFlowConfiguration();
+        dataFlowConfiguration.setBoolean( //
+                TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts, false);
         Table result = executeDataFlow(parameters);
 
         Assert.assertEquals(result.getExtracts().size(), 1);
@@ -64,26 +93,6 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsFunctio
 
         List<GenericRecord> records = readOutput();
         Assert.assertEquals(records.size(), 0);
-    }
-
-    protected QuotaFlowParameters getStandardParameters() {
-        TargetMarket market = new TargetMarket();
-        market.setIntentScoreThreshold(IntentScore.LOW);
-        market.setFitScoreThreshold(20.0);
-        market.setNumDaysBetweenIntentProspectResends(365);
-        market.setModelId("M1");
-        market.setNumProspectsDesired(3);
-        market.setDeliverProspectsFromExistingAccounts(true);
-        List<SingleReferenceLookup> lookups = new ArrayList<>();
-        lookups.add(new SingleReferenceLookup("Intent1", ReferenceInterpretation.COLUMN));
-        lookups.add(new SingleReferenceLookup("Intent2", ReferenceInterpretation.COLUMN));
-        market.setIntentSort(new Sort(lookups, true));
-        market.setOffset(1);
-        ProspectDiscoveryConfiguration configuration = new ProspectDiscoveryConfiguration();
-        configuration.setDouble(ProspectDiscoveryOptionName.IntentPercentage, 100);
-        Quota quota = new Quota();
-        quota.setBalance(100);
-        return new QuotaFlowParameters(market, quota, configuration);
     }
 
     @Override

@@ -21,19 +21,23 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
+@ContextConfiguration(locations = {"classpath:serviceflows-prospectdiscovery-context.xml"})
 public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase {
 
     private QuotaFlowParameters getStandardParameters() {
         TargetMarket market = new TargetMarket();
-        market.setIntentScoreThreshold(IntentScore.LOW);
-        market.setFitScoreThreshold(0.0);
-        market.setNumDaysBetweenIntentProspectResends(365);
+        TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
+        marketConfiguration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.LOW.toString());
+        marketConfiguration.setDouble(TargetMarketDataFlowOptionName.FitScoreThreshold, 0.0);
+        marketConfiguration.set(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, 365);
+        marketConfiguration.setBoolean(TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts, true);
+
         market.setModelId("M1");
         market.setNumProspectsDesired(100);
-        market.setDeliverProspectsFromExistingAccounts(true);
         List<SingleReferenceLookup> lookups = new ArrayList<>();
         lookups.add(new SingleReferenceLookup("Intent1", ReferenceInterpretation.COLUMN));
         lookups.add(new SingleReferenceLookup("Intent2", ReferenceInterpretation.COLUMN));
@@ -62,7 +66,8 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
     @Test(groups = "functional")
     public void testOnlyFitSent() {
         QuotaFlowParameters parameters = getStandardParameters();
-        parameters.getTargetMarket().setIntentScoreThreshold(IntentScore.MAX);
+        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket().getDataFlowConfiguration();
+        dataFlowConfiguration.set(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.MAX.toString());
 
         Table result = executeDataFlow(parameters);
 
@@ -79,7 +84,9 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
     @Test(groups = "functional")
     public void testOnlyIntentSent() {
         QuotaFlowParameters parameters = getStandardParameters();
-        parameters.getTargetMarket().setFitScoreThreshold(100.0);
+        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+                .getDataFlowConfiguration();
+        dataFlowConfiguration.setDouble(TargetMarketDataFlowOptionName.FitScoreThreshold, 100.0);
 
         Table result = executeDataFlow(parameters);
 
@@ -108,7 +115,8 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
     @Test(groups = "functional")
     public void testNoMoreThanOneProspectPerAccount() {
         QuotaFlowParameters parameters = getStandardParameters();
-        parameters.getTargetMarket().setMaxProspectsPerAccount(1);
+        parameters.getTargetMarket().getDataFlowConfiguration()
+                .setInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount, 1);
 
         Table result = executeDataFlow(parameters);
 

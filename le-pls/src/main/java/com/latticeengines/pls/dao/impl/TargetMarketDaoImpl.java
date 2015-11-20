@@ -11,36 +11,33 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.pls.dao.TargetMarketDao;
 
 @Component("targetMarketDao")
-public class TargetMarketDaoImpl extends BaseDaoImpl<TargetMarket> implements
-        TargetMarketDao {
+public class TargetMarketDaoImpl extends BaseDaoImpl<TargetMarket> implements TargetMarketDao {
 
     @Override
     protected Class<TargetMarket> getEntityClass() {
         return TargetMarket.class;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
+    @SuppressWarnings("unchecked")
     public TargetMarket findTargetMarketByName(String name) {
         Session session = getSessionFactory().getCurrentSession();
         Class<TargetMarket> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where NAME = :name",
-                entityClz.getSimpleName());
+        String queryStr = String.format("from %s where NAME = :name", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("name", name);
-        List targetMarkets = query.list();
+        List<TargetMarket> targetMarkets = query.list();
         if (targetMarkets.size() == 0) {
             return null;
         }
-        return (TargetMarket) targetMarkets.get(0);
+        return targetMarkets.get(0);
     }
 
     @Override
     public boolean deleteTargetMarketByName(String name) {
         Session session = getSessionFactory().getCurrentSession();
         Class<TargetMarket> entityClz = getEntityClass();
-        String queryStr = String.format("delete from %s where NAME = :name",
-                entityClz.getSimpleName());
+        String queryStr = String.format("delete from %s where NAME = :name", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         int numTargetMarketReturned = query.executeUpdate();
         if (numTargetMarketReturned == 1)

@@ -18,6 +18,8 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
@@ -25,12 +27,14 @@ public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsFunction
 
     private QuotaFlowParameters getStandardParameters() {
         TargetMarket market = new TargetMarket();
-        market.setIntentScoreThreshold(IntentScore.LOW);
-        market.setFitScoreThreshold(0.0);
-        market.setNumDaysBetweenIntentProspectResends(null);
+        TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
+        marketConfiguration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.LOW.toString());
+        marketConfiguration.setDouble(TargetMarketDataFlowOptionName.FitScoreThreshold, 0.0);
+        marketConfiguration.set(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, null);
+        marketConfiguration.setBoolean(TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts, true);
+
         market.setModelId("M1");
         market.setNumProspectsDesired(100);
-        market.setDeliverProspectsFromExistingAccounts(true);
         List<SingleReferenceLookup> lookups = new ArrayList<>();
         lookups.add(new SingleReferenceLookup("Intent1", ReferenceInterpretation.COLUMN));
         lookups.add(new SingleReferenceLookup("Intent2", ReferenceInterpretation.COLUMN));
@@ -57,7 +61,9 @@ public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsFunction
     @Test(groups = "functional")
     public void testIntentResent() {
         QuotaFlowParameters parameters = getStandardParameters();
-        parameters.getTargetMarket().setNumDaysBetweenIntentProspectResends(1);
+        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+                .getDataFlowConfiguration();
+        dataFlowConfiguration.setInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, 1);
 
         Table result = executeDataFlow(parameters);
 

@@ -6,7 +6,6 @@ import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,6 +15,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -76,7 +76,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
 
     protected static final TargetMarket TARGET_MARKET = new TargetMarket();
     protected static final String TEST_TARGET_MARKET_NAME = "TEST_TARGET_MARKET_NAME";
-    protected static final Date CREATION_DATE = new Date();
+    protected static final DateTime CREATION_DATE = DateTime.now();
     protected static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     protected static final String DESCRIPTION = "The Target Market For Functional Tests";
     protected static final Integer NUM_PROPSPECTS_DESIRED = 100;

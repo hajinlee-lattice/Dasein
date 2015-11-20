@@ -4,11 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ConfigurationBagUnitTestNG {
-    private ConfigurationBag bag;
+    public enum OptionName {
+        testInt, //
+        testString, //
+        testDouble, //
+        testNotExists
+    }
+
+    private ConfigurationBag<TestOption, OptionName> bag;
 
     public class TestOption implements HasOptionAndValue {
         private String option;
@@ -40,15 +47,15 @@ public class ConfigurationBagUnitTestNG {
         }
     }
 
-    @BeforeClass(groups = "unit")
+    @BeforeMethod(groups = "unit")
     @SuppressWarnings("unchecked")
     public void setup() {
         List<TestOption> options = new ArrayList<>();
-        TestOption option = new TestOption("testString", "foo");
+        TestOption option = new TestOption(OptionName.testString.toString(), "foo");
         options.add(option);
-        option = new TestOption("testInt", "123");
+        option = new TestOption(OptionName.testInt.toString(), "123");
         options.add(option);
-        option = new TestOption("testDouble", "123.123");
+        option = new TestOption(OptionName.testDouble.toString(), "123.123");
         options.add(option);
 
         bag = new ConfigurationBag(List.class.cast(options));
@@ -56,12 +63,24 @@ public class ConfigurationBagUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetInt() {
-        int value = bag.getInt("testInt", 0);
+        int value = bag.getInt(OptionName.testInt, 0);
         Assert.assertEquals(value, 123);
     }
 
     @Test(groups = "unit", expectedExceptions = RuntimeException.class)
     public void testGetInvalidInt() {
-        bag.getInt("testDouble", 123);
+        bag.getInt(OptionName.testDouble, 123);
+    }
+
+    @Test(groups = "unit")
+    public void testSetNullValue() {
+        bag.set(OptionName.testInt, null);
+        Integer value = bag.get(OptionName.testInt, Integer.class);
+        Assert.assertEquals(value, null);
+    }
+
+    @Test(groups = "unit", expectedExceptions = RuntimeException.class)
+    public void testValueDoesntExist() {
+        bag.get(OptionName.testNotExists, Integer.class);
     }
 }

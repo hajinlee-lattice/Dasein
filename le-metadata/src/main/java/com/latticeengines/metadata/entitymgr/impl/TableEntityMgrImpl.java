@@ -31,7 +31,7 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
 
     @Autowired
     private ExtractDao extractDao;
-    
+
     @Autowired
     private LastModifiedKeyDao lastModifiedKeyDao;
 
@@ -84,7 +84,7 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
         List<Table> tables = super.findAll();
         return tables;
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table findByName(String name) {
@@ -92,8 +92,8 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
         inflateTable(table);
         return table;
     }
-    
-    static void inflateTable(Table table) {
+
+    private static void inflateTable(Table table) {
         if (table != null) {
             Hibernate.initialize(table.getAttributes());
             Hibernate.initialize(table.getExtracts());
