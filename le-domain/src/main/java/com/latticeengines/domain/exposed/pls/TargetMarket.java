@@ -26,7 +26,6 @@ import org.joda.time.DateTimeZone;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.query.Restriction;
-import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -45,7 +44,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private Long creationTimestamp;
     private Tenant tenant;
     private Long tenantId;
-    private Sort intentSort;
+    private List<String> selectedIntent;
     private Integer numProspectsDesired;
     private String modelId;
     private String eventColumnName;
@@ -195,24 +194,26 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
 
     @JsonProperty
     @Transient
-    public Sort getIntentSort() {
-        return this.intentSort;
+    public List<String> getSelectedIntent() {
+        return this.selectedIntent;
     }
 
     @JsonProperty
-    public void setIntentSort(Sort sort) {
-        this.intentSort = sort;
+    @Transient
+    public void setSelectedIntent(List<String> selectedIntent) {
+        this.selectedIntent = selectedIntent;
     }
 
     @JsonProperty
-    @Column(name = "INTENT_SORT", nullable = false)
-    public String getIntentSortString() {
-        return JsonUtils.serialize(this.intentSort);
+    @Column(name = "SELECTED_INTENT", nullable = false)
+    public String getSelectedIntentString() {
+        return JsonUtils.serialize(this.selectedIntent);
     }
 
     @JsonProperty
-    public void setIntentSortString(String intentSortStr) {
-        this.intentSort = JsonUtils.deserialize(intentSortStr, Sort.class);
+    @SuppressWarnings("unchecked")
+    public void setSelectedIntentString(String selectedIntentString) {
+        this.selectedIntent = JsonUtils.deserialize(selectedIntentString, List.class);
     }
 
     @Column(name = "NUM_PROSPECTS_DESIRED", nullable = true)

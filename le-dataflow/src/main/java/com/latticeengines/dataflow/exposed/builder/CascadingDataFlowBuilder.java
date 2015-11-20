@@ -64,7 +64,6 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 
 import com.google.common.base.Joiner;
-import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -173,14 +172,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     builder);
         }
 
-        public Node filter(Restriction restriction) {
-            // XXX TODO
-            // XXX TODO handle null restrictions
-            return new Node(identifier, builder);
-        }
-
         public Node sort(String field) {
             return new Node(builder.register(new SortOperation(identifier, field, builder)), builder);
+        }
+
+        public Node sort(String field, boolean descending) {
+            return new Node(builder.register(new SortOperation(identifier, field, descending, builder)), builder);
         }
 
         public Node sort(Sort sort) {

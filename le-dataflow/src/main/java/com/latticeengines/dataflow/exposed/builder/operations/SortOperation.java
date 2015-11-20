@@ -13,15 +13,20 @@ import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 
 public class SortOperation extends Operation {
-    public SortOperation(String prior, String field, CascadingDataFlowBuilder builder) {
+    public SortOperation(String prior, String field, boolean descending, CascadingDataFlowBuilder builder) {
         super(builder);
 
         List<SingleReferenceLookup> lookups = new ArrayList<>();
         SingleReferenceLookup lookup = new SingleReferenceLookup(field, ReferenceInterpretation.COLUMN);
         lookups.add(lookup);
         Sort sort = new Sort(lookups);
+        sort.setDescending(descending);
 
         init(prior, sort, builder);
+    }
+
+    public SortOperation(String prior, String field, CascadingDataFlowBuilder builder) {
+        this(prior, field, false, builder);
     }
 
     public SortOperation(String prior, Sort sort, CascadingDataFlowBuilder builder) {

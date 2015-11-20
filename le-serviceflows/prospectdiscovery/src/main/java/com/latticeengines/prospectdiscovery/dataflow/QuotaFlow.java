@@ -48,8 +48,9 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
                 marketConfiguration.getString(TargetMarketDataFlowOptionName.IntentScoreThreshold));
         double fitScoreThreshold = marketConfiguration.getDouble(TargetMarketDataFlowOptionName.FitScoreThreshold);
 
-        Node intent = account.filter(getIntentAboveThresholdExpression(market.getIntentSort(), intentScoreThreshold),
-                getFields(market.getIntentSort()));
+        Node intent = account.filter( //
+                getIntentAboveThresholdExpression(market.getSelectedIntent(), intentScoreThreshold), //
+                new FieldList(market.getSelectedIntent()));
         Node fit = account.filter(String.format("%s >= %f", scoreColumn, fitScoreThreshold), //
                 new FieldList(scoreColumn));
 
@@ -57,7 +58,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         fit = fit.renamePipe("Fit");
 
         intent = intent.filter( //
-                getIntentExistsExpression(market.getIntentSort()), getFields(market.getIntentSort()));
+                getIntentExistsExpression(market.getSelectedIntent()), new FieldList(market.getSelectedIntent()));
 
         intent = intent.innerJoin(new FieldList(LatticeAccountID), contact, new FieldList(LatticeAccountID));
         fit = fit.innerJoin(new FieldList(LatticeAccountID), contact, new FieldList(LatticeAccountID));
@@ -88,8 +89,8 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         intent = joined.filter("IsIntent", new FieldList("IsIntent")).renamePipe("Intent");
         fit = joined.filter("!IsIntent", new FieldList("IsIntent")).renamePipe("Fit");
 
-        intent = intent.sort(market.getIntentSort());
-        fit = fit.sort(fitSort(market));
+        intent = sortByIntent(intent, market.getSelectedIntent());
+        fit = sortByFit(fit, market.getModelId());
 
         intent = intent.addRowID("Offset");
         fit = fit.addRowID("Offset");
@@ -161,25 +162,48 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
                 .groupBy(new FieldList("Email"), aggregations);
     }
 
-    private Sort fitSort(TargetMarket market) {
-        SingleReferenceLookup lookup = new SingleReferenceLookup(String.format("Score_%s", market.getModelId()),
+    private Node sortByFit(Node last, String modelId) {
+        SingleReferenceLookup lookup = new SingleReferenceLookup(String.format("Score_%s", modelId),
                 ReferenceInterpretation.COLUMN);
         List<SingleReferenceLookup> lookups = new ArrayList<>();
         lookups.add(lookup);
-        return new Sort(lookups, true);
+        Sort sort = new Sort(lookups, true);
+        return last.sort(sort);
     }
 
-    private String getIntentExistsExpression(Sort intent) {
+    private Node sortByIntent(Node last, List<String> intent) {
+        if (intent.size() == 0)
+            return last;
         StringBuilder sb = new StringBuilder();
-        int size = intent.getLookups().size();
+        sb.append("(");
+        for (int i = 0; i < intent.size(); ++i) {
+            sb.append(intent.get(i));
+            if (i < intent.size() - 1) {
+                sb.append(" + ");
+            }
+        }
+        sb.append(String.format(") / %dF", intent.size()));
+
+        String averageExpression = sb.toString();
+        last = last.addFunction(averageExpression, new FieldList(intent), new FieldMetadata("AverageIntent",
+                Double.class));
+
+        last = last.sort("AverageIntent", true);
+        last = last.discard(new FieldList("AverageIntent"));
+        return last;
+    }
+
+    private String getIntentExistsExpression(List<String> intent) {
+        StringBuilder sb = new StringBuilder();
+        int size = intent.size();
         if (size == 0) {
             return "true";
         }
         for (int i = 0; i < size; ++i) {
-            SingleReferenceLookup lookup = intent.getLookups().get(i);
-            sb.append(lookup.getReference().toString());
+            String lookup = intent.get(i);
+            sb.append(lookup);
             sb.append(" != 0 && ");
-            sb.append(lookup.getReference().toString());
+            sb.append(lookup);
             sb.append(" != null");
             if (i != size - 1) {
                 sb.append(" && ");
@@ -189,17 +213,17 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         return sb.toString();
     }
 
-    private String getIntentAboveThresholdExpression(Sort intent, IntentScore threshold) {
+    private String getIntentAboveThresholdExpression(List<String> intent, IntentScore threshold) {
         StringBuilder sb = new StringBuilder();
-        int size = intent.getLookups().size();
+        int size = intent.size();
         if (size == 0) {
             return "true";
         }
         for (int i = 0; i < size; ++i) {
-            SingleReferenceLookup lookup = intent.getLookups().get(i);
-            sb.append(lookup.getReference().toString());
+            String lookup = intent.get(i);
+            sb.append(lookup);
             sb.append(String.format(" >= %d && ", threshold.getValue()));
-            sb.append(lookup.getReference().toString());
+            sb.append(lookup);
             sb.append(" != null");
             if (i != size - 1) {
                 sb.append(" && ");
@@ -207,14 +231,6 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
 
         }
         return sb.toString();
-    }
-
-    private FieldList getFields(Sort sort) {
-        List<String> fields = new ArrayList<>();
-        for (SingleReferenceLookup lookup : sort.getLookups()) {
-            fields.add(lookup.getReference().toString());
-        }
-        return new FieldList(fields);
     }
 
     @Override
@@ -230,10 +246,14 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
                     market.getName()));
         }
 
-        if (market.getIntentSort() == null) {
-            throw new IllegalArgumentException(String.format("Intent sort must be set for market with name %s",
+        if (market.getSelectedIntent() == null) {
+            throw new IllegalArgumentException(String.format("Intent must be set for market with name %s",
                     market.getName()));
         }
 
+        if (market.getSelectedIntent().size() == 0) {
+            throw new IllegalArgumentException(String.format(
+                    "Must provide at least one selected intent field for market with name %s", market.getName()));
+        }
     }
 }

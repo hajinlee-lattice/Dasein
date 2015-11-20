@@ -8,9 +8,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.query.ReferenceInterpretation;
-import com.latticeengines.common.exposed.query.SingleReferenceLookup;
-import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.IntentScore;
@@ -35,10 +32,10 @@ public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsFunction
 
         market.setModelId("M1");
         market.setNumProspectsDesired(100);
-        List<SingleReferenceLookup> lookups = new ArrayList<>();
-        lookups.add(new SingleReferenceLookup("Intent1", ReferenceInterpretation.COLUMN));
-        lookups.add(new SingleReferenceLookup("Intent2", ReferenceInterpretation.COLUMN));
-        market.setIntentSort(new Sort(lookups, true));
+        List<String> intent = new ArrayList<>();
+        intent.add("Intent1");
+        intent.add("Intent2");
+        market.setSelectedIntent(intent);
         market.setOffset(1);
         ProspectDiscoveryConfiguration configuration = new ProspectDiscoveryConfiguration();
         configuration.setDouble(ProspectDiscoveryOptionName.IntentPercentage, 50);

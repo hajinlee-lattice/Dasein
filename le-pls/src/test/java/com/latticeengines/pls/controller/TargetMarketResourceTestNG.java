@@ -30,7 +30,7 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET.setContactFilter(CONTACT_FILTER);
         TARGET_MARKET.setIsDefault(IS_DEFAULT);
         TARGET_MARKET.setOffset(OFFSET);
-        TARGET_MARKET.setIntentSort(SORT);
+        TARGET_MARKET.setSelectedIntent(SELECTED_INTENT);
 
         TargetMarketDataFlowConfiguration configuration = TARGET_MARKET.getDataFlowConfiguration();
         configuration.setInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends,
