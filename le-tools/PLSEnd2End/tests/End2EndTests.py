@@ -107,10 +107,10 @@ class Test(unittest.TestCase):
         assert len(lead_faileds) == 0, lead_faileds;
         assert len(contact_faileds)==0, contact_faileds;
 
-        danteLead = leads_list[2].values()[0]
+        danteLead = leads_list.keys()[0]
         dr = DanteRunner()
         dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
-        danteLead = contact_lists[2].values()[0]
+        danteLead = contacts_list.keys()[0]
         dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
 
         leads_list = sfdc.addLeadsToSFDC(2);
@@ -123,9 +123,10 @@ class Test(unittest.TestCase):
         assert len(lead_faileds)==0, lead_faileds;
         assert len(contact_faileds) == 0, contact_faileds;
 
-        danteLead = leads_list[2].values()[0]
+        danteLead = leads_list.keys()[0]
+        dr = DanteRunner()
         dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
-        danteLead = contact_lists[2].values()[0]
+        danteLead = contacts_list.keys()[0]
         dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
         
     def testName(self):

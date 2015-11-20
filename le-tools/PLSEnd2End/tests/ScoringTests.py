@@ -61,10 +61,10 @@ class Test(unittest.TestCase):
         assert len(lead_faileds)==0, lead_faileds;
         assert len(contact_faileds)==0, contact_faileds;
 
-        danteLead = leads_list[2].values()[0]
+        danteLead = leads_list.keys()[0]
         dr = DanteRunner()
         dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
-        danteLead = contact_lists[2].values()[0]
+        danteLead = contacts_list.keys()[0]
         dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
 
     def TestHourlyScoringELQ_Dante(self):
@@ -103,23 +103,29 @@ class Test(unittest.TestCase):
         sfdc = SFDCRequest();
         leads_list = sfdc.addLeadsToSFDC(2);
         contacts_list = sfdc.addContactsToSFDC(2)
-         
+        # print "Leads List"
+        # leads_list={u'00Q8000001cTdNQEA0': 'PuGUjm6Y7BWMnIcHfsZF1RJA@emdeon.com', u'00Q8000001cTdNGEA0': 'LSqXebJv7wnyIu02Qa4DdARZGVOrsxF_YKoMmCTl6P@enstargroup.bm'}
+        # print "contacts List"
+        # contacts_list={u'0038000001sEAIsAAO': '_HuOx9RfWUnTvhVmwAy0@hotmail.com', u'0038000001sEAIdAAO': 'NGk36wFt14EH29PJ_yiXAWeaYDVLZCMQB07dsnuOSlTmfRg@crewsfs.com', u'0038000001sEAInAAO': 'GRhz1UZ6p9JiIXj4tF_swHSqkK50NEC3cDagVOAbrxyY2dMeP@ryder.com'}
+
         PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_3,PLSEnvironments.pls_marketing_app_SFDC);
-         
+
         lead_lists = sfdc.getLeadsFromSFDC(leads_list); 
         contact_lists = sfdc.getContactsFromSFDC(contacts_list);
-         
+
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",lead_lists);
         contact_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC",contact_lists);
-        print "the length of the lead_faileds is: " % len(lead_faileds)
-        print "the length of the contact_faileds is: " % len(contact_faileds)
+
+        print lead_faileds
+        print "the length of the lead_faileds is: %d" % len(lead_faileds)
+        print "the length of the contact_faileds is: %d" % len(contact_faileds)
         assert len(lead_faileds)==0, lead_faileds;
         assert len(contact_faileds) == 0, contact_faileds;
 
-        danteLead = leads_list[2].values()[0]
+        danteLead = leads_list.keys()[0]
         dr = DanteRunner()
         dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
-        danteLead = contact_lists[2].values()[0]
+        danteLead = contacts_list.keys()[0]
         dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
 
     def testName(self):

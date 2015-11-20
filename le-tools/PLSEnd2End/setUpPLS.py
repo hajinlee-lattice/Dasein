@@ -9,12 +9,6 @@ from operations.TestHelpers import LPConfigRunner
 from operations.TestRunner import SessionRunner
 
 def setUpPls():
-    # ''' Refresh SVN for templates '''
-    # print "Refreshing SVN"
-    # runner = SessionRunner()
-    # if False == runner.runCommandLocally("svn update", PLSEnvironments.svn_location_local):
-    #     print "the svn updated failed, please check the really reasons and try again."
-    #     return False
 
     ''' configure Bard Tenant -- drop templates, configure DL.. '''
     lp = LPConfigRunner();

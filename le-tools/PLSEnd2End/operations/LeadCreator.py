@@ -36,8 +36,8 @@ def recordNewAdded(sequence,marketting_app,sobjects, lead_id,email):
 def recordResultSet(id,email,operation,modified_date,scored,result):
     dlc = SessionRunner()
     connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest;    
-    query = "update results set operation='%s', executed_date=getdate(),modifiedDate='%s',scored=%s,result=%d where id='%s' and email='%s'" % (operation,modified_date,scored,result,id,email);        
-    
+    query = "update results set operation='%s', executed_date=getdate(),modifiedDate='%s',scored=%s,result=%d where id='%s' and email='%s'" % (operation,modified_date[0:19],scored,result,id,email);
+
     return dlc.execQuery(connection_string, query);
 def getSequence():
     dlc = SessionRunner()
@@ -87,7 +87,7 @@ def verifyResult(operation,records):
             passed=False; 
         if not passed:
             results.append(r);
-            
+
         recordResultSet(r["id"], r["email"], operation, r["latticeforleads__Last_Score_Date__c"], r["latticeforleads__Score__c"], passed);           
         
     return results;
