@@ -97,12 +97,14 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     public void getCredentialUsingEai() {
         CrmCredential newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
-        Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010oIogZVEFGbL3n0qiAp6F66TC");
+        Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
+        Assert.assertEquals(newCrmCredential.getSecurityToken(), "oIogZVEFGbL3n0qiAp6F66TC");
         crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
 
         newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00DM0000001dg3uMAA");
-        Assert.assertEquals(newCrmCredential.getPassword(), "Happy20105aGieJUACRPQ21CG3nUwn8iz");
+        Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
+        Assert.assertEquals(newCrmCredential.getSecurityToken(), "5aGieJUACRPQ21CG3nUwn8iz");
         crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE);
     }
 

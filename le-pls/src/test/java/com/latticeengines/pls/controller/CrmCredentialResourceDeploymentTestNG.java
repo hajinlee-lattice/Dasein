@@ -84,13 +84,15 @@ public class CrmCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBa
                 + "/pls/credentials/sfdc?tenantId=" +  customerSpace.toString() +   "&&isProduction=true", CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
         Assert.assertEquals(newCrmCredential.getUserName(), "apeters-widgettech@lattice-engines.com");
-        Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010oIogZVEFGbL3n0qiAp6F66TC");
+        Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
+        Assert.assertEquals(newCrmCredential.getSecurityToken(), "oIogZVEFGbL3n0qiAp6F66TC");
 
         newCrmCredential = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/credentials/sfdc?tenantId=" +  customerSpace.toString() +   "&&isProduction=false", CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00DM0000001dg3uMAA");
         Assert.assertEquals(newCrmCredential.getUserName(), "tsanghavi@lattice-engines.com.sandbox2");
-        Assert.assertEquals(newCrmCredential.getPassword(), "Happy20105aGieJUACRPQ21CG3nUwn8iz");
+        Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
+        Assert.assertEquals(newCrmCredential.getSecurityToken(), "5aGieJUACRPQ21CG3nUwn8iz");
     }
 
 }
