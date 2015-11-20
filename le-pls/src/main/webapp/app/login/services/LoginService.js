@@ -21,7 +21,7 @@ angular.module('mainApp.login.services.LoginService', [
             data: JSON.stringify({ Username: username, Password: passwordHash.toString() })
          }).then(
             function onSuccess(response) {
-                var result = response.data
+                var result = response.data;
                 if (result != null && result !== "") {
                     BrowserStorageUtility.setTokenDocument(result.Uniqueness + "." + result.Randomness);
                     result.Result.UserName = username;
