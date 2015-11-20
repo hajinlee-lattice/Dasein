@@ -65,7 +65,7 @@ class QueryColumn(object):
     def setStatisticalType(self, st):
         if st is not None and st.lower() not in [ 'nominal', 'ratio', 'ordinal', 'interval' ]:
             raise UnknownMetadataValue(st)
-        self.statistical_type_ = st
+        self.statistical_type_ = st.lower()
 
     def getTags(self):
         return self.tags_
@@ -81,7 +81,7 @@ class QueryColumn(object):
     def setFundamentalType(self, ft):
         if ft is not None and ft.lower() not in [ 'alpha', 'numeric', 'currency', 'percentage', 'boolean', 'year' ]:
             raise UnknownMetadataValue(ft)
-        self.fundamental_type_ = ft
+        self.fundamental_type_ = ft.lower()
 
     def getDescription(self):
         return self.description_
