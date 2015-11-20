@@ -39,9 +39,7 @@ class ProfilingThenTrainTest(TrainingTestBase):
         traininglauncher.execute(False)
         
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
-        self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
-        self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
-        
+
     def assertProfilingData(self):
         diagnosticsJsonDict = json.loads(open("./results/diagnostics.json").read())
         self.assertEqual(diagnosticsJsonDict["Summary"]["NumberOfSkippedRows"], 0)
