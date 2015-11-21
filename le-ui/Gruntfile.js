@@ -12,16 +12,17 @@ module.exports = function (grunt) {
         env: {
             dev: {
                 NODE_ENV: 'development',
-                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080'
+                API_URL: 'http://localhost:8080'
             },
             integration: {
                 NODE_ENV: 'integration',
                 API_URL: 'http://bodcdevhdpweb53.dev.lattice.local:8080',
-                USE_PORT: 8080
+                USE_PORT: 3000
             },
             qa: {
                 NODE_ENV: 'qa',
-                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080'
+                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                USE_PORT: 3000
             },
             stage: {
                 NODE_ENV: 'stage',
@@ -44,7 +45,7 @@ module.exports = function (grunt) {
                 args: [ './app.js' ]
             },
             nodemon: {
-                cmd: 'nodemon.cmd',
+                cmd: 'nodemon',
                 args: [ './app.js' ]
             },
             killnode: {
@@ -75,6 +76,12 @@ module.exports = function (grunt) {
     var devText = 'Run Express Server, using Local API Endpoints';
     grunt.registerTask('dev', devText, [
         'env:dev',
+        'run:nodemon'
+    ]);
+
+    var integrationText = 'Run Express Server, using 53 API Endpoints';
+    grunt.registerTask('integration', integrationText, [
+        'env:integration',
         'run:nodemon'
     ]);
 

@@ -27,19 +27,19 @@
                 <tbody>
                     <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
                         <td>{{targetMarket.name}}</td>
-                        <td>{{targetMarket.creationDate | date: "yyyy-MM-dd"}}</td>
+                        <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
                         <td>{{targetMarket.targetMarketStatistics.expectedLift}}</td>
                         <td>{{targetMarket.targetMarketStatistics.numCompanies}}</td>
-                        <td>{{targetMarket.targetMarketStatistics.marketRevenue}}</td>
+                        <td>${{targetMarket.targetMarketStatistics.marketRevenue}}</td>
                         <td>{{targetMarket.targetMarketStatistics.numAccounts}}</td>
                         <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
-                        <td>{{targetMarket.targetMarketStatistics.revenue}}</td>
+                        <td>${{targetMarket.targetMarketStatistics.revenue}}</td>
                     </tr>
 
                     <!-- fake data for testing purposes -->
                     <tr>
                         <td>Global Target Market</td>
-                        <td>01/01/2015</td>
+                        <td>2015/01/01</td>
                         <td>2.3x</td>
                         <td>75</td>
                         <td>$323,001,950</td>
@@ -49,7 +49,7 @@
                     </tr>
                     <tr>
                         <td>Global Target Market</td>
-                        <td>01/01/2015</td>
+                        <td>2015/01/01</td>
                         <td>2.3x</td>
                         <td>75</td>
                         <td>$323,001,950</td>
@@ -59,7 +59,7 @@
                     </tr>
                     <tr>
                         <td>Global Target Market</td>
-                        <td>01/01/2015</td>
+                        <td>2015/01/01</td>
                         <td>2.3x</td>
                         <td>75</td>
                         <td>$323,001,950</td>
@@ -69,7 +69,7 @@
                     </tr>
                     <tr>
                         <td>Global Target Market</td>
-                        <td>01/01/2015</td>
+                        <td>2015/01/01</td>
                         <td>2.3x</td>
                         <td>75</td>
                         <td>$323,001,950</td>
@@ -79,7 +79,7 @@
                     </tr>
                     <tr>
                         <td>Global Target Market</td>
-                        <td>01/01/2015</td>
+                        <td>2015/01/01</td>
                         <td>2.3x</td>
                         <td>75</td>
                         <td>$323,001,950</td>
