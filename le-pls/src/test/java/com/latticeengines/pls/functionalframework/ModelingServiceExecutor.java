@@ -159,10 +159,18 @@ public class ModelingServiceExecutor {
         log.info(String.format("App id for modeling: %s", appId));
         System.out.println(String.format("App id for modeling: %s", appId));
         JobStatus status = waitForModelingAppId(appId);
+        // Wait for 30 seconds before retrieving the result directory
+        Thread.sleep(30 * 1000L);
         String resultDir = status.getResultDirectory();
-        return UuidUtils.parseUuid(resultDir);
+        
+        if (resultDir != null) {
+            return UuidUtils.parseUuid(resultDir);
+        } else {
+            log.warn(String.format("No result directory for modeling job %s", appId));
+            System.out.println(String.format("No result directory for modeling job %s", appId));
+            return null;
+        }
     }
-    
     
     private JobStatus waitForAppId(String appId) throws Exception {
         return waitForAppId(appId, builder.getRetrieveJobStatusUrl());
