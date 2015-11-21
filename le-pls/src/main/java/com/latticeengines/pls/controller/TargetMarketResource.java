@@ -20,7 +20,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/targetmarkets")
 @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
-public class TargetMarketReource {
+public class TargetMarketResource {
 
     @Autowired
     private TargetMarketService targetMarketService;
