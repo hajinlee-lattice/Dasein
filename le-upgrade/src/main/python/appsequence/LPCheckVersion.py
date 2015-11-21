@@ -59,7 +59,10 @@ class LPCheckVersion( StepBase ):
     if not lgm.hasLoadGroup('PushToLeadDestination_Step1'):
       return Applicability.cannotApplyFail
 
-    ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
+    if type in ('MKTO', 'ELQ'):
+      ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
+    else:
+      ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step2', 'targetQueries')
 
     appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type) )
     appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type) )
@@ -76,7 +79,7 @@ class LPCheckVersion( StepBase ):
     elif type == 'ELQ':
       s = re.search('<cm scn=\"C_Lattice_Predictive_Score1\" tcn=\"(.*?)\"/>', str)
     else:
-      s = re.search('<cm scn=\"C_Lattice_Predictive_Score1\" tcn=\"(.*?)\"/>', str)
+      s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', str)
 
     if not s:
       raise ValueError( 'Get the Score Field failed' )
@@ -88,7 +91,7 @@ class LPCheckVersion( StepBase ):
     elif type == 'ELQ':
       s = re.search('<cm scn=\"C_Lattice_LastScoreDate1\" tcn=\"(.*?)\"/>', str)
     else:
-      s = re.search('<cm scn=\"C_Lattice_LastScoreDate1\" tcn=\"(.*?)\"/>', str)
+      s = re.search('queryColumnName=\"C_Lattice_LastScoreDate1\" fsColumnName=\"(.*?)\"', str)
 
     if not s:
       raise ValueError( 'Get the ScoreDate Field failed' )
