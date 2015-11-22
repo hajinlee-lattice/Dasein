@@ -11,9 +11,11 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOption;
+import com.latticeengines.domain.exposed.pls.TargetMarketStatistics;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.TargetMarketDao;
 import com.latticeengines.pls.dao.TargetMarketDataFlowOptionDao;
+import com.latticeengines.pls.dao.TargetMarketStatisticsDao;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
@@ -26,26 +28,35 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
     @Autowired
     TargetMarketDataFlowOptionDao targetMarketDataflowOptionDao;
+    
+    @Autowired
+    TargetMarketStatisticsDao targetMarketStatisticsDao;
+    
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     @Override
     public BaseDao<TargetMarket> getDao() {
-        return targetMarketDao;
+        return this.targetMarketDao;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(TargetMarket targetMarket) {
-        TargetMarket targetMarketStored = targetMarketDao.findTargetMarketByName(targetMarket.getName());
+        TargetMarket targetMarketStored = this.targetMarketDao.findTargetMarketByName(targetMarket.getName());
         if (targetMarketStored != null) {
             throw new RuntimeException(String.format("Target market with name %s already exists",
                     targetMarket.getName()));
         }
         initializeForDatabaseEntry(targetMarket);
-        targetMarketDao.create(targetMarket);
+
+        TargetMarketStatistics targetMarketStatistics = targetMarket.getTargetMarketStatistics();
+        targetMarketStatistics.setPid(null);
+        this.targetMarketStatisticsDao.create(targetMarketStatistics);
+
+        this.targetMarketDao.create(targetMarket);
         for (TargetMarketDataFlowOption option : targetMarket.getRawDataFlowConfiguration()) {
-            targetMarketDataflowOptionDao.create(option);
+            this.targetMarketDataflowOptionDao.create(option);
         }
     }
 
@@ -53,20 +64,20 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteTargetMarketByName(String name) {
         TargetMarket targetMarket = targetMarketDao.findTargetMarketByName(name);
-        targetMarketDao.delete(targetMarket);
+        this.targetMarketDao.delete(targetMarket);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public TargetMarket findTargetMarketByName(String name) {
-        TargetMarket market = targetMarketDao.findTargetMarketByName(name);
+        TargetMarket market = this.targetMarketDao.findTargetMarketByName(name);
         return market;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<TargetMarket> getAllTargetMarkets() {
-        return targetMarketDao.findAll();
+        return this.targetMarketDao.findAll();
     }
 
     @Override
@@ -80,7 +91,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     }
 
     private void initializeForDatabaseEntry(TargetMarket targetMarket) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
+        Tenant tenant = this.tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
         targetMarket.setTenant(tenant);
         targetMarket.setTenantId(tenant.getPid());
         targetMarket.setPid(null);
@@ -89,6 +100,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
             option.setPid(null);
             option.setTargetMarket(targetMarket);
         }
+        
     }
 
 }
