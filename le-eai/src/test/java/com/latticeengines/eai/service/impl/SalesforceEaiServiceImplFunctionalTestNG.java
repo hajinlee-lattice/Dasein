@@ -18,7 +18,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
-import com.latticeengines.domain.exposed.functionalframework.StandaloneHttpServer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -27,6 +26,7 @@ import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.functionalframework.MetadataServlet;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
+import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
 public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestNGBase {
 

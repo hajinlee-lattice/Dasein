@@ -17,6 +17,7 @@
         <le.scheduler.version>2.0.17-SNAPSHOT</le.scheduler.version>
         <le.security.version>2.0.17-SNAPSHOT</le.security.version>
         <le.baton.version>2.0.17-SNAPSHOT</le.baton.version>
+        <le.testfwk.version>2.0.17-SNAPSHOT</le.testfwk.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <parquet.avro.version>1.4.3</parquet.avro.version>
         <avro.version>1.7.7</avro.version>
@@ -537,6 +538,13 @@
             <artifactId>jetty</artifactId>
             <version>6.1.26</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
         </dependency>
     </dependencies>
 </project>
