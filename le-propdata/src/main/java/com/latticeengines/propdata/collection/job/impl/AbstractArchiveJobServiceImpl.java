@@ -34,9 +34,15 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         int t;
-        for (t = 0; t < 100; t++) { if (tryExecuteInternal()) break; }
+        Logger log = getLogger();
+        for (t = 0; t < 100; t++) {
+            try {
+                if (tryExecuteInternal()) break;
+            } catch (Exception e) {
+                log.error("An archive job failed.");
+            }
+        }
         if (t == 100) {
-            Logger log = getLogger();
             log.error(fatal, String.format("A single job executed has retried %d times!", t));
         }
     }
@@ -58,7 +64,7 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
         setArchiveService(getArchiveService());
     }
 
-    private boolean tryExecuteInternal() throws JobExecutionException {
+    private boolean tryExecuteInternal() throws InterruptedException {
         Logger log = getLogger();
 
         CollectionJobContext jobCtx = archiveService.findRunningJob();
@@ -94,11 +100,7 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
             proceedProgress(jobCtx);
         }
 
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            throw new JobExecutionException(e);
-        }
+        Thread.sleep(10000L);
 
         return false;
     }

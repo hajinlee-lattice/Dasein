@@ -33,7 +33,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Value("${propdata.collection.mapred.reduce.tasks:8}")
     private int reduceTasks;
 
-    @Value("${propdata.collection.cascading.platform:mapred}")
+    @Value("${propdata.collection.cascading.platform:tez}")
     private String cascadingPlatform;
 
     @Override
@@ -59,7 +59,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     private DataFlowContext commonContext(String sourceName, Map<String, String> sources) {
         DataFlowContext ctx = new DataFlowContext();
-        if ("tez".equalsIgnoreCase(cascadingPlatform)) {
+        if ("mr".equalsIgnoreCase(cascadingPlatform)) {
+            ctx.setProperty("ENGINE", "MR");
+        } else {
             ctx.setProperty("ENGINE", "TEZ");
         }
         ctx.setProperty("SOURCES", sources);
