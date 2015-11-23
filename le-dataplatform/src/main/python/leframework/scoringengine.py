@@ -14,7 +14,7 @@ def decodeDataValue(serializedValueAndType):
     if len(serializedValue) > 0:
         serializedValue = serializedValue[1:-1]
         if serializedType == 'Float':
-            serializedValue = float(serializedValue)        
+            serializedValue = float(serializedValue)
     elif serializedType == "String":
         serializedValue = None
     else:
@@ -82,7 +82,7 @@ def getRowToScore(line):
  
 def predict(pipeline, rowDict):
     dataFrame = pd.DataFrame(rowDict)
-    targetColumn = pipeline.getPipeline()[2].targetColumn
+    targetColumn = pipeline.getPipeline()[2].targetColumn_
  
     if targetColumn in dataFrame.columns.values:
         dataFrame.drop(targetColumn, axis = 1, inplace = True)

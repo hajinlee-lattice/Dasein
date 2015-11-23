@@ -69,7 +69,7 @@ class DataCompositionGenerator(State):
         pipeline = self.getMediator().pipeline.getPipeline()
         # TODO Create a better mechanism for retrieving this step.
         step = next(x for x in pipeline if x.__class__.__name__ == "ImputationStep")
-        imputations = step._enumMappings
+        imputations = step.enumMappings_
     
         result = list()
         for name, details in fields.iteritems():

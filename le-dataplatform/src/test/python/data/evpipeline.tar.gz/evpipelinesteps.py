@@ -1,15 +1,11 @@
 import encoder
 import numpy as np
 import pandas as pd
-import random as rd
-from os import urandom
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
+import random as rd
 import statsmodels.tsa.ar_model as am
 
-from pipelinefwk import PipelineStep
-from pipelinefwk import get_logger
-from __builtin__ import True
 
 logger = get_logger("evpipeline")
  
@@ -37,14 +33,14 @@ def get_predicted_revenue(row, colList):
     return rev
  
 class EnumeratedColumnTransformStep(PipelineStep):
-    _enumMappings = {}
+    enumMappings_ = {}
  
     def __init__(self, enumMappings):
-        self._enumMappings = enumMappings
+        self.enumMappings_ = enumMappings
          
-    def transform(self, dataFrame, imputationValues = {}):
+    def transform(self, dataFrame):
         outputFrame = dataFrame
-        for column, encoder in self._enumMappings.iteritems():
+        for column, encoder in self.enumMappings_.iteritems():
             if hasattr(encoder, 'classes_'):
                 classSet = set(encoder.classes_.flat)
                 outputFrame[column] = outputFrame[column].map(lambda s: 'NULL' if s not in classSet else s)
@@ -62,7 +58,7 @@ class ColumnTypeConversionStep(PipelineStep):
     def __init__(self, columnsToConvert=[]):
         self.columnsToConvert_ = columnsToConvert
  
-    def transform(self, dataFrame, imputationValues = {}):
+    def transform(self, dataFrame):
         if len(self.columnsToConvert_) > 0:
             for column in self.columnsToConvert_:
                 if column in dataFrame and dataFrame[column].dtype == np.object_:
@@ -72,40 +68,37 @@ class ColumnTypeConversionStep(PipelineStep):
         return dataFrame
      
 class ImputationStep(PipelineStep):
-    _enumMappings = dict()
-    imputationValues = {}
-    targetColumn = ""
+    enumMappings_ = dict()
+    imputationValues_ = {}
+    targetColumn_ = ""
      
     def __init__(self, enumMappings, imputationValues, targetCol):
-        self._enumMappings = enumMappings
-        self.imputationValues = imputationValues
-        self.targetColumn = targetCol
+        self.enumMappings_ = enumMappings
+        self.imputationValues_ = imputationValues
+        self.targetColumn_ = targetCol
  
     def transform(self, dataFrame):
-        #self.imputationValues = imputationValues
-        outputFrame = dataFrame
- 
         calculateImputationValues = True
-        if len(self.imputationValues) != 0:
+        if len(self.imputationValues_) != 0:
             calculateImputationValues = False
                
         outputFrame, nullValues = self.generateIsNullColumns(dataFrame)
-        if len(self._enumMappings) > 0:
-            if self.targetColumn in outputFrame and calculateImputationValues == True:
-                expectedLabelValue = self.getExpectedLabelValue(outputFrame, self.targetColumn) 
+        if len(self.enumMappings_) > 0:
+            if self.targetColumn_ in outputFrame and calculateImputationValues == True:
+                expectedLabelValue = self.getExpectedLabelValue(outputFrame, self.targetColumn_) 
              
-            for column, value in self._enumMappings.iteritems():
+            for column, value in self.enumMappings_.iteritems():
                 if column in outputFrame:
                     if nullValues[column] > 0 and calculateImputationValues == True:
-                        imputationBins = self.createBins(outputFrame[column], outputFrame[self.targetColumn], 20)
+                        imputationBins = self.createBins(outputFrame[column], outputFrame[self.targetColumn_], 20)
                         imputationValue = self.matchValue(expectedLabelValue, imputationBins)
-                        self.imputationValues[column] = imputationValue
+                        self.imputationValues_[column] = imputationValue
  
                     try:
-                        outputFrame[column] = outputFrame[column].fillna(self.imputationValues[column])
+                        outputFrame[column] = outputFrame[column].fillna(self.imputationValues_[column])
                     except KeyError:
-                        self.imputationValues[column] = value
-                        outputFrame[column] = outputFrame[column].fillna(self.imputationValues[column])
+                        self.imputationValues_[column] = value
+                        outputFrame[column] = outputFrame[column].fillna(self.imputationValues_[column])
  
         return outputFrame
      
@@ -118,13 +111,12 @@ class ImputationStep(PipelineStep):
     def generateIsNullColumns(self, dataFrame):
         nullValues = {}
         outputFrame = dataFrame
-        if len(self._enumMappings) > 0:
-            for column, value in self._enumMappings.iteritems():
+        if len(self.enumMappings_) > 0:
+            for column, _ in self.enumMappings_.iteritems():
                 if column in outputFrame:
-                    isNullColumn, nullCount = self.getIsNullColumn(outputFrame[column])
+                    _, nullCount = self.getIsNullColumn(outputFrame[column])
                     if nullCount > 0:
                         nullValues[column] = nullCount
-                        #outputFrame[column + "_isNull"] = pd.Series(isNullColumn)
                     else:
                         nullValues[column] = 0
         return outputFrame, nullValues
@@ -150,14 +142,14 @@ class ImputationStep(PipelineStep):
         sp[numBins] = number
         return tuple(sp)
      
-    def meanValuePair(self, x,tupleSize=2):
+    def meanValuePair(self, x, tupleSize = 2):
         def mean(k):  return sum([float(y[k]) for y in x]) / len(x) / 1.0
         if tupleSize > 1: return [mean(k) for k in range(tupleSize)]
         return [sum(x) / 1.0 / len(x)]
  
     def createBins(self, x, y, numBins):
         if len(x) != len(y):
-             print "Warning: Number of records and number of labels are different."
+            print "Warning: Number of records and number of labels are different."
  
         pairs = []
         numberOfPoints = min(len(x), len(y))
@@ -174,7 +166,7 @@ class ImputationStep(PipelineStep):
         return pd.Series([mvPair(b) for b in range(len(indBins)-1)])
  
     def matchValue(self, yvalue, binPairs):
-        def absFn(x): return( x if x > 0 else (-x))
+        def absFn(x): return (x if x > 0 else (-x))
         def sgnFn(x):
             if x == 0:
                 return x
@@ -209,7 +201,7 @@ class EVModelStep(PipelineStep):
     def getRequiredProperties(self):
         return ["provenanceProperties"]
          
-    def transform(self, dataFrame, imputationValues = {}):
+    def transform(self, dataFrame):
         provenanceProps = self.props_["provenanceProperties"]
         colList = provenanceProps["EVModelColumns"].split(",")
         colList = [x for x in colList if x in dataFrame]
