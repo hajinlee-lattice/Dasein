@@ -47,13 +47,13 @@
                         </mapping>
                     </mappings>
                     <preremoveScriptlet>
-                        <scriptFile>src/main/scripts/preremove</scriptFile>
+                        <scriptFile>src/main/resourcesscripts/preremove</scriptFile>
                     </preremoveScriptlet>
                     <preinstallScriptlet>
-                        <scriptFile>src/main/scripts/preinstall</scriptFile>
+                        <scriptFile>src/main/resources/scripts/preinstall</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>src/main/scripts/postinstall</scriptFile>
+                        <scriptFile>src/main/resources/scripts/postinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>
