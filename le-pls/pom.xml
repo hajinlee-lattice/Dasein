@@ -19,6 +19,7 @@
         <le.monitor.version>2.0.17-SNAPSHOT</le.monitor.version>
         <le.liaison.version>2.0.17-SNAPSHOT</le.liaison.version>
         <le.swlib.version>2.0.17-SNAPSHOT</le.swlib.version>
+        <le.testfwk.version>2.0.17-SNAPSHOT</le.testfwk.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
@@ -479,10 +480,11 @@
             <version>1.5.4</version>
         </dependency>
         <dependency>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>jetty</artifactId>
-            <version>6.1.26</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
             <scope>test</scope>
+            <classifier>tests</classifier>
         </dependency>
     </dependencies>
 
