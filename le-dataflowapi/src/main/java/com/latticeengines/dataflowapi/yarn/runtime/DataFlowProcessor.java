@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -43,6 +44,12 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
     @Autowired
     private MetadataProxy proxy;
+
+    @Value("${dataflowapi.checkpoint:false}")
+    private boolean checkpoint;
+
+    @Value("${dataflowapi.engine:TEZ}")
+    private String engine;
 
     public DataFlowProcessor() {
         super();
@@ -94,9 +101,9 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty("TARGETPATH", targetPath);
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", dataFlowConfig.getDataFlowBeanName());
-        ctx.setProperty("CHECKPOINT", false);
+        ctx.setProperty("CHECKPOINT", checkpoint);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty("ENGINE", engine);
         ctx.setProperty("APPCTX", appContext);
         ctx.setProperty("PARAMETERS", dataFlowConfig.getDataFlowParameters());
         log.info(String.format("Running data transform with bean %s", dataFlowConfig.getDataFlowBeanName()));
