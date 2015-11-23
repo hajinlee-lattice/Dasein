@@ -1,0 +1,6 @@
+#!/bin/bash -x
+if [ ! -d "/opt/node/latest" ]; then
+    mkdir -p /opt/node/latest
+rm -rf /opt/node/latest/*
+adduser yarn
+groupadd yarn

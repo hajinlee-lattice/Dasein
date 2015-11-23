@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.latticeengines</groupId>
+    <artifactId>le-ui-rpm</artifactId>
+    <packaging>rpm</packaging>
+    <version>2.0.17-SNAPSHOT</version>
+    <description>LE UI RPM</description>
+
+    <properties>
+        <le.rpm.version>2.0.17-SNAPSHOT</le.rpm.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1-alpha-4</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- license>GPL (c) 2005, SWWDC</license -->
+                    <!--distribution>Trash 2005</distribution -->
+                    <group>Application/Collectors</group>
+                    <!-- prefix>/usr/local</prefix -->
+                    <changelogFile>src/main/resources/changelog</changelogFile>
+                    <mappings>
+                        <mapping>
+                            <directory>/opt/node/latest</directory>
+                            <filemode>755</filemode>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
+                            <sources>
+                                <source>
+                                    <location>.</location>
+                                    <excludes>
+                                        <exclude>
+                                            **/test/**
+                                        </exclude>
+                                    </excludes>
+                                </source>
+                            </sources>
+                        </mapping>
+                    </mappings>
+                    <preremoveScriptlet>
+                        <scriptFile>src/main/scripts/preremove</scriptFile>
+                    </preremoveScriptlet>
+                    <preinstallScriptlet>
+                        <scriptFile>src/main/scripts/preinstall</scriptFile>
+                    </preinstallScriptlet>
+                    <postinstallScriptlet>
+                        <scriptFile>src/main/scripts/postinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
+                    </postinstallScriptlet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
