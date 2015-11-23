@@ -16,6 +16,7 @@
 
     <modules>
         <module>le-common</module>
+        <module>le-testframework</module>
         <module>le-microservice</module>
         <module>le-domain</module>
         <module>le-remote</module>
