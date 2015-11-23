@@ -51,31 +51,33 @@
                         <label class="control-label">
                             Products
                         </label>
-                        <div ng-repeat="product in availableProducts">
+                        <div ng-repeat="product in availableProductsNames">
                             <div class="action-checkbox">
-                                <input id="{{product}}" type="checkbox" value="{{product}}" ng-checked="selectedProducts.indexOf(product) > -1" ng-click="toggleSelection(product)" />
+                                <input id="{{product}}" type="checkbox" value="{{product}}" ng-checked="selectedProductNames.indexOf(product) > -1" ng-click="toggleSelection(product)" />
                                 <label for="{{product}}"></label>
                                 {{product}}
                             </div>
                         </div>
                     </div>
-                    <div class="col col-md-12 col-sm-12 col-xs-12">
-                        <label class="control-label">
-                            CRM Topology
-                        </label>
-                        <select class="form-control"
-                                ng-options="option for option in availableTopologies"
-                                ng-model="spaceConfig.Topology">
-                        </select>
-                    </div>
-                    <div class="col col-md-12 col-sm-12 col-xs-12">
-                        <label class="control-label">
-                            Data Loader URL
-                        </label>
-                        <select class="form-control"
-                                ng-options="option for option in availableDLAddresses"
-                                ng-model="spaceConfig.DL_Address">
-                        </select>
+                    <div ng-show = LPAisSelected(selectedProducts)>
+	                    <div class="col col-md-12 col-sm-12 col-xs-12">
+	                        <label class="control-label">
+	                            CRM Topology
+	                        </label>
+	                        <select class="form-control"
+	                                ng-options="option for option in availableTopologies"
+	                                ng-model="spaceConfig.Topology">
+	                        </select>
+	                    </div>
+	                    <div class="col col-md-12 col-sm-12 col-xs-12">
+	                        <label class="control-label">
+	                            Data Loader URL
+	                        </label>
+	                        <select class="form-control"
+	                                ng-options="option for option in availableDLAddresses"
+	                                ng-model="spaceConfig.DL_Address">
+	                        </select>
+	                    </div>
                     </div>
                 </div>
             </form>
@@ -86,18 +88,23 @@
                             {{ product }}
                         </div>
                 </div>
-                <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
-                    <span class="node">Topology</span> :
-                    {{ spaceConfig.Topology }}
-                </div>
-                <div class="col col-md-12 col-sm-12 col-xs-12 readonly-config-entry">
-                    <span class="node">Data Loader URL</span> :
-                    {{ spaceConfig.DL_Address }}
+                <div ng-show = LPAisSelected(selectedProducts)>
+	                <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
+	                    <span class="node">Topology</span> :
+	                    {{ spaceConfig.Topology }}
+	                </div>
+	                <div class="col col-md-12 col-sm-12 col-xs-12 readonly-config-entry">
+	                    <span class="node">Data Loader URL</span> :
+	                    {{ spaceConfig.DL_Address }}
+	                </div>
                 </div>
             </form>
             <br>
             <h4>Feature Flags</h4>
-            <feature-flag flag="featureFlags.Dante" name="Dante" readonly="readonly"></feature-flag>
+            <div ng-repeat="featureFlag in selectedFeatureFlags">
+                <feature-flag show={{!featureFlag.Configurable}} flag="featureFlag.Value" name={{featureFlag.DisplayName}} readonly="readonly"></feature-flag>
+            </div>
+
         </div>
     </div>
     <div ng-show="loading">
@@ -110,7 +117,7 @@
         <br/>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages below.</p>
         <br/>
-        <components-config data="components" readonly="readonly" is-valid="isValid"></components-config>
+        <components-config data="selectedComponents" readonly="readonly" is-valid="isValid"></components-config>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages above.</p>
         <button class="btn btn-primary" ng-if="new" ng-disabled="!isValid.valid" ng-click="onSaveClick()">INSTALL</button>
         <button class="btn btn-primary" ng-if="!new" ng-click="onDeleteClick()"><i class="fa fa-trash-o"></i> DELETE</button>

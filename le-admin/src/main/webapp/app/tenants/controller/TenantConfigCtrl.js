@@ -38,11 +38,18 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     // system-wise options
     //==================================================
     $scope.availableProducts = ["Lead Prioritization"];
+    $scope.availableProductsNames = ["Lead Prioritization"];
     $scope.availableTopologies = ["Marketo"];
     $scope.availableDLAddresses = ["http://bodcdevvint207.dev.lattice.local:8081"];
     $scope.services = [];
+    $scope.servicesWithProducts = [];
+    $scope.featureFlagDefinitions = [];
+    $scope.selectedFeatureFlags = [];
+    $scope.selectedComponents = [];
     updateAvailableProducts();
     updateSpaceConfigurationOptions();
+    getAvailableFeatureFlags();
+    getAvailableComponents();
 
 
     //==================================================
@@ -53,6 +60,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     });
     $scope.components = [];
     $scope.isValid = {valid: true};
+    $scope.selectedProductNames=[];
     $scope.selectedProducts=[];
 
 
@@ -77,19 +85,21 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     // other definitions
     //==================================================
     $scope.onSaveClick = function(){
-        $scope.spaceConfig.Products = $scope.selectedProducts;
+        $scope.spaceConfig.Products = $scope.selectedProductNames;
         var infos = {
             CustomerSpaceInfo: $scope.spaceInfo,
             TenantInfo: $scope.tenantInfo
         };
 
+        $scope.featureFlags = _.object(_.map($scope.selectedFeatureFlags, function(x){return [x.DisplayName, x.Value];}));
+        console.log("featureFlags are: " + $scope.featureFlags);
+
         $scope.tenantRegisration =
-            TenantUtility.constructTenantRegistration($scope.components,
+            TenantUtility.constructTenantRegistration($scope.selectedComponents,
                 $scope.tenantId, $scope.contractId, infos, $scope.spaceConfig, $scope.featureFlags);
 
         popInstallConfirmationModal();
     };
-
 
     $scope.onDeleteClick = function(){ popDeleteConfirmationModal(); };
 
@@ -99,15 +109,68 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         data.callback(derivedValue);
     });
     
-    $scope.toggleSelection = function toggleSelection(product) {
-        var idx = $scope.selectedProducts.indexOf(product);
+    $scope.toggleSelection = function toggleSelection(productName) {
+        var idx = $scope.selectedProductNames.indexOf(productName);
         if (idx > -1) {
+          $scope.selectedProductNames.splice(idx, 1);
           $scope.selectedProducts.splice(idx, 1);
         }
         else {
-          $scope.selectedProducts.push(product);
+          $scope.selectedProductNames.push(productName);
+          // add the selected product object into selectedProducts
+          _.each($scope.availableProducts, function(product){
+              if (product.name === productName) {
+                  $scope.selectedProducts.push(product);
+              }
+          });
         }
-      };
+        
+        getSelecetedFeatureFlags($scope.selectedProducts);
+        getSelectedComponents($scope.selectedProducts, $scope.components);
+    };
+
+    $scope.LPAisSelected = function LPAisSelected(selectedProducts) {
+        for (var i = 0; i < selectedProducts.length; i++) {
+            if (selectedProducts[i].name === "Lead Prioritization") {
+                return true;
+            }
+        }
+        return false;
+    };
+    
+    function getSelecetedFeatureFlags(selectedProducts) {
+        $scope.selectedFeatureFlags = [];
+        _.each(selectedProducts, function(selectedProduct){
+            $scope.selectedFeatureFlags = $scope.selectedFeatureFlags.concat(selectedProduct.featureFlags);
+        });
+    }
+    
+    function getSelectedComponents(selectedProducts, components) {
+        $scope.selectedComponents = [];
+        _.each(selectedProducts, function(selectedProduct){
+            var selectedComponentNames = selectedProduct.components;
+            _.each(selectedComponentNames, function(selectedComponentName){
+                _.each(components, function(component){
+                    if (component.Component === selectedComponentName) {
+                        if (!containsObject(component, $scope.selectedComponents)) {
+                            $scope.selectedComponents.push(component);
+                        }
+                    }
+                });
+            });
+        });
+        console.log($scope.selectedComponents);
+    }
+    
+    function containsObject(obj, list) {
+        var i;
+        for (i = 0; i < list.length; i++) {
+            if (list[i] === obj) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     function constructNewPage() {
         $scope.spaceInfo = {
@@ -117,9 +180,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             },
             featureFlags: ""
         };
-        $scope.featureFlags = {
-            Dante: false
-        };
+
         $scope.tenantInfo = {
             properties: {
                 displayName: $scope.tenantId,
@@ -169,19 +230,23 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 $scope.contractInfo = result1.resultObj.ContractInfo;
                 $scope.tenantInfo = result1.resultObj.TenantInfo;
                 $scope.spaceConfig = result1.resultObj.SpaceConfiguration;
-
+                
                 try {
-                    $scope.featureFlags = JSON.parse($scope.spaceInfo.featureFlags);
+                    $scope.selectedFeatureFlagMap = JSON.parse($scope.spaceInfo.featureFlags);
                 } catch (err) {
-                    $scope.featureFlags = "";
+                    $scope.selectedFeatureFlagMap = "";
                 }
+                console.log($scope.selectedFeatureFlagMap);
+                console.log($scope.featureFlagDefinitions);
+                constructSelectedFeatureFlagsInViewPage();
 
                 ServiceService.GetRegisteredServices().then( function(result2) {
                     if (result2.success) {
                         $scope.services = result2.resultObj;
                         $scope.componentsToScan = $scope.services.length;
-                        _.each($scope.services, function(service){
-                            if (!$scope.featureFlags.Dante && service === "Dante") {
+                        console.log($scope.selectedComponents);
+                        _.each($scope.services, function(service) {
+                            if (!$scope.selectedFeatureFlagMap.Dante && service === "Dante") {
                                 $scope.componentsToScan--;
                                 return;
                             }
@@ -198,7 +263,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                                             Message: result.errorMsg
                                         };
                                     }
-                                    $scope.components.push(component);
+                                    $scope.selectedComponents.push(component);
                                     if ($scope.componentsToScan <= 0) {
                                         if ($scope.listenState) updateServiceStatus();
                                         $scope.loading = false;
@@ -213,6 +278,20 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 });
             }
         });
+    }
+    
+    function constructSelectedFeatureFlagsInViewPage() {
+        $scope.selectedFeatureFlags = [];
+        for (var selectedFeatureFlag in $scope.selectedFeatureFlagMap) {
+            value = $scope.selectedFeatureFlagMap[selectedFeatureFlag];
+            if (!$scope.featureFlagDefinitions.hasOwnProperty(selectedFeatureFlag)) {
+                console.warn("FeatureFlag: " + selectedFeatureFlag + " has not been defined.");
+            } else {
+                var featureFlag = $scope.featureFlagDefinitions[selectedFeatureFlag];
+                featureFlag.Value = $scope.selectedFeatureFlagMap[selectedFeatureFlag];
+                $scope.selectedFeatureFlags.push(featureFlag);
+            }
+        }
     }
 
     function popInstallConfirmationModal() {
@@ -328,11 +407,87 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
 
     // get $scope.availableProducts through REST call
     function updateAvailableProducts() {
-        ServiceService.GetAvailableProducts().then(function(result1) {
-            if (result1.success) {
-                $scope.availableProducts = result1.resultObj;
+        ServiceService.GetAvailableProducts().then(function(result) {
+            if (result.success) {
+                $scope.availableProductsNames = result.resultObj;
+                $scope.availableProducts = [];
+                _.each($scope.availableProductsNames, function(availableProductName) {
+                    var availableProduct = {};
+                    availableProduct.name = availableProductName;
+                    availableProduct.featureFlags = [];
+                    availableProduct.components = [];
+                    $scope.availableProducts.push(availableProduct);
+                });
+            } else {
+                console.log("Getting available products service error");
             }
         });
+    }
+
+    function getAvailableFeatureFlags() {
+        ServiceService.GetFeatureFlagDefinitions().then(function(result) {
+            if (result.success) {
+                $scope.featureFlagDefinitions = result.resultObj;
+                parseFeatureFlagDefinitions($scope.featureFlagDefinitions);
+            } else {
+                console.log("Getting available feature flags service error");
+            }
+        });
+    }
+    
+    function parseFeatureFlagDefinitions(featureFlagDefinitions) {
+        if (featureFlagDefinitions === null) {
+            return;
+        } else {
+            _.each(featureFlagDefinitions, function(featureFlag){
+                // initilize its value
+                featureFlag.Value = defaultFeatureFlagValue(featureFlag);
+                if (featureFlag.AvailableProducts !== null) {
+                    _.each(featureFlag.AvailableProducts, function(product){
+                        _.each($scope.availableProducts, function(availableProduct){
+                            if (availableProduct.name === product) {
+                                availableProduct.featureFlags.push(featureFlag);
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        console.log("parseFeatureFlagDefinitions" + $scope.availableProducts);
+    }
+    
+    function defaultFeatureFlagValue(featureFlag) {
+        if (featureFlag.DisplayName === "Dante") {
+            return true;
+        }
+        if (!featureFlag.Configurable) {
+            return true;
+        }
+        return false;
+    }
+    
+    function getAvailableComponents() {
+        ServiceService.GetRegisteredServicesWithAssociatedProducts().then( function(result) {
+            if (result.success) {
+                $scope.servicesWithProducts = result.resultObj;
+                _.each($scope.availableProducts, function(availableProduct){
+                  var componentNames = Object.keys($scope.servicesWithProducts);
+                  for (var i = 0; i < componentNames.length; i++) {
+                      var componentName = componentNames[i];
+                      var products = $scope.servicesWithProducts[componentName];
+                      for (var j = 0; j < products.length; j++) {
+                          if (products[j] === availableProduct.name) {
+                              availableProduct.components.push(componentName);
+                          }
+                      }
+                  }
+             });
+            }
+            else {
+                console.log("Getting available components service error");
+            }
+        });
+        console.log("getAvailableComponents " + $scope.availableProducts);
     }
 
     function updateSpaceConfigurationOptions() {
@@ -344,9 +499,6 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                         case "DL_Address":
                             $scope.availableDLAddresses = node.Options;
                             break;
-//                        case "Product":
-//                            $scope.availableProducts = node.Options;
-//                            break;
                         case "Topology":
                             $scope.availableTopologies = node.Options;
                             break;

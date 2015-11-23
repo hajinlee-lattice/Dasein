@@ -131,12 +131,12 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         featureFlagService.defineFlag(FLAG_ID, definition);
         try {
             featureFlagService.setFlag(TestTenantId, FLAG_ID, true);
-            Assert.fail("Should have thrown exception.");
         } catch (Exception e) {
-            Assert.assertTrue(true, "TestFlag should NOT have been set since it is not configurable.");
+            Assert.fail("TestFlag should have been set even it not configurable, since configurability"
+                    + "only has something to do with the UI in tenant console");
         }
         flags = featureFlagService.getFlags(TestTenantId);
-        Assert.assertFalse(flags.containsKey(FLAG_ID), "TestFlag should have NOT been set.");
+        Assert.assertTrue(flags.containsKey(FLAG_ID), "TestFlag should have been set.");
     }
 
 }

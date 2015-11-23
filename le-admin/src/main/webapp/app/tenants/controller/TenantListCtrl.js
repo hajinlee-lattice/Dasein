@@ -68,8 +68,8 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                 {field: "TenantId", title: "Tenant ID"},
                 {field: "ContractId", title: "Contract ID"},
                 {field: "DisplayName", title: "Tenant Name"},
-                {field: "CreatedDate", title: "Created Date", format: "{0:yyyy-MMM-dd }"},
-                {field: "LastModifiedDate", title: "Last Modified Date", format: "{0:yyyy-MMM-dd }", width: 150},
+                {field: "CreatedDate", title: "Created Date", format: "{0:yyyy-MM-dd HH:mm:ss }"},
+                {field: "LastModifiedDate", title: "Last Modified Date", format: "{0:yyyy-MM-dd HH:mm:ss }", width: 150},
                 "Product",
                 {
                     field: "Status",

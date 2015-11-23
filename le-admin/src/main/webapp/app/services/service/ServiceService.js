@@ -6,6 +6,7 @@ var app = angular.module("app.services.service.ServiceService", [
 app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
 
     this.registeredServices = null;
+    this.registeredServicesWithAssociatedProducts = null;
 
     function cacheServiceList(services) {
         this.registeredServices = services;
@@ -14,6 +15,13 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
         }, 60000);
     }
 
+    function cacheServiceAndProductsList(servicesAndProducts) {
+        this.registeredServicesWithAssociatedProducts = servicesAndProducts;
+        $interval(function() {
+            this.registeredServicesWithAssociatedProducts = null;
+        }, 60000);
+    }
+    
     this.spaceConfigOptions = null;
 
     function cacheSpaceConfigOptions(services) {
@@ -45,6 +53,34 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
             });
         } else {
             result.resultObj = this.registeredServices;
+            defer.resolve(result);
+        }
+
+        return defer.promise;
+    };
+
+    this.GetRegisteredServicesWithAssociatedProducts = function() {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        if (this.registeredServicesWithAssociatedProducts === null) {
+            $http({
+                method: 'GET',
+                url: '/admin/services/products'
+            }).success(function (data) {
+                cacheServiceAndProductsList(data);
+                result.resultObj = data;
+                defer.resolve(result);
+            }).error(function (err, status) {
+                SessionUtility.handleAJAXError(err, status);
+            });
+        } else {
+            result.resultObj = this.registeredServicesWithAssociatedProducts;
             defer.resolve(result);
         }
 
@@ -123,6 +159,28 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
         $http({
             method: 'GET',
             url: '/admin/tenants/products'
+        }).success(function (data) {
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function (err, status) {
+            SessionUtility.handleAJAXError(err, status);
+        });
+
+        return defer.promise;
+    };
+    
+    this.GetFeatureFlagDefinitions = function() {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'GET',
+            url: '/admin/featureflags/'
         }).success(function (data) {
             result.resultObj = data;
             defer.resolve(result);
