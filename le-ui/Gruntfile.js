@@ -94,7 +94,7 @@ module.exports = function (grunt) {
     var qaText = 'Run Express Server, using API Endpoints on 52';
     grunt.registerTask('qa', qaText, [
         'env:qa',
-        'nodemon'
+        'run:nodemon'
     ]);
 
     var text = 'Kill all node.exe on windows';
