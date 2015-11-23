@@ -47,7 +47,7 @@
                         </mapping>
                     </mappings>
                     <preremoveScriptlet>
-                        <scriptFile>src/main/resourcesscripts/preremove</scriptFile>
+                        <scriptFile>src/main/resources/scripts/preremove</scriptFile>
                     </preremoveScriptlet>
                     <preinstallScriptlet>
                         <scriptFile>src/main/resources/scripts/preinstall</scriptFile>
