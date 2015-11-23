@@ -58,7 +58,7 @@ public class ConfigurationBagUnitTestNG {
         option = new TestOption(OptionName.testDouble.toString(), "123.123");
         options.add(option);
 
-        bag = new ConfigurationBag(List.class.cast(options));
+        bag = new ConfigurationBag<TestOption, OptionName>(List.class.cast(options));
     }
 
     @Test(groups = "unit")
