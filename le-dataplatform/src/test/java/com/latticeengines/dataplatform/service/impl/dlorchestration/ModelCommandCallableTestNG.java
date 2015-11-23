@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
-import com.latticeengines.domain.exposed.functionalframework.StandaloneHttpServer;
+import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
 @ContextConfiguration(locations = { "classpath:dataplatform-dlorchestration-quartz-context.xml" })
 public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase {

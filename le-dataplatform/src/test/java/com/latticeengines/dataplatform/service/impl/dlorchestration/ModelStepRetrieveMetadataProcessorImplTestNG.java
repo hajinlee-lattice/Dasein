@@ -32,7 +32,8 @@ import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.functionalframework.StandaloneHttpServer;
+import com.latticeengines.testframework.rest.StandaloneHttpServer;
+
 
 @SuppressWarnings("unused")
 public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {

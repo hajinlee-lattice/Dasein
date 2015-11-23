@@ -19,6 +19,7 @@
         <le.monitor.version>2.0.17-SNAPSHOT</le.monitor.version>
         <le.remote.version>2.0.17-SNAPSHOT</le.remote.version>
         <le.swlib.version>2.0.17-SNAPSHOT</le.swlib.version>
+        <le.testfwk.version>2.0.17-SNAPSHOT</le.testfwk.version>
     </properties>
 
     <parent>
@@ -497,6 +498,13 @@
             <artifactId>le-swlib</artifactId>
             <version>${le.swlib.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
         </dependency>
     </dependencies>
 

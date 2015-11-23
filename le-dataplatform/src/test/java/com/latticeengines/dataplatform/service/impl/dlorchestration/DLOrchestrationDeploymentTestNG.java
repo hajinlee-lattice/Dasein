@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
-import com.latticeengines.domain.exposed.functionalframework.StandaloneHttpServer;
+import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
 public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContextTests {
