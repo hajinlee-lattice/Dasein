@@ -113,7 +113,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         var idx = $scope.selectedProductNames.indexOf(productName);
         if (idx > -1) {
           $scope.selectedProductNames.splice(idx, 1);
-          $scope.selectedProducts.splice(idx, 1);
+          $scope.selectedProducts = _.reject($scope.selectedProducts, function(product) { return product.name === productName; });
         }
         else {
           $scope.selectedProductNames.push(productName);
