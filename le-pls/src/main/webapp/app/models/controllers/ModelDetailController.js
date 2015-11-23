@@ -43,7 +43,8 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
             model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
             model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
-            model.BottomSample = ModelService.FormatLeadSampleData(model.BottomSample);
+            var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
+            model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
             model.TotalAttributeValues = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
 
             thresholdData = ThresholdExplorerService.PrepareData(model);
@@ -63,4 +64,12 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             });
         }
     });
+    
+    function filterHighScoresInBottomLeads(bottomLeads) {
+        if (bottomLeads === null) {
+            return bottomLeads;
+        }
+        var toReturn = _.reject(bottomLeads, function(bottomLead){ return bottomLead.Score > 10; });
+        return toReturn;
+    }
 });
