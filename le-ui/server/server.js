@@ -46,16 +46,20 @@ class Server {
                 const url = API_URL + '/pls' + req.url;
                 let r = null;
 
-                if (req.method === 'POST') {
-                    r = request.post({ 
-                        uri: url, 
-                        json: req.body 
-                    });
-                } else {
-                    r = request(url);
-                }
+                try {
+                    if (req.method === 'POST') {
+                        r = request.post({ 
+                            uri: url, 
+                            json: req.body 
+                        });
+                    } else {
+                        r = request(url);
+                    }
 
-                req.pipe(r).pipe(res);
+                    req.pipe(r).pipe(res);
+                } catch(err) {
+                    console.log(err.msg);
+                }
             });
         }
     }

@@ -1,4 +1,4 @@
-angular.module('mainApp.targetMarkets.services.TargetMarketService', [
+angular.module('mainApp.markets.services.TargetMarketService', [
 ])
 .service('TargetMarketService', function($http, $q) {
     

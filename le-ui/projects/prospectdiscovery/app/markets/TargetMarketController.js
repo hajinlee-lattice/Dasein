@@ -1,5 +1,5 @@
-angular.module('mainApp.targetMarkets.controllers.TargetMarketController', [
-    'mainApp.targetMarkets.services.TargetMarketService'
+angular.module('mainApp.markets.controllers.TargetMarketController', [
+    'mainApp.markets.services.TargetMarketService'
 ])
 .controller('TargetMarketController', function($scope, $rootScope, TargetMarketService) {
     $scope.targetMarkets;

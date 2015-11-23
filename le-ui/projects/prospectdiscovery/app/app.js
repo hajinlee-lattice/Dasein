@@ -10,6 +10,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.core.services.HelpService',
     'mainApp.core.controllers.MainHeaderController',
     'mainApp.core.controllers.MainViewController',
+    'mainApp.main.controllers.MainNavigationController',
     'mainApp.login.services.LoginService',
     'mainApp.config.services.ConfigService',
     'mainApp.appCommon.modals.SimpleModal'
@@ -20,17 +21,29 @@ var mainApp = angular.module('mainApp', [
         .when('/', { 
             templateUrl: './app/main/MainView.html' 
         })
+        .when('/insights', { 
+            templateUrl: './app/insights/InsightsView.html'
+        })
+        .when('/markets', { 
+            templateUrl: './app/markets/TargetMarketView.html'
+        })
+        .when('/reports', { 
+            templateUrl: './app/reports/ReportsView.html'
+        })
+        .when('/admin', { 
+            templateUrl: './app/admin/AdminView.html'
+        })
         .when('/import', { 
             templateUrl: './app/import/form.html' 
+        })
+        .when('/import/file', { 
+            templateUrl: './app/import/file.html' 
         })
         .when('/import/process', { 
             templateUrl: './app/import/process.html' 
         })
         .when('/import/ready', { 
             templateUrl: './app/import/ready.html' 
-        })
-        .when('/markets', { 
-            templateUrl: './app/markets/TargetMarketView.html' 
         })
         .otherwise({ 
             template: '/' 
@@ -69,9 +82,13 @@ var mainApp = angular.module('mainApp', [
         console.log('init',hasSessionTimedOut(),previousSession);
 
         if (previousSession != null && !hasSessionTimedOut()) {
-            $http.get('./app/main/MainHeaderView.html').success(function (html) {
+            $http.get('./app/header/HeaderView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainHeaderView").html(html))(scope);
+            });
+            $http.get('./app/subnav/SubNavView.html').success(function (html) {
+                var scope = $rootScope.$new();
+                $compile($("#mainNavigationView").html(html))(scope);
             });
 
             $scope.refreshPreviousSession(previousSession.Tenant);
@@ -198,7 +215,7 @@ var mainApp = angular.module('mainApp', [
             animation: true,
             backdrop: false,
             scope: $scope,
-            templateUrl: 'app/views/WarningModal.html'
+            templateUrl: 'app/main/WarningModal.html'
         });
 
         $scope.refreshSession = function() {

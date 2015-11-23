@@ -25,20 +25,21 @@
     <link rel="stylesheet" type="text/css" href="/lib/css/jquery.qtip.css"/>
     <link rel="stylesheet" type="text/css" href="/lib/css/font-awesome.css"/>
 
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.mobile.all.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.dataviz.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.mobile.all.min.css">
 
     <link href="assets/styles/production.css" rel="stylesheet" type="text/css" />
     <!-- /build -->
 
 </head>
-<body data-ng-controller="MainController" style="background:#f5f5f5;">
+<body data-ng-controller="MainController" style="background:#fff;">
     <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
     <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
     <div id="mainHeaderView"></div>
+    <div id="mainNavigationView"></div>
     <div id="mainContentView" data-ng-view class="container"></div>
     <div class="footer" data-ng-show="showFooter">
         © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
@@ -52,8 +53,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 
 <script type="text/javascript">
     WebFontConfig = {
-        google: { families: [ 'Open Sans' ]
-        }
+        google: { families: [ 'Open Sans' ] }
     };
 </script>
 
@@ -61,7 +61,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script type="text/javascript">
     (function() {
         var wf = document.createElement('script');
-        wf.src = 'lib/js/webfontloader.js';
+        wf.src = '/lib/js/webfontloader.js';
         wf.type = 'text/javascript';
         wf.async = 'true';
         var s = document.getElementsByTagName('script')[0];
@@ -88,10 +88,10 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="/lib/js/d3.js"></script>
 <script src="/lib/js/jstorage.js"></script>
 <!--
-<script src="lib/js/alasql.min.js"></script>
-<script src="lib/js/FileSaver.js"></script>
+<script src="/lib/js/alasql.min.js"></script>
+<script src="/lib/js/FileSaver.js"></script>
 -->
-<script src="lib/js/kendo.all.min.js"></script>
+<script src="/lib/js/kendo.all.min.js"></script>
 
 <!-- self-host vendors -->
 <script src="/app/vendor/date.format.js"></script>
@@ -125,10 +125,14 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/services/FeatureFlagService.js"></script>
 <script src="app/services/ConfigService.js"></script>
 <script src="app/services/HelpService.js"></script>
-<script src="app/main/MainHeaderController.js"></script>
-<script src="app/main/MainViewController.js"></script>
+<script src="app/header/HeaderController.js"></script>
+<script src="app/main/MainController.js"></script>
+<script src="app/subnav/SubNavController.js"></script>
 <script src="app/import/ManageCredentialsController.js"></script>
 <script src="/app/modals/SimpleModal.js"></script>
+<script src="app/insights/InsightsController.js"></script>
+<script src="app/reports/ReportsController.js"></script>
+<script src="app/admin/AdminController.js"></script>
 <script src="app/markets/TargetMarketController.js"></script>
 <script src="app/markets/TargetMarketService.js"></script>
 <!--
@@ -232,15 +236,15 @@ Use DOMUtil.isIE() to detect internet explorer.
         {path:cdnroot + "angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap.min.js", fallback:"/lib/js/ui-bootstrap.js"},
         {path:cdnroot + "angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.min.js", fallback:"/lib/js/ui-bootstrap-tpls.js"},
         {path:cdnroot + "qtip2/<%= version.qtip2 %>/jquery.qtip.min.js", fallback:"/lib/js/jquery.qtip.js"},
-        {path:cdnroot + "underscore.js/<%= version.underscore %>/underscore-min.js", fallback:"lib/js/underscore.js"},
+        {path:cdnroot + "underscore.js/<%= version.underscore %>/underscore-min.js", fallback:"/lib/js/underscore.js"},
         {path:cdnroot + "twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js", fallback:"/lib/js/bootstrap.js"},
         {path:cdnroot + "d3/<%= version.d3 %>/d3.min.js", fallback:"/lib/js/d3.js"},
         {path:cdnroot + "jStorage/<%= version.jStorage %>/jstorage.min.js", fallback:"/lib/js/jstorage.js"},
-        {path:cdnroot + "alasql/<%= version.alasql %>/alasql.min.js", fallback:"lib/js/alasql.min.js"},
-        {path:cdnroot + "FileSaver.js/<%= version.FileSaver %>/FileSaver.min.js", fallback:"lib/js/FileSaver.js"},
-        {path:"//kendo.cdn.telerik.com/<%= version.kendo %>/js/kendo.all.min.js", fallback:"lib/js/kendo.all.min.js"},
+        {path:cdnroot + "alasql/<%= version.alasql %>/alasql.min.js", fallback:"/lib/js/alasql.min.js"},
+        {path:cdnroot + "FileSaver.js/<%= version.FileSaver %>/FileSaver.min.js", fallback:"/lib/js/FileSaver.js"},
+        {path:"//kendo.cdn.telerik.com/<%= version.kendo %>/js/kendo.all.min.js", fallback:"/lib/js/kendo.all.min.js"},
 
-        {path:cdnroot + "webfont/<%= version.webfont %>/webfontloader.js", fallback:"lib/js/webfontloader.js"},
+        {path:cdnroot + "webfont/<%= version.webfont %>/webfontloader.js", fallback:"/lib/js/webfontloader.js"},
 
         {path:"app/production_<%= versionString %>.min.js", fallback:"app/production_<%= versionString %>.min.js"}
     ];
