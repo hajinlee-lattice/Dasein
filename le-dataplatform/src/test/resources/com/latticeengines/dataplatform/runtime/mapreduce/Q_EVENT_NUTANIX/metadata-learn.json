@@ -102,12 +102,7 @@
     "CloudTechnologies_SoftwareBasic_Two"
   ],
   "targets": [
-	"Event: P1_Event",
-	"Readouts: LeadID | Email",
-	"Company: Company",
-	"LastName: LastName",
-	"FirstName: FirstName",
-	"SpamIndicator: SpamIndicator"
+	"Event: P1_Event"
   ],
   "data_profile": "/user/s-analytics/customers/Nutanix/data/EventMetadata/profile.avro",
   "config_metadata": "/user/s-analytics/customers/Nutanix/data/EventMetadata/metadata.avsc",
