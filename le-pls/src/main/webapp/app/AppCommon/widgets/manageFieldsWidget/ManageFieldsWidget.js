@@ -168,6 +168,10 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         return ManageFieldsService.CategoryEditable(dataItem);
     };
 
+    $scope.categoryWarning = function(dataItem) {
+        return $scope.isEmpty(dataItem.Category) && dataItem.ApprovedUsage !== "None" && dataItem.ApprovedUsage !== "Model";
+    };
+
     $scope.selectChanged = function($event, filerColumn) {
         if (filerColumn == "source") {
             sourceSelectChanged();
@@ -231,8 +235,20 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         if ($scope.onlyShowErrorFields) {
             var columns = $scope.gridOptions.columns;
             for (var i = 0; i < columns.length; i++) {
-                if (columns[i].field != "SourceToDisplay") {
-                    errorFilters.push({ field: columns[i].field, operator: "eq", value: "" });
+                if (columns[i].field !== "SourceToDisplay" && columns[i].field !== "Tags") {
+                    if (columns[i].field === "Category") {
+                        errorFilters.push({
+                            logic: "and",
+                            filters: [
+                                { field: "Tags", operator: "eq", value: "Internal" },
+                                { field: "ApprovedUsage", operator: "neq", value: "None" },
+                                { field: "ApprovedUsage", operator: "neq", value: "Model" },
+                                { field: columns[i].field, operator: "eq", value: "" }
+                            ]
+                        });
+                    } else {
+                        errorFilters.push({ field: columns[i].field, operator: "eq", value: "" });
+                    }
                 }
             }
         }

@@ -61,9 +61,9 @@
     </script>
     <script id="categoryTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'Category')" class='k-dirty'></span>
-        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.Category)}" title="{{dataItem.Category}}">{{dataItem.Category}}</span>
-        <span data-ng-if="batchEdit && !categoryEditable(dataItem)" data-ng-class="isEmpty(dataItem.Category) ? 'warning' : 'edit'" title="{{dataItem.Category}}">{{dataItem.Category}}</span>
-        <select data-ng-if="batchEdit && categoryEditable(dataItem)" data-ng-options="c for c in CategoryOptions" data-ng-model="dataItem.Category" data-ng-change="valueChanged($event, dataItem, 'Category', '#:Category#')" class="form-control" data-ng-class="{'warning': isEmpty(dataItem.Category)}"></select>
+        <span data-ng-if="!batchEdit" data-ng-class="{'warning': categoryEditable(dataItem) && categoryWarning(dataItem)}" title="{{dataItem.Category}}">{{dataItem.Category}}</span>
+        <span data-ng-if="batchEdit && !categoryEditable(dataItem)" class="edit" title="{{dataItem.Category}}">{{dataItem.Category}}</span>
+        <select data-ng-if="batchEdit && categoryEditable(dataItem)" data-ng-options="c for c in CategoryOptions" data-ng-model="dataItem.Category" data-ng-change="valueChanged($event, dataItem, 'Category', '#:Category#')" class="form-control" data-ng-class="{'warning': categoryWarning(dataItem)}"></select>
     </script>
     <script id="approvedUsageTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'ApprovedUsage')" class='k-dirty'></span>
