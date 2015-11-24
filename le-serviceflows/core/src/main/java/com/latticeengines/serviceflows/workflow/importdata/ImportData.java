@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.steps.prospectdiscovery;
+package com.latticeengines.serviceflows.workflow.importdata;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,10 +8,10 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
-import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("importData")
-public class ImportData extends BaseFitModelStep<BaseFitModelStepConfiguration> {
+public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(ImportData.class);
 
@@ -30,10 +30,10 @@ public class ImportData extends BaseFitModelStep<BaseFitModelStepConfiguration> 
 
     private ImportConfiguration setupSalesforceImportConfig() {
         ImportConfiguration importConfig = new ImportConfiguration();
-        SourceImportConfiguration salesforceConfig = new SourceImportConfiguration();
-        salesforceConfig.setSourceType(SourceType.SALESFORCE);
+        SourceImportConfiguration sourceImportConfig = new SourceImportConfiguration();
+        sourceImportConfig.setSourceType(configuration.getSourceType());
 
-        importConfig.addSourceConfiguration(salesforceConfig);
+        importConfig.addSourceConfiguration(sourceImportConfig);
         importConfig.setCustomerSpace(CustomerSpace.parse(configuration.getCustomerSpace()));
         return importConfig;
     }

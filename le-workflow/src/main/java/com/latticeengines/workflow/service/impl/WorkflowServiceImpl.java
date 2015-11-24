@@ -43,7 +43,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private static final Log log = LogFactory.getLog(WorkflowServiceImpl.class);
     private static final String WORKFLOW_SERVICE_UUID = "WorkflowServiceUUID";
-    private static final EnumSet<BatchStatus> TERMINAL_STATUS = EnumSet.of(BatchStatus.ABANDONED,
+    private static final EnumSet<BatchStatus> TERMINAL_BATCH_STATUS = EnumSet.of(BatchStatus.ABANDONED,
             BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.STOPPED);
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 24;
 
@@ -180,7 +180,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             status = getStatus(workflowId);
             if (status == null) {
                 break;
-            } else if (TERMINAL_STATUS.contains(status.getStatus())) {
+            } else if (TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
                 break done;
             }
             Thread.sleep(1000);

@@ -31,7 +31,7 @@
     </bean>
 
     <bean id="itemProcessor" class="com.latticeengines.dataflowapi.yarn.runtime.DataFlowProcessor" />
-    
+
     <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
     <import resource="classpath:dataflow-context.xml" />

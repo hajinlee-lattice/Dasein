@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.steps.prospectdiscovery;
+package com.latticeengines.serviceflows.workflow.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +13,10 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("runDataFlow")
-public class RunDataFlow extends BaseFitModelStep<BaseFitModelStepConfiguration> {
+public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(RunDataFlow.class);
 
@@ -36,11 +37,11 @@ public class RunDataFlow extends BaseFitModelStep<BaseFitModelStepConfiguration>
 
     private DataFlowConfiguration setupPreMatchTableDataFlow() {
         DataFlowConfiguration dataFlowConfig = new DataFlowConfiguration();
-        dataFlowConfig.setName("PrematchFlow");
+        dataFlowConfig.setName(configuration.getFlowName());
         dataFlowConfig.setCustomerSpace(CustomerSpace.parse(configuration.getCustomerSpace()));
-        dataFlowConfig.setDataFlowBeanName("preMatchEventTableFlow");
+        dataFlowConfig.setDataFlowBeanName(configuration.getDataflowBeanName());
         dataFlowConfig.setDataSources(createDataFlowSources());
-        dataFlowConfig.setTargetPath("/PrematchFlowRun");
+        dataFlowConfig.setTargetPath(configuration.getTargetPath());
         return dataFlowConfig;
     }
 
@@ -57,7 +58,8 @@ public class RunDataFlow extends BaseFitModelStep<BaseFitModelStepConfiguration>
 
     @SuppressWarnings("unchecked")
     private List<Table> retrieveRegisteredTablesAndExtraSources() {
-        String url = String.format("%s/metadata/customerspaces/%s/tables", configuration.getMicroServiceHostPort(), configuration.getCustomerSpace());
+        String url = String.format("%s/metadata/customerspaces/%s/tables", configuration.getMicroServiceHostPort(),
+                configuration.getCustomerSpace());
         List<String> tableList = restTemplate.getForObject(url, List.class);
         List<Table> tables = new ArrayList<>();
 
@@ -67,12 +69,12 @@ public class RunDataFlow extends BaseFitModelStep<BaseFitModelStepConfiguration>
             tables.add(t);
         }
 
-        Table stopList = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, "/tmp/Stoplist/Stoplist.avro",
+        Table stopList = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, configuration.getStoplistAvroFile(),
                 null, null);
-        stopList.getExtracts().get(0).setPath("/tmp/Stoplist/*.avro");
+        stopList.getExtracts().get(0).setPath(configuration.getStoplistPath());
         // register the stop list table
-        url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(), configuration.getCustomerSpace(),
-                stopList.getName());
+        url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
+                configuration.getCustomerSpace(), stopList.getName());
         restTemplate.postForLocation(url, stopList);
         tables.add(stopList);
         return tables;

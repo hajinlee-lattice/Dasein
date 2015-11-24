@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.steps.prospectdiscovery;
+package com.latticeengines.serviceflows.workflow.match;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -27,9 +27,10 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("createEventTableFromMatchResult")
-public class CreateEventTableFromMatchResult extends BaseFitModelStep<BaseFitModelStepConfiguration> {
+public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CreateEventTableFromMatchResult.class);
 
@@ -61,7 +62,9 @@ public class CreateEventTableFromMatchResult extends BaseFitModelStep<BaseFitMod
         }
 
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        String matchTableName = "RunMatchWithLEUniverse_" + commandId + "_DerivedColumns";
+        String matchTableName = configuration.getMatchCommandType().getCommandName() + "_" + commandId + "_"
+                + configuration.getDestTables();
+        log.info("matchTableName:" + matchTableName);
         try (Connection conn = DriverManager.getConnection(dbCreds.getJdbcUrl())) {
             String query = "SELECT DISTINCT s.name FROM SYSOBJECTS, SYSCOLUMNS s, " + matchTableName + "_Metadata r"
                     + " WHERE SYSOBJECTS.id = s.id AND " + " SYSOBJECTS.xtype = 'u' AND " + " SYSOBJECTS.name = '"
@@ -83,7 +86,7 @@ public class CreateEventTableFromMatchResult extends BaseFitModelStep<BaseFitMod
         config.setCreds(dbCreds);
         config.setQuery(sb.toString());
         config.setCustomer(configuration.getCustomerSpace());
-        config.setKeyCols(Arrays.<String>asList(new String[] { "Source_Id" }));
+        config.setKeyCols(Arrays.<String> asList(new String[] { "Source_Id" }));
         config.setTargetHdfsDir(hdfsTargetPath);
 
         AppSubmission submission = restTemplate.postForObject(url, config, AppSubmission.class);
@@ -104,8 +107,8 @@ public class CreateEventTableFromMatchResult extends BaseFitModelStep<BaseFitMod
         String extractPath = eventTable.getExtracts().get(0).getPath();
         extractPath = extractPath.substring(0, extractPath.lastIndexOf("/"));
         eventTable.getExtracts().get(0).setPath(extractPath);
-        url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(), configuration.getCustomerSpace(),
-                eventTable.getName());
+        url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
+                configuration.getCustomerSpace(), eventTable.getName());
         restTemplate.postForLocation(url, eventTable);
         return eventTable;
     }

@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.steps.prospectdiscovery;
+package com.latticeengines.serviceflows.workflow.match;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,9 +17,10 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("loadHdfsTableToPDServer")
-public class LoadHdfsTableToPDServer extends BaseFitModelStep<BaseFitModelStepConfiguration> {
+public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(LoadHdfsTableToPDServer.class);
 
@@ -36,17 +37,14 @@ public class LoadHdfsTableToPDServer extends BaseFitModelStep<BaseFitModelStepCo
     private AbstractMap.SimpleEntry<Table, DbCreds> loadHdfsTableToPDServer() {
         ExportConfiguration exportConfig = new ExportConfiguration();
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
-                configuration.getCustomerSpace(), "PrematchFlow");
+                configuration.getCustomerSpace(), configuration.getFlowName());
         Table prematchFlowTable = restTemplate.getForObject(url, Table.class);
 
         DbCreds.Builder credsBuilder = new DbCreds.Builder()
-                . //
-                dbType("SQLServer")
-                . //
-                jdbcUrl("jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE")
-                . //
-                user("DLTransfer"). //
-                password("free&NSE");
+                .dbType("SQLServer") // SQLServer is the only supported match dbtype
+                .jdbcUrl(configuration.getDbUrl()) //
+                .user(configuration.getDbUser()) //
+                .password(configuration.getDbPassword());
         DbCreds creds = new DbCreds(credsBuilder);
 
         createTable(prematchFlowTable, creds);

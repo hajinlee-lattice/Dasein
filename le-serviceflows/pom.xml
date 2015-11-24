@@ -9,10 +9,12 @@
 
     <properties>
         <component-name>serviceflows</component-name>
+        <le.camille.version>2.0.17-SNAPSHOT</le.camille.version>
         <le.dataflow.version>2.0.17-SNAPSHOT</le.dataflow.version>
         <le.domain.version>2.0.17-SNAPSHOT</le.domain.version>
         <le.serviceflows.core.version>2.0.17-SNAPSHOT</le.serviceflows.core.version>
         <le.swlib.version>2.0.17-SNAPSHOT</le.swlib.version>
+        <le.workflow.version>2.0.17-SNAPSHOT</le.workflow.version>
     </properties>
 
 

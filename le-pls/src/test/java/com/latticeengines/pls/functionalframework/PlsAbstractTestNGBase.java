@@ -26,7 +26,6 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.query.ExistsRestriction;
@@ -44,28 +43,14 @@ import com.latticeengines.domain.exposed.pls.TargetMarketStatistics;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
-import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.AuthorizationHeaderHttpRequestInterceptor;
-import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
 
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
-public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextTests {
-
-    protected static final String adminUsername = "bnguyen@lattice-engines.com";
-    protected static final String adminPassword = "tahoe";
-    protected static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
-    protected static final String generalUsername = "lming@lattice-engines.com";
-    protected static final String generalPassword = "admin";
-    protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase {
 
     protected static final Quota QUOTA = new Quota();
     protected static final String TEST_QUOTA_ID = "TEST_QUOTA_ID";
@@ -116,48 +101,11 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static Tenant mainTestingTenant;
     protected static Tenant ALTERNATIVE_TESTING_TENANT;
 
-    @Autowired
-    private InternalTestUserService internalTestUserService;
-
-    protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
-
     @Value("${pls.test.contract}")
     protected String contractId;
 
-    protected RestTemplate restTemplate = new RestTemplate();
-    protected RestTemplate magicRestTemplate = new RestTemplate();
-
-    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
-    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase.getMagicAuthHeaderInterceptor();
-    protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase.getStatusErrorHandler();
-
-    protected List<ClientHttpRequestInterceptor> addAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader});
-    protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader});
-
-    protected boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName,
-            String lastName, String password) {
-        UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
-        userRegistrationWithTenant.setTenant(tenant);
-        UserRegistration userRegistration = new UserRegistration();
-        userRegistrationWithTenant.setUserRegistration(userRegistration);
-        User user = new User();
-        user.setActive(true);
-        user.setEmail(email);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setUsername(username);
-        Credentials creds = new Credentials();
-        creds.setUsername(username);
-        creds.setPassword(password);
-        userRegistration.setUser(user);
-        userRegistration.setCredentials(creds);
-
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-
-        return magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users", userRegistrationWithTenant,
-                Boolean.class);
-    }
+    @Autowired
+    private InternalTestUserService internalTestUserService;
 
     protected UserDocument loginAndAttach(AccessLevel level, Tenant tenant) {
         String username = internalTestUserService.getUsernameForAccessLevel(level);

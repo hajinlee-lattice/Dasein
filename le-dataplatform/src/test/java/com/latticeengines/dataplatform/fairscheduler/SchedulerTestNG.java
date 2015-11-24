@@ -326,7 +326,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             if (appStatus == FinalApplicationStatus.SUCCEEDED) {
                 successCount++;
             }
-            if (TERMINAL_STATUS.contains(appStatus)) {
+            if (YarnUtils.TERMINAL_STATUS.contains(appStatus)) {
                 jobStatusToCollect.remove(appId);
                 jobStatus.put(appId, modelingJobService.getJobReportById(appId));
             }

@@ -27,6 +27,7 @@
                 <value>file:${WORKFLOWAPI_PROPDIR}/workflowapi.properties</value>
                 <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
                 <value>file:${DB_PROPDIR}/db.properties</value>
+                <value>file:${SECURITY_PROPDIR}/security.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

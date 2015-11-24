@@ -8,8 +8,10 @@
 
     <properties>
         <component-name>serviceflows-core</component-name>
+        <le.camille.version>2.0.17-SNAPSHOT</le.camille.version>
         <le.dataflow.version>2.0.17-SNAPSHOT</le.dataflow.version>
         <le.domain.version>2.0.17-SNAPSHOT</le.domain.version>
+        <le.workflow.version>2.0.17-SNAPSHOT</le.workflow.version>
     </properties>
 
     <parent>
@@ -22,15 +24,29 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.dataflow.version}</version>
             <scope>provided</scope>
         </dependency>
-    
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-workflow</artifactId>
+            <version>${le.workflow.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -216,7 +232,7 @@
             <version>1.8.2</version>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>

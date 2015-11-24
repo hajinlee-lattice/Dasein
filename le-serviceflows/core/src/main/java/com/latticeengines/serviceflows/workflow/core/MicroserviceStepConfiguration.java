@@ -1,19 +1,26 @@
-package com.latticeengines.workflowapi.steps.prospectdiscovery;
+package com.latticeengines.serviceflows.workflow.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.workflow.exposed.build.BaseStepConfiguration;
 
-public class BaseFitModelStepConfiguration extends BaseStepConfiguration {
+public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 
     @NotEmptyString
+    @NotNull
     private String customerSpace;
 
     @NotEmptyString
+    @NotNull
     private String microServiceHostPort;
 
-    @NotEmptyString
-    private String modelingServiceHdfsBaseDir;
+    @JsonIgnore
+    public void microserviceStepConfiguration(MicroserviceStepConfiguration config) {
+        this.customerSpace = config.getCustomerSpace();
+        this.microServiceHostPort = config.getMicroServiceHostPort();
+    }
 
     @JsonProperty("customerSpace")
     public String getCustomerSpace() {
@@ -35,13 +42,4 @@ public class BaseFitModelStepConfiguration extends BaseStepConfiguration {
         this.microServiceHostPort = microServiceHostPort;
     }
 
-    @JsonProperty("modelingServiceHdfsBaseDir")
-    public String getModelingServiceHdfsBaseDir() {
-        return modelingServiceHdfsBaseDir;
-    }
-
-    @JsonProperty("modelingServiceHdfsBaseDir")
-    public void setModelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
-        this.modelingServiceHdfsBaseDir = modelingServiceHdfsBaseDir;
-    }
 }

@@ -1,24 +1,19 @@
 package com.latticeengines.workflowapi.functionalframework;
 
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.List;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
@@ -30,6 +25,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGBase;
@@ -38,16 +34,20 @@ import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGB
 @ContextConfiguration(locations = { "classpath:test-workflowapi-context.xml" })
 public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBase {
 
-    protected static final CustomerSpace CUSTOMERSPACE = CustomerSpace.parse("WFAPITests.WFAPITests.WFAPITests");
-    protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 40;
+    protected static final CustomerSpace WFAPITEST_CUSTOMERSPACE = CustomerSpace.parse("WFAPITests.WFAPITests.WFAPITests");
+    protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 60;
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(WorkflowApiFunctionalTestNGBase.class);
 
-    protected RestTemplate restTemplate = new RestTemplate();
+    @Value("${workflowapi.microservice.rest.endpoint.hostport}")
+    protected String microServiceHostPort;
 
-    @Value("${workflowapi.test.api.hostport}")
-    protected String hostPort;
+    @Value("${workflowapi.modelingservice.basedir}")
+    protected String modelingServiceHdfsBaseDir;
+
+    protected RestTemplate restTemplate = new RestTemplate();
+    protected DataPlatformFunctionalTestNGBase platformTestBase;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -58,60 +58,50 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    protected DataPlatformFunctionalTestNGBase platformTestBase;
-
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
-        Tenant t = tenantEntityMgr.findByTenantId(CUSTOMERSPACE.toString());
+        Tenant t = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
         if (t != null) {
             tenantEntityMgr.delete(t);
         }
-        t = createTenant(CUSTOMERSPACE);
+        t = new Tenant();
+        t.setId(WFAPITEST_CUSTOMERSPACE.toString());
+        t.setName(WFAPITEST_CUSTOMERSPACE.toString());
         tenantEntityMgr.create(t);
 
         com.latticeengines.domain.exposed.camille.Path path = //
-        PathBuilder.buildCustomerSpacePath("Production", CUSTOMERSPACE);
+        PathBuilder.buildCustomerSpacePath("Production", WFAPITEST_CUSTOMERSPACE);
         HdfsUtils.rmdir(yarnConfiguration, path.toString());
         HdfsUtils.mkdir(yarnConfiguration, path.toString());
     }
 
-    private Tenant createTenant(CustomerSpace customerSpace) {
-        Tenant tenant = new Tenant();
-        tenant.setId(customerSpace.toString());
-        tenant.setName(customerSpace.toString());
-        return tenant;
-    }
-
-    public void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-
-        for (AbstractMap.SimpleEntry<String, String> e : copyEntries) {
-            for (String pattern : StringUtils.commaDelimitedListToStringArray(e.getKey())) {
-                for (Resource res : resolver.getResources(pattern)) {
-                    Path destinationPath = getDestinationPath(e.getValue(), res);
-                    FSDataOutputStream os = fs.create(destinationPath);
-                    FileCopyUtils.copy(res.getInputStream(), os);
-                }
-            }
-        }
-
-    }
-
-    protected Path getDestinationPath(String destPath, Resource res) throws IOException {
-        Path dest = new Path(destPath, res.getFilename());
-        return dest;
-    }
-
     protected AppSubmission submitWorkflow(WorkflowConfiguration configuration) {
-        String url = String.format("%s/workflowapi/workflows/", URLUtils.getRestAPIHostPort(hostPort));
+        String url = String.format("%s/workflowapi/workflows/", URLUtils.getRestAPIHostPort(microServiceHostPort));
         try {
             AppSubmission submission = restTemplate.postForObject(url, configuration, AppSubmission.class);
             return submission;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected void submitWorkflowAndAssertSuccessfulCompletion(WorkflowConfiguration workflowConfig) throws Exception {
+        AppSubmission submission = submitWorkflow(workflowConfig);
+        assertNotNull(submission);
+        assertNotEquals(submission.getApplicationIds().size(), 0);
+        String appId = submission.getApplicationIds().get(0);
+        assertNotNull(appId);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, WORKFLOW_WAIT_TIME_IN_MILLIS, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        String url = String.format("%s/workflowapi/workflows/yarnapps/%s", URLUtils.getRestAPIHostPort(microServiceHostPort), appId);
+        String workflowId = restTemplate.getForObject(url, String.class);
+
+        url = String.format("%s/workflowapi/workflows/%s", URLUtils.getRestAPIHostPort(microServiceHostPort), workflowId);
+        WorkflowStatus workflowStatus = restTemplate.getForObject(url, WorkflowStatus.class);
+        assertEquals(workflowStatus.getStatus(), BatchStatus.COMPLETED);
     }
 
 }

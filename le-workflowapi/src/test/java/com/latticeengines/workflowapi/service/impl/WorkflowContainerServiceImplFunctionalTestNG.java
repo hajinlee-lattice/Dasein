@@ -29,7 +29,7 @@ public class WorkflowContainerServiceImplFunctionalTestNG extends WorkflowApiFun
 
         ModelWorkflowConfiguration workflowConfig = new ModelWorkflowConfiguration.Builder()
                 .setModelLoadDataConfiguration(loadDataConfig).build();
-        workflowConfig.setContainerConfiguration(modelWorkflow.name(), CUSTOMERSPACE,
+        workflowConfig.setContainerConfiguration(modelWorkflow.name(), WFAPITEST_CUSTOMERSPACE,
                 "WorkflowContainerServiceImplTest_submitWorkflow");
 
         ApplicationId appId = workflowContainerService.submitWorkFlow(workflowConfig);

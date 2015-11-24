@@ -94,12 +94,13 @@ public class WorkflowTranslator {
             }
 
             private void validateConfiguration(final AbstractStep<?> step) {
-                Set<AnnotationValidationError> validationErrors = beanValidationService
-                        .validate(step.getConfiguration());
+                Set<AnnotationValidationError> validationErrors = beanValidationService.validate(step
+                        .getConfiguration());
                 if (validationErrors.size() > 0) {
                     StringBuilder validationErrorStringBuilder = new StringBuilder();
                     for (AnnotationValidationError annotationValidationError : validationErrors) {
-                        validationErrorStringBuilder.append(annotationValidationError.toString());
+                        validationErrorStringBuilder.append(annotationValidationError.getFieldName() + ":"
+                                + annotationValidationError.getAnnotationName() + "\n");
                     }
 
                     throw new LedpException(LedpCode.LEDP_28008, new String[] { step.getConfiguration().toString(),

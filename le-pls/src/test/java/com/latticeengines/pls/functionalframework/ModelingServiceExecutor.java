@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -162,7 +163,7 @@ public class ModelingServiceExecutor {
         // Wait for 30 seconds before retrieving the result directory
         Thread.sleep(30 * 1000L);
         String resultDir = status.getResultDirectory();
-        
+
         if (resultDir != null) {
             return UuidUtils.parseUuid(resultDir);
         } else {
@@ -171,7 +172,7 @@ public class ModelingServiceExecutor {
             return null;
         }
     }
-    
+
     private JobStatus waitForAppId(String appId) throws Exception {
         return waitForAppId(appId, builder.getRetrieveJobStatusUrl());
     }
@@ -193,8 +194,7 @@ public class ModelingServiceExecutor {
             if (i == maxTries) {
                 break;
             }
-        } while (status.getStatus() != FinalApplicationStatus.SUCCEEDED
-                && status.getStatus() != FinalApplicationStatus.FAILED);
+        } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
 
         assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
         return status;
@@ -363,7 +363,7 @@ public class ModelingServiceExecutor {
             this.setHdfsDirToSample(hdfsDirToSample);
             return this;
         }
-        
+
         public Builder retrieveModelingJobStatusUrl(String modelingJobStatusUrl) {
             this.setModelingJobStatusUrl(modelingJobStatusUrl);
             return this;
@@ -564,7 +564,7 @@ public class ModelingServiceExecutor {
         public void setModelingJobStatusUrl(String modelingJobStatusUrl) {
             this.modelingJobStatusUrl = modelingJobStatusUrl;
         }
-        
+
         public String getModelingJobStatusUrl() {
             return modelingJobStatusUrl;
         }

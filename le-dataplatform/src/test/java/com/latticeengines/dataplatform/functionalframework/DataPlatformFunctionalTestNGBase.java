@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -44,6 +43,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -59,8 +59,6 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
-    public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
-            FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 20;
 
     protected String suffix = this.getClass().getSimpleName() + "_" + generateUnique();
@@ -366,7 +364,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 break;
             }
             for (FinalApplicationStatus statusCheck : applicationStatuses) {
-                if (status.equals(statusCheck) || TERMINAL_STATUS.contains(status)) {
+                if (status.equals(statusCheck) || YarnUtils.TERMINAL_STATUS.contains(status)) {
                     break done;
                 }
             }

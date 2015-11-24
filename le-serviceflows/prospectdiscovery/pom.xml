@@ -22,20 +22,34 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
             <version>${le.serviceflows.core.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-core</artifactId>
+            <version>${le.serviceflows.core.version}</version>
             <classifier>tests</classifier>
         </dependency>
-    
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.dataflow.version}</version>
             <scope>provided</scope>
         </dependency>
-    
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-workflow</artifactId>
+            <version>${le.workflow.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -221,7 +235,7 @@
             <version>1.8.2</version>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>

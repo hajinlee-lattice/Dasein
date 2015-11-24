@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.steps.prospectdiscovery;
+package com.latticeengines.serviceflows.workflow.modeling;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,9 +8,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 @Component("sample")
-public class Sample extends BaseFitModelStep<BaseFitModelStepConfiguration> {
+public class Sample extends BaseWorkflowStep<ModelStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(Sample.class);
 

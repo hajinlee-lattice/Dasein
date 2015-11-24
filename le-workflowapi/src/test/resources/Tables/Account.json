@@ -1,0 +1,731 @@
+{
+  "name": "Account",
+  "display_name": "Account",
+  "attributes": [
+    {
+      "name": "Id",
+      "length": 18,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Id",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Account ID",
+      "logical_type": "id",
+      "enum_values": ""
+    },
+    {
+      "name": "Name",
+      "length": 255,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Name",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Account Name",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "BillingStreet",
+      "length": 255,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "BillingStreet",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Billing Street",
+      "logical_type": "textarea",
+      "enum_values": ""
+    },
+    {
+      "name": "BillingCity",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "BillingCity",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Billing City",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "BillingState",
+      "length": 80,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "BillingState",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Billing State/Province",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "BillingPostalCode",
+      "length": 20,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "BillingPostalCode",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Billing Zip/Postal Code",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "BillingCountry",
+      "length": 80,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "BillingCountry",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Billing Country",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "Website",
+      "length": 255,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Website",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Website",
+      "logical_type": "url",
+      "enum_values": ""
+    },
+    {
+      "name": "Industry",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Industry",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Industry",
+      "logical_type": "picklist",
+      "enum_values": "Agriculture,Apparel,Banking,Biotechnology,Chemicals,Communications,Construction,Consulting,Education,Electronics,Energy,Engineering,Entertainment,Environmental,Finance,Food___Beverage,Government,Healthcare,Hospitality,Insurance,Machinery,Manufacturing,Media,Not_For_Profit,Recreation,Retail,Shipping,Technology,Telecommunications,Transportation,Utilities,Other,_"
+    },
+    {
+      "name": "AnnualRevenue",
+      "length": 0,
+      "nullable": true,
+      "physicalDataType": "DOUBLE",
+      "precision": 18,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "AnnualRevenue",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Annual Revenue",
+      "logical_type": "currency",
+      "enum_values": ""
+    },
+    {
+      "name": "NumberOfEmployees",
+      "length": 0,
+      "nullable": true,
+      "physicalDataType": "INT",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "NumberOfEmployees",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Employees",
+      "logical_type": "int",
+      "enum_values": ""
+    },
+    {
+      "name": "Ownership",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "Ownership",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Ownership",
+      "logical_type": "picklist",
+      "enum_values": "Public,Private,Subsidiary,Other,_"
+    },
+    {
+      "name": "TickerSymbol",
+      "length": 20,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "TickerSymbol",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Ticker Symbol",
+      "logical_type": "string",
+      "enum_values": ""
+    },
+    {
+      "name": "OwnerId",
+      "length": 18,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "OwnerId",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Owner ID",
+      "logical_type": "reference",
+      "enum_values": ""
+    },
+    {
+      "name": "CreatedDate",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "CreatedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Created Date",
+      "logical_type": "datetime",
+      "enum_values": ""
+    },
+    {
+      "name": "LastModifiedDate",
+      "length": 0,
+      "nullable": false,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "LastModifiedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Modified Date",
+      "logical_type": "datetime",
+      "enum_values": ""
+    },
+    {
+      "name": "LastActivityDate",
+      "length": 0,
+      "nullable": true,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD",
+        "PhysicalName": "LastActivityDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Activity",
+      "logical_type": "date",
+      "enum_values": ""
+    },
+    {
+      "name": "LastViewedDate",
+      "length": 0,
+      "nullable": true,
+      "physicalDataType": "LONG",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
+        "PhysicalName": "LastViewedDate",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Last Viewed Date",
+      "logical_type": "datetime",
+      "enum_values": ""
+    },
+    {
+      "name": "AccountSource",
+      "length": 40,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": 0,
+      "scale": 0,
+      "properties": {
+        "Extensions": [
+          {
+            "Category": ""
+          },
+          {
+            "DataType": ""
+          }
+        ],
+        "DataSource": [
+          ""
+        ],
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "",
+        "Description": "",
+        "StatisticalType": "",
+        "PhysicalName": "AccountSource",
+        "DataQuality": "",
+        "SemanticType": "",
+        "ApprovedUsage": [
+          ""
+        ],
+        "DisplayDiscretizationStrategy": ""
+      },
+      "display_name": "Account Source",
+      "logical_type": "picklist",
+      "enum_values": "Web,Phone_Inquiry,Partner_Referral,Purchased_List,Other,POET,new_lead_source_test_06_27_2014,Test_Lead_source_up_to_40_characters___,PlayMaker,_"
+    }
+  ],
+  "extracts": [],
+  "primary_key": {
+    "attributesAsStr": "Id",
+    "name": "PK_ID",
+    "display_name": "Primary key for the identity column(s)",
+    "attributes": [
+      "Id"
+    ]
+  },
+  "last_modified_key": {
+    "attributesAsStr": "LastModifiedDate",
+    "name": "LK_LUD",
+    "display_name": "Last Modified Key to hold column containing last modified timestamp",
+    "attributes": [
+      "LastModifiedDate"
+    ],
+    "last_modified_ts": 1442544230000
+  }
+}

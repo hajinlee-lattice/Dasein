@@ -257,7 +257,9 @@ public enum LedpCode {
     LEDP_28005("Problem creating event table from match result; commandId:{0}."), //
     LEDP_28006("Problem sampling event table:{0}."), //
     LEDP_28007("Problem profiling and modeling event table:{0}."), //
-    LEDP_28008("Step configuration failed validation with errors:{0} ... {1}.");
+    LEDP_28008("Step configuration failed validation with errors:{0} ... {1}."), //
+    LEDP_28009("Received Null propdata match status for this url:{0}."), //
+    LEDP_28010("Modeling app {0} did not succeed:{1}.");
 
     private String message;
 

@@ -11,10 +11,13 @@
         <component-name>workflowapi</component-name>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
+        <le.baton.version>2.0.17-SNAPSHOT</le.baton.version>
         <le.common.version>2.0.17-SNAPSHOT</le.common.version>
         <le.dataplatform.version>2.0.17-SNAPSHOT</le.dataplatform.version>
         <le.microservice.version>2.0.17-SNAPSHOT</le.microservice.version>
         <le.security.version>2.0.17-SNAPSHOT</le.security.version>
+        <le.serviceflows.core.version>2.0.17-SNAPSHOT</le.serviceflows.core.version>
+        <le.serviceflows.prospectdiscovery.version>2.0.17-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
         <le.workflow.version>2.0.17-SNAPSHOT</le.workflow.version>
     </properties>
 
@@ -26,6 +29,16 @@
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-core</artifactId>
+            <version>${le.serviceflows.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-prospectdiscovery</artifactId>
+            <version>${le.serviceflows.prospectdiscovery.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-workflow</artifactId>
@@ -152,8 +165,39 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
             <classifier>intf</classifier>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-baton</artifactId>
+            <version>${le.baton.version}</version>
+            <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
-
 </project>

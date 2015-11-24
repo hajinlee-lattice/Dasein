@@ -60,6 +60,8 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -82,14 +84,14 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String CUSTOMERSPACE = "DemoContract.DemoTenant.Production";
-    private CustomerSpace customerSpace;
-    
+    private static final CustomerSpace customerSpace = CustomerSpace.parse(CUSTOMERSPACE);
+
     @Value("${pls.test.sfdc.user.name}")
     private String salesforceUserName;
-    
+
     @Value("${pls.test.sfdc.passwd.encrypted}")
     private String salesforcePasswd;
-    
+
     @Value("${pls.test.sfdc.securitytoken}")
     private String salesforceSecurityToken;
     
@@ -115,13 +117,13 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         restTemplate.setInterceptors(addMagicAuthHeaders);
-        customerSpace = CustomerSpace.parse(CUSTOMERSPACE);
-        setupTenant();
+        setupTenant(customerSpace);
         setupUsers();
-        setupCamille();
+        setupCamille(customerSpace);
         setupHdfs();
         installServiceFlow();
         createImportTablesInMetadataStore();
+        copyStopListToHdfs();
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -417,7 +419,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         }
 
     }
-    
+
     private String getVersionFromPomXmlFile() throws Exception {
         Collection<File> files = FileUtils.listFiles(new File("."), new IOFileFilter() {
 
@@ -430,9 +432,9 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             public boolean accept(File dir, String name) {
                 return name.equals("le-pls");
             }
-            
+
         }, null);
-        
+
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(files.iterator().next()));
         StringBuilder content = null;
@@ -464,7 +466,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
                 break;
             }
         }
-        
+
         return version;
     }
 
@@ -483,7 +485,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         PumpStreamHandler psh = new PumpStreamHandler(stdout);
         executor.setStreamHandler(psh);
         executor.execute(cmdLine);
-        
+
         System.out.println(new String(stdout.toByteArray()));
 
         HdfsUtils.rmdir(yarnConfiguration, //
@@ -576,15 +578,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/DemoContract.DemoTenant.Production");
     }
 
-    private void setupTenant() throws Exception {
-        super.deleteTenantByRestCall(CUSTOMERSPACE);
-        tenant = new Tenant();
-        tenant.setId(CUSTOMERSPACE);
-        tenant.setName(CUSTOMERSPACE);
-        super.createTenantByRestCall(tenant);
-    }
-
-    private void setupCamille() throws Exception {
+    private void setupCamille(CustomerSpace customerSpace) throws Exception {
         BatonService baton = new BatonServiceImpl();
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
         spaceInfo.properties = new CustomerSpaceProperties();
@@ -595,17 +589,17 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
                 customerSpace.getTenantId(), //
                 customerSpace.getSpaceId(), //
                 spaceInfo);
-        crmCredentialZKService.removeCredentials("sfdc", CUSTOMERSPACE, true);
+        crmCredentialZKService.removeCredentials("sfdc", customerSpace.toString(), true);
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
         crmCredential.setPassword(salesforcePasswd);
         crmCredential.setSecurityToken(salesforceSecurityToken);
         crmCredential.setUrl("https://login.salesforce.com");
-        crmCredentialZKService.writeToZooKeeper("sfdc", CUSTOMERSPACE, true, crmCredential, true);
+        crmCredentialZKService.writeToZooKeeper("sfdc", customerSpace.toString(), true, crmCredential, true);
 
         Camille camille = CamilleEnvironment.getCamille();
         Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(CUSTOMERSPACE), "Eai");
+                CustomerSpace.parse(customerSpace.toString()), "Eai");
         Path connectTimeoutDocPath = docPath.append("SalesforceEndpointConfig") //
                 .append("HttpClient").append("ConnectTimeout");
         camille.create(connectTimeoutDocPath, new Document("60000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
@@ -640,6 +634,22 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             restTemplate.postForObject(microServiceHostPort
                     + "/metadata/customerspaces/{customerSpace}/importtables/{tableName}", table, String.class,
                     urlVariables);
+        }
+    }
+
+    private void copyStopListToHdfs() {
+        // add the stop list to HDFS
+        String stoplist = ClassLoader.getSystemResource("com/latticeengines/pls/controller/Stoplist/Stoplist.avro")
+                .getPath();
+        try {
+            HdfsUtils.mkdir(yarnConfiguration, "/tmp/Stoplist");
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00000, e, new String[] { "/tmp/Stoplist" });
+        }
+        try {
+            HdfsUtils.copyLocalToHdfs(yarnConfiguration, stoplist, "/tmp/Stoplist");
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_27001, e, new String[] { stoplist, "/tmp/Stoplist" });
         }
     }
 
@@ -690,14 +700,14 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
         assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
     }
-    
+
     static class CollectingLogOutputStream extends LogOutputStream {
         private final List<String> lines = new LinkedList<String>();
-        
-        @Override 
+
+        @Override
         protected void processLine(String line, int level) {
             lines.add(line);
-        }   
+        }
         public List<String> getLines() {
             return lines;
         }

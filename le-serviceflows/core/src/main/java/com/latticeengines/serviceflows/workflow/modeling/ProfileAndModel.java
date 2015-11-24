@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.steps.prospectdiscovery;
+package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +12,11 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 @Component("profileAndModel")
-public class ProfileAndModel extends BaseFitModelStep<BaseFitModelStepConfiguration> {
+public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(ProfileAndModel.class);
 
@@ -35,7 +37,7 @@ public class ProfileAndModel extends BaseFitModelStep<BaseFitModelStepConfigurat
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
 
         String[] eventCols = new String[] { //
-        "Event_IsWon", //
+                "Event_IsWon", //
                 "Event_StageIsClosedWon", //
                 "Event_IsClosed", //
                 "Event_OpportunityCreated" //
