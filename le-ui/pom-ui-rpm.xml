@@ -15,6 +15,69 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>buildmachine</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>buildmachine</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/buildmachine</ui.environ.variables.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>devcluster</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>devcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/devcluster</ui.environ.variables.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>qacluster</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qacluster</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/qacluster</ui.environ.variables.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>stage</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>stage</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/stage</ui.environ.variables.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>prodcluster</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/prodcluster</ui.environ.variables.path>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -26,7 +89,6 @@
                     <!-- license>GPL (c) 2005, SWWDC</license -->
                     <!--distribution>Trash 2005</distribution -->
                     <group>Application/Collectors</group>
-                    <!-- prefix>/usr/local</prefix -->
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
@@ -41,7 +103,13 @@
                                         <exclude>
                                             **/test/**
                                         </exclude>
+                                        <exclude>
+                                            **/ENV_VARS
+                                        </exclude>
                                     </excludes>
+                                </source>
+                                <source>
+                                    <location>${ui.environ.variables.path}/ENV_VARS</location>
                                 </source>
                             </sources>
                         </mapping>

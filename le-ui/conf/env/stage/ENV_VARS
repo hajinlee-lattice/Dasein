@@ -1,0 +1,4 @@
+export NODE_ENV=stage
+export API_URL=https://app.lattice-engines.com
+export USE_PORT=8080
+
