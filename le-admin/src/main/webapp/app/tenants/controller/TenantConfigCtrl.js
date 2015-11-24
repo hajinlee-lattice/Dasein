@@ -242,9 +242,11 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
 
                 ServiceService.GetRegisteredServices().then( function(result2) {
                     if (result2.success) {
-                        $scope.services = result2.resultObj;
+                        var allServices = result2.resultObj;
+                        console.log($scope.availableProducts);
+                        $scope.services = constructSelectedComponentsInViewPage(allServices);
                         $scope.componentsToScan = $scope.services.length;
-                        console.log($scope.selectedComponents);
+                        
                         _.each($scope.services, function(service) {
                             if (!$scope.selectedFeatureFlagMap.Dante && service === "Dante") {
                                 $scope.componentsToScan--;
@@ -279,7 +281,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             }
         });
     }
-    
+
     function constructSelectedFeatureFlagsInViewPage() {
         $scope.selectedFeatureFlags = [];
         for (var selectedFeatureFlag in $scope.selectedFeatureFlagMap) {
@@ -292,6 +294,23 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 $scope.selectedFeatureFlags.push(featureFlag);
             }
         }
+    }
+
+    function constructSelectedComponentsInViewPage(allServices) {
+        if ($scope.availableProducts === null || $scope.availableProducts.length === 0) {
+            return allServices;
+        }
+        
+        var toReturn = [];
+        var selectedProducts = $scope.spaceConfig.Products;
+        _.each($scope.availableProducts, function(availableProduct){
+            _.each(selectedProducts, function(selectedProduct){
+                if (availableProduct.name === selectedProduct) {
+                    toReturn = toReturn.concat(availableProduct.components);
+                }
+            });
+        });
+        return toReturn;
     }
 
     function popInstallConfirmationModal() {
