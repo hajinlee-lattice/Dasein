@@ -1,6 +1,7 @@
 package com.latticeengines.eai.routes.salesforce;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.spring.SpringCamelContext;
@@ -82,7 +83,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         }
 
         dataContainer.setValueForAttribute(attr, new String(ch, start, length));
-        if (processedRecords == 0 && attr.getName().equals(lmk)) {
+        if (processedRecords == 0 && attr.getPhysicalName().equals(lmk)) {
             String value = dataContainer.getValueForAttribute(attr).toString();
             lmkValue = Long.parseLong(value);
         }
@@ -98,8 +99,11 @@ public class ExtractDataXmlHandler extends DefaultHandler {
 
     public String initialize(SpringCamelContext context, Table table) {
         this.dataContainer = new DataContainer(context, table);
-        this.tableAttributeMap = table.getNameAttributeMap();
-        this.lmk = "LastModifiedDate";
+        this.tableAttributeMap = new HashMap<String, Attribute>();
+        for (Attribute attr : table.getAttributes()) {
+            tableAttributeMap.put(attr.getPhysicalName(), attr);
+        }
+        this.lmk = table.getLastModifiedKey().getName();
         return dataContainer.getLocalDataFile().getName();
     }
 

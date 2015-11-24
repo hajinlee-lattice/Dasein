@@ -145,6 +145,8 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 Attribute attrFromImportTables = nameAttrMap.get(descField.getName());
                 Attribute attr = new Attribute();
                 String type = descField.getType();
+
+                attr.setName(descField.getName());
                 attr.setName(descField.getName());
                 attr.setDisplayName(descField.getLabel());
                 attr.setLength(descField.getLength());
@@ -157,12 +159,14 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 attr.setDataQuality(attrFromImportTables.getDataQuality());
                 attr.setDescription(attrFromImportTables.getDescription());
                 attr.setDisplayDiscretizationStrategy(attrFromImportTables.getDisplayDiscretizationStrategy());
-                attr.setDisplayName(attrFromImportTables.getDisplayName());
                 attr.setCategory(attrFromImportTables.getCategory());
                 attr.setDataType(attrFromImportTables.getDataType());
                 attr.setFundamentalType(attrFromImportTables.getFundamentalType());
                 attr.setPhysicalName(attr.getName());
                 attr.setSemanticType(attrFromImportTables.getSemanticType());
+                if (StringUtils.isNotEmpty(attr.getSemanticType())) {
+                    attr.setName(attr.getSemanticType());
+                }
                 attr.setStatisticalType(attrFromImportTables.getStatisticalType());
                 attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
 
@@ -226,8 +230,14 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
     }
 
     String createQuery(Table table, String filterExpression) {
-        String query = "SELECT " + StringUtils.join(table.getAttributes(), ",") + " FROM " + table.getName();
+        List<Attribute> attrs = table.getAttributes();
+        List<String> attrName = new ArrayList<>();
+        for (Attribute attr : attrs) {
+            attrName.add(attr.getPhysicalName());
+        }
+        String query = "SELECT " + StringUtils.join(attrName, ",") + " FROM " + table.getName();
 
+        System.out.println(query);
         if (filterExpression != null) {
             query += " WHERE " + filterExpression;
         }

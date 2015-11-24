@@ -138,7 +138,6 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         waitForCamelMessagesToComplete(camelContext);
 
         for (Table table : tables) {
-            new EaiMetadataServiceImpl().useSemanticTypeAsAttrName(table);
             System.out.println(JsonUtils.serialize(table));
         }
         checkDataExists(targetPath, tableNameList, 1);
@@ -182,7 +181,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
-        new EaiMetadataServiceImpl().useSemanticTypeAsAttrName(tables.get(0));
+        System.out.println(tables);
         assertFalse(tables.get(0).getNameAttributeMap().containsKey("Id"));
         assertTrue(tables.get(0).getNameAttributeMap().containsKey("NewId"));
 

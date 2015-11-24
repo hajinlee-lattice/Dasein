@@ -220,7 +220,6 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
             addTenantToTable(table, customerSpace);
             addExtractToTable(table, targetPathsMap.get(table.getName()), processedRecordsMap.get(table.getName()));
             setLastModifiedTimeStamp(table, importContext);
-            useSemanticTypeAsAttrName(table);
         }
     }
 
@@ -231,15 +230,6 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         LastModifiedKey lmk = table.getLastModifiedKey();
         Long lastModifiedDateValue = map.get(table.getName());
         lmk.setLastModifiedTimestamp(lastModifiedDateValue);
-    }
-
-    @VisibleForTesting
-    void useSemanticTypeAsAttrName(Table table) {
-        for (Attribute attr : table.getAttributes()) {
-            if (StringUtils.isNotEmpty(attr.getSemanticType())) {
-                attr.setName(attr.getSemanticType());
-            }
-        }
     }
 
     @Override

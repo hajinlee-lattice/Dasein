@@ -79,18 +79,17 @@ public class DataContainer {
     }
 
     public void setValueForAttribute(Attribute attribute, Object value) {
-        String attrName;
-        if (StringUtils.isNotEmpty(attribute.getSemanticType())) {
-            attrName = attribute.getSemanticType();
-        } else {
-            attrName = attribute.getName();
-        }
         if (value == null) {
-            record.put(attrName, AvroTypeConverter.getEmptyValue(Type.valueOf(attribute.getPhysicalDataType())));
+            record.put(attribute.getName(),
+                    AvroTypeConverter.getEmptyValue(Type.valueOf(attribute.getPhysicalDataType())));
         } else {
-            Type type = Type.valueOf(attribute.getPhysicalDataType());
-            record.put(attrName,
-                    AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, attribute, value));
+            try {
+                Type type = Type.valueOf(attribute.getPhysicalDataType());
+                record.put(attribute.getName(), AvroTypeConverter.convertIntoJavaValueForAvroType(
+                        typeConverterRegistry, type, attribute, value));
+            } catch (Exception e) {
+                System.out.println(attribute.getName());
+            }
         }
     }
 
