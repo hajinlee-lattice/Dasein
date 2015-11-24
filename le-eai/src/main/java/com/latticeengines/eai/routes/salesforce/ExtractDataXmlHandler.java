@@ -103,7 +103,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         for (Attribute attr : table.getAttributes()) {
             tableAttributeMap.put(attr.getPhysicalName(), attr);
         }
-        this.lmk = table.getLastModifiedKey().getName();
+        this.lmk = table.getLastModifiedKey().getAttributesAsStr();
         return dataContainer.getLocalDataFile().getName();
     }
 
