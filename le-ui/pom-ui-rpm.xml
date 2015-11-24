@@ -32,8 +32,8 @@
                         <mapping>
                             <directory>/opt/node/latest</directory>
                             <filemode>755</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
+                            <username>build</username>
+                            <groupname>build</groupname>
                             <sources>
                                 <source>
                                     <location>.</location>

@@ -4,5 +4,3 @@ if [ ! -d "/opt/node/latest" ]; then
     mkdir -p /opt/node/latest
 fi
 rm -rf /opt/node/latest/*
-adduser yarn
-groupadd yarn
