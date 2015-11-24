@@ -152,8 +152,18 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
     this.ShowBasedOnInternalOrExternal = function (predictor, isExternal) {
         var toReturn = false;
-        var tag = isExternal ? "External" : "Internal";
         if (predictor != null && predictor.Tags != null) {
+            var tag = isExternal ? "External" : "Internal";
+
+            // DP-1883
+            if (predictor.Category === "Lead Information" || predictor.Category === "Marketing Activity") {
+                if (isExternal) {
+                    return false;
+                } else {
+                    tag = "Internal";
+                }
+            }
+
             for (var x=0; x<predictor.Tags.length; x++) {
                 if (tag == predictor.Tags[x]) {
                     toReturn = true;
