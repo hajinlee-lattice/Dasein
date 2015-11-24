@@ -214,7 +214,6 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
 
         @SuppressWarnings("unchecked")
         Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
-        // setProcessedRecords(table, importContext);
 
         for (Table table : tablesMetadataFromImport) {
             addTenantToTable(table, customerSpace);
