@@ -8,10 +8,7 @@ import sys
 from urlparse import urlparse
 
 from leframework.argumentparser import ArgumentParser
-from leframework.executors.aggregationexecutor import AggregationExecutor
-from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.executors.learningexecutor import LearningExecutor
-from leframework.executors.parallellearningexecutor import ParallelLearningExecutor
 from leframework.progressreporter import ProgressReporter
 from leframework.webhdfs import WebHDFS
 
@@ -121,12 +118,13 @@ class Launcher(object):
         schema["python_pipeline_script"] = params["pipelineScript"]
         schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
 
-        if isinstance(executor, LearningExecutor) or isinstance(executor, ParallelLearningExecutor) or isinstance(executor, DataProfilingExecutor):
+        loadTrainingData, loadTestData = executor.loadData()
+        if loadTrainingData:
             self.training = parser.createList(self.stripPath(schema["training_data"]), postProcessClf)
-        
-        if isinstance(executor, LearningExecutor) or isinstance(executor, AggregationExecutor) or isinstance(executor, DataProfilingExecutor):
+
+        if loadTestData:
             self.test = parser.createList(self.stripPath(schema["test_data"]), postProcessClf)
-          
+
         params["training"] = self.training
         params["test"] = self.test
 
@@ -202,3 +200,4 @@ if __name__ == "__main__":
 
     l = Launcher(sys.argv[1], sys.argv[2])
     l.execute(True)
+
