@@ -43,7 +43,7 @@ class PipelineStep:
     def setPostScoreStep(self, postScoreStep):
         self.postScoreStep_ = postScoreStep
          
-    def transform(self, dataFrame, imputationValues = {}): pass
+    def transform(self, dataFrame): pass
  
     def setProperty(self, propertyName, propertyValue):
         self.props_[propertyName] = propertyValue

@@ -191,7 +191,7 @@ class ImputationStep(PipelineStep):
         if valuePair == binPairs[numBins - 1]:
             adjValue = 2.0 * splitValue
         return valuePair[0] + adjValue
-         
+
 class EVModelStep(PipelineStep):
      
     def __init__(self, props):
