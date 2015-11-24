@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -67,7 +68,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
         assertEquals(targetMarket.getDescription(), DESCRIPTION);
-        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(), CREATION_DATE.getDayOfYear());
+        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(), CREATION_DATE.toDateTime(DateTimeZone.UTC).getDayOfYear());
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED);
         assertEquals(targetMarket.getModelId(), MODEL_ID);
         assertEquals(targetMarket.getEventColumnName(), EVENT_COLUMN_NAME);

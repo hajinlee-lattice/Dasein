@@ -275,7 +275,8 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
 
     @JsonProperty
     @JoinColumn(name = "FK_PID", nullable = false)
-    @OneToOne
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public TargetMarketStatistics getTargetMarketStatistics() {
         return this.targetMarketStatistics;
     }

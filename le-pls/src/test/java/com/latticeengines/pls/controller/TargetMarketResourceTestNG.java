@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+import org.joda.time.DateTimeZone;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -12,7 +13,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
-import com.latticeengines.domain.exposed.pls.TargetMarketStatistics;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
@@ -54,7 +54,7 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         setupUsers();
         cleanupTargetMarketDB();
     }
-
+    
     @BeforeMethod(groups = { "functional" })
     public void beforeMethod() {
         // using admin session by default
@@ -70,7 +70,7 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
         assertEquals(targetMarket.getDescription(), DESCRIPTION);
-        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(), CREATION_DATE.getDayOfYear());
+        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(), CREATION_DATE.toDateTime(DateTimeZone.UTC).getDayOfYear());
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED);
         assertEquals(targetMarket.getModelId(), MODEL_ID);
         assertEquals(targetMarket.getEventColumnName(), EVENT_COLUMN_NAME);
