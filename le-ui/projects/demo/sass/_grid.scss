@@ -1,5 +1,6 @@
 // Grids adapted from CSS SMart Grids http://dryan.github.io/css-smart-grid/
 
+
 // 20px at 960px wide container, accounting for a 1/2 gutter width padding on the left and right of the container
 $gutter:    percentage(20px/940px);
 
@@ -34,7 +35,7 @@ $offset-list:    (1, "one") (2, "two") (3, "three") (4, "four") (5, "five") (6, 
 }
 @mixin flexbox-row() {
     html.flexbox & {
-        @media (min-width:$columns-break-point) {
+        @include media(">large") {
             display:    -moz-flex;
             display:     -ms-flex; // one day, maybe
             display:     -ms-flexbox;
@@ -122,7 +123,7 @@ $offset-list:    (1, "one") (2, "two") (3, "three") (4, "four") (5, "five") (6, 
 		@include flexbox-row;
 	}
 }
-@media (min-width:$columns-break-point) {
+@include media(">large") {
     @include column-set;
 }
 

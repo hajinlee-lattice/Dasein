@@ -65,12 +65,12 @@ h5 { font-size: 130%; }
 /* 
 Body Copy 
 ========================================================= */
-.body2 {
+.smaller {
 	font-size: 13px;
 	color: $jet;
 }
-.body3 {
-	@extend .body2;
+.smallest {
+	@extend .smaller;
 	font-size: 10px;
 }
 

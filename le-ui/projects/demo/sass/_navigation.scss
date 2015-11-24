@@ -78,7 +78,7 @@ ul.menu {
 
 @include media('>medium') {
 
-  .nav-button {
+  .button.nav-button {
     display: none;
   }
   .main-nav {
