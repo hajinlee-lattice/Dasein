@@ -15,13 +15,13 @@ public class SalesforceImportStrategyBaseUnitTestNG {
         table.setName("Lead");
 
         Attribute firstName = new Attribute();
-        firstName.setName("FirstName");
+        firstName.setPhysicalName("FirstName");
         Attribute lastName = new Attribute();
-        lastName.setName("LastName");
+        lastName.setPhysicalName("LastName");
         Attribute salutation = new Attribute();
-        salutation.setName("Salutation");
+        salutation.setPhysicalName("Salutation");
         Attribute email = new Attribute();
-        email.setName("Email");
+        email.setPhysicalName("Email");
 
         table.addAttribute(firstName);
         table.addAttribute(lastName);
