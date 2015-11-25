@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.exposed.yarn.runtime;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.yarn.am.allocate.ContainerAllocator;
 import org.springframework.yarn.integration.ip.mind.MindAppmasterService;
 import org.springframework.yarn.integration.ip.mind.MindRpcMessageHolder;
 
