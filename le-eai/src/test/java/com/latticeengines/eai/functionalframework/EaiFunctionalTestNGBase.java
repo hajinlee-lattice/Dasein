@@ -147,8 +147,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         camille.create(importTimeoutDocPath, new Document("3600000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 
-    protected Table createFile(URL inputUrl, String fileName) {
-        String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
+    protected Table createFile(File destDir, String fileName) {
+        String url = String.format("jdbc:relique:csv:%s", destDir.getPath());
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");

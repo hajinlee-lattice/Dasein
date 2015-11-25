@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -33,7 +32,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
-import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -155,40 +153,4 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         checkDataExists(targetPath, tableNameList, 1);
     }
-
-    @Test(groups = { "deployment" }, dataProvider = "fileProvider", enabled = false)
-    public void extractAndImportForFile(String fileName, boolean verifyDataAndRowCount, int expectedNumRows)
-            throws Exception {
-        URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/exposed/service/impl");
-        URL metadataUrl = ClassLoader.getSystemResource( //
-                String.format("com/latticeengines/eai/exposed/service/impl/%sMetadata.json", fileName));
-        SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
-        Table file = createFile(dataUrl, fileName);
-        fileImportConfig.setSourceType(SourceType.FILE);
-        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { file }));
-        Map<String, String> props = new HashMap<>();
-        props.put(ImportProperty.DATAFILEDIR, dataUrl.getPath());
-        props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
-        fileImportConfig.setProperties(props);
-        ImportConfiguration importConfig = new ImportConfiguration();
-        importConfig.setCustomerSpace(CustomerSpace.parse(customer));
-        importConfig.addSourceConfiguration(fileImportConfig);
-        ApplicationId appId = eaiService.extractAndImport(importConfig);
-        assertNotNull(appId);
-        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        if (verifyDataAndRowCount) {
-            verifyAllDataNotNullWithNumRows(yarnConfiguration, targetPath + "/dataFromFile/" + fileName,
-                    expectedNumRows);
-        }
-    }
-
-    @DataProvider(name = "fileProvider")
-    public Object[][] getFiles() {
-        return new Object[][] { { "ConcurSample", false, -1 }, //
-                { "file1", true, 4 }, //
-                { "file2", true, 3 }, //
-                { "file3", true, 4 } };
-    }
-
 }

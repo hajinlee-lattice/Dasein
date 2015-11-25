@@ -2,10 +2,9 @@ package com.latticeengines.eai.service.impl.file;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -18,9 +17,6 @@ import com.latticeengines.eai.service.impl.ImportStrategy;
 
 @Component("fileImportService")
 public class FileImportServiceImpl extends ImportService {
-
-    @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
 
     public FileImportServiceImpl() {
         super(SourceType.FILE);
