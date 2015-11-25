@@ -32,6 +32,5 @@
     <import resource="classpath:eai-yarn-client-context.xml" />
     <import resource="classpath:eai-import-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
-    <import resource="classpath:eai-appmaster-service-context.xml"/>
 
 </beans> 

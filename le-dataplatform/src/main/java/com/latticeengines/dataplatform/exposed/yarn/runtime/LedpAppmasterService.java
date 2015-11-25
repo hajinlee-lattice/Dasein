@@ -1,14 +1,15 @@
-package com.latticeengines.eai.appmaster.service;
+package com.latticeengines.dataplatform.exposed.yarn.runtime;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.yarn.am.allocate.ContainerAllocator;
 import org.springframework.yarn.integration.ip.mind.MindAppmasterService;
 import org.springframework.yarn.integration.ip.mind.MindRpcMessageHolder;
 
-public abstract class EaiAppmasterService extends MindAppmasterService implements SmartLifecycle {
+public abstract class LedpAppmasterService extends MindAppmasterService implements SmartLifecycle {
 
-    protected static Log log = LogFactory.getLog(EaiAppmasterService.class);
+    protected static Log log = LogFactory.getLog(LedpAppmasterService.class);
 
     @Override
     protected abstract MindRpcMessageHolder handleMindMessageInternal(MindRpcMessageHolder message);

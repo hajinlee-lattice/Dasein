@@ -16,7 +16,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -27,7 +26,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.source.SourceCredentialType;
-import com.latticeengines.eai.appmaster.service.EaiAppmasterService;
 import com.latticeengines.eai.config.HttpClientConfig;
 import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
@@ -65,9 +63,6 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
     private CrmCredentialZKService crmCredentialZKService;
 
     @Autowired
-    private EaiAppmasterService eaiAppmasterService;
-
-    @Autowired
     private EaiMetadataService eaiMetadataService;
 
     @Autowired
@@ -75,27 +70,32 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
+
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
+
+        int i = 1;
+        setProgress(0.05f * i);
         log.info("Routes are:" + camelContext.getRoutes());
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         importContext.setProperty(ImportProperty.METADATAURL, importConfig.getProperty(ImportProperty.METADATAURL));
         log.info("Starting extract and import.");
+
         try {
             List<Table> tableMetadata = dataExtractionService.extractAndImport(importConfig, importContext);
 
             while (camelContext.getInflightRepository().size() > 0) {
+                setProgress(0.05f * (i + 2));
                 Thread.sleep(5000L);
             }
             log.info("Finished extract and import.");
 
             eaiMetadataService.updateTableSchema(tableMetadata, importContext);
             eaiMetadataService.registerTables(tableMetadata, importContext);
-
+            setProgress(0.95f);
         } catch (Exception e) {
             Thread.sleep(20000);
             dataExtractionService.cleanUpTargetPathData(importContext);
-            eaiAppmasterService.handleException(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         return null;

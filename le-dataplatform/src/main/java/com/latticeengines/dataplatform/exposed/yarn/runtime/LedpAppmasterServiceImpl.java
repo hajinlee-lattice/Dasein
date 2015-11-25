@@ -1,11 +1,12 @@
-package com.latticeengines.eai.appmaster.service;
+package com.latticeengines.dataplatform.exposed.yarn.runtime;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.am.allocate.ContainerAllocator;
 import org.springframework.yarn.integration.ip.mind.MindRpcMessageHolder;
 
-@Component("eaiAppmasterService")
-public class EaiAppmasterServiceImpl extends EaiAppmasterService {
+@Component("ledpAppmasterService")
+public class LedpAppmasterServiceImpl extends LedpAppmasterService {
 
     private Exception e;
 

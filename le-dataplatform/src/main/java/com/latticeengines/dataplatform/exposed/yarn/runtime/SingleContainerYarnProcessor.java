@@ -14,10 +14,25 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.LineMapper;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.integration.channel.AbstractPollableChannel;
+import org.springframework.integration.channel.AbstractSubscribableChannel;
+import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.dispatcher.MessageDispatcher;
+import org.springframework.integration.dispatcher.UnicastingDispatcher;
+import org.springframework.integration.handler.AbstractMessageHandler;
+import org.springframework.integration.ip.tcp.TcpOutboundGateway;
+import org.springframework.integration.ip.tcp.connection.AbstractClientConnectionFactory;
+import org.springframework.integration.ip.tcp.connection.TcpNetClientConnectionFactory;
+import org.springframework.yarn.integration.ip.mind.DefaultMindAppmasterServiceClient;
+import org.springframework.yarn.integration.ip.mind.MindAppmasterServiceClient;
+import org.springframework.yarn.integration.ip.mind.MindRpcSerializer;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.dataplatform.exposed.yarn.runtime.progress.LedpProgressReporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
@@ -33,12 +48,21 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     private ItemWriter<String> itemWriter = new SingleContainerWriter();
     private Class<T> type;
 
+    //@Autowired
+    protected LedpAppmasterService ledpAppmasterService;
+
+    @Autowired
+    private LedpProgressReporter ledpProgressReporter;
+
+    protected MindAppmasterServiceClient appmasterServiceClient;
+
     @SuppressWarnings("unchecked")
     public SingleContainerYarnProcessor() {
         this.type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
-    public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService, ApplicationContext context) {
+    public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService,
+            ApplicationContext context) {
         List<SoftwarePackage> packages = softwareLibraryService.getLatestInstalledPackages(module);
         log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
         log.info(String.format("Found %d of software packages from the software library for this module.",
@@ -103,5 +127,36 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
         return null;
     }
 
-}
+    protected void setProgress(float progress) {
+        ledpProgressReporter.setProgress(progress);
+    }
 
+    protected void initAppmasterServiceClient(BeanFactory applicationContext) {
+        appmasterServiceClient = new DefaultMindAppmasterServiceClient();
+        AbstractClientConnectionFactory clientConnectionFactory = new TcpNetClientConnectionFactory("localhost",
+                ledpAppmasterService.getPort());
+        clientConnectionFactory.setSerializer(new MindRpcSerializer());
+        clientConnectionFactory.setDeserializer(new MindRpcSerializer());
+        clientConnectionFactory.start();
+        TcpOutboundGateway tcpOutboundGateway = new TcpOutboundGateway();
+        tcpOutboundGateway.setConnectionFactory(clientConnectionFactory);
+
+        final MessageDispatcher dispatcher = new UnicastingDispatcher();
+        dispatcher.addHandler((AbstractMessageHandler) tcpOutboundGateway);
+        AbstractSubscribableChannel requestChannel = new AbstractSubscribableChannel() {
+
+            @Override
+            protected MessageDispatcher getDispatcher() {
+                return dispatcher;
+            }
+        };
+
+        ((MindAppmasterServiceClient) appmasterServiceClient).setRequestChannel(requestChannel);
+
+        AbstractPollableChannel replyChannel = new QueueChannel();
+        tcpOutboundGateway.setReplyChannel(replyChannel);
+        ((MindAppmasterServiceClient) appmasterServiceClient).setResponseChannel(replyChannel);
+        ((MindAppmasterServiceClient) appmasterServiceClient).setBeanFactory(applicationContext);
+
+    }
+}

@@ -24,6 +24,7 @@
     <context:component-scan base-package="com.latticeengines.dataplatform">
         <context:exclude-filter type="aspectj" expression="com.latticeengines.dataplatform.controller.*" />
         <context:exclude-filter type="aspectj" expression="com.latticeengines.dataplatform.mbean.*" />
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.dataplatform.exposed.yarn.runtime.*" />
     </context:component-scan>
 
     <import resource="classpath:dataplatform-camille-context.xml"/>

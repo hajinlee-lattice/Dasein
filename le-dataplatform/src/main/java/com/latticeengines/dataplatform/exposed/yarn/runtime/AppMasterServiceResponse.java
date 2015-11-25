@@ -1,4 +1,4 @@
-package com.latticeengines.eai.appmaster.service;
+package com.latticeengines.dataplatform.exposed.yarn.runtime;
 
 import org.springframework.yarn.integration.ip.mind.binding.BaseResponseObject;
 

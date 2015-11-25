@@ -45,6 +45,7 @@ import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.ContainerRuntimeProperty;
+import com.latticeengines.dataplatform.exposed.yarn.runtime.progress.LedpProgressReporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -72,6 +73,9 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
     @Autowired
     protected YarnService yarnService;
+
+    @Autowired
+    protected LedpProgressReporter ledpProgressReporter;
 
     @Override
     protected void onInit() throws Exception {
@@ -133,7 +137,9 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
             log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
         }
 
+        log.info("Using our app master");
         try {
+            ledpProgressReporter.setContainerAllocator(getAllocator());
             getYarnJobLauncher().run(getParameters());
         } catch (JobExecutionException e) {
             log.error("Error in jobLauncherHelper.", e);
@@ -145,7 +151,9 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
                 break;
             }
         }
+
         notifyCompleted();
+
     }
 
     @Override
@@ -168,6 +176,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         }
 
         if (service instanceof BatchAppmasterService) {
+
             ((BatchAppmasterService) service).addInterceptor(new JobRepositoryRemoteServiceInterceptor() {
 
                 @Override
