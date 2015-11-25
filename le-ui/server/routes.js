@@ -55,6 +55,7 @@ module.exports = [
             '/demo/grid.html': 'grid.html',
             '/demo/links.html': 'links.html',
             '/demo/lists.html': 'lists.html',
+            '/demo/tables.html': 'tables.html',
             '/demo/typography.html': 'typography.html',
             '/demo/downloads.html': 'downloads.html'
         },
