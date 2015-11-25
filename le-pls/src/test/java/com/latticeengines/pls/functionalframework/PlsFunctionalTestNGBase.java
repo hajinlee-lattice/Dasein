@@ -70,13 +70,13 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired
     private QuotaEntityMgr quotaEntityMgr;
-    
+
     @Autowired
     private TargetMarketEntityMgr targetMarketEntityMgr;
-    
+
     @Autowired
     private ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
-    
+
     @Autowired
     private UserService userService;
 
@@ -103,7 +103,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         tenant.setId(tenantName);
         tenant.setName(tenantName);
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
         return magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
                 new HashMap<>());
     }
@@ -342,7 +342,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
             }
         }
     }
-        
+
     protected void cleanupQuotaDB() {
         setupSecurityContext(mainTestingTenant);
         List<Quota> quotas = this.quotaEntityMgr.getAllQuotas();
@@ -352,7 +352,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
             }
         }
     }
-    
+
     protected void cleanupProspectDiscoveryOptionDB() {
         setupSecurityContext(mainTestingTenant);
         List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryOptionEntityMgr.findAllProspectDiscoveryOptions();

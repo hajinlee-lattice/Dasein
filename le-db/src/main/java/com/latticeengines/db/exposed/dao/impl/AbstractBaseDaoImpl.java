@@ -1,16 +1,18 @@
 package com.latticeengines.db.exposed.dao.impl;
 
-import java.util.List;
-
-import javax.sql.DataSource;
-
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
 
-import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import javax.persistence.Column;
+import javax.sql.DataSource;
+import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.List;
 
 public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
@@ -25,10 +27,10 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     /**
      * This is a generic create for the ORM layer. This should work for all
      * entity types.
-     *
      */
     @Override
     public void create(T entity) {
+        setAuditingFields(entity);
         getSessionFactory().getCurrentSession().persist(entity);
     }
 
@@ -46,22 +48,19 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
      * associated instances if the association is mapped with
      * cascade="save-update"
      *
-     *
-     * @param entity
-     *            - Parameters: object - a transient or detached instance
-     *            containing new or updated state
-     *
+     * @param entity - Parameters: object - a transient or detached instance
+     *               containing new or updated state
      */
     @Override
     public void createOrUpdate(T entity) {
+        setAuditingFields(entity);
         getSessionFactory().getCurrentSession().saveOrUpdate(entity);
     }
 
     /**
      * Find an entity by key
      *
-     * @param entity
-     *            - entity.pid must NOT be null.
+     * @param entity - entity.pid must NOT be null.
      * @return
      */
     @SuppressWarnings("unchecked")
@@ -79,6 +78,24 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     }
 
     @SuppressWarnings("unchecked")
+    public <F> T findByField(String fieldName, F fieldValue) {
+        Session session = getSessionFactory().getCurrentSession();
+        String columnName = getColumnName(fieldName);
+        String queryStr = String.format("from %s where %s = :value", getEntityClass().getSimpleName(), columnName);
+        Query query = session.createQuery(queryStr);
+        query.setParameter("value", fieldValue);
+        List<T> results = query.list();
+        if (results.size() == 0) {
+            return null;
+        }
+        if (results.size() > 1) {
+            throw new RuntimeException(String.format("Multiple rows found with field %s equaling value %s", fieldName,
+                    fieldValue.toString()));
+        }
+        return results.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll() {
         Session session = getSessionFactory().getCurrentSession();
@@ -89,6 +106,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @Override
     public void update(T entity) {
+        setAuditingFields(entity);
         getSessionFactory().getCurrentSession().update(entity);
     }
 
@@ -107,5 +125,25 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     protected DataSource getDataSource() {
         return SessionFactoryUtils.getDataSource(getSessionFactory());
+    }
+
+    private String getColumnName(String fieldName) {
+        try {
+            Field field = getEntityClass().getDeclaredField(fieldName);
+            Column annotation = field.getAnnotation(Column.class);
+            return annotation.name();
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(String.format("No such field %s", e));
+        }
+    }
+
+    private void setAuditingFields(T entity) {
+        if (entity instanceof HasAuditingFields) {
+            Date now = new Date();
+            if (entity.getPid() == null) {
+                ((HasAuditingFields) entity).setCreated(now);
+            }
+            ((HasAuditingFields) entity).setUpdated(now);
+        }
     }
 }

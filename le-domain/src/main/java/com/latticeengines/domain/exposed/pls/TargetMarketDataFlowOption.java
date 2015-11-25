@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

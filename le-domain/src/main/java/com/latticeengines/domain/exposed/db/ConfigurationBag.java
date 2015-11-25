@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed.db;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

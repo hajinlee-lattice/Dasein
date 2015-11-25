@@ -1,11 +1,10 @@
 package com.latticeengines.db.exposed.dao.impl;
 
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 /**
  * Provides persistence with the single converged platform default multi-tenant

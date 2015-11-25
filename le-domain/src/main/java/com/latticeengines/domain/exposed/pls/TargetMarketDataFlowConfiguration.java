@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.db.ConfigurationBag;
 
 public class TargetMarketDataFlowConfiguration extends ConfigurationBag<TargetMarketDataFlowOption, TargetMarketDataFlowOptionName> {
     @SuppressWarnings("unchecked")
