@@ -37,3 +37,117 @@ pre {
 	padding: 1em;
 	border: #ddd solid 1px;
 }
+
+.style-guide .colors h5 {
+	font-size: 0.9em;
+}
+.color {
+	height: 100px;
+	border: #ddd solid 1px;
+}
+.jet { 
+	background: #333333;
+}
+.onyx { 
+	background: #464646;
+}
+.black-titanium { 
+	background: #676767;
+}
+.gun-metal { 
+	background: #888888;
+}
+.cobalt { 
+	background: #bbbbbb;
+}
+.silver { 
+	background: #d0d0d0;
+}
+.palladium { 
+	background: #e7e7e7;
+}
+.white-gold { 
+	background: #f1f1f1;
+}
+.pearl-white { 
+	background: #ffffff;
+}
+.saphire { 
+	background: #467dba;
+}
+.saphire-two { 
+	background: #629acc;
+}
+.saphire-three { 
+	background: #65b7e5;
+}
+.saphire-four { 
+	background: #26639b;
+}
+.aqua-marine { 
+	background: #6ce3ff;
+}
+.amber { 
+	background: #f16a22;
+}
+.amber-two { 
+	background: #ff8c36;
+}
+.amber-three { 
+	background: #ffbd48;
+}
+.amber-four { 
+	background: #cc5200;
+}
+.gold { 
+	background: #ffbd48;
+}
+.gold-two { 
+	background: #ffda7d;
+}
+.gold-three { 
+	background: #ffe67b;
+}
+.gold-four { 
+	background: #ef9d18;
+}
+.jade { 
+	background: #6fbe4a;
+}
+.jade-two { 
+	background: #8ed162;
+}
+.jade-three { 
+	background: #a2e264;
+}
+.jade-four { 
+	background: #129e4e;
+}
+
+
+.amethyst { 
+	background: #7b4bb2;
+}
+.amethyst-two { 
+	background: #8d66c6;
+}
+.amethyst-three { 
+	background: #9f6fe2;
+}
+.amethyst-four { 
+	background: #663399;
+}
+
+
+.ruby { 
+	background: #d22027;
+}
+.ruby-two { 
+	background: #e83a3a;
+}
+.ruby-three { 
+	background: #f75959;
+}
+.ruby-four { 
+	background: #b50b20;
+}
