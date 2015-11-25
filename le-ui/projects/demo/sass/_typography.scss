@@ -148,17 +148,39 @@ Lists
 .ordered-list { 
 	list-style: decimal; 
 }
-.summary-list {
-	
-}
-.stats dl:first-of-type {
-	
-}
-	.stats dt {
 
+.summary-list dt {
+	float: left;
+	clear: left;
+	width: 100px;
+}
+.summary-list dt:after {
+	content: ":";
+}
+.summary-list dd {
+	margin: 0 0 0 110px;
+	padding: 0 0 0.5em 0;
+	text-align: right;
+}
+
+
+	.stats-group dl {
+		border-left: $palladium solid 1px;
+		padding: 0 1em;
+		float: left;
+	}
+	.stats-group dl:first-of-type {
+		border-left: 0;
+		padding-left: 0;
+	}
+	.stats dt {
+		text-transform: uppercase;
+		font-size: 0.8em;
+		line-height: 1;
 	}
 	.stats dd {
-
+		font-size: 2em;
+		line-height: 1;
 	} 
 
 
