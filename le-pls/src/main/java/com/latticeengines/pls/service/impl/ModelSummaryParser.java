@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -37,6 +38,8 @@ public class ModelSummaryParser {
     public static final String NAME = "Name";
 
     public static final String MODEL_SUMMARY_PREDICTORS = "Predictors";
+    
+    public static final String MODEL_SUMMARY_SEGMENTATIONS = "Segmentations";
 
     public static final String DEFAULT_PREDICTOR_NAME = "DefaultPredictorName";
 
@@ -112,6 +115,7 @@ public class ModelSummaryParser {
         summary.setTotalConversionCount(JsonUtils.getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
         summary.setIncomplete(isIncomplete(json));
+        setLiftStatistics(json.get(MODEL_SUMMARY_SEGMENTATIONS), summary);
 
         if (details.has("ModelID")) {
             summary.setId(details.get("ModelID").asText());
@@ -159,6 +163,45 @@ public class ModelSummaryParser {
         return summary;
     }
 
+    @SuppressWarnings("unchecked")
+    private void setLiftStatistics(JsonNode json, ModelSummary summary) {
+        List<Map<String, ?>> segmentations = JsonUtils.getOrDefault(json, List.class, new ArrayList<>());
+        
+        if (segmentations.size() == 0) {
+            return;
+        }
+        List<Map<String, Integer>> segments = (List<Map<String, Integer>>) segmentations.get(0).get("Segments");
+        
+        long totalRowCount = 0;
+        long totalConvertedCount = 0;
+        int i = 1;
+        double averageProbability = (double) summary.getTotalConversionCount() / (double) summary.getTotalRowCount();
+        double top10PctLift = 0;
+        double top20PctLift = 0;
+        double top30PctLift = 0;
+        for (Map<String, Integer> segment : segments) {
+            int rowCount = segment.get("Count");
+            int convertedCount = segment.get("Converted");
+            
+            totalRowCount += rowCount;
+            totalConvertedCount += convertedCount;
+            
+            if (i == 10) {
+                top10PctLift = ((double) totalConvertedCount/(double) totalRowCount)/averageProbability;
+            }
+            if (i == 20) {
+                top20PctLift = ((double) totalConvertedCount/(double) totalRowCount)/averageProbability;
+            }
+            if (i == 30) {
+                top30PctLift = ((double) totalConvertedCount/(double) totalRowCount)/averageProbability;
+            }
+            i++;
+        }
+        summary.setTop10PercentLift(top10PctLift);
+        summary.setTop20PercentLift(top20PctLift);
+        summary.setTop30PercentLift(top30PctLift);
+    }
+
     private List<Predictor> parsePredictors(JsonNode predictorsJsonNode, ModelSummary summary) {
 
         List<Predictor> predictors = new ArrayList<Predictor>();
@@ -195,14 +238,14 @@ public class ModelSummaryParser {
             predictors.add(predictor);
         }
 
-        sortAndSetPredicotrs(predictors);
+        sortAndSetPredictors(predictors);
 
         return predictors;
     }
 
-    private void sortAndSetPredicotrs(List<Predictor> predictors) {
+    private void sortAndSetPredictors(List<Predictor> predictors) {
         if (predictors == null) {
-            throw new NullPointerException("predictors should not be null.");
+            throw new NullPointerException("Predictors should not be null.");
         }
         int numberUsedForBuyerInsights = predictors.size();
         if (numberUsedForBuyerInsights > defaultBiPredictorNum) {

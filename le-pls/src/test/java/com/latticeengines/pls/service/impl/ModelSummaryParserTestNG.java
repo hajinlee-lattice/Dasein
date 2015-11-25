@@ -50,6 +50,8 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
         assertTrue(topPredictorsAreSortedAndSet(predictors));
         String decompressedDetails = new String(CompressionUtils.decompressByteArray(summary.getDetails().getData()));
         assertEquals(decompressedDetails, data);
+        assertTrue(summary.getTop10PercentLift() > summary.getTop20PercentLift());
+        assertTrue(summary.getTop20PercentLift() > summary.getTop30PercentLift());
     }
 
     private boolean topPredictorsAreSortedAndSet(List<Predictor> predictors) {

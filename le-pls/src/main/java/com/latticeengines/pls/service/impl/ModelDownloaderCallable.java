@@ -83,10 +83,18 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             try {
                 String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
                 ModelSummary summary = parser.parse(file, contents);
+                String[] tokens = file.split("/");
                 summary.setTenant(tenant);
 
                 if (!set.contains(summary.getId())) {
-                    log.info(String.format("Creating model summary with id %s from file %s.", summary.getId(), file));
+                    try {
+                        summary.setApplicationId("application_" + tokens[tokens.length-3]);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        log.error(String.format("Cannot set application id of model summary with id %s.", summary.getId()));
+                    }
+                    
+                    log.info(String.format("Creating model summary with id %s appId %s from file %s.", //
+                            summary.getId(), summary.getApplicationId(), file));
                     modelSummaryEntityMgr.create(summary);
                     foundFilesToDownload = true;
                 }
@@ -95,8 +103,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 // delete the bad model summary file
                 HdfsUtils.rmdir(yarnConfiguration, file);
             } catch (IOException e) {
-                log.fatal(ExceptionUtils.getFullStackTrace(e)); // will trigger
-                                                                // pagerDuty
+                log.fatal(ExceptionUtils.getFullStackTrace(e)); // will trigger PagerDuty
             } catch (Exception e) {
                 log.error(e);
             }

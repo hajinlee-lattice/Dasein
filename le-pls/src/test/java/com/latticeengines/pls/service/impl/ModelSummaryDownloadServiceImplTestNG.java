@@ -99,6 +99,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         setupSecurityContext(tenant);
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1, "One new summaries should have been created");
+        assertEquals(summaries.get(0).getApplicationId(), "application_1423547416066_0001");
 
         modelSummaryDownloadService.executeInternal(null);
         summaries = modelSummaryEntityMgr.findAll();
