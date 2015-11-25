@@ -45,7 +45,7 @@ $offset-list:    (1, "one") (2, "two") (3, "three") (4, "four") (5, "five") (6, 
             @include prefixer(align-items, flex-start, webkit moz ms);
             flex-align: flex-start;
             @include prefixer(justify-content, flex-start, webkit moz ms spec);
-            width: 100%;
+            width: 90%;
         }
     }
 }
