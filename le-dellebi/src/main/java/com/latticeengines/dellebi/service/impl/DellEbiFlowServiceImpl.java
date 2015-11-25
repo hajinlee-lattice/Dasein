@@ -2,9 +2,10 @@ package com.latticeengines.dellebi.service.impl;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.dellebi.service.FileType;
@@ -19,37 +20,22 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
     @Resource(name = "smbFileFlowService")
     private FileFlowService smbFileFlowService;
 
+    @Autowired
+    private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
+
     @Override
     public DataFlowContext getFile() {
         DataFlowContext context = new DataFlowContext();
-        String txtFileName = smbFileFlowService.getFile();
-        String zipFileName = null;
-        if (txtFileName != null) {
-            zipFileName = getZipFileName(txtFileName);
-            context.setProperty(TXT_FILE_NAME, txtFileName);
-            context.setProperty(ZIP_FILE_NAME, zipFileName);
-            context.setProperty(FILE_SOURCE, FILE_SOURCE_SMB);
+        context = smbFileFlowService.getContext();
+        String fileName = context.getProperty(ZIP_FILE_NAME, String.class);
+
+        if (fileName != null) {
             return context;
         }
 
-        txtFileName = localFileFlowService.getFile();
-        if (txtFileName != null) {
-            zipFileName = getZipFileName(txtFileName);
-            context.setProperty(TXT_FILE_NAME, txtFileName);
-            context.setProperty(ZIP_FILE_NAME, zipFileName);
-            context.setProperty(FILE_SOURCE, FILE_SOURCE_LOCAL);
-        }
-        return context;
-    }
+        context = localFileFlowService.getContext();
 
-    private String getZipFileName(String txtFileName) {
-        String zipFileName;
-        if (txtFileName.endsWith(".txt")) {
-            zipFileName = StringUtils.removeEnd(txtFileName, ".txt") + ".zip";
-        } else {
-            zipFileName = txtFileName + ".zip";
-        }
-        return zipFileName;
+        return context;
     }
 
     private boolean isSmb(DataFlowContext context) {
@@ -129,12 +115,19 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         }
         return false;
     }
-    
+
     @Override
     public String getErrorOutputDir(DataFlowContext context) {
         if (isSmb(context)) {
             return smbFileFlowService.getErrorOutputDir();
         }
         return localFileFlowService.getErrorOutputDir();
+    }
+
+    @Override
+    public String getTargetColumns(DataFlowContext context) {
+        String fileType = context.getProperty(FILE_TYPE, String.class);
+
+        return dellEbiConfigEntityMgr.getTargetColumns(fileType);
     }
 }

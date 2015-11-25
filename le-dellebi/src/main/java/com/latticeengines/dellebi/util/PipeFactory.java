@@ -65,11 +65,12 @@ public class PipeFactory {
 
         // There're 2 new fields should be added to output file:
         // PROCESSED_FLG is 0; STAGE_DT is current date.
-        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG")).append(new Fields("STAGE_DT"))
-                .append(new Fields("FileName"));
+        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG"))
+                .append(new Fields("STAGE_DT")).append(new Fields("FileName"));
 
         docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubWarFunction(outputScrubArguments), Fields.RESULTS);
+        docPipe = new Each(docPipe, scrubArguments, new ScrubWarFunction(outputScrubArguments),
+                Fields.RESULTS);
         return docPipe;
     }
 
@@ -85,11 +86,12 @@ public class PipeFactory {
 
         // There're 2 new fields should be added to output file:
         // PROCESSED_FLG is 0; STAGE_DT is current date.
-        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG")).append(new Fields("STAGE_DT"))
-                .append(new Fields("FileName"));
+        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG"))
+                .append(new Fields("STAGE_DT")).append(new Fields("FileName"));
 
         docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubShipAddrFunction(outputScrubArguments), Fields.RESULTS);
+        docPipe = new Each(docPipe, scrubArguments, new ScrubShipAddrFunction(outputScrubArguments),
+                Fields.RESULTS);
         return docPipe;
     }
 
@@ -106,17 +108,19 @@ public class PipeFactory {
         // There're 3 new fields should be added to output file:
         // PROCESSED_FLG is 0; STAGE_DT is current date;FileName is input file
         // name.
-        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG")).append(new Fields("STAGE_DT"))
-                .append(new Fields("FileName"));
+        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG"))
+                .append(new Fields("STAGE_DT")).append(new Fields("FileName"));
 
         docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubOdrSumFunction(outputScrubArguments), Fields.RESULTS);
+        docPipe = new Each(docPipe, scrubArguments, new ScrubOdrSumFunction(outputScrubArguments),
+                Fields.RESULTS);
 
-        Fields replaceScrubArgument = new Fields("SRC_LCL_CHNL_CD", "REF_LCL_CHNL_CD", "CNCL_DT", "INV_DT", "ORD_DT",
-                "ORD_STAT_DT", "SHIP_DT", "EXCH_DT", "SHIP_BY_DT", "PRF_OF_DLVR_DT", "ESTD_BUS_DLVR_DT");
+        Fields replaceScrubArgument = new Fields("SRC_LCL_CHNL_CD", "REF_LCL_CHNL_CD", "CNCL_DT",
+                "INV_DT", "ORD_DT", "ORD_STAT_DT", "SHIP_DT", "EXCH_DT", "SHIP_BY_DT",
+                "PRF_OF_DLVR_DT", "ESTD_BUS_DLVR_DT");
 
-        docPipe = new Each(docPipe, replaceScrubArgument, new ScrubOdrSumFunctionReplace(replaceScrubArgument),
-                Fields.REPLACE);
+        docPipe = new Each(docPipe, replaceScrubArgument,
+                new ScrubOdrSumFunctionReplace(replaceScrubArgument), Fields.REPLACE);
         return docPipe;
     }
 
@@ -132,16 +136,17 @@ public class PipeFactory {
 
         // There're 2 new fields should be added to output file:
         // PROCESSED_FLG is 0; STAGE_DT is current date.
-        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG")).append(new Fields("STAGE_DT"))
-                .append(new Fields("FileName"));
+        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG"))
+                .append(new Fields("STAGE_DT")).append(new Fields("FileName"));
 
         docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubOdrDtlFunction(outputScrubArguments), Fields.RESULTS);
+        docPipe = new Each(docPipe, scrubArguments, new ScrubOdrDtlFunction(outputScrubArguments),
+                Fields.RESULTS);
 
         Fields replaceScrubArgument = new Fields("SVC_TAG_ID", "SRC_BU_ID");
 
-        docPipe = new Each(docPipe, replaceScrubArgument, new ScrubOdrDtlFunctionReplace(replaceScrubArgument),
-                Fields.REPLACE);
+        docPipe = new Each(docPipe, replaceScrubArgument,
+                new ScrubOdrDtlFunctionReplace(replaceScrubArgument), Fields.REPLACE);
         return docPipe;
     }
 
@@ -158,12 +163,13 @@ public class PipeFactory {
             Fields scrubArgument = new Fields(s);
             scrubArguments = scrubArguments.append(scrubArgument);
         }
-        
+
         Fields outputScrubArguments = new Fields("#QTE_NUM_VAL");
-        
-        List<String> exportedItems = new ArrayList<String>(Arrays.asList(exportedQuoteFields.split(",")));
-        
-        for (String s: exportedItems) {
+
+        List<String> exportedItems = new ArrayList<String>(
+                Arrays.asList(exportedQuoteFields.split(",")));
+
+        for (String s : exportedItems) {
             Fields outputScrubrgument = new Fields(s);
             outputScrubArguments = outputScrubArguments.append(outputScrubrgument);
         }
@@ -171,7 +177,8 @@ public class PipeFactory {
         docPipe = new Pipe("copy");
         AssertSizeEquals equals = new AssertSizeEquals(111);
         docPipe = new Each(docPipe, AssertionLevel.VALID, equals);
-        docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments), Fields.RESULTS);
+        docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments),
+                Fields.RESULTS);
         return docPipe;
     }
 }

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:security="http://www.springframework.org/schema/security"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context-4.0.xsd
+      http://www.springframework.org/schema/jee
+      http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-4.0.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+
+
+    <!-- Hibernate data source -->
+    <bean id="dataSourceDellEbiTarget"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${dellebi.datatarget.driver}" />
+        <property name="url" value="${dellebi.datatarget.url}" />
+        <property name="username" value="${dellebi.datatarget.user}" />
+        <property name="password" value="${dellebi.datatarget.password.encrypted}" />
+    </bean>
+
+    <!-- Hibernate data source -->
+    <bean id="dataSourceDellEbi"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${dellebi.configdb.datasource.driver}" />
+        <property name="url" value="${dellebi.configdb.datasource.url}" />
+        <property name="username" value="${dellebi.configdb.datasource.user}" />
+        <property name="password"
+            value="${dellebi.configdb.datasource.password.encrypted}" />
+    </bean>
+
+    <!-- Hibernate session factory -->
+    <bean id="sessionFactoryDellEbi"
+        class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceDellEbi" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dellebi" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${dellebi.configdb.datasource.dialect}</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManagerDellEbiCfg"
+        class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+        p:sessionFactory-ref="sessionFactoryDellEbi">
+    </bean>
+
+    <bean id="dellEbiTargetJDBCTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+        p:dataSource-ref="dataSourceDellEbiTarget" />
+
+    <!-- All DAOs' EntityMgrs should be added to com.latticeengines.dataplatform.functionalframework.OrderedEntityMgrListForDbClean -->
+    <!-- DAOs for LeadScoring(DLOrchestration) database -->
+    <bean id="dellEbiCfgDao"
+        class="com.latticeengines.dellebi.dao.impl.DellEbiConfigDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryDellEbi" />
+    </bean>
+
+    <bean id="dellEbiExecutionLogDao"
+        class="com.latticeengines.dellebi.dao.impl.DellEbiExecutionLogDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryDellEbi" />
+    </bean>
+
+</beans>

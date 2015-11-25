@@ -2,13 +2,18 @@ package com.latticeengines.dellebi.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileType;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 
 @Component("localFileFlowService")
 public class LocalFileFlowServiceImpl extends BaseFileFlowService {
@@ -23,8 +28,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     @Value("${dellebi.local.datatarget.dbname}")
     private String localTargetDB;
 
-    @Override
-    public String getFile() {
+    public File getScanedFile() {
 
         try {
 
@@ -36,31 +40,62 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
             if (files == null) {
                 return null;
             }
-            String txtFileName = null;
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    continue;
-                }
-                String zipFileName = file.getName();
-                if (!zipFileName.endsWith(".zip")) {
-                    continue;
-                }
-                if (isFailedFile(zipFileName)) {
-                    continue;
-                }
-                if (FileType.QUOTE.equals(getFileType(zipFileName))) {
-                    log.info("Found one new quote file, name=" + zipFileName);
-                    txtFileName = downloadAndUnzip(new FileInputStream(file), zipFileName);
-                    break;
+
+            for (File zipFile : files) {
+                if (isValidFile(zipFile)) {
+                    String zipFileName = zipFile.getName();
+                    log.info("Found one new file, name=" + zipFileName);
+
+                    return zipFile;
                 }
             }
-            return txtFileName;
-
         } catch (Exception ex) {
-            log.error("Failed to get Smb file!", ex);
+            log.warn("Failed to get Smb file! error=" + ex.getMessage());
         }
 
         return null;
+    }
+
+    @Override
+    public DataFlowContext getContext() {
+
+        DataFlowContext context = new DataFlowContext();
+
+        File scanedFile = getScanedFile();
+
+        if (scanedFile != null) {
+            String txtFileName = null;
+
+            String zipFileName = scanedFile.getName();
+            String fileType = getFileType(zipFileName).toString();
+
+            DellEbiExecutionLog dellEbiExecutionLog = new DellEbiExecutionLog();
+
+            try {
+                dellEbiExecutionLog.setFile(zipFileName);
+                dellEbiExecutionLog.setStartDate(new Date());
+                dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.NewFile.getStatus());
+                dellEbiExecutionLogEntityMgr.createOrUpdate(dellEbiExecutionLog);
+                txtFileName = downloadAndUnzip(new FileInputStream(scanedFile), zipFileName);
+                dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Downloaded.getStatus());
+                dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
+                context.setProperty(DellEbiFlowService.LOG_ENTRY, dellEbiExecutionLog);
+                context.setProperty(DellEbiFlowService.TXT_FILE_NAME, txtFileName);
+                context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, zipFileName);
+                context.setProperty(DellEbiFlowService.FILE_SOURCE,
+                        DellEbiFlowService.FILE_SOURCE_SMB);
+                context.setProperty(DellEbiFlowService.FILE_TYPE, fileType);
+
+                return context;
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                log.warn("Failed to get Smb file! error=" + ex.getMessage());
+                dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage());
+            }
+        }
+
+        return context;
     }
 
     @Override
@@ -73,6 +108,82 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     public String getTargetDB() {
         return localTargetDB;
     }
-    
-    
+
+    protected boolean isValidFile(File file) {
+
+        String fileName = file.getName();
+
+        try {
+            if (file.isDirectory()) {
+                return false;
+            }
+
+            if (!fileName.endsWith(".zip")) {
+                return false;
+            }
+            if (isFailedFile(fileName)) {
+                return false;
+            }
+
+            if (!isValidForDate(file)) {
+                return false;
+            }
+
+            if (isProcessedFile(file)) {
+                return false;
+            }
+
+            for (FileType type : FileType.values()) {
+                if (type.equals(getFileType(fileName))) {
+                    return true;
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Can not validate the local file, name=" + fileName, e);
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean isValidForDate(File file) {
+        String fileName = file.getName();
+        Long dateLong1, dateLong2;
+        FileType type = getFileType(fileName);
+        String typeName = type.toString();
+
+        Date startDate = dellEbiConfigEntityMgr.getStartDate(typeName);
+
+        if (startDate == null) {
+            dateLong1 = -1L;
+        } else {
+            dateLong1 = startDate.getTime();
+        }
+
+        dateLong2 = file.lastModified();
+
+        if (dateLong2 > dateLong1) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    protected boolean isProcessedFile(File file) {
+        String filename = file.getName();
+        DellEbiExecutionLog dellEbiExecutionLog = dellEbiExecutionLogEntityMgr
+                .getEntryByFile(filename);
+
+        if (dellEbiExecutionLog == null) {
+            return false;
+        }
+
+        if (dellEbiExecutionLog.getStatus() == DellEbiExecutionLogStatus.Completed.getStatus()) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

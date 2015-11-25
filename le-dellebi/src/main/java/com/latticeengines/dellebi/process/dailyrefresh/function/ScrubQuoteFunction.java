@@ -26,7 +26,7 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
     public ScrubQuoteFunction(Fields fieldDeclaration) {
         super(2, fieldDeclaration);
     }
-    
+
     private static final Log log = LogFactory.getLog(ScrubQuoteFunction.class);
 
     @Override
@@ -40,16 +40,17 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
         String fileName = fs.getPath().getName();
 
         Tuple result = new Tuple();
-        
+
         int sizeOfFieldDeclaration = this.fieldDeclaration.size();
-        
+
         for (int i = 0; i < sizeOfFieldDeclaration; i++) {
             String fieldName = this.fieldDeclaration.get(i).toString();
             switch (fieldName) {
             case "QUOTE_CREATE_DATE":
-                String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
+                String quoteCreationDate = convertDatetimeToDate(
+                        argument.getString("QUOTE_CREATE_DATE"));
                 result.add(quoteCreationDate);
-                break; 
+                break;
             case "fileName":
                 result.add(fileName);
                 break;
@@ -63,7 +64,7 @@ public class ScrubQuoteFunction extends BaseOperation implements Function {
     }
 
     private String convertDatetimeToDate(String s) {
-        
+
         if (s != null && !s.isEmpty() && s.trim().length() > 10) {
             SimpleDateFormat formatterOld = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
             SimpleDateFormat formatterNew = new SimpleDateFormat("yyyy-MM-dd");

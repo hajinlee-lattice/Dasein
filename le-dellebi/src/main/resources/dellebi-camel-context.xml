@@ -11,10 +11,9 @@
            http://www.springframework.org/schema/util
            http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://camel.apache.org/schema/spring
-		   http://camel.apache.org/schema/spring/camel-spring.xsd">
+           http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-    <camelContext id="camel"
-        xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
         <routeBuilder ref="filearchiver" />
         <routeBuilder ref="fileunzipper" />
     </camelContext>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
            http://www.springframework.org/schema/aop
            http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
@@ -12,38 +12,38 @@
            http://www.springframework.org/schema/util
            http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://camel.apache.org/schema/spring
-		   http://camel.apache.org/schema/spring/camel-spring.xsd">
+           http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-	<bean name="dellebiManagerJob"
-		class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-		<property name="jobClass" value="com.latticeengines.dellebi.dataprocess.DellEbiDailyJob" />
-		<property name="durability" value="true" />
-		<property name="jobDataMap">
+    <bean name="dellebiManagerJob"
+        class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="com.latticeengines.dellebi.dataprocess.DellEbiDailyJob" />
+        <property name="durability" value="true" />
+        <property name="jobDataMap">
         <map>
             <entry key="dailyFlow" value-ref="dailyFlow" />
             <entry key="exportAndReportService" value-ref="exportAndReportService" />
         </map>
     </property>
 
-	</bean>
+    </bean>
 
-	<bean id="dellebiManagerCronTrigger"
-		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-		<property name="jobDetail" ref="dellebiManagerJob" />
-		<property name="cronExpression" value="0 0/5 * * * ?" />
-	</bean>
+    <bean id="dellebiManagerCronTrigger"
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="dellebiManagerJob" />
+        <property name="cronExpression" value="0 0/5 * * * ?" />
+    </bean>
 
-	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-		<property name="triggers">
-			<list>
-				<ref bean="dellebiManagerCronTrigger" />
-			</list>
-		</property>
-		<property name="jobDetails">
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="dellebiManagerCronTrigger" />
+            </list>
+        </property>
+        <property name="jobDetails">
             <list>
                 <ref bean="dellebiManagerJob" />
             </list>
         </property>
-	</bean>
+    </bean>
 
 </beans>

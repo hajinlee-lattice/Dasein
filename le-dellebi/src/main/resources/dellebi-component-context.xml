@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
            http://www.springframework.org/schema/aop
            http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
@@ -12,25 +12,27 @@
            http://www.springframework.org/schema/util
            http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://camel.apache.org/schema/spring
-	   http://camel.apache.org/schema/spring/camel-spring.xsd">
+       http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-	<bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow">
-		<constructor-arg>
-			<util:list list-class="java.util.ArrayList">
-				<ref bean="getOrderSumDailyFlow" />
-				<ref bean="getOrderDetailDailyFlow" />
-				<ref bean="getShipDailyFlow" />
-				<ref bean="getWarrantyDailyFlow" />
-				<ref bean="getQuoteDailyFlow" />
-			</util:list>
-		</constructor-arg>
-	</bean>
 
-	<bean id="hadoopfilesystemoperations"
-		class="com.latticeengines.dellebi.util.HadoopFileSystemOperations" />
+    <bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow"
+        depends-on="initialConfigs">
+        <constructor-arg>
+            <util:list list-class="java.util.ArrayList">
+                <ref bean="getOrderSumDailyFlow" />
+                <ref bean="getOrderDetailDailyFlow" />
+                <ref bean="getShipDailyFlow" />
+                <ref bean="getWarrantyDailyFlow" />
+                <ref bean="getQuoteDailyFlow" />
+            </util:list>
+        </constructor-arg>
+    </bean>
 
-	<bean id="mail" class="com.latticeengines.dellebi.util.MailSender" />
+    <bean id="hadoopfilesystemoperations"
+        class="com.latticeengines.dellebi.util.HadoopFileSystemOperations" />
 
-	<bean id="exportAndReportService" class="com.latticeengines.dellebi.util.ExportAndReportService" />
+    <bean id="mail" class="com.latticeengines.dellebi.util.MailSender" />
+
+    <bean id="exportAndReportService" class="com.latticeengines.dellebi.util.ExportAndReportService" />
 
 </beans>

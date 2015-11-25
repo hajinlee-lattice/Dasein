@@ -15,6 +15,7 @@
         <le.dataplatform.version>2.0.17-SNAPSHOT</le.dataplatform.version>
         <jetty.version>6.1.26</jetty.version>
         <mysql.driver.version>5.1.35</mysql.driver.version>
+        <le.domain.version>2.0.17-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
@@ -270,7 +271,12 @@
             <version>${mysql.driver.version}</version>
             <scope>test</scope>
         </dependency>
-        
-   </dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+    </dependencies>
 
 </project>

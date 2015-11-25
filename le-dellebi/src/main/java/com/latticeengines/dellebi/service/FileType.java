@@ -2,8 +2,8 @@ package com.latticeengines.dellebi.service;
 
 public enum FileType {
 
-    QUOTE("QuoteTransDailyFlow"), ORDER_SUMMARY("OrderSumDailyFlow"), ORDER_DETAIL("OrderDetailDailyFlow"), SHIP(
-            "ShipDailyFlow"), WARRANTE("WarrantyDailyFlow");
+    QUOTE("QuoteTransDailyFlow"), ORDER_SUMMARY("OrderSumDailyFlow"), ORDER_DETAIL(
+            "OrderDetailDailyFlow"), SHIP("ShipDailyFlow"), WARRANTE("WarrantyDailyFlow");
 
     private String type;
 

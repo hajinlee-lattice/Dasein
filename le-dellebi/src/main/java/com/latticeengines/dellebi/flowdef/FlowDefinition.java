@@ -14,6 +14,7 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 
+import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.dellebi.util.PipeFactory;
@@ -53,8 +54,6 @@ public class FlowDefinition {
     private String shipToAddrFields;
     @Value("${dellebi.warrantyfields}")
     private String warrantyFields;
-    @Value("${dellebi.quotefields}")
-    private String quoteFields;
     @Value("${dellebi.exportedordersummaryfields}")
     private String exportedOrderSummaryFields;
     @Value("${dellebi.exportedorderdetailfields}")
@@ -63,25 +62,35 @@ public class FlowDefinition {
     private String exportedShipToAddrFields;
     @Value("${dellebi.exportedwarrantyfields}")
     private String exportedWarrantyFields;
-    @Value("${dellebi.exportedquotefields}")
-    private String exportedQuoteFields;
 
     @Autowired
     private DellEbiFlowService dellEbiFlowService;
 
+    @Autowired
+    private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
+
     private static final Log log = LogFactory.getLog(FlowDefinition.class);
+
+    @Bean
+    public FlowDef initialConfigs() {
+        dellEbiConfigEntityMgr.initialService();
+        return null;
+    }
 
     @SuppressWarnings("rawtypes")
     @Bean
     public FlowDef getOrderSumDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
+                dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","),
+                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
         try {
-            filePipe = PipeFactory.getPipe("order_summary_Pipe", orderSummaryFields, exportedOrderSummaryFields);
+            filePipe = PipeFactory.getPipe("order_summary_Pipe", orderSummaryFields,
+                    exportedOrderSummaryFields);
         } catch (Exception e) {
             log.error("Failed to get order summary pipe!", e);
         }
@@ -97,13 +106,16 @@ public class FlowDefinition {
     @Bean
     public FlowDef getOrderDetailDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
+                dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","),
+                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
         try {
-            filePipe = PipeFactory.getPipe("order_detail_Pipe", orderDetailFields, exportedOrderDetailFields);
+            filePipe = PipeFactory.getPipe("order_detail_Pipe", orderDetailFields,
+                    exportedOrderDetailFields);
         } catch (Exception e) {
             log.error("Failed to get order detail pipe!", e);
         }
@@ -118,13 +130,16 @@ public class FlowDefinition {
     @Bean
     public FlowDef getShipDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
+                dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","),
+                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
         try {
-            filePipe = PipeFactory.getPipe("ship_to_addr_lattice_Pipe", shipToAddrFields, exportedShipToAddrFields);
+            filePipe = PipeFactory.getPipe("ship_to_addr_lattice_Pipe", shipToAddrFields,
+                    exportedShipToAddrFields);
         } catch (Exception e) {
             log.error("Failed to get ship to addr pipe!", e);
         }
@@ -139,13 +154,16 @@ public class FlowDefinition {
     @Bean
     public FlowDef getWarrantyDailyFlow() {
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
+                dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(true, ","),
+                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
         try {
-            filePipe = PipeFactory.getPipe("warranty_global_Pipe", warrantyFields, exportedWarrantyFields);
+            filePipe = PipeFactory.getPipe("warranty_global_Pipe", warrantyFields,
+                    exportedWarrantyFields);
         } catch (Exception e) {
             log.error("Failed to get ship to addr pipe!", e);
         }
@@ -162,13 +180,21 @@ public class FlowDefinition {
 
         log.info("Initial quote daily flow definition!");
 
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(false, ","), dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
-        Tap failedRowsTapFile = new Hfs(new TextDelimited(false, ","), dellEbiFlowService.getErrorOutputDir(null), SinkMode.UPDATE);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
+                dellEbiFlowService.getTxtDir(null));
+        Tap outTapFile = new Hfs(new TextDelimited(false, ","),
+                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
+        Tap failedRowsTapFile = new Hfs(new TextDelimited(false, ","),
+                dellEbiFlowService.getErrorOutputDir(null), SinkMode.UPDATE);
 
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
-        
+
+        String quoteFields = dellEbiConfigEntityMgr
+                .getInputFields(DellEbiConfigEntityMgr.DellEbi_Quote);
+        String exportedQuoteFields = dellEbiConfigEntityMgr
+                .getOutputFields(DellEbiConfigEntityMgr.DellEbi_Quote);
+
         try {
             filePipe = PipeFactory.getPipe("quote_trans_Pipe", quoteFields, exportedQuoteFields);
         } catch (Exception e) {

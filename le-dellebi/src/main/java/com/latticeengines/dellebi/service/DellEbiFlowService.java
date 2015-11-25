@@ -9,6 +9,8 @@ public interface DellEbiFlowService {
     public static final String FILE_SOURCE = "FILE_SOURCE";
     public static final String TXT_FILE_NAME = "TXT_FILE_NAME";
     public static final String ZIP_FILE_NAME = "ZIP_FILE_NAME";
+    public static final String FILE_TYPE = "FILE_TYPE";
+    public static final String LOG_ENTRY = "LOG_ENTRY";
 
     public static final String RESULT_KEY = "RESULT";
 
@@ -17,7 +19,7 @@ public interface DellEbiFlowService {
     DataFlowContext getFile();
 
     String getOutputDir(DataFlowContext context);
-    
+
     String getErrorOutputDir(DataFlowContext context);
 
     void registerFailedFile(DataFlowContext context);
@@ -31,6 +33,8 @@ public interface DellEbiFlowService {
     String getTxtDir(DataFlowContext context);
 
     String getTargetDB(DataFlowContext context);
+
+    String getTargetColumns(DataFlowContext context);
 
     boolean runStoredProcedure(DataFlowContext context);
 

@@ -25,6 +25,7 @@ public class ScrubOdrSumFunction extends BaseOperation implements Function {
         super(2, fieldDeclaration);
     }
 
+    @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
 
         HadoopFlowProcess hfp = (HadoopFlowProcess) flowProcess;

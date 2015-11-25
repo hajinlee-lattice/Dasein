@@ -14,10 +14,13 @@ import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
 import cascading.flow.planner.PlannerException;
 import cascading.property.AppProps;
 
+import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class DailyFlow {
@@ -56,6 +59,9 @@ public class DailyFlow {
     private HadoopFileSystemOperations hadoopfilesystemoperations;
 
     @Autowired
+    private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
+
+    @Autowired
     private MailSender mailSender;
 
     private ArrayList<FlowDef> flowList;
@@ -69,7 +75,7 @@ public class DailyFlow {
         DataFlowContext context = dellEbiFlowService.getFile();
         String fileName = context.getProperty(DellEbiFlowService.TXT_FILE_NAME, String.class);
         if (fileName == null) {
-            log.info("There's no file found or can not get file!");
+            log.info("There's no valid file or can not get file!");
             context.setProperty(DellEbiFlowService.RESULT_KEY, Boolean.FALSE);
             return context;
         }
@@ -94,20 +100,27 @@ public class DailyFlow {
 
         } catch (PlannerException e) {
             log.error("Cascading failed!", e);
-            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName, "check "
-                    + dellebiEnv + " environment. error=" + e);
+            mailSender.sendEmail(mailReceiveList,
+                    "Dell EBI daily refresh just failed! file=" + fileName,
+                    "check " + dellebiEnv + " environment. error=" + e);
             dellEbiFlowService.registerFailedFile(context);
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
             return context;
 
         } catch (Exception e) {
             log.error("Daily flow failed!", e);
-            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName, "check "
-                    + dellebiEnv + " environment. error=" + e);
+            mailSender.sendEmail(mailReceiveList,
+                    "Dell EBI daily refresh just failed! file=" + fileName,
+                    "check " + dellebiEnv + " environment. error=" + e);
             dellEbiFlowService.registerFailedFile(context);
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
             return context;
         }
+
+        DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(DellEbiFlowService.LOG_ENTRY,
+                DellEbiExecutionLog.class);
+        dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Transformed.getStatus());
+        dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
 
         log.info("Finished Cascading job!");
 

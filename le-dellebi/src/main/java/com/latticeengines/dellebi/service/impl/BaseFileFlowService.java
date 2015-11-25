@@ -14,11 +14,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
+import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.dellebi.service.FileType;
 
@@ -29,14 +32,17 @@ public abstract class BaseFileFlowService implements FileFlowService {
     static final int FAIL_TRIES = 3;
     private Map<String, Integer> failedFiles = new HashMap<>();
 
-    @Value("${dellebi.quoteheaders}")
-    String quoteHeaders;
-    
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
-    
+
     @Value("${dellebi.datahadooperrorworkingpath}")
     private String dataHadoopErrorWorkingPath;
+
+    @Autowired
+    protected DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
+
+    @Autowired
+    protected DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
     public BaseFileFlowService() {
         super();
@@ -47,19 +53,19 @@ public abstract class BaseFileFlowService implements FileFlowService {
         if (zipFileName.startsWith("tgt_quote_trans_global")) {
             return FileType.QUOTE;
         }
-    
+
         if (zipFileName.startsWith("tgt_lat_order_summary_global")) {
             return FileType.ORDER_SUMMARY;
         }
-    
+
         if (zipFileName.startsWith("tgt_order_detail_global")) {
             return FileType.ORDER_DETAIL;
         }
-    
+
         if (zipFileName.startsWith("tgt_ship_to_addr_lattice")) {
             return FileType.SHIP;
         }
-    
+
         if (zipFileName.startsWith("tgt_warranty_global")) {
             return FileType.WARRANTE;
         }
@@ -96,7 +102,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
     protected String downloadAndUnzip(InputStream is, String fileName) {
         String zipDir = getZipDir();
         String txtDir = getTxtDir();
-    
+
         try {
             Configuration conf = new Configuration();
             FileSystem fs = FileSystem.get(conf);
@@ -108,19 +114,21 @@ public abstract class BaseFileFlowService implements FileFlowService {
             log.info("Starting to download file to HDFS, fileName=" + fileName);
             FileCopyUtils.copy(is, os);
             log.info("Finished downloading file to HDFS, fileName=" + fileName);
-    
+
             if (HdfsUtils.fileExists(conf, txtDir)) {
                 HdfsUtils.rmdir(conf, txtDir);
             }
             return unzip(fs, zipDir, txtDir, fileName);
-    
+
         } catch (Exception ex) {
             log.error("Can not download or unzip File, name=" + fileName, ex);
             return null;
         }
     }
 
-    private String unzip(FileSystem fs, String zipDir, String txtDir, String zipFileName) throws Exception {
+    private String unzip(FileSystem fs, String zipDir, String txtDir, String zipFileName)
+            throws Exception {
+
         int idx = zipFileName.lastIndexOf(".");
         if (idx < 0) {
             log.info("It's not a zip file!");
@@ -131,11 +139,15 @@ public abstract class BaseFileFlowService implements FileFlowService {
             log.info("It's not a zip file!");
             return null;
         }
-    
+
         String inputFile = zipDir + "/" + zipFileName;
         ZipInputStream zipIn = new ZipInputStream(fs.open((new Path(inputFile))));
         ZipEntry entry = zipIn.getNextEntry();
         String txtFileName = null;
+
+        FileType type = getFileType(zipFileName);
+        String typeName = type.toString();
+        String quoteHeaders = dellEbiConfigEntityMgr.getHeaders(typeName);
         while (entry != null) {
             txtFileName = entry.getName();
             String txtFilePath = txtDir + "/" + txtFileName;
@@ -155,12 +167,12 @@ public abstract class BaseFileFlowService implements FileFlowService {
                 }
             }
             entry = zipIn.getNextEntry();
-    
+
         }
         zipIn.close();
         return txtFileName;
     }
-    
+
     @Override
     public String getTxtDir() {
         return dataHadoopWorkingPath + "/txt_dir";
@@ -175,7 +187,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
     public String getOutputDir() {
         return dataHadoopWorkingPath + "/output";
     }
-    
+
     @Override
     public String getErrorOutputDir() {
         return dataHadoopErrorWorkingPath;
