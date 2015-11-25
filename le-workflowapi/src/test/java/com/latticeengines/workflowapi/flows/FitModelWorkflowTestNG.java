@@ -21,12 +21,12 @@ public class FitModelWorkflowTestNG extends FitModelWorkflowTestNGBase {
     @Autowired
     private FitModelWorkflow fitModelWorkflow;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupForFitModel();
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void testWorkflow() throws Exception {
         FitModelWorkflowConfiguration workflowConfig = generateFitModelWorkflowConfiguration();
 
