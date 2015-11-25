@@ -70,7 +70,6 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         cleanupCamilleAndHdfs(customer);
-        targetPath = dataExtractionService.createTargetPath(customer);
 
         initZK(customer);
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
@@ -106,6 +105,8 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
     @Test(groups = "functional")
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
+        targetPath = dataExtractionService.createTargetPath(customer) + "/"
+                + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
         importConfig.setProperty(ImportProperty.METADATAURL, mockMetadataUrl);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
 

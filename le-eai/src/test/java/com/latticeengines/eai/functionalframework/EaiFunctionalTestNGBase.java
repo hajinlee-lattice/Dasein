@@ -207,11 +207,9 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         }
     }
 
-    protected void checkExtractsDirectoryExists(String customer, List<String> tables) throws Exception {
-        CustomerSpace space = CustomerSpace.parse(customer);
+    protected void checkExtractsDirectoryExists(String targetPath, List<String> tables) throws Exception {
         for (String table : tables) {
-            String path = (PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), space) + "/" + table + "/Extracts")
-                    .toString();
+            String path = targetPath + "/" + table + "/Extracts";
             assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
         }
     }

@@ -123,6 +123,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     @Test(groups = { "deployment" }, enabled = true)
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
+        targetPath += "/" + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);

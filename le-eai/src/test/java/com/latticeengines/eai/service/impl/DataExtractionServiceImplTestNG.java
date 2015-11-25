@@ -91,7 +91,6 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         cleanupCamilleAndHdfs(customer);
 
         crmCredentialZKService.removeCredentials(customer, customer, true);
-        targetPath = dataExtractionService.createTargetPath(customer);
         initZK(customer);
 
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
@@ -128,6 +127,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
+        targetPath = dataExtractionService.createTargetPath(customer) + "/"
+                + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
 
@@ -146,12 +147,15 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         dataExtractionService.cleanUpTargetPathData(importContext);
         checkDataExists(targetPath, tableNameList, 0);
-        checkExtractsDirectoryExists(customer, tableNameList);
+
+        checkExtractsDirectoryExists(targetPath, tableNameList);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testAttributeWithSemanticType() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
+        targetPath = dataExtractionService.createTargetPath(customer) + "/"
+                + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
 
@@ -198,7 +202,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         dataExtractionService.cleanUpTargetPathData(importContext);
         checkDataExists(targetPath, Arrays.<String> asList(new String[] { "Account" }), 0);
-        checkExtractsDirectoryExists(customer, Arrays.<String> asList(new String[] { "Account" }));
+        checkExtractsDirectoryExists(targetPath, Arrays.<String> asList(new String[] { "Account" }));
     }
 
     @SuppressWarnings("deprecation")

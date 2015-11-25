@@ -16,7 +16,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.camel.spi.TypeConverterRegistry;
 import org.apache.camel.spring.SpringCamelContext;
-import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;

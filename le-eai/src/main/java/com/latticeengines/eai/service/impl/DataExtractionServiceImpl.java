@@ -75,14 +75,15 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         String customerSpace = importConfig.getCustomerSpace().toString();
         context.setProperty(ImportProperty.CUSTOMER, customerSpace);
 
-        String targetPath = createTargetPath(customerSpace);
-        context.setProperty(ImportProperty.TARGETPATH, targetPath);
         context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
         context.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
         context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
+        String targetPath = createTargetPath(customerSpace);
         List<Table> tableMetadata = eaiMetadataService.getImportTables(customerSpace);
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
+            context.setProperty(ImportProperty.TARGETPATH, targetPath + "/" + sourceImportConfig.getSourceType().getName());
+
             Map<String, String> props = sourceImportConfig.getProperties();
             log.info("Moving properties from import config to import context.");
             for (Map.Entry<String, String> entry : props.entrySet()) {
