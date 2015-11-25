@@ -129,8 +129,14 @@ Modifiers
 ========================================================= */
 .italic { font-style: italic; }
 .bold   { font-weight: 700; }
-
 .block-margins { margin: 1em 0; }
+
+.success-text {
+	color: $jade;
+}
+.error-text {
+	color: $ruby;
+}
 
 
 

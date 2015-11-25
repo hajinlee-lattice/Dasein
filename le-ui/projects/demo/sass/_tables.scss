@@ -8,12 +8,19 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
     vertical-align: baseline;
+    width: 100%;
 }
-table th { font-weight: bold; }
+table th { 
+	background: $dark-blue;
+	color: $pearl-white;
+}
 table td, table th { padding: 9px 10px; text-align: left; }
 
-table tbody tr:nth-child(even) {
-    background: #f9f9f9;
+table td {
+	border-bottom: $palladium solid 1px;
+}
+table tr.expandable td {
+	border-bottom: none;
 }
 
 /* Mobile */
