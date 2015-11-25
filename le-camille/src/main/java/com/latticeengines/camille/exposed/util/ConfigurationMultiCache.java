@@ -3,6 +3,8 @@ package com.latticeengines.camille.exposed.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
 import com.latticeengines.camille.exposed.translators.PathTranslator;
 import com.latticeengines.camille.exposed.translators.PathTranslatorFactory;
@@ -27,6 +29,9 @@ public class ConfigurationMultiCache<T extends ConfigurationScope> {
     public <D> D get(T scope, Path p, Class<D> clazz) {
         ConfigurationCache<T> cache = getCache(scope, p);
         Document doc = cache.get();
+        if (StringUtils.isEmpty(doc.getData())) {
+            throw new RuntimeException("Cannot deserialize emtry string to a type safe document.");
+        }
         return DocumentUtils.toTypesafeDocument(doc, clazz);
     }
 

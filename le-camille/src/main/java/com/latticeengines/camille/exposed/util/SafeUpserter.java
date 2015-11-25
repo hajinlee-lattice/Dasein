@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,16 +42,26 @@ public class SafeUpserter {
                     controller.create(path, docRaw);
                 } else {
                     Document existingRaw = controller.get(path);
-                    T replacementTyped = upserter.apply(DocumentUtils.toTypesafeDocument(existingRaw, clazz));
-                    if (replacementTyped == null) {
-                        throw new NullPointerException("Upserter must not return null");
+                    if (StringUtils.isEmpty(existingRaw.getData())) {
+                        controller.delete(path);
+                        T docTyped = upserter.apply(null);
+                        if (docTyped == null) {
+                            throw new NullPointerException("Upserter must not return null");
+                        }
+                        Document docRaw = DocumentUtils.toRawDocument(docTyped);
+                        controller.create(path, docRaw);
+                    } else {
+                        T replacementTyped = upserter.apply(DocumentUtils.toTypesafeDocument(existingRaw, clazz));
+                        if (replacementTyped == null) {
+                            throw new NullPointerException("Upserter must not return null");
+                        }
+                        Document replacementRaw = DocumentUtils.toRawDocument(replacementTyped);
+
+                        // Handle cases where T is not a VersionedDocument
+                        replacementRaw.setVersion(existingRaw.getVersion());
+
+                        controller.set(path, replacementRaw);
                     }
-                    Document replacementRaw = DocumentUtils.toRawDocument(replacementTyped);
-
-                    // Handle cases where T is not a VersionedDocument
-                    replacementRaw.setVersion(existingRaw.getVersion());
-
-                    controller.set(path, replacementRaw);
                 }
                 return;
             } catch (KeeperException.BadVersionException | KeeperException.NodeExistsException e) {

@@ -1,12 +1,9 @@
 package com.latticeengines.camille.exposed.featureflags;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.camille.exposed.util.ConfigurationMultiCache;
@@ -73,24 +70,7 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
         }
 
         CustomerSpaceScope customerSpaceScope = new CustomerSpaceScope(space);
-        ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(customerSpaceScope);
         Path featureFlagValueFilePath = new Path("/" + PathConstants.FEATURE_FLAGS_FILE);
-        try {
-            if (controller.exists(featureFlagValueFilePath)) {
-                Document existingRaw = controller.get(featureFlagValueFilePath);
-                if (StringUtils.isEmpty(existingRaw.getData())) {
-                    controller.delete(featureFlagValueFilePath);
-                }
-            }
-        } catch (KeeperException.BadVersionException | KeeperException.NodeExistsException e) {
-            log.warn(String.format("Possibly temporary failure attempting to safely upsert to path %s",
-                    featureFlagValueFilePath), e);
-        } catch (Exception e) {
-            throw new RuntimeException(String.format(
-                    "Unexpected issue while attempting to safely upsert to path %s: %s", featureFlagValueFilePath,
-                    e.getMessage()), e);
-        }
-
         SafeUpserter upserter = new SafeUpserter();
         upserter.upsert(customerSpaceScope, featureFlagValueFilePath,
                 new Function<FeatureFlagValueMap, FeatureFlagValueMap>() {
