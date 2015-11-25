@@ -16,10 +16,8 @@ public final class PathConstants {
     public static final String SPACECONFIGURATION_NODE = "SpaceConfiguration";
 
     public static final String PROPERTIES_FILE = "properties.json";
-    @Deprecated
     public static final String FEATURE_FLAGS_FILE = "feature-flags.json";
     public static final String FEATURE_FLAGS_DEFINITIONS_FILE = "feature-flag-definitions.json";
-    public static final String FEATURE_FLAGS_VALUES_FILE = "feature-flag-values.json";
     public static final String BOOTSTRAP_STATE_FILE = "state.json";
     public static final String BOOTSTRAP_LOCK = "lock";
 

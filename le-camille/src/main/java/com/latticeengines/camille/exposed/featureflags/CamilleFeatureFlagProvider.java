@@ -1,9 +1,12 @@
 package com.latticeengines.camille.exposed.featureflags;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.camille.exposed.util.ConfigurationMultiCache;
@@ -69,8 +72,27 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
                     "Feature flag %s cannot be toggled without a corresponding definition", id));
         }
 
+        CustomerSpaceScope customerSpaceScope = new CustomerSpaceScope(space);
+        ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(customerSpaceScope);
+        Path featureFlagValueFilePath = new Path("/" + PathConstants.FEATURE_FLAGS_FILE);
+        try {
+            if (controller.exists(featureFlagValueFilePath)) {
+                Document existingRaw = controller.get(featureFlagValueFilePath);
+                if (StringUtils.isEmpty(existingRaw.getData())) {
+                    controller.delete(featureFlagValueFilePath);
+                }
+            }
+        } catch (KeeperException.BadVersionException | KeeperException.NodeExistsException e) {
+            log.warn(String.format("Possibly temporary failure attempting to safely upsert to path %s",
+                    featureFlagValueFilePath), e);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "Unexpected issue while attempting to safely upsert to path %s: %s", featureFlagValueFilePath,
+                    e.getMessage()), e);
+        }
+
         SafeUpserter upserter = new SafeUpserter();
-        upserter.upsert(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE),
+        upserter.upsert(customerSpaceScope, featureFlagValueFilePath,
                 new Function<FeatureFlagValueMap, FeatureFlagValueMap>() {
                     @Override
                     public FeatureFlagValueMap apply(FeatureFlagValueMap existing) {
@@ -90,7 +112,7 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     @Override
     public void removeFlagFromSpace(CustomerSpace space, final String id) {
         SafeUpserter upserter = new SafeUpserter();
-        upserter.upsert(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE),
+        upserter.upsert(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_FILE),
                 new Function<FeatureFlagValueMap, FeatureFlagValueMap>() {
                     @Override
                     public FeatureFlagValueMap apply(FeatureFlagValueMap existing) {
@@ -155,7 +177,7 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
 
     private void rebuildValues(CustomerSpace space) {
         try {
-            valueCache.rebuild(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_VALUES_FILE));
+            valueCache.rebuild(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_FILE));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -198,8 +220,8 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     public FeatureFlagValueMap getFlags(CustomerSpace space) {
         FeatureFlagValueMap toReturn;
         try {
-            toReturn = valueCache.get(new CustomerSpaceScope(space), new Path("/"
-                    + PathConstants.FEATURE_FLAGS_VALUES_FILE), FeatureFlagValueMap.class);
+            toReturn = valueCache.get(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_FILE),
+                    FeatureFlagValueMap.class);
         } catch (Exception e) {
             log.warn("Exception occurred attempting to retrieve feature flags", e);
             toReturn = null;
