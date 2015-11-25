@@ -65,6 +65,10 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Long constructionTime;
     private ModelSummaryStatus status = ModelSummaryStatus.INACTIVE;
     private String rawFile;
+    private Double top10PercentLift;
+    private Double top20PercentLift;
+    private Double top30PercentLift;
+    private String applicationId;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -327,4 +331,48 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @Transient
     @JsonProperty("RawFile")
     public void setRawFile(String rawFile) { this.rawFile = rawFile; }
+
+    @JsonProperty("Top10PctLift")
+    @Column(name = "TOP_10_PCT_LIFT", nullable = true)
+    public Double getTop10PercentLift() {
+        return top10PercentLift;
+    }
+
+    @JsonProperty("Top10PctLift")
+    public void setTop10PercentLift(Double top10PercentLift) {
+        this.top10PercentLift = top10PercentLift;
+    }
+
+    @JsonProperty("Top20PctLift")
+    @Column(name = "TOP_20_PCT_LIFT", nullable = true)
+    public Double getTop20PercentLift() {
+        return top20PercentLift;
+    }
+
+    @JsonProperty("Top20PctLift")
+    public void setTop20PercentLift(Double top20PercentLift) {
+        this.top20PercentLift = top20PercentLift;
+    }
+
+    @JsonProperty("Top30PctLift")
+    @Column(name = "TOP_30_PCT_LIFT", nullable = true)
+    public Double getTop30PercentLift() {
+        return top30PercentLift;
+    }
+
+    @JsonProperty("Top30PctLift")
+    public void setTop30PercentLift(Double top30PercentLift) {
+        this.top30PercentLift = top30PercentLift;
+    }
+
+    @JsonProperty("ApplicationId")
+    @Column(name = "APPLICATION_ID", nullable = true)
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    @JsonProperty("ApplicationId")
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
 }

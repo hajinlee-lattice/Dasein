@@ -145,6 +145,7 @@ public enum LedpCode {
     LEDP_18050("Query with name {0} not found."), //
     LEDP_18051("Column with name {0} not found."), //
     LEDP_18052("The following predictors do not exist in the predictor table: {0}."), //
+    LEDP_18053("Problems uploading file."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
