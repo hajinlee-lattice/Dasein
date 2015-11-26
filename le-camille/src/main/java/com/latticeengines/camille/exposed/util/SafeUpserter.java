@@ -34,29 +34,18 @@ public class SafeUpserter {
         for (int remaining = numRetries; remaining > 0; remaining--) {
             try {
                 if (!controller.exists(path)) {
-                    T docTyped = upserter.apply(null);
-                    if (docTyped == null) {
-                        throw new NullPointerException("Upserter must not return null");
-                    }
-                    Document docRaw = DocumentUtils.toRawDocument(docTyped);
-                    controller.create(path, docRaw);
+                    createNewPathWithDoc(upserter, path, controller);
                 } else {
                     Document existingRaw = controller.get(path);
                     if (StringUtils.isEmpty(existingRaw.getData())) {
                         controller.delete(path);
-                        T docTyped = upserter.apply(null);
-                        if (docTyped == null) {
-                            throw new NullPointerException("Upserter must not return null");
-                        }
-                        Document docRaw = DocumentUtils.toRawDocument(docTyped);
-                        controller.create(path, docRaw);
+                        createNewPathWithDoc(upserter, path, controller);
                     } else {
                         T replacementTyped = upserter.apply(DocumentUtils.toTypesafeDocument(existingRaw, clazz));
                         if (replacementTyped == null) {
                             throw new NullPointerException("Upserter must not return null");
                         }
                         Document replacementRaw = DocumentUtils.toRawDocument(replacementTyped);
-
                         // Handle cases where T is not a VersionedDocument
                         replacementRaw.setVersion(existingRaw.getVersion());
 
@@ -74,6 +63,16 @@ public class SafeUpserter {
         }
 
         throw new RuntimeException(String.format("Could not upsert to path %s after %s attempts", path, numRetries));
+    }
+
+    private <T> void createNewPathWithDoc(Function<T, T> upserter, Path path, ConfigurationController<?> controller)
+            throws Exception {
+        T docTyped = upserter.apply(null);
+        if (docTyped == null) {
+            throw new NullPointerException("Upserter must not return null");
+        }
+        Document docRaw = DocumentUtils.toRawDocument(docTyped);
+        controller.create(path, docRaw);
     }
 
     private void sleep(long msec) {
