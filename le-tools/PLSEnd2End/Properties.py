@@ -14,9 +14,9 @@ class PLSEnvironments(object):
     parser.read("config.ini")
 
     # properties definition
-    pls_bard_1 = "TestELQ_10_14"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
-    pls_bard_2 = "TestMKTO_10_14"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
-    pls_bard_3 = "TestSFDC_10_14"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+    pls_bard_1 = "AutoJekinsElq_11_16_1447677239"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+    pls_bard_2 = "AutoJekinsMKTO_11_16_1447681859"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+    pls_bard_3 = "AutoJekinsSFDC_11_16_1447683254"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
 
     pls_version = parser.get("TestSetup", "pls_version");
     dante_server_name = parser.get("DanteInfo", "dante_server_name");
@@ -42,8 +42,7 @@ class PLSEnvironments(object):
     dl_server = "https://%s.dev.lattice.local:8080/" % dl_server_name;
     dl_server_user = "richard.liu@lattice-engines.com";
     dl_server_pwd = "1";
-    dlc_path = "\\\\le-700086\Share\Builds\dl_2.9.0.9732n\DLC"
-
+    dlc_path = "\\\\10.41.1.55\DevelopmentShare\TestAutomation\DLC"#"\\\\10.61.0.210\DevQA\share\Software\DLTools"
     visidb_server_user = "admin";
     visidb_server_pwd = "visid@t@b@se";
 
