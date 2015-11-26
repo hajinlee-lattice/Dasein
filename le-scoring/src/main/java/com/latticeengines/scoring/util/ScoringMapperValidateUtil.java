@@ -111,12 +111,14 @@ public class ScoringMapperValidateUtil {
                     continue;
                 }
                 if (datatype.get(name).asLong() != type) {
-                    String msg = String.format("%d does not match with %d ", type, datatype.get(name).asLong());
+                    String msg = String.format("Column %s has type %d in %s which does not match with %d from event table", name,
+                            type, modelGuid, datatype.get(name).asLong());
                     toReturn.add(msg);
                 }
             }
         } else {
-            String msg = String.format("%s does not contain %s. ", modelGuid, ScoringDaemonService.INPUT_COLUMN_METADATA);
+            String msg = String.format("%s does not contain %s. ", modelGuid,
+                    ScoringDaemonService.INPUT_COLUMN_METADATA);
             toReturn.add(msg);
         }
         return toReturn;

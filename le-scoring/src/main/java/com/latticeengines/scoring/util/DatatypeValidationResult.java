@@ -23,8 +23,7 @@ public class DatatypeValidationResult {
             sb.append("none");
         } else {
             for (String dfStr : datatypeFailures) {
-                sb.append(dfStr);
-                sb.append("\t");
+                sb.append(dfStr).append("\n");
             }
         }
         sb.append("\nmodelFailures:\n");
@@ -33,12 +32,12 @@ public class DatatypeValidationResult {
         } else {
             Set<String> keys = modelFailures.keySet();
             for (String model : keys) {
-                sb.append(model);
-                sb.append(": ");
+                sb.append(model).append(": ");
                 List<String> msgs = modelFailures.get(model);
-                for (String msg : msgs)
-                    sb.append(msg);
-                sb.append("\t");
+                for (String msg : msgs) {
+                    sb.append(msg).append("\n");
+                }
+                sb.append("\n");
             }
         }
         return sb.toString();
