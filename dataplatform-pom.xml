@@ -15,6 +15,7 @@
     </parent>
     
     <modules>
+        <module>le-testframework</module>
         <module>le-common</module>
         <module>le-domain</module>
         <module>le-remote</module>
@@ -27,6 +28,7 @@
         <module>le-dataflow</module>
         <module>le-baton</module>
         <module>le-eai</module>
+        <module>le-swlib</module>
         <module>le-dataplatform</module>
     </modules>
 </project>
