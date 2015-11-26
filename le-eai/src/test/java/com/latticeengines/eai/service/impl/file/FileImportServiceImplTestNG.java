@@ -17,8 +17,11 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.relique.jdbc.csv.CsvDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import reactor.util.UUIDUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -40,20 +43,30 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     
     @Value("${eai.test.upload.mnt.dir}")
     private String mountedDir;
+    
+    private File destDir = null;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
     }
+    
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        FileUtils.deleteDirectory(destDir);
+    }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void importMetadataAndDataAndWriteToHdfs() throws Exception {
         ImportContext ctx = new ImportContext(yarnConfiguration);
         ctx.setProperty(ImportProperty.TARGETPATH, "/tmp/dataFromFile/file1");
         ctx.setProperty(ImportProperty.CUSTOMER, "testcustomer");
 
         URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1.csv");
-        File destDir = new File(mountedDir);
+        destDir = new File(mountedDir +"/" + UUIDUtils.create().toString());
+        if (!destDir.exists()) {
+            destDir.mkdir();
+        }
         File srcFile = new File(dataUrl.getPath());
         FileUtils.copyFileToDirectory(srcFile, destDir);
         URL metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1Metadata.json");
