@@ -43,7 +43,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private UserService userService;
 
-    @Test(groups= "functional")
+    @Test(groups = "functional")
     public void testBootstrapTenant() throws InterruptedException {
         createTenantInZK();
 
@@ -121,11 +121,11 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-
     private void bootstrap() {
         DocumentDirectory confDir = new DocumentDirectory(new Path("/"));
         confDir.add("/SuperAdminEmails", "[\"" + testAdminUsername + "\"]");
         confDir.add("/LatticeAdminEmails", "[ ]");
+        confDir.add("/ExternalAdminEmails", "[ ]");
         batonService.bootstrap(contractId, tenantId, spaceID, serviceName,
                 new SerializableDocumentDirectory(confDir).flatten());
     }

@@ -95,6 +95,9 @@ public class TenantServiceImpl implements TenantService {
             return false;
         }
 
+        // use featureFlag service to write to FFV about the feature flag values
+        // (all)
+
         List<SerializableDocumentDirectory> configSDirs = tenantRegistration.getConfigDirectories();
         if (configSDirs == null) {
             return true;

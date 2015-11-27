@@ -24,12 +24,13 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private UserService userService;
 
-    @Test(groups= {"functional"})
+    @Test(groups = { "functional" })
     public void testProvisionTenant() {
         Tenant tenant = createTestTenant();
         List<String> superAdmins = Collections.singletonList("bnguyen@lattice-engines.com");
         List<String> latticeAdmins = Collections.singletonList("ysong@lattice-engines.com");
-        componentManager.provisionTenant(tenant, superAdmins, latticeAdmins);
+        List<String> externalAdmins = Collections.singletonList("latticeengines8@gmail.com");
+        componentManager.provisionTenant(tenant, superAdmins, latticeAdmins, externalAdmins);
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 
         Tenant newTenant = tenantService.findByTenantId(tenant.getId());
@@ -44,9 +45,15 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
             Assert.assertEquals(level, AccessLevel.INTERNAL_ADMIN);
         }
 
+        for (String email : externalAdmins) {
+            AccessLevel level = userService.getAccessLevel(tenant.getId(), email);
+            Assert.assertEquals(level, AccessLevel.EXTERNAL_ADMIN);
+        }
+
         tenant = createTestTenant();
         tenant.setName("new name");
-        componentManager.provisionTenant(tenant, Collections.<String>emptyList(), Collections.<String>emptyList());
+        componentManager.provisionTenant(tenant, Collections.<String> emptyList(), Collections.<String> emptyList(),
+                Collections.<String> emptyList());
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 
         newTenant = tenantService.findByTenantId(tenant.getId());
@@ -61,9 +68,13 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
         for (String email : latticeAdmins) {
             Assert.assertFalse(userService.inTenant(tenant.getId(), email));
         }
+
+        for (String email : externalAdmins) {
+            Assert.assertFalse(userService.inTenant(tenant.getId(), email));
+        }
     }
 
-    private Tenant createTestTenant(){
+    private Tenant createTestTenant() {
         Tenant tenant = new Tenant();
         tenant.setId("PLS_COMPONENT_MANAGER_TEST_TENANT");
         tenant.setName("Pls component manager test tenant");

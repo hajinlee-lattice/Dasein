@@ -64,6 +64,10 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
         node = confDir.get(new Path("/LatticeAdminEmails"));
         node.getDocument().setData("[ ]");
+
+        // node = confDir.get(new Path("/ExternalAdminEmails"));
+        // node.getDocument().setData("[ ]");
+
         return confDir;
     }
 

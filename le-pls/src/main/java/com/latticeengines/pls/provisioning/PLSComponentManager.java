@@ -41,28 +41,6 @@ public class PLSComponentManager {
     @Autowired
     private TenantConfigService tenantConfigService;
 
-    public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails) {
-        if (tenantService.hasTenantId(tenant.getId())) {
-            LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
-            try {
-                tenantService.updateTenant(tenant);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, String.format("Updating tenant %s error. " +
-                        "Tenant name possibly already exists.", tenant.getId()), e);
-            }
-        } else {
-            try {
-                tenantService.registerTenant(tenant);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, String.format("Registrating tenant %s error. " +
-                        "Tenant name possibly already exists.", tenant.getId()), e);
-            }
-        }
-
-        assignAccessLevelByEmails(internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
-        assignAccessLevelByEmails(superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
-    }
-
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
         String camilleTenantId = space.getTenantId();
@@ -76,8 +54,7 @@ public class PLSComponentManager {
         try {
             tenantDocument = tenantConfigService.getTenantDocument(PLSTenantId);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18028,
-                    String.format("Getting tenant document error."), e);
+            throw new LedpException(LedpCode.LEDP_18028, String.format("Getting tenant document error."), e);
         }
         String tenantName = tenantDocument.getTenantInfo().properties.displayName;
 
@@ -85,24 +62,30 @@ public class PLSComponentManager {
         try {
             emailListInJson = configDir.get("/SuperAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028,
-                    String.format("Cannot parse input configuration"), e);
+            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
         }
         List<String> superAdminEmails = parseEmails(emailListInJson);
 
         try {
             emailListInJson = configDir.get("/LatticeAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028,
-                    String.format("Cannot parse input configuration"), e);
+            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
         }
         List<String> internalAdminEmails = parseEmails(emailListInJson);
+
+        // add get external Admin Emails
+        try {
+            emailListInJson = configDir.get("/ExternalAdminEmails").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
+        }
+        List<String> externalAdminEmails = parseEmails(emailListInJson);
 
         Tenant tenant = new Tenant();
         tenant.setId(PLSTenantId);
         tenant.setName(tenantName);
 
-        provisionTenant(tenant, superAdminEmails, internalAdminEmails);
+        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails);
     }
 
     private static List<String> parseEmails(String emailsInJson) {
@@ -126,6 +109,31 @@ public class PLSComponentManager {
         return adminEmails;
     }
 
+    public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,
+            List<String> externalAdminEmails) {
+        if (tenantService.hasTenantId(tenant.getId())) {
+            LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
+            try {
+                tenantService.updateTenant(tenant);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, String.format("Updating tenant %s error. "
+                        + "Tenant name possibly already exists.", tenant.getId()), e);
+            }
+        } else {
+            try {
+                tenantService.registerTenant(tenant);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, String.format("Registrating tenant %s error. "
+                        + "Tenant name possibly already exists.", tenant.getId()), e);
+            }
+        }
+
+        assignAccessLevelByEmails(internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
+        assignAccessLevelByEmails(superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
+        // add List of external admin users
+        assignAccessLevelByEmails(externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());
+    }
+
     public void discardTenant(Tenant tenant) {
         List<User> users = userService.getUsers(tenant.getId());
         if (users != null) {
@@ -139,21 +147,49 @@ public class PLSComponentManager {
         }
     }
 
+    private void assignAccessLevelByEmails(Collection<String> emails, AccessLevel accessLevel, String tenantId) {
+        for (String email : emails) {
+            User user;
+            try {
+                user = userService.findByEmail(email);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028, String.format("Finding user with email %s error.", email),
+                        e);
+            }
+            if (user == null) {
+                UserRegistration uReg = createAdminUserRegistration(email, accessLevel);
+                try {
+                    userService.createUser(uReg);
+                } catch (Exception e) {
+                    throw new LedpException(LedpCode.LEDP_18028, String.format("Adding new user %s error.", email), e);
+                }
+            }
+            try {
+                userService.assignAccessLevel(accessLevel, tenantId, email);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_18028,
+                        String.format("Assigning Access level to %s error.", email), e);
+            }
+        }
+    }
+
     private UserRegistration createAdminUserRegistration(String username, AccessLevel accessLevel) {
         // construct User
         User adminUser = new User();
         adminUser.setUsername(username);
-        adminUser.setFirstName("Super");
-        adminUser.setLastName("Admin");
+        adminUser.setFirstName("Lattice");
+        adminUser.setLastName("User");
         adminUser.setAccessLevel(accessLevel.name());
         adminUser.setActive(true);
-        adminUser.setTitle("Lattice PLO");
+        adminUser.setTitle("Lattice User");
         adminUser.setEmail(username);
 
         // construct credential
         Credentials creds = new Credentials();
         creds.setUsername(username);
-        creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+        // creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+        String passwrod = geneneratePasswordBasedOnUsername(username);
+        creds.setPassword(passwrod);
 
         // construct user registration
         UserRegistration uReg = new UserRegistration();
@@ -163,31 +199,14 @@ public class PLSComponentManager {
         return uReg;
     }
 
-    private void assignAccessLevelByEmails(Collection<String> emails, AccessLevel accessLevel, String tenantId) {
-        for (String email : emails) {
-            User user;
-            try {
-                user = userService.findByEmail(email);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("Finding user with email %s error.", email), e);
-            }
-            if (user == null) {
-                UserRegistration uReg = createAdminUserRegistration(email, accessLevel);
-                try {
-                    userService.createUser(uReg);
-                } catch (Exception e) {
-                    throw new LedpException(LedpCode.LEDP_18028,
-                            String.format("Adding new user %s error.", email), e);
-                }
-            }
-            try {
-                userService.assignAccessLevel(accessLevel, tenantId, email);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028,
-                        String.format("Assigning SuperAdmin role to %s error.", email), e);
-            }
-        }
+    // set the password of the user as the SHA256(CipherUtils(username))
+    private String geneneratePasswordBasedOnUsername(String username) {
+        // try {
+        // return (CipherUtils.encrypt(username));
+        // } catch (Exception e) {
+        // throw new
+        // RuntimeException("Exception when generating password based on username.");
+        // }
+        return "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
     }
-
 }
