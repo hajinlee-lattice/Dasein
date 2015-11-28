@@ -9,6 +9,10 @@ import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
+import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
+import com.latticeengines.domain.exposed.dataloader.QueryDataResult;
+import com.latticeengines.domain.exposed.dataloader.QueryStatusResult;
+import com.latticeengines.domain.exposed.dataloader.RunQueryResult;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
@@ -53,4 +57,21 @@ public interface DataLoaderService {
 
     void updateDataProvider(String crmType, String plsTenantId, CrmConfig crmConfig, String dlUrl);
 
+    long executeLoadGroup(String tenantName, String groupName, String email, String dlUrl);
+
+    LaunchJobsResult getLaunchJobs(long launchId, String dlUrl);
+
+    String getLoadGroupLastSuccessTime(String tenantName, String groupName, String dlUrl);
+
+    long getLastFailedLaunchId(String tenantName, String groupName, String dlUrl);
+
+    InstallResult getLoadGroupStatus(String tenantName, String groupName, String dlUrl);
+
+    InstallResult cancelLaunch(long launchId, String dlUrl);
+
+    String runQuery(String tenantName, String queryName, String dlUrl);
+
+    QueryStatusResult getQueryStatus(String tenantName, String queryHandle, String dlUrl);
+
+    QueryDataResult getQueryData(String tenantName, String queryHandle, int startRow, int rowCount, String dlUrl);
 }

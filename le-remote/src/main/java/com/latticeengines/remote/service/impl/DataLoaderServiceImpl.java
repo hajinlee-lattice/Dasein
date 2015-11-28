@@ -30,7 +30,12 @@ import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
+import com.latticeengines.domain.exposed.dataloader.InstallResult.ValueResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
+import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
+import com.latticeengines.domain.exposed.dataloader.QueryDataResult;
+import com.latticeengines.domain.exposed.dataloader.QueryStatusResult;
+import com.latticeengines.domain.exposed.dataloader.RunQueryResult;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -63,6 +68,14 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String UPDATE_DATA_PROVIDER = "/UpdateDataProvider";
     private static final String DOWNLOAD_CONFIG = "/DownloadConfigFile";
     private static final String GET_QUERY_METADATA_COLUMNS = "/GetQueryMetadataColumns";
+    private static final String EXECUTE_GROUP = "/ExecuteGroup";
+    private static final String GET_LAUNCH_JOBS = "/GetLaunchJobs";
+    private static final String GET_GROUP_STATUS = "/GetLoadGroupStatus";
+    private static final String CANCEL_LAUNCH = "/CancelLaunch";
+    private static final String RUN_QUERY = "/RunQuery";
+    private static final String GET_QUERY_STATUS = "/GetQueryStatus";
+    private static final String GET_QUERY_RESULT_DATA = "/GetQueryResultData";
+    private static final String DL_USER = "LP";
 
     private static final String SEGMENT_PREFIX = "DefnSegment_";
     private static final String MODELID_PREFIX = "LatticeFunctionExpressionConstant(\"";
@@ -570,5 +583,198 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static boolean shouldRetry(String response) {
         for (String trigger : RETRY_TRIGGERS) { if (response.contains(trigger)) return true; }
         return false;
+    }
+
+    @RestApiCall
+    public long executeLoadGroup(String tenantName, String groupName, String email, String dlUrl) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("email", DL_USER);
+            paramerters.put("tenantName", tenantName);
+            paramerters.put("groupName", groupName);
+            paramerters.put("state", "launch");
+            String response = callDLRestService(dlUrl, EXECUTE_GROUP, paramerters);
+            InstallResult result = JsonUtils.deserialize(response, InstallResult.class);
+
+            if (result.getStatus() != 3) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21010, new String[] { String.valueOf(result.getStatus()), error });
+            }
+            String launchId = null;
+            List<ValueResult> valueResults = result.getValueResult();
+            if (valueResults != null) {
+                for (ValueResult valueResult : valueResults) {
+                    if ("launchId".equalsIgnoreCase(valueResult.getKey())) {
+                        launchId = valueResult.getValue();
+                        break;
+                    }
+                }
+            }
+
+            if (launchId != null) {
+                return Long.parseLong(launchId);
+            } else {
+                throw new LedpException(LedpCode.LEDP_21010, new String[] { String.valueOf(result.getStatus()),
+                        "Launch id was not returned." });
+            }
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21011, ex);
+        }
+    }
+
+    @Override
+    @RestApiCall
+    public LaunchJobsResult getLaunchJobs(long launchId, String dlUrl) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("launchId", String.valueOf(launchId));
+            String response = callDLRestService(dlUrl, GET_LAUNCH_JOBS, paramerters);
+            LaunchJobsResult result = JsonUtils.deserialize(response, LaunchJobsResult.class);
+
+            if (result.getStatus() != 3) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21012, new String[] { String.valueOf(result.getStatus()), error });
+            }
+            return result;
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21013, ex);
+        }
+    }
+
+    @Override
+    @RestApiCall
+    public InstallResult getLoadGroupStatus(String tenantName, String groupName, String dlUrl) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("tenantName", tenantName);
+            paramerters.put("groupName", groupName);
+            String response = callDLRestService(dlUrl, GET_GROUP_STATUS, paramerters);
+            InstallResult result = JsonUtils.deserialize(response, InstallResult.class);
+
+            if (result.getStatus() != 3) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21014, new String[] { String.valueOf(result.getStatus()), error });
+            }
+            return result;
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21015, ex);
+        }
+    }
+
+    @Override
+    @RestApiCall
+    public String getLoadGroupLastSuccessTime(String tenantName, String groupName, String dlUrl) {
+        InstallResult result = getLoadGroupStatus(tenantName, groupName, dlUrl);
+        List<ValueResult> valueResults = result.getValueResult();
+        String date = getValue("LastSuccessDate", valueResults);
+        if (date == null) {
+            throw new LedpException(LedpCode.LEDP_21016);
+        }
+        return date;
+    }
+
+    @Override
+    @RestApiCall
+    public long getLastFailedLaunchId(String tenantName, String groupName, String dlUrl) {
+        InstallResult result = getLoadGroupStatus(tenantName, groupName, dlUrl);
+        List<ValueResult> valueResults = result.getValueResult();
+        String launchId = getValue("LastFailureLaunchId", valueResults);
+        if (launchId == null) {
+            throw new LedpException(LedpCode.LEDP_21017);
+        }
+        return Long.parseLong(launchId);
+    }
+
+    private String getValue(String key, List<ValueResult> valueResults) {
+        for (ValueResult valueResult : valueResults) {
+            if (key.equalsIgnoreCase(valueResult.getKey())) {
+                return valueResult.getValue();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @RestApiCall
+    public InstallResult cancelLaunch(long launchId, String dlUrl) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("launchId", Long.toString(launchId));
+            paramerters.put("email", DL_USER);
+            paramerters.put("moveLaunchToHistory", "true");
+            String response = callDLRestService(dlUrl, CANCEL_LAUNCH, paramerters);
+            InstallResult result = JsonUtils.deserialize(response, InstallResult.class);
+
+            if (result.getStatus() != 3) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21018, new String[] { String.valueOf(result.getStatus()), error });
+            }
+            return result;
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21019, ex);
+        }
+    }
+
+    @Override
+    @RestApiCall
+    public String runQuery(String tenantName, String queryName, String dlUrl) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("tenantName", tenantName);
+            paramerters.put("queryName", queryName);
+            String response = callDLRestService(dlUrl, RUN_QUERY, paramerters);
+            RunQueryResult result = JsonUtils.deserialize(response, RunQueryResult.class);
+
+            if (!result.getSuccess()) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21020, new String[] { error });
+            }
+            return result.getQueryHandle();
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21021, ex);
+        }
+    }
+
+    @Override
+    @RestApiCall
+    public QueryStatusResult getQueryStatus(String tenantName, String queryHandle, String dlUrl) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("tenantName", tenantName);
+            paramerters.put("queryHandle", queryHandle);
+            String response = callDLRestService(dlUrl, GET_QUERY_STATUS, paramerters);
+            QueryStatusResult result = JsonUtils.deserialize(response, QueryStatusResult.class);
+
+            if (!result.getSuccess()) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21022, new String[] { error });
+            }
+            return result;
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21023, ex);
+        }
+    }
+
+    @Override
+    @RestApiCall
+    public QueryDataResult getQueryData(String tenantName, String queryHandle, int startRow,
+            int rowCount, String dlUrl) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("tenantName", tenantName);
+            paramerters.put("queryHandle", queryHandle);
+            paramerters.put("startRow", String.valueOf(startRow));
+            paramerters.put("rowCount", String.valueOf(rowCount));
+            String response = callDLRestService(dlUrl, GET_QUERY_RESULT_DATA, paramerters);
+            QueryDataResult result = JsonUtils.deserialize(response, QueryDataResult.class);
+
+            if (!result.getSuccess()) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21024, new String[] { error });
+            }
+            return result;
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21025, ex);
+        }
     }
 }
