@@ -10,6 +10,7 @@ angular.module('mainApp.core.utilities.NavUtility', [])
     this.MODEL_CREATION_HISTORY_HASH = "/ModelCreationHistory";
     this.ACTIVATE_MODEL = "/ActivateModel";
     this.SETUP_HASH = "/ManageFields";
+    this.DEPLOYMENT_WIZARD_HASH = "/DeploymentWizard";
 
     // Navigation Event Constants
     this.MANAGE_CREDENTIALS_NAV_EVENT = "ManageCredentialsNavEvent";
@@ -20,6 +21,7 @@ angular.module('mainApp.core.utilities.NavUtility', [])
     this.MODEL_CREATION_HISTORY_NAV_EVENT = "ModelCreationHistoryNavEvent";
     this.SETUP_NAV_EVENT = "SetupNavEvent";
     this.LOAD_FIELDS_NAV_EVENT = "LoadFieldsEvent";
+    this.DEPLOYMENT_WIZARD_NAV_EVENT = "DeploymentWizardNavEvent";
 
     // General Event Constants
     this.SYSTEM_CONFIGURED_COMPLETE_EVENT = "SystemConfiguredCompleteEvent";

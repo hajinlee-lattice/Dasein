@@ -28,12 +28,16 @@ public class PropertiesFileFeatureFlagProvider implements DefaultFeatureFlagProv
     @Value("${pls.ff.adminalertstab:None}")
     private String adminAlertsTab;
 
+    @Value("${pls.ff.deploymentwizardpage:None}")
+    private String deploymentWizardPage;
+
     @Override
     public FeatureFlagValueMap getDefaultFlags() {
         flagDefinitions = FeatureFlagClient.getDefinitions();
 
         setFlagIfNotNull(PlsFeatureFlag.SETUP_PAGE.getName(), setupPage);
         setFlagIfNotNull(PlsFeatureFlag.ADMIN_ALERTS_TAB.getName(), adminAlertsTab);
+        setFlagIfNotNull(PlsFeatureFlag.DEPLOYMENT_WIZARD_PAGE.getName(), deploymentWizardPage);
 
         setFlagIfNotNull("PlsTestFlag", plsTestFlag);
         return new FeatureFlagValueMap(flags);

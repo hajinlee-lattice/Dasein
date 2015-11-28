@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -25,9 +26,16 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinit
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
+import com.latticeengines.domain.exposed.pls.TenantDeployment;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
+import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.pls.service.TenantDeploymentService;
+import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("tenantConfigService")
 public class TenantConfigServiceImpl implements TenantConfigService {
@@ -44,6 +52,18 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     @Autowired
     @Qualifier("propertiesFileFeatureFlagProvider")
     private DefaultFeatureFlagProvider defaultFeatureFlagProvider;
+
+    @Autowired
+    private TenantService tenantService;
+
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private ModelSummaryService modelSummaryService;
+
+    @Autowired
+    private TenantDeploymentService tenantDeploymentService;
 
     @PostConstruct
     private void definePlsFeatureFlags() {
@@ -101,6 +121,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             FeatureFlagValueMap tenantFlags = FeatureFlagClient.getFlags(customerSpace);
             tenantFlags = combineDefaultFeatureFlags(tenantFlags);
             tenantFlags = overwriteDataloaderFlags(tenantFlags, tenantId);
+            tenantFlags = overwriteDeploymentWizardFlag(tenantFlags, tenantId);
             return tenantFlags;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18049, e, new String[]{ tenantId });
@@ -145,6 +166,43 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             getTopology(tenantId);
             return true;
         } catch (LedpException e) {
+            return false;
+        }
+    }
+
+    private FeatureFlagValueMap overwriteDeploymentWizardFlag(FeatureFlagValueMap flags, String tenantId) {
+        String flagId = PlsFeatureFlag.DEPLOYMENT_WIZARD_PAGE.getName();
+        if (flags.containsKey(flagId) && !flags.get(flagId)) {
+            return flags;
+        } else {
+            Boolean needToRedirect = needToRedirectDeploymentWizardPage(tenantId);
+            updateFlag(flags, flagId, needToRedirect);
+            return new FeatureFlagValueMap(flags);
+        }
+    }
+
+    private Boolean needToRedirectDeploymentWizardPage(String tenantId) {
+        try {
+            CRMTopology topology = getTopology(tenantId);
+            if (topology != null && "SFDC".equals(topology.getName())) {
+                TenantDeployment tenantDeployment = tenantDeploymentService.getTenantDeployment(tenantId);
+                if (tenantDeployment != null) {
+                    return !tenantDeploymentService.isDeploymentCompleted(tenantDeployment);
+                } else {
+                    List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+                    if (summaries != null) {
+                        for (ModelSummary summary : summaries) {
+                            if (modelSummaryService.modelIdinTenant(summary.getId(), tenantId)) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
             return false;
         }
     }

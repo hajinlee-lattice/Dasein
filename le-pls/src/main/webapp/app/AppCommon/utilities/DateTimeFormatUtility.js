@@ -235,5 +235,8 @@ angular.module('mainApp.appCommon.utilities.DateTimeFormatUtility', [])
     this.FormatShortDate = function (dateString) {
         return dateFormat(new Date(dateString), "m/d/yyyy");
     };
-    
+
+    this.FormatDateTime = function (dateString, formatString) {
+        return dateFormat(new Date(dateString), formatString);
+    };
 });

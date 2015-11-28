@@ -33,7 +33,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         SYSTEM_SETUP_PAGE: 'SystemSetupPage',
         ACTIVATE_MODEL_PAGE: 'ActivateModelPage',
 
-        SETUP_PAGE: 'SetupPage'
+        SETUP_PAGE: 'SetupPage',
+        DEPLOYMENT_WIZARD_PAGE: 'DeploymentWizardPage'
     };
     this.Flags = function(){ return flags; };
 
@@ -114,6 +115,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         UpdateFlag(flags.ACTIVATE_MODEL_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
 
         UpdateFlag(flags.SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+        UpdateFlag(flags.DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
     }
 
 });

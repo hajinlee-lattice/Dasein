@@ -20,8 +20,21 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $scope.showModelCreationHistoryDropdown = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
             $scope.showActivateModel = FeatureFlagService.FlagIsEnabled(flags.ACTIVATE_MODEL_PAGE);
             $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
+            $scope.redirectDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.DEPLOYMENT_WIZARD_PAGE);
         });
     }
+
+    $scope.logoClicked = function ($event) {
+        if ($scope.redirectDeploymentWizard) {
+            if ($event != null) {
+                $event.preventDefault();
+            }
+
+            $rootScope.$broadcast(NavUtility.DEPLOYMENT_WIZARD_NAV_EVENT);
+        } else {
+            $scope.modelListClicked($event);
+        }
+    };
 
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
