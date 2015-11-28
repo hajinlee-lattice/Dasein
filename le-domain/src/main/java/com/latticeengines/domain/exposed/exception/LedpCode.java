@@ -146,6 +146,16 @@ public enum LedpCode {
     LEDP_18051("Column with name {0} not found."), //
     LEDP_18052("The following predictors do not exist in the predictor table: {0}."), //
     LEDP_18053("Problems uploading file."), //
+    LEDP_18054("Failed to start importing Salesforce data, error: {0}."), //
+    LEDP_18055("Failed to start enriching data, error: {0}."), //
+    LEDP_18056("Failed to start validating metadata, error: {0}."), //
+    LEDP_18057("Another load group is running."), //
+    LEDP_18058("Failed to get running jobs for deployment step {0}, error: {1}."), //
+    LEDP_18059("Failed to get success time for deployment step {0}, error: {1}."), //
+    LEDP_18060("Failed to get complete jobs for deployment step {0}, error: {1}."), //
+    LEDP_18061("Failed to start running query, error: {0}."), //
+    LEDP_18062("Failed to download query result data, error: {0}."), //
+    LEDP_18063("Tenant deployment with tenant id {0} not found."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
@@ -202,6 +212,22 @@ public enum LedpCode {
     LEDP_21007("Problem deleting DataLoader tenant via DataLoader REST: {0}"), //
     LEDP_21008("Problem getting spec details via DataLoader REST: {0}"), //
     LEDP_21009("Problem getting query metadata via DataLoader REST: {0}"), //
+    LEDP_21010("Problem executing group via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
+    LEDP_21011("Problem executing group via DataLoader REST: {0}"), //
+    LEDP_21012("Problem getting launch jobs via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
+    LEDP_21013("Problem getting launch jobs via DataLoader REST: {0}"), //
+    LEDP_21014("Problem getting group status via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
+    LEDP_21015("Problem getting group status via DataLoader REST: {0}"), //
+    LEDP_21016("Problem getting group last success time: there is no success launch in DL."), //
+    LEDP_21017("Problem getting group last failure launch: there is no failure launch in DL."), //
+    LEDP_21018("Problem canceling launch via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
+    LEDP_21019("Problem canceling launch via DataLoader REST: {0}"), //
+    LEDP_21020("Problem running query via DataLoader REST; DataLoader error message: {1}"), //
+    LEDP_21021("Problem running query via DataLoader REST: {0}"), //
+    LEDP_21022("Problem getting query status via DataLoader REST; DataLoader error message: {1}"), //
+    LEDP_21023("Problem getting query status via DataLoader REST: {0}"), //
+    LEDP_21024("Problem getting query result data via DataLoader REST; DataLoader error message: {1}"), //
+    LEDP_21025("Problem getting query result data via DataLoader REST: {0}"), //
 
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"), //

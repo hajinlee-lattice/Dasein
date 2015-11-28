@@ -9,7 +9,8 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinit
 public enum PlsFeatureFlag {
     ACTIVATE_MODEL_PAGE("ActivateModelPage", "the page to manage model activities through segments."), SYSTEM_SETUP_PAGE(
             "SystemSetupPage", "System Setup page."), ADMIN_ALERTS_TAB("AdminAlertsTab",
-            "Alerts tab in the admin page."), SETUP_PAGE("SetupPage", "Root flag for the whole Setup page.");
+            "Alerts tab in the admin page."), SETUP_PAGE("SetupPage", "Root flag for the whole Setup page."),
+            DEPLOYMENT_WIZARD_PAGE("DeploymentWizardPage", "Root flag for the deployment wizard page.");
 
     private String name;
     private FeatureFlagDefinition definition;
