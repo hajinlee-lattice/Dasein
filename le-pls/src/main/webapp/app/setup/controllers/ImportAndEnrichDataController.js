@@ -102,15 +102,15 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
     }
 
     function getObjects(step, status, inTimer) {
-        if (inTimer) {
-            if ($scope.gettingObjects === true) { return; }
-            $scope.gettingObjects = true;
+        if (!needGetObjects(step, inTimer)) {
+            return;
         }
 
         TenantDeploymentService.GetObjects(step, status).then(function (result) {
             if (result.Success === true) {
                 if (result.ResultObj.LaunchStatus === SetupUtility.STATUS_SUCCESS) {
                     clearTimer(step);
+                    $scope.gettingObjects = false;
                     $rootScope.$broadcast(NavUtility.DEPLOYMENT_WIZARD_NAV_EVENT);
                     return;
                 }
@@ -147,6 +147,25 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
                 getDataCompleted(step);
             }
         });
+    }
+
+    function needGetObjects(step , inTimer) {
+        if (!pageExists()) {
+            if (inTimer) {
+                clearTimer(step);
+                $scope.gettingObjects = false;
+            }
+            return false;
+        }
+
+        if (inTimer) {
+            if ($scope.gettingObjects === true) {
+                return false;
+            }
+            $scope.gettingObjects = true;
+        }
+
+        return true;
     }
 
     function getDataCompleted(step) {
@@ -285,6 +304,10 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
 
     function getQueryStatus(link, queryHandle) {
         var step = link.attr("step");
+        if (!needQueryStatus(step)) {
+            return;
+        }
+
         TenantDeploymentService.GetQueryStatus(queryHandle, link.attr("filename")).then(function (result) {
             if (result.Success === true) {
                 var obj = result.ResultObj;
@@ -312,7 +335,28 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
                 link.removeAttr("disabled").removeClass("disabled");
                 updateStatusLabelFail(step, result.ErrorResults);
             }
+
+            $scope.gettingQueryStatus = false;
         });
+    }
+
+    function needQueryStatus(step) {
+        if (!pageExists()) {
+            clearTimer(step);
+            $scope.gettingQueryStatus = false;
+            return false;
+        }
+
+        if ($scope.gettingQueryStatus === true) {
+            return false;
+        }
+        $scope.gettingQueryStatus = true;
+
+        return true;
+    }
+
+    function pageExists() {
+        return $('#importAndEnrichData').length > 0;
     }
 
     function clearTimer(step) {

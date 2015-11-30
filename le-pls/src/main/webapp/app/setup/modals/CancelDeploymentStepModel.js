@@ -1,6 +1,7 @@
 angular.module('mainApp.setup.controllers.CancelDeploymentStepModel', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.StringUtility'
+    'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.setup.utilities.SetupUtility'
 ])
 
 .service('CancelDeploymentStepModel', function ($compile, $rootScope, $http, ResourceUtility) {
@@ -30,12 +31,13 @@ angular.module('mainApp.setup.controllers.CancelDeploymentStepModel', [
 
 })
 
-.controller('CancelDeploymentStepController', function ($scope, $rootScope, ResourceUtility) {
+.controller('CancelDeploymentStepController', function ($scope, $rootScope, ResourceUtility, SetupUtility) {
     $scope.ResourceUtility = ResourceUtility;
 
-    if ($scope.step === "IMPORT_SFDC_DATA") {
+    var step = $scope.link.attr("step");
+    if (step === SetupUtility.STEP_IMPORT_DATA) {
         $scope.confirmContent = ResourceUtility.getString('SETUP_CANCEL_IMPORT_SFDC_DATA_LABEL');
-    } else if ($scope.step === "ENRICH_DATA") {
+    } else if (step === SetupUtility.STEP_ENRICH_DATA) {
         $scope.confirmContent = ResourceUtility.getString('SETUP_CANCEL_ENRICH_DATA_LABEL');
     }
 
