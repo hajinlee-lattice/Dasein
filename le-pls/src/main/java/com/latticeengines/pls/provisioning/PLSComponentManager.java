@@ -1,18 +1,14 @@
 package com.latticeengines.pls.provisioning;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -64,14 +60,14 @@ public class PLSComponentManager {
         } catch (NullPointerException e) {
             throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
         }
-        List<String> superAdminEmails = parseEmails(emailListInJson);
+        List<String> superAdminEmails = EmailUtils.parseEmails(emailListInJson);
 
         try {
             emailListInJson = configDir.get("/LatticeAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
             throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
         }
-        List<String> internalAdminEmails = parseEmails(emailListInJson);
+        List<String> internalAdminEmails = EmailUtils.parseEmails(emailListInJson);
 
         // add get external Admin Emails
         try {
@@ -79,34 +75,13 @@ public class PLSComponentManager {
         } catch (NullPointerException e) {
             throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
         }
-        List<String> externalAdminEmails = parseEmails(emailListInJson);
+        List<String> externalAdminEmails = EmailUtils.parseEmails(emailListInJson);
 
         Tenant tenant = new Tenant();
         tenant.setId(PLSTenantId);
         tenant.setName(tenantName);
 
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails);
-    }
-
-    private static List<String> parseEmails(String emailsInJson) {
-        List<String> adminEmails = new ArrayList<>();
-
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String unescaped = StringEscapeUtils.unescapeJava(emailsInJson);
-            JsonNode aNode = mapper.readTree(unescaped);
-            if (!aNode.isArray()) {
-                throw new IOException("AdminEmails suppose to be a list of strings");
-            }
-            for (JsonNode node : aNode) {
-                adminEmails.add(node.asText());
-            }
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18028, String.format(
-                    "Cannot parse AdminEmails to a list of valid emails: %s", emailsInJson), e);
-        }
-
-        return adminEmails;
     }
 
     public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,

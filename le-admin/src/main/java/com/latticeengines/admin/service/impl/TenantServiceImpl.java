@@ -10,6 +10,8 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +28,10 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.EmailUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory.Node;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
@@ -37,9 +42,12 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.security.exposed.service.UserService;
 
 @Component("adminTenantService")
 public class TenantServiceImpl implements TenantService {
+    private static final Log log = LogFactory.getLog(TenantServiceImpl.class);
     private static final String spaceConfigNode = LatticeComponent.spaceConfigNode;
     private static final String danteFeatureFlag = "Dante";
 
@@ -60,7 +68,12 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private DefaultConfigOverwritter overwritter;
 
+    @Autowired
+    private UserService userService;
+
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    private ProductAndExternalAdminInfo prodAndExternalAminInfo;
 
     public TenantServiceImpl() {
     }
@@ -109,9 +122,7 @@ public class TenantServiceImpl implements TenantService {
             props.put(serviceName, flatDir);
         }
 
-        // as a short term patch, waking up Dante's .NET App Pool is necessary
-        // for it to pick up the bootstrap command.
-        danteComponent.wakeUpAppPool();
+        preinstall(spaceConfig, configSDirs);
 
         // change components in orchestrator based on selected product
         // retrieve mappings from Camille
@@ -125,6 +136,55 @@ public class TenantServiceImpl implements TenantService {
         });
 
         return true;
+    }
+
+    protected void preinstall(SpaceConfiguration spaceConfig, List<SerializableDocumentDirectory> configDirectories) {
+        // as a short term patch, waking up Dante's .NET App Pool is necessary
+        // for it to pick up the bootstrap command.
+        danteComponent.wakeUpAppPool();
+        prodAndExternalAminInfo = getProductAndExternalAdminInfo(spaceConfig, configDirectories);
+
+    }
+
+    private ProductAndExternalAdminInfo getProductAndExternalAdminInfo(SpaceConfiguration spaceConfig,
+            List<SerializableDocumentDirectory> configDirectories) {
+        // Check if PD is external user existed
+        if (configDirectories == null || spaceConfig == null) {
+            return null;
+        }
+        ProductAndExternalAdminInfo prodAndExternalEmail = new ProductAndExternalAdminInfo();
+        List<LatticeProduct> selectedProducts = spaceConfig.getProducts();
+        List<String> externalEmailList = null;
+        log.info(selectedProducts);
+        for (SerializableDocumentDirectory configDirectory : configDirectories) {
+            if (configDirectory.getRootPath().equals("/PLS")) {
+                Collection<Node> nodes = configDirectory.getNodes();
+                for (Node node : nodes) {
+                    if (node.getNode().equals("ExternalAdminEmails")) {
+                        String externalAminEmailsString = node.getData();
+                        log.info(externalAminEmailsString);
+                        externalEmailList = EmailUtils.parseEmails(externalAminEmailsString);
+                    }
+                }
+            }
+        }
+
+        Map<String, Boolean> externalEmailMap = new HashMap<String, Boolean>();
+
+        if (externalEmailList != null) {
+            for (String email : externalEmailList) {
+                externalEmailMap.put(email, checkExternalAdminUserExistence(email));
+            }
+        }
+        prodAndExternalEmail.setProducts(selectedProducts);
+        prodAndExternalEmail.setExternalEmailMap(externalEmailMap);
+
+        return prodAndExternalEmail;
+    }
+
+    private boolean checkExternalAdminUserExistence(String externalEmail) {
+        User user = userService.findByEmail(externalEmail);
+        return user != null;
     }
 
     @Override
@@ -248,5 +308,29 @@ public class TenantServiceImpl implements TenantService {
         }
 
         return BootstrapState.constructOKState(state2.installedVersion);
+    }
+
+    public static class ProductAndExternalAdminInfo {
+        public List<LatticeProduct> products;
+        public Map<String, Boolean> externalEmailMap;
+
+        public ProductAndExternalAdminInfo() {
+        }
+
+        public List<LatticeProduct> getProducts() {
+            return this.products;
+        }
+
+        public void setProducts(List<LatticeProduct> products) {
+            this.products = products;
+        }
+
+        public Map<String, Boolean> getExternalEmailMap() {
+            return this.externalEmailMap;
+        }
+
+        public void setExternalEmailMap(Map<String, Boolean> externalEmailMap) {
+            this.externalEmailMap = externalEmailMap;
+        }
     }
 }
