@@ -1,0 +1,38 @@
+<div data-ng-controller="JobsCtrl" class="container">
+    <div class="row jobs-header">
+        <h4 class="pull-left">Jobs</h4>
+        <span class="pull-right">
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></button>
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span></button>
+        <a ui-sref="jobs.import.credentials">
+            <button class="btn btn-primary">Import Data</button>
+        </a>
+        </span>
+    </div>
+    
+    <div class="panel panel-default">
+        <div class="panel-heading job-table-equal-space">
+            <span>Timestamp</span>
+            <span>Job Type</span>
+            <span>Status</span>
+            <span>User</span>
+        </div>
+        <div class="panel-body jobs-table-content">
+            <div class="job-table-equal-space">
+                <span>11/18/2015 9:06 PM</span>
+                <span>Loadfile import</span>
+                <span>Running [<a>Cancel Job</a>]</span>
+                <span>LatticeUser1</span>
+            </div>
+            <div class="text-center">
+                <div class="breadcrumb flat">
+                    <a href="#">Load Data<span class="spinner" data-ng-show="loadingData"><i class="icon-spin icon-refresh"></i></span></a>
+                    <a href="#">Match Data<span class="spinner" data-ng-show="matchingData"><i class="icon-spin icon-refresh"></i></span></a>
+                    <a href="#">Generate Insights<span class="spinner" data-ng-show="generatingInsights"><i class="icon-spin icon-refresh"></i></span></a>
+                    <a href="#">Create Universal Model<span class="spinner" data-ng-show="generatingModel"><i class="icon-spin icon-refresh"></i></span></a>
+                    <a href="#">Create Universal Target Market<span class="spinner" data-ng-show="generatingTargetMarket"><i class="icon-spin icon-refresh"></i></span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

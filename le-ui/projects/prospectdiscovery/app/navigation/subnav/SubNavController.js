@@ -1,4 +1,4 @@
-angular.module('mainApp.main.controllers.MainNavigationController', [
+angular.module('controllers.navigation.subnav', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
@@ -6,9 +6,9 @@ angular.module('mainApp.main.controllers.MainNavigationController', [
     'mainApp.login.services.LoginService'
 ])
 
-.controller('MainNavigationController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
+.controller('SubNavCtrl', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
     this.init = function() {
-        this.lis = lis = $('#mainNavigationView ul li');
+        this.lis = lis = $('.pd-summary-subnav ul li');
         
         $(lis).on('mousedown', this.handleClick.bind(this));
     }

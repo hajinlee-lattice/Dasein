@@ -1,0 +1,22 @@
+@import "header/HeaderStyles";
+@import "jobs/status/StatusStyles";
+@import "navigation/table/TableStyles";
+@import "navigation/message/MessageStyles";
+@import "navigation/links/LinksStyles";
+@import "navigation/subnav/SubNavStyles";
+@import "navigation/navdash/NavDashStyles";
+
+body {
+    background: #fff;
+    overflow-x: hidden;
+    
+    .container {
+        max-width: 1280px;
+    }
+}
+@media (max-width: 1280px) {
+    body .container {
+        width: auto;
+        margin: 0 5em;
+    }
+}

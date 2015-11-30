@@ -65,12 +65,12 @@ module.exports = function (grunt) {
     var defaultText = 'Run Express Server in Production';
     grunt.registerTask('default', defaultText, [
         'env:prod',
-        'nodemon'
+        'run:node'
     ]);
 
     grunt.registerTask('prod', defaultText, [
         'env:prod',
-        'run:nodemon'
+        'run:node'
     ]);
 
     var devText = 'Run Express Server, using Local API Endpoints';

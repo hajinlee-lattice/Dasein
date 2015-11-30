@@ -1,0 +1,14 @@
+#mainHeaderView {
+    height: 4.7em;
+    border-bottom: 1px solid #ddd;
+    padding: 0.75em 1em;
+    background: #fff;
+
+    header {
+        box-shadow: none;
+    }
+    .nav-pills > li {
+        display: inline-block;
+        float: none;
+    }
+}

@@ -4,12 +4,11 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.services.FeatureFlagService',
-    'mainApp.markets.controllers.TargetMarketController',
-    'mainApp.insights.controllers.InsightsController',
-    'mainApp.reports.controllers.ReportsController',
+    'mainApp.markets.controllers.MarketsController',
+    'mainApp.fingerprints.controllers.FingerprintsController',
+    'controllers.jobs',
     'mainApp.admin.controllers.AdminController',
-    'mainApp.config.services.ConfigService',
-    'mainApp.config.controllers.ManageCredentialsController'
+    'mainApp.config.services.ConfigService'
 ])
 
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {

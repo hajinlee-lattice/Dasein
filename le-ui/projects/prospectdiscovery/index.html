@@ -24,23 +24,23 @@
     <link rel="stylesheet" type="text/css" href="/lib/css/bootstrap.css"/>
     <link rel="stylesheet" type="text/css" href="/lib/css/jquery.qtip.css"/>
     <link rel="stylesheet" type="text/css" href="/lib/css/font-awesome.css"/>
-
+<!--
     <link rel="stylesheet" type="text/css" href="/lib/css/kendo.common-bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/lib/css/kendo.bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/lib/css/kendo.dataviz.min.css">
     <link rel="stylesheet" type="text/css" href="/lib/css/kendo.dataviz.bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/lib/css/kendo.mobile.all.min.css">
-
+-->
+    <link href="/demo/css/lattice.css" rel="stylesheet" type="text/css" />
     <link href="assets/styles/production.css" rel="stylesheet" type="text/css" />
     <!-- /build -->
 
 </head>
-<body data-ng-controller="MainController" style="background:#fff;">
+<body data-ng-controller="MainController">
     <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
     <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
     <div id="mainHeaderView"></div>
-    <div id="mainNavigationView"></div>
-    <div id="mainContentView" data-ng-view class="container"></div>
+    <div id="mainContentView" ui-view></div>
     <div class="footer" data-ng-show="showFooter">
         © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
     </div>
@@ -75,7 +75,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="/lib/js/angular/angular.js"></script>
 <script src="/lib/js/angular/angular-sanitize.js"></script>
 <script src="/lib/js/angular/angular-resource.js"></script>
-<script src="/lib/js/angular/angular-route.js"></script>
+<script src="/lib/js/angular-ui-router.js"></script>
 <!--
 <script src="/lib/js/crypto/core.js"></script>
 <script src="/lib/js/crypto/sha256.js"></script>
@@ -127,14 +127,22 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/services/HelpService.js"></script>
 <script src="app/header/HeaderController.js"></script>
 <script src="app/main/MainController.js"></script>
-<script src="app/subnav/SubNavController.js"></script>
-<script src="app/import/ManageCredentialsController.js"></script>
-<script src="/app/modals/SimpleModal.js"></script>
-<script src="app/insights/InsightsController.js"></script>
-<script src="app/reports/ReportsController.js"></script>
+<script src="app/navigation/table/TableController.js"></script>
+<script src="app/navigation/message/MessageController.js"></script>
+<script src="app/navigation/links/LinksController.js"></script>
+<script src="app/navigation/subnav/SubNavController.js"></script>
+<script src="app/navigation/navdash/NavDashController.js"></script>
+<script src="app/markets/builder/BuilderController.js"></script>
+<script src="app/jobs/JobsController.js"></script>
+<script src="app/jobs/status/StatusController.js"></script>
+<script src="app/jobs/import/credentials/CredentialsController.js"></script>
+<script src="app/jobs/import/file/FileController.js"></script>
+<script src="app/fingerprints/FingerprintsController.js"></script>
 <script src="app/admin/AdminController.js"></script>
-<script src="app/markets/TargetMarketController.js"></script>
-<script src="app/markets/TargetMarketService.js"></script>
+<script src="app/markets/MarketsController.js"></script>
+<script src="app/markets/MarketsService.js"></script>
+<script src="app/markets/dashboard/DashboardService.js"></script>
+<script src="/app/modals/SimpleModal.js"></script>
 <!--
 <script src="app/services/WidgetService.js"></script>
 <script src="app/modals/TenantSelectionModal.js"></script>

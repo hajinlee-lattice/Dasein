@@ -1,0 +1,36 @@
+.pd-summary {
+    background: #003B67;
+    color: #fff;
+    height: 200px;
+
+    .container.row {
+        height: 100%;
+        display: flex;
+
+        .pd-summary-panel {
+            background-color: rgba(255,255,255,.075);
+            padding: 1em;
+            margin-top: 1em;
+            margin-bottom: 1em;
+
+            h3 {
+                color: #fff;
+                padding: 0.25em 0 1em;
+                font-weight: normal;
+                text-align: center;
+            }
+
+            li {
+
+
+                p {
+                    display: inline-block;
+                }
+
+                span {
+                    float: right;
+                }
+            }
+        }
+    }
+}

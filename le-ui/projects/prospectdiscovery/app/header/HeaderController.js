@@ -6,7 +6,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.core.services.FeatureFlagService'
 ])
 
-.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
+.controller('MainHeaderCtrl', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
 console.log('ResourceUtility', $scope.ResourceUtility);

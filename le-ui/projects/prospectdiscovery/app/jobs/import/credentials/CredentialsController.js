@@ -1,4 +1,4 @@
-angular.module('mainApp.config.controllers.ManageCredentialsController', [
+angular.module('controllers.jobs.import.credentials', [
     'mainApp.appCommon.directives.ngQtipDirective',
     'mainApp.appCommon.directives.helperMarkDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
@@ -7,7 +7,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     'mainApp.config.services.ConfigService'
 ])
 
-.service('ManageCredentialsService', function (StringUtility) {
+.service('CredentialsService', function (StringUtility) {
 
     this.ValidateCredentials = function (type, credentials) {
         console.log('ValidateCredentials');
@@ -27,7 +27,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     };
 })
 
-.controller('ManageCredentialsController', function ($scope, $rootScope, $location, ResourceUtility, BrowserStorageUtility, ConfigService, ManageCredentialsService) {
+.controller('CredentialsCtrl', function ($scope, $rootScope, $location, ResourceUtility, BrowserStorageUtility, ConfigService, CredentialsService) {
     $scope.ResourceUtility = ResourceUtility;
     
     $scope.crmProductionComplete = false;
@@ -125,7 +125,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     
     $scope.crmProductionSaveClicked = function () {
         $scope.crmProductionError = "";
-        if (ManageCredentialsService.ValidateCredentials("sfdc", $scope.crmProductionCredentials)) {
+        if (CredentialsService.ValidateCredentials("sfdc", $scope.crmProductionCredentials)) {
             if ($scope.crmProductionSaveInProgress) {
                 return;
             }
@@ -148,7 +148,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     
     $scope.crmSandboxSaveClicked = function () {
         $scope.crmSandboxError = "";
-        if (ManageCredentialsService.ValidateCredentials("sfdc", $scope.crmSandboxCredentials)) {
+        if (CredentialsService.ValidateCredentials("sfdc", $scope.crmSandboxCredentials)) {
             if ($scope.crmSandboxSaveInProgress) {
                 return;
             }

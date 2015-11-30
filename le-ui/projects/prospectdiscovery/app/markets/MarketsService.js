@@ -1,6 +1,6 @@
-angular.module('mainApp.markets.services.TargetMarketService', [
+angular.module('mainApp.markets.services.MarketsService', [
 ])
-.service('TargetMarketService', function($http, $q) {
+.service('MarketsService', function($http, $q) {
     
     this.getAllTargetMarkets = function() {
         var deferred = $q.defer();

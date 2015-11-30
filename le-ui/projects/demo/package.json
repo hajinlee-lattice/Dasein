@@ -2,7 +2,7 @@
   "name": "guide",
   "version": "1.0.0",
   "description": "Saphire Design System for Lattice Engines",
-  "main": "idex.html",
+  "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

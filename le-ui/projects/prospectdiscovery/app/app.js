@@ -1,6 +1,6 @@
 //Initial load of the application    
 var mainApp = angular.module('mainApp', [
-    'ngRoute',
+    'ui.router',
     'ui.bootstrap',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
@@ -10,43 +10,145 @@ var mainApp = angular.module('mainApp', [
     'mainApp.core.services.HelpService',
     'mainApp.core.controllers.MainHeaderController',
     'mainApp.core.controllers.MainViewController',
-    'mainApp.main.controllers.MainNavigationController',
     'mainApp.login.services.LoginService',
     'mainApp.config.services.ConfigService',
-    'mainApp.appCommon.modals.SimpleModal'
+    'mainApp.appCommon.modals.SimpleModal',
+    'controllers.markets.builder',
+    'controllers.navigation.table',
+    'controllers.navigation.message',
+    'controllers.navigation.links',
+    'controllers.navigation.navdash',
+    'controllers.navigation.subnav'
 ])
 
-.config(['$routeProvider', function($routeProvider) {
-    $routeProvider
-        .when('/', { 
-            templateUrl: './app/main/MainView.html' 
+.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise('/');
+
+    $stateProvider
+        .state('home', {
+            url: '/',
+            templateUrl: './app/main/MainView.html'
         })
-        .when('/insights', { 
-            templateUrl: './app/insights/InsightsView.html'
+        .state('fingerprints', {
+            url: '/fingerprints',
+            templateUrl: './app/fingerprints/FingerprintsView.html'
         })
-        .when('/markets', { 
-            templateUrl: './app/markets/TargetMarketView.html'
+        .state('markets', {
+            url: '/markets',
+            template:
+                '<div ui-view="navigation"></div>' +
+                '<div ui-view="summary"></div>' +
+                '<div ui-view="main"></div>'
         })
-        .when('/reports', { 
-            templateUrl: './app/reports/ReportsView.html'
+        .state('markets.dashboard', {
+            url: '/dashboard',
+            views: {
+                "navigation": {
+                    templateUrl: './app/navigation/links/LinksView.html'
+                },
+                "summary": {
+                    templateUrl: './app/navigation/navdash/NavDashView.html'
+                },
+                "main": {
+                    templateUrl: './app/markets/dashboard/DashboardView.html'
+                }
+            }
         })
-        .when('/admin', { 
+        .state('markets.list', {
+            url: '/status',
+            views: {
+                "navigation": {
+                    templateUrl: './app/navigation/links/LinksView.html'
+                },
+                "summary": {
+                    template: ''
+                },
+                "main": {
+                    templateUrl: './app/markets/MarketsView.html'
+                }
+            }
+        })
+        .state('markets.builder', {
+            url: '/builder',
+            views: {
+                "navigation": {
+                    templateUrl: './app/navigation/links/LinksView.html'
+                },
+                "summary": {
+                    templateUrl: './app/navigation/subnav/SubNavView.html'
+                },
+                "main": {
+                    templateUrl: './app/markets/builder/BuilderView.html'
+                }
+            }
+        })
+        .state('jobs', {
+            url: '/jobs',
+            template:'<div ui-view="summary"></div><div ui-view="main"></div>'
+            
+        })
+        .state('jobs.status', {
+            url: '/status',
+            views: {
+                "summary@jobs": {
+                    templateUrl: './app/navigation/table/TableView.html'
+                },
+                "main": {
+                    templateUrl: './app/jobs/status/StatusView.html'
+                }
+            }
+        })
+        .state('jobs.import', {
+            url: '/import'
+            
+        })
+        .state('jobs.import.credentials', {
+            url: '/credentials',
+            views: {
+                "summary@jobs": {
+                    templateUrl: './app/navigation/message/MessageView.html'
+                },
+                "main@jobs": {
+                    templateUrl: './app/jobs/import/credentials/CredentialsView.html'
+                }
+            }
+        })
+        .state('jobs.import.file', {
+            url: '/file',
+            views: {
+                "summary@jobs": {
+                    templateUrl: './app/navigation/message/MessageView.html'
+                },
+                "main@jobs": {
+                    templateUrl: './app/jobs/import/file/FileView.html'
+                }
+            }
+        })
+        .state('jobs.import.processing', {
+            url: '/processing',
+            views: {
+                "summary@jobs": {
+                    templateUrl: './app/navigation/message/MessageView.html'
+                },
+                "main@jobs": {
+                    templateUrl: './app/jobs/import/processing/ProcessingView.html'
+                }
+            }
+        })
+        .state('jobs.import.ready', {
+            url: '/ready',
+            views: {
+                "navigation@jobs": {
+                    templateUrl: './app/navigation/message/MessageView.html'
+                },
+                "main@jobs": {
+                    templateUrl: './app/jobs/import/ready/ReadyView.html'
+                }
+            }
+        })
+        .state('admin', {
+            url: '/admin',
             templateUrl: './app/admin/AdminView.html'
-        })
-        .when('/import', { 
-            templateUrl: './app/import/form.html' 
-        })
-        .when('/import/file', { 
-            templateUrl: './app/import/file.html' 
-        })
-        .when('/import/process', { 
-            templateUrl: './app/import/process.html' 
-        })
-        .when('/import/ready', { 
-            templateUrl: './app/import/ready.html' 
-        })
-        .otherwise({ 
-            template: '/' 
         });
 }])
 
@@ -86,11 +188,12 @@ var mainApp = angular.module('mainApp', [
                 var scope = $rootScope.$new();
                 $compile($("#mainHeaderView").html(html))(scope);
             });
+            /*
             $http.get('./app/subnav/SubNavView.html').success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainNavigationView").html(html))(scope);
             });
-
+            */
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
             return window.open('/','_self');
@@ -241,7 +344,7 @@ var mainApp = angular.module('mainApp', [
         if (hasSessionTimedOut()) {
             $scope.sessionExpired = true;
             /** This line is actually necessary. Otherwise, user doesn't get properly logged out when tenant selection modal is up */
-            hideTenantSelectionModal();
+            //hideTenantSelectionModal();
             stopObservingUserInteractionBasedOnMouseAndKeyboard();
             LoginService.Logout();
         } else {
