@@ -1,6 +1,5 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Report;
 import com.latticeengines.pls.entitymanager.ReportEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -26,7 +25,6 @@ public class ReportEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
         setupUsers();
         cleanupDB();
-        mainTestingTenant = setupTenant(CustomerSpace.parse("Test"));
     }
 
     @BeforeMethod(groups = "functional")
