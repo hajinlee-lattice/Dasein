@@ -1,6 +1,6 @@
 package com.latticeengines.workflowapi.flows;
 
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.workflowapi.steps.dlorchestration.ModelLoadDataConfiguration;
 
 public class DLOrchestrationWorkflowConfiguration extends WorkflowConfiguration {

@@ -11,6 +11,7 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private String modelingServiceHdfsBaseDir;
 
+    //    private List<String> eventColumns = new ArrayList<>();
     @JsonProperty("modelingServiceHdfsBaseDir")
     public String getModelingServiceHdfsBaseDir() {
         return modelingServiceHdfsBaseDir;

@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.wordnik.swagger.annotations.Api;

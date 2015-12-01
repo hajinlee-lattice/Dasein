@@ -25,9 +25,9 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })

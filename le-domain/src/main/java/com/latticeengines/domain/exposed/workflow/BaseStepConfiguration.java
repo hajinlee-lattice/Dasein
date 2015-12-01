@@ -1,4 +1,4 @@
-package com.latticeengines.workflow.exposed.build;
+package com.latticeengines.domain.exposed.workflow;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 

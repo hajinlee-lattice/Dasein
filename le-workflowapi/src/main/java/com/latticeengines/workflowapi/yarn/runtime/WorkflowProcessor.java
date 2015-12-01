@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.domain.exposed.workflow.YarnAppWorkflowId;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.entitymgr.YarnAppWorkflowIdEntityMgr;
 

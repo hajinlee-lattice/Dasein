@@ -2,10 +2,10 @@ package com.latticeengines.workflow.exposed.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 
 public interface WorkflowService {
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
@@ -13,7 +14,6 @@ import com.latticeengines.serviceflows.workflow.modeling.Sample;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 
 @Component("fitModelWorkflow")
 public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {

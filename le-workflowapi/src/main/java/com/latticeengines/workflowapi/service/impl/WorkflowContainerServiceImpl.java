@@ -11,10 +11,10 @@ import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 import com.latticeengines.workflowapi.entitymgr.YarnAppWorkflowIdEntityMgr;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 

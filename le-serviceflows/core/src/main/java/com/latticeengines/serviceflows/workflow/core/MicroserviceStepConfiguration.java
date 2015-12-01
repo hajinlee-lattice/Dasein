@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.workflow.exposed.build.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 

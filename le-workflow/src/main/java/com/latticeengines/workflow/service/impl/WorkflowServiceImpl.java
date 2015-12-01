@@ -32,10 +32,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
 @Component("workflowService")

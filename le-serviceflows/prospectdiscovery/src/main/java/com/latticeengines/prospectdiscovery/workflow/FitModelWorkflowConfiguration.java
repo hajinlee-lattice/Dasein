@@ -2,12 +2,12 @@ package com.latticeengines.prospectdiscovery.workflow;
 
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 
 public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
 

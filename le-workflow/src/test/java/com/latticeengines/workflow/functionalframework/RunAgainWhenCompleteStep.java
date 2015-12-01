@@ -4,8 +4,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
-import com.latticeengines.workflow.exposed.build.BaseStepConfiguration;
 
 @Component("runAgainWhenCompleteStep")
 public class RunAgainWhenCompleteStep extends AbstractStep<BaseStepConfiguration> {

@@ -1,7 +1,7 @@
 package com.latticeengines.workflowapi.steps.dlorchestration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.workflow.exposed.build.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class ModelLoadDataConfiguration extends BaseStepConfiguration {
 
