@@ -156,6 +156,9 @@ public enum LedpCode {
     LEDP_18061("Failed to start running query, error: {0}."), //
     LEDP_18062("Failed to download query result data, error: {0}."), //
     LEDP_18063("Tenant deployment with tenant id {0} not found."), //
+    LEDP_18065("Problems creating payload file {0}."), //
+    LEDP_18066("Problems reading payload file {0}."), //
+    LEDP_18067("Could not change state of file {0} to PROCESSING."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
