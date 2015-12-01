@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.FilePayload;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;

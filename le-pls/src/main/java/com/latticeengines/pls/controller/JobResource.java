@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.pls.JobStatus;
 import com.latticeengines.domain.exposed.pls.JobStep;
 import com.latticeengines.domain.exposed.pls.JobStepType;
 import com.latticeengines.domain.exposed.pls.JobType;
+import com.latticeengines.domain.exposed.pls.StepStatus;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -40,35 +41,35 @@ public class JobResource {
         JobStep stepLoad = new JobStep();
         steps.add(stepLoad);
         stepLoad.setJobStepType(JobStepType.LOAD_DATA);
-        stepLoad.setJobStatus(JobStatus.COMPLETED);
+        stepLoad.setStepStatus(StepStatus.COMPLETED);
         stepLoad.setStartTimestamp(new Date());
         stepLoad.setEndTimestamp(new Date());
 
         JobStep stepMatch = new JobStep();
         steps.add(stepMatch);
         stepMatch.setJobStepType(JobStepType.MATCH_DATA);
-        stepMatch.setJobStatus(JobStatus.COMPLETED);
+        stepMatch.setStepStatus(StepStatus.COMPLETED);
         stepMatch.setStartTimestamp(new Date());
         stepMatch.setEndTimestamp(new Date());
 
         JobStep stepInsights = new JobStep();
         steps.add(stepInsights);
         stepInsights.setJobStepType(JobStepType.GENERATE_INSIGHTS);
-        stepInsights.setJobStatus(JobStatus.COMPLETED);
+        stepInsights.setStepStatus(StepStatus.COMPLETED);
         stepInsights.setStartTimestamp(new Date());
         stepInsights.setEndTimestamp(new Date());
 
         JobStep stepModel = new JobStep();
         steps.add(stepModel);
         stepModel.setJobStepType(JobStepType.CREATE_MODEL);
-        stepModel.setJobStatus(JobStatus.COMPLETED);
+        stepModel.setStepStatus(StepStatus.COMPLETED);
         stepModel.setStartTimestamp(new Date());
         stepModel.setEndTimestamp(new Date());
 
         JobStep stepMarket = new JobStep();
         steps.add(stepMarket);
         stepMarket.setJobStepType(JobStepType.CREATE_GLOBAL_TARGET_MARKET);
-        stepMarket.setJobStatus(JobStatus.RUNNING);
+        stepMarket.setStepStatus(StepStatus.RUNNING);
         stepMarket.setStartTimestamp(new Date());
     }
 

@@ -14,7 +14,7 @@ public class JobStep implements HasId<Long>, HasName {
     private String description;
     private Date startTimestamp;
     private Date endTimestamp;
-    private JobStatus jobStatus;
+    private StepStatus stepStatus;
     private JobStepType jobStepType;
 
 
@@ -61,13 +61,13 @@ public class JobStep implements HasId<Long>, HasName {
     }
 
     @JsonProperty
-    public JobStatus getJobStatus() {
-        return jobStatus;
+    public StepStatus getStepStatus() {
+        return stepStatus;
     }
 
     @JsonProperty
-    public void setJobStatus(JobStatus jobStatus) {
-        this.jobStatus = jobStatus;
+    public void setStepStatus(StepStatus stepStatus) {
+        this.stepStatus = stepStatus;
     }
 
     @JsonProperty
