@@ -8,6 +8,8 @@ public enum AccessLevel {
     EXTERNAL_USER(
         Arrays.asList(
             GrantedRight.VIEW_PLS_MODELS,
+            GrantedRight.VIEW_PLS_JOBS,
+            GrantedRight.EDIT_PLS_JOBS,
             GrantedRight.VIEW_PLS_TARGETMARKETS,
             GrantedRight.VIEW_PLS_QUOTAS
         )
@@ -17,6 +19,8 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_USERS,
             GrantedRight.EDIT_PLS_USERS,
             GrantedRight.VIEW_PLS_MODELS,
+            GrantedRight.VIEW_PLS_JOBS,
+            GrantedRight.EDIT_PLS_JOBS,
             GrantedRight.VIEW_PLS_TARGETMARKETS,
             GrantedRight.VIEW_PLS_QUOTAS
         )
@@ -25,6 +29,8 @@ public enum AccessLevel {
         Arrays.asList(
             GrantedRight.VIEW_PLS_REPORTING,
             GrantedRight.VIEW_PLS_MODELS,
+            GrantedRight.VIEW_PLS_JOBS,
+            GrantedRight.EDIT_PLS_JOBS,
             GrantedRight.VIEW_PLS_TARGETMARKETS,
             GrantedRight.VIEW_PLS_QUOTAS
         )
@@ -38,6 +44,8 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_REPORTING,
             GrantedRight.VIEW_PLS_MODELS,
             GrantedRight.EDIT_PLS_MODELS,
+            GrantedRight.VIEW_PLS_JOBS,
+            GrantedRight.EDIT_PLS_JOBS,
             GrantedRight.VIEW_PLS_TARGETMARKETS,
             GrantedRight.EDIT_PLS_TARGETMARKETS,
             GrantedRight.VIEW_PLS_QUOTAS,
@@ -54,6 +62,8 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_MODELS,
             GrantedRight.EDIT_PLS_MODELS,
             GrantedRight.CREATE_PLS_MODELS,
+            GrantedRight.VIEW_PLS_JOBS,
+            GrantedRight.EDIT_PLS_JOBS,
             GrantedRight.VIEW_PLS_TARGETMARKETS,
             GrantedRight.EDIT_PLS_TARGETMARKETS,
             GrantedRight.CREATE_PLS_TARGETMARKETS,
