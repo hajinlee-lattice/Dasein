@@ -19,7 +19,7 @@ public class ProgressMonitor {
 
     private final static Log log = LogFactory.getLog(ProgressMonitor.class);
 
-    private static final int MAX_ATTEMPT = 5;
+    private static final int MAX_ATTEMPTS = 5;
 
     private ServerSocket listener;
 
@@ -32,7 +32,7 @@ public class ProgressMonitor {
     public ProgressMonitor(ContainerAllocator allocator) {
         this.allocator = allocator;
         int attempt = 1;
-        while (attempt <= MAX_ATTEMPT) {
+        while (attempt <= MAX_ATTEMPTS) {
             try {
                 listener = new ServerSocket(0);
                 break;
@@ -43,7 +43,7 @@ public class ProgressMonitor {
             }
         }
         if (listener == null) {
-            log.error("Couldn't find open port after " + MAX_ATTEMPT + " attempts; aborting progress monitor");
+            log.error("Couldn't find open port after " + MAX_ATTEMPTS + " attempts; aborting progress monitor");
         }
 
         executor = Executors.newSingleThreadScheduledExecutor();
