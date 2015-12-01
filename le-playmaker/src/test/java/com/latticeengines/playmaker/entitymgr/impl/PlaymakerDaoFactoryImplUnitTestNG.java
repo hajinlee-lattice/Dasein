@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImpl;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV740;
+import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV750;
 
 public class PlaymakerDaoFactoryImplUnitTestNG {
 
@@ -29,7 +30,7 @@ public class PlaymakerDaoFactoryImplUnitTestNG {
         Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImplV740.class);
 
         dao = daoFactory.findDao(null, daoFactory.normalizedVer("7.5.2"), defaultDao);
-        Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImplV740.class);
+        Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImplV750.class);
 
         dao = daoFactory.findDao(null, daoFactory.normalizedVer("7.4.01"), defaultDao);
         Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImplV740.class);
