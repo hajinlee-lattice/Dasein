@@ -71,7 +71,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void importDataForFile() throws Exception {
         URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
@@ -79,6 +79,8 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver);
         DbCreds creds = new DbCreds(builder);
+        
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Nutanix.csv", "/tmp");
 
         String[] types = new String[] {
                 "Long", //
@@ -215,6 +217,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         Properties props = new Properties();
         props.put("trimHeaders", "true");
         props.put("columnTypes", StringUtils.join(types, ","));
+        props.put("yarn.mr.hdfs.resources", "/tmp/Nutanix.csv#Nutanix.csv");
         ApplicationId appId = sqoopSyncJobService.importData("Nutanix", //
                 "/tmp/dataFromFile", //
                 creds, //

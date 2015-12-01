@@ -3,6 +3,8 @@ package com.latticeengines.dataplatform.service.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -13,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
@@ -92,6 +95,7 @@ public class SqoopJobServiceImpl {
         );
     }
 
+    @SuppressWarnings("deprecation")
     protected ApplicationId importDataWithWhereCondition(String table, //
                                        String query, //
                                        String targetDir, //
@@ -167,6 +171,20 @@ public class SqoopJobServiceImpl {
 
             if (hdfsClassPath != null) {
                 yarnConfiguration.set("yarn.mr.hdfs.class.path", hdfsClassPath);
+            }
+            
+            String hdfsResources = props.getProperty("yarn.mr.hdfs.resources");
+            
+            if (hdfsResources != null) {
+                String[] hdfsResourceList = hdfsResources.split(",");
+                
+                for (String hdfsResource : hdfsResourceList) {
+                    try {
+                        DistributedCache.addCacheFile(new URI(hdfsResource), yarnConfiguration);
+                    } catch (URISyntaxException e) {
+                        log.error(e);
+                    }
+                }
             }
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
