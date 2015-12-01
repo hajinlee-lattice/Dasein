@@ -237,10 +237,10 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
         }
         String query = "SELECT " + StringUtils.join(attrName, ",") + " FROM " + table.getName();
 
-        System.out.println(query);
         if (filterExpression != null) {
             query += " WHERE " + filterExpression;
         }
+        log.info(query);
         return query;
     }
 

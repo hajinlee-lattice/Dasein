@@ -145,8 +145,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         checkDataExists(targetPath, tableNameList, 1);
         tablesBeforeExtract = tablesAfterExtract;
         tablesAfterExtract = eaiMetadataService.getTables(customerSpace);
-        checkLastModifiedTimestampInRecords(tablesBeforeExtract);
         checkLastModifiedTimestampChanged(false, tablesBeforeExtract, tablesAfterExtract);
+        checkLastModifiedTimestampInRecords(tablesBeforeExtract);
         checkExtract(tablesAfterExtract);
 
     }
@@ -182,9 +182,13 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         for (Table table : tablesBeforeExtract) {
             List<String> filesForTable = getFilesFromHdfs(targetPath, table.getName());
             List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(filesForTable.get(0)));
+            log.info("Table: " + table.getName());
             for (GenericRecord record : records) {
-                Long lastModifiedDateValue = (Long) record.get(table.getLastModifiedKey().getAttributeNames()[0]);
-                assertEquals(table.getLastModifiedKey().getLastModifiedTimestamp().compareTo(lastModifiedDateValue), 0);
+                Long lastModifiedDateValueFromRecord = (Long) record.get(table.getLastModifiedKey().getAttributeNames()[0]);
+                log.info("value from record: " + lastModifiedDateValueFromRecord);
+                Long lastModifiedDateValueFromTable = table.getLastModifiedKey().getLastModifiedTimestamp();
+                log.info("value from metadata: " + lastModifiedDateValueFromTable);
+                assertEquals(lastModifiedDateValueFromTable.compareTo(lastModifiedDateValueFromRecord), 0);
             }
         }
     }

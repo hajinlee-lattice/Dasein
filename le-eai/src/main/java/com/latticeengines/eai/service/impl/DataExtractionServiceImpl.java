@@ -114,6 +114,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             DateTime date;
             if (lmk != null) {
                 lastModifiedKey = lmk.getAttributeNames()[0];
+                log.info("Table: " + table.getName() + ", LastModifiedTimeStamp: " + lmk.getLastModifiedTimestamp());
                 date = new DateTime(lmk.getLastModifiedTimestamp());
             } else {
                 throw new LedpException(LedpCode.LEDP_17006, new String[] { customerSpace });
