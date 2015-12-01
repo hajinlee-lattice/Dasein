@@ -21,17 +21,16 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.pls.FilePayload;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;
-import com.latticeengines.workflow.exposed.build.WorkflowConfiguration;
 
 public class ProcessingStateProcessorUnitTestNG {
-    
+
     private File queuedDir = new File("/tmp/queued");
     private final ProcessingStateProcessor processor = new ProcessingStateProcessor();
     private Properties props = new Properties();
-    
+
     @BeforeMethod(groups = "unit")
     public void setup() throws Exception {
         URL url = ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/fileprocessor/processingstate");
@@ -45,13 +44,13 @@ public class ProcessingStateProcessorUnitTestNG {
                 YarnUtils.appIdFromString("application_1448430180764_0001"));
         props.put("restApiProxy", apiProxy);
     }
-    
+
     @AfterMethod(groups = "unit")
     public void tearDown() throws Exception {
         FileUtils.deleteDirectory(new File("/tmp/processing"));
         FileUtils.deleteDirectory(queuedDir);
     }
-    
+
     @Test(groups = "unit")
     public void processDir() {
         processor.processDir(new File("/tmp"), FileProcessingState.PROCESSING, FileProcessingState.QUEUED, props);
@@ -76,9 +75,9 @@ public class ProcessingStateProcessorUnitTestNG {
         ReflectionTestUtils.setField(processor, "fileDeleter", fileDeleter);
         processor.processDir(new File("/tmp"), FileProcessingState.PROCESSING, FileProcessingState.QUEUED, props);
         // Since 9 files weren't deleted (mocked), then 9 files are kept in the queue directory
-        // and 1 file moved to processing directory 
+        // and 1 file moved to processing directory
         assertEquals(FileUtils.listFiles(queuedDir, new String[] { "json" }, false).size(), 9);
-        Collection<File> processingFiles = FileUtils.listFiles(new File("/tmp/processing"), new String[] { "json" }, false); 
+        Collection<File> processingFiles = FileUtils.listFiles(new File("/tmp/processing"), new String[] { "json" }, false);
         assertEquals(processingFiles.size(), 1);
         FilePayload payload = JsonUtils.deserialize(FileUtils.readFileToString(processingFiles.iterator().next()), //
                 FilePayload.class);
