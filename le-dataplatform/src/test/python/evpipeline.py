@@ -32,7 +32,6 @@ def setupPipeline(metadata, stringColumns, targetColumn):
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
     evModelStep = EVModelStep({})
-    imputationValues = {}
-    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(continuousColumns, imputationValues, targetColumn), evModelStep]
+    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(continuousColumns, {}, [], [], [], targetColumn), evModelStep]
     pipeline = Pipeline(steps)
     return pipeline

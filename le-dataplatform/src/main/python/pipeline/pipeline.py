@@ -29,7 +29,6 @@ def setupPipeline(metadata, stringColumns, targetColumn):
     # categoricalColumns refer to the columns that are categorical from the metadata
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
-    imputationValues = {}
-    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(continuousColumns, imputationValues, targetColumn)]
+    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(continuousColumns, {}, [], [], [], targetColumn)]
     pipeline = Pipeline(steps)
     return pipeline
