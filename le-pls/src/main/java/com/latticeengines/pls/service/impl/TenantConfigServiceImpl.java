@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
 import com.latticeengines.domain.exposed.pls.TenantDeployment;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
 import com.latticeengines.pls.service.ModelSummaryService;

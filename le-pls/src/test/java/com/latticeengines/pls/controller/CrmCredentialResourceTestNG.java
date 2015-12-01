@@ -12,7 +12,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
 
 public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "deployment" }, enabled = false)
