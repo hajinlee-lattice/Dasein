@@ -99,7 +99,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
         case "float":
             return "FLOAT";
         case "string":
-            return "VARCHAR(255)";
+            return "VARCHAR(MAX)";
         case "long":
             return "BIGINT";
         case "boolean":

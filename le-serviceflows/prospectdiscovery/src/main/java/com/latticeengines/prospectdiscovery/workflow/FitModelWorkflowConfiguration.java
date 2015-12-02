@@ -1,5 +1,8 @@
 package com.latticeengines.prospectdiscovery.workflow;
 
+import java.util.List;
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -54,13 +57,8 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder stoplistAvroFile(String stoplistAvroFile) {
-            dataFlow.setStoplistAvroFile(stoplistAvroFile);
-            return this;
-        }
-
-        public Builder stoplistPath(String stoplistPath) {
-            dataFlow.setStoplistPath(stoplistPath);
+        public Builder extraSourceFileToPathMap(Map<String, String> extraSourceFileToPathMap) {
+            dataFlow.setExtraSourceFileToPathMap(extraSourceFileToPathMap);
             return this;
         }
 
@@ -96,6 +94,11 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+            return this;
+        }
+
+        public Builder eventColumns(List<String> eventColumns) {
+            model.setEventColumns(eventColumns);
             return this;
         }
 

@@ -69,14 +69,18 @@ public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
             tables.add(t);
         }
 
-        Table stopList = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, configuration.getStoplistAvroFile(),
-                null, null);
-        stopList.getExtracts().get(0).setPath(configuration.getStoplistPath());
-        // register the stop list table
-        url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
-                configuration.getCustomerSpace(), stopList.getName());
-        restTemplate.postForLocation(url, stopList);
-        tables.add(stopList);
+        for (String extraSourceFile : configuration.getExtraSourceFileToPathMap().keySet()) {
+            String extraSourcePath = configuration.getExtraSourceFileToPathMap().get(extraSourceFile);
+            Table extraSourceTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, extraSourceFile,
+                    null, null);
+            extraSourceTable.getExtracts().get(0).setPath(extraSourcePath);
+            // register the extra source table
+            url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
+                    configuration.getCustomerSpace(), extraSourceTable.getName());
+            restTemplate.postForLocation(url, extraSourceTable);
+            tables.add(extraSourceTable);
+        }
+
         return tables;
     }
 

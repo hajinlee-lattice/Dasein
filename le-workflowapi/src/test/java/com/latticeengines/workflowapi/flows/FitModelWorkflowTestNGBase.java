@@ -5,8 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.stream.XMLInputFactory;
@@ -85,15 +88,23 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
     }
 
     protected FitModelWorkflowConfiguration generateFitModelWorkflowConfiguration() {
+        List<String> eventCols = new ArrayList<>();
+        eventCols.add("Event_IsWon");
+        eventCols.add("Event_StageIsClosedWon");
+        eventCols.add("Event_IsClosed");
+        eventCols.add("Event_OpportunityCreated");
+
+        Map<String, String> extraSources = new LinkedHashMap<>();
+        extraSources.put("/tmp/Stoplist/Stoplist.avro", "/tmp/Stoplist/*.avro");
+
         FitModelWorkflowConfiguration workflowConfig = new FitModelWorkflowConfiguration.Builder()
         .customer(DEMO_CUSTOMERSPACE.toString()) //
         .microServiceHostPort(microServiceHostPort) //
         .sourceType(SourceType.SALESFORCE) //
         .flowName("PrematchFlow") //
         .dataflowBeanName("preMatchEventTableFlow") //
+        .extraSourceFileToPathMap(extraSources) //
         .targetPath("/PrematchFlowRun") //
-        .stoplistAvroFile("/tmp/Stoplist/Stoplist.avro") //
-        .stoplistPath("/tmp/Stoplist/*.avro") //
         .matchDbUrl("jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE") //
         .matchDbUser("DLTransfer") //
         .matchDbPassword("free&NSE") //
@@ -101,6 +112,7 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
         .matchClient("PD130") //
         .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+        .eventColumns(eventCols) //
         .build();
 
         return workflowConfig;

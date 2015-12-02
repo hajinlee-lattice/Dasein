@@ -36,15 +36,9 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
     private void profileAndModel(Table eventTable) throws Exception {
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
 
-        String[] eventCols = new String[] { //
-                "Event_IsWon", //
-                "Event_StageIsClosedWon", //
-                "Event_IsClosed", //
-                "Event_OpportunityCreated" //
-        };
         List<String> excludedColumns = new ArrayList<>();
 
-        for (String eventCol : eventCols) {
+        for (String eventCol : configuration.getEventColumns()) {
             excludedColumns.add(eventCol);
         }
 
@@ -58,7 +52,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         excludedColumns.toArray(excludeList);
         bldr = bldr.profileExcludeList(excludeList);
 
-        for (String eventCol : eventCols) {
+        for (String eventCol : configuration.getEventColumns()) {
             bldr = bldr.targets(eventCol) //
                     .metadataTable("EventTable-" + eventCol) //
                     .keyColumn("Id") //
