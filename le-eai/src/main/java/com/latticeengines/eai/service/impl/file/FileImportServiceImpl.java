@@ -38,8 +38,8 @@ public class FileImportServiceImpl extends ImportService {
 
     @Override
     public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext context) {
-        context.setProperty(ImportProperty.DATAFILEDIR, //
-                srcImportConfig.getProperties().get(ImportProperty.DATAFILEDIR));
+        context.setProperty(ImportProperty.HDFSFILE, //
+                srcImportConfig.getProperties().get(ImportProperty.HDFSFILE));
         context.setProperty(ImportProperty.METADATAFILE, //
                 srcImportConfig.getProperties().get(ImportProperty.METADATAFILE));
         context.setProperty(ImportProperty.FILEURLPROPERTIES, //

@@ -8,14 +8,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -35,6 +38,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
+    
+    @Autowired
+    private Configuration yarnConfiguration;
 
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
@@ -46,12 +52,35 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
+        DbCreds creds = getCreds(ctx);
+        Properties props = getProperties(ctx, table);
+        
+        try {
+            ApplicationId appId = sqoopSyncJobService.importData(table.getName(), //
+                    ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
+                    creds, //
+                    LedpQueueAssigner.getPropDataQueueNameForSubmission(), //
+                    ctx.getProperty(ImportProperty.CUSTOMER, String.class), //
+                    Arrays.<String> asList(new String[] { table.getAttributes().get(0).getName() }), //
+                    null, //
+                    1, //
+                    props);
+            ctx.setProperty(ImportProperty.APPID, appId);
+        } finally {
+            FileUtils.deleteQuietly(new File(table.getName() + ".csv"));
+            FileUtils.deleteQuietly(new File("." + table.getName() + ".csv.crc"));
+        }
+    }
+    
+    private DbCreds getCreds(ImportContext ctx) {
         String url = createJdbcUrl(ctx);
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver);
-        DbCreds creds = new DbCreds(builder);
-
+        return new DbCreds(builder);
+    }
+    
+    private Properties getProperties(ImportContext ctx, Table table) {
         List<String> types = new ArrayList<>();
         for (Attribute attr : table.getAttributes()) {
             types.add(attr.getPhysicalDataType());
@@ -60,17 +89,28 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         Properties props = new Properties();
         props.put("columnTypes", StringUtils.join(types, ","));
         props.put("yarn.mr.hdfs.class.path", "/app/eai/lib");
+        
+        String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
+        String fileName = createLocalFileForClassGeneration(hdfsFileToImport);
+        table.setName(fileName);
+        props.put("yarn.mr.hdfs.resources", String.format("%s#%s.csv", hdfsFileToImport, fileName));
 
-        ApplicationId appId = sqoopSyncJobService.importData(table.getName(), //
-                ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
-                creds, //
-                LedpQueueAssigner.getPropDataQueueNameForSubmission(), //
-                ctx.getProperty(ImportProperty.CUSTOMER, String.class), //
-                Arrays.<String> asList(new String[] { table.getAttributes().get(0).getName() }), //
-                null, //
-                1, //
-                props);
-        ctx.setProperty(ImportProperty.APPID, appId);
+        return props;
+    }
+    
+    private String createLocalFileForClassGeneration(String hdfsFileToImport) {
+        try {
+            String[] tokens = hdfsFileToImport.split("/");
+            String[] fileNameTokens = tokens[tokens.length-1].split("\\.");
+            String fileName = fileNameTokens[fileNameTokens.length-2] + //
+                    "-" + UUID.randomUUID();
+            fileName = fileName.replaceAll("-", "_");
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsFileToImport, //
+                    fileName + ".csv");
+            return fileName;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18068, e, new String[] { hdfsFileToImport });
+        }
     }
 
     @Override
@@ -115,8 +155,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @SuppressWarnings("unchecked")
     protected String createJdbcUrl(ImportContext ctx) {
-        String dataFileDirPath = ctx.getProperty(ImportProperty.DATAFILEDIR, String.class);
-        String url = String.format("jdbc:relique:csv:%s", dataFileDirPath);
+        String url = String.format("jdbc:relique:csv:%s", "./");
 
         String serializedMap = ctx.getProperty(ImportProperty.FILEURLPROPERTIES, String.class);
         Map<String, String> fileUrlProperties = JsonUtils.deserialize(serializedMap, HashMap.class);

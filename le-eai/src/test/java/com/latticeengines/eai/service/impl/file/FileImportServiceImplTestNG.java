@@ -10,18 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.relique.jdbc.csv.CsvDriver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import reactor.util.UUIDUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -41,19 +37,24 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
     
-    @Value("${eai.test.upload.mnt.dir}")
-    private String mountedDir;
+    private URL metadataUrl;
     
-    private File destDir = null;
+    private URL dataUrl;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/sourceFiles");
+        HdfsUtils.mkdir(yarnConfiguration, "/tmp/sourceFiles");
+        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
+        metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1Metadata.json");
     }
     
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
-        FileUtils.deleteDirectory(destDir);
+        //HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
+        //HdfsUtils.rmdir(yarnConfiguration, "/tmp/sourceFiles");
     }
 
     @Test(groups = "functional", enabled = true)
@@ -61,26 +62,11 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         ImportContext ctx = new ImportContext(yarnConfiguration);
         ctx.setProperty(ImportProperty.TARGETPATH, "/tmp/dataFromFile/file1");
         ctx.setProperty(ImportProperty.CUSTOMER, "testcustomer");
-
-        URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1.csv");
-        destDir = new File(mountedDir +"/" + UUIDUtils.create().toString());
-        if (!destDir.exists()) {
-            destDir.mkdir();
-        }
-        File srcFile = new File(dataUrl.getPath());
-        FileUtils.copyFileToDirectory(srcFile, destDir);
-        URL metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1Metadata.json");
+        
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
-        Table file = createFile(destDir, "file1");
         fileImportConfig.setSourceType(SourceType.FILE);
-        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { file }));
-        Map<String, String> props = new HashMap<>();
-        props.put(ImportProperty.DATAFILEDIR, destDir.getAbsolutePath());
-        props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
-        Map<String, String> urlProperties = new HashMap<>();
-        urlProperties.put(CsvDriver.DATE_FORMAT, "MM-DD-YYYY");
-        props.put(ImportProperty.FILEURLPROPERTIES, JsonUtils.serialize(urlProperties));
-        fileImportConfig.setProperties(props);
+        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { createFile(new File(dataUrl.getPath()).getParentFile(), "file1") }));
+        fileImportConfig.setProperties(getProperties());
 
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
         fileImportConfig.setTables(Arrays.<Table> asList(tables.get(0)));
@@ -94,5 +80,15 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
                 ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
                 4);
     }
-
+    
+    private Map<String, String> getProperties() {
+        Map<String, String> props = new HashMap<>();
+        props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
+        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/file1.csv");
+        Map<String, String> urlProperties = new HashMap<>();
+        urlProperties.put(CsvDriver.DATE_FORMAT, "MM-DD-YYYY");
+        props.put(ImportProperty.FILEURLPROPERTIES, JsonUtils.serialize(urlProperties));
+        return props;
+    }
+    
 }
