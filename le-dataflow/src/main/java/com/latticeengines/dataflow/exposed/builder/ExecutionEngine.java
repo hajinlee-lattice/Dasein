@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import cascading.flow.FlowConnector;
-
 import com.latticeengines.dataflow.exposed.builder.engine.MapReduceExecutionEngine;
 import com.latticeengines.dataflow.exposed.builder.engine.TezExecutionEngine;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+
+import cascading.flow.FlowConnector;
 
 public abstract class ExecutionEngine {
 

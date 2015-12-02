@@ -2,12 +2,12 @@ package com.latticeengines.dataflow.exposed.builder.engine;
 
 import java.util.Properties;
 
+import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowRuntimeProps;
 import cascading.flow.hadoop.HadoopFlowConnector;
-
-import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 public class MapReduceExecutionEngine extends ExecutionEngine {
 

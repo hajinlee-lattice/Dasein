@@ -9,8 +9,6 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 
-import cascading.tuple.Fields;
-
 public abstract class PivotSnapshotDataFlowBuilder extends CascadingDataFlowBuilder {
 
     protected static final String SNAPSHOT_SOURCE = "SnapshotSource";

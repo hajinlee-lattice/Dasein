@@ -2,6 +2,8 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 
 import java.beans.ConstructorProperties;
 
+import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+
 import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
@@ -12,8 +14,6 @@ import cascading.operation.FilterCall;
 import cascading.operation.OperationCall;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
-
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 
 public class LimitOperation extends Operation {
     public LimitOperation(String prior, int count, CascadingDataFlowBuilder builder) {

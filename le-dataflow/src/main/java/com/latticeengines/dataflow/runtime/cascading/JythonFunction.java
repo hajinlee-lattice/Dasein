@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.latticeengines.common.exposed.jython.JythonEvaluator;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -13,8 +15,6 @@ import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-
-import com.latticeengines.common.exposed.jython.JythonEvaluator;
 
 @SuppressWarnings("rawtypes")
 public class JythonFunction extends BaseOperation implements Function {

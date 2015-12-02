@@ -11,6 +11,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
@@ -29,10 +33,6 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
-
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class AvroRead {
 

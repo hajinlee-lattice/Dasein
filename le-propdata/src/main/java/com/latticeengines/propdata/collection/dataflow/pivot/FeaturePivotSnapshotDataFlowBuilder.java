@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.collection.dataflow.pivot;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +11,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.dataflow.runtime.cascading.PivotBuffer;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.propdata.collection.dataflow.merge.MergeRawSnapshotDataFlowBuilder;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 
 import cascading.tuple.Fields;
 

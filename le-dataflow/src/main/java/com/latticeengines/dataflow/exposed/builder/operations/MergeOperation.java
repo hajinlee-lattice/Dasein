@@ -1,11 +1,11 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
+import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+
 import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
-
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 
 public class MergeOperation extends Operation {
 

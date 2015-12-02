@@ -3,10 +3,10 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.util.AbstractMap;
 import java.util.List;
 
-import cascading.pipe.Pipe;
-
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+
+import cascading.pipe.Pipe;
 
 public abstract class Operation {
     protected CascadingDataFlowBuilder builder;
