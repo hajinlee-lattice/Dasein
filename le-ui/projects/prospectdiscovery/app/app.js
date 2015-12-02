@@ -21,13 +21,23 @@ var mainApp = angular.module('mainApp', [
     'controllers.navigation.subnav'
 ])
 
+.run(['$rootScope', '$state', function($rootScope, $state) {
+    $rootScope.$on('$stateChangeStart', function(evt, to, params) {
+      if (to.redirectTo) {
+        evt.preventDefault();
+        $state.go(to.redirectTo, params)
+      }
+    });
+}])
+
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise('/');
 
     $stateProvider
         .state('home', {
             url: '/',
-            templateUrl: './app/main/MainView.html'
+            //templateUrl: './app/main/MainView.html'
+            redirectTo: 'markets.dashboard'
         })
         .state('fingerprints', {
             url: '/fingerprints',
@@ -35,6 +45,7 @@ var mainApp = angular.module('mainApp', [
         })
         .state('markets', {
             url: '/markets',
+            redirectTo: 'markets.dashboard',
             template:
                 '<div ui-view="navigation"></div>' +
                 '<div ui-view="summary"></div>' +
@@ -82,10 +93,39 @@ var mainApp = angular.module('mainApp', [
                 }
             }
         })
+        .state('markets.prospect_schedule', {
+            url: '/prospect_schedule',
+            views: {
+                "navigation": {
+                    templateUrl: './app/navigation/links/LinksView.html'
+                },
+                "summary": {
+                    template: ''
+                },
+                "main": {
+                    templateUrl: './app/markets/prospect/ScheduleView.html'
+                }
+            }
+        })
+        .state('markets.prospect_list', {
+            url: '/prospect_list',
+            views: {
+                "navigation": {
+                    templateUrl: './app/navigation/links/LinksView.html'
+                },
+                "summary": {
+                    template: ''
+                },
+                "main": {
+                    templateUrl: './app/markets/prospect/ListView.html'
+                }
+            }
+        })
         .state('jobs', {
             url: '/jobs',
-            template:'<div ui-view="summary"></div><div ui-view="main"></div>'
-            
+            template:
+                '<div ui-view="summary"></div>' +
+                '<div ui-view="main"></div>'
         })
         .state('jobs.status', {
             url: '/status',
@@ -93,14 +133,13 @@ var mainApp = angular.module('mainApp', [
                 "summary@jobs": {
                     templateUrl: './app/navigation/table/TableView.html'
                 },
-                "main": {
+                "main@jobs": {
                     templateUrl: './app/jobs/status/StatusView.html'
                 }
             }
         })
         .state('jobs.import', {
             url: '/import'
-            
         })
         .state('jobs.import.credentials', {
             url: '/credentials',

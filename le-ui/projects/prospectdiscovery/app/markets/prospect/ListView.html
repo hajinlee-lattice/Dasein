@@ -1,0 +1,80 @@
+<div class="container">
+<div class="row target-market-header">
+    <h4 class="columns three">Prospect List</h4>
+    
+    <div class="columns nine">
+        <select class="button white-button markets-header-select">
+            <option>All Target Markets</option>
+        </select>
+        <a ui-sref="markets.builder">
+            <button type="button" class="button white-button fa fa-sort-amount-desc"></button>
+        </a>
+    </div>
+</div>
+<div class="row target-market-prospect-table">
+    <div class="columns twelve">
+        <table class="responsive">
+            <tbody>
+                <tr>
+                    <th>Name</th>
+                    <th>File</th>
+                    <th>Type</th>
+                    <th>Delivery Method</th>
+                    <th>Prospects</th>
+                </tr>
+                <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
+                    <td>{{targetMarket.name}}</td>
+                    <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
+                    <td>{{targetMarket.targetMarketStatistics.expectedLift}}</td>
+                    <td>{{targetMarket.targetMarketStatistics.numCompanies}}</td>
+                    <td>${{targetMarket.targetMarketStatistics.marketRevenue}}</td>
+                </tr>
+
+                <!-- fake data for testing purposes -->
+                <tr>
+                    <td>Jan 1st, 2015</td>
+                    <td><i class="fa fa-download"></i>Global Target Market</td>
+                    <td>Contact</td>
+                    <td>File</td>
+                    <td>3,000</td>
+                </tr>
+                <tr>
+                    <td>Jan 1st, 2015</td>
+                    <td><i class="fa fa-download"></i>Global Target Market</td>
+                    <td>Contact</td>
+                    <td>SalesForce</td>
+                    <td>3,000</td>
+                </tr>
+                <tr>
+                    <td>Jan 1st, 2015</td>
+                    <td><i class="fa fa-download"></i>Global Target Market</td>
+                    <td>Contact</td>
+                    <td>File</td>
+                    <td>3,000</td>
+                </tr>
+                <tr>
+                    <td>Jan 1st, 2015</td>
+                    <td><i class="fa fa-download"></i>Global Target Market</td>
+                    <td>Contact</td>
+                    <td>File</td>
+                    <td>3,000</td>
+                </tr>
+                <tr>
+                    <td>Jan 1st, 2015</td>
+                    <td><i class="fa fa-download"></i>Global Target Market</td>
+                    <td>Contact</td>
+                    <td>File</td>
+                    <td>3,000</td>
+                </tr>
+                <tr>
+                    <td>Jan 1st, 2015</td>
+                    <td><i class="fa fa-download"></i>Global Target Market</td>
+                    <td>Contact</td>
+                    <td>File</td>
+                    <td>3,000</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>

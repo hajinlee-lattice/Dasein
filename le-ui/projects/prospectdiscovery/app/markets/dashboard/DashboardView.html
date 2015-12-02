@@ -1,5 +1,136 @@
-<div data-ng-controller="DashboardCtrl" class="container">
-    <div class="page-header">
-      <h1>ROI Dashboard</h1>
+<div class="container">
+    <div class="row target-market-header">
+        <h4 class="columns six">Most Recent New Opportunities</h4>
+        
+        <div class="columns six">
+            <select class="button white-button markets-header-select">
+                <option>Last Quarter</option>
+            </select>
+            <select class="button white-button markets-header-select">
+                <option>All Target Markets</option>
+            </select>
+            <a ui-sref="markets.builder">
+                <button type="button" class="button white-button fa fa-sort-amount-desc"></button>
+            </a>
+        </div>
+    </div>
+    <div class="row target-market-prospect-table">
+        <div class="columns twelve">
+            <table class="responsive">
+                <tbody>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Opportunity Name</th>
+                        <th>Stage</th>
+                        <th>Date</th>
+                    </tr>
+                    <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
+                        <td>{{targetMarket.name}}</td>
+                        <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.expectedLift}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.numCompanies}}</td>
+                    </tr>
+
+                    <!-- fake data for testing purposes -->
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Stage</td>
+                        <td>Date</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Stage</td>
+                        <td>Date</td>                        
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Stage</td>
+                        <td>Date</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Stage</td>
+                        <td>Date</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Stage</td>
+                        <td>Date</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Stage</td>
+                        <td>Date</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row target-market-header">
+        <h4 class="columns twelve">Most Recent New Opportunities</h4>
+    </div>
+    <div class="row target-market-prospect-table">
+        <div class="columns twelve">
+            <table class="responsive">
+                <tbody>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Opportunity Name</th>
+                        <th>Stage</th>
+                        <th>Date</th>
+                    </tr>
+                    <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
+                        <td>{{targetMarket.name}}</td>
+                        <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.expectedLift}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.numCompanies}}</td>
+                    </tr>
+
+                    <!-- fake data for testing purposes -->
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Amount</td>
+                        <td>Date</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Amount</td>
+                        <td>Date</td>                        
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Amount</td>
+                        <td>Date</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Amount</td>
+                        <td>Date</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Amount</td>
+                        <td>Date</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Name</td>
+                        <td>Opportunity Name</td>
+                        <td>Amount</td>
+                        <td>Date</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

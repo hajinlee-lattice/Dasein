@@ -1,26 +1,33 @@
 <div data-ng-controller="MarketsCtrl" class="container">
-<div class="page-header">
-  <h1>Target Markets</h1>
-    <a ui-sref="markets.builder">
-        <button type="button" class="btn btn-primary" style="float:right;margin-top:-3.5em;">Target Market Builder</button>
-    </a>
+<div class="row target-market-header">
+    <h4 class="columns two">Markets</h4>
+    
+    <div class="columns ten">
+        <a ui-sref="markets.builder">
+            <button type="button" class="button white-button fa fa-filter"></button>
+        </a>
+        <a ui-sref="markets.builder">
+            <button type="button" class="button white-button fa fa-sort-amount-desc"></button>
+        </a>
+        <a ui-sref="markets.builder">
+            <button type="button" class="button orange-button">Target Market Builder</button>
+        </a>
+    </div>
 </div>
-<div class="target-market-table">
-    <div class="data-table wrapper">
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Created</th>
-                <th>Expected Lift</th>
-                <th>Companies</th>
-                <th>Market Revenue</th>
-                <th>Account</th>
-                <th>Customers</th>
-                <th>Revenue</th>
-            </tr>
-            </thead>
+<div class="row target-market-table">
+    <div class="columns twelve">
+        <table class="responsive">
             <tbody>
+                <tr>
+                    <th>Name</th>
+                    <th>Created</th>
+                    <th>Expected Lift</th>
+                    <th>Companies</th>
+                    <th>Market Revenue</th>
+                    <th>Account</th>
+                    <th>Customers</th>
+                    <th>Revenue</th>
+                </tr>
                 <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
                     <td>{{targetMarket.name}}</td>
                     <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
@@ -86,4 +93,5 @@
             </tbody>
         </table>
     </div>
+</div>
 </div>

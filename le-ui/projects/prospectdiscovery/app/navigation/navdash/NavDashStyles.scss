@@ -3,7 +3,7 @@
     color: #fff;
     height: 150px;
 
-    .container.row {
+    .container .row {
         height: 100%;
         display: flex;
 
@@ -12,24 +12,14 @@
             padding: 1em;
             margin-top: 1em;
             margin-bottom: 1em;
+            text-align: center;
 
-            h3 {
-                color: #fff;
-                padding: 0.25em 0 1em;
-                font-weight: normal;
-                text-align: center;
+            div.graph {
+                height: 60px;
             }
 
-            li {
+            span {
 
-
-                p {
-                    display: inline-block;
-                }
-
-                span {
-                    float: right;
-                }
             }
         }
     }
