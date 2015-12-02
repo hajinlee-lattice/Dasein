@@ -131,7 +131,7 @@ public class TenantServiceImpl implements TenantService {
             @Override
             public void run() {
                 orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
-                        orchestratorProps);
+                        orchestratorProps, prodAndExternalAminInfo);
             }
         });
 

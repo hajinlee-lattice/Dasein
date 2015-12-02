@@ -26,8 +26,7 @@ public class EmailServiceImpl implements EmailService {
     private EmailSettings emailsettings;
 
     @Override
-    public void sendSimpleEmail(String subject, Object content, String contentType,
-                                     Collection<String> recipients) {
+    public void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients) {
         EmailUtils.sendSimpleEmail(subject, content, contentType, recipients, emailsettings);
     }
 
@@ -40,12 +39,12 @@ public class EmailServiceImpl implements EmailService {
     public void sendPlsNewInternalUserEmail(Tenant tenant, User user, String password, String hostport) {
         try {
 
-            EmailTemplateBuilder builder =
-                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_NEW_INTERNAL_USER);
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_NEW_INTERNAL_USER);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
-            builder.replaceToken("{{tenantmsg}}",
+            builder.replaceToken(
+                    "{{tenantmsg}}",
                     String.format("You have been added to the <strong>%s</strong> Lead Prioritization Tenant.",
                             tenant.getName()));
             builder.replaceToken("{{username}}", user.getUsername());
@@ -63,8 +62,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPlsNewExternalUserEmail(User user, String password, String hostport) {
         try {
-            EmailTemplateBuilder builder =
-                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_NEW_EXTERNAL_USER);
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_NEW_EXTERNAL_USER);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -76,6 +74,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
+            log.info("Sending email to " + user.getUsername());
             sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp, Collections.singleton(user.getEmail()));
         } catch (Exception e) {
             log.error("Failed to send new external user email to " + user.getEmail() + " " + e.getMessage());
@@ -86,12 +85,12 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPlsExistingInternalUserEmail(Tenant tenant, User user, String hostport) {
         try {
-            EmailTemplateBuilder builder =
-                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_EXISTING_INTERNAL_USER);
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_EXISTING_INTERNAL_USER);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
-            builder.replaceToken("{{tenantname}}",tenant.getName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
@@ -105,12 +104,12 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPlsExistingExternalUserEmail(Tenant tenant, User user, String hostport) {
         try {
-            EmailTemplateBuilder builder =
-                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_EXISTING_EXTERNAL_USER);
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_EXISTING_EXTERNAL_USER);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
-            builder.replaceToken("{{tenantname}}",tenant.getName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
@@ -124,8 +123,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPlsForgetPasswordEmail(User user, String password, String hostport) {
         try {
-            EmailTemplateBuilder builder =
-                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_FORGET_PASSWORD);
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_FORGET_PASSWORD);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());

@@ -12,19 +12,25 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.EmailSettings;
 
 public class EmailUtils {
-    private EmailUtils() { }
+    private static final Logger log = LoggerFactory.getLogger(EmailUtils.class);
+
+    private EmailUtils() {
+    }
 
     public static void sendSimpleEmail(String subject, Object content, String contentType,
-                                Collection<String> recipients, EmailSettings emailSettings) {
+            Collection<String> recipients, EmailSettings emailSettings) {
         try {
             Message message = new MimeMessage(applySettings(emailSettings));
             message.setFrom(new InternetAddress(emailSettings.getFrom()));
-            for (String recipient: recipients) {
+            for (String recipient : recipients) {
                 message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
             }
             message.setSubject(subject);
@@ -37,16 +43,18 @@ public class EmailUtils {
     }
 
     public static void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
-                                   EmailSettings emailSettings) {
+            EmailSettings emailSettings) {
         try {
+            log.info("Begining to send multi part email now.");
             Message message = new MimeMessage(applySettings(emailSettings));
             message.setFrom(new InternetAddress(emailSettings.getFrom()));
-            for (String recipient: recipients) {
+            for (String recipient : recipients) {
                 message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
             }
             message.setSubject(subject);
             message.setContent(content);
 
+            log.info("Begining to send multi part email before calling transport.");
             Transport.send(message);
         } catch (MessagingException e) {
             throw new LedpException(LedpCode.LEDP_19000, "Error sending a multipart email", e);
@@ -69,12 +77,11 @@ public class EmailUtils {
             props.put("mail.smtp.auth", "true");
         }
 
-        Session session = Session.getInstance(props,
-                new javax.mail.Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(emailSettings.getUsername(), emailSettings.getPassword());
-                    }
-                });
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(emailSettings.getUsername(), emailSettings.getPassword());
+            }
+        });
 
         return session;
     }

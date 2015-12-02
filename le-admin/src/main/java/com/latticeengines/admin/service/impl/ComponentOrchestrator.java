@@ -1,5 +1,6 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,8 +12,10 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
@@ -21,12 +24,25 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.security.exposed.service.EmailService;
+import com.latticeengines.security.exposed.service.UserService;
 
 @Component
 public class ComponentOrchestrator {
 
     @Autowired
     List<LatticeComponent> components;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private UserService userService;
+
+    @Value("security.pls.app.hostport=http://localhost:8080")
+    private String apiHostPort;
 
     private static Map<String, LatticeComponent> componentMap;
     private static BatonService batonService = new BatonServiceImpl();
@@ -91,15 +107,68 @@ public class ComponentOrchestrator {
     }
 
     public void orchestrate(String contractId, String tenantId, String spaceId,
-            Map<String, Map<String, String>> properties) {
+            Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo) {
         OrchestratorVisitor visitor = new OrchestratorVisitor(contractId, tenantId, spaceId, properties);
         TopologicalTraverse traverser = new TopologicalTraverse();
         traverser.traverse(components, visitor);
 
-        // TODO
-        // add while loop to check the status of each component from zookeeper,
-        // and use email service to send out email.
-        // set up certain timeout, say 24 hours.
+        postInstall(visitor, prodAndExternalAminInfo, tenantId);
+    }
+
+    void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo, String tenantId) {
+        boolean installSuccess = checkComponentsBootStrapStatus(visitor);
+        emailService(installSuccess, prodAndExternalAminInfo, tenantId);
+    }
+
+    private boolean checkComponentsBootStrapStatus(OrchestratorVisitor visitor) {
+        if (visitor.failed.size() == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    private void emailService(boolean allComponentsSuccessful, ProductAndExternalAdminInfo prodAndExternalAminInfo,
+            String tenantId) {
+        List<String> newEmailList = new ArrayList<String>();
+        List<String> existingEmailList = new ArrayList<String>();
+        if (allComponentsSuccessful) {
+            if (prodAndExternalAminInfo.products.contains(LatticeProduct.PD)) {
+                Map<String, Boolean> externalEmailMap = prodAndExternalAminInfo.getExternalEmailMap();
+                Set<String> externalEmails = externalEmailMap.keySet();
+                for (String externalEmail : externalEmails) {
+                    if (!externalEmailMap.get(externalEmail)) {
+                        newEmailList.add(externalEmail);
+                    } else {
+                        existingEmailList.add(externalEmail);
+                    }
+                }
+            }
+        }
+        sendExistingEmails(existingEmailList, tenantId);
+        sendNewEmails(newEmailList);
+    }
+
+    private void sendNewEmails(List<String> emailList) {
+        for (String email : emailList) {
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                log.error(String.format("User: %s cannot be found", email));
+            }
+            emailService.sendPlsNewExternalUserEmail(user, "admin", apiHostPort);
+        }
+    }
+
+    private void sendExistingEmails(List<String> emailList, String tenantId) {
+        for (String email : emailList) {
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                log.error(String.format("User: %s cannot be found", email));
+            }
+            log.info("tenantId is " + tenantId);
+            Tenant tenant = new Tenant();
+            tenant.setName(tenantId);
+            emailService.sendPlsExistingExternalUserEmail(tenant, user, apiHostPort);
+        }
     }
 
     private static class OrchestratorVisitor implements Visitor {
@@ -124,22 +193,23 @@ public class ComponentOrchestrator {
             if (o instanceof LatticeComponent) {
                 LatticeComponent component = (LatticeComponent) o;
 
-                log.info("Attempt to install component " + component.getName());
-
-                List<? extends LatticeComponent> dependencies = component.getChildren();
-                for (LatticeComponent dependency : dependencies) {
-                    if (this.failed.contains(dependency.getName())
-                            || !(batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId,
-                                    dependency.getName())).state.equals(BootstrapState.State.OK)) {
-                        // dependency not satisfied
-                        failed.add(component.getName());
-                        return;
-                    }
-                }
-
-                log.info("Dependencies for installing component " + component.getName() + " are all satisfied.");
-
                 if (properties.containsKey(component.getName())) {
+
+                    log.info("Attempt to install component " + component.getName());
+
+                    List<? extends LatticeComponent> dependencies = component.getChildren();
+                    for (LatticeComponent dependency : dependencies) {
+                        if (this.failed.contains(dependency.getName())
+                                || !(batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId,
+                                        dependency.getName())).state.equals(BootstrapState.State.OK)) {
+                            // dependency not satisfied
+                            failed.add(component.getName());
+                            return;
+                        }
+                    }
+
+                    log.info("Dependencies for installing component " + component.getName() + " are all satisfied.");
+
                     Map<String, String> bootstrapProperties = properties.get(component.getName());
                     batonService.bootstrap(contractId, tenantId, spaceId, component.getName(), bootstrapProperties);
 

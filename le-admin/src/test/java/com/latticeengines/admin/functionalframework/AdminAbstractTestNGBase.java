@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
@@ -249,5 +251,19 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     protected void undefineFeatureFlagByRestCall(String flagId) {
         String url = getRestHostPort() + "/admin/featureflags/" + flagId;
         restTemplate.delete(url);
+    }
+
+    public ProductAndExternalAdminInfo generateProductAndExternalAdminInfo() {
+        ProductAndExternalAdminInfo prodAndExternalAminInfo = new ProductAndExternalAdminInfo();
+        List<LatticeProduct> products = new ArrayList<LatticeProduct>();
+        products.add(LatticeProduct.LPA);
+        products.add(LatticeProduct.PD);
+        Map<String, Boolean> externalEmailMap = new HashMap<String, Boolean>();
+        externalEmailMap.put("michael@fake.com", false);
+        externalEmailMap.put("jane@fake.com", false);
+        externalEmailMap.put("lucas@fake.com", true);
+        prodAndExternalAminInfo.setExternalEmailMap(externalEmailMap);
+        prodAndExternalAminInfo.setProducts(products);
+        return prodAndExternalAminInfo;
     }
 }

@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -166,7 +167,9 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
             properties.put(component.getName(), sDir.flatten());
         }
 
-        orchestrator.orchestrate(TestContractId, TestTenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties);
+        ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateProductAndExternalAdminInfo();
+        orchestrator.orchestrate(TestContractId, TestTenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
+                prodAndExternalAminInfo);
 
         ExecutorService executorService = Executors.newFixedThreadPool(orchestrator.components.size());
         Map<String, Future<BootstrapState>> states = new HashMap<>();
@@ -208,5 +211,4 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
             }
         }
     }
-
 }
