@@ -8,7 +8,5 @@ public enum ArchiveProgressStatus {
     TRANSFORMING,
     TRANSFORMED,
     UPLOADING,
-    UPLOADED,
-    PIVOTING,
-    PIVOTED
+    UPLOADED
 }

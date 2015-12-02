@@ -817,6 +817,18 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(groupby, pm.getValue());
     }
 
+    protected String addGroupByAndBuffer(String prior, FieldList groupByFields, Buffer buffer, List<FieldMetadata> fms) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        if (pm == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
+        }
+        Pipe groupby = null;
+        groupby = new GroupBy(pm.getKey(), new Fields(groupByFields.getFields()));
+        groupby = new Every(groupby, buffer, Fields.RESULTS);
+
+        return register(groupby, fms);
+    }
+
     protected String addGroupByAndBuffer(String prior, FieldList groupByFields, FieldList sortFields, Buffer buffer,
             boolean descending) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);

@@ -81,13 +81,6 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase<Progress extends Ar
         context = transformRawData(context);
         exportToDB(context);
 
-        testAutoDetermineDateRange();
-
-        context = createNewProgress(dates[1], dates[2]);
-        context = importFromDB(context);
-        context = transformRawData(context);
-        exportToDB(context);
-
         cleanupProgressTables();
     }
 

@@ -4,14 +4,15 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,25 +37,31 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class AbstractArchiveService<Progress extends ArchiveProgressBase> implements ArchiveService {
 
-    private Logger log;
+    private Log log;
     private ArchiveProgressEntityMgr<Progress> entityMgr;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     abstract ArchiveProgressEntityMgr<Progress> getProgressEntityMgr();
 
-    abstract Logger getLogger();
+    abstract Log getLogger();
 
     abstract String getSourceTableName();
 
     abstract String getDestTableName();
 
+    abstract String getPivotedTableName();
+
     abstract String getMergeDataFlowQualifier();
+
+    abstract String getPivotDataFlowQualifier();
 
     abstract String getSrcTableSplitColumn();
 
     abstract String getDestTableSplitColumn();
 
     abstract String getSrcTableTimestampColumn();
+
+    abstract void createIndicesForTables();
 
     @Autowired
     private SqoopSyncJobService sqoopService;
@@ -175,19 +182,7 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         LoggingUtils.logInfo(log, progress, "Start transforming ...");
 
         // merge raw and snapshot, then output most recent records
-        if (progress.getRowsDownloadedToHdfs() > 0 && !transformRawDataToMostRecent(progress)) {
-            response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
-            return response;
-        }
-
-        // copy result to snapshot
-        try {
-            String snapshotDir = hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSourceTableName()).toString();
-            String srcDir = workflowDirsInHdfs() + "/Output";
-            HdfsUtils.rmdir(yarnConfiguration, snapshotDir);
-            HdfsUtils.copyFiles(yarnConfiguration, srcDir, snapshotDir);
-        } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to copy data to Snapshot folder.", e);
+        if (progress.getRowsDownloadedToHdfs() > 0 && !transformRawDataInternal(progress)) {
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
         }
@@ -220,54 +215,28 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             return refreshContextAndDBToStatus(response, progress, ArchiveProgressStatus.UPLOADED);
         }
 
-        String sourceDir = workflowDirsInHdfs() + "/Output";
+        // upload source
+        String sourceDir = snapshotDirInHdfs();
         String destTable = getDestTableName();
-
-        // cleanup stage table
-        String stageTableName = destTable + "_stage";
-        String bakTableName = destTable + "_bak";
-        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        String customer = getSqoopCustomerName(progress);
-
-        try {
-            LoggingUtils.logInfo(log, progress, "Create a clean stage table.");
-            dropJdbcTableIfExists(stageTableName);
-            jdbcTemplateDest.execute("SELECT TOP 0 * INTO " + stageTableName + " FROM " + destTable);
-
-            long uploadStartTime = System.currentTimeMillis();
-            DbCreds.Builder builder = new DbCreds.Builder();
-            builder.host(destHost).port(destPort).db(destDb).user(dbUser).password(dbPassword);
-            DbCreds creds = new DbCreds(builder);
-            sqoopService.exportDataSync(stageTableName, sourceDir, creds, assignedQueue,
-                    customer + "-uploadRawDataExportData", numMappers, null);
-            long rowsUploaded = jdbcTemplateDest.queryForObject("SELECT COUNT(*) FROM " + stageTableName, Long.class);
-            progress.setRowsUploadedToSql(rowsUploaded);
-            LoggingUtils.logInfoWithDuration(log, progress, "Uploaded " + rowsUploaded + " rows to stage table.", uploadStartTime);
-        } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to upload data to DB.", e);
+        if (!uploadAvroToDestTable(progress, sourceDir, destTable)) {
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
-        } finally {
-            FileUtils.deleteQuietly(new File(stageTableName+".java"));
+        }
+
+        // upload pivoted
+        sourceDir = pivotedSnapshotDirInHdfs();
+        destTable = getPivotedTableName();
+        if (!uploadAvroToDestTable(progress, sourceDir, destTable)) {
+            response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
+            return response;
         }
 
         try {
-            LoggingUtils.logInfo(log, progress, "Rename dest table to back up table.");
-            swapTableNamesInDestDB(destTable, bakTableName);
-
-            LoggingUtils.logInfo(log, progress, "Rename stage table to dest table.");
-            swapTableNamesInDestDB(stageTableName, destTable);
+            createIndicesForTables();
         } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to swap stage and dest tables", e);
-
-            LoggingUtils.logInfo(log, progress, "Restore backup table to dest table.");
-            swapTableNamesInDestDB(bakTableName, destTable);
-
+            updateStatusToFailed(progress, "Failed to create indices fo tables", e);
             response.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
             return response;
-        } finally {
-            LoggingUtils.logInfo(log, progress, "Drop backup table");
-            dropJdbcTableIfExists(bakTableName);
         }
 
         // finish
@@ -360,6 +329,14 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         return incrementalDataDir.toString();
     }
 
+    private String snapshotDirInHdfs() {
+        return hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSourceTableName()).toString();
+    }
+
+    private String pivotedSnapshotDirInHdfs() {
+        return hdfsPathBuilder.constructRawDataFlowSnapshotDir(getPivotedTableName()).toString();
+    }
+
     private String constructWhereClauseByDates(String timestampColumn, Date startDate, Date endDate) {
         return String.format("\"%s > '%s' AND %s <= '%s'\"", timestampColumn, dateFormat.format(startDate),
                 timestampColumn, dateFormat.format(endDate));
@@ -397,25 +374,28 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
                 + " WHERE " + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
         progress.setRowsDownloadedToHdfs(rowsDownloaded);
 
-        String avscFile = getSourceTableName() + ".avsc";
-        String schemaDir = hdfsPathBuilder.constructSchemaDir(getSourceTableName()).toString();
-        schemaDir = schemaDir.endsWith("/") ? schemaDir : schemaDir + "/";
+        return true;
+    }
+
+    private void extractSchema(String sourceName) throws Exception {
+        String avscFile = sourceName + ".avsc";
+        String schemaDir = hdfsPathBuilder.constructSchemaDir(sourceName).toString();
         String avscPath =  schemaDir + avscFile;
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, avscPath);
-            }
-            String avroPath = targetDir + "/part-m-00000.avro";
+        if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
+            HdfsUtils.rmdir(yarnConfiguration, avscPath);
+        }
+
+        String avroDir = hdfsPathBuilder.constructRawDataFlowSnapshotDir(sourceName).toString();
+        List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
+        if (files.size() > 0) {
+            String avroPath = files.get(0);
             if (HdfsUtils.fileExists(yarnConfiguration, avroPath)) {
                 Schema schema = AvroUtils.getSchema(yarnConfiguration, new org.apache.hadoop.fs.Path(avroPath));
                 HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
             }
-        } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to upload avsc.", e);
-            return false;
+        } else {
+            throw new IllegalStateException("No avro file found at " + avroDir);
         }
-
-        return true;
     }
 
     private boolean importSnapshotDestData(Progress progress) {
@@ -466,40 +446,137 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
         return true;
     }
 
-    private boolean transformRawDataToMostRecent(Progress progress) {
-        // prepare target dir in hdfs
-        String targetDir = workflowDirsInHdfs();
+    private boolean transformRawDataInternal(Progress progress) {
+        // dedupe
+        String targetDir = mergeWorkflowDirInHdfs();
         if (!cleanupHdfsDir(targetDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
             return false;
         }
-
-        // execute data flow
         try {
-            transformRawDataInternal(progress);
+            collectionDataFlowService.executeMergeRawSnapshotData(
+                    getSourceTableName(),
+                    incrementalDataDirInHdfs(progress),
+                    getMergeDataFlowQualifier()
+            );
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform raw data.", e);
+            return false;
+        }
+
+        // copy deduped result to snapshot
+        try {
+            String snapshotDir = snapshotDirInHdfs();
+            String srcDir = mergeWorkflowDirInHdfs() + "/Output";
+            HdfsUtils.rmdir(yarnConfiguration, snapshotDir);
+            HdfsUtils.copyFiles(yarnConfiguration, srcDir, snapshotDir);
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to copy deduped data to Snapshot folder.", e);
+            return false;
+        }
+
+        // extract schema
+        try {
+            extractSchema(getSourceTableName());
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to extract schema of " + getSourceTableName() + " avsc.", e);
+            return false;
+        }
+
+        // pivot
+        targetDir = pivotWorkflowDirInHdfs();
+        if (!cleanupHdfsDir(targetDir, progress)) {
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
+            return false;
+        }
+        try {
+            collectionDataFlowService.executePivotSnapshotData(
+                    getPivotedTableName(),
+                    snapshotDirInHdfs(),
+                    getPivotDataFlowQualifier()
+            );
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to pivot snapshot data.", e);
+            return false;
+        }
+
+        // copy pivoted result to snapshot
+        try {
+            String snapshotDir = pivotedSnapshotDirInHdfs();
+            String srcDir = pivotWorkflowDirInHdfs() + "/Output";
+            HdfsUtils.rmdir(yarnConfiguration, snapshotDir);
+            HdfsUtils.copyFiles(yarnConfiguration, srcDir, snapshotDir);
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
+            return false;
+        }
+
+        // extract schema
+        try {
+            extractSchema(getPivotedTableName());
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to extract schema of " + getPivotedTableName() + " avsc.", e);
             return false;
         }
 
         return true;
     }
 
-    void transformRawDataInternal(Progress progress) {
-        collectionDataFlowService.executeTransformRawData(
-                getSourceTableName(),
-                incrementalDataDirInHdfs(progress),
-                getMergeDataFlowQualifier()
-        );
-    }
-
-    protected String workflowDirsInHdfs() {
+    protected String mergeWorkflowDirInHdfs() {
         return hdfsPathBuilder.constructWorkFlowDir(getSourceTableName(),
                 CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW).toString();
     }
 
+    protected String pivotWorkflowDirInHdfs() {
+        return hdfsPathBuilder.constructWorkFlowDir(getPivotedTableName(),
+                CollectionDataFlowKeys.PIVOT_SNAPSHOT_FLOW).toString();
+    }
+
     private String getSqoopCustomerName(Progress progress) {
         return entityMgr.getProgressClass().getSimpleName() + "[" + progress.getRootOperationUID() + "]";
+    }
+
+    private boolean uploadAvroToDestTable(Progress progress, String avroDir, String destTable) {
+        String stageTableName = destTable + "_stage";
+        String bakTableName = destTable + "_bak";
+        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        String customer = getSqoopCustomerName(progress);
+
+        try {
+            LoggingUtils.logInfo(log, progress, "Create a clean stage table " + stageTableName);
+            dropJdbcTableIfExists(stageTableName);
+            jdbcTemplateDest.execute("SELECT TOP 0 * INTO " + stageTableName + " FROM " + destTable);
+
+            long uploadStartTime = System.currentTimeMillis();
+            DbCreds.Builder builder = new DbCreds.Builder();
+            builder.host(destHost).port(destPort).db(destDb).user(dbUser).password(dbPassword);
+            DbCreds creds = new DbCreds(builder);
+            sqoopService.exportDataSync(stageTableName, avroDir, creds, assignedQueue,
+                    customer + "-upload-" + destTable, numMappers, null);
+            long rowsUploaded = jdbcTemplateDest.queryForObject("SELECT COUNT(*) FROM " + stageTableName, Long.class);
+            progress.setRowsUploadedToSql(rowsUploaded);
+            LoggingUtils.logInfoWithDuration(log, progress, "Uploaded " + rowsUploaded + " rows to " + stageTableName, uploadStartTime);
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to upload " + destTable + " to DB.", e);
+            return false;
+        } finally {
+            FileUtils.deleteQuietly(new File(stageTableName+".java"));
+        }
+
+        try {
+            swapTableNamesInDestDB(progress, destTable, bakTableName);
+            swapTableNamesInDestDB(progress, stageTableName, destTable);
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to swap stage and dest tables for " + destTable, e);
+            swapTableNamesInDestDB(progress, bakTableName, destTable);
+
+            return false;
+        } finally {
+            LoggingUtils.logInfo(log, progress, "Drop backup table");
+            dropJdbcTableIfExists(bakTableName);
+        }
+
+        return true;
     }
 
     private void dropJdbcTableIfExists(String tableName) {
@@ -507,14 +584,15 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
                 + tableName + "') AND type in (N'U')) DROP TABLE " + tableName);
     }
 
-    private void swapTableNamesInDestDB(String srcTable, String destTable) {
+    private void swapTableNamesInDestDB(Progress progress, String srcTable, String destTable) {
         dropJdbcTableIfExists(destTable);
         jdbcTemplateDest.execute("EXEC sp_rename '" + srcTable + "', '" + destTable + "'");
+        LoggingUtils.logInfo(log, progress, String.format("Rename %s to %s.", srcTable, destTable));
     }
 
 
     private void updateStatusToFailed(Progress progress, String errorMsg, Exception e) {
-        LoggingUtils.logError(log, progress, "Failed to swap stage and dest tables", e);
+        LoggingUtils.logError(log, progress, errorMsg, e);
         progress.setStatusBeforeFailed(progress.getStatus());
         progress.setErrorMessage(errorMsg);
         entityMgr.updateStatus(progress, ArchiveProgressStatus.FAILED);

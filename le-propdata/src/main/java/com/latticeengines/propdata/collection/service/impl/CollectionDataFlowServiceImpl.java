@@ -37,11 +37,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     private String cascadingPlatform;
 
     @Override
-    public void executeTransformRawData(String sourceName, String rawDir, String mergeDataFlow) {
-        executeMergeRawSnapshot(sourceName, rawDir, mergeDataFlow);
-    }
-
-    private void executeMergeRawSnapshot(String sourceName, String rawDir, String dataFlowBuilderQualifier) {
+    public void executeMergeRawSnapshotData(String sourceName, String rawDir, String mergeDataFlowQualifier) {
         String flowName = CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW;
 
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(sourceName, flowName).toString();
@@ -53,8 +49,25 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         DataFlowContext ctx = commonContext(sourceName, sources);
         ctx.setProperty("TARGETPATH", targetPath + "/Output");
-        ctx.setProperty("FLOWNAME", sourceName + "-" + CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW);
-        dataTransformationService.executeNamedTransformation(ctx, dataFlowBuilderQualifier);
+        ctx.setProperty("FLOWNAME", sourceName + "-" + flowName);
+        dataTransformationService.executeNamedTransformation(ctx, mergeDataFlowQualifier);
+    }
+
+
+    @Override
+    public void executePivotSnapshotData(String sourceName, String snapshotDir, String pivotDataFlowQualifier) {
+        String flowName = CollectionDataFlowKeys.PIVOT_SNAPSHOT_FLOW;
+
+        String targetPath = hdfsPathBuilder.constructWorkFlowDir(sourceName, flowName).toString();
+        String snapshotPath = snapshotDir;
+
+        Map<String, String> sources = new HashMap<>();
+        sources.put(CollectionDataFlowKeys.DEST_SNAPSHOT_SOURCE, snapshotPath + "/*.avro");
+
+        DataFlowContext ctx = commonContext(sourceName, sources);
+        ctx.setProperty("TARGETPATH", targetPath + "/Output");
+        ctx.setProperty("FLOWNAME", sourceName + "-" + flowName);
+        dataTransformationService.executeNamedTransformation(ctx, pivotDataFlowQualifier);
     }
 
     private DataFlowContext commonContext(String sourceName, Map<String, String> sources) {

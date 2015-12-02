@@ -6,5 +6,6 @@ final public class CollectionDataFlowKeys {
     public static final String DEST_SNAPSHOT_SOURCE = "DestSnapshotSource";
 
     public static final String MERGE_RAW_SNAPSHOT_FLOW = "MergeRawSnapshotFlow";
+    public static final String PIVOT_SNAPSHOT_FLOW = "PivotSnapshotFlow";
 
 }
