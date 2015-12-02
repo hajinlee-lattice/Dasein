@@ -186,7 +186,7 @@
                                     <location>target/evpipeline.tar.gz</location>
                                 </source>
                                 <source>
-                                    <location>src/test/python/evpipeline.py</location>
+                                    <location>src/main/python/evpipeline/evpipeline.py</location>
                                 </source>
                             </sources>
                         </mapping>

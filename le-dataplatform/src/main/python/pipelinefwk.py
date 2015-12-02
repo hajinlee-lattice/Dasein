@@ -21,27 +21,24 @@ class Pipeline:
     def getPipeline(self):
         return self.pipelineSteps_
      
-    def predict(self, dataFrame, forModeling = True):
+    def predict(self, dataFrame):
         transformed = dataFrame
-         
         for step in self.pipelineSteps_:
-            if not forModeling or not step.isPostScoreStep():
-                transformed = step.transform(transformed)
-             
+            transformed = step.transform(transformed)
         return transformed
  
 class PipelineStep:
-    postScoreStep_ = False
+    modelStep_ = False
     props_ = {}
  
     def __init__(self, props):
         self.props_ = props
      
-    def isPostScoreStep(self):
-        return self.postScoreStep_
+    def isModelStep(self):
+        return self.modelStep_
      
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
+    def setModelStep(self, modelStep):
+        self.modelStep_ = modelStep
          
     def transform(self, dataFrame): pass
  
@@ -63,11 +60,15 @@ class ModelStep(PipelineStep):
     def getModelInputColumns(self):
         return self.modelInputColumns_
      
-    def __init__(self, model, modelInputColumns, scoreColumnName="Score"):
+    def __init__(self, model = None, modelInputColumns = None, scoreColumnName="Score"):
         self.model_ = model
         self.modelInputColumns_ = modelInputColumns
         self.scoreColumnName_ = scoreColumnName
+        self.setModelStep(True)
          
+    def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName = "Score"):
+         return ModelStep(model, modelInputColumns, scoreColumnName)
+    
     def transform(self, dataFrame):
         dataFrame = dataFrame.convert_objects(convert_numeric=True)
         dataFrame.fillna(0, inplace=True)

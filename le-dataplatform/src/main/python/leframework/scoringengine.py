@@ -82,7 +82,7 @@ def getRowToScore(line):
  
 def predict(pipeline, rowDict):
     dataFrame = pd.DataFrame(rowDict)
-    return pipeline.predict(dataFrame, False)
+    return pipeline.predict(dataFrame)
 
 def writeToFile(w, rowId, scoreList):
     w.write(rowId + "," + ",".join(scoreList) + "\n")

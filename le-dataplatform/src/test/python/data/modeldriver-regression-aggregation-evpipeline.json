@@ -340,11 +340,12 @@
     "Product_62_Span"
   ],
   "targets": [
-    "Target"
+    "Event: Target",
+    "Revenue: __Revenue_0"
   ],
   "training_data": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/data/Play_11_TrainingSample_WithRevenue_2/samples/s0Training-evpipeline.avro",
   "test_data": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/data/Play_11_TrainingSample_WithRevenue_2/samples/s0Test-evpipeline.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/rf_train.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/aggregate_train.py",
   "model_data_dir": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/models/Play_11_TrainingSample_WithRevenue_2/fd7037df-1661-4cf2-aeda-1ef64a32f8c5",
   "schema": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/data/Play_11_TrainingSample_WithRevenue_2/schema-evpipeline.avsc",
   "key_columns": [
@@ -352,7 +353,7 @@
   ],
   "data_format": "avro",
   "algorithm_properties": "criterion=gini n_estimators=100 n_jobs=5 min_samples_split=25 min_samples_leaf=10 max_depth=8 bootstrap=True",
-  "provenance_properties": "EVModelColumns=__Revenue_0,__Revenue_1,__Revenue_2,__Revenue_3,__Revenue_4,__Revenue_5,__Revenue_6,__Revenue_7,__Revenue_8,__Revenue_9,__Revenue_10,__Revenue_11 DataLoader_Query=x DataLoader_TenantName=y DataLoader_Instance=z",
+  "provenance_properties": "DataLoader_Query=x DataLoader_TenantName=y DataLoader_Instance=z",
   "data_profile": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/data/Play_11_EventMetadata/profile-evpipeline.avro",
   "config_metadata": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/data/Play_11_EventMetadata",
   "diagnostics_path": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/data/Play_11_EventMetadata/diagnostics.json",

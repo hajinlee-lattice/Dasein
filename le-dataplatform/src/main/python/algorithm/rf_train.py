@@ -17,7 +17,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                                           verbose=3)
         
     with Capture() as capture:
-        captureThread = CaptureMonitor(capture, estimators, runtimeProperties, "building tree.*");
+        captureThread = CaptureMonitor(capture, 0.1, 0.233, estimators, runtimeProperties, "building tree.*");
         try:
             captureThread.start()
             clf.fit(X_train, Y_train)

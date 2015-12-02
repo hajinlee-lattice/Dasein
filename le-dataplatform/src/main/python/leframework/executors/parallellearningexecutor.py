@@ -70,8 +70,9 @@ class ParallelLearningExecutor(Executor):
         globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
 
         # Create the data pipeline
-        pipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
+        pipeline, scoringPipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
         params["pipeline"] = pipeline
+        params["scoringPipeline"] = scoringPipeline
 
         training = pipeline.predict(params["training"])
 

@@ -1,4 +1,5 @@
 import sys
+import pickle
 from trainingtestbase import TrainingTestBase
 
 class ParallelLearningExecutorTest(TrainingTestBase):
@@ -12,6 +13,7 @@ class ParallelLearningExecutorTest(TrainingTestBase):
         traininglauncher = Launcher("model-parallel-driver.json")
         traininglauncher.execute(False)
         # Retrieve the pickled model from local directory
-        modelPickle = open("results/model.p")
-        self.assertTrue(modelPickle is not None, "Model pickle is not generated.")
+        with open("results/model.p", 'rb') as handle:
+            pickleModel = pickle.load(handle)
+            self.assertEqual(len(pickleModel), 1, "Wrong number of classifiers")
         

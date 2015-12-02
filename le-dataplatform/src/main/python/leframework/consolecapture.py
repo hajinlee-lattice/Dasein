@@ -24,7 +24,7 @@ class Capture(list):
         oldStandout.close()
             
 class CaptureMonitor(threading.Thread):
-    def __init__(self, capture, totalStages, runtimeProperties, capturePattern):
+    def __init__(self, capture,  previousWeight, currentWeight, totalStages, runtimeProperties, capturePattern):
         super(CaptureMonitor, self).__init__()
         self.capture = capture
         self.stages = totalStages
@@ -37,7 +37,8 @@ class CaptureMonitor(threading.Thread):
         self.capturePattern = capturePattern
         
         self.stop = threading.Event()
-        
+        self.previousWeight = previousWeight
+        self.currentWeight = currentWeight
     
     def run(self):
         while not self.stop.isSet():
@@ -46,7 +47,7 @@ class CaptureMonitor(threading.Thread):
             captureStages = sum(map(lambda x: 1 if re.match(self.capturePattern, x) else 0, captureList))
             if (captureStages > 0):
                 self.currentStages += captureStages;
-                self.progressReporter.nextStateForPreStateMachine(0.1, 0.233, self.currentStages)
+                self.progressReporter.nextStateForPreStateMachine(self.previousWeight, self.currentWeight, self.currentStages)
             else:
                 self.stop.wait(5)
     

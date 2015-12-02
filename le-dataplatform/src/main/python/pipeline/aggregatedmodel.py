@@ -33,7 +33,6 @@ def _parallel_predict_proba(models, X):
     proba = models[0].predict_proba(X)
     for i in (range(1, len(models))):
         preds = models[i].predict_proba(X)
-        
         if proba.shape == preds.shape:
             proba = np.add(proba, preds)
         else:
@@ -43,27 +42,45 @@ def _parallel_predict_proba(models, X):
 
     return proba
 
+def _parallel_predict_regression(models, X):
+    regression = models[0].predict(X)
+    for i in (range(1, len(models))):
+        preds = models[i].predict(X)
+        if regression.shape == preds.shape:
+            regression = np.add(regression, preds)
+        else:
+            minRows = min(len(regression), len(preds))
+            minCols = min(len(regression[0]), len(preds[0]))
+            regression = np.add(regression[0:minRows, 0:minCols], preds[0:minRows, 0:minCols])
+
+    return regression
+
 class AggregatedModel(object):
+    regressionModels = []
     models = []
     n_models = 0
-
+    
     def __init__(self):
         self.__build_model()
         print "Number of aggregated models:" + str(len(self.models))
+        print "Number of aggregated regression models:" + str(len(self.regressionModels))
 
     def __is_pickle_file(self, filename):
         return (filename.endswith('.p') or filename.endswith('.pkl') or filename.endswith('.pickle')) and ("STP" not in filename)
 
     def __build_model(self):
         self.models = []
+        self.regressionModels = []
         files = os.listdir(os.curdir)
         for f in files:
             if self.__is_pickle_file(f):
                 with open(f, 'rb') as handle:
-                    clf = pickle.load(handle)
-                    self.models.append(clf)
+                    clfs = pickle.load(handle)
+                    self.models.append(clfs[0])
+                    if len(clfs) > 1:
+                        self.regressionModels.append(clfs[1])
 
-            self.n_models = len(self.models)
+        self.n_models = len(self.models)
 
     def __partition_individual_models(self, aggrregatedmodel):
         """Private function used to partition individual models between jobs. To be used to paralellize the aggregated model."""
@@ -101,25 +118,40 @@ class AggregatedModel(object):
                 The class probabilities of the input samples. Classes are
                 ordered by arithmetical order.
         """
+        return self.predict(X, True)
+    
+    def predict_regression(self, X):
+        if (len(self.regressionModels) == 0):
+            return None
+        return self.predict(X, False)
+    
+    def predict(self, X, isPredictPossibility):
+        
         # Check data
         if getattr(X, "dtype", None) != DTYPE or X.ndim != 2:
             X = array2d(X, dtype=DTYPE)
 
         jobs, individual_models, starts = self.__partition_individual_models(self)
 
-        all_proba = Parallel(n_jobs=1)(
-            delayed(_parallel_predict_proba)(self.models[starts[i]:starts[i + 1]], X)
-            for i in range(jobs))
-        
-        # Reduce
-        proba = all_proba[0]
-        for j in range(1, len(all_proba)):
-            if proba.shape == all_proba[j].shape:
-                proba = np.add(proba, all_proba[j])
-            else:
-                minRows = min(len(proba), len(all_proba[j]))
-                minCols = min(len(proba[0]), len(all_proba[j][0]))
-                proba = np.add(proba[0:minRows, 0:minCols], all_proba[j][0:minRows, 0:minCols])
+        if isPredictPossibility:
+            all_values = Parallel(n_jobs=1)(
+                delayed(_parallel_predict_proba)(self.models[starts[i]:starts[i + 1]], X)
+                for i in range(jobs))
+        else:
+            all_values = Parallel(n_jobs=1)(
+                delayed(_parallel_predict_regression)(self.regressionModels[starts[i]:starts[i + 1]], X)
+                for i in range(jobs))
                 
-        proba = np.divide(proba, self.n_models)
-        return proba
+        # Reduce
+        value = all_values[0]
+        for j in range(1, len(all_values)):
+            if value.shape == all_values[j].shape:
+                value = np.add(value, all_values[j])
+            else:
+                minRows = min(len(value), len(all_values[j]))
+                minCols = min(len(value[0]), len(all_values[j][0]))
+                value = np.add(value[0:minRows, 0:minCols], all_values[j][0:minRows, 0:minCols])
+                
+        value = np.divide(value, self.n_models)
+        return value
+    

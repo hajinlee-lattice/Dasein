@@ -6,18 +6,22 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/test/python/data/evpipeline.tar.gz
+            <directory>src/main/python/evpipeline
             </directory>
             <outputDirectory>.</outputDirectory>
             <includes>
                 <include>**/*.py</include>
             </includes>
+            <excludes>
+                <exclude>evpipeline.py</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>src/main/python/pipeline</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
                 <include>aggregatedmodel.py</include>
+                <include>encoder.py</include>
             </includes>
         </fileSet>
     </fileSets>

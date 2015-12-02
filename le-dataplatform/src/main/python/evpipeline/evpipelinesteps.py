@@ -1,4 +1,5 @@
 import encoder
+import math
 import numpy as np
 import pandas as pd
 import random as rd
@@ -9,29 +10,6 @@ from pipelinefwk import get_logger
 from sklearn.decomposition import PCA
  
 logger = get_logger("evpipeline")
-  
-def get_predicted_revenue(row, colList):
-    y = row[colList].as_matrix()
-    y = y[y > 0]
-    rev = 0
-      
-    try:
-        mlag = len(y) / 2
-        if mlag > 2:
-            model = am.AR(y)
-            results = model.fit(maxlag=mlag, ic='aic', trend='c', method='cmle')
-            rev = results.predict().item(-1)
-            if rev < 0.01:
-                rev = 0
-        elif len(y) == 0:
-            rev = 0
-        else:
-            rev = np.mean(y)
-    except:
-        logger.info("No convergence, so using average")
-        rev = np.mean(y)
-        return rev
-    return rev
   
 class EnumeratedColumnTransformStep(PipelineStep):
     enumMappings_ = {}
@@ -260,20 +238,33 @@ class ImputationStep(PipelineStep):
         return valuePair[0] + adjValue  
  
 class EVModelStep(PipelineStep):
-      
-    def __init__(self, props):
-        PipelineStep.__init__(self, props)
-        self.setPostScoreStep(True)
-          
-    def getRequiredProperties(self):
-        return ["provenanceProperties"]
-          
+    model_ = None
+    modelInputColumns_ = []
+    scoreColumnName_ = None
+    revenueColumnName_ = None
+    def __init__(self, model = None, modelInputColumns = None, revenueColumnName = None, scoreColumnName="Score"):
+        self.model_ = model
+        self.modelInputColumns_ = modelInputColumns
+        self.scoreColumnName_ = scoreColumnName
+        self.revenueColumnName_ = revenueColumnName
+        self.setModelStep(True)
+         
+    def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName = "Score"):
+         return EVModelStep(model, modelInputColumns, revenueColumnName, scoreColumnName)
+     
     def transform(self, dataFrame):
-        provenanceProps = self.props_["provenanceProperties"]
-        colList = provenanceProps["EVModelColumns"].split(",")
-        colList = [x for x in colList if x in dataFrame]
-          
+        
         outputFrame = pd.DataFrame(columns=["Score", "ExpectedRevenue"])
-        outputFrame["Score"] = dataFrame["Score"]
-        outputFrame["ExpectedRevenue"] = dataFrame.apply(lambda row: get_predicted_revenue(row, colList), axis=1)
+        outputFrame["Score"] = dataFrame[self.scoreColumnName_]
+        if (self.revenueColumnName_ == None):
+            outputFrame["ExpectedRevenue"] = 0
+            return outputFrame
+        
+        revenueColumn = self.model_.predict_regression(dataFrame[self.modelInputColumns_])  
+        if (revenueColumn != None):      
+            outputFrame["ExpectedRevenue"] = revenueColumn
+            outputFrame["ExpectedRevenue"] = outputFrame["ExpectedRevenue"].apply(lambda x : math.exp(x) - 1.0)
+            outputFrame["ExpectedRevenue"] = outputFrame["ExpectedRevenue"] * outputFrame[self.scoreColumnName_]
+        else:
+            outputFrame["ExpectedRevenue"] = 0
         return outputFrame

@@ -3,14 +3,12 @@ import glob
 import json
 import os
 import pickle
-from sklearn.ensemble import RandomForestClassifier
 import subprocess
 import sys
 import shutil
 
 from testbase import removeFiles
 from trainingtestbase import TrainingTestBase
-
 
 class EVPipelineTrainingTest(TrainingTestBase):
     
@@ -33,11 +31,17 @@ class EVPipelineTrainingTest(TrainingTestBase):
             del sys.modules['launcher']
         from evpipelinesteps import EVModelStep
         from launcher import Launcher
-
+        from aggregatedmodel import AggregatedModel
         
-        traininglauncher = Launcher("modeldriver-evpipeline.json")
+        traininglauncher = Launcher("modeldriver-regression-evpipeline.json")
         traininglauncher.execute(False)
 
+        os.unlink("model.p")
+        os.symlink("./results/model.p", "model.p")
+        
+        traininglauncher = Launcher("modeldriver-regression-aggregation-evpipeline.json")
+        traininglauncher.execute(False)
+        
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
 
@@ -47,21 +51,24 @@ class EVPipelineTrainingTest(TrainingTestBase):
             self.decodeBase64ThenDecompressToFile(entry["Value"], fileName)
             if entry["Key"].find('STPipelineBinary') >= 0:
                 pipeline = pickle.load(open(fileName, "r"))
-                self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
+                self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), AggregatedModel), "clf not instance of AggregatedModel.")
                 self.assertTrue(isinstance(pipeline.getPipeline()[4], EVModelStep), "No post score step.")
+                self.assertIsNotNone(pipeline.getPipeline()[4].model_)
+                self.assertTrue(isinstance(pipeline.getPipeline()[4].model_, AggregatedModel), "clf not instance of AggregatedModel.")
+                self.assertTrue(len(pipeline.getPipeline()[4].model_.models) == 1, "There no models found.")
+                self.assertTrue(len(pipeline.getPipeline()[4].model_.regressionModels) == 1, "There no regression models found.")
+                
             os.rename(fileName, "./results/" + entry["Key"])
 
-        self.createCSVFromModel("modeldriver-evpipeline.json", "./results/scoreinputfile.txt")
+        self.createCSVFromModel("modeldriver-regression-aggregation-evpipeline.json", "./results/scoreinputfile.txt")
         
         with open("./results/scoringengine.py", "w") as scoringScript:
             scoringScript.write(jsonDict["Model"]["Script"])
 
-#         os.environ["PYTHONPATH"] = ''
+        os.environ["PYTHONPATH"] = '/usr/local/lib/python2.7/site-packages:./evpipeline.tar.gz:./lepipeline.tar.gz'
         popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        _, stderr = popen.communicate()
-        self.assertEquals(len(stderr), 0, str(stderr))
-        
+        stdout, stderr = popen.communicate()
+        print stderr
         tokens = csv.reader(open("./results/scoreoutputfile.txt", "r")).next()
         self.assertEquals(len(tokens), 3)
-

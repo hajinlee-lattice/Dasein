@@ -146,8 +146,9 @@ class LearningExecutor(Executor):
         globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
         
         # Create the data pipeline
-        pipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
+        pipeline, scoringPipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
         params["pipeline"] = pipeline
+        params["scoringPipeline"] = scoringPipeline
         training = pipeline.predict(params["training"])
         test = pipeline.predict(params["test"])
         return (training, test, metadata)
@@ -167,10 +168,12 @@ class LearningExecutor(Executor):
             mediator.data = params["test"]
             mediator.schema = params["schema"]
             mediator.pipeline = params["pipeline"]
+            mediator.scoringPipeline = params["scoringPipeline"]
             mediator.depivoted = parser.isDepivoted()
             mediator.provenanceProperties = parser.getProvenanceProperties()
             mediator.algorithmProperties = parser.getAlgorithmProperties()
             mediator.metadata = params["metadata"]
+            mediator.revenueColumn = parser.revenueColumn
             mediator.templateVersion = parser.templateVersion
             mediator.messages = []
             stateMachine.run()

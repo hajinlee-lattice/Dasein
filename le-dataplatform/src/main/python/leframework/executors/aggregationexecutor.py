@@ -145,8 +145,9 @@ class AggregationExecutor(Executor):
         globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
 
         # Create the data pipeline
-        pipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
+        pipeline, scoringPipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
         params["pipeline"] = pipeline
+        params["scoringPipeline"] = scoringPipeline
 
         test = pipeline.predict(test)
         params["allDataPostTransform"] = test
@@ -167,9 +168,11 @@ class AggregationExecutor(Executor):
             mediator.data = params["test"]
             mediator.schema = params["schema"]
             mediator.pipeline = params["pipeline"]
+            mediator.scoringPipeline = params["scoringPipeline"]
             mediator.depivoted = parser.isDepivoted()
             mediator.provenanceProperties = parser.getProvenanceProperties()
             mediator.metadata = params["metadata"]
+            mediator.revenueColumn = parser.revenueColumn
             mediator.templateVersion = parser.templateVersion
             mediator.algorithmProperties = parser.getAlgorithmProperties()
             mediator.messages = []

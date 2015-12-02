@@ -1,9 +1,11 @@
 import encoder
-from pipelinefwk import Pipeline
-from pipelinesteps import ColumnTypeConversionStep
-from pipelinesteps import EnumeratedColumnTransformStep
-from pipelinesteps import ImputationStep
+from evpipelinesteps import ColumnTypeConversionStep
+from evpipelinesteps import EVModelStep
 from pipelinefwk import ModelStep
+from evpipelinesteps import EnumeratedColumnTransformStep
+from evpipelinesteps import ImputationStep
+from pipelinefwk import Pipeline
+ 
  
 def getDecoratedColumns(metadata):
     stringColumns = dict()
@@ -33,7 +35,7 @@ def setupPipeline(metadata, stringColumns, targetColumn):
     steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(continuousColumns, {}, [], [], [], targetColumn)]
     pipeline = Pipeline(steps)
     
-    scoringSteps = steps + [ModelStep()]
+    scoringSteps = steps + [ModelStep(), EVModelStep()]
     scoringPipeline = Pipeline(scoringSteps)
     
     return pipeline, scoringPipeline

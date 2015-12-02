@@ -8,7 +8,6 @@ import pickle
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
-from pipelinefwk import ModelStep
 from pipelinefwk import Pipeline
 
 class ModelGenerator(State, JsonGenBase):
@@ -55,24 +54,15 @@ class ModelGenerator(State, JsonGenBase):
         self.model = model
     
     def __getPipeline(self, mediator):
-        pipeline = mediator.pipeline
-        pipelineSteps = pipeline.getPipeline()
+        scoringPipeline = mediator.scoringPipeline
+        pipelineSteps = scoringPipeline.getPipeline()
         steps = []
-        modelStepAdded = False
         for step in pipelineSteps:
-            if step.isPostScoreStep() and not modelStepAdded:
-                steps.append(ModelStep(mediator.clf, mediator.schema["features"]))
-                modelStepAdded = True
-                
-                for propName in step.getRequiredProperties():
-                    if propName in mediator.__dict__:
-                        step.setProperty(propName, mediator.__dict__[propName])
-                    else:
-                        self.logger.warn("Could not get mediator property %s for %s." % (propName, str(step)))
+            if step.isModelStep():
+                newStep = step.clone(mediator.clf, mediator.schema["features"], mediator.revenueColumn)
+                steps.append(newStep)
+                continue
             steps.append(step)
-
-        if not modelStepAdded:
-            steps.append(ModelStep(mediator.clf, mediator.schema["features"]))
         return Pipeline(steps)
     
     def __compressFile(self, filename):

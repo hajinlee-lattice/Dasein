@@ -42,7 +42,7 @@ class ArgumentParser(object):
 
         self.fields = dataSchema["fields"]
         self.features = self.metadataSchema["features"]
-        (self.target, self.readouts, self.samples, self.templateVersion) = self.extractTargets()
+        (self.target, self.readouts, self.samples, self.revenueColumn, self.templateVersion) = self.extractTargets()
         self.keys = self.metadataSchema["key_columns"]
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
@@ -73,9 +73,10 @@ class ArgumentParser(object):
         lastNameKey = "LastName".lower()
         firstNameKey = "FirstName".lower()
         spamIndicatorKey = "SpamIndicator".lower()
+        revenueKey = "Revenue".lower()
         templateVersionKey = "Template_Version".lower()
 
-        templateVersion = None
+        templateVersion = None; revenueColumn = None
         target = None; readouts = []; samples = dict()
         for sTarget in specifiedTargets:
             pair = sTarget.split(":")
@@ -101,6 +102,9 @@ class ArgumentParser(object):
                 elif key == spamIndicatorKey:
                     if columnExists(value): samples[spamIndicatorKey] = value
                     else: logWarning(value, "spamindicator")
+                elif key == revenueKey:
+                    if columnExists(value): revenueColumn = value
+                    else: logWarning(value, "revenueColumn")
                 elif key == templateVersionKey:
                     templateVersion = value
                 else: logWarning(value, "unspecified")
@@ -110,7 +114,7 @@ class ArgumentParser(object):
                 if columnExists(value): target = value
                 else: logWarning(value, "target")
 
-        return target, readouts, samples, templateVersion
+        return target, readouts, samples, revenueColumn, templateVersion
 
     def __parseProperties(self, name):
         element = {}
@@ -157,7 +161,8 @@ class ArgumentParser(object):
         included = []
         self.stringColNames = set()
 
-        scoringColumns = set(self.features) | set([self.target]) | set(self.keys)
+        scoringColumns = set(self.features) | set([self.target]) | set(self.keys) 
+        scoringColumns |= set([self.revenueColumn]) if self.revenueColumn != None else set()
         nonScoringColumns = set(self.readouts) | set(self.samples.values())
 
         if postProcessClf:
@@ -232,7 +237,7 @@ class ArgumentParser(object):
         schema["samples"] = self.samples
         schema["stringColumns"] = self.stringColNames
         schema["fields"] = { k['name']:k['type'][0] for k in self.fields }
-
+        
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
 
