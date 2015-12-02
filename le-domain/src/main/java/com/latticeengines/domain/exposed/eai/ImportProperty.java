@@ -8,11 +8,11 @@ public class ImportProperty extends BaseProperty {
     public static final String EAICONFIG = "eaiConfig";
     public static final String IMPORTCTX = "importContext";
     public static final String METADATAFILE = "metadataFile";
-    public static final String DATAFILEDIR = "dataFile";
     public static final String PRODUCERTEMPLATE = "producerTemplate";
     public static final String FILEURLPROPERTIES = "fileUrlProperties";
     public static final String EXTRACT_PATH = "extractPaths";
     public static final String LAST_MODIFIED_DATE = "lastModifiedDate";
     public static final String PROCESSED_RECORDS = "processedRecords";
     public static final String METADATAURL = "metadataUrl";
+    public static final String HDFSFILE = "hdfsFile";
 }
