@@ -3,6 +3,7 @@ package com.latticeengines.security.util;
 import java.util.Collection;
 import java.util.Properties;
 
+import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -12,15 +13,15 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.EmailSettings;
 
-public class EmailUtils {
-    private static final Logger log = LoggerFactory.getLogger(EmailUtils.class);
+public final class EmailUtils {
+    private static final Log log = LogFactory.getLog(EmailUtils.class);
 
     private EmailUtils() {
     }
@@ -77,7 +78,7 @@ public class EmailUtils {
             props.put("mail.smtp.auth", "true");
         }
 
-        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+        Session session = Session.getInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(emailSettings.getUsername(), emailSettings.getPassword());
             }
