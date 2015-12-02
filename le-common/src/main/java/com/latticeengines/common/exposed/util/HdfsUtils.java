@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileChecksum;
 import org.apache.hadoop.fs.FileStatus;
@@ -73,6 +75,15 @@ public class HdfsUtils {
                     StreamUtils.copy(is, os);
                     return new String(os.toByteArray());
                 }
+            }
+        }
+    }
+    
+    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath) 
+            throws Exception{
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
+                IOUtils.copy(inputStream, outputStream);
             }
         }
     }
