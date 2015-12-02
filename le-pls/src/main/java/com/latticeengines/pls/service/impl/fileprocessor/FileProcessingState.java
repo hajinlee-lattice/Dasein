@@ -29,5 +29,5 @@ public enum FileProcessingState {
     public FileProcessingState getPriorState() {
         return priorState;
     }
-
+    
 }

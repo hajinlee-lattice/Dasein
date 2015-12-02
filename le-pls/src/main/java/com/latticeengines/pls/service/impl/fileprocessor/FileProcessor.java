@@ -17,7 +17,6 @@ public class FileProcessor extends QuartzJobBean {
 
     private String fileProcessorDir;
     private RestApiProxy restApiProxy;
-    
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -27,7 +26,6 @@ public class FileProcessor extends QuartzJobBean {
             File dir = new File(fileProcessorDir);
             state.execute(dir, props);
         }
-        
     }
 
     public String getFileProcessorDir() {

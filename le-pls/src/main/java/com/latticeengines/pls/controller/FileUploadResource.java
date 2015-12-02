@@ -18,7 +18,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "fileuploads", description = "REST resource for uploading data files")
 @RestController
 @RequestMapping("/fileuploads")
-@PreAuthorize("hasRole('Create_PLS_Models')")
+@PreAuthorize("hasRole('Edit_PLS_Data')")
 public class FileUploadResource {
 
     @Autowired

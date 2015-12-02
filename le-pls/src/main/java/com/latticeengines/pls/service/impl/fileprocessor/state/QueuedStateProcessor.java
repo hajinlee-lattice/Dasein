@@ -25,11 +25,17 @@ public class QueuedStateProcessor extends BaseStateProcessor {
         File dataDir = new File(baseDir.getAbsolutePath() + "/data");
         Collection<File> dataFiles = FileUtils.listFiles(dataDir, new String[] { "csv" }, false);
         Collection<File> queuedFiles = FileUtils.listFiles(stateDir, new String[] { "json" }, false);
+        Collection<File> processingFiles = FileUtils.listFiles(mkdirForState(baseDir, FileProcessingState.PROCESSING), //
+                new String[] { "json" }, false);
         
         Set<String> queuedFilesSet = new HashSet<>();
         
         for (File queuedFile : queuedFiles) {
             queuedFilesSet.add(stripExtension(queuedFile)[1]);
+        }
+        
+        for (File processingFile : processingFiles) {
+            queuedFilesSet.add(stripExtension(processingFile)[1]);
         }
         
         for (File dataFile : dataFiles) {

@@ -3,15 +3,17 @@ package com.latticeengines.pls.service.impl.fileprocessor.state;
 import java.io.File;
 import java.util.Properties;
 
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;
 
 
-public class FailedStateProcessor extends BaseStateProcessor {
+public class FailedStateProcessor extends TerminalStateProcessor {
 
     @Override
     public void processDir(File baseDir, FileProcessingState state, FileProcessingState priorState, Properties properties) {
-        // TODO Auto-generated method stub
-        
+        super.processDir(baseDir, state, priorState, properties, //
+                FinalApplicationStatus.FAILED, FinalApplicationStatus.KILLED);
     }
 
 }

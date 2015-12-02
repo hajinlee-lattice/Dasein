@@ -40,7 +40,7 @@ public class ProcessingStateProcessor extends BaseStateProcessor {
 
         });
 
-        RestApiProxy restApiProxy = (RestApiProxy) properties.get("restApiProxy");
+        RestApiProxy restApiProxy = getRestApiProxy(properties);
         for (File queuedFile : queuedFiles) {
             String[] tenantAndFileName = stripExtension(queuedFile);
             String fileName = tenantAndFileName[1];
