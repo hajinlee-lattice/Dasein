@@ -126,7 +126,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
 
     private Node removePreviouslyGeneratedIntent(Node intent, TargetMarket market, Node existingProspect) {
         // Remove intent generated prospects if they were generated more
-        // than NumDaysBetweenIntentProspectResends days ago.
+        // than NumDaysBetweenIntentProspecResends days ago.
 
         TargetMarketDataFlowConfiguration dataFlowConfiguration = market.getDataFlowConfiguration();
         Integer numDaysBetweenResends = dataFlowConfiguration.get(

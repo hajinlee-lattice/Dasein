@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -37,7 +38,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "TARGET_MARKET")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
+public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, HasApplicationId {
 
     private Long pid;
     private String name;
@@ -55,6 +56,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
     private Integer offset;
     private List<TargetMarketDataFlowOption> rawDataFlowConfiguration = new ArrayList<>();
     private TargetMarketStatistics targetMarketStatistics;
+    private String applicationId;
 
     @Column(name = "NAME", nullable = false)
     @Override
@@ -140,7 +142,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
 
     @Override
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
@@ -275,17 +277,17 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
 
     @JsonProperty
     @JoinColumn(name = "FK_PID", nullable = false)
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @OneToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public TargetMarketStatistics getTargetMarketStatistics() {
         return this.targetMarketStatistics;
     }
-    
+
     @JsonProperty
     public void setTargetMarketStatistics(TargetMarketStatistics targetMarketStatistics) {
         this.targetMarketStatistics = targetMarketStatistics;
     }
-    
+
     @OneToMany(cascade = CascadeType.MERGE, mappedBy = "targetMarket", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<TargetMarketDataFlowOption> getRawDataFlowConfiguration() {
@@ -308,4 +310,14 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId {
         this.rawDataFlowConfiguration = configuration.getBag();
     }
 
+    @Column(name = "APPLICATION_ID", nullable = true)
+    @JsonProperty
+    public String getApplicationId() {
+        return this.applicationId;
+    }
+
+    @JsonProperty
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
 }

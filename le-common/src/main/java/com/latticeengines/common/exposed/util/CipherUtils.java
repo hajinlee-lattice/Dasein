@@ -26,26 +26,38 @@ public class CipherUtils {
     // Required by CBC block-chaining mode
     private static IvParameterSpec ivspec = new IvParameterSpec(new byte[16]);
 
-    public static String encrypt(final String str) throws Exception {
-        Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
-        cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), ivspec);
-        return Base64.encodeBase64String(cipher.doFinal(str.getBytes()));
+    public static String encrypt(final String str) {
+        try {
+            Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
+            cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), ivspec);
+            return Base64.encodeBase64String(cipher.doFinal(str.getBytes()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static String decrypt(final String str) throws Exception {
-        Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
-        cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
-        return new String(cipher.doFinal(Base64.decodeBase64(str)));
+    public static String decrypt(final String str) {
+        try {
+            Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
+            cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
+            return new String(cipher.doFinal(Base64.decodeBase64(str)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * This function is run to set the secret key for both encryption and
      * decryption
      */
-    public static String generateKey() throws Exception {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance(CIPHER_METHOD);
-        keyGenerator.init(128);
-        return Base64.encodeBase64String(keyGenerator.generateKey().getEncoded());
+    public static String generateKey() {
+        try {
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(CIPHER_METHOD);
+            keyGenerator.init(128);
+            return Base64.encodeBase64String(keyGenerator.generateKey().getEncoded());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static SecretKey strToKey(String key) {

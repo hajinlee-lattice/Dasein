@@ -5,6 +5,9 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import org.joda.time.DateTimeZone;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -13,13 +16,19 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
+import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
+@Component
+public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
-    @BeforeClass(groups = { "functional" })
+    @Autowired
+    private RestApiProxy proxy;
+
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         TARGET_MARKET.setName(TEST_TARGET_MARKET_NAME);
         TARGET_MARKET.setCreationTimestampObject(CREATION_DATE);
@@ -54,15 +63,15 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         setupUsers();
         cleanupTargetMarketDB();
     }
-    
-    @BeforeMethod(groups = { "functional" })
+
+    @BeforeMethod(groups = "deployment")
     public void beforeMethod() {
         // using admin session by default
         switchToSuperAdmin();
     }
 
-    @Test(groups = { "functional" })
-    public void postTargetMarket_calledWithTargetMarket_assertAllAttributesArePersisted() {
+    @Test(groups = "deployment", timeOut = 120000, enabled = true)
+    public void create() {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET, TargetMarket.class);
 
         TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
@@ -70,7 +79,8 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
         assertEquals(targetMarket.getDescription(), DESCRIPTION);
-        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(), CREATION_DATE.toDateTime(DateTimeZone.UTC).getDayOfYear());
+        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(),
+                CREATION_DATE.toDateTime(DateTimeZone.UTC).getDayOfYear());
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED);
         assertEquals(targetMarket.getModelId(), MODEL_ID);
         assertEquals(targetMarket.getEventColumnName(), EVENT_COLUMN_NAME);
@@ -91,10 +101,13 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
                 DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS.booleanValue());
         assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount),
                 MAX_PROSPECTS_PER_ACCOUNT.intValue());
+
+        WorkflowStatus status = waitForWorkflowCompletion(targetMarket.getApplicationId());
+        assertEquals(status.getStatus(), BatchStatus.COMPLETED);
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "postTargetMarket_calledWithTargetMarket_assertAllAttributesArePersisted" })
-    public void updateTargetMarket_calledWithParameters_assertTargetMarketUpdated() {
+    @Test(groups = "deployment", dependsOnMethods = "create", enabled = false)
+    public void update() {
         TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
 
         restTemplate.put(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME, TARGET_MARKET);
@@ -106,12 +119,26 @@ public class TargetMarketResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "updateTargetMarket_calledWithParameters_assertTargetMarketUpdated" })
-    public void deleteTargetMarketPosted_calledWithTargetMarketName_assertTargetMarketDeleted() {
+    @Test(groups = "deployment", dependsOnMethods = "update", enabled = false)
+    public void delete() {
         restTemplate.delete(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
 
         TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertNull(targetMarket);
+    }
+
+    private WorkflowStatus waitForWorkflowCompletion(String applicationId) {
+        while (true) {
+            WorkflowStatus status = proxy.getWorkflowStatusFromApplicationId(applicationId);
+            if (!status.getStatus().isRunning()) {
+                return status;
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

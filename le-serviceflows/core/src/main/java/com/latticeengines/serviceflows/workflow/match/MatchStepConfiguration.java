@@ -10,10 +10,6 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotEmptyString
     @NotNull
-    private String flowName;
-
-    @NotEmptyString
-    @NotNull
     private String dbUrl;
 
     @NotEmptyString
@@ -22,7 +18,7 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotEmptyString
     @NotNull
-    private String dbPassword;
+    private String dbPasswordEncrypted;
 
     @NotEmptyString
     @NotNull
@@ -34,16 +30,6 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotNull
     private MatchCommandType matchCommandType;
-
-    @JsonProperty("flow_name")
-    public String getFlowName() {
-        return flowName;
-    }
-
-    @JsonProperty("flow_name")
-    public void setFlowName(String flowName) {
-        this.flowName = flowName;
-    }
 
     @JsonProperty("db_url")
     public String getDbUrl() {
@@ -65,14 +51,14 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         this.dbUser = dbUser;
     }
 
-    @JsonProperty("db_password")
-    public String getDbPassword() {
-        return dbPassword;
+    @JsonProperty("db_password_encrypted")
+    public String getDbPasswordEncrypted() {
+        return dbPasswordEncrypted;
     }
 
-    @JsonProperty("db_password")
-    public void setDbPassword(String dbPassword) {
-        this.dbPassword = dbPassword;
+    @JsonProperty("db_password_encrypted")
+    public void setDbPasswordEncrypted(String dbPassword) {
+        this.dbPasswordEncrypted = dbPassword;
     }
 
     @JsonProperty("dest_tables")

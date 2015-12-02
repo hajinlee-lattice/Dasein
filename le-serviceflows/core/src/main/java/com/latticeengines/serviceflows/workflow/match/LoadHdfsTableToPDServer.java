@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -37,14 +38,14 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
     private AbstractMap.SimpleEntry<Table, DbCreds> loadHdfsTableToPDServer() {
         ExportConfiguration exportConfig = new ExportConfiguration();
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
-                configuration.getCustomerSpace(), configuration.getFlowName());
+                configuration.getCustomerSpace(), "PrematchFlow");
         Table prematchFlowTable = restTemplate.getForObject(url, Table.class);
 
         DbCreds.Builder credsBuilder = new DbCreds.Builder()
                 .dbType("SQLServer") // SQLServer is the only supported match dbtype
                 .jdbcUrl(configuration.getDbUrl()) //
                 .user(configuration.getDbUser()) //
-                .password(configuration.getDbPassword());
+                .password(CipherUtils.decrypt(configuration.getDbPasswordEncrypted()));
         DbCreds creds = new DbCreds(credsBuilder);
 
         createTable(prematchFlowTable, creds);
@@ -88,26 +89,26 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
                 }
             }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_28004, e, new String[] { table.getName() });
+            throw new LedpException(LedpCode.LEDP_28004, e, new String[]{table.getName()});
         }
     }
 
     private String getSQLServerType(String type) {
         switch (type) {
-        case "double":
-            return "FLOAT";
-        case "float":
-            return "FLOAT";
-        case "string":
-            return "VARCHAR(MAX)";
-        case "long":
-            return "BIGINT";
-        case "boolean":
-            return "BIT";
-        case "int":
-            return "INT";
-        default:
-            throw new RuntimeException("Unknown SQL Server type for avro type " + type);
+            case "double":
+                return "FLOAT";
+            case "float":
+                return "FLOAT";
+            case "string":
+                return "VARCHAR(MAX)";
+            case "long":
+                return "BIGINT";
+            case "boolean":
+                return "BIT";
+            case "int":
+                return "INT";
+            default:
+                throw new RuntimeException("Unknown SQL Server type for avro type " + type);
         }
     }
 

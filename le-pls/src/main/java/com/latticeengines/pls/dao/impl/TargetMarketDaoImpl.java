@@ -45,4 +45,16 @@ public class TargetMarketDaoImpl extends BaseDaoImpl<TargetMarket> implements Ta
         return false;
     }
 
+    @Override
+    public TargetMarket findDefaultTargetMarket() {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<TargetMarket> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where IS_DEFAULT = 1", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        List<TargetMarket> targetMarkets = query.list();
+        if (targetMarkets.size() == 0) {
+            return null;
+        }
+        return targetMarkets.get(0);
+    }
 }

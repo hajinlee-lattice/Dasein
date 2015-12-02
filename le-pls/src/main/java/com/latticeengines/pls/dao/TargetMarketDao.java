@@ -19,4 +19,6 @@ public interface TargetMarketDao extends BaseDao<TargetMarket> {
      *    deleted
      */
     boolean deleteTargetMarketByName(String name);
+
+    TargetMarket findDefaultTargetMarket();
 }

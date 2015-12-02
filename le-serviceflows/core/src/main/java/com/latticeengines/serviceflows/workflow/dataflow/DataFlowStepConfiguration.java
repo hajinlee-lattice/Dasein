@@ -1,6 +1,6 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
-import java.util.Map;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
@@ -11,38 +11,10 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotEmptyString
     @NotNull
-    private String flowName;
-
-    @NotEmptyString
-    @NotNull
-    private String dataflowBeanName;
-
-    @NotEmptyString
-    @NotNull
     private String targetPath;
 
     @NotNull
-    private Map<String, String> extraSourceFileToPathMap = null;
-
-    @JsonProperty("flow_name")
-    public String getFlowName() {
-        return flowName;
-    }
-
-    @JsonProperty("flow_name")
-    public void setFlowName(String flowName) {
-        this.flowName = flowName;
-    }
-
-    @JsonProperty("bean_name")
-    public String getDataflowBeanName() {
-        return dataflowBeanName;
-    }
-
-    @JsonProperty("bean_name")
-    public void setDataflowBeanName(String dataflowBeanName) {
-        this.dataflowBeanName = dataflowBeanName;
-    }
+    private List<String> extraSources = null;
 
     @JsonProperty("target_path")
     public String getTargetPath() {
@@ -55,13 +27,12 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     }
 
     @JsonProperty("extra_sources")
-    public Map<String, String> getExtraSourceFileToPathMap() {
-        return extraSourceFileToPathMap;
+    public List<String> getExtraSources() {
+        return extraSources;
     }
 
     @JsonProperty("extra_sources")
-    public void setExtraSourceFileToPathMap(Map<String, String> extraSourceFileToPathMap) {
-        this.extraSourceFileToPathMap = extraSourceFileToPathMap;
+    public void setExtraSources(List<String> extraSources) {
+        this.extraSources = extraSources;
     }
-
 }

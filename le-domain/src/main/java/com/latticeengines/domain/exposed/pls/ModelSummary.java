@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -42,7 +43,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "MODEL_SUMMARY", uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
         @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId {
+public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId {
 
     private String id;
     private String name;
@@ -326,11 +327,15 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @Transient
     @JsonProperty("RawFile")
-    public String getRawFile() { return rawFile; }
+    public String getRawFile() {
+        return rawFile;
+    }
 
     @Transient
     @JsonProperty("RawFile")
-    public void setRawFile(String rawFile) { this.rawFile = rawFile; }
+    public void setRawFile(String rawFile) {
+        this.rawFile = rawFile;
+    }
 
     @JsonProperty("Top10PctLift")
     @Column(name = "TOP_10_PCT_LIFT", nullable = true)

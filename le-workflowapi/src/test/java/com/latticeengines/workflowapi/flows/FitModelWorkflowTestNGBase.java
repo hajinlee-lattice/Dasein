@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +31,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -94,20 +94,18 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         eventCols.add("Event_IsClosed");
         eventCols.add("Event_OpportunityCreated");
 
-        Map<String, String> extraSources = new LinkedHashMap<>();
-        extraSources.put("/tmp/Stoplist/Stoplist.avro", "/tmp/Stoplist/*.avro");
+        List<String> extraSources = new ArrayList<>();
+        extraSources.add("/tmp/Stoplist/*.avro");
 
         FitModelWorkflowConfiguration workflowConfig = new FitModelWorkflowConfiguration.Builder()
         .customer(DEMO_CUSTOMERSPACE.toString()) //
         .microServiceHostPort(microServiceHostPort) //
         .sourceType(SourceType.SALESFORCE) //
-        .flowName("PrematchFlow") //
-        .dataflowBeanName("preMatchEventTableFlow") //
-        .extraSourceFileToPathMap(extraSources) //
+        .extraSources(extraSources) //
         .targetPath("/PrematchFlowRun") //
         .matchDbUrl("jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE") //
         .matchDbUser("DLTransfer") //
-        .matchDbPassword("free&NSE") //
+        .matchDbPasswordEncrypted(CipherUtils.encrypt("free&NSE")) //
         .matchDestTables("DerivedColumns") //
         .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
         .matchClient("PD130") //

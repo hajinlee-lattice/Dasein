@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.pls.service.TargetMarketService;
+import com.latticeengines.pls.util.WorkflowSubmitter;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -25,12 +26,20 @@ public class TargetMarketResource {
     @Autowired
     private TargetMarketService targetMarketService;
 
+    @Autowired
+    private WorkflowSubmitter workflowSubmitter;
+
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a target market")
     @PreAuthorize("hasRole('Create_PLS_TargetMarkets')")
     public void create(@RequestBody TargetMarket targetMarket) {
-        this.targetMarketService.createTargetMarket(targetMarket);
+        if (targetMarketService.getTargetMarketByName(targetMarket.getName()) != null) {
+            throw new RuntimeException(String.format("Target market %s already exists", targetMarket.getName()));
+        }
+
+        targetMarketService.createTargetMarket(targetMarket);
+        workflowSubmitter.submitFitWorkflow(targetMarket);
     }
 
     @RequestMapping(value = "/{targetMarketName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -38,17 +47,21 @@ public class TargetMarketResource {
     @ApiOperation(value = "Delete a target market")
     @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
     public void delete(@PathVariable String targetMarketName) {
-        this.targetMarketService.deleteTargetMarketByName(targetMarketName);
+        targetMarketService.deleteTargetMarketByName(targetMarketName);
     }
 
     @RequestMapping(value = "/{targetMarketName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a target market")
     @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
-    public void update(@PathVariable String targetMarketName,
-            @RequestBody TargetMarket targetMarket) {
-        this.targetMarketService.updateTargetMarketByName(targetMarket,
-                targetMarketName);
+    public void update(@PathVariable String targetMarketName, @RequestBody TargetMarket targetMarket) {
+        TargetMarket existing = targetMarketService.getTargetMarketByName(targetMarket.getName());
+
+        targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
+
+        if (existing != null && !existing.getAccountFilterString().equals(targetMarket.getAccountFilterString())) {
+            workflowSubmitter.submitFitWorkflow(targetMarket);
+        }
     }
 
     @RequestMapping(value = "/{targetMarketName}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -56,12 +69,12 @@ public class TargetMarketResource {
     @ApiOperation(value = "Get a target market by a name")
     @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
     public TargetMarket find(@PathVariable String targetMarketName) {
-        return this.targetMarketService.getTargetMarketByName(targetMarketName);
+        return targetMarketService.getTargetMarketByName(targetMarketName);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     public List<TargetMarket> findAll() {
-        return this.targetMarketService.getAllTargetMarkets();
+        return targetMarketService.getAllTargetMarkets();
     }
 }

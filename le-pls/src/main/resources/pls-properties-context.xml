@@ -27,6 +27,7 @@
                 <value>file:${DB_PROPDIR}/db.properties</value>
                 <value>file:${PLS_PROPDIR}/pls.properties</value>
                 <value>file:${SECURITY_PROPDIR}/security.properties</value>
+                <value>file:${PROPDATA_PROPDIR}/propdata.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

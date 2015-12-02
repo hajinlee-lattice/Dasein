@@ -28,10 +28,10 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
     @Autowired
     TargetMarketDataFlowOptionDao targetMarketDataflowOptionDao;
-    
+
     @Autowired
     TargetMarketStatisticsDao targetMarketStatisticsDao;
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
@@ -47,6 +47,9 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
         if (targetMarketStored != null) {
             throw new RuntimeException(String.format("Target market with name %s already exists",
                     targetMarket.getName()));
+        }
+        if (targetMarket.getIsDefault() && targetMarketDao.findDefaultTargetMarket() != null) {
+            throw new RuntimeException("Only one default market can be created");
         }
         initializeForDatabaseEntry(targetMarket);
 
@@ -100,7 +103,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
             option.setPid(null);
             option.setTargetMarket(targetMarket);
         }
-        
+
     }
 
 }

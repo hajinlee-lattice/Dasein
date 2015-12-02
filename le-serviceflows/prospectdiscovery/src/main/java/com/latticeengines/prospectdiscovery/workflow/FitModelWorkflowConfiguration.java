@@ -1,9 +1,10 @@
 package com.latticeengines.prospectdiscovery.workflow;
 
 import java.util.List;
-import java.util.Map;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
@@ -28,6 +29,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder customer(String customerSpace) {
             microservice.setCustomerSpace(customerSpace);
+            fitModel.setCustomerSpace(CustomerSpace.parse(customerSpace));
             return this;
         }
 
@@ -41,24 +43,18 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder flowName(String flowName) {
-            dataFlow.setFlowName(flowName);
-            match.setFlowName(flowName);
-            return this;
-        }
-
-        public Builder dataflowBeanName(String dataflowBeanName) {
-            dataFlow.setDataflowBeanName(dataflowBeanName);
-            return this;
-        }
-
         public Builder targetPath(String targetPath) {
             dataFlow.setTargetPath(targetPath);
             return this;
         }
 
-        public Builder extraSourceFileToPathMap(Map<String, String> extraSourceFileToPathMap) {
-            dataFlow.setExtraSourceFileToPathMap(extraSourceFileToPathMap);
+        public Builder targetMarket(TargetMarket targetMarket) {
+            // TODO Set target market on post-match flow configuration
+            return this;
+        }
+
+        public Builder extraSources(List<String> extraSources) {
+            dataFlow.setExtraSources(extraSources);
             return this;
         }
 
@@ -72,8 +68,8 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder matchDbPassword(String matchDbPassword) {
-            match.setDbPassword(matchDbPassword);
+        public Builder matchDbPasswordEncrypted(String matchDbPasswordEncrypted) {
+            match.setDbPasswordEncrypted(matchDbPasswordEncrypted);
             return this;
         }
 

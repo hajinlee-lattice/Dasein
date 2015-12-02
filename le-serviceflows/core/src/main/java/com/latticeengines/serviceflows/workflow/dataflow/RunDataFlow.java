@@ -37,9 +37,9 @@ public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
 
     private DataFlowConfiguration setupPreMatchTableDataFlow() {
         DataFlowConfiguration dataFlowConfig = new DataFlowConfiguration();
-        dataFlowConfig.setName(configuration.getFlowName());
+        dataFlowConfig.setName("PrematchFlow");
         dataFlowConfig.setCustomerSpace(CustomerSpace.parse(configuration.getCustomerSpace()));
-        dataFlowConfig.setDataFlowBeanName(configuration.getDataflowBeanName());
+        dataFlowConfig.setDataFlowBeanName("preMatchEventTableFlow");
         dataFlowConfig.setDataSources(createDataFlowSources());
         dataFlowConfig.setTargetPath(configuration.getTargetPath());
         return dataFlowConfig;
@@ -69,11 +69,9 @@ public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
             tables.add(t);
         }
 
-        for (String extraSourceFile : configuration.getExtraSourceFileToPathMap().keySet()) {
-            String extraSourcePath = configuration.getExtraSourceFileToPathMap().get(extraSourceFile);
-            Table extraSourceTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, extraSourceFile,
+        for (String extraSourcePath : configuration.getExtraSources()) {
+            Table extraSourceTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, extraSourcePath,
                     null, null);
-            extraSourceTable.getExtracts().get(0).setPath(extraSourcePath);
             // register the extra source table
             url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                     configuration.getCustomerSpace(), extraSourceTable.getName());
