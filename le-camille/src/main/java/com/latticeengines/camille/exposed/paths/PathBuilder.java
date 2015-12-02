@@ -60,6 +60,10 @@ public final class PathBuilder {
         return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.TABLES);
     }
 
+    public static Path buildDataFilePath(String podId, CustomerSpace space) {
+        return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES);
+    }
+
     public static Path buildCustomerSpacePath(String podId, CustomerSpace space) {
         return buildCustomerSpacePath(podId, space.getContractId(), space.getTenantId(), space.getSpaceId());
     }
