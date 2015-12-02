@@ -77,14 +77,19 @@ class PMMLModelGenerator(State):
                              right_child,
                              recordCount=str(samples))
         else:
-            if isAggregatedModel:
+            positiveReadCount = 0.0
+            if(len(value[0]) > 1):
                 positiveReadCount = value[0,1]
-                totalReadCount = value[0,1] + value[0,0]
+                
+            if isAggregatedModel:
+                totalReadCount = value[0,0] + positiveReadCount
                 predictedScore = str(positiveReadCount / totalReadCount)
                 curNode = E.Node(splitPredicate, score = str(predictedScore), recordCount = str(int(totalReadCount)), positiveReadCount = str(int(positiveReadCount)))
             else:
-                positive = E.ScoreDistribution(value='1', recordCount=str(value[0,1]))
-                negative = E.ScoreDistribution(value='0', recordCount=str(value[0,0]))
+                negative = E.ScoreDistribution(value='0', recordCount=str(value[0,0]))                  
+                positive = E.ScoreDistribution(value='1', recordCount=str(positiveReadCount))
+
+
                 curNode = E.Node(splitPredicate,
                                  positive, 
                                  negative,
