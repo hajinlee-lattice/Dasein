@@ -10,12 +10,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 
 @Entity
 @Table(name = "TARGET_MARKET_DATA_FLOW_OPTION")

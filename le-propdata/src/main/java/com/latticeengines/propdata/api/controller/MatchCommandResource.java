@@ -1,12 +1,6 @@
 package com.latticeengines.propdata.api.controller;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
@@ -35,22 +27,6 @@ public class MatchCommandResource {
     @Autowired
     private MatchCommandService matchCommandService;
 
-    @Value("${propdata.matcher.available.clients}")
-    private String availableClientsNames;
-
-    @Value("${propdata.matcher.default.client}")
-    private String defaultClient;
-
-    private Set<MatchClient> availableClients;
-
-    @PostConstruct
-    private void parseAvailableClients() {
-        availableClients = new HashSet<>();
-        for (String clientName: availableClientsNames.split(",")) {
-            availableClients.add(MatchClient.valueOf(clientName));
-        }
-    }
-
     @RequestMapping(value = "/{commandID}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the status of a match command on the specific client. " +
@@ -58,7 +34,7 @@ public class MatchCommandResource {
             "PD130 should be used only in QA.")
     public MatchStatusResponse getMatchStatus(@PathVariable Long commandID,
                                              @RequestParam(value="matchClient", required = false, defaultValue = "Default") String clientName) {
-        configClientFromRequest(clientName);
+        MatchClientContextHolder.setMatchClient(matchCommandService.getMatchClientByName(clientName));
         MatchCommandStatus status = matchCommandService.getMatchCommandStatus(commandID);
         return new MatchStatusResponse(status);
     }
@@ -70,17 +46,13 @@ public class MatchCommandResource {
             "PD130 should be used only in QA.")
     public Commands createMatchCommand(@RequestBody CreateCommandRequest request,
                                       @RequestParam(value="matchClient", required=false, defaultValue = "Default") String clientName) {
-        configClientFromRequest(clientName);
+        MatchClientContextHolder.setMatchClient(matchCommandService.getMatchClientByName(clientName));
         return matchCommandService.createMatchCommand(request);
     }
 
-    private void configClientFromRequest(String clientName) {
-        if ("Default".equals(clientName)) { clientName = defaultClient; }
-        MatchClient client = MatchClient.valueOf(clientName);
-        if (!availableClients.contains(client)) {
-            throw new LedpException(LedpCode.LEDP_25004, new String[]{clientName});
-        }
-        MatchClientContextHolder.setMatchClient(client);
-    }
+    @RequestMapping(value = "/bestclient", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Return the best matcher client to use.")
+    public MatchClient getBestMatchClient() { return matchCommandService.getBestMatchClient(); }
 
 }

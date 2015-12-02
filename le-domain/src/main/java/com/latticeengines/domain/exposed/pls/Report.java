@@ -1,14 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.security.HasTenant;
-import com.latticeengines.domain.exposed.security.Tenant;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import java.util.Date;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -21,7 +13,17 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.Date;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "REPORT")
