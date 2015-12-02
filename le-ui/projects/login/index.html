@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" id="ng-app" data-ng-app="mainApp">
 <head runat="server">
+    
     <base href="/login/"> 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
@@ -8,45 +9,30 @@
     <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
     <title>Login - Lattice Engines</title>
 
-    <!-- build:template:dist
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.css"/>
-
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.common-bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.dataviz.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.dataviz.bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.mobile.all.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/styles/production_<%= versionString %>.min.css"/>
-    /build -->
-    <!-- build:remove:dist -->
-    <link rel="stylesheet" type="text/css" href="/lib/css/bootstrap.css"/>
-    <link rel="stylesheet" type="text/css" href="/lib/css/jquery.qtip.css"/>
-    <link rel="stylesheet" type="text/css" href="/lib/css/font-awesome.css"/>
-
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.mobile.all.min.css">
-
-    <link href="assets/styles/production.css" rel="stylesheet" type="text/css" />
-    <!-- /build -->
+    <!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="/demo/css/lattice.css">
 
 </head>
 <body data-ng-controller="MainController" class="blue-background">
-<!-- Used for all modals. Be sure to clear HTML before and after using it. -->
-<div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-<div class="content-wrap">
-    <div id="mainView">
-        <div id="mainHeaderView"></div>
-        <div data-ng-view class="container"></div>
-    </div>
-</div>
-<div class="footer" data-ng-show="showFooter">
-    © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
-</div>
+        
+    <div id="outer-wrap">
+    <div id="inner-wrap">
+
+        <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
+        <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
+        <div id="mainView">
+            <div id="mainHeaderView"></div>
+            <div data-ng-view></div>
+        </div>
+
+        <div class="container row footer" data-ng-show="showFooter">
+            <div class="columns four">
+                © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
+            </div>
+        </div>
+
+    </div><!-- End #inner-wrap -->
+    </div><!-- End #outer-wrap -->
 
 <!--
 This div will be added to the DOM if the browser is IE
