@@ -163,8 +163,8 @@ public class PLSComponentManager {
         Credentials creds = new Credentials();
         creds.setUsername(username);
         // creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
-        String passwrod = geneneratePasswordBasedOnUsername(username);
-        creds.setPassword(passwrod);
+        String password = geneneratePasswordBasedOnUsername(username);
+        creds.setPassword(password);
 
         // construct user registration
         UserRegistration uReg = new UserRegistration();
