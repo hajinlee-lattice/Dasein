@@ -69,6 +69,18 @@ public enum GrantedRight implements GrantedAuthority {
             return "Edit_PLS_Jobs";
         }
     }, //
+    VIEW_PLS_DATA {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Data";
+        }
+    }, //
+    EDIT_PLS_DATA {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_Data";
+        }
+    }, //
     VIEW_PLS_TARGETMARKETS {
         @Override
         public String getAuthority() {
