@@ -1,0 +1,1042 @@
+{
+    "CreatedBy": 28,
+    "CreationDate": "/Date(1447925410328-0500)/",
+    "DisplayName": "rulebas",
+    "DomainID": -1,
+    "ExternalID": "rulebas_1447925414024",
+    "InternalID": -2147483648,
+    "IsActive": true,
+    "LastModificationDate": "/Date(1447925410328-0500)/",
+    "LastModifiedBy": 28,
+    "LogicalNotion": "Play",
+    "DirtyColumns": null,
+    "ExtensionData": null,
+    "IsEditTemplate": false,
+    "IsReadOnly": false,
+    "RequiresUpdate": false,
+    "Rights": {
+        "MayCreate": true,
+        "MayEdit": true,
+        "MayExecute": false,
+        "MayView": true
+    },
+    "SynchronizationData": null,
+    "AnalyticsArchitecture": 0,
+    "AverageRevenuePerAccount": null,
+    "AverageRevenuePerAccountCurrencyLookupID": "USD",
+    "AvgCycleLength": 30,
+    "CreatedByName": "Randy Wood",
+    "CurrentProcessDisplayString": "None",
+    "Description": null,
+    "ExcludeFromFilters": false,
+    "ExcludeFromHoldouts": false,
+    "ExpectedConversionRate": null,
+    "HoldoutID": null,
+    "ImageKey": "rulebasedplay",
+    "IsApproved": false,
+    "IsExternal": false,
+    "IsInternal": true,
+    "IsProductPlay": true,
+    "IsRenewalPlay": false,
+    "LastGenerateDate": null,
+    "LastModifiedByName": "Randy Wood",
+    "LastSuccessfulProcessID": "None",
+    "LastUserModificationDate": "/Date(1447442963080-0500)/",
+    "LastUserModifiedByName": "System",
+    "LaunchRuleDisplayString": "Exclude",
+    "LaunchRuleID": 2,
+    "OutputSalesView": true,
+    "PlayFeedbackDislikes": 0,
+    "PlayFeedbackLikes": 0,
+    "PlayGroupsString": "",
+    "PlayTypeDisplayString": "Product",
+    "PlayTypeID": "Product",
+    "PotentialRevenue": null,
+    "ProcessStatusDisplayString": "AVAILABLE",
+    "ProcessStatusID": "AVAILABLE",
+    "Rank": 0,
+    "RenewalOpportunity": null,
+    "ScoreSourceDisplayString": "RuleBased",
+    "ScoreSourceID": "RuleBased",
+    "ScoringMethodDisplayString": "Probability",
+    "ScoringMethodID": "Probability",
+    "Settings": "",
+    "SolutionName": null,
+    "SolutionType": null,
+    "SourceTypeDisplayString": "PlayMaker",
+    "SourceTypeID": "PlayMaker",
+    "StageDisplayString": "Details",
+    "StageID": "Complete",
+    "Status": {
+        "ApprovableReasonString": "",
+        "CombinedModelScoreCurrentStep": null,
+        "CombinedModelScoreCurrentStepDisplayString": null,
+        "CombinedModelScoreError": null,
+        "CombinedModelScoreMaxSteps": null,
+        "CombinedModelScoreStatusDisplayString": "",
+        "CombinedModelScoreStatusID": "None",
+        "DeletableReasonString": "",
+        "IsApprovable": true,
+        "IsDeletable": true,
+        "IsReadOnly": false,
+        "IsUnavailable": false
+    },
+    "TargetCustomerCount": null,
+    "TargetListVersionID": null,
+    "TargetProductDisplayName": null,
+    "TemplateDisplayName": "Rule-Based",
+    "UserRoleDisplayName": "",
+    "UserRoleID": null,
+    "AccountPlayProductListVersion": null,
+    "AutoCalculateEventFilter": true,
+    "AutoCalculateTargetFilter": true,
+    "AutoCalculateTrainingFilter": true,
+    "AvailableSurveyQuestions": [
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Maturity",
+            "DomainID": -1,
+            "ExternalID": "Q003",
+            "InternalID": 3,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": false,
+            "PlayOffset": null,
+            "QueryText": "How would you assess the maturity of {!Account.DisplayName}?",
+            "QuestionOffset": 300,
+            "ResponseInfos": [
+                {
+                    "InternalID": 5,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "{!Account.DisplayName} is not an early adopter of technology."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 6,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Sophisticated technology user focused primarily on benefits."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 7,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Sophisticated technology user focused primarily on ROI."
+                    },
+                    "ResponseCurrencyLookupID": null
+                }
+            ],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "RADIO_BUTTONS"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Objectives",
+            "DomainID": -1,
+            "ExternalID": "Q001",
+            "InternalID": 1,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": false,
+            "PlayOffset": null,
+            "QueryText": "How would you characterize the IT objectives of {!Account.DisplayName}?",
+            "QuestionOffset": 100,
+            "ResponseInfos": [
+                {
+                    "InternalID": 1,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Rolling out applications -- new applications and upgrades and business intelligence."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 2,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Improving infrastructure integrity -- data security and backups and network and system."
+                    },
+                    "ResponseCurrencyLookupID": null
+                }
+            ],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "CHECKBOXES"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Process",
+            "DomainID": -1,
+            "ExternalID": "Q002",
+            "InternalID": 2,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": false,
+            "PlayOffset": null,
+            "QueryText": "Where is {!Account.DisplayName} in the budgeting process?",
+            "QuestionOffset": 200,
+            "ResponseInfos": [
+                {
+                    "InternalID": 3,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Committed budget in place for IT priorities."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 4,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Budget has not yet been committed."
+                    },
+                    "ResponseCurrencyLookupID": null
+                }
+            ],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "DROP_DOWN"
+        }
+    ],
+    "EventSpec": {
+        "BuildTypeID": "DefaultFilter",
+        "EventFilter": {
+            "ContextName": null,
+            "FilterUnions": [
+                {
+                    "Connective": null,
+                    "Discriminator": "Concrete",
+                    "FilterCategory": "TIMES_SERIES",
+                    "FilterTarget": "PRODUCT_PURCHASE",
+                    "LeftMathematicalSide": null,
+                    "LeftTransformation": null,
+                    "LookupID": "",
+                    "Negate": false,
+                    "Relation": "IN_CURRENT_PERIOD",
+                    "RightMathematicalSide": null,
+                    "RightTransformation": null,
+                    "Terms": [],
+                    "Value": "",
+                    "ValueDataType": null,
+                    "Values": null
+                }
+            ]
+        },
+        "IsDefault": true
+    },
+    "ExpireRecommendations": null,
+    "ExplicitSurveyQuestions": [],
+    "GenericString1": null,
+    "GenericString2": null,
+    "GenericString3": null,
+    "GenericString4": null,
+    "GenericString5": null,
+    "GlobalSurveyQuestions": [
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Contact Duration",
+            "DomainID": -1,
+            "ExternalID": "Q010",
+            "InternalID": 10,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "Approximately how many years has your contact been at {!Account.DisplayName}?",
+            "QuestionOffset": 510,
+            "ResponseInfos": [],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "DECIMAL"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "IT Budget Review",
+            "DomainID": -1,
+            "ExternalID": "Q009",
+            "InternalID": 9,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "How many IT budget reviews typically take place at {!Account.DisplayName}?",
+            "QuestionOffset": 530,
+            "ResponseInfos": [],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "INT"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Openness to Emerging Technologies",
+            "DomainID": -1,
+            "ExternalID": "Q005",
+            "InternalID": 5,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "How would you assess {!Account.DisplayName}'s openness to new and emerging technologies?",
+            "QuestionOffset": 350,
+            "ResponseInfos": [
+                {
+                    "InternalID": 11,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Not open at all."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 12,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Somewhat open."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 13,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Very open."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 14,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Seeks new and emerging technologies out."
+                    },
+                    "ResponseCurrencyLookupID": null
+                }
+            ],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "RADIO_BUTTONS"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Client Opinion",
+            "DomainID": -1,
+            "ExternalID": "Q004",
+            "InternalID": 4,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "How would you assess {!Account.DisplayName}'s opinion of your products?",
+            "QuestionOffset": 250,
+            "ResponseInfos": [
+                {
+                    "InternalID": 8,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Unfavorable."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 9,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "No opinion."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 10,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Favorable."
+                    },
+                    "ResponseCurrencyLookupID": null
+                }
+            ],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "RADIO_BUTTONS"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Contact Opinion",
+            "DomainID": -1,
+            "ExternalID": "Q008",
+            "InternalID": 8,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "How would you describe your contact at {!Account.DisplayName}?",
+            "QuestionOffset": 500,
+            "ResponseInfos": [],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "FREE_TEXT"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "IT Spending Control",
+            "DomainID": -1,
+            "ExternalID": "Q006",
+            "InternalID": 6,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "What control does your contact at {!Account.DisplayName} have over IT spending?",
+            "QuestionOffset": 450,
+            "ResponseInfos": [
+                {
+                    "InternalID": 15,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "No control."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 16,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "On controlling group."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 17,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Control with approval needed."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 18,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "Full control."
+                    },
+                    "ResponseCurrencyLookupID": null
+                }
+            ],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "RADIO_BUTTONS"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "IT Budget",
+            "DomainID": -1,
+            "ExternalID": "Q011",
+            "InternalID": 11,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "What is the IT budget at {!Account.DisplayName} for next year?",
+            "QuestionOffset": 520,
+            "ResponseInfos": [],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "MONETARY"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Fiscal Year",
+            "DomainID": -1,
+            "ExternalID": "Q012",
+            "InternalID": 12,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "When does the fiscal year start for {!Account.DisplayName}?",
+            "QuestionOffset": 540,
+            "ResponseInfos": [],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "DATE"
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447443057760-0500)/",
+            "DisplayName": "Contact Frequency",
+            "DomainID": -1,
+            "ExternalID": "Q007",
+            "InternalID": 7,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "SurveyQuestion",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": true,
+                "MayEdit": true,
+                "MayExecute": false,
+                "MayView": true
+            },
+            "SynchronizationData": null,
+            "Category": "None",
+            "DisplayCondition": "[{!RecentlyContacted} = False]",
+            "IsGlobalQuestion": true,
+            "PlayOffset": null,
+            "QueryText": "Why has {!Account.DisplayName} not been contacted recently?",
+            "QuestionOffset": 550,
+            "ResponseInfos": [
+                {
+                    "InternalID": 19,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "It only has {!NumberOpenLeads} open leads."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 20,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "It only has {!NumberLeads} leads of any sort."
+                    },
+                    "ResponseCurrencyLookupID": null
+                },
+                {
+                    "InternalID": 21,
+                    "ResponseContents": {
+                        "DiscriminatorKey": "STRING",
+                        "Offset": null,
+                        "Value": "It is a new account."
+                    },
+                    "ResponseCurrencyLookupID": null
+                }
+            ],
+            "ResponseTypeDisplayString": null,
+            "ResponseTypeKey": "RADIO_BUTTONS"
+        }
+    ],
+    "IsLikelihoodsOverridden": false,
+    "LaunchInErrorState": false,
+    "LaunchScoreSummary": {
+        "LastGenerateDate": null,
+        "PrelaunchBucketSummaries": [],
+        "PrelaunchNetNewCount": 0,
+        "PrelaunchTotal": 0,
+        "PrelaunchTotalPotentialRevenue": null,
+        "PrelaunchWeightedRevenue": null
+    },
+    "LaunchStatus": null,
+    "LiftChartProfile": null,
+    "ModelGenerationWorkflowID": null,
+    "ModelHealth": "Not Available",
+    "ModelOrScoreOutOfDate": true,
+    "PlayFeedback": [],
+    "PlayGroups": [],
+    "PlayWorkflowType": {
+        "CreatedBy": 0,
+        "CreationDate": "/Date(1447442962077-0500)/",
+        "DisplayName": "List",
+        "DomainID": -1,
+        "ExternalID": "ADefault",
+        "InternalID": 1,
+        "IsActive": true,
+        "LastModificationDate": "/Date(1447442962077-0500)/",
+        "LastModifiedBy": 0,
+        "LogicalNotion": "PlayWorkflowType",
+        "DirtyColumns": null,
+        "ExtensionData": null,
+        "IsEditTemplate": false,
+        "IsReadOnly": true,
+        "RequiresUpdate": false,
+        "Rights": {
+            "MayCreate": false,
+            "MayEdit": false,
+            "MayExecute": false,
+            "MayView": false
+        },
+        "SynchronizationData": null,
+        "RemoveAction": "VIEW_PLAY_WORKFLOW_TYPES_SELECTOR_DELETE_ALERT_LABEL"
+    },
+    "PriorityRuleMaps": [
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447925410576-0500)/",
+            "DisplayName": "",
+            "DomainID": -1,
+            "ExternalID": "",
+            "InternalID": 0,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447925410576-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "PlayPriorityRuleMap",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": true,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": false,
+                "MayEdit": false,
+                "MayExecute": false,
+                "MayView": false
+            },
+            "SynchronizationData": null,
+            "IncludeRemaining": false,
+            "PlayID": -2147483648,
+            "PriorityID": 6,
+            "PriorityRuleSpec": {
+                "FilterUnions": [
+                    {
+                        "Discriminator": "Concrete",
+                        "LookupID": "Address1",
+                        "Relation": "CONTAINS",
+                        "Value": "a",
+                        "Negate": false,
+                        "Terms": [],
+                        "Connective": null,
+                        "FilterTarget": "STANDARD",
+                        "LeftTransformation": null,
+                        "RightTransformation": null,
+                        "FilterCategory": "STATIC",
+                        "UniqueID": "FILTER_1447925430921_920"
+                    }
+                ],
+                "ListBuildTypeID": "Builder"
+            }
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447925410578-0500)/",
+            "DisplayName": "",
+            "DomainID": -1,
+            "ExternalID": "",
+            "InternalID": 0,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447925410578-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "PlayPriorityRuleMap",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": true,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": false,
+                "MayEdit": false,
+                "MayExecute": false,
+                "MayView": false
+            },
+            "SynchronizationData": null,
+            "IncludeRemaining": false,
+            "PlayID": -2147483648,
+            "PriorityID": 7,
+            "PriorityRuleSpec": {
+                "FilterUnions": [
+                    {
+                        "Discriminator": "Concrete",
+                        "LookupID": "Address2",
+                        "Relation": "CONTAINS",
+                        "Value": "c",
+                        "Negate": false,
+                        "Terms": [],
+                        "Connective": null,
+                        "FilterTarget": "STANDARD",
+                        "LeftTransformation": null,
+                        "RightTransformation": null,
+                        "FilterCategory": "STATIC",
+                        "UniqueID": "FILTER_1447925440089_921"
+                    }
+                ],
+                "ListBuildTypeID": "Builder"
+            }
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447925410578-0500)/",
+            "DisplayName": "",
+            "DomainID": -1,
+            "ExternalID": "",
+            "InternalID": 0,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447925410578-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "PlayPriorityRuleMap",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": true,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": false,
+                "MayEdit": false,
+                "MayExecute": false,
+                "MayView": false
+            },
+            "SynchronizationData": null,
+            "IncludeRemaining": false,
+            "PlayID": -2147483648,
+            "PriorityID": 8,
+            "PriorityRuleSpec": {
+                "FilterUnions": [
+                    {
+                        "Discriminator": "Concrete",
+                        "LookupID": "Address1",
+                        "Relation": "CONTAINS",
+                        "Value": "d",
+                        "Negate": false,
+                        "Terms": [],
+                        "Connective": null,
+                        "FilterTarget": "STANDARD",
+                        "LeftTransformation": null,
+                        "RightTransformation": null,
+                        "FilterCategory": "STATIC",
+                        "UniqueID": "FILTER_1447925457145_923"
+                    }
+                ],
+                "ListBuildTypeID": "Builder"
+            }
+        },
+        {
+            "CreatedBy": 0,
+            "CreationDate": "/Date(1447925410578-0500)/",
+            "DisplayName": "",
+            "DomainID": -1,
+            "ExternalID": "",
+            "InternalID": 0,
+            "IsActive": true,
+            "LastModificationDate": "/Date(1447925410578-0500)/",
+            "LastModifiedBy": 0,
+            "LogicalNotion": "PlayPriorityRuleMap",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": true,
+            "RequiresUpdate": false,
+            "Rights": {
+                "MayCreate": false,
+                "MayEdit": false,
+                "MayExecute": false,
+                "MayView": false
+            },
+            "SynchronizationData": null,
+            "IncludeRemaining": false,
+            "PlayID": -2147483648,
+            "PriorityID": 9,
+            "PriorityRuleSpec": null
+        }
+    ],
+    "Products": [],
+    "ProductsDisplayConfiguration": "Sales-ProductList",
+    "ProductsString": "",
+    "ROCScore": -1,
+    "RoleMaps": [],
+    "SFDCCampaignID": null,
+    "SFDCLeadSource": null,
+    "SFDCLeadStatusID": null,
+    "TalkingPoints": [
+        {
+            "CreatedBy": 28,
+            "CreationDate": null,
+            "DisplayName": "tempDisplayName",
+            "DomainID": -1,
+            "ExternalID": "TP-rulebas_1447925470071",
+            "InternalID": -2147483648,
+            "IsActive": true,
+            "LastModificationDate": null,
+            "LastModifiedBy": null,
+            "LogicalNotion": "TalkingPoints",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": null,
+            "SynchronizationData": null,
+            "CopyAction": "Copy",
+            "CreatedByDisplayName": "Randy Wood",
+            "Description": null,
+            "DetailsText": "<p>rule base</p>",
+            "HeadingText": "Reasons to Buy",
+            "LastModifiedByDisplayName": null,
+            "LocaleDisplayString": "United States English",
+            "LocaleExternalID": null,
+            "LocaleID": "-1",
+            "Offset": 1,
+            "PlayExternalID": "rulebas_1447925414024",
+            "PlayID": null,
+            "PlayName": null,
+            "SummaryText": null,
+            "AvailableHeadings": [
+                {
+                    "Value": ""
+                },
+                {
+                    "Value": "Competitive Differentiation"
+                },
+                {
+                    "Value": "Dante Talking Point sample"
+                },
+                {
+                    "Value": "Différentiation concurrentielle"
+                },
+                {
+                    "Value": "Just Text in TP"
+                },
+                {
+                    "Value": "Reasons to Buy"
+                },
+                {
+                    "Value": "test"
+                },
+                {
+                    "Value": "Value Proposition"
+                },
+                {
+                    "Value": "With Values in TP"
+                }
+            ],
+            "HeadingPlaceholder": "Section Heading (required)",
+            "initialized": true
+        }
+    ],
+    "TargetListVersion": null,
+    "TargetProductSpec": {
+        "ProductDisplayNames": [],
+        "ProductGroupID": null,
+        "ProductIDs": []
+    },
+    "TargetSpec": {
+        "ContextName": null,
+        "FilterUnions": [],
+        "FileName": null,
+        "ListBuildTypeID": "Builder"
+    },
+    "TrainingSpec": {
+        "BuildTypeID": "CopyTargetFilter",
+        "TrainingFilter": {
+            "ContextName": null,
+            "FilterUnions": []
+        }
+    },
+    "talkingPointsValid": true,
+    "targetFiltersValid": true,
+    "trainingFiltersValid": true,
+    "eventFiltersValid": true,
+    "rulesFiltersValid": true,
+    "CombinedModelScoreErrorLocal": "",
+    "_change": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    ],
+    "Dirty": true
+}

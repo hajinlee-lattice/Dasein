@@ -1,0 +1,28 @@
+what can this project do?finish playmaker end2end process
+details
+1.	configuration part
+a. Dataloader provider configuration,Done by rest
+b. JAMS DB update, Done by pyodbc
+c. Playmaker system configuration, Done by rest
+d. Get OTK,Done by rest
+e. Match tenant account table,Done by pyodbc
+f.  Salesforce app configuration,Done by webdriver(not very stable)
+
+2.	data flow part
+a. Play relates operation e.g. Create,Score,Approve,Launch, Done by rest
+b. Sync data in SFDC,Done by webdriver
+
+NEED ADDED
+more detailed verify points in each points
+SFDC part automation
+
+NOTICE:
+now GUI part use Firefox browser, you need install it first
+install Python,pip
+
+
+USAGE:
+you can run tests\end2endtest.py directly
+Configuration\Properties.py provide all necessary parameters
+PlaysCreationJsonFiles folder contains all type of Plays to create
+steps folder contains all end2end process steps
