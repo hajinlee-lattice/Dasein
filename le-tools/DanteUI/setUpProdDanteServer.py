@@ -19,7 +19,7 @@ def setProperties():
 
     ''' Setting up properties in config.ini file... '''
     logging.info("Setting up properties in config.ini file...")
-    configFile = '.\Dante\config.ini'
+    configFile = '.\DanteUI\config.ini'
     configParser = SafeConfigParser()
     configParser.read(configFile)
     configParser.set('Sales_Force', 'prod_dante_server', args.server)

@@ -26,7 +26,7 @@ def setDanteSFECProperties():
 
     ''' Setting up properties in config.ini file... '''
     logging.info("Setting up properties in config.ini file...")
-    configFile = '.\Dante\config.ini'
+    configFile = '.\DanteUI\config.ini'
     configParser = SafeConfigParser()
     configParser.read(configFile)
     if args.sf_url_login !=None:

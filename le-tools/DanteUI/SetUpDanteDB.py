@@ -21,7 +21,7 @@ def setDanteDBProperties():
 
     ''' Setting up properties in config.ini file... '''
     logging.info("Setting up properties in config.ini file...")
-    configFile = '.\Dante\config.ini'
+    configFile = '.\DanteUI\config.ini'
     configParser = SafeConfigParser()
     configParser.read(configFile)
     configParser.set('Dante_DB', 'Dante_DB_Server', args.server)
