@@ -1,10 +1,15 @@
 package com.latticeengines.admin.tenant.batonadapter.metadata;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -19,6 +24,7 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
 
@@ -30,6 +36,9 @@ public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTes
 
     @Autowired
     private PLSComponentDeploymentTestNG plsComponentTestNG;
+
+    @Value("${admin.metadata.url}")
+    private String metadataUrl;
 
     public void installMetadata() {
         Map<String, Map<String, String>> properties = new HashMap<>();
@@ -46,12 +55,39 @@ public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTes
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException, IOException {
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         installMetadata();
         // verify parent component, for debugging purpose
         BootstrapState state = waitForSuccess(MetadataComponent.componentName);
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
         state = waitForSuccess(getServiceName());
         Assert.assertEquals(state.state, BootstrapState.State.OK);
+        Assert.assertEquals(getImportTables(CustomerSpace.parse(contractId).toString()).size(), 5);
+    }
+
+    public List<Table> getImportTables(String customerSpace) {
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("customerSpace", customerSpace);
+        String[] tableNames = restTemplate.getForObject(metadataUrl + "/customerspaces/{customerSpace}/importtables",
+                String[].class, uriVariables);
+        List<Table> tables = new ArrayList<>();
+        for (String tableName : tableNames) {
+            uriVariables.put("tableName", tableName);
+            Table table = getImportTable(customerSpace, tableName);
+            if (table != null) {
+                tables.add(table);
+            }
+        }
+        return tables;
+    }
+
+    private Table getImportTable(String customerSpace, String tableName) {
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("customerSpace", customerSpace);
+        uriVariables.put("tableName", tableName);
+        Table newTable = restTemplate.getForObject(metadataUrl
+                + "/customerspaces/{customerSpace}/importtables/{tableName}", Table.class, uriVariables);
+        return newTable;
     }
 
     @Override
