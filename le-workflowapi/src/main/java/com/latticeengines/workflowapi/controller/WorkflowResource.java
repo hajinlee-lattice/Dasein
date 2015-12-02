@@ -43,20 +43,32 @@ public class WorkflowResource {
         return new AppSubmission(Arrays.<ApplicationId>asList(new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
     }
 
-    @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
     public String getWorkflowId(@PathVariable String applicationId) {
-        log.info("getWorkflowId for applicationId:" + applicationId);
-        WorkflowExecutionId workflowId = workflowContainerService.getWorkflowId(YarnUtils.appIdFromString(applicationId));
-        return String.valueOf(workflowId.getId());
+        return getWorkflowIdFromAppId(applicationId);
     }
 
-    @RequestMapping(value = "/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/status/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted workflow")
     public WorkflowStatus getWorkflowStatus(@PathVariable String workflowId) {
         return workflowService.getStatus(new WorkflowExecutionId(Long.valueOf(workflowId)));
+    }
+
+    @RequestMapping(value = "/yarnapps/status/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
+    public WorkflowStatus getWorkflowStatusFromApplicationId(@PathVariable String applicationId) {
+        String workflowId = getWorkflowIdFromAppId(applicationId);
+        return workflowService.getStatus(new WorkflowExecutionId(Long.valueOf(workflowId)));
+    }
+
+    private String getWorkflowIdFromAppId(String applicationId) {
+        log.info("getWorkflowId for applicationId:" + applicationId);
+        WorkflowExecutionId workflowId = workflowContainerService.getWorkflowId(YarnUtils.appIdFromString(applicationId));
+        return String.valueOf(workflowId.getId());
     }
 
 }
