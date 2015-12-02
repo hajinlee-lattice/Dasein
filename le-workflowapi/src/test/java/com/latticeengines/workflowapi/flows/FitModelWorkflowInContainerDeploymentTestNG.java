@@ -1,22 +1,18 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertEquals;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflow;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 
-public class FitModelWorkflowDeploymentTestNG extends FitModelWorkflowTestNGBase {
+public class FitModelWorkflowInContainerDeploymentTestNG extends FitModelWorkflowTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(FitModelWorkflowDeploymentTestNG.class);
+    private static final Log log = LogFactory.getLog(FitModelWorkflowInContainerDeploymentTestNG.class);
 
     @Autowired
     private FitModelWorkflow fitModelWorkflow;
@@ -27,13 +23,12 @@ public class FitModelWorkflowDeploymentTestNG extends FitModelWorkflowTestNGBase
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void testWorkflow() throws Exception {
+    public void testWorkflowInContainer() throws Exception {
         FitModelWorkflowConfiguration workflowConfig = generateFitModelWorkflowConfiguration();
 
-        WorkflowExecutionId workflowId = workflowService.start(fitModelWorkflow.name(), workflowConfig);
+        workflowConfig.setContainerConfiguration(fitModelWorkflow.name(), DEMO_CUSTOMERSPACE,
+                "FitModelWorkflowTest_submitWorkflow");
 
-        BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
-        assertEquals(status, BatchStatus.COMPLETED);
+        submitWorkflowAndAssertSuccessfulCompletion(workflowConfig);
     }
-
 }
