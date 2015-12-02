@@ -35,11 +35,9 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/Pods/Default/Contracts/DevelopTestPLSTenant1");
         setUpMarketoEloquaTestEnvironment();
-        switchToSuperAdmin();
     }
-
-    @Test(groups = "functional")
-    public void uploadFile() throws Exception {
+    
+    private SimpleBooleanResponse submitFile() throws Exception {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", new ClassPathResource(PATH));
         HttpHeaders headers = new HttpHeaders();
@@ -49,12 +47,30 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
                 map, headers);
         ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + "/pls/fileuploads?name=file1.csv",
                 HttpMethod.POST, requestEntity, String.class);
-        SimpleBooleanResponse response = JsonUtils.deserialize(result.getBody(), SimpleBooleanResponse.class);
-        assertTrue(response.isSuccess());
+        return JsonUtils.deserialize(result.getBody(), SimpleBooleanResponse.class);
+    }
+    
+
+    @Test(groups = "functional")
+    public void uploadFile() throws Exception {
+        switchToExternalAdmin();
+        assertTrue(submitFile().isSuccess());
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, //
                 "/Pods/Default/Contracts/DevelopTestPLSTenant1/Tenants/DevelopTestPLSTenant1/Spaces/Production/Data/Files/file1.csv");
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
         assertEquals(contents, expectedContents);
+    }
 
+    @Test(groups = "functional")
+    public void uploadFileWithNoAccess() throws Exception {
+        switchToExternalUser();
+        boolean exception = false;
+        try {
+            submitFile().isSuccess();
+        } catch (Exception e) {
+            exception = true;
+            assertEquals(e.getMessage(), "403");
+        }
+        assertTrue(exception, "Exception should have been thrown.");
     }
 }
