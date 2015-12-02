@@ -13,6 +13,8 @@ public class MatchClientSerializer extends JsonSerializer<MatchClient> {
                           SerializerProvider provider) throws IOException {
 
         generator.writeStartObject();
+        generator.writeFieldName("Name");
+        generator.writeString(value.name());
         generator.writeFieldName("Url");
         generator.writeString(String.format("jdbc:sqlserver://%s:%d;databaseName=PropDataMatchDB;",
                 value.getHost(), value.getPort()));

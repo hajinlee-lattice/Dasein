@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.propdata;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize(using = MatchClientSerializer.class)
+@JsonDeserialize(using = MatchClientDeserializer.class)
 public enum MatchClient {
 
     PD126("10.51.15.126", 1433),
