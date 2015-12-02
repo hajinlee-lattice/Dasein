@@ -1,14 +1,16 @@
 package com.latticeengines.pls.controller;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.pls.service.FileUploadService;
@@ -24,11 +26,17 @@ public class FileUploadResource {
     @Autowired
     private FileUploadService fileUploadService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/octet-stream")
+    @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file")
-    public SimpleBooleanResponse uploadFile(@PathVariable String fileName, InputStream fileInputStream) {
-        fileUploadService.uploadFile(fileName, fileInputStream);
+    public SimpleBooleanResponse uploadFile(@RequestParam("name") String name, @RequestParam("file") MultipartFile file) {
+        if (!file.isEmpty()) {
+            try {
+                fileUploadService.uploadFile(name, new ByteArrayInputStream(file.getBytes()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return SimpleBooleanResponse.successResponse();
     }
 
