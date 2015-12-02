@@ -84,7 +84,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
 
         sDir = new SerializableDocumentDirectory(batonService.getDefaultConfiguration(getServiceName()));
         properties.put(getServiceName(), sDir.flatten());
-        ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateProductAndExternalAdminInfo();
+        ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
         orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
                 prodAndExternalAminInfo);
     }

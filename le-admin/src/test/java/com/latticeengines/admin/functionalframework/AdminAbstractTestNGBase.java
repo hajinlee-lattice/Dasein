@@ -253,6 +253,15 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         restTemplate.delete(url);
     }
 
+    public ProductAndExternalAdminInfo generateLPAandEmptyExternalAdminInfo() {
+        ProductAndExternalAdminInfo prodAndExternalAminInfo = new ProductAndExternalAdminInfo();
+        List<LatticeProduct> products = Arrays.asList(LatticeProduct.LPA);
+        Map<String, Boolean> externalEmailMap = new HashMap<String, Boolean>();
+        prodAndExternalAminInfo.setExternalEmailMap(externalEmailMap);
+        prodAndExternalAminInfo.setProducts(products);
+        return prodAndExternalAminInfo;
+    }
+
     public ProductAndExternalAdminInfo generateProductAndExternalAdminInfo() {
         ProductAndExternalAdminInfo prodAndExternalAminInfo = new ProductAndExternalAdminInfo();
         List<LatticeProduct> products = new ArrayList<LatticeProduct>();
