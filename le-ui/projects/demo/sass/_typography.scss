@@ -3,10 +3,15 @@ Base
 ========================================================= */
 $header-color: $onyx;
 
+@font-face {
+	font-family: ProximaNova-Regular;
+	src: url("../fonts/Proxima Nova Fonts/ProximaNova-Regular.otf") format("opentype");
+}
+
 body {
 	color: $gun-metal;
 	font-size: 14px;                                                                                
-	font-family: 'Proxima Nova',Arial,sans-serif;
+	font-family: 'ProximaNova-Regular',Arial,sans-serif;
 	font-weight: normal;
 	line-height: 1.6;
 	@include media(">small") {
@@ -29,10 +34,10 @@ h1 {
         font-size: 200%;
     }
     @include media(">medium") {
-        font-size: 300%;
+        font-size: 250%;
     }
     @include media(">large") {
-        font-size: 400%;
+        font-size: 300%;
     }
 }
 h2 { 
@@ -125,24 +130,6 @@ a.emphasized {
 }
 
 /* 
-Modifiers
-========================================================= */
-.italic { font-style: italic; }
-.bold   { font-weight: 700; }
-.block-margins { margin: 1em 0; }
-
-.success-text {
-	color: $jade;
-}
-.error-text {
-	color: $ruby;
-}
-
-
-
-
-
-/* 
 Lists
 ========================================================= */
 .unordered-list, .ordered-list { 
@@ -153,6 +140,28 @@ Lists
 }
 .ordered-list { 
 	list-style: decimal; 
+}
+
+.blue-summary-list, .gray-summary-list {
+	padding: 20px;
+}
+.blue-summary-list {
+	background: $blue-summary-list;
+	color: $pearl-white;
+}
+	.blue-summary-list .summary-title {
+		color: $pearl-white;
+	}
+.gray-summary-list {
+	background: $palladium;
+	color: $dark-gray;
+}
+
+.summary-title {
+	font-size: 16px;
+	text-transform: uppercase;
+	text-align: center;
+	margin-bottom: 8px;
 }
 
 .summary-list dt {
@@ -191,3 +200,21 @@ Lists
 
 
 
+
+/* 
+Badges
+========================================================= */
+.badge {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    background-color: #777;
+    border-radius: 10px;
+}

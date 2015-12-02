@@ -6,7 +6,23 @@ html {
   box-sizing: inherit;
 }
 
-/* Text and Element Shifts */
+
+
+.italic { font-style: italic; }
+.bold   { font-weight: 700; }
+.block-margins { margin: 1em 0; }
+.blue-text {
+	color: $blue-text;
+}
+.orange-text {
+	color: $orange-text;	
+}
+.success-text {
+	color: $jade;
+}
+.error-text {
+	color: $ruby;
+}
 .text-centered {
 	text-align: center;
 }
