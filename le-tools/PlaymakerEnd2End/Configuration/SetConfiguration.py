@@ -11,21 +11,20 @@ parser.add_argument('-k', '--key', dest = 'key', action = 'store', required = Fa
 parser.add_argument('-tk', '--token', dest = 'token', action = 'store', required = False, help = 'Access Token')
 args = parser.parse_args()
 """
-def updateConfigIni(tenantName,host,QueneName,SFDCPWD="",playName="",playType="",SFDCUser="",withModelingOnDataPlatform="TRUE"):
+def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser,withModelingOnDataPlatform="TRUE"):
     with open("..\\config.ini") as ini:
         jsonIni=json.load(ini)
-        if withModelingOnDataPlatform == "FALSE":
-            jsonIni['withModelingOnDataPlatform']=withModelingOnDataPlatform
+        jsonIni['withModelingOnDataPlatform']=withModelingOnDataPlatform
         jsonIni["tenantName"]=tenantName
         jsonIni["host"]=host
         jsonIni["QueneName"]=QueneName
-        if playName:
+        if playName!= "default":
             jsonIni["playName"]=playName
-        if playType:
+        if playType != "default":
             jsonIni['playType']=playType
-        if SFDCUser:
+        if SFDCUser!= "default":
             jsonIni['SFDCUser']=SFDCUser
-            if not SFDCPWD:
+            if SFDCPWD == "default":
                 print("You have chanded SFDC user,please also update the password!")
                 return
             else:

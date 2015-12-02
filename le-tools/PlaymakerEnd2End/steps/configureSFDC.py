@@ -22,9 +22,10 @@ def loginSF(ff=SalePrismEnvironments.ff,user=SalePrismEnvironments.SFDCUser,pwd=
 	ff.find_element_by_id('password').send_keys(pwd)
 	ff.find_element_by_id('Login').click()
 	time.sleep(5)
-	if ff.find_element_by_id('showMeLater').is_displayed():
+	try:
 		ff.find_element_by_id('showMeLater').click()
-	#assert  ff.find_element_by_xpath("//a[text()='Lattice Admin']").is_displayed()
+	except Exception,e:
+		pass
 	log.info("salesforce login successfully")
 
 def configDanteServer(ff=SalePrismEnvironments.ff,dante_Server=SalePrismEnvironments.dante_Server):#need run loginSF first

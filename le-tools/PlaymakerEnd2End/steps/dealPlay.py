@@ -40,7 +40,7 @@ class DealPlay(object):
 				if k == "AppConfig.System.DataLoaderTenantName":
 					value=tenant
 				if k== "AppConfig.System.EnableModelingService":
-					if useDataplatform == "FALSE":
+					if useDataPlatform == "FALSE":
 						value="FALSE"
 					else:
 						value="TRUE"
