@@ -6,7 +6,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.services.FeatureFlagService',
     'mainApp.markets.controllers.MarketsController',
     'mainApp.fingerprints.controllers.FingerprintsController',
+    'services.jobs',
     'controllers.jobs',
+    'controllers.jobs.status',
     'mainApp.admin.controllers.AdminController',
     'mainApp.config.services.ConfigService'
 ])

@@ -2,48 +2,42 @@
     padding-top: 25px;
     padding-bottom: 10px;
 }
-
-.job-table-equal-space {
-    display: flex;
-    justify-content: space-between;
-}
-.panel-default>.panel-heading.job-table-equal-space {
+.panel .panel-heading.custom-heading {
+    height: 38px;
     background: #003B67;
+    padding: 8px 0px !important;
+    font-size: 125%;
 }
 
 .breadcrumb {
     /*centering*/
     display: inline-block;
     overflow: hidden;
-    border-radius: 5px;
 }
 
 .breadcrumb a {
-    color: black;
+    color: black !important;
     text-decoration: none;
     outline: none;
     display: block;
     float: left;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 60px;
     /*need more margin on the left of links to accomodate the numbers*/
-    padding: 0 20px 0 45px;
+    padding: 0 50px 0 55px;
     position: relative;
 }
 /*since the first link does not have a triangle before it we can reduce the left padding to make it look consistent with other links*/
 .breadcrumb a:first-child {
     padding-left: 35px;
-    border-radius: 5px 0 0 5px; /*to match with the parent's radius*/
 }
 .breadcrumb a:first-child:before {
     left: 14px;
 }
-.breadcrumb a:last-child {
-    border-radius: 0 5px 5px 0; /*this was to prevent glitches on hover*/
-}
 
 .jobs-table-content {
-    background: #ddd;
+    background: white;
+    font-size: 125%;
 }
 
 /*adding the arrows for the breadcrumbs using rotated pseudo elements*/
@@ -67,9 +61,9 @@
     box-shadow: 
         5px -5px 0 5px #ddd;
     /*
-        5px - for rounded arrows and 
+        0px - for sharp arrows
         50px - to prevent hover glitches on the border created using shadows*/
-    border-radius: 0 5px 0 50px;
+    border-radius: 0 0px 0 50px;
 }
 /*we dont need an arrow after the last link*/
 .breadcrumb a:last-child:after {
@@ -89,4 +83,16 @@
 .flat a:hover, .flat a.active, 
 .flat a:hover:after, .flat a.active:after{
     background: #9EEB62;
+}
+.flat a .spinner {
+    position: absolute;
+    right: 0;
+    z-index: 99;
+}
+.expanded-true {
+    background: #ddd;
+    margin-bottom: 3px;
+}
+.expanded-false {
+    border-bottom: solid 3px #ddd;
 }

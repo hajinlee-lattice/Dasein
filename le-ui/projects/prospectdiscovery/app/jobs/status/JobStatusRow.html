@@ -1,0 +1,24 @@
+<div class="expanded-{{jobRowExpanded}}">
+    <div class="clearfix">
+        <span class="col-md-3">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
+        <span class="col-md-3">{{job.jobtype}}</span>
+        <span class="col-md-3">{{job.status}}<span data-ng-show="showStatusLink"> [<a href="#">{{statusLinkText}}</a>]</span></span>
+        <span class="col-md-3">{{job.user}}
+        <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="toggleArrow()" data-ng-show="! jobRowExpanded">
+            <span><i class="fa fa-angle-double-down fa-lg"></i></span>
+        </a>
+        <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="toggleArrow()" data-ng-show="jobRowExpanded">
+            <span><i class="fa fa-angle-double-up fa-lg"></i></span>
+        </a>
+        </span>
+    </div>
+    <div class="job-{{job.id}} text-center" data-ng-show="jobRowExpanded">
+        <div class="breadcrumb flat">
+            <a href="#"><span>Load Data</span><span class="spinner" data-ng-show="loadingData"><i class="fa fa-spinner fa-pulse"></i></span></a>
+            <a href="#">Match Data<span class="spinner" data-ng-show="matchingData"><i class="fa fa-spinner fa-pulse"></i></span></a>
+            <a href="#"><span>Generate Insights</span><span class="spinner" data-ng-show="generatingInsights"><i class="fa fa-spinner fa-pulse"></i></span></a>
+            <a href="#">Create Universal Model<span class="spinner" data-ng-show="generatingModel"><i class="fa fa-spinner fa-pulse"></i></span></a>
+            <a href="#">Create Universal Target Market<span class="spinner" data-ng-show="generatingTargetMarket"><i class="fa fa-spinner fa-pulse"></i></span></a>
+        </div>
+    </div>
+</div>
