@@ -33,7 +33,7 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, "/Pods/Default/Contracts/DevelopTestPLSTenant1");
+        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant1", contractId));
         setUpMarketoEloquaTestEnvironment();
     }
     
@@ -56,7 +56,9 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         switchToExternalAdmin();
         assertTrue(submitFile().isSuccess());
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, //
-                "/Pods/Default/Contracts/DevelopTestPLSTenant1/Tenants/DevelopTestPLSTenant1/Spaces/Production/Data/Files/file1.csv");
+                String.format( //
+                        "/Pods/Default/Contracts/%sPLSTenant1/Tenants/%sPLSTenant1/Spaces/Production/Data/Files/file1.csv", //
+                        contractId, contractId));
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
         assertEquals(contents, expectedContents);
     }
