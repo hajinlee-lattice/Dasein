@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
 
         PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_1,PLSEnvironments.pls_marketing_app_ELQ)
 
-        contact_lists = elq.getEloquaContact(contact_lists);
+        contact_lists = elq.getEloquaContact(contact_lists[0]);
 
         contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
         assert len(contact_faileds)==0, contact_faileds;
@@ -36,9 +36,9 @@ class Test(unittest.TestCase):
         leads_list = mkto.addLeadToMarketoForDante(5);
         
         PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_2,PLSEnvironments.pls_marketing_app_MKTO);
-        
-        lead_lists = mkto.getLeadFromMarketo(leads_list); 
-        
+
+        lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
+
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
         assert len(lead_faileds)==0, lead_faileds;
 

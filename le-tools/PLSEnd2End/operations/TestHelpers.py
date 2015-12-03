@@ -387,15 +387,15 @@ class LPConfigRunner(SessionRunner):
         authorization = self.modelLogin();
         self.modelLoginAttach(tenantName, authorization);
         count=0
-        while(count<6):
+        while(count<120):
             models = self.lpGetModel(authorization);
 
             if len(models) >= modelPriority:
                 break;
             print "we can't get the model, will try again after 30 seconds."
             count=count+1
-            time.sleep(30)
-        if count==6:
+            time.sleep(120)
+        if count==30:
             print "The existing models: %d is less than the expected: %d" % (len(models), modelPriority + 1)
             return False;
 

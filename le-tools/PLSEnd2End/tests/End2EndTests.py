@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
         elq = EloquaRequest();
         contact_lists = elq.addEloquaContactForDante(5);
         PlsOperations.runBulkScoring(tenant);
-        contact_lists = elq.getEloquaContact(contact_lists);
+        contact_lists = elq.getEloquaContact(contact_lists[0]);
         contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
         assert len(contact_faileds)==0, contact_faileds;
 
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
 
         contact_lists = elq.addEloquaContactForDante(2);
         PlsOperations.runHourlyScoring(tenant);
-        contact_lists = elq.getEloquaContact(contact_lists);
+        contact_lists = elq.getEloquaContact(contact_lists[0]);
         contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",contact_lists);
         assert len(contact_faileds)==0, contact_faileds;
 
@@ -67,7 +67,7 @@ class Test(unittest.TestCase):
         mkto = MarketoRequest();
         leads_list = mkto.addLeadToMarketo(5);
         PlsOperations.runBulkScoring(tenant);        
-        lead_lists = mkto.getLeadFromMarketo(leads_list);         
+        lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
         assert len(lead_faileds)==0, lead_faileds;
 
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
 
         leads_list = mkto.addLeadToMarketo(2);
         PlsOperations.runHourlyScoring(tenant);        
-        lead_lists = mkto.getLeadFromMarketo(leads_list);        
+        lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
         lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
         assert len(lead_faileds)==0, lead_faileds;
 
