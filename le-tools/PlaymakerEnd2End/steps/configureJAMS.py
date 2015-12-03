@@ -11,7 +11,7 @@ except ImportError:
 import sys
 sys.path.append("..")
 from Configuration.Properties import SalePrismEnvironments
-log=SalePrismEnvironments.log
+log=SalePrismEnvironments.logProvider.getLog("configureJams",True)
 def update247DB(tenant=SalePrismEnvironments.tenantName,qname=SalePrismEnvironments.QueneName):
 	log.info("########## update JAMSCFG table on 247 DB configuration start   ##########")
 	updateQName="update Tenants set Queue_Name='"+qname+"' where Tenant = '"+tenant+"'"
