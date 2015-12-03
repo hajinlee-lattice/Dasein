@@ -25,6 +25,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_JOBS,
             GrantedRight.EDIT_PLS_JOBS,
             GrantedRight.VIEW_PLS_TARGETMARKETS,
+            GrantedRight.CREATE_PLS_TARGETMARKETS,
             GrantedRight.VIEW_PLS_QUOTAS
         )
     ),
