@@ -26,9 +26,16 @@
                 </a>
             </div>
         </div>
+        <div class="completion-times">
+            <span>{{ completionTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ completionTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ completionTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ completionTimes.create_model | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ completionTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</span>
+        </div>
     </div>
     
-    <div>
+    <div class="pd-summary import-summary">
         <h5>Data Imported</h5>
         <div class="container">
             <ul class="row">

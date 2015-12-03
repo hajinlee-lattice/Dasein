@@ -10,6 +10,7 @@
 }
 .gray-summary-list {
     background: #e7e7e7;
+    margin-top: 20px;
 }
 .summary-desc {
     clear: both;
@@ -20,6 +21,7 @@
     /*centering*/
     display: inline-block;
     overflow: hidden;
+    margin-bottom: 0px;
 }
 
 .summary-desc .breadcrumb a {
@@ -30,8 +32,7 @@
     float: left;
     font-size: 15px;
     line-height: 60px;
-    /*need more margin on the left of links to accomodate the numbers*/
-    padding: 0 51px 0 57.2px;
+    margin-top: 10px;
     position: relative;
 }
 /*since the first link does not have a triangle before it we can reduce the left padding to make it look consistent with other links*/
@@ -62,9 +63,7 @@
     /*stylish arrow design using box shadow*/
     box-shadow: 
         5px -5px 0 5px white;
-    /*
-        0px - for sharp arrows
-        50px - to prevent hover glitches on the border created using shadows*/
+    border-radius: 0 0px 0 50px;
 }
 /*we dont need an arrow after the last link*/
 .summary-desc .breadcrumb a:last-child:after {
@@ -72,8 +71,8 @@
 }
 
 .summary-desc .breadcrumb.flat {
+    background: white;
     padding: 0px 0px;
-    margin-top: 8px;
     border-radius: 0px
 }
 .summary-desc .flat a, .summary-desc .flat a:after {
@@ -89,4 +88,20 @@
 }
 .summary-desc .flat a span:last-child, .summary-desc .flat a span:nth-last-child(2) {
     right: 15px;
+}
+.pd-summary.import-summary {
+    background: white;
+    margin-top: 30px;
+}
+.completion-times {
+    text-align: justify;
+    padding-left: 20px;
+}
+.completion-times span {
+    display: inline-block;
+    font-weight: lighter;
+    font-size: 0.8em;
+}
+.completion-times span:not(:first-child) {
+    margin-left: 100px;
 }

@@ -27,8 +27,8 @@
     float: left;
     font-size: 15px;
     line-height: 60px;
-    /*need more margin on the left of links to accomodate the numbers*/
     padding: 0 50px 0 55px;
+    margin-top: 10px;
     position: relative;
 }
 /*since the first link does not have a triangle before it we can reduce the left padding to make it look consistent with other links*/
@@ -63,14 +63,10 @@
     transform: scale(0.707) rotate(45deg);
     /*we need to prevent the arrows from getting buried under the next link*/
     z-index: 1;
-    /*background same as links but the gradient will be rotated to compensate with the transform applied*/
     background: white;
     /*stylish arrow design using box shadow*/
     box-shadow: 
         5px -5px 0 5px #ddd;
-    /*
-        0px - for sharp arrows
-        50px - to prevent hover glitches on the border created using shadows*/
     border-radius: 0 0px 0 50px;
 }
 /*we dont need an arrow after the last link*/
@@ -81,7 +77,6 @@
 .breadcrumb.flat {
     background: #ddd;
     padding: 0px 0px;
-    margin-top: 8px;
     border-radius: 0px;
 }
 .flat a, .flat a:after {
