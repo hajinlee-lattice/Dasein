@@ -60,35 +60,35 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
 
     @Column(name = "NAME", nullable = false)
     @Override
-    @JsonProperty
+    @JsonProperty("name")
     public String getName() {
         return name;
     }
 
     @Override
-    @JsonProperty
+    @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
     }
 
     @Column(name = "DESCRIPTION", nullable = false)
-    @JsonProperty
+    @JsonProperty("description")
     public String getDescription() {
         return this.description;
     }
 
-    @JsonProperty
+    @JsonProperty("description")
     public void setDescription(String description) {
         this.description = description;
     }
 
-    @JsonProperty
+    @JsonProperty("creation_timestamp")
     @Column(name = "CREATION_TIMESTAMP", nullable = false)
     public Long getCreationTimestamp() {
         return this.creationTimestamp;
     }
 
-    @JsonProperty
+    @JsonProperty("creation_timestamp")
     public void setCreationTimestamp(Long creationDate) {
         this.creationTimestamp = creationDate;
     }
@@ -142,7 +142,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
 
     @Override
     @JsonIgnore
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
@@ -161,16 +161,18 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
         return JsonUtils.serialize(this.accountFilter);
     }
 
+    @JsonIgnore
     public void setAccountFilterString(String accountFilterString) {
         this.accountFilter = JsonUtils.deserialize(accountFilterString, Restriction.class);
     }
 
-    @JsonProperty
+    @JsonProperty("account_filter")
     @Transient
     public Restriction getAccountFilter() {
         return this.accountFilter;
     }
 
+    @JsonProperty("account_filter")
     public void setAccountFilter(Restriction accountFilter) {
         this.accountFilter = accountFilter;
     }
@@ -186,104 +188,105 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
         this.contactFilter = JsonUtils.deserialize(contactFilterString, Restriction.class);
     }
 
-    @JsonProperty
+    @JsonProperty("contact_filter")
     @Transient
     public Restriction getContactFilter() {
         return this.contactFilter;
     }
 
+    @JsonProperty("contact_filter")
     public void setContactFilter(Restriction contactFilter) {
         this.contactFilter = contactFilter;
     }
 
-    @JsonProperty
+    @JsonProperty("selected_intent")
     @Transient
     public List<String> getSelectedIntent() {
         return this.selectedIntent;
     }
 
-    @JsonProperty
+    @JsonProperty("selected_intent")
     @Transient
     public void setSelectedIntent(List<String> selectedIntent) {
         this.selectedIntent = selectedIntent;
     }
 
-    @JsonProperty
+    @JsonIgnore
     @Column(name = "SELECTED_INTENT", nullable = false)
     public String getSelectedIntentString() {
         return JsonUtils.serialize(this.selectedIntent);
     }
 
-    @JsonProperty
+    @JsonIgnore
     @SuppressWarnings("unchecked")
     public void setSelectedIntentString(String selectedIntentString) {
         this.selectedIntent = JsonUtils.deserialize(selectedIntentString, List.class);
     }
 
     @Column(name = "NUM_PROSPECTS_DESIRED", nullable = true)
-    @JsonProperty
+    @JsonProperty("num_prospects_desired")
     public Integer getNumProspectsDesired() {
         return this.numProspectsDesired;
     }
 
-    @JsonProperty
+    @JsonProperty("num_prospects_desired")
     public void setNumProspectsDesired(Integer numProspectsDesired) {
         this.numProspectsDesired = numProspectsDesired;
     }
 
     @Column(name = "MODEL_ID", nullable = true)
-    @JsonProperty
+    @JsonProperty("model_id")
     public String getModelId() {
         return this.modelId;
     }
 
-    @JsonProperty
+    @JsonProperty("model_id")
     public void setModelId(String modelId) {
         this.modelId = modelId;
     }
 
     @Column(name = "EVENT_COLUMN_NAME", nullable = true)
-    @JsonProperty
+    @JsonProperty("event_column_name")
     public String getEventColumnName() {
         return this.eventColumnName;
     }
 
-    @JsonProperty
+    @JsonProperty("event_column_name")
     public void setEventColumnName(String eventColumnName) {
         this.eventColumnName = eventColumnName;
     }
 
     @Column(name = "IS_DEFAULT")
-    @JsonProperty
+    @JsonProperty("is_default")
     public Boolean getIsDefault() {
         return this.isDefault;
     }
 
-    @JsonProperty
+    @JsonProperty("is_default")
     public void setIsDefault(Boolean isDefault) {
         this.isDefault = isDefault;
     }
 
     @Column(name = "OFFSET", nullable = false)
-    @JsonProperty
+    @JsonProperty("offset")
     public Integer getOffset() {
         return this.offset;
     }
 
-    @JsonProperty
+    @JsonProperty("offset")
     public void setOffset(Integer offset) {
         this.offset = offset;
     }
 
-    @JsonProperty
+    @JsonProperty("target_market_statistics")
     @JoinColumn(name = "FK_PID", nullable = false)
-    @OneToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public TargetMarketStatistics getTargetMarketStatistics() {
         return this.targetMarketStatistics;
     }
 
-    @JsonProperty
+    @JsonProperty("target_market_statistics")
     public void setTargetMarketStatistics(TargetMarketStatistics targetMarketStatistics) {
         this.targetMarketStatistics = targetMarketStatistics;
     }
@@ -311,12 +314,12 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
     }
 
     @Column(name = "APPLICATION_ID", nullable = true)
-    @JsonProperty
+    @JsonProperty("application_id")
     public String getApplicationId() {
         return this.applicationId;
     }
 
-    @JsonProperty
+    @JsonProperty("application_id")
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
