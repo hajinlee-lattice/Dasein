@@ -175,10 +175,10 @@ var mainApp = angular.module('mainApp', [
             }
         })
         .state('jobs.import.ready', {
-            url: '/ready',
+            url: '/ready/:jobId',
             views: {
-                "navigation@jobs": {
-                    templateUrl: './app/navigation/message/MessageView.html'
+                "summary@jobs": {
+                    templateUrl: './app/navigation/table/TableView.html'
                 },
                 "main@jobs": {
                     templateUrl: './app/jobs/import/ready/ReadyView.html'

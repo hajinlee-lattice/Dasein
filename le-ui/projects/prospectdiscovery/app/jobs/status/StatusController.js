@@ -14,6 +14,8 @@ angular.module('controllers.jobs.status', [
             $scope.jobRowExpanded = false;
             $scope.jobCompleted = false;
             $scope.statusLinkText;
+            $scope.statusLinkState;
+            $scope.jobId = $scope.job.id;
 
             /** State variables to track which steps have been completed and which steps is running */
             $scope.jobStepsRunningStates = { load_data: false, match_data: false,
@@ -28,6 +30,7 @@ angular.module('controllers.jobs.status', [
                 $scope.showStatusLink = true;
                 $scope.jobCompleted = true;
                 $scope.statusLinkText = "View Report";
+                $scope.statusLinkState = "jobs.import.ready";
             }
             
             $scope.expandJobStatus = function() {

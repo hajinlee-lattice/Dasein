@@ -2,7 +2,7 @@
     <div class="clearfix">
         <span class="col-md-3">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="col-md-3">{{job.jobType}}</span>
-        <span class="col-md-3">{{job.status}}<span data-ng-show="showStatusLink"> [<a href="#">{{statusLinkText}}</a>]</span></span>
+        <span class="col-md-3">{{job.status}}<span data-ng-show="showStatusLink"> [<a ui-sref="{{statusLinkState}}({ jobId: {{jobId}} })">{{statusLinkText}}</a>]</span></span>
         <span class="col-md-3">{{job.user}}
         <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded">
             <span><i class="fa fa-angle-double-down fa-lg"></i></span>

@@ -1,4 +1,45 @@
-<div class="page-header">
-  <h1>Import Data Wizard <small>Successful!</small></h1>
+<div class="container" data-ng-controller="ImportReadyController">
+    <div class="columns four import-summary-title">
+        <a ui-sref="jobs.status">
+            <button class="button icon-button white-button"><span class="fa fa-chevron-left"></span></button>
+        </a>
+        <div>Job Status</div>
+    </div>
+    <div class="summary-desc">
+        Loadfile import started on 11/18/2015 at 9:06 PM by superuser.
+    </div>
+    <div class="text-center">
+        <div class="breadcrumb flat">
+            <a href="#">Load Data
+                <span class="icon"><i class="fa fa-check"></i></span>
+            </a>
+            <a href="#">Match Data
+                <span class="icon"><i class="fa fa-check"></i></span>
+            </a>
+            <a href="#">Generate Insights
+                <span class="icon"><i class="fa fa-check"></i></span>
+            </a>
+            <a href="#">Create Universal Model
+                <span class="icon"><i class="fa fa-check"></i></span>
+            </a>
+            <a href="#">Create Universal Target Market
+                <span class="icon"><i class="fa fa-check"></i></span>
+            </a>
+        </div>
+    </div>
+    
+    <div>
+        <h5>Data Imported</h5>
+        <div class="container">
+            <ul class="row">
+                <li class="columns three gray-summary-list pd-summary-panel" ng-repeat="table in tables">
+                    <h3 class="summary-title">{{table.name}}</h3>
+                    <dl class="summary-list" ng-repeat="(key, value) in table.items">
+                        <dt>{{key}}</dt>
+                        <dd>{{value}}</dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
-<p>You're Salesforce data has been successfully imported!</p>
