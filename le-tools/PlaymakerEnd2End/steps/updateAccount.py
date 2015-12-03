@@ -11,7 +11,7 @@ except Exception,e:
 import json,sys
 sys.path.append("..")
 from Configuration.Properties import  SalePrismEnvironments
-log=SalePrismEnvironments.log
+log=SalePrismEnvironments.logProvider.getLog("updateAccount",True)
 def updateTenantAccount(tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,user=SalePrismEnvironments.DBUser,pwd=SalePrismEnvironments.DBPwd):
 	log.info("##########  Account Match process starts   ##########")
 	with open('..\\AccountJson') as jsonData:
