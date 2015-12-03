@@ -1,6 +1,6 @@
 package com.latticeengines.pls.controller;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -27,50 +27,57 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class JobResource {
 
     // temporary stub data
-    List<Job> jobs = new ArrayList<>();
     Job job = new Job();
-    List<JobStep> steps = new ArrayList<>();
+    Job job1 = new Job();
+
+    JobStep stepLoad = new JobStep();
+    JobStep stepMatch = new JobStep();
+    JobStep stepInsights = new JobStep();
+    JobStep stepModel = new JobStep();
+    JobStep stepMarket = new JobStep();
+    JobStep stepMarketCompleted = new JobStep();
+    
     {
-        jobs.add(job);
         job.setId(1L);
         job.setJobStatus(JobStatus.RUNNING);
         job.setJobType(JobType.LOADFILE_IMPORT);
         job.setUser("LatticeUser1");
         job.setStartTimestamp(new Date());
 
-        JobStep stepLoad = new JobStep();
-        steps.add(stepLoad);
+        job1.setId(2L);
+        job1.setJobStatus(JobStatus.COMPLETED);
+        job1.setJobType(JobType.LOADFILE_IMPORT);
+        job1.setUser("LatticeUser1");
+        job1.setStartTimestamp(new Date());
+
         stepLoad.setJobStepType(JobStepType.LOAD_DATA);
         stepLoad.setStepStatus(StepStatus.COMPLETED);
         stepLoad.setStartTimestamp(new Date());
         stepLoad.setEndTimestamp(new Date());
 
-        JobStep stepMatch = new JobStep();
-        steps.add(stepMatch);
         stepMatch.setJobStepType(JobStepType.MATCH_DATA);
         stepMatch.setStepStatus(StepStatus.COMPLETED);
         stepMatch.setStartTimestamp(new Date());
         stepMatch.setEndTimestamp(new Date());
 
-        JobStep stepInsights = new JobStep();
-        steps.add(stepInsights);
         stepInsights.setJobStepType(JobStepType.GENERATE_INSIGHTS);
         stepInsights.setStepStatus(StepStatus.COMPLETED);
         stepInsights.setStartTimestamp(new Date());
         stepInsights.setEndTimestamp(new Date());
 
-        JobStep stepModel = new JobStep();
-        steps.add(stepModel);
         stepModel.setJobStepType(JobStepType.CREATE_MODEL);
         stepModel.setStepStatus(StepStatus.COMPLETED);
         stepModel.setStartTimestamp(new Date());
         stepModel.setEndTimestamp(new Date());
 
-        JobStep stepMarket = new JobStep();
-        steps.add(stepMarket);
         stepMarket.setJobStepType(JobStepType.CREATE_GLOBAL_TARGET_MARKET);
         stepMarket.setStepStatus(StepStatus.RUNNING);
         stepMarket.setStartTimestamp(new Date());
+
+        stepMarketCompleted.setJobStepType(JobStepType.CREATE_GLOBAL_TARGET_MARKET);
+        stepMarketCompleted.setStepStatus(StepStatus.COMPLETED);
+        stepMarketCompleted.setStartTimestamp(new Date());
+        stepMarketCompleted.setEndTimestamp(new Date());
     }
 
     @RequestMapping(value = "/{jobId}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -78,15 +85,22 @@ public class JobResource {
     @ApiOperation(value = "Get a job by id")
     @PreAuthorize("hasRole('View_PLS_Jobs')")
     public Job find(@PathVariable String jobId) {
-        job.setSteps(steps);
-        return job;
+        if (jobId.equals("1")) {
+            job.setSteps(Arrays.asList(stepLoad, stepMatch, stepInsights, stepModel, stepMarket));
+            return job;
+        } else if (jobId.equals("2")) {
+            job1.setSteps(Arrays.asList(stepLoad, stepMatch, stepInsights, stepModel, stepMarketCompleted));
+            return job1;
+        }
+        return null;
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     public List<Job> findAll() {
-        job.setSteps(null);
-        return jobs;
+        job.setSteps(Arrays.asList(stepLoad, stepMatch, stepInsights, stepModel, stepMarket));
+        job1.setSteps(Arrays.asList(stepLoad, stepMatch, stepInsights, stepModel, stepMarketCompleted));
+        return Arrays.asList(job, job1);
     }
 
     @RequestMapping(value = "/{jobId}", method = RequestMethod.PUT, headers = "Accept=application/json")
