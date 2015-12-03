@@ -118,7 +118,6 @@ console.log('LoginController init');
     };
 
     $scope.getWidgetConfigDoc = function () {
-        window.open("/pd/#/jobs/import/credentials", "_self");
         ConfigService.GetWidgetConfigDocument().then(function() {
             $("body").removeClass("login-body");
             $rootScope.$broadcast("ShowFooterEvent", true);
@@ -188,6 +187,7 @@ console.log('LoginController init');
             if (result.Success === true) {
                 $scope.showForgotPassword = false;
                 $scope.resetPasswordSuccess = true;
+                window.open("/pd/#/jobs/import/credentials", "_self");
             } else {
                 $scope.showForgotPasswordError = true;
 
