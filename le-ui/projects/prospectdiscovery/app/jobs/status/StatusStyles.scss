@@ -2,6 +2,9 @@
     padding-top: 25px;
     padding-bottom: 10px;
 }
+.jobs-header span {
+    text-align: right;
+}
 .panel .panel-heading.custom-heading {
     height: 38px;
     background: #003B67;
@@ -80,14 +83,17 @@
     color: black;
     transition: all 0.5s;
 }
-.flat a:hover, .flat a.active, 
-.flat a:hover:after, .flat a.active:after{
-    background: #9EEB62;
+.flat a.state-finished-true, .flat a.state-finished-true:after {
+    background: rgb(113, 188, 81);
 }
-.flat a .spinner {
+.flat a .icon {
     position: absolute;
     right: 0;
     z-index: 99;
+    top: 0;
+}
+.flat a span:last-child, .flat a span:nth-last-child(2) {
+    right: 15px;
 }
 .expanded-true {
     background: #ddd;

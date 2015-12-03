@@ -1,24 +1,59 @@
 <div class="expanded-{{jobRowExpanded}}">
     <div class="clearfix">
         <span class="col-md-3">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-        <span class="col-md-3">{{job.jobtype}}</span>
+        <span class="col-md-3">{{job.jobType}}</span>
         <span class="col-md-3">{{job.status}}<span data-ng-show="showStatusLink"> [<a href="#">{{statusLinkText}}</a>]</span></span>
         <span class="col-md-3">{{job.user}}
-        <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="toggleArrow()" data-ng-show="! jobRowExpanded">
+        <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded">
             <span><i class="fa fa-angle-double-down fa-lg"></i></span>
         </a>
-        <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="toggleArrow()" data-ng-show="jobRowExpanded">
+        <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded">
             <span><i class="fa fa-angle-double-up fa-lg"></i></span>
         </a>
         </span>
     </div>
-    <div class="job-{{job.id}} text-center" data-ng-show="jobRowExpanded">
+    <div class="text-center" data-ng-show="jobRowExpanded">
         <div class="breadcrumb flat">
-            <a href="#"><span>Load Data</span><span class="spinner" data-ng-show="loadingData"><i class="fa fa-spinner fa-pulse"></i></span></a>
-            <a href="#">Match Data<span class="spinner" data-ng-show="matchingData"><i class="fa fa-spinner fa-pulse"></i></span></a>
-            <a href="#"><span>Generate Insights</span><span class="spinner" data-ng-show="generatingInsights"><i class="fa fa-spinner fa-pulse"></i></span></a>
-            <a href="#">Create Universal Model<span class="spinner" data-ng-show="generatingModel"><i class="fa fa-spinner fa-pulse"></i></span></a>
-            <a href="#">Create Universal Target Market<span class="spinner" data-ng-show="generatingTargetMarket"><i class="fa fa-spinner fa-pulse"></i></span></a>
+            <a href="#" class="state-finished-{{jobStepsCompletedStates.load_data}}">Load Data
+                <span class="icon" data-ng-show="jobStepsRunningStates.load_data">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="icon" data-ng-show="jobStepsCompletedStates.load_data">
+                    <i class="fa fa-check"></i>
+                </span>
+            </a>
+            <a href="#" class="state-finished-{{jobStepsCompletedStates.match_data}}">Match Data
+                <span class="icon" data-ng-show="jobStepsRunningStates.match_data">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="icon" data-ng-show="jobStepsCompletedStates.match_data">
+                    <i class="fa fa-check"></i>
+                </span>
+            </a>
+            <a href="#" class="state-finished-{{jobStepsCompletedStates.generate_insights}}">Generate Insights
+                <span class="icon" data-ng-show="jobStepsRunningStates.generate_insights">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="icon" data-ng-show="jobStepsCompletedStates.generate_insights">
+                    <i class="fa fa-check"></i>
+                </span>
+            </a>
+            <a href="#" class="state-finished-{{jobStepsCompletedStates.create_model}}">Create Universal Model
+                <span class="icon" data-ng-show="jobStepsRunningStates.create_model">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="icon" data-ng-show="jobStepsCompletedStates.create_model">
+                    <i class="fa fa-check"></i>
+                </span>
+            </a>
+            <a href="#" class="state-finished-{{jobStepsCompletedStates.create_global_target_market}}">Create Universal Target Market
+                <span class="icon" data-ng-show="jobStepsRunningStates.create_global_target_market">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="icon" data-ng-show="jobStepsCompletedStates.create_global_target_market">
+                    <i class="fa fa-check"></i>
+                </span>
+            </a>
         </div>
     </div>
 </div>

@@ -22,7 +22,7 @@ angular.module('services.jobs', [
                     return {
                         id: rawObj.id,
                         timestamp: rawObj.startTimestamp,
-                        jobtype: rawObj.jobType,
+                        jobType: rawObj.jobType,
                         status: rawObj.jobStatus,
                         user: rawObj.user
                     };
@@ -42,17 +42,20 @@ angular.module('services.jobs', [
 
         $http({
             method: 'GET',
-            url: '/pls/job/' + jobId
+            url: '/pls/jobs/' + jobId
         }).then(
             function onSuccess(response) {
                 var jobInfo = response.data;
 
                 result = {
                     success: true,
-                    id: jobInfo.id,
-                    jobstatus: jobInfo.jobStatus,
-                    steprunning: getStepRunning(job),
-                    stepsCompleted: getStepsCompleted(job)
+                    resultObj:
+                        {
+                            id: jobInfo.id,
+                            jobStatus: jobInfo.jobStatus,
+                            stepRunning: getStepRunning(jobInfo),
+                            stepsCompleted: getStepsCompleted(jobInfo)
+                        }
                 };
                 deferred.resolve(result);
             }, function onError(resposne) {
@@ -70,7 +73,7 @@ angular.module('services.jobs', [
         }
         
         for (var i = 0; i < job.steps.length; i++) {
-            if (job.steps[i].jobStatus == "Running") {
+            if (job.steps[i].stepStatus == "Running") {
                 return job.steps[i].jobStepType;
             }
         }
@@ -78,14 +81,14 @@ angular.module('services.jobs', [
     };
     
     function getStepsCompleted(job) {
-        if (job.jobStatus == "Pending") {
-            return null;
+        if (job.steps == null) {
+            return [];
         }
-        
+
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
-            if (jobs.steps[i].jobStatus == "Completed") {
-                stepsCompleted.push(jobs.steps[i].jobStepType);
+            if (job.steps[i].stepStatus == "Completed") {
+                stepsCompleted.push(job.steps[i].jobStepType);
             }
         }
         return stepsCompleted;
