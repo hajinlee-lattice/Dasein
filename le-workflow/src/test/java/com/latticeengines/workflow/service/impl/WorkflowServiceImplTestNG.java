@@ -103,4 +103,5 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
         status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.STOPPED);
     }
+
 }

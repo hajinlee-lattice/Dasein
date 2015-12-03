@@ -46,4 +46,5 @@ public enum JobType {
     public static JobType getByType(String type) {
         return typeMap.get(type);
     }
+
 }

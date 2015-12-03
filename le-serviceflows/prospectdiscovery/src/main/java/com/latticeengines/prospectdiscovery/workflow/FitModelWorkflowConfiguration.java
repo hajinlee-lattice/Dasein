@@ -28,6 +28,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         private ModelStepConfiguration model = new ModelStepConfiguration();
 
         public Builder customer(String customerSpace) {
+            fitModel.setCustomerSpace(CustomerSpace.parse(customerSpace));
             microservice.setCustomerSpace(customerSpace);
             fitModel.setCustomerSpace(CustomerSpace.parse(customerSpace));
             return this;

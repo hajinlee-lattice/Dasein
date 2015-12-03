@@ -1,35 +1,22 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed.workflow;
 
 import java.util.Date;
-import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
-public class Job implements HasId<Long>, HasName {
+public class JobStep implements HasId<Long>, HasName {
 
     private Long id;
     private String name;
     private String description;
     private Date startTimestamp;
     private Date endTimestamp;
-    private JobStatus jobStatus;
-    private JobType jobType;
-    private String user;
-    private List<JobStep> steps;
+    private JobStatus stepStatus;
+    private String jobStepType;
 
-    @Override
-    @JsonProperty
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    @JsonProperty
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     @Override
     @JsonProperty
@@ -74,43 +61,35 @@ public class Job implements HasId<Long>, HasName {
     }
 
     @JsonProperty
-    public JobStatus getJobStatus() {
-        return jobStatus;
+    public JobStatus getStepStatus() {
+        return stepStatus;
     }
 
     @JsonProperty
-    public void setJobStatus(JobStatus jobStatus) {
-        this.jobStatus = jobStatus;
+    public void setStepStatus(JobStatus stepStatus) {
+        this.stepStatus = stepStatus;
     }
 
     @JsonProperty
-    public JobType getJobType() {
-        return jobType;
+    public String getJobStepType() {
+        return jobStepType;
     }
 
     @JsonProperty
-    public void setJobType(JobType jobType) {
-        this.jobType = jobType;
+    public void setJobStepType(String jobStepType) {
+        this.jobStepType = jobStepType;
     }
 
-    @JsonProperty
-    public String getUser() {
-        return user;
+    @JsonIgnore
+    @Override
+    public Long getId() {
+        return id;
     }
 
-    @JsonProperty
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    @JsonProperty
-    public List<JobStep> getSteps() {
-        return steps;
-    }
-
-    @JsonProperty
-    public void setSteps(List<JobStep> steps) {
-        this.steps = steps;
+    @Override
+    @JsonIgnore
+    public void setId(Long id) {
+        this.id = id;
     }
 
 }

@@ -27,4 +27,5 @@ public interface WorkflowService {
 
     WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception;
 
+    com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId);
 }

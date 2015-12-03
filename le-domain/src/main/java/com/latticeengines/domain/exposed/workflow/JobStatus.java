@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed.workflow;
 
 import java.util.HashMap;
 import java.util.Map;

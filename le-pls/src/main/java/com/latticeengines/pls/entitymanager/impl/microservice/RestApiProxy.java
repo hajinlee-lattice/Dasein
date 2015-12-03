@@ -1,5 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl.microservice;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -43,6 +46,25 @@ public class RestApiProxy implements WorkflowProxy, JobProxy {
                     WorkflowStatus.class);
         } catch (Exception e) {
             throw new RuntimeException("getWorkflowStatusFromApplicationId: Remote call failure", e);
+        }
+    }
+
+    // @Override
+    public Job getWorkflowExecution(String workflowId) {
+        try {
+            return restTemplate.getForObject(constructUrl("workflowapi", "job/" + workflowId), Job.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getWorkflowExecution: Remote call failure", e);
+        }
+    }
+
+    // @Override
+    @SuppressWarnings("unchecked")
+    public List<Job> getWorkflowExecutionsForTenant(long tenantPid) {
+        try {
+            return restTemplate.getForObject(constructUrl("workflowapi", "jobs/" + tenantPid), List.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getWorkflowExecutionsForTenant: Remote call failure", e);
         }
     }
 
