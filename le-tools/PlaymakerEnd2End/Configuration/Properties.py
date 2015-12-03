@@ -23,9 +23,12 @@ class SalePrismEnvironments(object):
     QueneName=paras.get('QueneName')
     playName=paras.get('playName')
     playType=paras.get("playType")
+    SFurl=paras.get("SFurl")
+    setUpPageUrl=paras.get("setUpPage")
     SFDCUser=paras.get('SFDCUser')
     SFDCPWD=paras.get('SFDCPWD')
     SPUser=paras.get("SPUser")
+    resetUrl=paras.get("resetUrl")
     SPPwd=paras.get("SPPwd")
     DBUser=paras.get("DBUser")
     DBPwd=paras.get("DBPwd")
@@ -47,14 +50,10 @@ class SalePrismEnvironments(object):
     getPortfililPlaysUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/GetPortfolioPlays?queryName=AllPortfolioPlays"
     launchPlaysUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/LaunchPlays?simulate=false&queryName=AllPortfolioPlays"
     #configuration in Properties
-    log=LogFactory.getLog(name="End2End",alsoToConsole=True)
+    logProvider=LogFactory
     OTK=getOneTimeKey(tenantName,jdbc)
     #webdriver
-    ff=webdriver.Firefox()
-    driver2=webdriver.Firefox()
-    #ff=webdriver.Remote("http://localhost:4444/wd/hub", webdriver.DesiredCapabilities.HTMLUNIT.copy())
-    ff.implicitly_wait(20)
-    ff.maximize_window()
+    driverType=paras.get("driverType")
     def __init__(self):
         pass
 

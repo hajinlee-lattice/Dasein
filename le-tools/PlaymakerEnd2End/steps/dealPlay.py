@@ -12,9 +12,11 @@ import time,sys,json,requests
 requests.packages.urllib3.disable_warnings()
 sys.path.append("..")
 from Configuration.Properties import SalePrismEnvironments
-log=SalePrismEnvironments.log
+
 class DealPlay(object):
 	def __init__(self):
+		#got log
+		self.log=SalePrismEnvironments.logProvider.getLog("DealPlay",True)
 		#got login cookie
 		loginUrl="https://"+SalePrismEnvironments.host+"/"+SalePrismEnvironments.tenantName+"_Application/WebLEApplicationServiceHost.svc/Login"
 		AuthorizationStr=SalePrismEnvironments.AuthorizationStr
@@ -27,7 +29,7 @@ class DealPlay(object):
 		self.aspAuth=cookieList[3].split("=")[1]
 		assert self.aspAuth!=None
 	def setPlaymakerConfigurationByRest(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,useDataPlatform=SalePrismEnvironments.withModelingOnDataPlatform):
-		log.info("##########  playmaker system configuration start   ##########")
+		self.log.info("##########  playmaker system configuration start   ##########")
 		with open('..\\SysConfig') as jsonData:
 			sysConfigJson=json.load(jsonData)
 		conn = pyodbc.connect(DRIVER='{SQL SERVER}',SERVER=host,DATABASE=tenant,UID=SalePrismEnvironments.DBUser,PWD=SalePrismEnvironments.DBPwd)
@@ -48,7 +50,7 @@ class DealPlay(object):
 				cur.execute(updateSQL)
 				conn.commit()
 		except Exception,e:
-			log.error(e)
+			self.log.error(e)
 		else:
 			print "Playmaker Confuguration DB  update successfully"
 		finally:
@@ -67,11 +69,14 @@ class DealPlay(object):
 		resetCacheXML=SalePrismEnvironments.resetCachePostXML
 		response=requests.post(resetCacheUrl,data=resetCacheXML,headers=resetCacheHeaders,verify=False)
 		assert response.status_code==200
-		log.info("reset cache successfully")
+		self.log.info("reset cache successfully")
 
-	def createPlayByREST(self,playType=SalePrismEnvironments.playType,playName=SalePrismEnvironments.playName):
-		#deal post data
-		log.info("##########  play creation starts   ##########")
+	def createPlayByREST(self,playName=SalePrismEnvironments.playName,*playType):
+		self.log.info("##########  play creation starts   ##########")
+		if playType:
+			pass
+		else:
+			playType=SalePrismEnvironments.playType
 		with open("..\\PlaysCreationJsonFiles\\"+playType) as createPlayJsonFile:
 			createPlayJson=json.load(createPlayJsonFile)
 		createPlayJson['DisplayName']=playName
@@ -85,10 +90,10 @@ class DealPlay(object):
 		assert resJson['Success']==True
 		PlayID=json.loads(resJson["CompressedResult"])["Key"]
 		assert int(PlayID)>0
-		log.info("Play created!")
+		self.log.info("Play created!")
 		return PlayID
 	def scorePlay(self,idOfPlay):
-		log.info("##########  Play Scoring start   ##########")
+		self.log.info("##########  Play Scoring start   ##########")
 		scorePlayUrl=SalePrismEnvironments.scorePlayUrl+str(idOfPlay)
 		scorePlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"*/*; q=0.01","LEFormsTicket":self.aspAuth,"User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host}
 		response=requests.post(scorePlayUrl,headers=scorePlayHeaders,verify=False)
@@ -98,7 +103,7 @@ class DealPlay(object):
 		approvePlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"*/*; q=0.01","LEFormsTicket":self.aspAuth,"User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host}
 		response=requests.post(approvePlayUrl,headers=approvePlayHeaders,verify=False)
 		assert response.status_code==200
-		log.info("##########  play approved! ready to launch   ##########")
+		self.log.info("##########  play approved! ready to launch   ##########")
 	def getStatusOfPlay(self,idOfPlay):
 		getStatusOfPlayUrl=SalePrismEnvironments.getStatusOfPlayUrl+str(idOfPlay)
 		getStatusOfPlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"*/*; q=0.01","LEFormsTicket":self.aspAuth}
@@ -108,7 +113,7 @@ class DealPlay(object):
 		status=json.loads(resultJson['CompressedResult'])['CombinedModelScoreStatusID']
 		return status
 	def launchPlay(self,nameOfPlayToLaunch=SalePrismEnvironments.playName,launchAllPlays=False):
-		log.info("##########  Play Launch starts   ##########")
+		self.log.info("##########  Play Launch starts   ##########")
 		getPortfililPlaysUrl=SalePrismEnvironments.getPortfililPlaysUrl
 		getPortfililPlaysHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"LEFormsTicket":self.aspAuth,"Origin":"https://"+SalePrismEnvironments.host}
 		response=requests.get(getPortfililPlaysUrl,headers=getPortfililPlaysHeaders,verify=False)
@@ -136,7 +141,7 @@ class DealPlay(object):
 				realJson=json.loads("["+str(realJson)+"]")
 				response=requests.post(launchPlaysUrl,json=realJson,headers=launchPlaysHeaders,verify=False)
 				assert response.status_code==200
-				log.info("play %s launched successfully"%jsonString)
+				self.log.info("play %s launched successfully"%jsonString)
 			elif jsonString.find(nameOfPlayToLaunch) > 0:
 				realJson=json.loads(jsonString)
 				realJson["LaunchRuleDisplayName"]="Create CRM recommendations"
@@ -147,7 +152,7 @@ class DealPlay(object):
 				realJson=json.loads("["+json.dumps(realJson)+"]")
 				response=requests.post(launchPlaysUrl,json=realJson,headers=launchPlaysHeaders,verify=False)
 				assert response.status_code==200
-				log.info("play %s launched successfully"%nameOfPlayToLaunch)
+				self.log.info("play %s launched successfully"%nameOfPlayToLaunch)
 				break
 	def getLaunchStatus(self,idOfPlay):
 		getLaunchStatusUrl=SalePrismEnvironments.getLaunchStatusUrl+str(idOfPlay)

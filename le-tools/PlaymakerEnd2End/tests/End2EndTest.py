@@ -8,14 +8,15 @@ from Configuration.Properties import SalePrismEnvironments
 from steps.updateAccount import updateTenantAccount
 from steps.configureDataloader import DataloaderDealer
 from steps.configureJAMS  import update247DB
-from steps.configureSFDC  import loginSF,configDanteServer,configOTK,syncData
+from steps.configureSFDC  import DealSFDC
 from steps.dealPlay  import DealPlay
 import unittest,time
 
-class End2EndNecessarySteps():
+class End2EndNecessarySteps(object):
 	def __init__(self):
 		self.playDealer=DealPlay()
 		self.dlDealer=DataloaderDealer()
+		self.sfdcDealer=DealSFDC()
 	def PlayMakerConfiguration(self):
 		self.playDealer.setPlaymakerConfigurationByRest()
 	def MatchAccountID(self):
@@ -34,12 +35,12 @@ class End2EndNecessarySteps():
 			status=self.playDealer.getStatusOfPlay(idOfPlay=PlayID)
 		self.playDealer.launchPlay()#launch play
 	def dataFlowSFDCPart(self):
-		loginSF()
-		configDanteServer()
-		configOTK()
+		self.sfdcDealer.loginSF()
+		self.sfdcDealer.configDanteServer()
+		self.sfdcDealer.configOTK()
 		if not self.dlDealer.isDanteGroupFinishSuccessfully():
 			return
-		syncData()
+		self.sfdcDealer.syncData()
 class DifferentScenario(object):
 	def __init__(self):
 		self.playDealer=DealPlay()
@@ -61,8 +62,8 @@ class DifferentScenario(object):
 		pass
 	def scorePlayWithoutEVModeling(self):
 		pass
-
-
+	def launchSeveralPlays(self):
+		pass
 class TestSteps(unittest.TestCase):
 	def setUp(self):
 		self.steps=End2EndNecessarySteps()
