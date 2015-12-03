@@ -44,7 +44,7 @@
     font-size: 125%;
     
     div.clearfix {
-        padding: 0.5em;
+        padding: 0.5em 0.5em 0.5em 0em;
     }
 }
 
@@ -82,6 +82,7 @@
     background: #ddd;
     padding: 0px 0px;
     margin-top: 8px;
+    border-radius: 0px;
 }
 .flat a, .flat a:after {
     background: white;

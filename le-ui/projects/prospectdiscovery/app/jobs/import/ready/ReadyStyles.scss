@@ -16,13 +16,13 @@
     padding-left: 5px;
     padding-top: 15px;
 }
-.breadcrumb {
+.summary-desc .breadcrumb {
     /*centering*/
     display: inline-block;
     overflow: hidden;
 }
 
-.breadcrumb a {
+.summary-desc .breadcrumb a {
     color: black !important;
     text-decoration: none;
     outline: none;
@@ -31,24 +31,19 @@
     font-size: 15px;
     line-height: 60px;
     /*need more margin on the left of links to accomodate the numbers*/
-    padding: 0 50px 0 55px;
+    padding: 0 51px 0 57.2px;
     position: relative;
 }
 /*since the first link does not have a triangle before it we can reduce the left padding to make it look consistent with other links*/
-.breadcrumb a:first-child {
+.summary-desc .breadcrumb a:first-child {
     padding-left: 35px;
 }
-.breadcrumb a:first-child:before {
+.summary-desc .breadcrumb a:first-child:before {
     left: 14px;
 }
 
-.jobs-table-content {
-    background: white;
-    font-size: 125%;
-}
-
 /*adding the arrows for the breadcrumbs using rotated pseudo elements*/
-.breadcrumb a:after {
+.summary-desc .breadcrumb a:after {
     content: '';
     position: absolute;
     top: 0;
@@ -66,33 +61,32 @@
     background: white;
     /*stylish arrow design using box shadow*/
     box-shadow: 
-        5px -5px 0 5px #ddd;
+        5px -5px 0 5px white;
     /*
         0px - for sharp arrows
         50px - to prevent hover glitches on the border created using shadows*/
-    border-radius: 0 0px 0 50px;
 }
 /*we dont need an arrow after the last link*/
-.breadcrumb a:last-child:after {
+.summary-desc .breadcrumb a:last-child:after {
     content: none;
 }
 
-.breadcrumb.flat {
-    background: #ddd;
+.summary-desc .breadcrumb.flat {
     padding: 0px 0px;
     margin-top: 8px;
+    border-radius: 0px
 }
-.flat a, .flat a:after {
+.summary-desc .flat a, .summary-desc .flat a:after {
     background: rgb(113, 188, 81);
     color: black;
     transition: all 0.5s;
 }
-.flat a .icon {
+.summary-desc .flat a .icon {
     position: absolute;
     right: 0;
     z-index: 99;
     top: 0;
 }
-.flat a span:last-child, .flat a span:nth-last-child(2) {
+.summary-desc .flat a span:last-child, .summary-desc .flat a span:nth-last-child(2) {
     right: 15px;
 }
