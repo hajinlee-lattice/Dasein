@@ -433,7 +433,8 @@ class LPConfigRunner(SessionRunner):
         ConfigDirectories.append({"RootPath": "/DLTemplate", "Nodes": []});
         ConfigDirectories.append({"RootPath": "/Dante", "Nodes": []})
         ConfigDirectories.append({"RootPath": "/PLS",
-                                  "Nodes": [{"Node": "LatticeAdminEmails", "Data": "[]"},
+                                  "Nodes": [{"Node": "ExternalAdminEmails", "Data": "[]"},
+                                            {"Node": "LatticeAdminEmails", "Data": "[]"},
                                             {"Node": "SuperAdminEmails",
                                              "Data": "[\"bnguyen@lattice-engines.com\",\"smeng@lattice-engines.com\"]"}]})
         ConfigDirectories.append({"RootPath": "/VisiDBTemplate", "Nodes": []})
