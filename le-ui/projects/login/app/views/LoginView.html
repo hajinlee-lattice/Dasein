@@ -87,11 +87,13 @@
 
                 <!-- Forgot Password success -->
                 <div class="form-signin" data-ng-show="!showLoginForm && resetPasswordSuccess && !showForgotPassword">
-                    <h2 class="form-signin-heading">{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_TITLE') }}</h2>
-                    <p><strong>{{ email }}</strong></p>
-                    <p>{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_BODY') }}</p>
-                    <div class="login-wrap">
-                        <div class="user-login-info-buttonforgot">
+                    <div class="form-header">
+                        <h3 class="form-signin-heading">{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_TITLE') }}</h3>
+                        <p><strong>{{ email }}</strong></p>
+                        <p>{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_BODY') }}</p>
+                    </div>
+                    <div class="form">
+                        <div class="form-group">
                             <button class="button orange-button" data-ng-click="showLoginForm = true;">{{ ResourceUtility.getString('RETURN_TO_LOGIN') }}</button>
                         </div>
                     </div>
