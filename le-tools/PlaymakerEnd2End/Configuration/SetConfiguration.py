@@ -11,10 +11,9 @@ def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser
         jsonIni["host"]=host
         jsonIni["QueneName"]=QueneName
         jsonIni["driverType"]=driverType
+        jsonIni['playType']=playType
         if playName!= "default":
             jsonIni["playName"]=playName
-        if playType != "default":
-            jsonIni['playType']=playType
         if SFDCUser!= "default":
             jsonIni['SFDCUser']=SFDCUser
             if SFDCPWD == "default":
