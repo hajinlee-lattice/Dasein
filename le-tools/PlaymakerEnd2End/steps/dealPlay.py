@@ -13,6 +13,15 @@ requests.packages.urllib3.disable_warnings()
 sys.path.append("..")
 from Configuration.Properties import SalePrismEnvironments
 
+class PlayTypes(object):
+	t_AnalyticList='AnalyticList'
+	t_CSRepeatPurchase='CSRepeatPurchase'
+	t_CSFirstPurchase='CSFirstPurchase'
+	t_LatticeGenerates='LatticeGenerates'
+	t_List='List'
+	t_RuleBased='RuleBased'
+	t_Winback='Winback'
+
 class DealPlay(object):
 	def __init__(self):
 		#got log
@@ -71,16 +80,23 @@ class DealPlay(object):
 		assert response.status_code==200
 		self.log.info("reset cache successfully")
 
-	def createPlayByREST(self,playName=SalePrismEnvironments.playName,*playType):
+	def createPlayByREST(self,playName=SalePrismEnvironments.playName,UseEVModel=False,*playType):
 		self.log.info("##########  play creation starts   ##########")
 		if playType:
 			pass
 		else:
 			playType=SalePrismEnvironments.playType
+		#Prepare the list for anlytics play type
+		AnlyticPlayList=[PlayTypes.t_CSFirstPurchase,PlayTypes.t_AnalyticList,PlayTypes.t_CSRepeatPurchase,PlayTypes.t_Winback]
 		with open("..\\PlaysCreationJsonFiles\\"+playType) as createPlayJsonFile:
 			createPlayJson=json.load(createPlayJsonFile)
 		createPlayJson['DisplayName']=playName
 		createPlayJson['ExternalID']=createPlayJson['DisplayName']+"_"+str(int(time.time()))
+		if playType in AnlyticPlayList:
+			if UseEVModel:
+				createPlayJson=self.enableEVModelInJson(createPlayJson)
+			else:
+				createPlayJson=self.disableEVModelInJson(createPlayJson)
 		#post create play data
 		savePlayUrl=SalePrismEnvironments.savePlayUrl
 		createPlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"application/json, text/javascript, */*; q=0.01","LEFormsTicket":self.aspAuth,"Content-Type":"application/json; charset=UTF-8","User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host}
@@ -161,6 +177,21 @@ class DealPlay(object):
 		temp=json.loads(json.loads(response.text)['CompressedResult'])['Value']
 		assert temp!=None
 		return temp["LaunchStatus"]
+
+	def enableEVModelInJson(self,jsonPost):
+		json_EVModel=dict(jsonPost)
+		json_EVModel['ModelingMethodID']='ExpectedRevenue'
+		json_EVModel['ScoringMethodID']='ExpectedRevenue'
+		self.log.info("Have enable EVModeling,ModelingMethodID value is %s, ScoringMethodID value is %s" % (json_EVModel['ModelingMethodID'],json_EVModel['ScoringMethodID']))
+		return json_EVModel
+
+	def disableEVModelInJson(self,jsonPost):
+		json_EVModel=dict(jsonPost)
+		json_EVModel['ModelingMethodID']='Probability'
+		json_EVModel['ScoringMethodID']='Lift'
+		self.log.info("Have disable EVModeling,ModelingMethodID value is %s, ScoringMethodID value is %s" % (json_EVModel['ModelingMethodID'],json_EVModel['ScoringMethodID']))
+		return json_EVModel
+
 if __name__=='__main__':
 	Play=DealPlay()
 	PlayID=Play.createPlayByREST()
