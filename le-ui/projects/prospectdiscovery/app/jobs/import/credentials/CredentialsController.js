@@ -136,7 +136,7 @@ angular.module('controllers.jobs.import.credentials', [
                     $scope.crmProductionError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
                     $scope.crmProductionComplete = true;
-                    window.location.hash = '#/import/process';
+                    $scope.createDefaultTargetMarket();
                 } else {
                     $scope.crmProductionError = result.resultErrors;
                 }
@@ -145,7 +145,20 @@ angular.module('controllers.jobs.import.credentials', [
             $scope.crmProductionError = ResourceUtility.getString("SYSTEM_SETUP_REQUIRED_FIELDS_ERROR");
         }
     };
-    
+
+    // FIXME - Move this to the MarketsService file when it's created
+    $scope.createDefaultTargetMarket = function () {
+        $.ajax({
+            url: '/pls/targetmarkets/default',
+            method: 'POST',
+            complete: function(event, status) {
+                alert('Default Target Market STATUS: ' + status);
+
+                window.location.hash = '#/jobs/status';
+            }
+        });
+    };
+
     $scope.crmSandboxSaveClicked = function () {
         $scope.crmSandboxError = "";
         if (CredentialsService.ValidateCredentials("sfdc", $scope.crmSandboxCredentials)) {

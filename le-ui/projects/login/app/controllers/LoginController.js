@@ -118,7 +118,7 @@ console.log('LoginController init');
     };
 
     $scope.getWidgetConfigDoc = function () {
-        //window.open("/lp/", "_self");
+        window.open("/pd/#/jobs/status", "_self");
         ConfigService.GetWidgetConfigDocument().then(function() {
             $("body").removeClass("login-body");
             $rootScope.$broadcast("ShowFooterEvent", true);

@@ -37,7 +37,7 @@ var mainApp = angular.module('mainApp', [
         .state('home', {
             url: '/',
             //templateUrl: './app/main/MainView.html'
-            redirectTo: 'markets.dashboard'
+            redirectTo: 'jobs.status'
         })
         .state('fingerprints', {
             url: '/fingerprints',
