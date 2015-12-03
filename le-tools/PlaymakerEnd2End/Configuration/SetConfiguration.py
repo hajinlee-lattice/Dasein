@@ -3,13 +3,14 @@ __author__ = 'BWang'
 import argparse,sys,json
 sys.path.append("..")
 
-def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser,withModelingOnDataPlatform="TRUE"):
+def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser,driverType,withModelingOnDataPlatform="TRUE"):
     with open("..\\config.ini") as ini:
         jsonIni=json.load(ini)
         jsonIni['withModelingOnDataPlatform']=withModelingOnDataPlatform
         jsonIni["tenantName"]=tenantName
         jsonIni["host"]=host
         jsonIni["QueneName"]=QueneName
+        jsonIni["driverType"]=driverType
         if playName!= "default":
             jsonIni["playName"]=playName
         if playType != "default":
@@ -32,6 +33,7 @@ if __name__ == "__main__":
     parser.add_argument('-sp', '--SFDCPWD', dest = 'SFDCPWD', action = 'store', required = False, help = 'password of the user to login salesforce')
     parser.add_argument('-pn', '--playName', dest = 'playName', action = 'store', required = False, help = 'the name of play you want to create')
     parser.add_argument('-pt', '--playType', dest = 'playType', action = 'store', required = False, help = 'which type of play you want to create')
+    parser.add_argument('-dt', '--driverType', dest = 'driverType', action = 'store', required = False, help = 'which browser you want to use')
     parser.add_argument('-d', '--withModelingOnDataPlatform', dest = 'withModelingOnDataPlatform', action = 'store', required = False, help = 'whether need score with data platform')
     args = parser.parse_args()
-    updateConfigIni(tenantName=args.tenantName,host=args.host,QueneName=args.queneName,SFDCUser=args.SFDCUser,SFDCPWD=args.SFDCPWD,playName=args.playName,playType=args.playType,withModelingOnDataPlatform=args.withModelingOnDataPlatform)
+    updateConfigIni(tenantName=args.tenantName,host=args.host,QueneName=args.queneName,SFDCUser=args.SFDCUser,SFDCPWD=args.SFDCPWD,playName=args.playName,playType=args.playType,driverType=args.driverType,withModelingOnDataPlatform=args.withModelingOnDataPlatform)
