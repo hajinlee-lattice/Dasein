@@ -7,7 +7,6 @@ import static org.testng.Assert.assertNull;
 import org.joda.time.DateTimeZone;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -20,7 +19,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-@Component
 public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";

@@ -33,16 +33,24 @@ public class WorkflowSubmitter {
     private String microserviceHostPort;
 
     @Value("${pls.modelingservice.basedir}")
-    protected String modelingServiceHdfsBaseDir;
+    private String modelingServiceHdfsBaseDir;
+
+    @Value("{pls.fitflow.stoplist.path}")
+    private String stoplistPath;
 
     public void submitFitWorkflow(TargetMarket targetMarket) {
-        String customer = SecurityContextUtils.getTenant().getName();
+        String customer = SecurityContextUtils.getTenant().getId();
         log.info(String.format("Submitting fit model workflow for target market %s and customer %s",
                 targetMarket.getName(), customer));
 
-        // TODO get from configuration
+        List<String> eventCols = new ArrayList<>();
+        eventCols.add("Event_IsWon");
+        eventCols.add("Event_StageIsClosedWon");
+        eventCols.add("Event_IsClosed");
+        eventCols.add("Event_OpportunityCreated");
+
         List<String> extraSources = new ArrayList<>();
-        extraSources.add("/tmp/stoplist/*.avro");
+        extraSources.add(stoplistPath);
         try {
             FitModelWorkflowConfiguration configuration = new FitModelWorkflowConfiguration.Builder()
                     .customer(customer)
@@ -55,11 +63,13 @@ public class WorkflowSubmitter {
                             "jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE")
                     .matchDbUser("DLTransfer") // TODO get from API
                     // TODO get from API
-                    .matchDbPasswordEncrypted(CipherUtils.encrypt("free&NSE")).matchDestTables("DerivedColumns") //
+                    .matchDbPasswordEncrypted(CipherUtils.encrypt("free&NSE")) //
+                    .matchDestTables("DerivedColumns") //
                     .targetMarket(targetMarket) //
                     .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                     .matchClient("PD130") // TODO get from API
                     .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+                    .eventColumns(eventCols) //
                     .build();
 
             ApplicationId applicationId = restApiProxy.submitWorkflow(configuration);

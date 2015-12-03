@@ -1,5 +1,4 @@
 
-alias wfapidptests='mvn -Pdeployment -DargLine="" -DWORKFLOWAPI_PROPDIR=conf/env/dev/ -DSECURITY_PROPDIR=../le-security/conf/env/dev -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -Djetty.port=8095 -DMVN_HOME=/usr/local/Cellar/maven/3.2.1 -DARTIFACT_VERSION=2.0.17-SNAPSHOT verify'
 alias dpbld='mvn -DskipTests clean assembly:single package dependency:copy-dependencies'
 alias sfdpl='mvn install && mvn -DskipTests clean install'
 alias dfdpl='mvn -Pshaded-yarn -DskipTests clean install && hadoop fs -rmr /app/dataflow && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -copyFromLocal target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -copyFromLocal conf/env/dev/dataflow.properties /app/dataflow'
@@ -31,9 +30,11 @@ alias admintests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -
 alias sectests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -Pgenerate -DargLine="" -DSECURITY_PROPDIR=conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks clean verify'
 alias plsdeptests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" MODEL_DL_QUARTZ_ENABLED="" mvn -Pdeployment -DargLine="" -DPLS_PROPDIR=conf/env/dev clean verify'
 alias plstests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" MODEL_DL_QUARTZ_ENABLED="" mvn -Pfunctional -DargLine="" -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -DPLS_PROPDIR=conf/env/dev -DSECURITY_PROPDIR=../le-security/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev clean verify'
-alias wfapitests='mvn clean verify -Pfunctional -DWORKFLOWAPI_PROPDIR=conf/env/dev -DargLine=""
+alias wfapitests='mvn clean verify -Pfunctional -DWORKFLOWAPI_PROPDIR=conf/env/dev -DargLine=""'
+alias wfapidptests='mvn -Pdeployment -DargLine="" -DWORKFLOWAPI_PROPDIR=conf/env/dev/ -DSECURITY_PROPDIR=../le-security/conf/env/dev -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev verify'
 alias plstestsbld='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" MODEL_DL_QUARTZ_ENABLED="" mvn -Pfunctional -DargLine="" -DPLS_PROPDIR=conf/env/buildmachine clean verify'
 alias plstestscc='mvn -Pcc -Pfunctional -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -DPLS_PROPDIR=conf/env/dev verify'
+alias plsdpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-pls-*-SNAPSHOT.war $JETTY_HOME/webapps'
 alias apideptests='mvn -Pdeployment -DargLine="" -DAPI_PROPDIR=conf/env/dev -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev/ -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.4.0.jar:$HADOOP_HOME/etc/hadoop clean verify'
 alias scoringtests='mvn -Pfunctional -DargLine="" -DSCORING_PROPDIR=conf/env/dev -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev/ clean verify'
 alias pdtests='mvn -Pfunctional -DargLine="" -DDATAFLOW_PROPDIR=../le-dataflow/conf/env/dev -DPROPDATA_MADISON_QUARTZ_ENABLED=disabled -DPROPDATA_PROPDIR=conf/env/dev -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -DDPDL_QUARTZ_ENABLED=disabled clean verify'
