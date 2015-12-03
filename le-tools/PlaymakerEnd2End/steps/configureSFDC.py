@@ -3,7 +3,6 @@
 @createDate 11/11/2015 
 """ 
 import time,sys
-from dealOTK import getKey
 sys.path.append("..")
 from Configuration.Properties import SalePrismEnvironments
 try:
@@ -44,7 +43,8 @@ def configDanteServer(ff=SalePrismEnvironments.ff,dante_Server=SalePrismEnvironm
 	assert ff.find_element_by_xpath("//html").text.find(dante_Server)>0
 	log.info("dante_Server set successfully")
 
-def configOTK(ff=SalePrismEnvironments.ff,tenant=SalePrismEnvironments.tenantName,OTK=getKey()):#need run loginSF first
+def configOTK(ff=SalePrismEnvironments.ff,tenant=SalePrismEnvironments.tenantName):#need run loginSF first
+
 	ff.find_element_by_xpath("//a[text()='Lattice Admin']").click()
 	try:
 		time.sleep(5)
@@ -58,13 +58,14 @@ def configOTK(ff=SalePrismEnvironments.ff,tenant=SalePrismEnvironments.tenantNam
 	ff.find_element_by_xpath("//label[text()='Customer ID:']//parent::div//child::input").clear()
 	ff.find_element_by_xpath("//label[text()='Customer ID:']//parent::div//child::input").send_keys(tenant)
 	ff.find_element_by_xpath("//label[text()='Token:']//parent::div//child::input").clear()
-	ff.find_element_by_xpath("//label[text()='Token:']//parent::div//child::input").send_keys(OTK)
+	print SalePrismEnvironments.OTK
+	ff.find_element_by_xpath("//label[text()='Token:']//parent::div//child::input").send_keys(SalePrismEnvironments.OTK)
 	time.sleep(5)
 	ff.find_element_by_xpath("//input[@value='Connect']").click()
 	time.sleep(15)
 	assert ff.find_element_by_xpath("//h3[text()='You are authenticated']").is_displayed()
 	log.info("Authentication done!")
-def syncData(ff=SalePrismEnvironments.ff):#need run loginSF first
+def syncData(ff=SalePrismEnvironments.ff):#need run loginSF first.
 	ff.find_element_by_xpath("//a[text()='Lattice Admin']").click()
 	assert ff.find_element_by_xpath("//h3[text()='You are authenticated']").is_displayed()
 	time.sleep(5)
@@ -87,13 +88,13 @@ def syncData(ff=SalePrismEnvironments.ff):#need run loginSF first
 			break
 	try:
 		assert is_recommendationExist
-	except Exception,e:
+	except AssertionError:
 		log.error("Sync Data Failed")
 	else:
 		log.info("Sync Data successfully")
 def main():
 	loginSF()
-	#configDanteServer()
+	configDanteServer()
 	configOTK()
 	syncData()
 if __name__ == '__main__':

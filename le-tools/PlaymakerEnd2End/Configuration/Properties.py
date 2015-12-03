@@ -11,6 +11,7 @@ except Exception,e:
 	os.system('pip install -U selenium')
 	from selenium import webdriver
 from tools.LogTool import LogFactory
+from tools.apitool import  getOneTimeKey
 class SalePrismEnvironments(object):
     "parser that read configuration properties from config.ini file"
     with open("..\\config.ini") as configFile:
@@ -30,7 +31,7 @@ class SalePrismEnvironments(object):
     DBPwd=paras.get("DBPwd")
     tenantUrl=paras.get("tenantUrl")
     dante_Server='https://'+host+'/DT_'+tenantName
-    jdbc='sqlserver://'+host+'\\SQL2012STD;databaseName='+tenantName
+    jdbc='jdbc:sqlserver://'+host+'\\SQL2012STD;databaseName='+tenantName
     sPrismUrl='https://'+host+'/'+tenantName+'_application'
     dataloaderUpdateRESTURL=paras.get("dataloaderUrl")+"/DLRestService/UpdateDataProvider"
     dataloaderGetLaunchStatusURL=paras.get("dataloaderUrl")+"/DLRestService/GetLaunchStatus"
@@ -47,8 +48,10 @@ class SalePrismEnvironments(object):
     launchPlaysUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/LaunchPlays?simulate=false&queryName=AllPortfolioPlays"
     #configuration in Properties
     log=LogFactory.getLog(name="End2End",alsoToConsole=True)
+    OTK=getOneTimeKey(tenantName,jdbc)
     #webdriver
     ff=webdriver.Firefox()
+    driver2=webdriver.Firefox()
     #ff=webdriver.Remote("http://localhost:4444/wd/hub", webdriver.DesiredCapabilities.HTMLUNIT.copy())
     ff.implicitly_wait(20)
     ff.maximize_window()

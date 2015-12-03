@@ -2,15 +2,7 @@ __author__ = 'BWang'
 
 import argparse,sys,json
 sys.path.append("..")
-"""
-parser = argparse.ArgumentParser()
-parser.add_argument('-func', '--function', dest = 'function_name', action = 'store', required = True, help = 'name of the function')
-parser.add_argument('-t', '--tenant', dest = 'tenant', action = 'store', required = False, help = 'name of the tenant')
-parser.add_argument('-db', '--database', dest = 'database', action = 'store', required = False, help = 'database connection string')
-parser.add_argument('-k', '--key', dest = 'key', action = 'store', required = False, help = 'one time key')
-parser.add_argument('-tk', '--token', dest = 'token', action = 'store', required = False, help = 'Access Token')
-args = parser.parse_args()
-"""
+
 def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser,withModelingOnDataPlatform="TRUE"):
     with open("..\\config.ini") as ini:
         jsonIni=json.load(ini)

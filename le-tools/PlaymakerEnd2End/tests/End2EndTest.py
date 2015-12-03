@@ -37,6 +37,8 @@ class End2EndNecessarySteps():
 		loginSF()
 		configDanteServer()
 		configOTK()
+		if not self.dlDealer.isDanteGroupFinishSuccessfully():
+			return
 		syncData()
 class DifferentScenario(object):
 	def __init__(self):
@@ -72,9 +74,8 @@ class TestSteps(unittest.TestCase):
 		self.steps.ConfigureDataLoader()
 	def test_eConfigureJAMS(self):
 		self.steps.ConfigureJAMS()
-
-	#def test_fPlayPart(self):
-	#	self.steps.dataFlowPlaymakerPart()
+	def test_fPlayPart(self):
+		self.steps.dataFlowPlaymakerPart()
 	def test_hSalesforcePart(self):
 		self.steps.dataFlowSFDCPart()
 

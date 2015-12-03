@@ -43,8 +43,9 @@ class DataloaderDealer(object):
 		finally:
 			if request !=None:
 				request.close()
-	def isDanteGroupFinishSuccessfully(self,ff=SalePrismEnvironments.ff,tenant=SalePrismEnvironments.tenantName):
+	def isDanteGroupFinishSuccessfully(self,tenant=SalePrismEnvironments.tenantName):
 		log.info("FULL_DANTE_DATA_FLOW is running, this may cost lof of time, please wait")
+		ff=SalePrismEnvironments.driver2
 		ff.get(SalePrismEnvironments.dataloaderUrl)
 		emailInput=ff.find_element_by_id('text_email_login')
 		emailInput.clear()
@@ -66,12 +67,13 @@ class DataloaderDealer(object):
 		launchId=ff.find_element_by_xpath("//div[@id='div_queue_launches']//td[2]").text
 		assert launchId!=None
 		log.info("The running FULL_DANTE_DATA_FLOW ID is %s "%launchId)
+		ff.quit()
 		RESTurl=SalePrismEnvironments.dataloaderGetLaunchStatusURL
 		fullDanteDataFlowJson={"launchId":int(launchId)}
 		isDanteGroupFinishSuccessfully=False
 		stillRunning="True"
 		while stillRunning=="True":
-			time.sleep(20)
+			time.sleep(60)
 			log.info("waiting for load group")
 			try:
 				request = requests.post(RESTurl,json=fullDanteDataFlowJson,headers=self.headers)
@@ -82,6 +84,8 @@ class DataloaderDealer(object):
 				if stillRunning == "False":
 					if runSucceed == "True":
 						isDanteGroupFinishSuccessfully=True
+					else:
+						log.error(responseValue[4]["Value"])
 					log.info(responseValue[4]["Value"])
 					break
 			except Exception,e:
