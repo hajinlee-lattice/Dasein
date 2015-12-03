@@ -9,16 +9,16 @@
             <div class="columns five login-content">
 
                 <!-- Messaging -->
-                <div class="notification-forgot-password" data-ng-show="showSuccessMessage">
+                <div class="messaging success-messaging" data-ng-show="showSuccessMessage">
                     <p>{{successMessage}}</p>
                 </div>
-                <div class="global-error" data-ng-show="showForgotPasswordError">
-                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{forgotPasswordErrorMessage}}</span>
-                    <button class="close btn btn-link" data-ng-click="showForgotPasswordError = false;"><i class="fa fa-times fa-inverse"></i></button>
+                <div class="messaging error-messaging" data-ng-show="showForgotPasswordError">
+                    <button class="button link-button close-button" data-ng-click="showForgotPasswordError = false;"><i class="fa fa-times"></i></button>
+                    <span><i class="fa fa-exclamation-circle"></i> {{forgotPasswordErrorMessage}}</span>
                 </div>
-                <div class="global-error" data-ng-show="showLoginError">
-                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{loginErrorMessage}}</span>
-                    <button class="close btn btn-link" data-ng-click="showLoginError = false;"><i class="fa fa-times fa-inverse"></i></button>
+                <div class="messaging error-messaging" data-ng-show="showLoginError">
+                    <button class="button link-button close-button" data-ng-click="showLoginError = false;"><i class="fa fa-times"></i></button>
+                    <span><i class="fa fa-exclamation-circle"></i> {{loginErrorMessage}}</span>
                 </div>
 
 
@@ -57,26 +57,30 @@
                 </div>
 
                 <!-- Forgot Password form -->
-                <div class="form form-signin" data-ng-show="!showLoginForm && showForgotPassword">
-                    <h2 class="form-signin-heading">
-                        {{ResourceUtility.getString('FORGOT_PASSWORD_TITLE')}}
-                    </h2>
-                    <p>{{ResourceUtility.getString('FORGOT_PASSWORD_MESSAGE')}}</p>
-
-                    <div class="form-group">
-                        <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
-                        <input type="text" 
-                               class="form-control {{forgotPasswordUsernameInvalid ? 'error' : ''}}" 
-                               placeholder="{{ResourceUtility.getString('LOGIN_USERNAME')}}"
-                               autocomplete="off"
-                               data-ng-model="forgotPasswordUsername"
-                               data-ng-enter="forgotPasswordOkClick()"
-                               autofocus>
+                <div class="form-signin" data-ng-show="!showLoginForm && showForgotPassword">
+                    <div class="form-header">
+                        <h3 class="form-signin-heading">
+                            {{ResourceUtility.getString('FORGOT_PASSWORD_TITLE')}}
+                        </h3>
+                        <p>{{ResourceUtility.getString('FORGOT_PASSWORD_MESSAGE')}}</p>
                     </div>
-                    <div class="form-actions">
-                        <button class="button orange-button" type="submit" data-ng-click="forgotPasswordOkClick()">{{ResourceUtility.getString('FORGOT_PASSWORD_SEND_EMAIL_BUTTON')}}</button>
-                        <div class="secondary-actions">
-                            <a href="#" class="btn btn-secondary" data-ng-click="cancelForgotPasswordClick($event)">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</a>
+
+                    <div class="form">
+                        <div class="form-group">
+                            <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
+                            <input type="text" 
+                                   class="form-control {{forgotPasswordUsernameInvalid ? 'error' : ''}}" 
+                                   placeholder="{{ResourceUtility.getString('LOGIN_USERNAME')}}"
+                                   autocomplete="off"
+                                   data-ng-model="forgotPasswordUsername"
+                                   data-ng-enter="forgotPasswordOkClick()"
+                                   autofocus>
+                        </div>
+                        <div class="form-actions">
+                            <button class="button orange-button" type="submit" data-ng-click="forgotPasswordOkClick()">{{ResourceUtility.getString('FORGOT_PASSWORD_SEND_EMAIL_BUTTON')}}</button>
+                            <div class="secondary-actions">
+                                <a href="#" class="btn btn-secondary" data-ng-click="cancelForgotPasswordClick($event)">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -88,7 +92,7 @@
                     <p>{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_BODY') }}</p>
                     <div class="login-wrap">
                         <div class="user-login-info-buttonforgot">
-                            <button class="btn btn-primary" data-ng-click="showLoginForm = true;">{{ ResourceUtility.getString('RETURN_TO_LOGIN') }}</button>
+                            <button class="button orange-button" data-ng-click="showLoginForm = true;">{{ ResourceUtility.getString('RETURN_TO_LOGIN') }}</button>
                         </div>
                     </div>
                 </div>

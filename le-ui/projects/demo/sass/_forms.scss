@@ -97,6 +97,18 @@ output {
   line-height: 1.42857143;
   color: #555555;
 }
+
+.form {
+  margin: 20px 0;
+}
+
+.form-header h1, .form-header h2, .form-header h3 {
+  margin-bottom: 10px;
+}
+.form-header p {
+  line-height: 1.25;
+}
+
 .form-control {
   display: block;
   width: 100%;
@@ -176,6 +188,12 @@ input[type="search"] {
 }
 .form-group {
   margin-bottom: 25px;
+}
+.form-actions {
+  margin-bottom: 20px;
+}
+.secondary-actions {
+  margin-top: 20px;  
 }
 .radio,
 .checkbox {
