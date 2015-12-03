@@ -42,6 +42,15 @@ public class TargetMarketResource {
         workflowSubmitter.submitFitWorkflow(targetMarket);
     }
 
+    @RequestMapping(value = "/default", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Register a default target market")
+    @PreAuthorize("hasRole('Create_PLS_TargetMarkets')")
+    public void createDefault() {
+        TargetMarket targetMarket = targetMarketService.createDefaultTargetMarket();
+        workflowSubmitter.submitFitWorkflow(targetMarket);
+    }
+
     @RequestMapping(value = "/{targetMarketName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a target market")

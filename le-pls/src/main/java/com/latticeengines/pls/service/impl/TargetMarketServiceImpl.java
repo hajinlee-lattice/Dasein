@@ -40,4 +40,9 @@ public class TargetMarketServiceImpl implements TargetMarketService {
         this.targetMarketEntityMgr.updateTargetMarketByName(targetMarket, name);
     }
 
+    @Override
+    public TargetMarket createDefaultTargetMarket() {
+        return this.targetMarketEntityMgr.createDefaultTargetMarket();
+    }
+
 }

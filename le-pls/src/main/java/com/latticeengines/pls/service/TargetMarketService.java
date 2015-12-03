@@ -16,4 +16,6 @@ public interface TargetMarketService {
 
     void updateTargetMarketByName(TargetMarket targetMarket, String name);
 
+    TargetMarket createDefaultTargetMarket();
+
 }

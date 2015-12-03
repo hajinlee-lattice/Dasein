@@ -212,7 +212,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
     }
 
     @JsonIgnore
-    @Column(name = "SELECTED_INTENT", nullable = false)
+    @Column(name = "SELECTED_INTENT", nullable = true)
     public String getSelectedIntentString() {
         return JsonUtils.serialize(this.selectedIntent);
     }
@@ -279,7 +279,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
     }
 
     @JsonProperty("target_market_statistics")
-    @JoinColumn(name = "FK_PID", nullable = false)
+    @JoinColumn(name = "FK_PID", nullable = true)
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public TargetMarketStatistics getTargetMarketStatistics() {

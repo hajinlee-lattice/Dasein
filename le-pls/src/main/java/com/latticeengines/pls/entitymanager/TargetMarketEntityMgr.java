@@ -15,4 +15,5 @@ public interface TargetMarketEntityMgr extends BaseEntityMgr<TargetMarket> {
     
     void updateTargetMarketByName(TargetMarket targetMarket, String name);
 
+    TargetMarket createDefaultTargetMarket();
 }

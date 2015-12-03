@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import org.joda.time.DateTimeZone;
 import org.springframework.batch.core.BatchStatus;
@@ -68,7 +69,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         switchToSuperAdmin();
     }
 
-    @Test(groups = "deployment", timeOut = 120000, enabled = true)
+    @Test(groups = "deployment", timeOut = 360000, enabled = false)
     public void create() {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET, TargetMarket.class);
 
@@ -124,6 +125,17 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertNull(targetMarket);
+    }
+
+    @Test(groups = "deployment", timeOut = 360000, enabled = false)
+    public void createDefault() {
+        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "Default",
+                TargetMarket.class);
+        assertTrue(targetMarket.getIsDefault());
+
+        waitForWorkflowCompletion(targetMarket.getApplicationId());
     }
 
     private WorkflowStatus waitForWorkflowCompletion(String applicationId) {

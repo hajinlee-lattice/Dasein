@@ -2,6 +2,7 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -54,13 +55,30 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
         initializeForDatabaseEntry(targetMarket);
 
         TargetMarketStatistics targetMarketStatistics = targetMarket.getTargetMarketStatistics();
-        targetMarketStatistics.setPid(null);
-        this.targetMarketStatisticsDao.create(targetMarketStatistics);
+        if (targetMarketStatistics != null) {
+            targetMarketStatistics.setPid(null);
+            this.targetMarketStatisticsDao.create(targetMarketStatistics);
+        }
 
         this.targetMarketDao.create(targetMarket);
-        for (TargetMarketDataFlowOption option : targetMarket.getRawDataFlowConfiguration()) {
-            this.targetMarketDataflowOptionDao.create(option);
+        if (targetMarket.getDataFlowConfiguration() != null) {
+            for (TargetMarketDataFlowOption option : targetMarket.getRawDataFlowConfiguration()) {
+                this.targetMarketDataflowOptionDao.create(option);
+            }
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TargetMarket createDefaultTargetMarket() {
+        TargetMarket targetMarket = new TargetMarket();
+        targetMarket.setCreationTimestampObject(DateTime.now());
+        targetMarket.setName("Default");
+        targetMarket.setDescription("Default Market");
+        targetMarket.setOffset(0);
+        targetMarket.setIsDefault(true);
+        create(targetMarket);
+        return targetMarket;
     }
 
     @Override
