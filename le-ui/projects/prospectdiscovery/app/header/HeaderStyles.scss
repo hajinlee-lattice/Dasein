@@ -1,11 +1,18 @@
 #mainHeaderView {
-    height: 4.7em;
+    height: 5.5em;
     border-bottom: 1px solid #ddd;
-    padding: 0.75em 0em;
     background: #fff;
 
     header {
         box-shadow: none;
+
+        div.brand {
+            margin-top: 1.3em;
+        }
+
+        div.row {
+            height: 5.5em;
+        }
 
         a.logo {
             padding: 5px 0;
@@ -14,6 +21,30 @@
             text-align: right;
             padding: 0;
             margin: 0;
+            height: 100%;
+
+            li {
+                height: 100%;
+            }
+
+            a {
+                height: 100%;
+                padding: 1.4em;
+                color: #333;
+                font-size: 16px;
+                transition: all 220ms ease, border 0 linear;
+            }
+        }
+        .nav-pills li:hover a {
+            background: #e7e7e7;
+        }
+        .nav-pills li.active a {
+            background: transparent;
+            padding-top: 1em;
+            margin-top: 0;
+            border-top: .4em solid #f16a22;
+            color: #629acc;
+            border-radius: 0;
         }
         .nav-pills > li {
             display: inline-block;

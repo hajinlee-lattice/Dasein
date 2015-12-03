@@ -7,9 +7,10 @@
 }
 .panel .panel-heading.custom-heading {
     height: 38px;
-    background: #003B67;
+    background: #d0d0d0;
     padding: 8px 0px !important;
     font-size: 125%;
+    color: #000;
 }
 
 .breadcrumb {
@@ -41,6 +42,10 @@
 .jobs-table-content {
     background: white;
     font-size: 125%;
+    
+    div.clearfix {
+        padding: 0.5em;
+    }
 }
 
 /*adding the arrows for the breadcrumbs using rotated pseudo elements*/
@@ -96,7 +101,7 @@
     right: 15px;
 }
 .expanded-true {
-    background: #ddd;
+    background: #e7e7e7;
     margin-bottom: 3px;
 }
 .expanded-false {
