@@ -22,7 +22,65 @@
             </tr>
         </thead>
         <tbody>
-            <data-job-status-row job="job"></data-job-status-row>
+
+            <tr data-ng-repeat-start="job in jobs" class="expandable expanded-{{jobRowExpanded}}">
+                <td>{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</td>
+                <td>{{job.jobType}}</td>
+                <td>{{job.status}}<span data-ng-show="showStatusLink"> [<a href="#">{{statusLinkText}}</a>]</span></td>
+                <td>{{job.user}}
+                    <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded">
+                        <span><i class="fa fa-angle-double-down fa-lg"></i></span>
+                    </a>
+                    <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded">
+                        <span><i class="fa fa-angle-double-up fa-lg"></i></span>
+                    </a>
+                </td>
+            </tr>
+            <tr class="expanded text-center" data-ng-repeat-end data-ng-show="jobRowExpanded">
+                <td colspan="6" class="breadcrumb flat">
+                    <a href="#" class="state-finished-{{jobStepsCompletedStates.load_data}}">Load Data
+                        <span class="icon" data-ng-show="jobStepsRunningStates.load_data">
+                            <i class="fa fa-spinner fa-pulse"></i>
+                        </span>
+                        <span class="icon" data-ng-show="jobStepsCompletedStates.load_data">
+                            <i class="fa fa-check"></i>
+                        </span>
+                    </a>
+                    <a href="#" class="state-finished-{{jobStepsCompletedStates.match_data}}">Match Data
+                        <span class="icon" data-ng-show="jobStepsRunningStates.match_data">
+                            <i class="fa fa-spinner fa-pulse"></i>
+                        </span>
+                        <span class="icon" data-ng-show="jobStepsCompletedStates.match_data">
+                            <i class="fa fa-check"></i>
+                        </span>
+                    </a>
+                    <a href="#" class="state-finished-{{jobStepsCompletedStates.generate_insights}}">Generate Insights
+                        <span class="icon" data-ng-show="jobStepsRunningStates.generate_insights">
+                            <i class="fa fa-spinner fa-pulse"></i>
+                        </span>
+                        <span class="icon" data-ng-show="jobStepsCompletedStates.generate_insights">
+                            <i class="fa fa-check"></i>
+                        </span>
+                    </a>
+                    <a href="#" class="state-finished-{{jobStepsCompletedStates.create_model}}">Create Universal Model
+                        <span class="icon" data-ng-show="jobStepsRunningStates.create_model">
+                            <i class="fa fa-spinner fa-pulse"></i>
+                        </span>
+                        <span class="icon" data-ng-show="jobStepsCompletedStates.create_model">
+                            <i class="fa fa-check"></i>
+                        </span>
+                    </a>
+                    <a href="#" class="state-finished-{{jobStepsCompletedStates.create_global_target_market}}">Create Universal Target Market
+                        <span class="icon" data-ng-show="jobStepsRunningStates.create_global_target_market">
+                            <i class="fa fa-spinner fa-pulse"></i>
+                        </span>
+                        <span class="icon" data-ng-show="jobStepsCompletedStates.create_global_target_market">
+                            <i class="fa fa-check"></i>
+                        </span>
+                    </a>
+                </td>
+            </tr>
+
         </tbody>
     </table>
 </div>
