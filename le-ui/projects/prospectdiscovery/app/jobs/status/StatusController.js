@@ -4,7 +4,7 @@ angular.module('controllers.jobs.status', [
 
 .directive('jobStatusRow', function() {
     return {
-        restrict: 'E',
+        restrict: 'AECM',
         templateUrl: 'app/jobs/status/JobStatusRow.html',
         scope: {
             job: '=',
