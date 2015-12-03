@@ -2,10 +2,10 @@
     <div class="row jobs-header">
         <h4 class="columns two">Jobs</h4>
         <span class="columns ten">
-            <button type="button" class="button white-button">
+            <button type="button" class="button icon-button white-button">
                 <span class="fa fa-filter"></span>
             </button>
-            <button type="button" class="button white-button">
+            <button type="button" class="button icon-button white-button">
                 <span class="fa fa-sort-amount-desc"></span>
             </button>
             <a ui-sref="jobs.import.credentials"><button class="button orange-button">Import Data</button></a>
@@ -13,16 +13,16 @@
     </div>
     
     <table class="responsive">
-        <tbody>
+        <thead>
             <tr>
                 <th>Timestamp</th>
                 <th>Job Type</th>
                 <th>Status</th>
                 <th>User</th>
             </tr>
-            <div data-ng-repeat="job in jobs">
-                <data-job-status-row job="job"></data-job-status-row>
-            </div>
+        </thead>
+        <tbody>
+            <data-job-status-row job="job"></data-job-status-row>
         </tbody>
     </table>
 </div>
