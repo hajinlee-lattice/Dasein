@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
+import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 
 public interface MatchCommandService {
@@ -19,7 +20,7 @@ public interface MatchCommandService {
 
     boolean resultTablesAreReady(Long commandId);
 
-    MatchClient getBestMatchClient();
+    MatchClientDocument getBestMatchClient();
 
     MatchClient getMatchClientByName(String clientName);
 

@@ -1,28 +1,25 @@
 package com.latticeengines.domain.exposed.propdata;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-@JsonSerialize(using = MatchClientSerializer.class)
-@JsonDeserialize(using = MatchClientDeserializer.class)
 public enum MatchClient {
 
-    PD126("10.51.15.126", 1433),
-    PD127("10.51.15.127", 1433),
-    PD128("10.51.15.128", 1433),
-    PD131("10.51.15.131", 1433),
-    PD130("10.51.15.130", 1433),
-    PD238("10.41.1.238", 1437);
+    PD126("10.51.15.126", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="),
+    PD127("10.51.15.127", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="),
+    PD128("10.51.15.128", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="),
+    PD131("10.51.15.131", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="),
+    PD130("10.51.15.130", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="),
+    PD238("10.41.1.238", 1437, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw==");
 
-    private final String host;
-    private final int port;
+    final String host;
+    final int port;
+    final String database;
+    final String username;
+    final String encryptedPassword;
 
-    MatchClient(String host, int port) {
+    MatchClient(String host, int port, String database, String username, String encryptedPassword) {
         this.host = host;
         this.port = port;
+        this.database = database;
+        this.username = username;
+        this.encryptedPassword = encryptedPassword;
     }
-
-    public String getHost() { return host; }
-
-    public int getPort() { return port; }
 }

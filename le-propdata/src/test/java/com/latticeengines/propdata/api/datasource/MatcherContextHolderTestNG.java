@@ -13,6 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.MatchClient;
+import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 
 public class MatcherContextHolderTestNG extends PropDataApiFunctionalTestNGBase {
@@ -40,7 +41,8 @@ public class MatcherContextHolderTestNG extends PropDataApiFunctionalTestNGBase 
             public Boolean call() throws Exception {
                 MatchClientContextHolder.setMatchClient(client);
                 String url = dataSource.getConnection().getMetaData().getURL();
-                return url.contains(client.getHost());
+                MatchClientDocument doc = new MatchClientDocument(client);
+                return url.contains(doc.getHost());
             }
         };
     }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
+import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.domain.exposed.propdata.MatchStatusResponse;
 import com.latticeengines.propdata.api.datasource.MatchClientContextHolder;
@@ -53,6 +54,6 @@ public class MatchCommandResource {
     @RequestMapping(value = "/bestclient", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Return the best matcher client to use.")
-    public MatchClient getBestMatchClient() { return matchCommandService.getBestMatchClient(); }
+    public MatchClientDocument getBestMatchClient() { return matchCommandService.getBestMatchClient(); }
 
 }

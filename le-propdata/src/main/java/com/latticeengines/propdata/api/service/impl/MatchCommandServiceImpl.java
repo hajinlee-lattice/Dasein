@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
+import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.api.entitymanager.CommandEntityMgr;
 import com.latticeengines.propdata.api.service.MatchCommandService;
@@ -70,8 +71,8 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
 
     @Override
-    public MatchClient getBestMatchClient() {
-        return MatchClient.valueOf(defaultClient);
+    public MatchClientDocument getBestMatchClient() {
+        return new MatchClientDocument(MatchClient.valueOf(defaultClient));
     }
 
     @Override
