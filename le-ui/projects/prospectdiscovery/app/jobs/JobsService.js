@@ -5,13 +5,14 @@ angular.module('services.jobs', [
     this.GetAllJobs = function() {
         var deferred = $q.defer();
         var result;
-
+/*
         $http({
             method: 'GET',
             url: '/pls/jobs'
         }).then(
-            function onSuccess(response) {
-                var jobs = response.data;
+            function onSuccess(response) { */
+                //var jobs = response.data;
+                var jobs = [{"id":1,"name":null,"description":null,"startTimestamp":1449106526700,"endTimestamp":null,"jobStatus":"Running","jobType":"Loadfile_import","user":"LatticeUser1","steps":null}];
                 result = {
                     success: true,
                     resultObj: null
@@ -27,25 +28,26 @@ angular.module('services.jobs', [
                         user: rawObj.user
                     };
                 });
-                deferred.resolve(result);
+                deferred.resolve(result);/*
             }, function onError(response) {
 
             }
         );
-
+*/
         return deferred.promise;
     };
     
     this.getJobStatus = function(jobId) {
         var deferred = $q.defer();
         var result;
-
+/*
         $http({
             method: 'GET',
             url: '/pls/jobs/' + jobId
         }).then(
-            function onSuccess(response) {
-                var jobInfo = response.data;
+            function onSuccess(response) { */
+                //var jobInfo = response.data;
+                var jobInfo = {"id":1,"name":null,"description":null,"startTimestamp":1448930225355,"endTimestamp":null,"jobStatus":"Running","jobType":"Loadfile_import","user":"LatticeUser1","steps":[{"name":null,"description":null,"startTimestamp":1448930225355,"endTimestamp":1448930225355,"jobStatus":"Completed","jobStepType":"Load_data"},{"name":null,"description":null,"startTimestamp":1448930225355,"endTimestamp":1448930225355,"jobStatus":"Completed","jobStepType":"Match_data"},{"name":null,"description":null,"startTimestamp":1448930225355,"endTimestamp":1448930225355,"jobStatus":"Completed","jobStepType":"Generate_insights"},{"name":null,"description":null,"startTimestamp":1448930225355,"endTimestamp":1448930225355,"jobStatus":"Completed","jobStepType":"Create_model"},{"name":null,"description":null,"startTimestamp":1448930225355,"endTimestamp":null,"jobStatus":"Running","jobStepType":"Create_global_target_market"}]};
 
                 result = {
                     success: true,
@@ -57,12 +59,12 @@ angular.module('services.jobs', [
                             stepsCompleted: getStepsCompleted(jobInfo)
                         }
                 };
-                deferred.resolve(result);
+                deferred.resolve(result);/*
             }, function onError(resposne) {
                 
             }
         );
-
+*/
         return deferred.promise;
         
     };

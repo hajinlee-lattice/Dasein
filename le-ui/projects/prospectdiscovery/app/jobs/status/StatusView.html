@@ -1,24 +1,28 @@
 <div data-ng-controller="JobsCtrl" class="container">
     <div class="row jobs-header">
-        <h4 class="columns six">Jobs</h4>
-        <span class="columns six">
-        <button type="button" class="btn btn-default"><span class="fa fa-filter"></span></button>
-        <button type="button" class="btn btn-default"><span class="fa fa-sort-amount-desc"></span></button>
-        <a ui-sref="jobs.import.credentials"><button class="btn btn-primary">Import Data</button></a>
+        <h4 class="columns two">Jobs</h4>
+        <span class="columns ten">
+            <button type="button" class="button white-button">
+                <span class="fa fa-filter"></span>
+            </button>
+            <button type="button" class="button white-button">
+                <span class="fa fa-sort-amount-desc"></span>
+            </button>
+            <a ui-sref="jobs.import.credentials"><button class="button orange-button">Import Data</button></a>
         </span>
     </div>
     
-    <div class="panel panel-default">
-        <div class="panel-heading custom-heading">
-            <span class="col-md-3">Timestamp</span>
-            <span class="col-md-3">Job Type</span>
-            <span class="col-md-3">Status</span>
-            <span class="col-md-3">User</span>
-        </div>
-        <div class="jobs-table-content">
+    <table class="responsive">
+        <tbody>
+            <tr>
+                <th>Timestamp</th>
+                <th>Job Type</th>
+                <th>Status</th>
+                <th>User</th>
+            </tr>
             <div data-ng-repeat="job in jobs">
                 <data-job-status-row job="job"></data-job-status-row>
             </div>
-        </div>
-    </div>
+        </tbody>
+    </table>
 </div>

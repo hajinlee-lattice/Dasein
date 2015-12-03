@@ -1,19 +1,19 @@
 <div class="expanded-{{jobRowExpanded}}">
-    <div class="clearfix">
-        <span class="col-md-3">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-        <span class="col-md-3">{{job.jobType}}</span>
-        <span class="col-md-3">{{job.status}}<span data-ng-show="showStatusLink"> [<a href="#">{{statusLinkText}}</a>]</span></span>
-        <span class="col-md-3">{{job.user}}
-        <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded">
-            <span><i class="fa fa-angle-double-down fa-lg"></i></span>
-        </a>
-        <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded">
-            <span><i class="fa fa-angle-double-up fa-lg"></i></span>
-        </a>
-        </span>
-    </div>
-    <div class="text-center" data-ng-show="jobRowExpanded">
-        <div class="breadcrumb flat">
+    <tr class="expandable">
+        <td>{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</td>
+        <td>{{job.jobType}}</td>
+        <td>{{job.status}}<span data-ng-show="showStatusLink"> [<a href="#">{{statusLinkText}}</a>]</span></td>
+        <td>{{job.user}}
+            <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded">
+                <span><i class="fa fa-angle-double-down fa-lg"></i></span>
+            </a>
+            <a class="pull-right" href="#" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded">
+                <span><i class="fa fa-angle-double-up fa-lg"></i></span>
+            </a>
+        </td>
+    </tr>
+    <tr class="expanded text-center" data-ng-show="jobRowExpanded">
+        <td colspan="6" class="breadcrumb flat">
             <a href="#" class="state-finished-{{jobStepsCompletedStates.load_data}}">Load Data
                 <span class="icon" data-ng-show="jobStepsRunningStates.load_data">
                     <i class="fa fa-spinner fa-pulse"></i>
@@ -54,6 +54,6 @@
                     <i class="fa fa-check"></i>
                 </span>
             </a>
-        </div>
-    </div>
+        </td>
+    </tr>
 </div>

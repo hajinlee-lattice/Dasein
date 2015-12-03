@@ -1,97 +1,99 @@
 <div data-ng-controller="MarketsCtrl" class="container">
-<div class="row target-market-header">
-    <h4 class="columns two">Markets</h4>
-    
-    <div class="columns ten">
-        <a ui-sref="markets.builder">
-            <button type="button" class="button white-button fa fa-filter"></button>
-        </a>
-        <a ui-sref="markets.builder">
-            <button type="button" class="button white-button fa fa-sort-amount-desc"></button>
-        </a>
-        <a ui-sref="markets.builder">
-            <button type="button" class="button orange-button">Target Market Builder</button>
-        </a>
+    <div class="row target-market-header">
+        <h4 class="columns two">Markets</h4>
+        
+        <div class="columns ten">
+            <a ui-sref="markets.builder">
+                <button type="button" class="button white-button"><span class="fa fa-filter"></span></button>
+            </a>
+            <a ui-sref="markets.builder">
+                <button type="button" class="button white-button"><span class="fa fa-sort-amount-desc"></span></button>
+            </a>
+            <a ui-sref="markets.builder">
+                <button type="button" class="button orange-button">Target Market Builder</button>
+            </a>
+        </div>
     </div>
-</div>
-<div class="row target-market-table">
-    <div class="columns twelve">
-        <table class="responsive">
-            <tbody>
-                <tr>
-                    <th>Name</th>
-                    <th>Created</th>
-                    <th>Expected Lift</th>
-                    <th>Companies</th>
-                    <th>Market Revenue</th>
-                    <th>Account</th>
-                    <th>Customers</th>
-                    <th>Revenue</th>
-                </tr>
-                <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
-                    <td>{{targetMarket.name}}</td>
-                    <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
-                    <td>{{targetMarket.targetMarketStatistics.expectedLift}}</td>
-                    <td>{{targetMarket.targetMarketStatistics.numCompanies}}</td>
-                    <td>${{targetMarket.targetMarketStatistics.marketRevenue}}</td>
-                    <td>{{targetMarket.targetMarketStatistics.numAccounts}}</td>
-                    <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
-                    <td>${{targetMarket.targetMarketStatistics.revenue}}</td>
-                </tr>
+    <div class="row target-market-table">
+        <div class="columns twelve">
+            <table class="responsive">
+                <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <th>Created</th>
+                        <th>Expected Lift</th>
+                        <th>Companies</th>
+                        <th>Market Revenue</th>
+                        <th>Account</th>
+                        <th>Customers</th>
+                        <th>Revenue</th>
+                    </tr>
+                    <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
+                        <td>{{targetMarket.name}}</td>
+                        <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.expectedLift}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.numCompanies}}</td>
+                        <td>${{targetMarket.targetMarketStatistics.marketRevenue}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.numAccounts}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
+                        <td>${{targetMarket.targetMarketStatistics.revenue}}</td>
+                    </tr>
 
-                <!-- fake data for testing purposes -->
-                <tr>
-                    <td>Global Target Market</td>
-                    <td>2015/01/01</td>
-                    <td>2.3x</td>
-                    <td>75</td>
-                    <td>$323,001,950</td>
-                    <td>19,745</td>
-                    <td>3,000</td>
-                    <td>$64,512,800</td>
-                </tr>
-                <tr>
-                    <td>Global Target Market</td>
-                    <td>2015/01/01</td>
-                    <td>2.3x</td>
-                    <td>75</td>
-                    <td>$323,001,950</td>
-                    <td>19,745</td>
-                    <td>3,000</td>
-                    <td>$64,512,800</td>
-                </tr>
-                <tr>
-                    <td>Global Target Market</td>
-                    <td>2015/01/01</td>
-                    <td>2.3x</td>
-                    <td>75</td>
-                    <td>$323,001,950</td>
-                    <td>19,745</td>
-                    <td>3,000</td>
-                    <td>$64,512,800</td>
-                </tr>
-                <tr>
-                    <td>Global Target Market</td>
-                    <td>2015/01/01</td>
-                    <td>2.3x</td>
-                    <td>75</td>
-                    <td>$323,001,950</td>
-                    <td>19,745</td>
-                    <td>3,000</td>
-                    <td>$64,512,800</td>
-                </tr>
-                <tr>
-                    <td>Global Target Market</td>
-                    <td>2015/01/01</td>
-                    <td>2.3x</td>
-                    <td>75</td>
-                    <td>$323,001,950</td>
-                    <td>19,745</td>
-                    <td>3,000</td>
-                    <td>$64,512,800</td>
-                </tr>
-            </tbody>
-        </table>
+                    <!-- fake data for testing purposes -->
+                    <div>
+                    <tr>
+                        <td>lobal Target Market</td>
+                        <td>2015/01/01</td>
+                        <td>2.3x</td>
+                        <td>75</td>
+                        <td>$323,001,950</td>
+                        <td>19,745</td>
+                        <td>3,000</td>
+                        <td>$64,512,800</td>
+                    </tr>
+                    <tr>
+                        <td>Global Target Market</td>
+                        <td>2015/01/01</td>
+                        <td>2.3x</td>
+                        <td>75</td>
+                        <td>$323,001,950</td>
+                        <td>19,745</td>
+                        <td>3,000</td>
+                        <td>$64,512,800</td>
+                    </tr>
+                    </div>
+                    <tr>
+                        <td>Global Target Market</td>
+                        <td>2015/01/01</td>
+                        <td>2.3x</td>
+                        <td>75</td>
+                        <td>$323,001,950</td>
+                        <td>19,745</td>
+                        <td>3,000</td>
+                        <td>$64,512,800</td>
+                    </tr>
+                    <tr>
+                        <td>Global Target Market</td>
+                        <td>2015/01/01</td>
+                        <td>2.3x</td>
+                        <td>75</td>
+                        <td>$323,001,950</td>
+                        <td>19,745</td>
+                        <td>3,000</td>
+                        <td>$64,512,800</td>
+                    </tr>
+                    <tr>
+                        <td>Global Target Market</td>
+                        <td>2015/01/01</td>
+                        <td>2.3x</td>
+                        <td>75</td>
+                        <td>$323,001,950</td>
+                        <td>19,745</td>
+                        <td>3,000</td>
+                        <td>$64,512,800</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 </div>
