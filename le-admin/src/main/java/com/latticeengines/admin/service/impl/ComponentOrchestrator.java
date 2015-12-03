@@ -41,7 +41,7 @@ public class ComponentOrchestrator {
     @Autowired
     private UserService userService;
 
-    @Value("security.pls.app.hostport=http://localhost:8080")
+    @Value("${security.pd.app.hostport}")
     private String apiHostPort;
 
     private static Map<String, LatticeComponent> componentMap;
@@ -154,7 +154,7 @@ public class ComponentOrchestrator {
             if (user == null) {
                 log.error(String.format("User: %s cannot be found", email));
             }
-            emailService.sendPlsNewExternalUserEmail(user, "admin", apiHostPort);
+            emailService.sendPdNewExternalUserEmail(user, "admin", apiHostPort);
         }
     }
 
@@ -167,7 +167,7 @@ public class ComponentOrchestrator {
             log.info("tenantId is " + tenantId);
             Tenant tenant = new Tenant();
             tenant.setName(tenantId);
-            emailService.sendPlsExistingExternalUserEmail(tenant, user, apiHostPort);
+            emailService.sendPdExistingExternalUserEmail(tenant, user, apiHostPort);
         }
     }
 

@@ -18,8 +18,7 @@ public class EmailTemplateBuilder {
 
     public EmailTemplateBuilder(Template template) throws IOException {
         String tmpFile = template.templateFile();
-        htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(tmpFile));
+        htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(tmpFile));
     }
 
     public EmailTemplateBuilder replaceToken(String token, String value) {
@@ -55,11 +54,13 @@ public class EmailTemplateBuilder {
     }
 
     public enum Template {
-        PLS_NEW_EXTERNAL_USER("new_user.html"),
-        PLS_NEW_INTERNAL_USER("new_user.html"),
-        PLS_EXISTING_EXTERNAL_USER("old_user.html"),
-        PLS_EXISTING_INTERNAL_USER("old_user.html"),
-        PLS_FORGET_PASSWORD("forget_password.html");
+        PLS_NEW_EXTERNAL_USER("new_user.html"), //
+        PLS_NEW_INTERNAL_USER("new_user.html"), //
+        PLS_EXISTING_EXTERNAL_USER("old_user.html"), //
+        PLS_EXISTING_INTERNAL_USER("old_user.html"), //
+        PLS_FORGET_PASSWORD("forget_password.html"), //
+        PD_NEW_EXTERNAL_USER("pd_new_external_user.html"), //
+        PD_EXISITING_EXTERNAL_USER("pd_old_external_user.html");
 
         private final static String templateRoot = "com/latticeengines/security/";
         private final String templateFile;
@@ -68,7 +69,9 @@ public class EmailTemplateBuilder {
             this.templateFile = templateRoot + tmpFile;
         }
 
-        public String templateFile() { return this.templateFile; }
+        public String templateFile() {
+            return this.templateFile;
+        }
     }
 
 }

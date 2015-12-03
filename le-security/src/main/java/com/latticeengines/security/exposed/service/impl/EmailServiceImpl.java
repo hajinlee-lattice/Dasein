@@ -20,7 +20,7 @@ import com.latticeengines.security.util.EmailUtils;
 @Component
 public class EmailServiceImpl implements EmailService {
 
-    private static final Log log = LogFactory.getLog(EmailUtils.class);
+    private static final Log log = LogFactory.getLog(EmailServiceImpl.class);
 
     @Autowired
     private EmailSettings emailsettings;
@@ -137,6 +137,49 @@ public class EmailServiceImpl implements EmailService {
             log.error("Failed to send forget password email to " + user.getEmail() + " " + e.getMessage());
         }
         log.info("Sending forget password email " + user.getEmail() + " succeeded.");
+    }
+
+    @Override
+    public void sendPdNewExternalUserEmail(User user, String password, String hostport) {
+        try {
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_NEW_EXTERNAL_USER);
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{tenantmsg}}", "You have been granted access to the Lattice Prospect Discovery.");
+            builder.replaceToken("{{username}}", user.getUsername());
+            builder.replaceToken("{{tenantname}}", "&nbsp;");
+            builder.replaceToken("{{password}}", password);
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            log.info("Sending email to " + user.getUsername());
+            sendMultiPartEmail("Welcome to Lattice Prospect Discovery", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error(String.format("Failed to send new external user email for PD to %s with the error message: %s",
+                    user.getEmail(), e.getMessage()));
+        }
+        log.info("Sending new external user email to " + user.getEmail() + " succeeded.");
+    }
+
+    @Override
+    public void sendPdExistingExternalUserEmail(Tenant tenant, User user, String hostport) {
+        try {
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PD_EXISITING_EXTERNAL_USER);
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            log.info("Sending email to " + user.getUsername());
+            sendMultiPartEmail("Welcome to Lattice Prospect Discovery", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error(String.format(
+                    "Failed to send exisiting external user email for PD to %s with the error message: %s",
+                    user.getEmail(), e.getMessage()));
+        }
+        log.info("Sending existing external user email to " + user.getEmail() + " succeeded.");
     }
 
 }

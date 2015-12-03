@@ -21,5 +21,9 @@ public interface EmailService {
 
     void sendPlsExistingExternalUserEmail(Tenant tenant, User user, String hostport);
 
+    void sendPdNewExternalUserEmail(User user, String password, String hostport);
+
+    void sendPdExistingExternalUserEmail(Tenant tenant, User user, String hostport);
+
     void sendPlsForgetPasswordEmail(User user, String password, String hostport);
 }
