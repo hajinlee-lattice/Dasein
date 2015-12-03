@@ -7,6 +7,7 @@ class ReservedFieldUtil():
         configFields.append(("Score", float(-1)))
         configFields.append(("Converted", None))
         configFields.append(("Training", None))
+        configFields.append(("PredictedRevenue", float(0)))
 
         # Decorate Names To Avoid Clashes
         lookup = dict()

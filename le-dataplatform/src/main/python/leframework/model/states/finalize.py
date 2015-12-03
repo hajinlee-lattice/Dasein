@@ -20,6 +20,7 @@ class Finalize(State):
     def execute(self):
         self.writeJson(self.getMediator())
         self.writeScoredText(self.getMediator())
+        self.writeRevenueStatisticsText(self.getMediator())
         self.invokeModelPredictorsExtraction(self.getMediator())
         self.writeReadoutSample(self.getMediator())
         self.writeEnhancedFiles(self.getMediator())
@@ -41,6 +42,12 @@ class Finalize(State):
         # write the target data to file
         numpy.savetxt(mediator.modelLocalDir + mediator.name + "_target.txt", eventData, delimiter=",", fmt="%s")
         
+    def writeRevenueStatisticsText(self, mediator):
+        if (mediator.revenueColumn != None):
+            numpy.savetxt(mediator.modelLocalDir + mediator.name + "_revenue_statistics.txt", mediator.revenueStatistics, delimiter=",", fmt="%s")
+        
+        
+
     def writeJson(self, mediator):
         stateMachine = self.getStateMachine()
         states = stateMachine.getStates()

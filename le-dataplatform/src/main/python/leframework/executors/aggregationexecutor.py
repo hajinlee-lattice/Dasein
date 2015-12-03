@@ -15,6 +15,8 @@ from leframework.model.states.datacompositiongenerator import DataCompositionGen
 from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
 from leframework.model.states.finalize import Finalize
 from leframework.model.states.initialize import Initialize
+from leframework.model.states.initializerevenue import InitializeRevenue
+from leframework.model.states.revenuestatistics import RevenueStatistics
 from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.namegenerator import NameGenerator
@@ -28,6 +30,7 @@ from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
+from leframework.model.states.revenuestatistics import RevenueStatistics
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -49,6 +52,8 @@ class AggregationExecutor(Executor):
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine(self.amHost, self.amPort)
         stateMachine.addState(Initialize(), 1)  
+        stateMachine.addState(InitializeRevenue(), 22)  
+        stateMachine.addState(RevenueStatistics(), 23)  
         stateMachine.addState(NormalizationGenerator(), 2)  
         stateMachine.addState(CalibrationGenerator(), 5)
         stateMachine.addState(AverageProbabilityGenerator(), 3)
