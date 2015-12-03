@@ -52,7 +52,7 @@ public class RestApiProxy implements WorkflowProxy, JobProxy {
     // @Override
     public Job getWorkflowExecution(String workflowId) {
         try {
-            return restTemplate.getForObject(constructUrl("workflowapi", "job/" + workflowId), Job.class);
+            return restTemplate.getForObject(constructUrl("workflowapi", "workflows/job/" + workflowId), Job.class);
         } catch (Exception e) {
             throw new RuntimeException("getWorkflowExecution: Remote call failure", e);
         }
@@ -62,7 +62,7 @@ public class RestApiProxy implements WorkflowProxy, JobProxy {
     @SuppressWarnings("unchecked")
     public List<Job> getWorkflowExecutionsForTenant(long tenantPid) {
         try {
-            return restTemplate.getForObject(constructUrl("workflowapi", "jobs/" + tenantPid), List.class);
+            return restTemplate.getForObject(constructUrl("workflowapi", "workflows/jobs/" + tenantPid), List.class);
         } catch (Exception e) {
             throw new RuntimeException("getWorkflowExecutionsForTenant: Remote call failure", e);
         }
