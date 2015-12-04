@@ -16,6 +16,9 @@ public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements Metri
         for (Object arg : joinPoint.getArgs()) {
             args.append((arg == null ? " " : arg.toString()) + ";");
         }
+        if (args.length() == 0) {
+            return "";
+        }
         String metrics = String.format(" Arguments=%s", args.deleteCharAt(args.length() - 1));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
