@@ -291,6 +291,7 @@ public enum LedpCode {
     LEDP_28008("Step configuration failed validation with errors:{0} ... {1}."), //
     LEDP_28009("Received Null propdata match status for this url:{0}."), //
     LEDP_28010("Modeling app {0} did not succeed:{1}."), //
+    LEDP_28011("Workflow name was not specified in workflow config:{1}"), //
 
     // le-dellebi
     LEDP_29000("The file type {0} is not found in the DellEBI configuration database. Please check the config database."), //

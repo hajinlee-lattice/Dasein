@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
@@ -43,7 +45,11 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
     @Override
     public String process(WorkflowConfiguration workflowConfig) throws Exception {
-        log.info("Running WorkflowProcessor with config:" + workflowConfig.toString());
+        if (workflowConfig.getWorkflowName() == null) {
+            throw new LedpException(LedpCode.LEDP_28011, new String[] { workflowConfig.toString() });
+        }
+        log.info(String.format("Running WorkflowProcessor with workflowName:%s and config:%s",
+                workflowConfig.getWorkflowName(), workflowConfig.toString()));
         appContext = loadSoftwarePackages("workflowapi", softwareLibraryService, appContext);
 
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
