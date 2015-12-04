@@ -571,9 +571,6 @@ public abstract class AbstractArchiveService<Progress extends ArchiveProgressBas
             swapTableNamesInDestDB(progress, bakTableName, destTable);
 
             return false;
-        } finally {
-            LoggingUtils.logInfo(log, progress, "Drop backup table");
-            dropJdbcTableIfExists(bakTableName);
         }
 
         return true;
