@@ -138,6 +138,11 @@ console.log('LoginController init');
         $http.get('./app/views/MainView.html').success(function (html) {
             var scope = $rootScope.$new();
             scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
+
+            if (!scope.isLoggedInWithTempPassword) {
+                window.open("/pd/#/jobs/import/credentials", "_self");
+            }
+
             scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
             $compile($("#mainView").html(html))(scope);
         });
@@ -187,7 +192,6 @@ console.log('LoginController init');
             if (result.Success === true) {
                 $scope.showForgotPassword = false;
                 $scope.resetPasswordSuccess = true;
-                window.open("/pd/#/jobs/import/credentials", "_self");
             } else {
                 $scope.showForgotPasswordError = true;
 

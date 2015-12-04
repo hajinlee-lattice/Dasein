@@ -148,11 +148,20 @@ angular.module('controllers.jobs.import.credentials', [
 
     // FIXME - Move this to the MarketsService file when it's created
     $scope.createDefaultTargetMarket = function () {
+        var authorizationToken = BrowserStorageUtility.getTokenDocument();
         $.ajax({
             url: '/pls/targetmarkets/default',
             method: 'POST',
+            beforeSend: function(xhr){
+                xhr.setRequestHeader('Authorization', authorizationToken);
+            },
             complete: function(event, status) {
-                alert('Default Target Market STATUS: ' + status);
+                console.log(event);
+                
+                if (status != "success") {
+                    var msg = event.responseJSON.errorMsg ? event.responseJSON.errorMsg : '';
+                    alert('Default Target Market STATUS: ' + status + '\nMESSAGE:' + msg);
+                }
 
                 window.location.hash = '#/jobs/status';
             }

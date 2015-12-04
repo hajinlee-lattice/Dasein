@@ -128,10 +128,9 @@ angular.module('mainApp.login.services.LoginService', [
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();
-                alert('service logout');
+
                 window.open("/", "_self");
 
-                //window.location.reload();
             } else {
                 SessionService.HandleResponseErrors(data, status);
             }
