@@ -1,16 +1,17 @@
 .pd-summary-links {
-    background: #d0d0d0;
-    color: #333;
+    background: #00223A;
+    color: #fff;
     height: 50px;
 
     ul {
         dl {
             padding: 0;
+            border-left: 1px solid #26639b;
         }
         dl a:visited,
         dl a:active,
         dl a {
-            color: #777;
+            color: #ccc;
             font-size: 16px;
             padding: 0.8em 1em;
             display: inline-block;
@@ -20,10 +21,10 @@
             padding-left: 4px;
         }
         dl a:hover {
-            color: #333;
+            color: #eee;
         }
         dl.active a {
-            color: #333;
+            color: #eee;
             text-shadow: none;
         }
     }
