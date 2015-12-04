@@ -11,11 +11,10 @@ except ImportError:
 	os.system('pip install -U selenium')
 	from selenium import webdriver
 requests.packages.urllib3.disable_warnings()
-log=SalePrismEnvironments.logProvider.getLog("DataloaderDealer",True)
+log=SalePrismEnvironments.log
 class DataloaderDealer(object):
 	def __init__(self):
 		self.headers={"MagicAuthentication":"Security through obscurity!","Accept":"application/json;","Content-Type":"application/json; charset=utf-8;"}
-		
 		self.driver=None
 	def setTenantDataProviderByREST(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,dbUser=SalePrismEnvironments.DBUser,dbPwd=SalePrismEnvironments.DBPwd):
 		log.info("##########  dataloader configuration start   ##########")
@@ -66,10 +65,10 @@ class DataloaderDealer(object):
 		#change tenant to specified one
 		self.driver.find_element_by_xpath("//li[@id='li_account']").click()
 		self.driver.find_element_by_xpath("//li[@id='li_changetenant']").click()
-		time.sleep(3)
+		time.sleep(5)
 		self.driver.find_element_by_xpath("//span[starts-with(text(),'"+tenant+"')]").click()
 		self.driver.find_element_by_xpath("//span[text()='OK']").click()
-		time.sleep(3)
+		time.sleep(5)
 		launchId=self.driver.find_element_by_xpath("//div[@id='div_queue_launches']//td[2]").text
 		assert launchId!=None
 		log.info("The running FULL_DANTE_DATA_FLOW ID is %s "%launchId)

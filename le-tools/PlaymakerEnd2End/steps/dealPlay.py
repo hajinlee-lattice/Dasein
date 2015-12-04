@@ -11,8 +11,8 @@ except ImportError:
 import time,json,requests
 requests.packages.urllib3.disable_warnings()
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
-
-log=SalePrismEnvironments.logProvider.getLog("DealPlay",True)
+from PlaymakerEnd2End.steps.DBHelper import DealDB
+log=SalePrismEnvironments.log
 class PlayTypes(object):
 	t_AnalyticList='AnalyticList'
 	t_CSRepeatPurchase='CSRepeatPurchase'
@@ -21,6 +21,10 @@ class PlayTypes(object):
 	t_List='List'
 	t_RuleBased='RuleBased'
 	t_Winback='Winback'
+class StatusCode(object):
+	s_Created=1000
+	s_Launched=2800
+	s_Synced=3000#need to investigate
 
 class DealPlay(object):
 	def __init__(self):
@@ -78,12 +82,9 @@ class DealPlay(object):
 		assert response.status_code==200
 		log.info("reset cache successfully")
 
-	def createPlayByREST(self,playName=SalePrismEnvironments.playName,UseEVModel=False,*playType):
+	def createPlayByREST(self,playName=SalePrismEnvironments.playName,UseEVModel=False,playType=SalePrismEnvironments.playType):
 		log.info("##########  play creation starts   ##########")
-		if playType:
-			pass
-		else:
-			playType=SalePrismEnvironments.playType
+		playName=playName+playType+str(int(time.time()))
 		#Prepare the list for anlytics play type
 		AnlyticPlayList=[PlayTypes.t_CSFirstPurchase,PlayTypes.t_AnalyticList,PlayTypes.t_CSRepeatPurchase,PlayTypes.t_Winback]
 		with open("..\\PlaysCreationJsonFiles\\"+playType) as createPlayJsonFile:
@@ -105,7 +106,10 @@ class DealPlay(object):
 		PlayID=json.loads(resJson["CompressedResult"])["Key"]
 		assert int(PlayID)>0
 		log.info("Play created!")
-		return PlayID
+		log.info("Name of created Play is"+playName)
+		selectSQL="SELECT  PreLead_ID  FROM PreLead where Status=1000 and Play_ID=%s"%PlayID
+		playDict={"playName":playName,"playId":PlayID,"recommendationsNumberGenerated":len(DealDB.fetchAllResultOfSelect(selectSQL))}
+		return playDict
 	def scorePlay(self,idOfPlay):
 		log.info("##########  Play Scoring start   ##########")
 		scorePlayUrl=SalePrismEnvironments.scorePlayUrl+str(idOfPlay)
@@ -126,7 +130,7 @@ class DealPlay(object):
 		resultJson=json.loads(response.text)
 		status=json.loads(resultJson['CompressedResult'])['CombinedModelScoreStatusID']
 		return status
-	def launchPlay(self,nameOfPlayToLaunch=SalePrismEnvironments.playName,launchAllPlays=False):
+	def launchPlay(self,nameOfPlayToLaunch,launchAllPlays=False):
 		log.info("##########  Play Launch starts   ##########")
 		getPortfililPlaysUrl=SalePrismEnvironments.getPortfililPlaysUrl
 		getPortfililPlaysHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"LEFormsTicket":self.aspAuth,"Origin":"https://"+SalePrismEnvironments.host}

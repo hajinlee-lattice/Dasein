@@ -11,7 +11,7 @@ except ImportError:
 	os.system('pip install -U selenium')
 	from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-log=SalePrismEnvironments.logProvider.getLog("SFDC",True)
+log=SalePrismEnvironments.log
 class DealSFDC(object):
 	def __init__(self):
 		
@@ -106,7 +106,7 @@ class DealSFDC(object):
 			log.error("reset SFDC failed Error is: %s"%e.message)
 		else:
 			log.info("reset SFDC successed")
-	def checkRecommendations(self):
+	def checkRecommendations(self,playName):
 		if not self.islogin():
 			self.loginSF()
 		self.driver.find_element_by_xpath("//a[text()='Lattice Recommendations']").click()
@@ -117,7 +117,7 @@ class DealSFDC(object):
 			self.driver.find_element_by_xpath("//span[text()='Page']//input").send_keys(i)
 			self.driver.find_element_by_xpath("//span[text()='Page']//input").send_keys(Keys.ENTER)
 			time.sleep(5)
-			if self.driver.find_element_by_xpath("//a[text()='"+SalePrismEnvironments.playName+"']").is_displayed():
+			if self.driver.find_element_by_xpath("//a[text()='"+playName+"']").is_displayed():
 				is_recommendationExist = True
 				break
 		try:
@@ -126,10 +126,10 @@ class DealSFDC(object):
 			log.error("Sync Data Failed")
 		else:
 			log.info("Sync Data successfully")
-	def checkAccountPage(self):
+	def checkAccountPage(self,playName):
 		if not self.islogin():
 			self.loginSF()
-		
+
 def main():
 	d=DealSFDC()
 	d.loginSF()

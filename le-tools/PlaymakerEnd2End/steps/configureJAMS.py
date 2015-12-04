@@ -9,7 +9,7 @@ except ImportError:
 	assert os.system('pip install -U pyodbc') ==0
 	import pyodbc
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
-log=SalePrismEnvironments.logProvider.getLog("configureJams",True)
+log=SalePrismEnvironments.log
 def update247DB(tenant=SalePrismEnvironments.tenantName,qname=SalePrismEnvironments.QueneName):
 	log.info("########## update JAMSCFG table on 247 DB configuration start   ##########")
 	updateQName="update Tenants set Queue_Name='"+qname+"' where Tenant = '"+tenant+"'"

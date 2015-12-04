@@ -10,7 +10,7 @@ except Exception,e:
 	import pyodbc
 import json
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
-log=SalePrismEnvironments.logProvider.getLog("updateAccount",True)
+log=SalePrismEnvironments.log
 def updateTenantAccount(tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,user=SalePrismEnvironments.DBUser,pwd=SalePrismEnvironments.DBPwd):
 	log.info("##########  Account Match process starts   ##########")
 	with open('..\\AccountJson') as jsonData:

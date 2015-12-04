@@ -49,7 +49,7 @@ class SalePrismEnvironments(object):
     getPortfililPlaysUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/GetPortfolioPlays?queryName=AllPortfolioPlays"
     launchPlaysUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/LaunchPlays?simulate=false&queryName=AllPortfolioPlays"
     #configuration in Properties
-    logProvider=LogFactory
+    log=LogFactory.getLog("End2End",True)
     OTK=getOneTimeKey(tenantName,jdbc)
     #webdriver
     driverType=paras.get("driverType")

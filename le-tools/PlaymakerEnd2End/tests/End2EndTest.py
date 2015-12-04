@@ -9,37 +9,11 @@ from PlaymakerEnd2End.steps.configureDataloader import DataloaderDealer
 from PlaymakerEnd2End.steps.configureJAMS  import update247DB
 from PlaymakerEnd2End.steps.configureSFDC  import DealSFDC
 from PlaymakerEnd2End.steps.dealPlay  import DealPlay
+from PlaymakerEnd2End.steps.DBHelper import DealDB
 import unittest,time
-log=SalePrismEnvironments.logProvider.getLog("TestClass",True)
+log=SalePrismEnvironments.log
 
-class End2EndNecessarySteps(object):
-	def __init__(self):
-		self.playDealer=DealPlay()
-		self.dlDealer=DataloaderDealer()
-		self.sfdcDealer=DealSFDC()
-	def PlayMakerConfiguration(self):
-		self.playDealer.setPlaymakerConfigurationByRest()
-	def MatchAccountID(self):
-		updateTenantAccount()
-	def ConfigureDataLoader(self):
-		self.dlDealer.setTenantDataProviderByREST()
-	def ConfigureJAMS(self):
-		update247DB()
-	def dataFlowPlaymakerPart(self):
-		PlayID=self.playDealer.createPlayByREST()#create a play
-		self.playDealer.approvePlay(idOfPlay=PlayID)#approve a play
-		self.playDealer.scorePlay(idOfPlay=PlayID)#do score
-		status=self.playDealer.getStatusOfPlay(idOfPlay=PlayID)
-		while status != 'Complete':#until score finish
-			time.sleep(10)
-			status=self.playDealer.getStatusOfPlay(idOfPlay=PlayID)
-		self.playDealer.launchPlay()#launch play
-	def dataFlowSFDCPart(self):
-		self.sfdcDealer.loginSF()
-		self.sfdcDealer.configDanteServer()
-		self.sfdcDealer.configOTK()
-		assert self.dlDealer.isDanteGroupFinishSuccessfully()
-		self.sfdcDealer.syncData()
+
 class DifferentScenario(object):
 	def __init__(self):
 		self.playDealer=DealPlay()
@@ -65,20 +39,32 @@ class DifferentScenario(object):
 		pass
 class TestSteps(unittest.TestCase):
 	def setUp(self):
-		self.steps=End2EndNecessarySteps()
-	def test_aPlayMakerConfiguration(self):
-		self.steps.PlayMakerConfiguration()
-	def test_cMatchAccountID(self):
-		self.steps.MatchAccountID()
-	def test_dConfigureDataLoader(self):
-		self.steps.ConfigureDataLoader()
-	def test_eConfigureJAMS(self):
-		self.steps.ConfigureJAMS()
-	def test_fPlayPart(self):
-		self.steps.dataFlowPlaymakerPart()
-	def test_hSalesforcePart(self):
-		self.steps.dataFlowSFDCPart()
-
+		self.playDealer=DealPlay()
+		self.dlDealer=DataloaderDealer()
+		self.sfdcDealer=DealSFDC()
+		self.playName=None
+		self.playId=None
+	def test_SimpleDataFlowPlaymakerPart(self):
+		createPlayResult=self.playDealer.createPlayByREST()#create a play
+		self.playId=createPlayResult["playId"]
+		self.playName=createPlayResult["playName"]
+		self.numberOfRecommendations=createPlayResult["recommendationsNumberGenerated"]
+		self.playDealer.approvePlay(idOfPlay=self.playId)#approve a play
+		self.playDealer.scorePlay(idOfPlay=self.playId)#do score
+		status=self.playDealer.getStatusOfPlay(idOfPlay=self.playId)
+		while status != 'Complete':#until score finish
+			time.sleep(10)
+			status=self.playDealer.getStatusOfPlay(idOfPlay=self.playId)
+		self.playDealer.launchPlay(nameOfPlayToLaunch=self.playName)#launch play
+		numberOf2800=DealDB.fetchAllResultOfSelect(SQL="SELECT  PreLead_ID  FROM PreLead where Status=2800 and Play_ID=%s"%self.playId)
+		assert numberOf2800==self.numberOfRecommendations
+	def test_SimpleDataFlowSFDCPart(self):
+		self.sfdcDealer.loginSF()
+		self.sfdcDealer.configDanteServer()
+		self.sfdcDealer.configOTK()
+		assert self.dlDealer.isDanteGroupFinishSuccessfully()
+		self.sfdcDealer.syncData()
+		#self.sfdcDealer.checkRecommendations(self.playName)
 if __name__ == '__main__':
 	unittest.main()
 	SalePrismEnvironments.ff.quit()
