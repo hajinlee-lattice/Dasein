@@ -23,6 +23,9 @@
                 <div data-ng-repeat="job in jobs">
                     <data-job-status-row job="job"></data-job-status-row>
                 </div>
+                <div data-ng-show="showEmptyJobsMessage" class="text-center">
+                    There are no jobs to show at the moment
+                </div>
             </div>
         </div>
     </div>

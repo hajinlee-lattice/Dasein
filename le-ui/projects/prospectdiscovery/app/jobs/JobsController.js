@@ -8,8 +8,14 @@ angular.module('controllers.jobs', [
 
 .controller('JobsCtrl', function($scope, $rootScope, $http, JobsService) {
     $scope.jobs;
+    $scope.showEmptyJobsMessage = false;
 
     JobsService.GetAllJobs().then(function(result) {
         $scope.jobs = result.resultObj;
     });
+    
+    if (! $scope.jobs) {
+        $scope.showEmptyJobsMessage = true;
+    }
+
 });

@@ -2,6 +2,11 @@ angular.module('services.jobs', [
 ])
 
 .service('JobsService', function($http, $q, _) {
+
+    var stepsNameDictionary = { "importData": "load_data", "runDataFlow": "load_data",
+            "loadHdfsTableToPDServer": "load_data", "match": "match_data", "createEventTableFromMatchResult": "match_data",
+            "sample": "generate_insights", "profileAndModel": "create_model" };
+
     this.GetAllJobs = function() {
         var deferred = $q.defer();
         var result;
@@ -51,9 +56,12 @@ angular.module('services.jobs', [
                     resultObj:
                         {
                             id: jobInfo.id,
+                            user: jobInfo.user,
+                            jobType: jobInfo.jobType,
                             jobStatus: jobInfo.jobStatus,
                             stepRunning: getStepRunning(jobInfo),
                             stepsCompleted: getStepsCompleted(jobInfo)
+                            // to add step endtimes
                         }
                 };
                 deferred.resolve(result);
@@ -72,7 +80,7 @@ angular.module('services.jobs', [
         
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Running") {
-                return job.steps[i].jobStepType;
+                return stepsNameDictionary[job.steps[i].jobStepType];
             }
         }
         return null;
@@ -86,8 +94,12 @@ angular.module('services.jobs', [
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {
-                stepsCompleted.push(job.steps[i].jobStepType);
+                stepsCompleted.push(stepsNameDictionary[job.steps[i].jobStepType]);
             }
+        }
+        
+        if (stepsCompleted.indexOf("create_model") > -1) {
+            stepsCompleted.push("create_global_target_market");
         }
         return stepsCompleted;
     }
