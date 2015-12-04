@@ -28,4 +28,9 @@ public class TenantDeploymentEntityMgrImpl extends BaseEntityMgrImpl<TenantDeplo
         return tenantDeploymentDao.findByTenantId(tenantId);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public boolean deleteByTenantId(Long tenantId) {
+        return tenantDeploymentDao.deleteByTenantId(tenantId);
+    }
 }

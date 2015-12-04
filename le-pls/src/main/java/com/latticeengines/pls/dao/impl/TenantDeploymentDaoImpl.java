@@ -34,4 +34,15 @@ public class TenantDeploymentDaoImpl extends BaseDaoImpl<TenantDeployment> imple
         return (TenantDeployment)list.get(0);
     }
 
+    @Override
+    public boolean deleteByTenantId(long tenantId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<TenantDeployment> entityClz = getEntityClass();
+        String queryStr = String.format("delete from %s where tenant_id = :tenantId", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setLong("tenantId", tenantId);
+        int deletedRows = query.executeUpdate();
+        return deletedRows > 0;
+    }
+
 }

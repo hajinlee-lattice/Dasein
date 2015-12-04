@@ -543,7 +543,7 @@
   padding-left: 16px;
 }
 
-#deploymentWizard .link-area a.disabled {
+#deploymentWizard a.disabled {
   color: #aaa;
   cursor: default;
   text-decoration: none;
@@ -587,4 +587,8 @@
 
 #deploymentWizard .enrich-progress {
   margin-top: 12px;
+}
+
+#deploymentWizard .clear-link {
+  margin-top: 80px;
 }

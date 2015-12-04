@@ -4,12 +4,14 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.services.SessionService',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.setup.utilities.SetupUtility',
     'mainApp.setup.controllers.CancelDeploymentStepModel',
+    'mainApp.setup.controllers.ClearDeploymentModel',
     'mainApp.setup.services.TenantDeploymentService'
 ])
 
-.controller('ImportAndEnrichDataController', function ($scope, $rootScope, $http, $filter, $timeout, ResourceUtility, DateTimeFormatUtility, BrowserStorageUtility, NavUtility, SessionService, SetupUtility, CancelDeploymentStepModel, TenantDeploymentService) {
+.controller('ImportAndEnrichDataController', function ($scope, $rootScope, $http, $filter, $timeout, ResourceUtility, DateTimeFormatUtility, BrowserStorageUtility, NavUtility, SessionService, FeatureFlagService, SetupUtility, CancelDeploymentStepModel, ClearDeploymentModel, TenantDeploymentService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.SetupUtility = SetupUtility;
     if (BrowserStorageUtility.getClientSession() == null) { return; }
@@ -116,19 +118,11 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
                 }
 
                 if (result.ResultObj.Jobs != null) {
-                    var tables = getTables(result.ResultObj.Jobs);
-                    if (tables.length > 0) {
+                    if (result.ResultObj.Jobs.length > 0) {
                         if (step === SetupUtility.STEP_ENRICH_DATA) {
-                            var table = tables[0];
-                            if (table.ExtractedRows > 0) {
-                                var extractRows = $filter('number')(table.ExtractedRows);
-                                var totalRows = $filter('number')(table.TotalRows);
-                                $scope.enrichProgress = extractRows + $scope.ofText + totalRows + $scope.leadsText;
-                            } else {
-                                $scope.enrichProgress = ResourceUtility.getString('SETUP_ENRICH_DATA_DEFAULT_PROGRESS_LABEL');
-                            }
+                            $scope.enrichProgress = getEnrichProgress(result.ResultObj.Jobs);
                         } else {
-                            $scope.tables = tables;
+                            $scope.tables = getTables(result.ResultObj.Jobs);
                         }
                     }
                 } else if (inTimer) {
@@ -171,6 +165,12 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
     function getDataCompleted(step) {
         if ($scope.deployment.Step === step || step === SetupUtility.STEP_ENRICH_DATA) {
             $scope.loading = false;
+
+            var flags = FeatureFlagService.Flags();
+            if (FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE)) {
+                $scope.showClearDeploymentLink = true;
+                $scope.disableClearDeploymentLink = $scope.deployment.Status === SetupUtility.STATUS_IN_PROGRESS;
+            }
         }
     }
 
@@ -189,6 +189,17 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
             tables.push(table);
         }
         return tables;
+    }
+
+    function getEnrichProgress(jobs) {
+        var job = jobs[jobs.length - 1];
+        if (job.ExtractedRows > 0 && job.TotalRows > 0) {
+            var extractRows = $filter('number')(job.ExtractedRows);
+            var totalRows = $filter('number')(job.TotalRows);
+            return extractRows + $scope.ofText + totalRows + ' ' + $scope.leadsText;
+        } else {
+            return ResourceUtility.getString('SETUP_ENRICH_DATA_DEFAULT_PROGRESS_LABEL');
+        }
     }
 
     $scope.retryImportDataClicked = function($event) {
@@ -245,14 +256,14 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
         }
 
         var link = $($event.currentTarget);
-        if (link.attr("disabled") === "disabled") {
+        if (link.hasClass("disabled")) {
             return;
         }
         CancelDeploymentStepModel.show($scope, link);
     };
 
     $scope.cancelStep = function(link) {
-        link.attr("disabled", "disabled").addClass("disabled");
+        link.addClass("disabled");
         var step = link.attr("step");
         updateStatusLabelInProgress(step, ResourceUtility.getString('SETUP_CANCEL_PROGRESS_LABEL'));
         TenantDeploymentService.CancelLaunch().then(function (result) {
@@ -261,7 +272,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
             } else {
                 updateStatusLabelFail(step, result.ErrorResults);
             }
-            link.removeAttr("disabled").removeClass("disabled");
+            link.removeClass("disabled");
         });
     };
 
@@ -274,11 +285,11 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
     };
 
     function runQuery(link) {
-        if (link.attr("disabled") === "disabled") {
+        if (link.hasClass("disabled")) {
             return;
         }
 
-        link.attr("disabled", "disabled").addClass("disabled");
+        link.addClass("disabled");
         var step = link.attr("step");
         var fileName = link.attr("filename");
         var progressMsg = ResourceUtility.getString('SETUP_RUN_QUERY_START_LABEL', [fileName]);
@@ -289,7 +300,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
 
                 startGetQueryStatusTimer(link, result.ResultObj);
             } else {
-                link.removeAttr("disabled").removeClass("disabled");
+                link.removeClass("disabled");
                 updateStatusLabelFail(step, result.ErrorResults);
             }
         });
@@ -304,7 +315,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
 
     function getQueryStatus(link, queryHandle) {
         var step = link.attr("step");
-        if (!needQueryStatus(step)) {
+        if (!needGetQueryStatus(step)) {
             return;
         }
 
@@ -315,24 +326,24 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
                     clearTimer(step);
 
                     $http.get(link.attr("url") + "/" + queryHandle).then(function (response) {
-                        link.removeAttr("disabled").removeClass("disabled");
+                        link.removeClass("disabled");
 
                         var file = new Blob([response.data], { type: link.attr("filetype") });
                         saveAs(file, link.attr("filename"));
                         updateStatusLabelSuccess(step, ResourceUtility.getString('SETUP_DOWNLOAD_QUERY_DATA_SUCCESS', [link.attr("filename")]));
                     }, function (response) {
                         SessionService.HandleResponseErrors(response.data, response.status);
-                        link.removeAttr("disabled").removeClass("disabled");
+                        link.removeClass("disabled");
                         updateStatusLabelFail(step, ResourceUtility.getString('SETUP_DOWNLOAD_QUERY_DATA_ERROR', [link.attr("filename")]));
                     });
                 } else if (obj.Status > 3) {
                     clearTimer(step);
-                    link.removeAttr("disabled").removeClass("disabled");
+                    link.removeClass("disabled");
                     updateStatusLabelFail(step, ResourceUtility.getString('SETUP_RUN_QUERY_ERROR', [link.attr("filename")]));
                 }
             } else {
                 clearTimer(step);
-                link.removeAttr("disabled").removeClass("disabled");
+                link.removeClass("disabled");
                 updateStatusLabelFail(step, result.ErrorResults);
             }
 
@@ -340,7 +351,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
         });
     }
 
-    function needQueryStatus(step) {
+    function needGetQueryStatus(step) {
         if (!pageExists()) {
             clearTimer(step);
             $scope.gettingQueryStatus = false;
@@ -415,6 +426,16 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
         }
     }
 
+    $scope.clearDeploymentLinkClick = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        if ($scope.disableClearDeploymentLink) {
+            return;
+        }
+        ClearDeploymentModel.show();
+    };
 })
 
 .directive('importAndEnrichData', function () {

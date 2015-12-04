@@ -14,4 +14,5 @@ public interface TenantDeploymentService {
 
     boolean isDeploymentCompleted(TenantDeployment tenantDeployment);
 
+    boolean deleteTenantDeployment(String tenantId);
 }

@@ -29,23 +29,13 @@ public class TenantDeploymentServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        deployment = new TenantDeployment();
-        deployment.setTenantId(-1L);
-        deployment.setCreatedBy("functionalTester@lattice-engines.com");
-        DateTime dt = new DateTime(DateTimeZone.UTC);
-        deployment.setCreateTime(new Timestamp(dt.getMillis()));
-        deployment.setStep(TenantDeploymentStep.ENRICH_DATA);
-        deployment.setStatus(TenantDeploymentStatus.IN_PROGRESS);
-        deployment.setCurrentLaunchId(123L);
-        tenantDeploymentEntityMgr.create(deployment);
+        deployment = newDeployment(-1L);
     }
 
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
         if (deployment != null) {
-            Long tenantId = deployment.getTenantId();
-            TenantDeployment retrivedDeployment = tenantDeploymentEntityMgr.findByTenantId(tenantId);
-            tenantDeploymentEntityMgr.delete(retrivedDeployment);
+            tenantDeploymentEntityMgr.deleteByTenantId(deployment.getTenantId());
         }
     }
 
@@ -66,6 +56,15 @@ public class TenantDeploymentServiceImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testDeleteTenantDeployment() {
+        TenantDeployment dep = newDeployment(-2L);
+        Assert.assertNotNull(tenantDeploymentEntityMgr.findByTenantId(dep.getTenantId()));
+        tenantDeploymentEntityMgr.deleteByTenantId(dep.getTenantId());
+        Assert.assertNull(tenantDeploymentEntityMgr.findByTenantId(dep.getTenantId()));
+        Assert.assertNotNull(tenantDeploymentEntityMgr.findByTenantId(deployment.getTenantId()));
+    }
+
+    @Test(groups = "functional")
     public void testIsDeploymentCompleted() {
         TenantDeployment dep = new TenantDeployment();
         dep.setStep(TenantDeploymentStep.PUBLISH_SCORES);
@@ -75,5 +74,18 @@ public class TenantDeploymentServiceImplTestNG extends PlsFunctionalTestNGBase {
         dep.setStep(TenantDeploymentStep.SCORE_LEADS);
         dep.setStatus(TenantDeploymentStatus.SUCCESS);
         Assert.assertFalse(tenantDeploymentService.isDeploymentCompleted(dep));
+    }
+
+    private TenantDeployment newDeployment(long tenantId) {
+        TenantDeployment deployment = new TenantDeployment();
+        deployment.setTenantId(tenantId);
+        deployment.setCreatedBy("functionalTester@lattice-engines.com");
+        DateTime dt = new DateTime(DateTimeZone.UTC);
+        deployment.setCreateTime(new Timestamp(dt.getMillis()));
+        deployment.setStep(TenantDeploymentStep.ENRICH_DATA);
+        deployment.setStatus(TenantDeploymentStatus.IN_PROGRESS);
+        deployment.setCurrentLaunchId(123L);
+        tenantDeploymentEntityMgr.create(deployment);
+        return deployment;
     }
 }

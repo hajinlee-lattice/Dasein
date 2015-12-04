@@ -90,4 +90,8 @@ public class TenantDeploymentServiceImpl implements TenantDeploymentService {
         }
     }
 
+    public boolean deleteTenantDeployment(String tenantId) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        return tenantDeploymentEntityMgr.deleteByTenantId(tenant.getPid());
+    }
 }

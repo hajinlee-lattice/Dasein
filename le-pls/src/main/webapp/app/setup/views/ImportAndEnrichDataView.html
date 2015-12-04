@@ -17,7 +17,7 @@
                 <span class="complete-label"><i class="fa fa-check green"></i>{{ResourceUtility.getString('SETUP_IMPORT_COMPLETE_LABEL')}}</span>
                 <span data-ng-show="importCompleteTime != null" class="complete-time">{{importCompleteTime}}</span>
                 <span data-ng-show="importCompleteTime != null" class="link-area large">
-                    <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/profilesummarycsv" filename="DataProfileSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_IMPORT_DATA}}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_PROFILE_SUMMARY_CSV')}}</span></a>
+                    <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/profilesummarycsv" filename="DataProfileSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_IMPORT_DATA}}" data-ng-class="{'disabled' : deployment.Status === SetupUtility.STATUS_IN_PROGRESS}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_PROFILE_SUMMARY_CSV')}}</span></a>
                 </span>
                 <span data-ng-show="getImportCompleteTimeError != null" class="link-area">{{getImportCompleteTimeError}}</span>
             </div>
@@ -46,7 +46,7 @@
                 <span class="complete-label"><i class="fa fa-check green"></i>{{ResourceUtility.getString('SETUP_ENRICH_COMPLETE_LABEL')}}</span>
                 <span data-ng-show="enrichCompleteTime != null" class="complete-time">{{enrichCompleteTime}}</span>
                 <span data-ng-show="enrichCompleteTime != null" class="link-area large">
-                    <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/enrichmentsummarycsv" filename="DataEnrichmentSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_ENRICH_DATA}}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_ENRICHMENT_SUMMARY_CSV')}}</span></a>
+                    <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/enrichmentsummarycsv" filename="DataEnrichmentSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_ENRICH_DATA}}" data-ng-class="{'disabled' : deployment.Status === SetupUtility.STATUS_IN_PROGRESS}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_ENRICHMENT_SUMMARY_CSV')}}</span></a>
                 </span>
                 <span data-ng-show="getEnrichCompleteTimeError != null" class="link-area">{{getEnrichCompleteTimeError}}</span>
             </div>
@@ -66,6 +66,9 @@
                 <span data-ng-show="!missingData"><i class="fa fa-times-circle red"></i>{{ResourceUtility.getString('SETUP_ERROR_VALIDATE_METADATA_LABEL')}}</span>
                 <span class="link-area"><a href="#" data-ng-click="retryValidationDataClicked($event)">{{ResourceUtility.getString('SETUP_RERUN_VALIDATION_LABEL')}}</a></span>
             </div>
+        </div>
+        <div class="clear-link">
+            <a href="#" id="clearDeploymentLink" data-ng-show="showClearDeploymentLink" data-ng-class="{'disabled': disableClearDeploymentLink}" data-ng-click="clearDeploymentLinkClick($event)">{{ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_TITLE')}}</a>
         </div>
     </div>
 </div>

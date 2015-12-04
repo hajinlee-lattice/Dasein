@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
-import com.latticeengines.domain.exposed.dataloader.QueryDataResult;
 import com.latticeengines.domain.exposed.dataloader.QueryStatusResult;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TenantDeployment;
@@ -66,6 +65,23 @@ public class TenantDeploymentResource {
         }
 
         return response;
+    }
+
+    @RequestMapping(value = "/deployment", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete tenant deployment")
+    public SimpleBooleanResponse deleteDeployment(HttpServletRequest request) {
+        try {
+            Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+            tenantDeploymentService.deleteTenantDeployment(tenant.getId());
+
+            return SimpleBooleanResponse.successResponse();
+        } catch (LedpException e) {
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
+        } catch (Exception e) {
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
+                    .getFullStackTrace(e)));
+        }
     }
 
     @RequestMapping(value = "/importsfdcdata", method = RequestMethod.POST, headers = "Accept=application/json")

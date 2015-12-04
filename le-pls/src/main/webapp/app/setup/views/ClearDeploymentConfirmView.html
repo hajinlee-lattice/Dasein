@@ -1,0 +1,27 @@
+<div class="modal-dialog modal-sm" data-ng-controller="ClearDeploymentController">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{{ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_TITLE')}}</h4>
+        </div>
+        <div class="modal-body">
+          <div data-ng-show="clearInProgress">
+              <div class="loader"> </div>
+              <h2 class="text-center">{{ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_PROGRESS')}}</h2>
+          </div>
+          <div data-ng-hide="clearInProgress" class="row">
+            <div class="col-sm-12 text-center">
+              <p>{{ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_LABEL')}}</p>
+            </div>
+          </div>
+          <div class="global-error local-error" data-ng-show="showClearError">
+              <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{clearErrorMessage}}</span>
+              <button class="close btn btn-link" data-ng-click="showClearError = false;"><i class="fa fa-times fa-inverse"></i></button>
+          </div>
+        </div>
+        <div class="modal-footer" data-ng-hide="clearInProgress">
+            <button id="discard-edit-no" class="btn btn-secondary" type="button" data-ng-click="noClicked()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
+            <a id="discard-edit-yes" class="btn btn-primary" href="#" data-ng-click="yesClicked($event)">{{ResourceUtility.getString('BUTTON_YES_LABEL')}}</a>
+        </div>
+    </div>
+</div>

@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
-import com.latticeengines.domain.exposed.dataloader.QueryDataResult;
 import com.latticeengines.domain.exposed.dataloader.QueryStatusResult;
 import com.latticeengines.domain.exposed.pls.TenantDeployment;
 import com.latticeengines.domain.exposed.pls.TenantDeploymentStep;

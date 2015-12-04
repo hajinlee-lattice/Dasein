@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.TenantDeploymentStatus;
 import com.latticeengines.domain.exposed.pls.TenantDeploymentStep;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.service.DlCallback;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantDeploymentManager;
@@ -34,6 +36,8 @@ import com.latticeengines.pls.service.TenantDeploymentService;
 import com.latticeengines.pls.service.VdbMetadataService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.service.EmailService;
+import com.latticeengines.security.exposed.service.UserService;
 
 @Component("tenantDeploymentManager")
 public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
@@ -61,6 +65,15 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
 
     @Autowired
     private TenantDeploymentService tenantDeploymentService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${security.pls.app.hostport:http://localhost:8080}")
+    private String hostPort;
 
     @Override
     public void importSfdcData(String tenantId, TenantDeployment deployment) {
@@ -140,7 +153,16 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                 deployment.setStatus(TenantDeploymentStatus.SUCCESS);
             }
             tenantDeploymentService.updateTenantDeployment(deployment);
+
+            sendEmail(deployment);
         } catch (Exception e) {
+            deployment.setStep(TenantDeploymentStep.VALIDATE_METADATA);
+            deployment.setStatus(TenantDeploymentStatus.FAIL);
+            deployment.setMessage(e.getMessage());
+            tenantDeploymentService.updateTenantDeployment(deployment);
+
+            sendEmail(deployment);
+
             throw new LedpException(LedpCode.LEDP_18056, e, new String[] { e.getMessage() });
         }
     }
@@ -259,7 +281,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
             StringBuffer stringBuilder = new StringBuffer();
             do {
                 result = dataLoaderService.getQueryData(space.getTenantId(), queryHandle, startRow, 2000, dlUrl);
-                int rows = appendCsvData(stringBuilder, result, true);
+                int rows = appendCsvData(stringBuilder, result, startRow == 0);
                 if (rows == 0) {
                     break;
                 }
@@ -340,6 +362,45 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
         }
     }
 
+    private void sendEmail(TenantDeployment deployment) {
+        try {
+            final String email = deployment.getCreatedBy();
+            final TenantDeploymentStep step = deployment.getStep();
+            final TenantDeploymentStatus status = deployment.getStatus();
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        User user = userService.findByEmail(email);
+                        if (step == TenantDeploymentStep.IMPORT_SFDC_DATA) {
+                            if (status == TenantDeploymentStatus.SUCCESS) {
+                                emailService.sendPdImportDataSuccessEmail(user, hostPort);
+                            } else if (status == TenantDeploymentStatus.FAIL) {
+                                emailService.sendPdImportDataErrorEmail(user, hostPort);
+                            }
+                        } else if (step == TenantDeploymentStep.ENRICH_DATA) {
+                            if (status == TenantDeploymentStatus.SUCCESS) {
+                                emailService.sendPdEnrichDataSuccessEmail(user, hostPort);
+                            } else if (status == TenantDeploymentStatus.FAIL) {
+                                emailService.sendPdEnrichDataErrorEmail(user, hostPort);
+                            }
+                        } else if (step == TenantDeploymentStep.VALIDATE_METADATA) {
+                            if (status == TenantDeploymentStatus.SUCCESS) {
+                                emailService.sendPdValidateMetadataSuccessEmail(user, hostPort);
+                            } else if (status == TenantDeploymentStatus.WARNING) {
+                                emailService.sendPdMetadataMissingEmail(user, hostPort);
+                            } else if (status == TenantDeploymentStatus.FAIL) {
+                                emailService.sendPdValidateMetadataErrorEmail(user, hostPort);
+                            }
+                        }
+                    } catch (Exception e) { }
+                }
+            });
+            executorService.shutdown();
+        } catch (Exception e) { }
+    }
+
     private class ProgressCallback implements DlCallback {
         private String tenantId;
         private Map<String, LaunchJobsResult> jobsMap;
@@ -368,34 +429,28 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
 
         @Override
         public void callback(Object result) {
+            TenantDeployment deployment = null;
             try
             {
-                TenantDeployment deployment = tenantDeploymentService.getTenantDeployment(tenantId);
+                deployment = tenantDeploymentService.getTenantDeployment(tenantId);
                 if (result instanceof Exception) {
                     Exception ex = (Exception)result;
-                    deployment.setStatus(TenantDeploymentStatus.FAIL);
-                    deployment.setMessage(ex.getMessage());
-                    tenantDeploymentService.updateTenantDeployment(deployment);
+                    handleError(deployment, ex.getMessage());
                 } else {
                     LaunchJobsResult jobsResult = (LaunchJobsResult)result;
                     if (jobsResult.getLaunchStatus() == JobStatus.SUCCESS) {
                         if (deployment.getStep() == TenantDeploymentStep.ENRICH_DATA) {
+                            deployment.setStatus(TenantDeploymentStatus.SUCCESS);
+                            sendEmail(deployment);
+
                             try {
                                 validateMetadata(tenantId, deployment);
-                            } catch (Exception ex) {
-                                deployment.setStep(TenantDeploymentStep.VALIDATE_METADATA);
-                                deployment.setStatus(TenantDeploymentStatus.FAIL);
-                                deployment.setMessage(ex.getMessage());
-                                tenantDeploymentService.updateTenantDeployment(deployment);
-                            }
+                            } catch (Exception e) { }
                         } else {
-                            deployment.setStatus(TenantDeploymentStatus.SUCCESS);
-                            tenantDeploymentService.updateTenantDeployment(deployment);
+                            handleSuccess(deployment);
                         }
                     } else {
-                        deployment.setMessage(jobsResult.getLaunchMessage());
-                        deployment.setStatus(TenantDeploymentStatus.FAIL);
-                        tenantDeploymentService.updateTenantDeployment(deployment);
+                        handleError(deployment, jobsResult.getLaunchMessage());
                     }
                 }
 
@@ -403,21 +458,48 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                     jobsMap.remove(tenantId);
                 }
 
-                if (deployment.getStatus() == TenantDeploymentStatus.SUCCESS) {
-                    if (deployment.getStep() == TenantDeploymentStep.IMPORT_SFDC_DATA) {
-                        try {
-                            enrichData(tenantId, deployment);
-                        } catch (Exception ex) {
-                            deployment.setStep(TenantDeploymentStep.ENRICH_DATA);
-                            deployment.setStatus(TenantDeploymentStatus.FAIL);
-                            deployment.setMessage(ex.getMessage());
-                            tenantDeploymentService.updateTenantDeployment(deployment);
-                        }
+                startNextStep(deployment);
+            } catch (Exception ex) {
+                try {
+                    synchronized (jobsMap) {
+                        jobsMap.remove(tenantId);
+                    }
+
+                    if (deployment != null) {
+                        handleError(deployment, ex.getMessage());
+                    }
+                } catch (Exception e) { }
+
+                log.warn(String.format("Executing completed callback encountered an exception in tenant deployment. Tenant id: %d.", tenantId), ex);
+            }
+        }
+
+        private void startNextStep(TenantDeployment deployment) {
+            if (deployment.getStatus() == TenantDeploymentStatus.SUCCESS) {
+                if (deployment.getStep() == TenantDeploymentStep.IMPORT_SFDC_DATA) {
+                    try {
+                        enrichData(tenantId, deployment);
+                    } catch (Exception ex) {
+                        deployment.setStep(TenantDeploymentStep.ENRICH_DATA);
+                        handleError(deployment, ex.getMessage());
                     }
                 }
-            } catch (Exception e) {
-                log.warn(String.format("Executing completed callback encountered an exception in tenant deployment. Tenant id: %d.", tenantId), e);
             }
+        }
+
+        private void handleSuccess(TenantDeployment deployment) {
+            deployment.setStatus(TenantDeploymentStatus.SUCCESS);
+            tenantDeploymentService.updateTenantDeployment(deployment);
+
+            sendEmail(deployment);
+        }
+
+        private void handleError(TenantDeployment deployment, String errorMessage) {
+            deployment.setStatus(TenantDeploymentStatus.FAIL);
+            deployment.setMessage(errorMessage);
+            tenantDeploymentService.updateTenantDeployment(deployment);
+
+            sendEmail(deployment);
         }
     }
 

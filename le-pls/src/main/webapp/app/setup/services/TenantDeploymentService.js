@@ -44,6 +44,42 @@ angular.module('mainApp.setup.services.TenantDeploymentService', [
         return deferred.promise;
     };
 
+    this.DeleteTenantDeployment = function () {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'DELETE',
+            url: '/pls/tenantdeployments/deployment?' + new Date().getTime(),
+            headers: {
+                'Content-Type': "application/json"
+            }
+        })
+        .success(function(data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: null
+            };
+            if (data.Success) {
+                result.Success = true;
+                result.ResultObj = data.Result;
+            } else {
+                result.ResultErrors = ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_ERROR');
+            }
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
     this.ImportSfdcData = function () {
         var deferred = $q.defer();
 
@@ -257,7 +293,6 @@ angular.module('mainApp.setup.services.TenantDeploymentService', [
             deferred.resolve(result);
         })
         .error(function (data, status, headers, config) {
-            SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
                 ResultErrors: ResourceUtility.getString('SETUP_GET_OBJECTS_ERROR')
@@ -329,7 +364,6 @@ angular.module('mainApp.setup.services.TenantDeploymentService', [
             deferred.resolve(result);
         })
         .error(function (data, status, headers, config) {
-            SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
                 ResultErrors: ResourceUtility.getString('SETUP_GET_QUERY_STATUS_ERROR', [fileName])
