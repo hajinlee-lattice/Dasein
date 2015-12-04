@@ -60,7 +60,9 @@ angular.module('controllers.jobs.status', [
             }
 
             function updateStatesBasedOnJobStatus(jobStatus) {
-                $scope.jobStepsRunningStates[jobStatus.stepRunning.toLowerCase()] = true;
+                if (jobStatus.jobStatus == "Running") {
+                    $scope.jobStepsRunningStates[jobStatus.stepRunning.toLowerCase()] = true;
+                }
 
                 for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
                     $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i].toLowerCase()] = true;
