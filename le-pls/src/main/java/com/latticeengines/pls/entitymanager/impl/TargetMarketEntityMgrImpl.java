@@ -77,6 +77,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
         targetMarket.setDescription("Default Market");
         targetMarket.setOffset(0);
         targetMarket.setIsDefault(true);
+        targetMarket.setEventColumnName("");
         create(targetMarket);
         return targetMarket;
     }
