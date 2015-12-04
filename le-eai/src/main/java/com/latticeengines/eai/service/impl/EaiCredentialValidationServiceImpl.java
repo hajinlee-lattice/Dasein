@@ -81,7 +81,8 @@ public class EaiCredentialValidationServiceImpl implements EaiCredentialValidati
             password += crmCredential.getSecurityToken();
         }
         loginConfig.setPassword(password);
-
+        log.info("username :" + crmCredential.getUserName());
+        log.info("password :" + password);
         try {
             salesforce.start();
         } catch (Exception e) {
