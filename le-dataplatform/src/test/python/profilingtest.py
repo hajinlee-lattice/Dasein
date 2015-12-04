@@ -6,7 +6,7 @@ class ProfilingTest(ProfilingTestBase):
 
     def testExecuteProfiling(self):
         from launcher import Launcher
-        profilinglauncher = Launcher("model-dataprofile.json")
+        profilinglauncher = Launcher("model-dataprofile-kent.json")
         profilinglauncher.execute(False, postProcessClf=False)
         learningExecutor = LearningExecutor()
 
