@@ -3,6 +3,8 @@ package com.latticeengines.pls.entitymanager.impl.microservice;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,8 @@ import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestI
 @Component("restApiProxy")
 public class RestApiProxy implements WorkflowProxy, JobProxy {
 
+    private static final Log log = LogFactory.getLog(RestApiProxy.class);
+
     private RestTemplate restTemplate = new RestTemplate();
 
     @Value("${pls.microservice.rest.endpoint.hostport}")
@@ -31,6 +35,7 @@ public class RestApiProxy implements WorkflowProxy, JobProxy {
     @Override
     public ApplicationId submitWorkflow(final WorkflowConfiguration config) {
         try {
+            log.info("Submitting workflow with config: " + config.toString());
             AppSubmission submission = restTemplate.postForObject(constructUrl("workflowapi", "workflows/"), config,
                     AppSubmission.class);
             return YarnUtils.appIdFromString(submission.getApplicationIds().get(0));
