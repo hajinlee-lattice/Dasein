@@ -36,7 +36,7 @@ public class WorkflowSubmitter {
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
-    @Value("{pls.fitflow.stoplist.path}")
+    @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
 
     public void submitFitWorkflow(TargetMarket targetMarket) {
