@@ -11,17 +11,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.service.TargetMarketService;
+import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflow;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component
 public class WorkflowSubmitter {
     private static final Log log = LogFactory.getLog(WorkflowSubmitter.class);
+
+    @Autowired
+    private FitModelWorkflow fitModelWorkflow;
 
     @Autowired
     private RestApiProxy restApiProxy;
@@ -71,6 +76,10 @@ public class WorkflowSubmitter {
                     .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                     .eventColumns(eventCols) //
                     .build();
+
+            String payloadName = fitModelWorkflow.name() + "-" + customer + "-" + targetMarket.getName();
+            configuration
+                    .setContainerConfiguration(fitModelWorkflow.name(), CustomerSpace.parse(customer), payloadName);
 
             ApplicationId applicationId = restApiProxy.submitWorkflow(configuration);
             log.info(String.format("Submitted fit model workflow with application id %s", applicationId));
