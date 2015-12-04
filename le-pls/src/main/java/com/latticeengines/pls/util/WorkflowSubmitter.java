@@ -17,16 +17,12 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.service.TargetMarketService;
-import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflow;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component
 public class WorkflowSubmitter {
     private static final Log log = LogFactory.getLog(WorkflowSubmitter.class);
-
-    @Autowired
-    private FitModelWorkflow fitModelWorkflow;
 
     @Autowired
     private RestApiProxy restApiProxy;
@@ -77,9 +73,9 @@ public class WorkflowSubmitter {
                     .eventColumns(eventCols) //
                     .build();
 
-            String payloadName = fitModelWorkflow.name() + "-" + customer + "-" + targetMarket.getName();
+            String payloadName = "fitModelWorkflow" + "-" + customer + "-" + targetMarket.getName();
             configuration
-                    .setContainerConfiguration(fitModelWorkflow.name(), CustomerSpace.parse(customer), payloadName);
+                    .setContainerConfiguration("fitModelWorkflow", CustomerSpace.parse(customer), payloadName);
 
             ApplicationId applicationId = restApiProxy.submitWorkflow(configuration);
             log.info(String.format("Submitted fit model workflow with application id %s", applicationId));
