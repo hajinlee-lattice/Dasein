@@ -28,6 +28,7 @@
         <module>le-liaison</module>
         <module>le-swlib</module>
         <module>le-workflow</module>
+        <module>le-serviceflows</module> 
         <module>le-pls</module>
     </modules>
 </project>
