@@ -26,4 +26,18 @@ public interface EmailService {
     void sendPdExistingExternalUserEmail(Tenant tenant, User user, String hostport);
 
     void sendPlsForgetPasswordEmail(User user, String password, String hostport);
+
+    void sendPdImportDataSuccessEmail(User user, String hostport);
+
+    void sendPdImportDataErrorEmail(User user, String hostport);
+
+    void sendPdEnrichDataSuccessEmail(User user, String hostport);
+
+    void sendPdEnrichDataErrorEmail(User user, String hostport);
+
+    void sendPdValidateMetadataSuccessEmail(User user, String hostport);
+
+    void sendPdMetadataMissingEmail(User user, String hostport);
+
+    void sendPdValidateMetadataErrorEmail(User user, String hostport);
 }

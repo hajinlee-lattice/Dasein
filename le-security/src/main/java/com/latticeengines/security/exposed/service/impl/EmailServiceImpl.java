@@ -182,4 +182,143 @@ public class EmailServiceImpl implements EmailService {
         log.info("Sending existing external user email to " + user.getEmail() + " succeeded.");
     }
 
+    @Override
+    public void sendPdImportDataSuccessEmail(User user, String hostport) {
+        try {
+            EmailTemplateBuilder builder =
+                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_SUCCESS);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{completemsg}}", "Your Salesforce Data Import is complete.");
+            builder.replaceToken("{{currentstep}}", "The system is currently enriching the data with Lattice Data Cloud.");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Import Data Successfully", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error("Failed to send import data complete email to " + user.getEmail() + " " + e.getMessage());
+        }
+        log.info("Sending import data complete email to " + user.getEmail() + " succeeded.");
+    }
+
+    @Override
+    public void sendPdImportDataErrorEmail(User user, String hostport) {
+        try {
+            EmailTemplateBuilder builder =
+                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_ERROR);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{errormsg}}", "Unable to import data.");
+            builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Import Data Failed", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error("Failed to send import data error email to " + user.getEmail() + " " + e.getMessage());
+        }
+        log.info("Sending import data error email to " + user.getEmail() + " succeeded.");
+    }
+
+    @Override
+    public void sendPdEnrichDataSuccessEmail(User user, String hostport) {
+        try {
+            EmailTemplateBuilder builder =
+                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_SUCCESS);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{completemsg}}", "Your Data Enrichment is complete.");
+            builder.replaceToken("{{currentstep}}", "The system is currently validating metadata.");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Enrich Data Successfully", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error("Failed to send enrichment data complete email to " + user.getEmail() + " " + e.getMessage());
+        }
+        log.info("Sending enrichment data complete email to " + user.getEmail() + " succeeded.");
+    }
+
+    @Override
+    public void sendPdEnrichDataErrorEmail(User user, String hostport) {
+        try {
+            EmailTemplateBuilder builder =
+                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_ERROR);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{errormsg}}", "Unable to enrich data.");
+            builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Enrich Data Failed", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error("Failed to send enrich data error email to " + user.getEmail() + " " + e.getMessage());
+        }
+        log.info("Sending enrich data error email to " + user.getEmail() + " succeeded.");
+    }
+
+    @Override
+    public void sendPdValidateMetadataSuccessEmail(User user, String hostport) {
+        try {
+            EmailTemplateBuilder builder =
+                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_SUCCESS);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{completemsg}}", "Your Metadata Validation is complete.");
+            builder.replaceToken("{{currentstep}}", "");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Metadata Validation Successfully", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error("Failed to send validate metadata complete email to " + user.getEmail() + " " + e.getMessage());
+        }
+        log.info("Sending validate metadata complete email to " + user.getEmail() + " succeeded.");
+    }
+
+    @Override
+    public void sendPdMetadataMissingEmail(User user, String hostport) {
+        try {
+            EmailTemplateBuilder builder =
+                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_ERROR);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{errormsg}}", "Missing data.");
+            builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to add missing data.");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Metadata Missing", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error("Failed to send metadata missing email to " + user.getEmail() + " " + e.getMessage());
+        }
+        log.info("Sending metadata missing email to " + user.getEmail() + " succeeded.");
+    }
+
+    @Override
+    public void sendPdValidateMetadataErrorEmail(User user, String hostport) {
+        try {
+            EmailTemplateBuilder builder =
+                    new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_ERROR);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{errormsg}}", "Unable to validate metadata.");
+            builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Validate Metadata Failed", mp, Collections.singleton(user.getEmail()));
+        } catch (Exception e) {
+            log.error("Failed to send validate metadata error email to " + user.getEmail() + " " + e.getMessage());
+        }
+        log.info("Sending validate metadata error email to " + user.getEmail() + " succeeded.");
+    }
 }
