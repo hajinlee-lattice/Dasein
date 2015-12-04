@@ -94,7 +94,10 @@ angular.module('services.jobs', [
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {
-                stepsCompleted.push(stepsNameDictionary[job.steps[i].jobStepType]);
+                var stepCompleted = stepsNameDictionary[job.steps[i].jobStepType];
+                if (stepsCompleted.indexOf(stepCompleted) == -1) {
+                    stepsCompleted.push(stepCompleted);
+                }
             }
         }
         

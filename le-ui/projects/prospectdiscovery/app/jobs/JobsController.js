@@ -12,6 +12,12 @@ angular.module('controllers.jobs', [
 
     JobsService.GetAllJobs().then(function(result) {
         $scope.jobs = result.resultObj;
+
+        if ($scope.jobs) {
+            $scope.showEmptyJobsMessage = false;
+        } else {
+            $scope.showEmptyJobsMessage = true;
+        }
     });
     
     if (! $scope.jobs) {
