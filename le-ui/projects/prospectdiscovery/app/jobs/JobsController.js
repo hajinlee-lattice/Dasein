@@ -19,9 +19,4 @@ angular.module('controllers.jobs', [
             $scope.showEmptyJobsMessage = true;
         }
     });
-    
-    if (! $scope.jobs) {
-        $scope.showEmptyJobsMessage = true;
-    }
-
 });
