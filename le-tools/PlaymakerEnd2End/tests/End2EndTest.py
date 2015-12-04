@@ -2,15 +2,15 @@
 @author bwang
 @createDate 11/11/2015
 """ 
-import sys,os
-sys.path.append("..")
-from Configuration.Properties import SalePrismEnvironments
-from steps.updateAccount import updateTenantAccount
-from steps.configureDataloader import DataloaderDealer
-from steps.configureJAMS  import update247DB
-from steps.configureSFDC  import DealSFDC
-from steps.dealPlay  import DealPlay
+import os
+from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
+from PlaymakerEnd2End.steps.updateAccount import updateTenantAccount
+from PlaymakerEnd2End.steps.configureDataloader import DataloaderDealer
+from PlaymakerEnd2End.steps.configureJAMS  import update247DB
+from PlaymakerEnd2End.steps.configureSFDC  import DealSFDC
+from PlaymakerEnd2End.steps.dealPlay  import DealPlay
 import unittest,time
+log=SalePrismEnvironments.logProvider.getLog("TestClass",True)
 
 class End2EndNecessarySteps(object):
 	def __init__(self):
@@ -38,8 +38,7 @@ class End2EndNecessarySteps(object):
 		self.sfdcDealer.loginSF()
 		self.sfdcDealer.configDanteServer()
 		self.sfdcDealer.configOTK()
-		if not self.dlDealer.isDanteGroupFinishSuccessfully():
-			return
+		assert self.dlDealer.isDanteGroupFinishSuccessfully()
 		self.sfdcDealer.syncData()
 class DifferentScenario(object):
 	def __init__(self):

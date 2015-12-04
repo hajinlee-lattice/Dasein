@@ -1,7 +1,7 @@
 __author__ = 'BWang'
 
-import argparse,sys,json
-sys.path.append("..")
+import argparse,json
+
 
 def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser,driverType,withModelingOnDataPlatform="TRUE"):
     with open("..\\config.ini") as ini:

@@ -2,20 +2,19 @@
 @author bwang
 @createDate 11/11/2015 
 """ 
-import time,sys
-sys.path.append("..")
-from Configuration.Properties import SalePrismEnvironments
+import time
+from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 try:
 	from selenium import webdriver
-except Exception,e:
+except ImportError:
 	import os
 	os.system('pip install -U selenium')
 	from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
+log=SalePrismEnvironments.logProvider.getLog("SFDC",True)
 class DealSFDC(object):
 	def __init__(self):
-		self.log=SalePrismEnvironments.logProvider.getLog("SFDC",True)
+		
 		if SalePrismEnvironments.driverType =="Firefox":
 			self.driver=webdriver.Firefox()
 			self.driver.implicitly_wait(20)
@@ -32,7 +31,7 @@ class DealSFDC(object):
 			self.driver.find_element_by_id('showMeLater').click()
 		except Exception,e:
 			pass
-		self.log.info("salesforce login successfully")
+		log.info("salesforce login successfully")
 
 	def configDanteServer(self,dante_Server=SalePrismEnvironments.dante_Server):#need run loginSF first
 		if not self.islogin():
@@ -50,7 +49,7 @@ class DealSFDC(object):
 		self.driver.find_element_by_xpath("//input[@value='Save']").click()
 		time.sleep(5)
 		assert self.driver.find_element_by_xpath("//html").text.find(dante_Server)>0
-		self.log.info("dante_Server set successfully")
+		log.info("dante_Server set successfully")
 
 	def configOTK(self,tenant=SalePrismEnvironments.tenantName):#need run self.loginSF first
 		if not self.islogin():
@@ -74,7 +73,7 @@ class DealSFDC(object):
 		self.driver.find_element_by_xpath("//input[@value='Connect']").click()
 		time.sleep(15)
 		assert self.driver.find_element_by_xpath("//h3[text()='You are authenticated']").is_displayed()
-		self.log.info("Authentication done!")
+		log.info("Authentication done!")
 	def syncData(self):#need run self.loginSF first.
 		if not self.islogin():
 			self.loginSF()
@@ -86,24 +85,8 @@ class DealSFDC(object):
 		self.driver.find_element_by_xpath("//input[@value='Sync']").click()
 		time.sleep(5)
 		assert self.driver.find_element_by_xpath("//html").text.find("The Sync Data job was initiated successfully")>0
-		time.sleep(20)
-		self.driver.find_element_by_xpath("//a[text()='Lattice Recommendations']").click()
-		is_recommendationExist = False
-		pageNumber=int(self.driver.find_element_by_xpath("//span[text()='Page']").text[-1])
-		for i in range(1,pageNumber+1):
-			self.driver.find_element_by_xpath("//span[text()='Page']//input").clear()
-			self.driver.find_element_by_xpath("//span[text()='Page']//input").send_keys(i)
-			self.driver.find_element_by_xpath("//span[text()='Page']//input").send_keys(Keys.ENTER)
-			time.sleep(5)
-			if self.driver.find_element_by_xpath("//a[text()='"+SalePrismEnvironments.playName+"']").is_displayed():
-				is_recommendationExist = True
-				break
-		try:
-			assert is_recommendationExist
-		except AssertionError:
-			self.log.error("Sync Data Failed")
-		else:
-			self.log.info("Sync Data successfully")
+		time.sleep(20)#wait for sync data process finish
+
 	def islogin(self):
 		try:
 			self.driver.find_element_by_xpath("//span[@id='userNavLabel']")
@@ -120,10 +103,33 @@ class DealSFDC(object):
 			resetTimeStampButton=self.driver.find_element_by_xpath("//input[@value='Reset Batch Chain Settings Timestamps']")
 			resetTimeStampButton.click()
 		except Exception,e:
-			self.log.error("reset SFDC failed Error is: %s"%e.message)
+			log.error("reset SFDC failed Error is: %s"%e.message)
 		else:
-			self.log.info("reset SFDC successed")
-
+			log.info("reset SFDC successed")
+	def checkRecommendations(self):
+		if not self.islogin():
+			self.loginSF()
+		self.driver.find_element_by_xpath("//a[text()='Lattice Recommendations']").click()
+		is_recommendationExist = False
+		pageNumber=int(self.driver.find_element_by_xpath("//span[text()='Page']").text[-1])
+		for i in range(1,pageNumber+1):
+			self.driver.find_element_by_xpath("//span[text()='Page']//input").clear()
+			self.driver.find_element_by_xpath("//span[text()='Page']//input").send_keys(i)
+			self.driver.find_element_by_xpath("//span[text()='Page']//input").send_keys(Keys.ENTER)
+			time.sleep(5)
+			if self.driver.find_element_by_xpath("//a[text()='"+SalePrismEnvironments.playName+"']").is_displayed():
+				is_recommendationExist = True
+				break
+		try:
+			assert is_recommendationExist
+		except AssertionError:
+			log.error("Sync Data Failed")
+		else:
+			log.info("Sync Data successfully")
+	def checkAccountPage(self):
+		if not self.islogin():
+			self.loginSF()
+		
 def main():
 	d=DealSFDC()
 	d.loginSF()

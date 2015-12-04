@@ -8,9 +8,7 @@ except ImportError:
 	import os
 	assert os.system('pip install -U pyodbc') ==0
 	import pyodbc
-import sys
-sys.path.append("..")
-from Configuration.Properties import SalePrismEnvironments
+from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 log=SalePrismEnvironments.logProvider.getLog("configureJams",True)
 def update247DB(tenant=SalePrismEnvironments.tenantName,qname=SalePrismEnvironments.QueneName):
 	log.info("########## update JAMSCFG table on 247 DB configuration start   ##########")

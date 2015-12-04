@@ -2,16 +2,15 @@
 Created on 11/12/2015
 @author: bwang
 '''
-import json,sys,os
-sys.path.append("..")
+import json,os
+from PlaymakerEnd2End.tools.LogTool import LogFactory
+from PlaymakerEnd2End.tools.apitool import getOneTimeKey
 try:
 	from selenium import webdriver
 except Exception,e:
 	import os
 	os.system('pip install -U selenium')
 	from selenium import webdriver
-from tools.LogTool import LogFactory
-from tools.apitool import  getOneTimeKey
 class SalePrismEnvironments(object):
     "parser that read configuration properties from config.ini file"
     with open("..\\config.ini") as configFile:

@@ -2,25 +2,23 @@
 @author bwang
 @createDate 11/11/2015 
 """
-import json,sys,time,requests
+import json,time,requests
+from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 try:
 	from selenium import webdriver
 except ImportError:
 	import os
 	os.system('pip install -U selenium')
 	from selenium import webdriver
-
 requests.packages.urllib3.disable_warnings()
-sys.path.append("..")
-from Configuration.Properties import SalePrismEnvironments
-
+log=SalePrismEnvironments.logProvider.getLog("DataloaderDealer",True)
 class DataloaderDealer(object):
 	def __init__(self):
 		self.headers={"MagicAuthentication":"Security through obscurity!","Accept":"application/json;","Content-Type":"application/json; charset=utf-8;"}
-		self.log=SalePrismEnvironments.logProvider.getLog("DataloaderDealer",True)
+		
 		self.driver=None
 	def setTenantDataProviderByREST(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,dbUser=SalePrismEnvironments.DBUser,dbPwd=SalePrismEnvironments.DBPwd):
-		self.log.info("##########  dataloader configuration start   ##########")
+		log.info("##########  dataloader configuration start   ##########")
 		RESTurl=SalePrismEnvironments.dataloaderUpdateRESTURL
 		AnalyticsDBJson={"tenantName": tenant,"dataProviderName": "AnalyticsDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": host},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": dbUser},{"Key": "Password","Value": dbPwd},{"Key": "Database","Value": tenant},{"Key": "Schema","Value": "dbo"}]}
 		DanteDBJson={"tenantName": tenant,"dataProviderName": "DanteDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": host},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": dbUser},{"Key": "Password","Value": dbPwd},{"Key": "Database","Value": "DT_"+tenant},{"Key": "Schema","Value": "dbo"}]}
@@ -40,9 +38,9 @@ class DataloaderDealer(object):
 			response = json.loads(request.text)
 			assert response['Success'] == True
 		except Exception,e:
-			self.log.error(e)
+			log.error(e)
 		else:
-			self.log.info("dataloader configuration finish successfully")
+			log.info("dataloader configuration finish successfully")
 		finally:
 			if request !=None:
 				request.close()
@@ -53,7 +51,7 @@ class DataloaderDealer(object):
 			self.driver.maximize_window()
 		elif SalePrismEnvironments.driverType=="Chrome":
 			pass
-		self.log.info("FULL_DANTE_DATA_FLOW is running, this may cost lof of time, please wait")
+		log.info("FULL_DANTE_DATA_FLOW is running, this may cost lof of time, please wait")
 		self.driver.get(SalePrismEnvironments.dataloaderUrl)
 		emailInput=self.driver.find_element_by_id('text_email_login')
 		emailInput.clear()
@@ -74,7 +72,7 @@ class DataloaderDealer(object):
 		time.sleep(3)
 		launchId=self.driver.find_element_by_xpath("//div[@id='div_queue_launches']//td[2]").text
 		assert launchId!=None
-		self.log.info("The running FULL_DANTE_DATA_FLOW ID is %s "%launchId)
+		log.info("The running FULL_DANTE_DATA_FLOW ID is %s "%launchId)
 		self.driver.quit()
 		RESTurl=SalePrismEnvironments.dataloaderGetLaunchStatusURL
 		fullDanteDataFlowJson={"launchId":int(launchId)}
@@ -82,7 +80,7 @@ class DataloaderDealer(object):
 		stillRunning="True"
 		while stillRunning=="True":
 			time.sleep(60)
-			self.log.info("waiting for load group")
+			log.info("waiting for load group")
 			try:
 				request = requests.post(RESTurl,json=fullDanteDataFlowJson,headers=self.headers)
 				assert request.status_code == 200
@@ -93,11 +91,11 @@ class DataloaderDealer(object):
 					if runSucceed == "True":
 						isDanteGroupFinishSuccessfully=True
 					else:
-						self.log.error(responseValue[4]["Value"])
-					self.log.info(responseValue[4]["Value"])
+						log.error(responseValue[4]["Value"])
+					log.info(responseValue[4]["Value"])
 					break
 			except Exception,e:
-				self.log.error(e)
+				log.error(e)
 		return isDanteGroupFinishSuccessfully
 
 
