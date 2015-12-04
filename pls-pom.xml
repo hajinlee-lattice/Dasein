@@ -27,6 +27,8 @@
         <module>le-baton</module>
         <module>le-liaison</module>
         <module>le-swlib</module>
+        <module>le-scheduler</module>
+        <module>le-dataflow</module>
         <module>le-workflow</module>
         <module>le-serviceflows</module> 
         <module>le-pls</module>
