@@ -100,6 +100,11 @@ class ZookeeperUtility():
         ex = self.zk.exists(path)
         return (None != ex)
 
+    def ls(self, path):
+        if self.zk.exists(path):
+            self.logger.info([str(x) for x in self.zk.get_children(path)])
+        else:
+            self.logger.info('path not exists')
 
 if __name__ == '__main__':
     pass

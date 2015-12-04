@@ -53,6 +53,11 @@ def main():
     parser_exists.add_argument('-pod', '--PodID', dest='pod', action='store', required=False, help='pod id', default='QA')
     parser_exists.add_argument('-t', '--Tenant', dest='tenant', action='store', required=True, help='tenant id')
 
+    # ls
+    parser_ls = subparsers.add_parser('ls', help='list path')
+    parser_ls.add_argument('-pod', '--PodID', dest='pod', action='store', required=False, help='pod id', default='QA')
+    parser_ls.add_argument('-path', '--Path', dest='path', action='store', required=True, help='path')
+
     args = parser.parse_args()
 
     zkutil = ZookeeperUtility(pod=args.pod)
@@ -72,6 +77,8 @@ def main():
         zkutil.displayNode(args.path)
     elif args.command == 'exists':
         print zkutil.exists(args.tenant)
+    elif args.command == 'ls':
+        zkutil.ls(args.path)
     else:
         logging.error('No such function: ' + args.function_name)
 
