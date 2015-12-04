@@ -33,6 +33,9 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 
 public class ModelingServiceExecutor {
 
+    // TODO externalize this as a property
+    private static final int MAX_SECONDS_WAIT_FOR_MODELING = 60*60*24;
+
     private static final Log log = LogFactory.getLog(ModelingServiceExecutor.class);
 
     private Builder builder;
@@ -179,12 +182,12 @@ public class ModelingServiceExecutor {
 
     private JobStatus waitForAppId(String appId, String jobStatusUrl) throws Exception {
         JobStatus status;
-        int maxTries = 60;
+        int maxTries = MAX_SECONDS_WAIT_FOR_MODELING;
         int i = 0;
         do {
             String url = String.format(modelingServiceHostPort + jobStatusUrl, appId);
             status = restTemplate.getForObject(url, JobStatus.class);
-            Thread.sleep(10000L);
+            Thread.sleep(1000L);
             i++;
 
             if (i == maxTries) {
