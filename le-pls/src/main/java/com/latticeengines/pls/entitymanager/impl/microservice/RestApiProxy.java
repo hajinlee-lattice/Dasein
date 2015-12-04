@@ -54,7 +54,7 @@ public class RestApiProxy implements WorkflowProxy, JobProxy {
         }
     }
 
-    // @Override
+     @Override
     public Job getWorkflowExecution(String workflowId) {
         try {
             return restTemplate.getForObject(constructUrl("workflowapi", "workflows/job/" + workflowId), Job.class);
@@ -63,7 +63,7 @@ public class RestApiProxy implements WorkflowProxy, JobProxy {
         }
     }
 
-    // @Override
+     @Override
     @SuppressWarnings("unchecked")
     public List<Job> getWorkflowExecutionsForTenant(long tenantPid) {
         try {
