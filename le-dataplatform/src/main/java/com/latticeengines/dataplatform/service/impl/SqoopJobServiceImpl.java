@@ -15,13 +15,18 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.sqoop.LedpSqoop;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopJobServiceImpl {
@@ -29,16 +34,16 @@ public class SqoopJobServiceImpl {
     private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
 
     protected ApplicationId exportData(String table, //
-                                       String sourceDir, //
-                                       DbCreds creds, //
-                                       String queue, //
-                                       String jobName, //
-                                       int numMappers, //
-                                       String javaColumnTypeMappings, //
-                                       String exportColumns, //
-                                       MetadataService metadataService, //
-                                       Configuration yarnConfiguration, //
-                                       boolean sync) {
+            String sourceDir, //
+            DbCreds creds, //
+            String queue, //
+            String jobName, //
+            int numMappers, //
+            String javaColumnTypeMappings, //
+            String exportColumns, //
+            MetadataService metadataService, //
+            Configuration yarnConfiguration, //
+            boolean sync) {
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
         cmds.add("-Dmapreduce.job.queuename=" + queue);
@@ -88,29 +93,27 @@ public class SqoopJobServiceImpl {
             Configuration yarnConfiguration, //
             boolean sync) {
 
-        return importDataWithWhereCondition(
-                table, query, targetDir, creds, queue, jobName, splitCols, //
+        return importDataWithWhereCondition(table, query, targetDir, creds, queue, jobName, splitCols, //
                 columnsToInclude, "", numMappers, driver, props, //
-                metadataService, yarnConfiguration, sync
-        );
+                metadataService, yarnConfiguration, sync);
     }
 
     @SuppressWarnings("deprecation")
     protected ApplicationId importDataWithWhereCondition(String table, //
-                                       String query, //
-                                       String targetDir, //
-                                       DbCreds creds, //
-                                       String queue, //
-                                       String jobName, //
-                                       List<String> splitCols, //
-                                       String columnsToInclude, //
-                                       String whereCondition, //
-                                       int numMappers, //
-                                       String driver, //
-                                       Properties props, //
-                                       MetadataService metadataService, //
-                                       Configuration yarnConfiguration, //
-                                       boolean sync) {
+            String query, //
+            String targetDir, //
+            DbCreds creds, //
+            String queue, //
+            String jobName, //
+            List<String> splitCols, //
+            String columnsToInclude, //
+            String whereCondition, //
+            int numMappers, //
+            String driver, //
+            Properties props, //
+            MetadataService metadataService, //
+            Configuration yarnConfiguration, //
+            boolean sync) {
 
         if (table != null && table.startsWith("Play")) {
             numMappers = 1;
@@ -123,7 +126,7 @@ public class SqoopJobServiceImpl {
         cmds.add(metadataService.getJdbcConnectionUrl(creds));
         cmds.add("--m");
         cmds.add(Integer.toString(numMappers));
-        
+
         if (query == null) {
             cmds.add("--table");
             cmds.add(table);
@@ -172,12 +175,12 @@ public class SqoopJobServiceImpl {
             if (hdfsClassPath != null) {
                 yarnConfiguration.set("yarn.mr.hdfs.class.path", hdfsClassPath);
             }
-            
+
             String hdfsResources = props.getProperty("yarn.mr.hdfs.resources");
-            
+
             if (hdfsResources != null) {
                 String[] hdfsResourceList = hdfsResources.split(",");
-                
+
                 for (String hdfsResource : hdfsResourceList) {
                     try {
                         DistributedCache.addCacheFile(new URI(hdfsResource), yarnConfiguration);
@@ -185,6 +188,15 @@ public class SqoopJobServiceImpl {
                         log.error(e);
                     }
                 }
+            }
+        }
+        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration);
+        for (String jarFilePath : jarFilePaths) {
+            try {
+                DistributedCache.addCacheFile(new URI(jarFilePath), yarnConfiguration);
+            } catch (URISyntaxException e) {
+                log.error(e);
+                throw new LedpException(LedpCode.LEDP_00002);
             }
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());

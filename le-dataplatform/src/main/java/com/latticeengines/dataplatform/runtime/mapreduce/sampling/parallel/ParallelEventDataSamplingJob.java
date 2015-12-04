@@ -28,6 +28,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
@@ -67,18 +68,20 @@ public class ParallelEventDataSamplingJob extends Configured implements Tool, MR
     }
 
     @Override
-    public void customize(Job job, Properties properties) {
-        Configuration config = job.getConfiguration();
+    public void customize(Job mrJob, Properties properties) {
+        Configuration config = mrJob.getConfiguration();
         customizeConfig(config, properties);
 
-        setInputFormat(job, config, properties);
-        setOutputFormat(job, properties);
+        MRJobUtil.setLocalizedResources(mrJob, properties);
 
-        Schema schema = getSchema(job, config, properties);
-        setSchema(job, schema);
+        setInputFormat(mrJob, config, properties);
+        setOutputFormat(mrJob, properties);
 
-        customizeJob(job);
-        customizeSampling(job, properties, schema);
+        Schema schema = getSchema(mrJob, config, properties);
+        setSchema(mrJob, schema);
+
+        customizeJob(mrJob);
+        customizeSampling(mrJob, properties, schema);
     }
 
     private void customizeConfig(Configuration config, Properties properties) {

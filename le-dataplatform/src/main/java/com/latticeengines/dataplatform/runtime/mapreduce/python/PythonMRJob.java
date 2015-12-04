@@ -1,6 +1,5 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
-import java.net.URI;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
@@ -12,6 +11,7 @@ import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class PythonMRJob extends Configured implements MRJobCustomization {
     public static final String PYTHON_MR_JOB = "pythonMRJob";
 
-    private static final String comma = ",";
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     public PythonMRJob(Configuration config) {
@@ -45,7 +44,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
     public void customize(Job mrJob, Properties properties) {
         Configuration config = mrJob.getConfiguration();
         customizeConfig(config, properties);
-        setLocalizedResources(mrJob, properties);
+        MRJobUtil.setLocalizedResources(mrJob, properties);
 
         setInputFormat(mrJob, properties, config);
         mrJob.setOutputFormatClass(NullOutputFormat.class);
@@ -103,45 +102,6 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             throw new LedpException(LedpCode.LEDP_15008, e);
         }
         mrJob.setInputFormatClass(NLineInputFormat.class);
-    }
-
-    private void setLocalizedResources(Job mrJob, Properties properties) {
-        String cachPaths = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name());
-        String cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name());
-
-        setCacheFiles(mrJob, cachPaths);
-        setCacheArchiveFiles(mrJob, cacheArchivePaths);
-    }
-
-    private void setCacheFiles(Job mrJob, String cachePaths) {
-        if (cachePaths == null)
-            return;
-        try {
-            URI[] caches = getCommaSeparatedURI(cachePaths);
-            mrJob.setCacheFiles(caches);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_15009, e);
-        }
-    }
-
-    private void setCacheArchiveFiles(Job mrJob, String cacheArchivePaths) {
-        if (cacheArchivePaths == null)
-            return;
-        try {
-            URI[] cacheArchives = getCommaSeparatedURI(cacheArchivePaths);
-            mrJob.setCacheArchives(cacheArchives);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_15010, e);
-        }
-    }
-
-    private URI[] getCommaSeparatedURI(String paths) throws Exception {
-        String[] files = paths.split(comma);
-        URI[] filesURI = new URI[files.length];
-        for (int i = 0; i < filesURI.length; i++) {
-            filesURI[i] = new URI(files[i].trim());
-        }
-        return filesURI;
     }
 
 }

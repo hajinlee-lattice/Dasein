@@ -154,6 +154,17 @@
                             </sources>
                         </mapping>
                         <mapping>
+                            <directory>/tmp/app/dataplatform/lib</directory>
+                            <filemode>644</filemode>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
+                            <sources>
+                                <source>
+                                    <location>target/le-dataplatform-${le.rpm.version}-shaded.jar</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
                             <directory>/tmp/app/dataplatform/scripts</directory>
                             <filemode>644</filemode>
                             <username>${mapping.username}</username>

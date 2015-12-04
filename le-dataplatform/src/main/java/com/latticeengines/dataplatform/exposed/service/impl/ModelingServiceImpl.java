@@ -39,6 +39,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
@@ -173,6 +174,8 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
 
         return modelingJobService.submitMRJob(parallelDispatchService.getSampleJobName(config.isParallelEnabled()),
                 properties);

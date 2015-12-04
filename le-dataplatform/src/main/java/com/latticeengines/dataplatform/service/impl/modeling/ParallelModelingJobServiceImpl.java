@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
@@ -37,7 +38,6 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     @Value("${dataplatform.container.parallel.reduce.memory}")
     private String reduceMemorySize;
 
-    
     protected ApplicationId sumbitJobInternal(ModelingJob modelingJob) {
         Properties appMasterProperties = modelingJob.getAppMasterPropertiesObject();
         Properties containerProperties = modelingJob.getContainerPropertiesObject();
@@ -45,13 +45,14 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         String metadata = containerProperties.getProperty(ContainerProperty.METADATA.name());
         containerProperties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
         Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
-        
+
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
         String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier);
 
         Properties properties = new Properties();
         String inputDir = classifier.getModelHdfsDir() + "/" + classifier.getName();
         int mapperSize = Integer.parseInt(appMasterProperties.getProperty(PythonMRProperty.MAPPER_SIZE.name()));
+        properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
         try {
             if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
                 setupProfilingMRConfig(properties, classifier, mapperSize, inputDir);
@@ -89,11 +90,11 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         }
         String linesPerMap = String.valueOf((featureSize + mapperSize - 1) / mapperSize); // round
                                                                                           // up
-        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier);
+        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier, properties.get(MapReduceProperty.CACHE_FILE_PATH.name()).toString());
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
-        
+
         HdfsUtils.writeToFile(yarnConfiguration, inputDir + "/" + PythonMRJobType.PROFILING_JOB.configName(),
                 StringUtils.join(features, System.lineSeparator()));
     }
@@ -109,13 +110,13 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         for (String path : trainingPaths) {
             trainingFiles.add(StringUtils.substringAfterLast(path, "/"));
         }
-        String cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingFiles);
+        String cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingFiles, properties.get(MapReduceProperty.CACHE_FILE_PATH.name()).toString());
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
-        
+
         setMapReduceMemory(properties);
-        
+
         HdfsUtils.writeToFile(yarnConfiguration, inputDir + "/" + PythonMRJobType.MODELING_JOB.configName(),
                 StringUtils.join(trainingFiles, System.lineSeparator()));
     }

@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FileAggregator;
@@ -129,11 +130,11 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
 
         String cacheFilePath = null;
         if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
-            cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier);
+            cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier, MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
         } else {
             List<String> trainingSets = new ArrayList<String>();
             trainingSets.add(trainingSet);
-            cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingSets);
+            cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingSets, MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
         }
 
         String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier);

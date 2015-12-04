@@ -66,6 +66,10 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
+                "/app/dataplatform/lib/*.jar", //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
                 getJobDir(containerProperties) + "/*", //
                 false));
         return hdfsEntries;

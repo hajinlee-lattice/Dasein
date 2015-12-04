@@ -14,6 +14,7 @@ hdfs dfs -rm -f -r /datascientist
 
 hdfs dfs -mkdir -p /app/dataflowapi/lib
 hdfs dfs -mkdir -p /app/dataplatform
+hdfs dfs -mkdir -p /app/dataplatform/lib
 hdfs dfs -mkdir -p /app/db
 hdfs dfs -mkdir -p /app/eai/lib
 hdfs dfs -mkdir -p /app/playmaker

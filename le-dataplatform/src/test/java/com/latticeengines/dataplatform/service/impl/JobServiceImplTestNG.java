@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
@@ -272,6 +273,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
         mapReduceCustomizationRegistry.register(new EventDataSamplingJob(hadoopConfiguration));
         ApplicationId applicationId = modelingJobService.submitMRJob("samplingJob", properties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
@@ -297,7 +300,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "{Dell}");
         properties.setProperty(MapReduceProperty.INPUT.name(), baseDir + "/{Dell}/eventTable");
-
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.mkdirs(new Path(baseDir + "/{Dell}/eventTable"));
         String newDir = ClassLoader.getSystemResource(
@@ -324,7 +328,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      * src/test/resources/com/latticeengines/dataplatform/
      * service/impl/mysql/create.sql should have been run before executing this
      * test.
-     *
+     * 
      * @throws Exception
      */
     @Test(groups = { "functional", "functional.production" }, enabled = true)
@@ -334,8 +338,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 .password(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = sqoopSyncJobService.importData("iris", baseDir + "/tmp/import", creds,
-                LedpQueueAssigner.getModelingQueueNameForSubmission(), "Dell", Arrays.<String> asList(new String[] { "ID" }),
-                "");
+                LedpQueueAssigner.getModelingQueueNameForSubmission(), "Dell",
+                Arrays.<String> asList(new String[] { "ID" }), "");
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, baseDir + "/tmp/import",

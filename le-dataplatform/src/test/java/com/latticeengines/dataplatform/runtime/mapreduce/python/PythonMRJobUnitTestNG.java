@@ -32,7 +32,7 @@ public class PythonMRJobUnitTestNG {
         String inputDir = inputUrl.getPath();
 
         classifier = PythonMRTestUtils.setupDummyClassifier();
-        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier);
+        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier, "/app/dataplatform/lib/le-dataplatform-shaded.jar");
         String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier);
         String[] tokens = classifier.getPythonPipelineLibHdfsPath().split("/");
 
@@ -66,7 +66,7 @@ public class PythonMRJobUnitTestNG {
         assertNotNull(conf.get(MapReduceProperty.INPUT.name()));
         assertEquals(conf.get(MRPathFilter.INPUT_FILE_PATTERN), PythonMRJobType.CONFIG_FILE);
 
-        assertEquals(job.getCacheFiles().length, 10);
+        assertEquals(job.getCacheFiles().length, 11);
         assertEquals(job.getCacheArchives().length, 2);
         assertEquals(job.getInputFormatClass(), NLineInputFormat.class);
 

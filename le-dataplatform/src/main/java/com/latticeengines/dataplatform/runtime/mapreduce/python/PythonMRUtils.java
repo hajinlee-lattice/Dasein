@@ -25,14 +25,16 @@ public class PythonMRUtils {
         return StringUtils.join(paths, ",");
     }
 
-    public static String setupProfilingCacheFiles(Classifier classifier) {
+    public static String setupProfilingCacheFiles(Classifier classifier, String dependencyCacheFiles) {
         List<String> paths = new ArrayList<String>();
+        paths.add(dependencyCacheFiles);
         paths.add(classifier.getTrainingDataHdfsPath());
         return setupCacheFiles(paths, classifier);
     }
 
-    public static String setupModelingCacheFiles(Classifier classifier, List<String> trainingSets) {
+    public static String setupModelingCacheFiles(Classifier classifier, List<String> trainingSets, String dependencyCacheFiles) {
         List<String> paths = new ArrayList<String>();
+        paths.add(dependencyCacheFiles);
         paths.add(classifier.getDataProfileHdfsPath());
         // Temporary redundancy to keep launcher.py from failing
         paths.add(classifier.getTrainingDataHdfsPath());

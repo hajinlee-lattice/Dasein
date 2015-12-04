@@ -1,5 +1,6 @@
 #!/bin/bash
 chmod 755 /tmp/app/dataplatform/scripts
+chmod 755 /tmp/app/dataplatform/lib
 chmod 755 /tmp/app/dataplatform/scripts/algorithm
 chmod 755 /tmp/app/playmaker/evmodel
 chmod 755 /tmp/datascientist
@@ -14,6 +15,7 @@ rm /tmp/datascientist/*.pyo
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/dataplatform.properties /app/dataplatform'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/hadoop-metrics2.properties /app/dataplatform'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/scripts /app/dataplatform'
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/lib /app/dataplatform'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/playmaker/* /app/playmaker'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/datascientist/* /datascientist'
 for microservice in 'dataflowapi' 'eai' 'workflowapi'
