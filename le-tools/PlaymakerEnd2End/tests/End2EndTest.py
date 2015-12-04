@@ -20,15 +20,29 @@ class DifferentScenario(object):
 	def launchAllPlaysWithDataPlatform(self):
 		self.playDealer.setPlaymakerConfigurationByRest(useDataPlatform="TRUE")
 		for f in os.listdir("..\\PlaysCreationJsonFiles"):
-			playId=self.playDealer.createPlayByREST(playType=f,playName=f+"WithDataPlatform")
+			f_Name,f_ext=f.split('.')
+			playId=self.playDealer.createPlayByREST(playType=f_Name,playName=f_Name+"WithDataPlatform")
 			self.playDealer.scorePlay(playId)
+			time_spend=0
+			#judge the scroe complted, and 1 hour time out
+			while status_play!='Complete'or time_spend<3600:
+				time.sleep(10)
+				time_spend=time_spend+10
+				status_play=self.playDealer.getStatusOfPlay(playId)
 			self.playDealer.approvePlay(playId)
 		self.playDealer.launchPlay(launchAllPlays=True)
 	def launchAllPlaysWithoutDataPlatform(self):
 		self.playDealer.setPlaymakerConfigurationByRest(useDataPlatform="FALSE")
 		for f in os.listdir("..\\PlaysCreationJsonFiles"):
-			playId=self.playDealer.createPlayByREST(playType=f,playName=f+"WithOUTDataPlatform")
+			f_Name,f_ext=f.split('.')
+			playId=self.playDealer.createPlayByREST(playType=f_Name,playName=f_Name+"WithOUTDataPlatform")
 			self.playDealer.scorePlay(playId)
+			status_play=self.playDealer.getStatusOfPlay(playId)
+			time_spend=0
+			#judge the scroe complted, and 1 hour time out
+			while status_play!='Complete'or time_spend<3600:
+				time.sleep(10)
+				status_play=self.playDealer.getStatusOfPlay(playId)
 			self.playDealer.approvePlay(playId)
 		self.playDealer.launchPlay(launchAllPlays=True)
 	def scorePlayWithEVModeling(self):

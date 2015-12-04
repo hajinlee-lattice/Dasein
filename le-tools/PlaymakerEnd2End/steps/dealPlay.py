@@ -85,16 +85,20 @@ class DealPlay(object):
 	def createPlayByREST(self,playName=SalePrismEnvironments.playName,UseEVModel=False,playType=SalePrismEnvironments.playType):
 		log.info("##########  play creation starts   ##########")
 		playName=playName+playType+str(int(time.time()))
+		log.info("The play type is: %s" % (playType))
 		#Prepare the list for anlytics play type
 		AnlyticPlayList=[PlayTypes.t_CSFirstPurchase,PlayTypes.t_AnalyticList,PlayTypes.t_CSRepeatPurchase,PlayTypes.t_Winback]
-		with open("..\\PlaysCreationJsonFiles\\"+playType) as createPlayJsonFile:
+		with open("..\\PlaysCreationJsonFiles\\"+playType+".json") as createPlayJsonFile:
 			createPlayJson=json.load(createPlayJsonFile)
 		createPlayJson['DisplayName']=playName
 		createPlayJson['ExternalID']=createPlayJson['DisplayName']+"_"+str(int(time.time()))
 		if playType in AnlyticPlayList:
+			log.info("This play is Anlytic play")
 			if UseEVModel:
+				log.info("This play has checked Use EV modeling")
 				createPlayJson=self.enableEVModelInJson(createPlayJson)
 			else:
+				log.info("This play has unchecked Use EV modeling")
 				createPlayJson=self.disableEVModelInJson(createPlayJson)
 		#post create play data
 		savePlayUrl=SalePrismEnvironments.savePlayUrl
