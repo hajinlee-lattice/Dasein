@@ -13,7 +13,6 @@ from operations import LeadCreator
 from operations import PlsOperations
 import time
 from operations.TestHelpers import LPConfigRunner
-from operations.TestRunner import SessionRunner
 
 
 class Test(unittest.TestCase):
@@ -33,16 +32,18 @@ class Test(unittest.TestCase):
         elq = EloquaRequest();
         contact_lists = elq.addEloquaContactForDante(5);
         PlsOperations.runBulkScoring(tenant);
+        time.sleep(15)
         contact_lists = elq.getEloquaContact(contact_lists[0]);
         contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
         assert len(contact_faileds)==0, contact_faileds;
 
         danteLead = contact_lists[2].values()[0]
         dr = DanteRunner()
-        dr.checkDanteValue(PLSEnvironments.pls_bard_1,danteLead)
+        dr.checkDanteValue(tenant,danteLead)
 
         contact_lists = elq.addEloquaContactForDante(2);
         PlsOperations.runHourlyScoring(tenant);
+        time.sleep(15)
         contact_lists = elq.getEloquaContact(contact_lists[0]);
         contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",contact_lists);
         assert len(contact_faileds)==0, contact_faileds;
@@ -50,7 +51,7 @@ class Test(unittest.TestCase):
         '''verify the dante result, check the leadcache table in dante database directly.'''
         # waitting to implement #dataplatforms
         danteLead = contact_lists[2].values()[0]
-        dr.checkDanteValue(PLSEnvironments.pls_bard_1,danteLead)
+        dr.checkDanteValue(tenant,danteLead)
 
     def TestEndToEndMKTO(self):
         ''' prepare the Tenant -- drop templates, configure DL.. '''
@@ -65,24 +66,26 @@ class Test(unittest.TestCase):
             assert False;
 
         mkto = MarketoRequest();
-        leads_list = mkto.addLeadToMarketo(5);
-        PlsOperations.runBulkScoring(tenant);        
+        leads_list = mkto.addLeadToMarketoForDante(5);
+        PlsOperations.runBulkScoring(tenant);
+        time.sleep(15)
         lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
         assert len(lead_faileds)==0, lead_faileds;
 
         danteLead = leads_list[2].values()[0]
         dr = DanteRunner()
-        dr.checkDanteValue(PLSEnvironments.pls_bard_2,danteLead)
+        dr.checkDanteValue(tenant,danteLead)
 
-        leads_list = mkto.addLeadToMarketo(2);
-        PlsOperations.runHourlyScoring(tenant);        
+        leads_list = mkto.addLeadToMarketoForDante(2);
+        PlsOperations.runHourlyScoring(tenant);
+        time.sleep(15)
         lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
         lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
         assert len(lead_faileds)==0, lead_faileds;
 
         danteLead = leads_list[2].values()[0]
-        dr.checkDanteValue(PLSEnvironments.pls_bard_2,danteLead)
+        dr.checkDanteValue(tenant,danteLead)
 
     def TestEndToEndSFDC(self):
         ''' prepare the Tenant -- drop templates, configure DL.. '''
@@ -100,6 +103,7 @@ class Test(unittest.TestCase):
         leads_list = sfdc.addLeadsToSFDC(5);
         contacts_list = sfdc.addContactsToSFDC(5)
         PlsOperations.runBulkScoring(tenant, PLSEnvironments.pls_marketing_app_SFDC);
+        time.sleep(15)
         lead_lists = sfdc.getLeadsFromSFDC(leads_list);
         contact_lists = sfdc.getContactsFromSFDC(contacts_list);
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC", lead_lists);
@@ -109,25 +113,26 @@ class Test(unittest.TestCase):
 
         danteLead = leads_list.keys()[0]
         dr = DanteRunner()
-        dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
+        dr.checkDanteValue(tenant,danteLead)
         danteLead = contacts_list.keys()[0]
-        dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
+        dr.checkDanteValue(tenant,danteLead)
 
         leads_list = sfdc.addLeadsToSFDC(2);
         contacts_list = sfdc.addContactsToSFDC(2)
         PlsOperations.runHourlyScoring(tenant, PLSEnvironments.pls_marketing_app_SFDC);
+        time.sleep(15)
         lead_lists = sfdc.getLeadsFromSFDC(leads_list);
         contact_lists = sfdc.getContactsFromSFDC(contacts_list);
-        lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC", lead_lists);
-        contact_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC", contact_lists);
+        lead_faileds = LeadCreator.verifyResult("TestHourlyScoringSFDC", lead_lists);
+        contact_faileds = LeadCreator.verifyResult("TestHourlyScoringSFDC", contact_lists);
         assert len(lead_faileds)==0, lead_faileds;
         assert len(contact_faileds) == 0, contact_faileds;
 
         danteLead = leads_list.keys()[0]
         dr = DanteRunner()
-        dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
+        dr.checkDanteValue(tenant,danteLead)
         danteLead = contacts_list.keys()[0]
-        dr.checkDanteValue(PLSEnvironments.pls_bard_3,danteLead)
+        dr.checkDanteValue(tenant,danteLead)
         
     def testName(self):
         pass

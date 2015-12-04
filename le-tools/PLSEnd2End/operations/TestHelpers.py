@@ -299,6 +299,7 @@ class LPConfigRunner(SessionRunner):
         if response.status_code == 200:
             return True
         else:
+            print response.text
             return False
 
     def lpElQCredentials(self, tenantName):
@@ -316,6 +317,7 @@ class LPConfigRunner(SessionRunner):
         if response.status_code == 200:
             return True
         else:
+            print response.text
             return False
 
     def lpMKTOCredentials(self, tenantName):
@@ -333,6 +335,7 @@ class LPConfigRunner(SessionRunner):
         if response.status_code == 200:
             return True
         else:
+            print response.text
             return False
 
     def init(self, tenant, marketting_app):
@@ -344,23 +347,23 @@ class LPConfigRunner(SessionRunner):
                                          PLSEnvironments.dl_server_name):
                 print "Credentials will be input after 5 minutes."
                 time.sleep(300);
-                self.lpSFDCCredentials(tenant)
-                self.lpElQCredentials(tenant);
+                assert self.lpSFDCCredentials(tenant)
+                assert self.lpElQCredentials(tenant);
                 created=True;
         elif marketting_app == PLSEnvironments.pls_marketing_app_MKTO:
             if True == self.addNewTenant(tenant, "Marketo", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                          PLSEnvironments.dl_server_name):
                 print "Credentials will be input after 5 minutes."
                 time.sleep(300);
-                self.lpSFDCCredentials(tenant)
-                self.lpMKTOCredentials(tenant)
+                assert self.lpSFDCCredentials(tenant)
+                assert self.lpMKTOCredentials(tenant)
                 created=True;
         else:
             if True == self.addNewTenant(tenant, "SFDC", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                          PLSEnvironments.dl_server_name):
                 print "Credentials will be input after 5 minutes."
                 time.sleep(300);
-                self.lpSFDCCredentials(tenant)
+                assert self.lpSFDCCredentials(tenant)
                 created=True;
         print "configure dataloader settings"
         if created:
