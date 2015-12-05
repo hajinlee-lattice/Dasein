@@ -1,8 +1,6 @@
 package com.latticeengines.scoring.util;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,12 +96,4 @@ public class ScoringJobUtil {
         }
     }
 
-    public static URI[] getURIs(String hdfsPaths) throws URISyntaxException {
-        String[] paths = hdfsPaths.split(ScoringDaemonService.COMMA);
-        URI[] files = new URI[paths.length];
-        for (int i = 0; i < files.length; i++) {
-            files[i] = new URI(paths[i].trim());
-        }
-        return files;
-    }
 }

@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -103,21 +104,13 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             mrJob.setMapperClass(EventDataScoringMapper.class);
             mrJob.setNumReduceTasks(0);
 
-            if (properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()) != null) {
-                String cacheFilePath = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name());
-                mrJob.setCacheFiles(ScoringJobUtil.getURIs(cacheFilePath));
-            }
+            MRJobUtil.setLocalizedResources(mrJob, properties);
             mrJob.addCacheFile(new URI(scoringPythonPath));
             mrJob.addCacheFile(new URI(dataTypeFilePath));
             List<String> jarFilePaths = HdfsUtils
                     .getFilesForDir(mrJob.getConfiguration(), jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {
                 mrJob.addFileToClassPath(new Path(jarFilePath));
-            }
-
-            if (properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()) != null) {
-                String cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name());
-                mrJob.setCacheArchives(ScoringJobUtil.getURIs(cacheArchivePaths));
             }
 
         } catch (Exception e) {
