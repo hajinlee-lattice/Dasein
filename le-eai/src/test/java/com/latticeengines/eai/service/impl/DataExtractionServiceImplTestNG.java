@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -176,10 +177,30 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         attr.setPhysicalName(attr.getName());
         attr.setStatisticalType("");
         attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+        PrimaryKey pk = new PrimaryKey();
+        pk.addAttribute(attr.getName());
+        table.setPrimaryKey(pk);
+
+        Attribute lmd = new Attribute();
+        lmd.setName("LastModifiedDate");
+        lmd.setSemanticType("");
+        lmd.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        lmd.setDataSource("");
+        lmd.setDataQuality("");
+        lmd.setDescription("");
+        lmd.setDisplayDiscretizationStrategy("");
+        lmd.setDisplayName("");
+        lmd.setCategory("");
+        lmd.setDataType("");
+        lmd.setFundamentalType("");
+        lmd.setPhysicalName(attr.getName());
+        lmd.setStatisticalType("");
+        lmd.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
         LastModifiedKey lmk = EaiMetadataUtil.createLastModifiedKey();
+        lmk.addAttribute(lmd.getName());
         lmk.setLastModifiedTimestamp(1000000000000L);
         table.setLastModifiedKey(lmk);
-        table.setAttributes(Arrays.<Attribute> asList(new Attribute[] { attr }));
+        table.setAttributes(Arrays.<Attribute> asList(new Attribute[] { attr, lmd }));
         when(eaiMetadataService.getImportTables(any(String.class))).thenReturn(
                 Arrays.<Table> asList(new Table[] { table }));
 

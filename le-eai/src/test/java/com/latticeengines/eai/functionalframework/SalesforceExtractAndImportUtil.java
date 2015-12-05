@@ -12,7 +12,7 @@ public class SalesforceExtractAndImportUtil {
         table.setName("Account");
 
         Attribute id = new Attribute();
-        id.setName("Id");
+        id.setName("SomeNonExistingId");
         Attribute accountSource = new Attribute();
         accountSource.setName("AccountSource");
         Attribute name = new Attribute();
@@ -64,7 +64,7 @@ public class SalesforceExtractAndImportUtil {
         Attribute rating = new Attribute();
         rating.setName("Rating");
         Attribute lastModifiedDate = new Attribute();
-        lastModifiedDate.setName("LastModifiedDate");
+        lastModifiedDate.setName("SomeNonExistingLastModifiedDate");
 
         table.addAttribute(id);
         table.addAttribute(accountSource);
@@ -98,8 +98,8 @@ public class SalesforceExtractAndImportUtil {
         table.setPrimaryKey(pk);
 
         LastModifiedKey lk = new LastModifiedKey();
-        lk.setName("LK_CreatedDate");
-        lk.addAttribute(createdDate.getName());
+        lk.setName("LK_LastModifiedDate");
+        lk.addAttribute(lastModifiedDate.getName());
         table.setLastModifiedKey(lk);
         return table;
     }

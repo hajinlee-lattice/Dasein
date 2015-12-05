@@ -2,6 +2,7 @@ package com.latticeengines.eai.service.impl.salesforce.strategy;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import org.apache.camel.CamelContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,8 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
         } catch (LedpException e) {
             exception = true;
             assertEquals(e.getCode(), LedpCode.LEDP_17003);
-            assertTrue(e.getMessage().contains("IsConverted, Company, NaicsCode, Salutation, Status"));
+            assertTrue(e.getMessage().contains("SomeNonExistingId, SomeNonExistingLastModifiedDate"));
+            assertFalse(e.getMessage().contains("NaicsCode"));
         }
 
         assertTrue(exception, "Exception should have been thrown.");

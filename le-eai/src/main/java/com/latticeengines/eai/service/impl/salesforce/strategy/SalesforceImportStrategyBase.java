@@ -28,12 +28,15 @@ import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeOwner;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
-import com.latticeengines.eai.metadata.util.EaiMetadataUtil;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 
@@ -125,18 +128,26 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         JobInfo jobInfo = setupJob(template, table);
 
-        PrimaryKey pk = EaiMetadataUtil.createPrimaryKey();
-
+        String customerSpace = ctx.getProperty(ImportProperty.CUSTOMER, String.class);
         try {
             SObjectDescription desc = template.requestBodyAndHeader("direct:getDescription", jobInfo,
                     SalesforceEndpointConfig.SOBJECT_NAME, table.getName(), SObjectDescription.class);
             List<SObjectField> descFields = desc.getFields();
             Map<String, Attribute> nameAttrMap = table.getNameAttributeMap();
-            validateSalesforceMetadata(table.getName(), nameAttrMap, descFields);
+            validateSalesforceMetadata(table, nameAttrMap, descFields);
 
             Table newTable = new Table();
             newTable.setName(table.getName());
             newTable.setDisplayName(desc.getLabel());
+
+            PrimaryKey pk = table.getPrimaryKey();
+            LastModifiedKey lmk = table.getLastModifiedKey();
+            if(pk == null){
+                throw new LedpException(LedpCode.LEDP_17009, new String[] { customerSpace });
+            }
+            if(lmk == null) {
+                throw new LedpException(LedpCode.LEDP_17006, new String[] { customerSpace });
+            }
 
             for (SObjectField descField : descFields) {
                 if (!nameAttrMap.containsKey(descField.getName())) {
@@ -193,13 +204,10 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 } else if (type.equals("datetime")) {
                     attr.setPropertyValue("dateFormat", "YYYY-MM-DD'T'HH:mm:ss.sssZ");
                 }
-                if (attr.getLogicalDataType().equals("id")) {
-                    pk.addAttribute(attr.getName());
-                }
                 newTable.addAttribute(attr);
             }
-            newTable.setPrimaryKey(table.getPrimaryKey());
-            newTable.setLastModifiedKey(table.getLastModifiedKey());
+            newTable.setPrimaryKey(pk);
+            newTable.setLastModifiedKey(lmk);
 
             Schema schema = AvroSchemaBuilder.createSchema(newTable.getName(), newTable);
             newTable.setSchema(schema);
@@ -209,18 +217,34 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
         }
     }
 
-    protected void validateSalesforceMetadata(String table, Map<String, Attribute> nameAttrMap,
+    protected void validateSalesforceMetadata(Table table, Map<String, Attribute> nameAttrMap,
             List<SObjectField> descFields) {
         List<String> descFieldNames = new ArrayList<>();
         for (SObjectField descField : descFields) {
             descFieldNames.add(descField.getName());
         }
-        validateMetadata(table, nameAttrMap, descFieldNames);
+        List<AttributeOwner> attrOwners = Arrays.<AttributeOwner> asList(new AttributeOwner[] { table.getPrimaryKey(),
+                table.getLastModifiedKey() });
+        validateRequiredAttributes(table.getName(), attrOwners, descFieldNames);
+        validateAttributes(table.getName(), nameAttrMap, descFieldNames);
+    }
+
+    private void validateRequiredAttributes(String table, List<AttributeOwner> attrOwners, List<String> descFieldNames) {
+        List<String> missedAttrNames = new ArrayList<>();
+        for (AttributeOwner attrOwner : attrOwners) {
+            for (String attrName : attrOwner.getAttributes()) {
+                if (!descFieldNames.contains(attrName)) {
+                    missedAttrNames.add(attrName);
+                }
+            }
+        }
+        if (missedAttrNames.size() > 0) {
+            throw new LedpException(LedpCode.LEDP_17003, new String[] { missedAttrNames.toString(), table });
+        }
     }
 
     @Override
     public ImportContext resolveFilterExpression(String expression, ImportContext ctx) {
-        // TODO Auto-generated method stub
         return null;
     }
 

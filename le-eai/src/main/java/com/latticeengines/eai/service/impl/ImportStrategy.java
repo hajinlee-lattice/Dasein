@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.ProducerTemplate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -15,6 +17,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class ImportStrategy {
+
+    private Log log = LogFactory.getLog(ImportStrategy.class);
 
     private static Map<String, ImportStrategy> strategies = new HashMap<>();
 
@@ -38,7 +42,7 @@ public abstract class ImportStrategy {
 
     protected abstract AvroTypeConverter getAvroTypeConverter();
 
-    protected void validateMetadata(String table, Map<String, Attribute> nameAttrMap, List<String> nameFields) {
+    protected void validateAttributes(String table, Map<String, Attribute> nameAttrMap, List<String> nameFields) {
         List<String> missedAttrNames = new ArrayList<>();
         for (String name : nameAttrMap.keySet()) {
             if (!nameFields.contains(name)) {
@@ -46,7 +50,7 @@ public abstract class ImportStrategy {
             }
         }
         if (missedAttrNames.size() > 0) {
-            throw new LedpException(LedpCode.LEDP_17003, new String[] { missedAttrNames.toString(), table });
+            log.warn(new LedpException(LedpCode.LEDP_17003, new String[] { missedAttrNames.toString(), table }));
         }
     }
 
