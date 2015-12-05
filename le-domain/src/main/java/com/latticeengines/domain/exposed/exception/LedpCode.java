@@ -90,6 +90,7 @@ public enum LedpCode {
     LEDP_17006("Got NULL Value from Last Modified Key for Tenant {0}"), //
     LEDP_17007("Got NULL Value from Table {0} for Tenant {1}"), //
     LEDP_17008("Unsupported Source Credential Check for Source Type {0}"), //
+    LEDP_17009("Got NULL Value from Primary Key for Tenant {0}"), //
 
     // PLS 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
