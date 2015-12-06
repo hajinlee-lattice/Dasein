@@ -375,23 +375,23 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                         User user = userService.findByEmail(email);
                         if (step == TenantDeploymentStep.IMPORT_SFDC_DATA) {
                             if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPdImportDataSuccessEmail(user, hostPort);
+                                emailService.sendPlsImportDataSuccessEmail(user, hostPort);
                             } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPdImportDataErrorEmail(user, hostPort);
+                                emailService.sendPlsImportDataErrorEmail(user, hostPort);
                             }
                         } else if (step == TenantDeploymentStep.ENRICH_DATA) {
                             if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPdEnrichDataSuccessEmail(user, hostPort);
+                                emailService.sendPlsEnrichDataSuccessEmail(user, hostPort);
                             } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPdEnrichDataErrorEmail(user, hostPort);
+                                emailService.sendPlsEnrichDataErrorEmail(user, hostPort);
                             }
                         } else if (step == TenantDeploymentStep.VALIDATE_METADATA) {
                             if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPdValidateMetadataSuccessEmail(user, hostPort);
+                                emailService.sendPlsValidateMetadataSuccessEmail(user, hostPort);
                             } else if (status == TenantDeploymentStatus.WARNING) {
-                                emailService.sendPdMetadataMissingEmail(user, hostPort);
+                                emailService.sendPlsMetadataMissingEmail(user, hostPort);
                             } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPdValidateMetadataErrorEmail(user, hostPort);
+                                emailService.sendPlsValidateMetadataErrorEmail(user, hostPort);
                             }
                         }
                     } catch (Exception e) { }
