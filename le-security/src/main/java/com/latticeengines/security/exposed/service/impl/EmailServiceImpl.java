@@ -187,11 +187,11 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPdImportDataSuccessEmail(User user, String hostport) {
+    public void sendPlsImportDataSuccessEmail(User user, String hostport) {
         try {
-            log.info("Sending PD import data complete email to " + user.getEmail() + " started.");
+            log.info("Sending PLS import data complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_SUCCESS);
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -203,18 +203,18 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lead Prioritization - Import Data Successfully", mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending PD import data complete email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS import data complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PD import data complete email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS import data complete email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
     @Override
-    public void sendPdImportDataErrorEmail(User user, String hostport) {
+    public void sendPlsImportDataErrorEmail(User user, String hostport) {
         try {
-            log.info("Sending PD import data error email to " + user.getEmail() + " started.");
+            log.info("Sending PLS import data error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_ERROR);
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -224,19 +224,19 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lead Prioritization - Import Data Failed", mp, Collections.singleton(user.getEmail()));
-            log.info("Sending PD import data error email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS import data error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PD import data error email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS import data error email to " + user.getEmail() + " " + e.getMessage());
         }
 
     }
 
     @Override
-    public void sendPdEnrichDataSuccessEmail(User user, String hostport) {
+    public void sendPlsEnrichDataSuccessEmail(User user, String hostport) {
         try {
-            log.info("Sending PD enrichment data complete email to " + user.getEmail() + " started.");
+            log.info("Sending PLS enrichment data complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_SUCCESS);
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -247,18 +247,18 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lead Prioritization - Enrich Data Successfully", mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending PD enrichment data complete email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS enrichment data complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PD enrichment data complete email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS enrichment data complete email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
     @Override
-    public void sendPdEnrichDataErrorEmail(User user, String hostport) {
+    public void sendPlsEnrichDataErrorEmail(User user, String hostport) {
         try {
-            log.info("Sending PD enrich data error email to " + user.getEmail() + " started.");
+            log.info("Sending PLS enrich data error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_ERROR);
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -268,18 +268,18 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lead Prioritization - Enrich Data Failed", mp, Collections.singleton(user.getEmail()));
-            log.info("Sending PD enrich data error email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS enrich data error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PD enrich data error email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS enrich data error email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
     @Override
-    public void sendPdValidateMetadataSuccessEmail(User user, String hostport) {
+    public void sendPlsValidateMetadataSuccessEmail(User user, String hostport) {
         try {
-            log.info("Sending PD validate metadata complete email to " + user.getEmail() + " started.");
+            log.info("Sending PLS validate metadata complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_SUCCESS);
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -290,19 +290,19 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lead Prioritization - Metadata Validation Successfully", mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending PD validate metadata complete email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS validate metadata complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PD validate metadata complete email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS validate metadata complete email to " + user.getEmail() + " " + e.getMessage());
         }
 
     }
 
     @Override
-    public void sendPdMetadataMissingEmail(User user, String hostport) {
+    public void sendPlsMetadataMissingEmail(User user, String hostport) {
         try {
-            log.info("Sending PD metadata missing email to " + user.getEmail() + " started.");
+            log.info("Sending PLS metadata missing email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_ERROR);
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -312,18 +312,18 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lead Prioritization - Metadata Missing", mp, Collections.singleton(user.getEmail()));
-            log.info("Sending PD metadata missing email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS metadata missing email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PD metadata missing email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS metadata missing email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
     @Override
-    public void sendPdValidateMetadataErrorEmail(User user, String hostport) {
+    public void sendPlsValidateMetadataErrorEmail(User user, String hostport) {
         try {
-            log.info("Sending PD validate metadata error email to " + user.getEmail() + " started.");
+            log.info("Sending PLS validate metadata error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PD_DEPLOYMENT_STEP_ERROR);
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -334,9 +334,9 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lead Prioritization - Validate Metadata Failed", mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending PD validate metadata error email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS validate metadata error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PD validate metadata error email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS validate metadata error email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 }

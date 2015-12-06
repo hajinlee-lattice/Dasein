@@ -27,17 +27,17 @@ public interface EmailService {
 
     void sendPlsForgetPasswordEmail(User user, String password, String hostport);
 
-    void sendPdImportDataSuccessEmail(User user, String hostport);
+    void sendPlsImportDataSuccessEmail(User user, String hostport);
 
-    void sendPdImportDataErrorEmail(User user, String hostport);
+    void sendPlsImportDataErrorEmail(User user, String hostport);
 
-    void sendPdEnrichDataSuccessEmail(User user, String hostport);
+    void sendPlsEnrichDataSuccessEmail(User user, String hostport);
 
-    void sendPdEnrichDataErrorEmail(User user, String hostport);
+    void sendPlsEnrichDataErrorEmail(User user, String hostport);
 
-    void sendPdValidateMetadataSuccessEmail(User user, String hostport);
+    void sendPlsValidateMetadataSuccessEmail(User user, String hostport);
 
-    void sendPdMetadataMissingEmail(User user, String hostport);
+    void sendPlsMetadataMissingEmail(User user, String hostport);
 
-    void sendPdValidateMetadataErrorEmail(User user, String hostport);
+    void sendPlsValidateMetadataErrorEmail(User user, String hostport);
 }
