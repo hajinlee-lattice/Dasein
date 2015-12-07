@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -18,8 +19,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodProperties;
-
-import junit.framework.Assert;
 
 public class PodLifecycleManagerUnitTestNG {
     @SuppressWarnings("unused")
