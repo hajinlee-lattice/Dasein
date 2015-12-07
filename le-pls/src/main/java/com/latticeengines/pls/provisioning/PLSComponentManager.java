@@ -3,17 +3,20 @@ package com.latticeengines.pls.provisioning;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -27,6 +30,10 @@ import com.latticeengines.security.exposed.service.UserService;
 public class PLSComponentManager {
 
     private static final Log LOGGER = LogFactory.getLog(PLSComponentManager.class);
+
+    private static final String DEFAUTL_PASSWORD = "admin";
+
+    private static final String DEFAULT_PASSWORD_HASH = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
     @Autowired
     private TenantService tenantService;
@@ -105,7 +112,6 @@ public class PLSComponentManager {
 
         assignAccessLevelByEmails(internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
         assignAccessLevelByEmails(superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
-        // add List of external admin users
         assignAccessLevelByEmails(externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());
     }
 
@@ -138,6 +144,7 @@ public class PLSComponentManager {
                 } catch (Exception e) {
                     throw new LedpException(LedpCode.LEDP_18028, String.format("Adding new user %s error.", email), e);
                 }
+                updatePasswordBasedOnUsername(uReg.getUser());
             }
             try {
                 userService.assignAccessLevel(accessLevel, tenantId, email);
@@ -162,9 +169,7 @@ public class PLSComponentManager {
         // construct credential
         Credentials creds = new Credentials();
         creds.setUsername(username);
-        // creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
-        String password = geneneratePasswordBasedOnUsername(username);
-        creds.setPassword(password);
+        creds.setPassword(DEFAULT_PASSWORD_HASH);
 
         // construct user registration
         UserRegistration uReg = new UserRegistration();
@@ -174,14 +179,19 @@ public class PLSComponentManager {
         return uReg;
     }
 
-    // set the password of the user as the SHA256(CipherUtils(username))
-    private String geneneratePasswordBasedOnUsername(String username) {
-        // try {
-        // return (CipherUtils.encrypt(username));
-        // } catch (Exception e) {
-        // throw new
-        // RuntimeException("Exception when generating password based on username.");
-        // }
-        return "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+    void updatePasswordBasedOnUsername(User user) {
+        // update the default password "admin" to SHA256(CipherUtils(username))
+        if (user == null) {
+            LOGGER.error("User cannot be found.");
+            throw new RuntimeException("User %s cannot be found.");
+        }
+        UserUpdateData userUpdateData = new UserUpdateData();
+        userUpdateData.setAccessLevel(user.getAccessLevel());
+        userUpdateData.setOldPassword(DigestUtils.sha256Hex(DEFAUTL_PASSWORD));
+        // le-pls and le-admin uses the same encoding schema to be in synch
+        LOGGER.info("The username is " + user.getUsername());
+        String newPassword = Base64Utils.encodeBase64WithDefaultTrim(user.getUsername());
+        userUpdateData.setNewPassword(DigestUtils.sha256Hex(newPassword));
+        userService.updateCredentials(user, userUpdateData);
     }
 }

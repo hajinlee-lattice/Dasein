@@ -20,6 +20,7 @@ import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
+import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -153,8 +154,12 @@ public class ComponentOrchestrator {
             User user = userService.findByEmail(email);
             if (user == null) {
                 log.error(String.format("User: %s cannot be found", email));
+                throw new RuntimeException(String.format("User: %s cannot be found", email));
             }
-            emailService.sendPdNewExternalUserEmail(user, "admin", apiHostPort);
+            // le-pls and le-admin uses the same encoding schema to be in synch
+            log.info("The username is " + user.getUsername());
+            String password = Base64Utils.encodeBase64WithDefaultTrim(user.getUsername());
+            emailService.sendPdNewExternalUserEmail(user, password, apiHostPort);
         }
     }
 
@@ -163,6 +168,7 @@ public class ComponentOrchestrator {
             User user = userService.findByEmail(email);
             if (user == null) {
                 log.error(String.format("User: %s cannot be found", email));
+                throw new RuntimeException(String.format("User: %s cannot be found", email));
             }
             log.info("tenantId is " + tenantId);
             Tenant tenant = new Tenant();
@@ -237,5 +243,4 @@ public class ComponentOrchestrator {
             }
         }
     }
-
 }

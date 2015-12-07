@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -32,6 +33,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     private final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
+    private final static String testAdminPassword = Base64Utils.encodeBase64WithDefaultTrim(testAdminUsername);
 
     private final static Log log = LogFactory.getLog(PLSComponentDeploymentTestNG.class);
 
@@ -65,15 +67,14 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         node = confDir.get(new Path("/LatticeAdminEmails"));
         node.getDocument().setData("[ ]");
 
-        // node = confDir.get(new Path("/ExternalAdminEmails"));
-        // node.getDocument().setData("[ ]");
+        node = confDir.get(new Path("/ExternalAdminEmails"));
+        node.getDocument().setData("[ ]");
 
         return confDir;
     }
 
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException {
-        String testAdminPassword = "admin";
 
         String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);

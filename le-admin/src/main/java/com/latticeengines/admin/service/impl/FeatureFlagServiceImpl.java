@@ -6,8 +6,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.service.FeatureFlagService;
@@ -23,8 +21,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("featureFlagService")
 public class FeatureFlagServiceImpl implements FeatureFlagService {
-
-    Logger log = LoggerFactory.getLogger(FeatureFlagServiceImpl.class);
 
     @Override
     public void defineFlag(String id, FeatureFlagDefinition definition) {
