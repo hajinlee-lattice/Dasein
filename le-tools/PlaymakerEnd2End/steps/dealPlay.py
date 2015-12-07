@@ -8,10 +8,14 @@ except ImportError:
 	import os
 	assert os.system('pip install -U pyodbc') ==0
 	import pyodbc
-import time,json,requests
+import time
+import json
+
+import requests
+
 requests.packages.urllib3.disable_warnings()
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
-from PlaymakerEnd2End.steps.DBHelper import DealDB
+from PlaymakerEnd2End.tools.DBHelper import DealDB
 log=SalePrismEnvironments.log
 class PlayTypes(object):
 	t_AnalyticList='AnalyticList'
@@ -41,7 +45,7 @@ class DealPlay(object):
 		assert self.aspAuth!=None
 	def setPlaymakerConfigurationByRest(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,useDataPlatform=SalePrismEnvironments.withModelingOnDataPlatform):
 		log.info("##########  playmaker system configuration start   ##########")
-		with open('..\\SysConfig') as jsonData:
+		with open('.\\PlaymakerEnd2End\\SysConfig.json') as jsonData:
 			sysConfigJson=json.load(jsonData)
 		conn = pyodbc.connect(DRIVER='{SQL SERVER}',SERVER=host,DATABASE=tenant,UID=SalePrismEnvironments.DBUser,PWD=SalePrismEnvironments.DBPwd)
 		cur = conn.cursor()
@@ -81,17 +85,28 @@ class DealPlay(object):
 		response=requests.post(resetCacheUrl,data=resetCacheXML,headers=resetCacheHeaders,verify=False)
 		assert response.status_code==200
 		log.info("reset cache successfully")
-
-	def createPlayByREST(self,playName=SalePrismEnvironments.playName,UseEVModel=False,playType=SalePrismEnvironments.playType):
+	def createPlayByREST(self,UseEVModel=False,playType=SalePrismEnvironments.playType):
 		log.info("##########  play creation starts   ##########")
-		playName=playName+playType+str(int(time.time()))
+		playName=playType+str(time.time()).replace('.','')
+		time.sleep(1)
+		playExternalId=playName+"_"+str(time.time()).replace('.','')
 		log.info("The play type is: %s" % (playType))
 		#Prepare the list for anlytics play type
 		AnlyticPlayList=[PlayTypes.t_CSFirstPurchase,PlayTypes.t_AnalyticList,PlayTypes.t_CSRepeatPurchase,PlayTypes.t_Winback]
-		with open("..\\PlaysCreationJsonFiles\\"+playType+".json") as createPlayJsonFile:
+		with open(".\\PlaymakerEnd2End\\PlaysCreationJsonFiles\\"+playType+".json") as createPlayJsonFile:
 			createPlayJson=json.load(createPlayJsonFile)
 		createPlayJson['DisplayName']=playName
-		createPlayJson['ExternalID']=createPlayJson['DisplayName']+"_"+str(int(time.time()))
+		createPlayJson['ExternalID']=playExternalId
+		talkingPointsPrefix="TP-"+playName+"_"
+		talkingPointsList=createPlayJson["TalkingPoints"]
+		if len(talkingPointsList)>0:
+			log.info("Modifying Talking Points timestamp")
+			for index in range(0,len(talkingPointsList)):
+				createPlayJson["TalkingPoints"][index]["ExternalID"]=talkingPointsPrefix+str(time.time()).replace('.','')
+				createPlayJson["TalkingPoints"][index]["PlayExternalID"]=playExternalId
+				time.sleep(1)
+		else:
+			log.info("No Talking Points need to modify")
 		if playType in AnlyticPlayList:
 			log.info("This play is Anlytic play")
 			if UseEVModel:
@@ -110,9 +125,9 @@ class DealPlay(object):
 		PlayID=json.loads(resJson["CompressedResult"])["Key"]
 		assert int(PlayID)>0
 		log.info("Play created!")
-		log.info("Name of created Play is"+playName)
-		selectSQL="SELECT  PreLead_ID  FROM PreLead where Status=1000 and Play_ID=%s"%PlayID
-		playDict={"playName":playName,"playId":PlayID,"recommendationsNumberGenerated":len(DealDB.fetchAllResultOfSelect(selectSQL))}
+		log.info("Name of created Play is  "+playName)
+
+		playDict={"playName":playName,"playId":PlayID}
 		return playDict
 	def scorePlay(self,idOfPlay):
 		log.info("##########  Play Scoring start   ##########")
@@ -120,6 +135,7 @@ class DealPlay(object):
 		scorePlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"*/*; q=0.01","LEFormsTicket":self.aspAuth,"User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host}
 		response=requests.post(scorePlayUrl,headers=scorePlayHeaders,verify=False)
 		assert response.status_code==200
+
 	def approvePlay(self,idOfPlay):
 		approvePlayUrl=SalePrismEnvironments.approvePlayUrl.replace("99",str(idOfPlay))
 		approvePlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"*/*; q=0.01","LEFormsTicket":self.aspAuth,"User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host}
@@ -175,7 +191,8 @@ class DealPlay(object):
 				response=requests.post(launchPlaysUrl,json=realJson,headers=launchPlaysHeaders,verify=False)
 				assert response.status_code==200
 				log.info("play %s launched successfully"%nameOfPlayToLaunch)
-				break
+				return time.strftime('%Y-%m-%d %H:%M:%S')
+
 	def getLaunchStatus(self,idOfPlay):
 		getLaunchStatusUrl=SalePrismEnvironments.getLaunchStatusUrl+str(idOfPlay)
 		getLaunchStatusHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"LEFormsTicket":self.aspAuth,"Origin":"https://"+SalePrismEnvironments.host}
@@ -200,13 +217,14 @@ class DealPlay(object):
 
 if __name__=='__main__':
 	Play=DealPlay()
-	PlayID=Play.createPlayByREST()
-	Play.approvePlay(idOfPlay=PlayID)
-	Play.scorePlay(idOfPlay=PlayID)
-	status=Play.getStatusOfPlay(idOfPlay=PlayID)
-	while status != 'Complete':
-		time.sleep(10)
-		status=Play.getStatusOfPlay(idOfPlay=PlayID)
-	print Play.getLaunchStatus(idOfPlay=PlayID)
-	Play.launchPlay()
-	Play.getLaunchStatus(idOfPlay=PlayID)
+	playDict=Play.createPlayByREST()
+	PlayID=playDict.get("playId")
+	#Play.approvePlay(idOfPlay=PlayID)
+	#Play.scorePlay(idOfPlay=PlayID)
+	#status=Play.getStatusOfPlay(idOfPlay=PlayID)
+	#while status != 'Complete':
+		#time.sleep(10)
+		#status=Play.getStatusOfPlay(idOfPlay=PlayID)
+	#print Play.getLaunchStatus(idOfPlay=PlayID)
+	#Play.launchPlay()
+	#Play.getLaunchStatus(idOfPlay=PlayID)

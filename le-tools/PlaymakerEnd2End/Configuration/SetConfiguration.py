@@ -4,7 +4,7 @@ import argparse,json
 
 
 def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser,driverType,withModelingOnDataPlatform="TRUE"):
-    with open("..\\config.ini") as ini:
+    with open(".\\PlaymakerEnd2End\\config.ini") as ini:
         jsonIni=json.load(ini)
         jsonIni['withModelingOnDataPlatform']=withModelingOnDataPlatform
         jsonIni["tenantName"]=tenantName

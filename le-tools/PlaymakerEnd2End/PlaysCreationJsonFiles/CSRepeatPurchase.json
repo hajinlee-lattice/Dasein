@@ -1,12 +1,12 @@
 {
     "CreatedBy": 28,
-    "CreationDate": "/Date(1447738663857-0500)/",
-    "DisplayName": "ThisIsACSPurchurs",
+    "CreationDate": "/Date(1449459009292-0500)/",
+    "DisplayName": "FFFFFFFF",
     "DomainID": -1,
-    "ExternalID": "ThisIsACSPurchurs_1447738688791",
+    "ExternalID": "FFFFFFFF_1449459012722",
     "InternalID": -2147483648,
     "IsActive": true,
-    "LastModificationDate": "/Date(1447738663857-0500)/",
+    "LastModificationDate": "/Date(1449459009292-0500)/",
     "LastModifiedBy": 28,
     "LogicalNotion": "Play",
     "DirtyColumns": null,
@@ -27,7 +27,7 @@
     "AvgCycleLength": 60,
     "CreatedByName": "Randy Wood",
     "CurrentProcessDisplayString": "None",
-    "Description": "for QA instance",
+    "Description": null,
     "ExcludeFromFilters": false,
     "ExcludeFromHoldouts": false,
     "ExpectedConversionRate": null,
@@ -41,7 +41,7 @@
     "LastGenerateDate": null,
     "LastModifiedByName": "Randy Wood",
     "LastSuccessfulProcessID": "None",
-    "LastUserModificationDate": "/Date(1447442963080-0500)/",
+    "LastUserModificationDate": "/Date(1448503291627-0500)/",
     "LastUserModifiedByName": "System",
     "LaunchRuleDisplayString": "Exclude",
     "LaunchRuleID": 2,
@@ -58,8 +58,8 @@
     "RenewalOpportunity": null,
     "ScoreSourceDisplayString": "Analytics",
     "ScoreSourceID": "Analytics",
-    "ScoringMethodDisplayString": "Probability",
-    "ScoringMethodID": "Probability",
+    "ScoringMethodDisplayString": "Lift",
+    "ScoringMethodID": "Lift",
     "Settings": "",
     "SolutionName": null,
     "SolutionType": null,
@@ -94,13 +94,13 @@
     "AvailableSurveyQuestions": [
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Maturity",
             "DomainID": -1,
             "ExternalID": "Q003",
             "InternalID": 3,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -155,13 +155,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Objectives",
             "DomainID": -1,
             "ExternalID": "Q001",
             "InternalID": 1,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -207,13 +207,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Process",
             "DomainID": -1,
             "ExternalID": "Q002",
             "InternalID": 2,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -294,13 +294,13 @@
     "GlobalSurveyQuestions": [
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Contact Duration",
             "DomainID": -1,
             "ExternalID": "Q010",
             "InternalID": 10,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -327,13 +327,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "IT Budget Review",
             "DomainID": -1,
             "ExternalID": "Q009",
             "InternalID": 9,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -360,13 +360,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Openness to Emerging Technologies",
             "DomainID": -1,
             "ExternalID": "Q005",
             "InternalID": 5,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -430,13 +430,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Client Opinion",
             "DomainID": -1,
             "ExternalID": "Q004",
             "InternalID": 4,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -491,13 +491,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Contact Opinion",
             "DomainID": -1,
             "ExternalID": "Q008",
             "InternalID": 8,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -524,13 +524,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "IT Spending Control",
             "DomainID": -1,
             "ExternalID": "Q006",
             "InternalID": 6,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -594,13 +594,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "IT Budget",
             "DomainID": -1,
             "ExternalID": "Q011",
             "InternalID": 11,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -627,13 +627,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Fiscal Year",
             "DomainID": -1,
             "ExternalID": "Q012",
             "InternalID": 12,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -660,13 +660,13 @@
         },
         {
             "CreatedBy": 0,
-            "CreationDate": "/Date(1447443057760-0500)/",
+            "CreationDate": "/Date(1448503388930-0500)/",
             "DisplayName": "Contact Frequency",
             "DomainID": -1,
             "ExternalID": "Q007",
             "InternalID": 7,
             "IsActive": true,
-            "LastModificationDate": "/Date(1447443057760-0500)/",
+            "LastModificationDate": "/Date(1448503388930-0500)/",
             "LastModifiedBy": 0,
             "LogicalNotion": "SurveyQuestion",
             "DirtyColumns": null,
@@ -739,13 +739,13 @@
     "PlayGroups": [],
     "PlayWorkflowType": {
         "CreatedBy": 0,
-        "CreationDate": "/Date(1447442962077-0500)/",
+        "CreationDate": "/Date(1448503290827-0500)/",
         "DisplayName": "Cross-Sell",
         "DomainID": -1,
         "ExternalID": "Cross-Sell",
         "InternalID": 2,
         "IsActive": true,
-        "LastModificationDate": "/Date(1447442962077-0500)/",
+        "LastModificationDate": "/Date(1448503290827-0500)/",
         "LastModifiedBy": 0,
         "LogicalNotion": "PlayWorkflowType",
         "DirtyColumns": null,
@@ -777,7 +777,7 @@
             "CreationDate": null,
             "DisplayName": "tempDisplayName",
             "DomainID": -1,
-            "ExternalID": "TP-ThisIsACSPurchurs_1447738800888",
+            "ExternalID": "TP-FFFFFFFF_1449459096013",
             "InternalID": -2147483648,
             "IsActive": true,
             "LastModificationDate": null,
@@ -793,14 +793,14 @@
             "CopyAction": "Copy",
             "CreatedByDisplayName": "Randy Wood",
             "Description": null,
-            "DetailsText": "<p>this is first talking points</p>",
+            "DetailsText": "<p>this is reasons to buy</p>",
             "HeadingText": "Reasons to Buy",
             "LastModifiedByDisplayName": null,
             "LocaleDisplayString": "United States English",
             "LocaleExternalID": null,
             "LocaleID": "-1",
             "Offset": 1,
-            "PlayExternalID": "ThisIsACSPurchurs_1447738688791",
+            "PlayExternalID": "FFFFFFFF_1449459012722",
             "PlayID": null,
             "PlayName": null,
             "SummaryText": null,
@@ -818,16 +818,187 @@
                     "Value": "Différentiation concurrentielle"
                 },
                 {
-                    "Value": "Just Text in TP"
+                    "Value": "Reasons to Buy"
+                },
+                {
+                    "Value": "ttttt"
+                },
+                {
+                    "Value": "Value Proposition"
+                }
+            ],
+            "HeadingPlaceholder": "Section Heading (required)",
+            "initialized": true
+        },
+        {
+            "CreatedBy": 28,
+            "CreationDate": null,
+            "DisplayName": "tempDisplayName",
+            "DomainID": -1,
+            "ExternalID": "TP-FFFFFFFF_1449459109242",
+            "InternalID": -2147483648,
+            "IsActive": true,
+            "LastModificationDate": null,
+            "LastModifiedBy": null,
+            "LogicalNotion": "TalkingPoints",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": null,
+            "SynchronizationData": null,
+            "CopyAction": "Copy",
+            "CreatedByDisplayName": "Randy Wood",
+            "Description": null,
+            "DetailsText": "<p>this is&nbsp;Competitive Differentiation</p>",
+            "HeadingText": "Competitive Differentiation",
+            "LastModifiedByDisplayName": null,
+            "LocaleDisplayString": "United States English",
+            "LocaleExternalID": null,
+            "LocaleID": "-1",
+            "Offset": 2,
+            "PlayExternalID": "FFFFFFFF_1449459012722",
+            "PlayID": null,
+            "PlayName": null,
+            "SummaryText": null,
+            "AvailableHeadings": [
+                {
+                    "Value": ""
+                },
+                {
+                    "Value": "Competitive Differentiation"
+                },
+                {
+                    "Value": "Dante Talking Point sample"
+                },
+                {
+                    "Value": "Différentiation concurrentielle"
                 },
                 {
                     "Value": "Reasons to Buy"
                 },
                 {
-                    "Value": "Value Proposition"
+                    "Value": "ttttt"
                 },
                 {
-                    "Value": "With Values in TP"
+                    "Value": "Value Proposition"
+                }
+            ],
+            "HeadingPlaceholder": "Section Heading (required)",
+            "initialized": true
+        },
+        {
+            "CreatedBy": 28,
+            "CreationDate": null,
+            "DisplayName": "tempDisplayName",
+            "DomainID": -1,
+            "ExternalID": "TP-FFFFFFFF_1449459121834",
+            "InternalID": -2147483648,
+            "IsActive": true,
+            "LastModificationDate": null,
+            "LastModifiedBy": null,
+            "LogicalNotion": "TalkingPoints",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": null,
+            "SynchronizationData": null,
+            "CopyAction": "Copy",
+            "CreatedByDisplayName": "Randy Wood",
+            "Description": null,
+            "DetailsText": "<p>this is&nbsp;Value Proposition</p>",
+            "HeadingText": "Value Proposition",
+            "LastModifiedByDisplayName": null,
+            "LocaleDisplayString": "United States English",
+            "LocaleExternalID": null,
+            "LocaleID": "-1",
+            "Offset": 3,
+            "PlayExternalID": "FFFFFFFF_1449459012722",
+            "PlayID": null,
+            "PlayName": null,
+            "SummaryText": null,
+            "AvailableHeadings": [
+                {
+                    "Value": ""
+                },
+                {
+                    "Value": "Competitive Differentiation"
+                },
+                {
+                    "Value": "Dante Talking Point sample"
+                },
+                {
+                    "Value": "Différentiation concurrentielle"
+                },
+                {
+                    "Value": "Reasons to Buy"
+                },
+                {
+                    "Value": "ttttt"
+                },
+                {
+                    "Value": "Value Proposition"
+                }
+            ],
+            "HeadingPlaceholder": "Section Heading (required)",
+            "initialized": true
+        },
+        {
+            "CreatedBy": 28,
+            "CreationDate": null,
+            "DisplayName": "tempDisplayName",
+            "DomainID": -1,
+            "ExternalID": "TP-FFFFFFFF_1449459142641",
+            "InternalID": -2147483648,
+            "IsActive": true,
+            "LastModificationDate": null,
+            "LastModifiedBy": null,
+            "LogicalNotion": "TalkingPoints",
+            "DirtyColumns": null,
+            "ExtensionData": null,
+            "IsEditTemplate": false,
+            "IsReadOnly": false,
+            "RequiresUpdate": false,
+            "Rights": null,
+            "SynchronizationData": null,
+            "CopyAction": "Copy",
+            "CreatedByDisplayName": "Randy Wood",
+            "Description": null,
+            "DetailsText": "<p>this is&nbsp;Competitive Differentiation</p>",
+            "HeadingText": "Competitive Differentiation",
+            "LastModifiedByDisplayName": null,
+            "LocaleDisplayString": "United States English",
+            "LocaleExternalID": null,
+            "LocaleID": "-1",
+            "Offset": 4,
+            "PlayExternalID": "FFFFFFFF_1449459012722",
+            "PlayID": null,
+            "PlayName": null,
+            "SummaryText": null,
+            "AvailableHeadings": [
+                {
+                    "Value": ""
+                },
+                {
+                    "Value": "Competitive Differentiation"
+                },
+                {
+                    "Value": "Dante Talking Point sample"
+                },
+                {
+                    "Value": "Différentiation concurrentielle"
+                },
+                {
+                    "Value": "Reasons to Buy"
+                },
+                {
+                    "Value": "ttttt"
+                },
+                {
+                    "Value": "Value Proposition"
                 }
             ],
             "HeadingPlaceholder": "Section Heading (required)",
@@ -841,61 +1012,15 @@
         "ProductIDs": [
             66,
             14,
-            17,
             8,
             7,
             11,
-            12,
-            10,
-            13,
-            16
+            12
         ]
     },
     "TargetSpec": {
         "ContextName": null,
-        "FilterUnions": [
-            {
-                "Discriminator": "Logical",
-                "LookupID": null,
-                "Relation": null,
-                "Value": null,
-                "Negate": false,
-                "Terms": [
-                    {
-                        "Discriminator": "Concrete",
-                        "LookupID": "Address1",
-                        "Relation": "CONTAINS",
-                        "Value": "a",
-                        "Negate": false,
-                        "Terms": [],
-                        "Connective": null,
-                        "FilterTarget": "STANDARD",
-                        "LeftTransformation": null,
-                        "RightTransformation": null,
-                        "FilterCategory": "STATIC",
-                        "UniqueID": "FILTER_1447738733968_544"
-                    },
-                    {
-                        "Discriminator": "Concrete",
-                        "LookupID": "Address1",
-                        "Relation": "CONTAINS",
-                        "Value": "b",
-                        "Negate": false,
-                        "Terms": [],
-                        "Connective": null,
-                        "FilterTarget": "STANDARD",
-                        "LeftTransformation": null,
-                        "RightTransformation": null,
-                        "FilterCategory": "STATIC",
-                        "UniqueID": "FILTER_1447738747127_545"
-                    }
-                ],
-                "Connective": "OR",
-                "FilterTarget": "STANDARD",
-                "LeftTransformation": null,
-                "RightTransformation": null
-            }
-        ],
+        "FilterUnions": [],
         "FileName": null,
         "ListBuildTypeID": "Builder"
     },

@@ -14,7 +14,6 @@ from selenium.webdriver.common.keys import Keys
 log=SalePrismEnvironments.log
 class DealSFDC(object):
 	def __init__(self):
-		
 		if SalePrismEnvironments.driverType =="Firefox":
 			self.driver=webdriver.Firefox()
 			self.driver.implicitly_wait(20)
@@ -106,7 +105,7 @@ class DealSFDC(object):
 			log.error("reset SFDC failed Error is: %s"%e.message)
 		else:
 			log.info("reset SFDC successed")
-	def checkRecommendations(self,playName):
+	def checkRecommendations(self,playName,numberOfRecommendations=0):
 		if not self.islogin():
 			self.loginSF()
 		self.driver.find_element_by_xpath("//a[text()='Lattice Recommendations']").click()
@@ -129,7 +128,8 @@ class DealSFDC(object):
 	def checkAccountPage(self,playName):
 		if not self.islogin():
 			self.loginSF()
-
+	def quit(self):
+		self.driver.quit()
 def main():
 	d=DealSFDC()
 	d.loginSF()
@@ -137,6 +137,7 @@ def main():
 	d.configDanteServer()
 	d.configOTK()
 	d.resetSFDC()
-	#d.syncData()
+	d.syncData()
+	d.quit()
 if __name__ == '__main__':
 	main()

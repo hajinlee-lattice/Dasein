@@ -13,7 +13,7 @@ from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 log=SalePrismEnvironments.log
 def updateTenantAccount(tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,user=SalePrismEnvironments.DBUser,pwd=SalePrismEnvironments.DBPwd):
 	log.info("##########  Account Match process starts   ##########")
-	with open('..\\AccountJson') as jsonData:
+	with open('.\\PlaymakerEnd2End\\AccountJson.json') as jsonData:
 		data=json.load(jsonData)
 	conn = pyodbc.connect(DRIVER='{SQL SERVER}',SERVER=host,DATABASE=tenant,UID=user,PWD=pwd)
 	cur = conn.cursor()

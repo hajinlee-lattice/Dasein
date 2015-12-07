@@ -2,7 +2,7 @@
 Created on 11/12/2015
 @author: bwang
 '''
-import json,os
+import json,os,time
 from PlaymakerEnd2End.tools.LogTool import LogFactory
 from PlaymakerEnd2End.tools.apitool import getOneTimeKey
 try:
@@ -13,7 +13,7 @@ except Exception,e:
 	from selenium import webdriver
 class SalePrismEnvironments(object):
     "parser that read configuration properties from config.ini file"
-    with open("..\\config.ini") as configFile:
+    with open(".\\PlaymakerEnd2End\\config.ini") as configFile:
         paras = json.load(configFile)
     # properties definition in config.ini
     withModelingOnDataPlatform=paras.get("withModelingOnDataPlatform")

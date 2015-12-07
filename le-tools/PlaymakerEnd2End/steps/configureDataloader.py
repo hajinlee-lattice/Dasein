@@ -2,20 +2,24 @@
 @author bwang
 @createDate 11/11/2015 
 """
-import json,time,requests
+import json
+import time
+
+import requests
+
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
+from PlaymakerEnd2End.tools.DBHelper import DealDB
+
 try:
-	from selenium import webdriver
+	import pyodbc
 except ImportError:
 	import os
-	os.system('pip install -U selenium')
-	from selenium import webdriver
+	os.system('pip install -U pyodbc')
 requests.packages.urllib3.disable_warnings()
 log=SalePrismEnvironments.log
 class DataloaderDealer(object):
 	def __init__(self):
 		self.headers={"MagicAuthentication":"Security through obscurity!","Accept":"application/json;","Content-Type":"application/json; charset=utf-8;"}
-		self.driver=None
 	def setTenantDataProviderByREST(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,dbUser=SalePrismEnvironments.DBUser,dbPwd=SalePrismEnvironments.DBPwd):
 		log.info("##########  dataloader configuration start   ##########")
 		RESTurl=SalePrismEnvironments.dataloaderUpdateRESTURL
@@ -43,42 +47,19 @@ class DataloaderDealer(object):
 		finally:
 			if request !=None:
 				request.close()
-	def isDanteGroupFinishSuccessfully(self,tenant=SalePrismEnvironments.tenantName):
-		if SalePrismEnvironments.driverType =="Firefox":
-			self.driver=webdriver.Firefox()
-			self.driver.implicitly_wait(20)
-			self.driver.maximize_window()
-		elif SalePrismEnvironments.driverType=="Chrome":
-			pass
-		log.info("FULL_DANTE_DATA_FLOW is running, this may cost lof of time, please wait")
-		self.driver.get(SalePrismEnvironments.dataloaderUrl)
-		emailInput=self.driver.find_element_by_id('text_email_login')
-		emailInput.clear()
-		emailInput.send_keys('bwang@lattice-engines.com')
-		#input password
-		pwdInput=self.driver.find_element_by_id('text_password_login')
-		pwdInput.clear()
-		pwdInput.send_keys('1')
-		#click login
-		self.driver.find_element_by_xpath("//input[@value='Sign In']").click()
-		time.sleep(2)#in case of element not found error
-		#change tenant to specified one
-		self.driver.find_element_by_xpath("//li[@id='li_account']").click()
-		self.driver.find_element_by_xpath("//li[@id='li_changetenant']").click()
-		time.sleep(5)
-		self.driver.find_element_by_xpath("//span[starts-with(text(),'"+tenant+"')]").click()
-		self.driver.find_element_by_xpath("//span[text()='OK']").click()
-		time.sleep(5)
-		launchId=self.driver.find_element_by_xpath("//div[@id='div_queue_launches']//td[2]").text
-		assert launchId!=None
+	def isDanteGroupFinishSuccessfully(self,tenant=SalePrismEnvironments.tenantName,timePoint=None):
+		assert timePoint!=None
+		sql="SELECT LaunchId,CreateTime FROM Launches where tenantid=(SELECT TenantId FROM Tenant where name='"+tenant+"') and GroupName='Full_Dante_Data_Flow' and createtime>'"+timePoint+"'"
+		result=DealDB.fetchResultOfSelect(SQL=sql,SERVER="10.41.1.193\SQL2012STD",DATABASE="DataLoader",fetchAll=False)
+		launchId=result[0]
+		assert launchId !=None
 		log.info("The running FULL_DANTE_DATA_FLOW ID is %s "%launchId)
-		self.driver.quit()
 		RESTurl=SalePrismEnvironments.dataloaderGetLaunchStatusURL
 		fullDanteDataFlowJson={"launchId":int(launchId)}
 		isDanteGroupFinishSuccessfully=False
 		stillRunning="True"
 		while stillRunning=="True":
-			time.sleep(60)
+
 			log.info("waiting for load group")
 			try:
 				request = requests.post(RESTurl,json=fullDanteDataFlowJson,headers=self.headers)
@@ -89,18 +70,19 @@ class DataloaderDealer(object):
 				if stillRunning == "False":
 					if runSucceed == "True":
 						isDanteGroupFinishSuccessfully=True
+						log.info(responseValue[4]["Value"])
 					else:
 						log.error(responseValue[4]["Value"])
-					log.info(responseValue[4]["Value"])
 					break
 			except Exception,e:
 				log.error(e)
+			time.sleep(60)
 		return isDanteGroupFinishSuccessfully
 
 
 def main():
 	d=DataloaderDealer()
-
-	print d.isDanteGroupFinishSuccessfully()
+	print d.isDanteGroupFinishSuccessfully(timePoint="2015-12-07 08:00:00")
 if __name__ == '__main__':
+
 	main()
