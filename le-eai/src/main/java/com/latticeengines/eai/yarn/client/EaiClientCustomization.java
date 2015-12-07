@@ -20,6 +20,7 @@ public class EaiClientCustomization extends SingleContainerClientCustomization {
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
         super(yarnConfiguration, hdfsJobBaseDir, webHdfs);
+        yarnConfiguration.setBoolean("mapreduce.job.user.classpath.first", true);
     }
 
     @Override
