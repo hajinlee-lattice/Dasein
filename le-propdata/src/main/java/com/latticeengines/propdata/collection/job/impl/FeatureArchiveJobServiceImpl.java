@@ -47,12 +47,10 @@ public class FeatureArchiveJobServiceImpl extends AbstractArchiveJobServiceImpl<
     Class<FeatureArchiveProgress> getProgressClass() { return FeatureArchiveProgress.class; }
 
     // set job data as map
-    @SuppressWarnings("unused")
     public void setFeatureArchiveService(FeatureArchiveService featureArchiveService) {
         this.featureArchiveService = featureArchiveService;
     }
 
-    @SuppressWarnings("unused")
     public void setQuartzEnabled(boolean quartzEnabled) { this.quartzEnabled = quartzEnabled; }
 
 }
