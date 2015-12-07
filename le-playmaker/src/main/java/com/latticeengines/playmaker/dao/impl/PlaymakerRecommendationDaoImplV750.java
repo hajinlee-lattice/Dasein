@@ -10,6 +10,6 @@ public class PlaymakerRecommendationDaoImplV750 extends PlaymakerRecommendationD
 
     @Override
     protected String getMonetaryValue() {
-        return "L.[Monetary_Value] AS MonetaryValue, ";
+        return "L.[Monetary_Value] * L.[Likelihood] / 100 AS MonetaryValue, ";
     }
 }
