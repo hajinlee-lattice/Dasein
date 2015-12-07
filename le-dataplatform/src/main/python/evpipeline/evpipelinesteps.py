@@ -270,17 +270,16 @@ class EVModelStep(PipelineStep):
      
     def transform(self, dataFrame):
         
-        outputFrame = pd.DataFrame(columns=["Score", "ExpectedRevenue"])
+        outputFrame = pd.DataFrame(columns=["Score", "PredictedRevenue"])
         outputFrame["Score"] = dataFrame[self.scoreColumnName_]
         if (self.revenueColumnName_ == None):
-            outputFrame["ExpectedRevenue"] = 0
+            outputFrame["PredictedRevenue"] = 0
             return outputFrame
         
         revenueColumn = self.model_.predict_regression(dataFrame[self.modelInputColumns_])  
         if (revenueColumn != None):      
-            outputFrame["ExpectedRevenue"] = revenueColumn
-            outputFrame["ExpectedRevenue"] = outputFrame["ExpectedRevenue"].apply(lambda x : math.exp(x) - 1.0)
-            outputFrame["ExpectedRevenue"] = outputFrame["ExpectedRevenue"] * outputFrame[self.scoreColumnName_]
+            outputFrame["PredictedRevenue"] = revenueColumn
+            outputFrame["PredictedRevenue"] = outputFrame["PredictedRevenue"].apply(lambda x : math.exp(x) - 1.0)
         else:
-            outputFrame["ExpectedRevenue"] = 0
+            outputFrame["PredictedRevenue"] = 0
         return outputFrame
