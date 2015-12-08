@@ -13,4 +13,5 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -g com.latticeengines \
     -a le-serviceflows \
     -v $VERSION \
+    -i com.latticeengines.prospectdiscovery.Initializer \
     -f /tmp/le-serviceflows-prospectdiscovery-*-shaded.jar
