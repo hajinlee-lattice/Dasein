@@ -19,7 +19,7 @@
         <module>le-scoring</module>
         <module>le-dataflow</module>
         <module>le-dataflowapi</module>
-        <module>le-serviceflow</module>
+        <module>le-serviceflows</module>
         <module>le-eai</module>
         <module>le-workflowapi</module>
         <module>le-propdata</module>
