@@ -25,45 +25,38 @@ import com.latticeengines.security.exposed.util.SecurityContextUtils;
 public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> implements TargetMarketEntityMgr {
 
     @Autowired
-    TargetMarketDao targetMarketDao;
+    private TargetMarketDao targetMarketDao;
 
     @Autowired
-    TargetMarketDataFlowOptionDao targetMarketDataflowOptionDao;
+    private TargetMarketDataFlowOptionDao targetMarketDataflowOptionDao;
 
     @Autowired
-    TargetMarketStatisticsDao targetMarketStatisticsDao;
+    private TargetMarketStatisticsDao targetMarketStatisticsDao;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     @Override
     public BaseDao<TargetMarket> getDao() {
-        return this.targetMarketDao;
+        return targetMarketDao;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(TargetMarket targetMarket) {
-        TargetMarket targetMarketStored = this.targetMarketDao.findTargetMarketByName(targetMarket.getName());
-        if (targetMarketStored != null) {
-            throw new RuntimeException(String.format("Target market with name %s already exists",
-                    targetMarket.getName()));
-        }
-        if (targetMarket.getIsDefault() && targetMarketDao.findDefaultTargetMarket() != null) {
-            throw new RuntimeException("Only one default market can be created");
-        }
+        targetMarket.setCreationTimestampObject(DateTime.now());
         initializeForDatabaseEntry(targetMarket);
 
         TargetMarketStatistics targetMarketStatistics = targetMarket.getTargetMarketStatistics();
         if (targetMarketStatistics != null) {
             targetMarketStatistics.setPid(null);
-            this.targetMarketStatisticsDao.create(targetMarketStatistics);
+            targetMarketStatisticsDao.create(targetMarketStatistics);
         }
 
-        this.targetMarketDao.create(targetMarket);
+        targetMarketDao.create(targetMarket);
         if (targetMarket.getDataFlowConfiguration() != null) {
             for (TargetMarketDataFlowOption option : targetMarket.getRawDataFlowConfiguration()) {
-                this.targetMarketDataflowOptionDao.create(option);
+                targetMarketDataflowOptionDao.create(option);
             }
         }
     }
@@ -72,7 +65,6 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     @Transactional(propagation = Propagation.REQUIRED)
     public TargetMarket createDefaultTargetMarket() {
         TargetMarket targetMarket = new TargetMarket();
-        targetMarket.setCreationTimestampObject(DateTime.now());
         targetMarket.setName("Default");
         targetMarket.setDescription("Default Market");
         targetMarket.setOffset(0);
@@ -86,20 +78,20 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteTargetMarketByName(String name) {
         TargetMarket targetMarket = targetMarketDao.findTargetMarketByName(name);
-        this.targetMarketDao.delete(targetMarket);
+        targetMarketDao.delete(targetMarket);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public TargetMarket findTargetMarketByName(String name) {
-        TargetMarket market = this.targetMarketDao.findTargetMarketByName(name);
+        TargetMarket market = targetMarketDao.findTargetMarketByName(name);
         return market;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<TargetMarket> getAllTargetMarkets() {
-        return this.targetMarketDao.findAll();
+        return targetMarketDao.findAll();
     }
 
     @Override
@@ -111,9 +103,15 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
         create(targetMarket);
     }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<TargetMarket> findAll() {
+        return super.findAll();
+    }
 
     private void initializeForDatabaseEntry(TargetMarket targetMarket) {
-        Tenant tenant = this.tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
+        Tenant tenant = tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
         targetMarket.setTenant(tenant);
         targetMarket.setTenantId(tenant.getPid());
         targetMarket.setPid(null);

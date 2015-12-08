@@ -60,11 +60,11 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "functional" })
     public void create_calledWithParameters_assertAllAttributesArePersisted() {
         setupSecurityContext(mainTestingTenant);
-        assertNull(this.targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
+        assertNull(targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
 
-        this.targetMarketEntityMgr.create(TARGET_MARKET);
+        targetMarketEntityMgr.create(TARGET_MARKET);
 
-        TargetMarket targetMarket = this.targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
+        TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
         assertEquals(targetMarket.getDescription(), DESCRIPTION);
@@ -95,7 +95,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     public void targetMarketCreatedInOneTenant_switchToAlternativeTenant_assertTargetMarketCannnotBeFound() {
         setupSecurityContext(ALTERNATIVE_TESTING_TENANT);
 
-        TargetMarket targetMarket = this.targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
+        TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
 
         assertNull(targetMarket);
     }
@@ -106,9 +106,9 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         TARGET_MARKET.setPid(null);
         TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
-        this.targetMarketEntityMgr.updateTargetMarketByName(TARGET_MARKET, TEST_TARGET_MARKET_NAME);
+        targetMarketEntityMgr.updateTargetMarketByName(TARGET_MARKET, TEST_TARGET_MARKET_NAME);
 
-        TargetMarket targetMarket = this.targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
+        TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
     }
@@ -116,10 +116,10 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "functional" }, dependsOnMethods = { "update_calledWithParameters_assertTargetMarketIsUpdated" })
     public void delete_calledWithParameters_assertTargetMarketIsDeleted() {
         setupSecurityContext(mainTestingTenant);
-        TargetMarket targetMarket = this.targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
+        TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNotNull(targetMarket);
 
-        this.targetMarketEntityMgr.deleteTargetMarketByName(TEST_TARGET_MARKET_NAME);
-        assertNull(this.targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
+        targetMarketEntityMgr.deleteTargetMarketByName(TEST_TARGET_MARKET_NAME);
+        assertNull(targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
     }
 }

@@ -103,7 +103,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         tenant.setId(tenantName);
         tenant.setName(tenantName);
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{ addMagicAuthHeader }));
         return magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
                 new HashMap<>());
     }

@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.TargetMarketService;
@@ -13,36 +15,48 @@ import com.latticeengines.pls.service.TargetMarketService;
 public class TargetMarketServiceImpl implements TargetMarketService {
 
     @Autowired
-    TargetMarketEntityMgr targetMarketEntityMgr;
+    private TargetMarketEntityMgr targetMarketEntityMgr;
 
     @Override
     public void createTargetMarket(TargetMarket targetMarket) {
-        this.targetMarketEntityMgr.create(targetMarket);
+        TargetMarket targetMarketStored = targetMarketEntityMgr.findTargetMarketByName(targetMarket.getName());
+        if (targetMarketStored != null) {
+            throw new LedpException(LedpCode.LEDP_18070, new String[] { targetMarket.getName() });
+        }
+
+        targetMarketEntityMgr.create(targetMarket);
     }
 
     @Override
     public void deleteTargetMarketByName(String name) {
-        this.targetMarketEntityMgr.deleteTargetMarketByName(name);
+        targetMarketEntityMgr.deleteTargetMarketByName(name);
     }
 
     @Override
     public TargetMarket getTargetMarketByName(String name) {
-        return this.targetMarketEntityMgr.findTargetMarketByName(name);
+        return targetMarketEntityMgr.findTargetMarketByName(name);
     }
 
     @Override
     public List<TargetMarket> getAllTargetMarkets() {
-        return this.targetMarketEntityMgr.getAllTargetMarkets();
+        return targetMarketEntityMgr.getAllTargetMarkets();
     }
 
     @Override
     public void updateTargetMarketByName(TargetMarket targetMarket, String name) {
-        this.targetMarketEntityMgr.updateTargetMarketByName(targetMarket, name);
+        targetMarketEntityMgr.updateTargetMarketByName(targetMarket, name);
     }
 
     @Override
     public TargetMarket createDefaultTargetMarket() {
-        return this.targetMarketEntityMgr.createDefaultTargetMarket();
+        List<TargetMarket> targetMarkets = targetMarketEntityMgr.findAll();
+        
+        for (TargetMarket targetMarket : targetMarkets) {
+            if (targetMarket.getIsDefault()) {
+               throw new LedpException(LedpCode.LEDP_18070);
+            }
+        }
+        return targetMarketEntityMgr.createDefaultTargetMarket();
     }
-
+    
 }
