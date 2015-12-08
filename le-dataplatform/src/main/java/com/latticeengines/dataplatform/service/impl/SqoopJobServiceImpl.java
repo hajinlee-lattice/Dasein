@@ -15,20 +15,19 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.sqoop.LedpSqoop;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
+@SuppressWarnings("deprecation")
 public class SqoopJobServiceImpl {
 
     private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
@@ -98,7 +97,6 @@ public class SqoopJobServiceImpl {
                 metadataService, yarnConfiguration, sync);
     }
 
-    @SuppressWarnings("deprecation")
     protected ApplicationId importDataWithWhereCondition(String table, //
             String query, //
             String targetDir, //
