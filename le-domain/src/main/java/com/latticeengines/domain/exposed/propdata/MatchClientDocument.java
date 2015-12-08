@@ -20,7 +20,7 @@ public class MatchClientDocument {
         this.host = matchClient.host;
         this.port = matchClient.port;
         this.database = matchClient.database;
-        this.url = String.format("jdbc:sqlserver://%s:%d;databaseName=%s;",
+        this.url = String.format("jdbc:sqlserver://%s:%d;databaseName=%s;user=$$USER$$;password=$$PASSWD$$",
                 this.getHost(), this.getPort(), this.getDatabase());
         this.username = matchClient.username;
         this.encryptedPassword = matchClient.encryptedPassword;
