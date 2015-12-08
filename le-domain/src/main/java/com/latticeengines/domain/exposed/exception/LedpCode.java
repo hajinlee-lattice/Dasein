@@ -161,6 +161,9 @@ public enum LedpCode {
     LEDP_18066("Problems reading payload file {0}."), //
     LEDP_18067("Could not change state of file {0} to PROCESSING."), //
     LEDP_18068("Could not copy HDFS file {0} to local."), //
+    LEDP_18069("Target market with name {0} already exists."), //
+    LEDP_18070("Default target market already exists."), //
+    
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

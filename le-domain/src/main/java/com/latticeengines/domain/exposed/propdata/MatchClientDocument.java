@@ -12,8 +12,6 @@ public class MatchClientDocument {
     private String url;
     private MatchClient matchClient;
 
-    private MatchClientDocument() {}
-
     public MatchClientDocument(MatchClient matchClient) {
         this.matchClient = matchClient;
         this.host = matchClient.host;
