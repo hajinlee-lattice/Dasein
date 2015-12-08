@@ -1,4 +1,7 @@
 #!/bin/bash
 echo 'Running Postinstall'
-hdfs dfs -copyFromLocal /tmp/app/dataflow/le-dataflow*-shaded.jar /app/dataflow/lib
+hdfs dfs -rm -r -f /app/dataflow/lib/*
+hdfs dfs -put /tmp/app/dataflow/le-dataflow*-shaded.jar /app/dataflow/lib
+hdfs dfs -put /tmp/app/dataflow/le-propdata*-shaded.jar /app/dataflow/lib
+hdfs dfs -put /tmp/app/dataflow/le-dellebi*-shaded.jar /app/dataflow/lib
 
