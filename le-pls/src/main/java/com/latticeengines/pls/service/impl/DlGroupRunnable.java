@@ -3,7 +3,6 @@ package com.latticeengines.pls.service.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.JobStatus;
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
 import com.latticeengines.pls.service.DlCallback;

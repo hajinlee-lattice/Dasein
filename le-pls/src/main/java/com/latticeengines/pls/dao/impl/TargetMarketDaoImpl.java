@@ -45,6 +45,7 @@ public class TargetMarketDaoImpl extends BaseDaoImpl<TargetMarket> implements Ta
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public TargetMarket findDefaultTargetMarket() {
         Session session = getSessionFactory().getCurrentSession();

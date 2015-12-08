@@ -73,10 +73,6 @@ public class RestApiProxy implements WorkflowProxy, JobProxy {
         }
     }
 
-    private String constructUrl(String context) {
-        return constructUrl(context, null);
-    }
-
     private String constructUrl(String context, String path) {
         String end = context;
         if (path != null) {

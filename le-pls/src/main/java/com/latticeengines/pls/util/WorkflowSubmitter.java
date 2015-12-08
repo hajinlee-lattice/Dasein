@@ -1,7 +1,9 @@
 package com.latticeengines.pls.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,8 +52,10 @@ public class WorkflowSubmitter {
         eventCols.add("Event_IsClosed");
         eventCols.add("Event_OpportunityCreated");
 
-        List<String> extraSources = new ArrayList<>();
-        extraSources.add(stoplistPath);
+        List<Map<String, String>> extraSources = new ArrayList<>();
+        Map<String, String> entryMap = new HashMap<>();
+        entryMap.put("PublicDomain", stoplistPath);
+        extraSources.add(entryMap);
         try {
             FitModelWorkflowConfiguration configuration = new FitModelWorkflowConfiguration.Builder()
                     .customer(customer)

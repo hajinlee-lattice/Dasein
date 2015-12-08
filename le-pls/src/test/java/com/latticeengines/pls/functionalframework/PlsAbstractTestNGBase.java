@@ -81,7 +81,7 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
     protected static final Double EXPECTED_LIFT = 0.2D;
     protected static final Integer NUM_COMPANIES = 45;
     protected static final Integer NUM_CUSTOMERS = 55;
-    protected static final Integer NUM_ACCOUTNS = 45;
+    protected static final Integer NUM_ACCOUNTS = 45;
     protected static final Integer MARKET_REVENUE = 100;
     protected static final Integer REVENUE = 200;
     protected static final Boolean IS_OUT_OF_DATE = false;

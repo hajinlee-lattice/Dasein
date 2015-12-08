@@ -47,7 +47,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET_STATISTICS.setExpectedLift(EXPECTED_LIFT);
         TARGET_MARKET_STATISTICS.setIsOutOfDate(IS_OUT_OF_DATE);
         TARGET_MARKET_STATISTICS.setMarketRevenue(MARKET_REVENUE);
-        TARGET_MARKET_STATISTICS.setNumAccounts(NUM_ACCOUTNS);
+        TARGET_MARKET_STATISTICS.setNumAccounts(NUM_ACCOUNTS);
         TARGET_MARKET_STATISTICS.setNumCompanies(NUM_COMPANIES);
         TARGET_MARKET_STATISTICS.setNumCustomers(NUM_CUSTOMERS);
         TARGET_MARKET_STATISTICS.setRevenue(REVENUE);

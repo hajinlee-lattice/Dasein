@@ -53,7 +53,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         TARGET_MARKET_STATISTICS.setExpectedLift(EXPECTED_LIFT);
         TARGET_MARKET_STATISTICS.setIsOutOfDate(IS_OUT_OF_DATE);
         TARGET_MARKET_STATISTICS.setMarketRevenue(MARKET_REVENUE);
-        TARGET_MARKET_STATISTICS.setNumAccounts(NUM_ACCOUTNS);
+        TARGET_MARKET_STATISTICS.setNumAccounts(NUM_ACCOUNTS);
         TARGET_MARKET_STATISTICS.setNumCompanies(NUM_COMPANIES);
         TARGET_MARKET_STATISTICS.setNumCustomers(NUM_CUSTOMERS);
         TARGET_MARKET_STATISTICS.setRevenue(REVENUE);
@@ -65,8 +65,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
 
     @BeforeMethod(groups = "deployment")
     public void beforeMethod() {
-        // using admin session by default
-        switchToSuperAdmin();
+        // using external admin session by default
+        switchToExternalAdmin();
     }
 
     @Test(groups = "deployment", timeOut = 360000, enabled = false)

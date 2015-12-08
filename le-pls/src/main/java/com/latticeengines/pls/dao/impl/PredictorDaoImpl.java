@@ -18,6 +18,7 @@ public class PredictorDaoImpl extends BaseDaoImpl<Predictor> implements Predicto
         return Predictor.class;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<Predictor> findByModelId(String modelId) {
         Session session = getSessionFactory().getCurrentSession();
