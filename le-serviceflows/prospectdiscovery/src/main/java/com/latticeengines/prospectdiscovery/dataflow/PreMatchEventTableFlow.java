@@ -16,7 +16,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         Node account = addSource("Account");
         Node contact = addSource("Contact");
         Node opportunity = addSource("Opportunity");
-        Node stoplist = addSource("Stoplist");
+        Node stoplist = addSource("PublicDomain");
 
         Node removeNullEmailAddresses = contact.filter("Email != null && !Email.trim().isEmpty()", //
                 new FieldList("Email"));

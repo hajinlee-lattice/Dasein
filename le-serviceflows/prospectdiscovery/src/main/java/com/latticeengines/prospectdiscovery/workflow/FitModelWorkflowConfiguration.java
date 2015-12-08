@@ -1,6 +1,7 @@
 package com.latticeengines.prospectdiscovery.workflow;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -54,7 +55,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder extraSources(List<String> extraSources) {
+        public Builder extraSources(List<Map<String, String>> extraSources) {
             dataFlow.setExtraSources(extraSources);
             return this;
         }
