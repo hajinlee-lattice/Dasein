@@ -75,7 +75,7 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
 
     @Override
     public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
-        Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = super.getHdfsEntries(containerProperties);
+        Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = getHdfsEntries(containerProperties, true);
         String module = getModuleName();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //

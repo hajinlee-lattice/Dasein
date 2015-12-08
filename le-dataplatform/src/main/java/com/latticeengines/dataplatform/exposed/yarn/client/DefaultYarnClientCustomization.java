@@ -59,15 +59,22 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     @Override
     public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
+        return getHdfsEntries(containerProperties, false);
+    }
+    
+    protected Collection<TransferEntry> getHdfsEntries(Properties containerProperties, boolean excludeDataplatformLib) {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
                 "/app/dataplatform/*.properties", //
                 false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                "/app/dataplatform/lib/*.jar", //
-                false));
+        
+        if (!excludeDataplatformLib) {
+            hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                    LocalResourceVisibility.PUBLIC, //
+                    "/app/dataplatform/lib/*.jar", //
+                    false));
+        }
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
                 getJobDir(containerProperties) + "/*", //
