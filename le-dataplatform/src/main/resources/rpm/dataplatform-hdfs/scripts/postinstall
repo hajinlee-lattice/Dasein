@@ -25,9 +25,9 @@ do
 done
 for service in 'db' 'security' 'eai' 'dataflowapi' 'workflowapi'
 do
+    su -l yarn -c "hdfs dfs -rm -r -f /app/$service/$service.properties"
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$service.properties /app/$service"
 done
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker
 rm -rf /tmp/datascientist
-
