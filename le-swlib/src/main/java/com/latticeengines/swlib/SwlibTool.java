@@ -25,7 +25,8 @@ public class SwlibTool {
                 addOption("a", "artifactId", true, " -<artifactId> (artifact id Maven-style)"). //
                 addOption("v", "version", true, " -<version> (version Maven-style)"). //
                 addOption("c", "classifier", false, " -<classifier> (classifier Maven-style)"). //
-                addOption("f", "localFileName", true, " -<localFileName> (path to local file to install)");
+                addOption("f", "localFileName", true, " -<localFileName> (path to local file to install)"). //
+                addOption("i", "initializer", true, " -<initializer> (initializer class name)");
 
         try {
             CommandLine cmd = parser.parse(options, args);
@@ -36,6 +37,7 @@ public class SwlibTool {
                 String artifactId = cmd.getOptionValue("artifactId");
                 String version = cmd.getOptionValue("version");
                 String classifier = cmd.getOptionValue("classifier");
+                String initializerClassName = cmd.getOptionValue("initializer");
 
                 File fileToInstall = null;
                 SoftwareLibraryService swlibService = appContext.getBean("softwareLibraryService",
@@ -46,6 +48,7 @@ public class SwlibTool {
                 swPackage.setArtifactId(artifactId);
                 swPackage.setVersion(version);
                 swPackage.setClassifier(classifier);
+                swPackage.setInitializerClass(initializerClassName);
 
                 if (operation.equals("install")) {
                     String fileName = cmd.getOptionValue("localFileName");
