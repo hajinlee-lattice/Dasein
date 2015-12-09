@@ -26,14 +26,18 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
         Table eventTable = JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
 
+        List<String> modelApplicationIds;
         try {
-            profileAndModel(eventTable);
+            modelApplicationIds = profileAndModel(eventTable);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_28007, e, new String[] { eventTable.getName() });
         }
+
+        executionContext.putString(MODEL_APP_IDS, JsonUtils.serialize(modelApplicationIds));
     }
 
-    private void profileAndModel(Table eventTable) throws Exception {
+    private List<String> profileAndModel(Table eventTable) throws Exception {
+        List<String> modelApplicationIds = new ArrayList<>();
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
 
         List<String> excludedColumns = new ArrayList<>();
@@ -60,8 +64,10 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
             modelExecutor.writeMetadataFile();
             modelExecutor.profile();
-            modelExecutor.model();
+            String modelAppId = modelExecutor.model();
+            modelApplicationIds.add(modelAppId);
         }
+        return modelApplicationIds;
     }
 
 }

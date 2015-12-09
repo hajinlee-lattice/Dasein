@@ -163,7 +163,7 @@ public enum LedpCode {
     LEDP_18068("Could not copy HDFS file {0} to local."), //
     LEDP_18069("Target market with name {0} already exists."), //
     LEDP_18070("Default target market already exists."), //
-    
+
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
@@ -294,8 +294,12 @@ public enum LedpCode {
     LEDP_28007("Problem profiling and modeling event table:{0}."), //
     LEDP_28008("Step configuration failed validation with errors:{0} ... {1}."), //
     LEDP_28009("Received Null propdata match status for this url:{0}."), //
-    LEDP_28010("Modeling app {0} did not succeed:{1}."), //
-    LEDP_28011("Workflow name was not specified in workflow config:{1}"), //
+    LEDP_28010("Modeling yarn app {0} did not succeed:{1}."), //
+    LEDP_28011("Workflow name was not specified in workflow config:{0}"), //
+    LEDP_28012("No models were generated from modeling steps"), //
+    LEDP_28013("Not all models were downloaded. Expected model appid's:{0}, Only found model appid's:{1}"), //
+    LEDP_28014("No result directory for modeling job {0}"), //
+    LEDP_28015("Workflow yarn step {0} did not succeed:{1}."), //
 
     // le-dellebi
     LEDP_29000("The file type {0} is not found in the DellEBI configuration database. Please check the config database."), //

@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
@@ -27,6 +30,7 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
     protected static final String DB_CREDS = "DB_CREDS";
     protected static final String MATCH_COMMAND_ID = "MATCH_COMMAND_ID";
     protected static final String MODELING_SERVICE_EXECUTOR_BUILDER = "MODELING_SERVICE_EXECUTOR_BUILDER";
+    protected static final String MODEL_APP_IDS = "MODEL_APP_IDS";
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -64,6 +68,11 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
                 break;
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
+
+        if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
+            throw new LedpException(LedpCode.LEDP_28015, new String[] { appId, status.getStatus().toString() });
+        }
+
     }
 
     protected ModelingServiceExecutor.Builder createModelingServiceExecutorBuilder(
@@ -79,7 +88,7 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
                 .retrieveModelingJobStatusUrl("/modeling/modelingjobs/%s") //
                 .modelingServiceHostPort(modelStepConfiguration.getMicroServiceHostPort()) //
                 .modelingServiceHdfsBaseDir(modelStepConfiguration.getModelingServiceHdfsBaseDir()) //
-                .customer(modelStepConfiguration.getCustomerSpace()) //
+                .customer(modelStepConfiguration.getCustomerSpace().toString()) //
                 .metadataContents(metadataContents) //
                 .yarnConfiguration(yarnConfiguration) //
                 .hdfsDirToSample(eventTable.getExtracts().get(0).getPath()) //

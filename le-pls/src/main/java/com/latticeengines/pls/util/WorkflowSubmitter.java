@@ -32,6 +32,9 @@ public class WorkflowSubmitter {
     @Autowired
     private TargetMarketService targetMarketService;
 
+    @Value("${pls.api.hostport}")
+    private String internalResourceHostPort;
+
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microserviceHostPort;
 
@@ -58,7 +61,7 @@ public class WorkflowSubmitter {
         extraSources.add(entryMap);
         try {
             FitModelWorkflowConfiguration configuration = new FitModelWorkflowConfiguration.Builder()
-                    .customer(customer)
+                    .customer(CustomerSpace.parse(customer))
                     .microServiceHostPort(microserviceHostPort)
                     .sourceType(SourceType.SALESFORCE)
                     .targetPath("/FitModelRun")
@@ -75,6 +78,7 @@ public class WorkflowSubmitter {
                     .matchClient("PD130") // TODO get from API
                     .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                     .eventColumns(eventCols) //
+                    .internalResourceHostPort(internalResourceHostPort) //
                     .build();
 
             String payloadName = "fitModelWorkflow" + "-" + customer + "-" + targetMarket.getName();

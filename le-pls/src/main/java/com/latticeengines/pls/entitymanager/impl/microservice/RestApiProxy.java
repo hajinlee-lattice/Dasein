@@ -2,13 +2,11 @@ package com.latticeengines.pls.entitymanager.impl.microservice;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -16,20 +14,19 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
 @Component("restApiProxy")
-public class RestApiProxy implements WorkflowProxy, JobProxy {
+public class RestApiProxy extends BaseRestApiProxy implements WorkflowProxy, JobProxy {
 
     private static final Log log = LogFactory.getLog(RestApiProxy.class);
-
-    private RestTemplate restTemplate = new RestTemplate();
 
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microserviceHostPort;
 
-    public RestApiProxy() {
-        restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+    @Override
+    public String getRestApiHostPort() {
+        return microserviceHostPort;
     }
 
     @Override
@@ -73,34 +70,9 @@ public class RestApiProxy implements WorkflowProxy, JobProxy {
         }
     }
 
-    private String constructUrl(String context, String path) {
-        String end = context;
-        if (path != null) {
-            end = combine(context, path);
-        }
-        return combine(microserviceHostPort, end);
-    }
-
-    private String combine(String... parts) {
-        for (int i = 0; i < parts.length; ++i) {
-            String part = parts[i];
-            if (i != 0) {
-                if (part.startsWith("/")) {
-                    part = part.substring(1);
-                }
-            }
-
-            if (i != parts.length - 1) {
-                if (part.endsWith("/")) {
-                    part = part.substring(0, part.length() - 2);
-                }
-            }
-        }
-        return StringUtils.join(parts, "/");
-    }
-
     @Override
     public JobStatus getJobStatus(String applicationId) {
         return null;
     }
+
 }

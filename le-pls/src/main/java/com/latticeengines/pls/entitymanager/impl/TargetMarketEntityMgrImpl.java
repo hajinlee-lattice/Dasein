@@ -65,7 +65,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     @Transactional(propagation = Propagation.REQUIRED)
     public TargetMarket createDefaultTargetMarket() {
         TargetMarket targetMarket = new TargetMarket();
-        targetMarket.setName("Default");
+        targetMarket.setName(TargetMarket.DEFAULT_NAME);
         targetMarket.setDescription("Default Market");
         targetMarket.setOffset(0);
         targetMarket.setIsDefault(true);

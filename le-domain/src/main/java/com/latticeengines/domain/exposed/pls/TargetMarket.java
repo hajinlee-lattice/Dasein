@@ -40,6 +40,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, HasApplicationId {
 
+    public static final String DEFAULT_NAME = "Default";
+
     private Long pid;
     private String name;
     private String description;

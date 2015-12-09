@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.PredictorStatus;
-import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.KeyValueDao;
 import com.latticeengines.pls.dao.ModelSummaryDao;
@@ -284,6 +283,19 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ModelSummary findByApplicationId(String applicationId) {
+        ModelSummary summary = modelSummaryDao.findByApplicationId(applicationId);
+        if (summary != null) {
+            inflateDetails(summary);
+        }
+        if (summary != null) {
+            inflatePredictors(summary);
+        }
+        return summary;
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public ModelSummary retrieveByModelIdForInternalOperations(String modelId) {
         ModelSummary summary = modelSummaryDao.findByModelId(modelId);
@@ -306,14 +318,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary getByModelId(String modelId) {
         return modelSummaryDao.findByModelId(modelId);
-    }
-
-    public void manufactureSecurityContextForInternalAccess(Tenant tenant) {
-        TicketAuthenticationToken auth = new TicketAuthenticationToken(null, "x.y");
-        Session session = new Session();
-        session.setTenant(tenant);
-        auth.setSession(session);
-        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @Override

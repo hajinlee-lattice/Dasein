@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -39,7 +38,7 @@ public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
     private DataFlowConfiguration setupPreMatchTableDataFlow() {
         DataFlowConfiguration dataFlowConfig = new DataFlowConfiguration();
         dataFlowConfig.setName("PrematchFlow");
-        dataFlowConfig.setCustomerSpace(CustomerSpace.parse(configuration.getCustomerSpace()));
+        dataFlowConfig.setCustomerSpace(configuration.getCustomerSpace());
         dataFlowConfig.setDataFlowBeanName("preMatchEventTableFlow");
         dataFlowConfig.setDataSources(createDataFlowSources());
         dataFlowConfig.setTargetPath(configuration.getTargetPath());

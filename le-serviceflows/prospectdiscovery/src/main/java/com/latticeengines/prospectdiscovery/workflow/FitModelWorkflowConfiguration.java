@@ -12,6 +12,7 @@ import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfigurati
 import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
+import com.latticeengines.serviceflows.workflow.modeling.ChooseModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 
 public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
@@ -27,11 +28,11 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         private DataFlowStepConfiguration dataFlow = new DataFlowStepConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
+        private ChooseModelStepConfiguration chooseModel = new ChooseModelStepConfiguration();
 
-        public Builder customer(String customerSpace) {
-            fitModel.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        public Builder customer(CustomerSpace customerSpace) {
+            fitModel.setCustomerSpace(customerSpace);
             microservice.setCustomerSpace(customerSpace);
-            fitModel.setCustomerSpace(CustomerSpace.parse(customerSpace));
             return this;
         }
 
@@ -51,7 +52,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder targetMarket(TargetMarket targetMarket) {
-            // TODO Set target market on post-match flow configuration
+            chooseModel.setTargetMarket(targetMarket);
             return this;
         }
 
@@ -100,17 +101,24 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            chooseModel.setInternalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
         public FitModelWorkflowConfiguration build() {
             importData.microserviceStepConfiguration(microservice);
             dataFlow.microserviceStepConfiguration(microservice);
             match.microserviceStepConfiguration(microservice);
             model.microserviceStepConfiguration(microservice);
+            chooseModel.microserviceStepConfiguration(microservice);
 
             fitModel.add(microservice);
             fitModel.add(importData);
             fitModel.add(dataFlow);
             fitModel.add(match);
             fitModel.add(model);
+            fitModel.add(chooseModel);
 
             return fitModel;
         }

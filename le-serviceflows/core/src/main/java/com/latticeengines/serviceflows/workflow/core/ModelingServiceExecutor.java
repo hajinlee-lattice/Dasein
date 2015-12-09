@@ -14,7 +14,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
@@ -33,7 +32,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 
 public class ModelingServiceExecutor {
 
-    // TODO externalize this as a property
+    // TODO externalize this as a step configuration property
     private static final int MAX_SECONDS_WAIT_FOR_MODELING = 60*60*24;
 
     private static final Log log = LogFactory.getLog(ModelingServiceExecutor.class);
@@ -99,7 +98,7 @@ public class ModelingServiceExecutor {
         waitForAppId(appId);
     }
 
-    public void sample() throws Exception {
+    public String sample() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         SamplingElement all = new SamplingElement();
@@ -114,9 +113,10 @@ public class ModelingServiceExecutor {
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for sampling: %s", appId));
         waitForAppId(appId);
+        return appId;
     }
 
-    public void profile() throws Exception {
+    public String profile() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(builder.getCustomer());
         config.setTable(builder.getTable());
@@ -129,6 +129,7 @@ public class ModelingServiceExecutor {
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for profile: %s", appId));
         waitForAppId(appId);
+        return appId;
     }
 
     public String model() throws Exception {
@@ -164,11 +165,11 @@ public class ModelingServiceExecutor {
         String resultDir = status.getResultDirectory();
 
         if (resultDir != null) {
-            return UuidUtils.parseUuid(resultDir);
+            return appId;
         } else {
             log.warn(String.format("No result directory for modeling job %s", appId));
             System.out.println(String.format("No result directory for modeling job %s", appId));
-            return null;
+            throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
         }
     }
 

@@ -39,7 +39,7 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
         CreateCommandRequest matchCommand = new CreateCommandRequest();
         matchCommand.setSourceTable(preMatchEventTable.getName());
         matchCommand.setCommandType(configuration.getMatchCommandType());
-        matchCommand.setContractExternalID(configuration.getCustomerSpace());
+        matchCommand.setContractExternalID(configuration.getCustomerSpace().toString());
         matchCommand.setDestTables(configuration.getDestTables());
 
         String url = String.format("%s/propdata/matchcommands", configuration.getMicroServiceHostPort());

@@ -85,7 +85,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         LoadConfiguration config = new LoadConfiguration();
         config.setCreds(dbCreds);
         config.setQuery(sb.toString());
-        config.setCustomer(configuration.getCustomerSpace());
+        config.setCustomer(configuration.getCustomerSpace().toString());
         config.setKeyCols(Arrays.<String> asList(new String[] { "Source_Id" }));
         config.setTargetHdfsDir(hdfsTargetPath);
 
@@ -114,7 +114,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
     }
 
     private String getTargetPath() {
-        CustomerSpace space = CustomerSpace.parse(configuration.getCustomerSpace());
+        CustomerSpace space = configuration.getCustomerSpace();
         return PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), space).toString();
     }
 

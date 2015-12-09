@@ -16,6 +16,8 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly);
 
+    ModelSummary findByApplicationId(String applicationId);
+
     void deleteByModelId(String modelId);
 
     List<ModelSummary> getAll();

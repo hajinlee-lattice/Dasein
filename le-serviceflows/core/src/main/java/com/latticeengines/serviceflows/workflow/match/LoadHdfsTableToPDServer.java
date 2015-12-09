@@ -51,7 +51,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
         createTable(prematchFlowTable, creds);
 
         exportConfig.setTable(prematchFlowTable.getName());
-        exportConfig.setCustomer(configuration.getCustomerSpace());
+        exportConfig.setCustomer(configuration.getCustomerSpace().toString());
         exportConfig.setHdfsDirPath(prematchFlowTable.getExtracts().get(0).getPath());
         exportConfig.setCreds(creds);
 

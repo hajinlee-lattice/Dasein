@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,20 +39,24 @@ import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -61,14 +66,15 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/internal")
 public class InternalResource extends InternalResourceBase {
 
-    private static final Log LOGGER = LogFactory.getLog(InternalResource.class);
+    protected static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
+    private static final Log log = LogFactory.getLog(InternalResource.class);
     private static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
     private static final String passwordTesterPwd = "Lattice123";
     private static final String adminTester = "pls-super-admin-tester@test.lattice-engines.com";
     private static final String adminTesterPwd = "admin";
     private static final String adUsername = "testuser1";
     private static final String adPassword = "Lattice1";
-    protected static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
+    private static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -91,6 +97,12 @@ public class InternalResource extends InternalResourceBase {
     @Autowired
     private InternalTestUserService internalTestUserService;
 
+    @Autowired
+    private TargetMarketService targetMarketService;
+
+    @Autowired
+    private TenantService tenantService;
+
     @Value("${pls.test.contract}")
     protected String contractId;
 
@@ -105,6 +117,60 @@ public class InternalResource extends InternalResourceBase {
 
     @Value("${pls.test.deployment.reset.by.admin:true}")
     private boolean resetByAdminApi;
+
+    @RequestMapping(value = "/targetmarkets/default/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create default target market")
+    public void createDefaultTargetMarket(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        targetMarketService.createDefaultTargetMarket();
+    }
+
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get target market by name")
+    public TargetMarket findTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        return targetMarketService.getTargetMarketByName(targetMarketName);
+    }
+
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update target market")
+    public void updateTargetMarket(@PathVariable("targetMarketName") String targetMarketName,
+            @PathVariable("tenantId") String tenantId, @RequestBody TargetMarket targetMarket,
+            HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
+    }
+
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete a target market")
+    public void deleteTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        targetMarketService.deleteTargetMarketByName(targetMarketName);
+    }
+
+    @RequestMapping(value = "/modelsummaries/{applicationId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get a model summary by applicationId")
+    public ModelSummary findModelSummaryByAppId(@PathVariable("applicationId") String applicationId,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+        return modelSummaryEntityMgr.findByApplicationId(applicationId);
+    }
 
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
@@ -123,8 +189,7 @@ public class InternalResource extends InternalResourceBase {
             return response;
         }
 
-        ((ModelSummaryEntityMgrImpl) modelSummaryEntityMgr).manufactureSecurityContextForInternalAccess(summary
-                .getTenant());
+        manufactureSecurityContextForInternalAccess(summary.getTenant());
 
         // Reuse the logic in the ModelSummaryResource to do the updates
         ModelSummaryResource msr = new ModelSummaryResource();
@@ -146,7 +211,7 @@ public class InternalResource extends InternalResourceBase {
     @ApiOperation(value = "Reset the testing environment for protractor tests.")
     public SimpleBooleanResponse createTestTenant(HttpServletRequest request) throws IOException {
         checkHeader(request);
-        LOGGER.info("Cleaning up test tenants through internal API");
+        log.info("Cleaning up test tenants through internal API");
 
         List<String> Ids = getTestTenantIds();
         final String tenant1Id = Ids.get(0);
@@ -162,7 +227,7 @@ public class InternalResource extends InternalResourceBase {
                 provisionThroughTenantConsole(tenant1Id, "Marketo");
             } catch (Exception ex) {
                 // do not interrupt, functional test could fail on this
-                LOGGER.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
+                log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
             }
         }
 
@@ -173,7 +238,7 @@ public class InternalResource extends InternalResourceBase {
                 provisionThroughTenantConsole(tenant2Id, "Eloqua");
             } catch (Exception ex) {
                 // do not interrupt, functional test could fail on this
-                LOGGER.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
+                log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
             }
         }
 
@@ -199,8 +264,8 @@ public class InternalResource extends InternalResourceBase {
             if (tenant.getId().equals(tenant2Id)) {
                 payload = JsonUtils.serialize(tenant);
                 HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers, payload);
-                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort() + "/pls/modelsummaries",
-                        true, headers);
+                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(
+                        getHostPort() + "/pls/modelsummaries", true, headers);
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(response);
                 while (jNode.size() < 2) {
@@ -213,10 +278,10 @@ public class InternalResource extends InternalResourceBase {
                     fakeTenant.setPid(-1L);
                     data.setTenant(fakeTenant);
                     data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                    HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true", true,
-                            headers, JsonUtils.serialize(data));
-                    response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort() + "/pls/modelsummaries", true,
-                            headers);
+                    HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true",
+                            true, headers, JsonUtils.serialize(data));
+                    response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort() + "/pls/modelsummaries",
+                            true, headers);
                     jNode = mapper.readTree(response);
                 }
             }
@@ -237,7 +302,7 @@ public class InternalResource extends InternalResourceBase {
         }
 
         List<Tenant> testTenants = new ArrayList<>();
-        for (String tenantId: Ids) {
+        for (String tenantId : Ids) {
             Tenant tenant = new Tenant();
             tenant.setId(tenantId);
             tenant.setName(tenant1Id);
@@ -372,5 +437,22 @@ public class InternalResource extends InternalResourceBase {
 
     private String getHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
+    }
+
+    private void manufactureSecurityContextForInternalAccess(String tenantId) {
+        log.info("Manufacturing security context for " + tenantId);
+        Tenant tenant = tenantService.findByTenantId(tenantId);
+        if (tenant == null) {
+            throw new RuntimeException("Could not find tenant:" + tenantId);
+        }
+        manufactureSecurityContextForInternalAccess(tenant);
+    }
+
+    private void manufactureSecurityContextForInternalAccess(Tenant tenant) {
+        TicketAuthenticationToken auth = new TicketAuthenticationToken(null, "x.y");
+        Session session = new Session();
+        session.setTenant(tenant);
+        auth.setSession(session);
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 }

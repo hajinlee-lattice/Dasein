@@ -45,12 +45,14 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
+import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
@@ -76,6 +78,13 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
     @Value("${workflowapi.test.sfdc.securitytoken}")
     private String salesforceSecurityToken;
 
+    @Value("${security.test.pls.api.hostport}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceProxy;
+
+    private TargetMarket defaultTargetMarket;
+
     protected void setupForFitModel() throws Exception {
         restTemplate.setInterceptors(getAddMagicAuthHeaders());
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
@@ -85,6 +94,14 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         installServiceFlow();
         createImportTablesInMetadataStore(DEMO_CUSTOMERSPACE, tenant);
         copyStopListToHdfs();
+
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        defaultTargetMarket = internalResourceProxy.findTargetMarketByName(TargetMarket.DEFAULT_NAME, DEMO_CUSTOMERSPACE.toString());
+        if (defaultTargetMarket != null) {
+            internalResourceProxy.deleteTargetMarketByName(TargetMarket.DEFAULT_NAME, DEMO_CUSTOMERSPACE.toString());
+        }
+        internalResourceProxy.createDefaultTargetMarket(DEMO_CUSTOMERSPACE.toString());
+        defaultTargetMarket = internalResourceProxy.findTargetMarketByName(TargetMarket.DEFAULT_NAME, DEMO_CUSTOMERSPACE.toString());
     }
 
     protected FitModelWorkflowConfiguration generateFitModelWorkflowConfiguration() {
@@ -100,20 +117,23 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         extraSources.add(map);
 
         FitModelWorkflowConfiguration workflowConfig = new FitModelWorkflowConfiguration.Builder()
-        .customer(DEMO_CUSTOMERSPACE.toString()) //
-        .microServiceHostPort(microServiceHostPort) //
-        .sourceType(SourceType.SALESFORCE) //
-        .extraSources(extraSources) //
-        .targetPath("/PrematchFlowRun") //
-        .matchDbUrl("jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE") //
-        .matchDbUser("DLTransfer") //
-        .matchDbPasswordEncrypted(CipherUtils.encrypt("free&NSE")) //
-        .matchDestTables("DerivedColumns") //
-        .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
-        .matchClient("PD130") //
-        .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-        .eventColumns(eventCols) //
-        .build();
+                .customer(DEMO_CUSTOMERSPACE) //
+                .microServiceHostPort(microServiceHostPort) //
+                .sourceType(SourceType.SALESFORCE) //
+                .extraSources(extraSources) //
+                .targetPath("/PrematchFlowRun") //
+                .matchDbUrl(
+                        "jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE") //
+                .matchDbUser("DLTransfer") //
+                .matchDbPasswordEncrypted(CipherUtils.encrypt("free&NSE")) //
+                .matchDestTables("DerivedColumns") //
+                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
+                .matchClient("PD130") //
+                .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+                .eventColumns(eventCols) //
+                .targetMarket(defaultTargetMarket) //
+                .internalResourceHostPort(internalResourceHostPort) //
+                .build();
 
         return workflowConfig;
     }
@@ -279,8 +299,8 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
 
     private void copyStopListToHdfs() {
         // add the stop list to HDFS
-        String stoplist = ClassLoader.getSystemResource("com/latticeengines/workflowapi/flows/prospectdiscovery/Stoplist/Stoplist.avro")
-                .getPath();
+        String stoplist = ClassLoader.getSystemResource(
+                "com/latticeengines/workflowapi/flows/prospectdiscovery/Stoplist/Stoplist.avro").getPath();
         try {
             HdfsUtils.mkdir(yarnConfiguration, "/tmp/Stoplist");
         } catch (Exception e) {

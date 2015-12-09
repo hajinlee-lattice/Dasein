@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -34,7 +33,7 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
         sourceImportConfig.setSourceType(configuration.getSourceType());
 
         importConfig.addSourceConfiguration(sourceImportConfig);
-        importConfig.setCustomerSpace(CustomerSpace.parse(configuration.getCustomerSpace()));
+        importConfig.setCustomerSpace(configuration.getCustomerSpace());
         return importConfig;
     }
 

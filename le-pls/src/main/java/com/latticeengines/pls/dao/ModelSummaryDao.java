@@ -7,6 +7,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 
 public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
+    ModelSummary findByApplicationId(String applicationId);
+
     ModelSummary findByModelId(String modelId);
 
     ModelSummary findByModelName(String modelName);

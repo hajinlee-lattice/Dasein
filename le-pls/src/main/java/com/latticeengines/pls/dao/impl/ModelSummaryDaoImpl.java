@@ -21,6 +21,21 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
 
     @SuppressWarnings("rawtypes")
     @Override
+    public ModelSummary findByApplicationId(String applicationId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where applicationId = :applicationId", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("applicationId", applicationId);
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (ModelSummary) list.get(0);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
     public ModelSummary findByModelId(String modelId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
@@ -33,7 +48,6 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         }
         return (ModelSummary) list.get(0);
     }
-
 
     @SuppressWarnings("rawtypes")
     @Override

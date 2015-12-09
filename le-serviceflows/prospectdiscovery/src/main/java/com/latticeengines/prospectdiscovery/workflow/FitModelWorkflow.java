@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
+import com.latticeengines.serviceflows.workflow.modeling.ChooseModel;
 import com.latticeengines.serviceflows.workflow.modeling.ProfileAndModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -33,6 +34,9 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     @Autowired
     private ProfileAndModel profileAndModel;
 
+    @Autowired
+    private ChooseModel chooseModel;
+
     @Bean
     public Job fitModelWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -45,6 +49,7 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
                 .next(matchWorkflow) //
                 .next(sample) //
                 .next(profileAndModel) //
+                .next(chooseModel) //
                 .build();
     }
 

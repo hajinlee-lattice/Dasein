@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 
-    @NotEmptyString
     @NotNull
-    private String customerSpace;
+    private CustomerSpace customerSpace;
 
     @NotEmptyString
     @NotNull
@@ -23,12 +23,12 @@ public class MicroserviceStepConfiguration extends BaseStepConfiguration {
     }
 
     @JsonProperty("customerSpace")
-    public String getCustomerSpace() {
+    public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
 
     @JsonProperty("customerSpace")
-    public void setCustomerSpace(String customerSpace) {
+    public void setCustomerSpace(CustomerSpace customerSpace) {
         this.customerSpace = customerSpace;
     }
 
