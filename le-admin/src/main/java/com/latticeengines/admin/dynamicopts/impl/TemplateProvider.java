@@ -2,6 +2,7 @@ package com.latticeengines.admin.dynamicopts.impl;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,9 @@ public class TemplateProvider implements OptionsProvider {
 
     @Override
     public List<String> getOptions() {
-        return dirWatcher.getOptions();
+        List<String> options = dirWatcher.getOptions();
+        options.removeAll(Collections.singletonList(".svn"));
+        return options;
     }
 
     public String getTemplate(String version, CRMTopology topology) {
