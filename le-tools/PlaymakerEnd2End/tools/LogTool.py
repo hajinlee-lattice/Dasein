@@ -7,7 +7,7 @@ class LogFactory():
         logging.basicConfig(level=logging.INFO,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='..\\log\\'+name+'%s.log'%time.strftime("%Y%m%d%H%M%S"),
+                filename='.\\PlaymakerEnd2End\\log\\'+name+'%s.log'%time.strftime("%Y%m%d%H%M%S"),
                 filemode='w')
         log=logging.getLogger(name)
         if alsoToConsole:

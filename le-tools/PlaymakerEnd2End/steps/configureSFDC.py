@@ -1,143 +1,122 @@
 """
 @author bwang
 @createDate 11/11/2015 
-""" 
+"""
 import time
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
-try:
-	from selenium import webdriver
-except ImportError:
-	import os
-	os.system('pip install -U selenium')
-	from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+from Libs.DanteUI.DantePageHelper import DantePageHelper
 log=SalePrismEnvironments.log
 class DealSFDC(object):
-	def __init__(self):
-		if SalePrismEnvironments.driverType =="Firefox":
-			self.driver=webdriver.Firefox()
-			self.driver.implicitly_wait(20)
-			self.driver.maximize_window()
-		elif SalePrismEnvironments.driverType=="Chrome":
-			pass
-	def loginSF(self,user=SalePrismEnvironments.SFDCUser,pwd=SalePrismEnvironments.SFDCPWD):
-		self.driver.get(SalePrismEnvironments.SFurl)
-		self.driver.find_element_by_id('username').send_keys(user)
-		self.driver.find_element_by_id('password').send_keys(pwd)
-		self.driver.find_element_by_id('Login').click()
-		time.sleep(5)
-		try:
-			self.driver.find_element_by_id('showMeLater').click()
-		except Exception,e:
-			pass
-		log.info("salesforce login successfully")
+    def __init__(self):
+        self.sf=DantePageHelper(sales_force_url=SalePrismEnvironments.SFurl,salesforce_user=SalePrismEnvironments.SFDCUser,salefore_pwd=SalePrismEnvironments.SFDCPWD,browertype=SalePrismEnvironments.driverType)
+        self.driver=self.sf.sele_instance
+        self.timeout='120s'
+    def loginSF(self,user=SalePrismEnvironments.SFDCUser,pwd=SalePrismEnvironments.SFDCPWD):
+        self.sf.LogInSaleForcePage()
+        log.info("salesforce login successfully")
+    def configDanteServer(self,dante_Server=SalePrismEnvironments.dante_Server):
+        self.sf.SetDanteServiceURL(D_Type='Account',LatticeURL=dante_Server,defaultTab='TalkingPoints',hasSalesPrism=True)
 
-	def configDanteServer(self,dante_Server=SalePrismEnvironments.dante_Server):#need run loginSF first
-		if not self.islogin():
-			self.loginSF()
-		self.driver.get(SalePrismEnvironments.setUpPageUrl)
-		time.sleep(5)
-		self.driver.find_element_by_id('DevToolsIntegrate_font').click()
-		self.driver.find_element_by_id('CustomSettings_font').click()
-		time.sleep(3)
-		self.driver.find_element_by_partial_link_text('Lattice Account iFrame Sett').click()
-		self.driver.find_element_by_xpath("//input[@value='Manage']").click()
-		self.driver.find_element_by_xpath("//input[@value='Edit']").click()
-		self.driver.find_element_by_xpath("//label[text()='Base URL']//parent::th//parent::tr//input").clear()
-		self.driver.find_element_by_xpath("//label[text()='Base URL']//parent::th//parent::tr//input").send_keys(dante_Server)
-		self.driver.find_element_by_xpath("//input[@value='Save']").click()
-		time.sleep(5)
-		assert self.driver.find_element_by_xpath("//html").text.find(dante_Server)>0
-		log.info("dante_Server set successfully")
+    def configOTK(self,tenant=SalePrismEnvironments.tenantName):
+        self.driver.wait_until_page_contains_element("Xpath=//a[text()='Lattice Admin']",self.timeout)
+        self.driver.click_link("Xpath=//a[text()='Lattice Admin']")
+        log.info( 'start to OAuth Connect')
+        if self.driver._is_element_present("Xpath=//h3[text()='You are authenticated']"):
+            log.info('App have authed before connect')
+            self.driver.wait_until_page_contains_element("Xpath=//a[text()='Disconnect']",self.timeout)
+            log.info('Start to disconnect Oauth first')
+            self.driver.click_link("Xpath=//a[text()='Disconnect']")
+            self.driver.wait_until_page_contains_element("Xpath=//input[@value='Disconnect']",self.timeout)
+            self.driver.wait_until_page_contains_element("Xpath=//input[@value='Disconnect']",self.timeout)
+            self.driver.wait_until_element_is_visible("Xpath=//input[@value='Disconnect']",self.timeout)
+            log.info( 'disconnect button is visable, click it to disconnect')
+            self.driver.click_button("Xpath=//input[@value='Disconnect']")
+            log.info( 'disconnect completed')
+            #self.driver.click_element("Xpath=//input[@value='Disconnect']")
+        self.driver.wait_until_page_contains_element("Xpath=//a[text()='Authenticate Now']",self.timeout)
+        log.info( 'click auth link')
+        self.driver.click_link("Xpath=//a[text()='Authenticate Now']")
+        self.driver.wait_until_page_contains_element("Xpath=//label[text()='Customer ID:']//parent::div//child::input",self.timeout)
+        self.driver.wait_until_element_is_visible("Xpath=//label[text()='Customer ID:']//parent::div//child::input",self.timeout)
+        self.driver.input_text("Xpath=//label[text()='Customer ID:']//parent::div//child::input",tenant)
+        log.info( 'set tenant name')
+        self.driver.wait_until_page_contains_element("Xpath=//label[text()='Token:']//parent::div//child::input",self.timeout)
+        self.driver.wait_until_element_is_visible("Xpath=//label[text()='Token:']//parent::div//child::input",self.timeout)
+        #self.driver.clear_element_text("Xpath=//label[text()='Token:']//parent::div//child::input")
+        self.driver.input_text("Xpath=//label[text()='Token:']//parent::div//child::input",SalePrismEnvironments.OTK)
+        log.info('set OTK')
+        self.driver.wait_until_page_contains_element("Xpath=//input[@value='Connect']",self.timeout)
+        self.driver.wait_until_element_is_visible("Xpath=//input[@value='Connect']",self.timeout)
+        self.driver.click_element("Xpath=//input[@value='Connect']")
+        log.info('connect tenant')
+        time.sleep(10)
+        #self.driver.wait_until_page_contains_element("Xpath=//a[text()='Lattice Admin']",self.timeout)
+        #self.driver.click_link("Xpath=//a[text()='Lattice Admin']")
+        self.driver.page_should_contain("You are authenticated")
+        log.info("Authentication done!")
+    def syncData(self):
+        log.info('Go to Lattice Admin page')
+        self.driver.wait_until_page_contains_element("Xpath=//a[text()='Lattice Admin']",self.timeout)
+        self.driver.click_link("Xpath=//a[text()='Lattice Admin']")
+        #self.driver.wait_until_page_contains_element("Xpath=//h3[text()='You are authenticated']",self.timeout)
+        log.info('start to Sync data')
+        self.driver.wait_until_page_contains_element("Xpath=//a[text()='Sync Data Now']",self.timeout)
+        self.driver.click_link("Xpath=//a[text()='Sync Data Now']")
+        self.driver.wait_until_page_contains_element("Xpath=//input[@value='Sync']",self.timeout)
+        time.sleep(10)
+        self.driver.wait_until_element_is_visible("Xpath=//input[@value='Sync']",self.timeout)
+        self.driver.click_button("Xpath=//input[@value='Sync']")
+        log.info('have set click button, wait for sync finished')
+        time.sleep(5)
+        self.driver.page_should_contain("The Sync Data job was initiated successfully")
+        time.sleep(20)
+        log.info ('syc successfully!')
+    def checkRecommendations(self,playName,numberOfRecommendations=0):
+        log.info('Go to Lattice Recommondation page')
+        self.driver.wait_until_page_contains_element("Xpath=//a[text()='Lattice Recommendations']",self.timeout)
+        self.driver.click_link("Xpath=//a[text()='Lattice Recommendations']")
+        self.driver.wait_until_page_contains_element('Xpath=//div[@id="ext-gen11"]/div',self.timeout)
+        is_recommendationExist = False
+        num_recommendation=0
+		#pageNumber=int(self.driver.find_element_by_xpath("//span[text()='Page']").text[-1])
+        next_page_is_enable=self.driver._is_element_present("Xpath=//a[text()='Next']")
+        if self.driver._is_element_present("Xpath=//a[text()='"+playName+"']"):
+            num_this_page=0
+            is_recommendationExist = True
+            num_this_page=int(self.driver.get_matching_xpath_count("//a[text()='"+playName+"']"))
+            num_recommendation=int(num_recommendation)+int(num_this_page)
+            log.info('new play exist in this page and num is %s' % (str(num_this_page)))
+        while next_page_is_enable:
+            self.driver.wait_until_page_contains_element("Xpath=//a[text()='Next']",self.timeout)
+            self.driver.click_link("Xpath=//a[text()='Next']")
+            self.driver.wait_until_page_contains_element('Xpath=//div[@id="ext-gen11"]/div',self.timeout)
+            if self.driver._is_element_present("Xpath=//a[text()='"+playName+"']"):
+                num_this_page=0
+                is_recommendationExist = True
+                num_this_page=int(self.driver.get_matching_xpath_count("//a[text()='"+playName+"']"))
+                num_recommendation=int(num_recommendation)+int(num_this_page)
+                log.info('new play exist in this page and num is %s' % (str(num_this_page)))
+        try:
+            assert is_recommendationExist
+            log.info("Sync Data successfully")
+        except AssertionError:
+            log.error("Sync Data Failed")
+        return num_recommendation
+    def resetSFDC(self):
+        try:
+            self.driver.go_to(SalePrismEnvironments.resetUrl)
+            self.driver.wait_until_page_contains_element("Xpath=//input[@value='Delete all Lattice Data (except error logs or setup data) - May need to be run multiple times']",self.timeout)
+            self.driver.click_button("Xpath=//input[@value='Delete all Lattice Data (except error logs or setup data) - May need to be run multiple times']")
+            time.sleep(5)
+            self.driver.wait_until_page_contains_element("//input[@value='Reset Batch Chain Settings Timestamps']",self.timeout)
+            self.driver.click_button("//input[@value='Reset Batch Chain Settings Timestamps']")
+        except Exception,e:
+            log.error("reset SFDC failed Error is: %s"%e.message)
+        else:
+            log.info("reset SFDC successed")
+    def quit(self):
+        self.sf.Close_browser()
 
-	def configOTK(self,tenant=SalePrismEnvironments.tenantName):#need run self.loginSF first
-		if not self.islogin():
-			self.loginSF()
-		self.driver.find_element_by_xpath("//a[text()='Lattice Admin']").click()
-		try:
-			time.sleep(5)
-			if self.driver.find_element_by_xpath("//h3[text()='You are authenticated']").is_displayed():
-				self.driver.find_element_by_xpath("//a[text()='Disconnect']").click()
-				self.driver.find_element_by_xpath("//input[@value='Disconnect']").click()
-		except Exception,e:
-			pass
-		time.sleep(5)
-		self.driver.find_element_by_xpath("//a[text()='Authenticate Now']").click()
-		self.driver.find_element_by_xpath("//label[text()='Customer ID:']//parent::div//child::input").clear()
-		self.driver.find_element_by_xpath("//label[text()='Customer ID:']//parent::div//child::input").send_keys(tenant)
-		self.driver.find_element_by_xpath("//label[text()='Token:']//parent::div//child::input").clear()
-		log.info("The OTK is %s"%SalePrismEnvironments.OTK)
-		self.driver.find_element_by_xpath("//label[text()='Token:']//parent::div//child::input").send_keys(SalePrismEnvironments.OTK)
-		time.sleep(5)
-		self.driver.find_element_by_xpath("//input[@value='Connect']").click()
-		time.sleep(15)
-		assert self.driver.find_element_by_xpath("//h3[text()='You are authenticated']").is_displayed()
-		log.info("Authentication done!")
-	def syncData(self):#need run self.loginSF first.
-		if not self.islogin():
-			self.loginSF()
-		self.driver.find_element_by_xpath("//a[text()='Lattice Admin']").click()
-		assert self.driver.find_element_by_xpath("//h3[text()='You are authenticated']").is_displayed()
-		time.sleep(5)
-		self.driver.find_element_by_partial_link_text("Sync Data Now").click()
-		time.sleep(6)
-		self.driver.find_element_by_xpath("//input[@value='Sync']").click()
-		time.sleep(5)
-		assert self.driver.find_element_by_xpath("//html").text.find("The Sync Data job was initiated successfully")>0
-		time.sleep(20)#wait for sync data process finish
-
-	def islogin(self):
-		try:
-			self.driver.find_element_by_xpath("//span[@id='userNavLabel']")
-		except Exception,e:
-			return False
-		else:
-			return True
-	def resetSFDC(self):
-		try:
-			self.driver.get(SalePrismEnvironments.resetUrl)
-			clearDataButton=self.driver.find_element_by_xpath("//input[@value='Delete all Lattice Data (except error logs or setup data) - May need to be run multiple times']")
-			clearDataButton.click()
-			time.sleep(5)
-			resetTimeStampButton=self.driver.find_element_by_xpath("//input[@value='Reset Batch Chain Settings Timestamps']")
-			resetTimeStampButton.click()
-		except Exception,e:
-			log.error("reset SFDC failed Error is: %s"%e.message)
-		else:
-			log.info("reset SFDC successed")
-	def checkRecommendations(self,playName,numberOfRecommendations=0):
-		if not self.islogin():
-			self.loginSF()
-		self.driver.find_element_by_xpath("//a[text()='Lattice Recommendations']").click()
-		is_recommendationExist = False
-		pageNumber=int(self.driver.find_element_by_xpath("//span[text()='Page']").text[-1])
-		for i in range(1,pageNumber+1):
-			self.driver.find_element_by_xpath("//span[text()='Page']//input").clear()
-			self.driver.find_element_by_xpath("//span[text()='Page']//input").send_keys(i)
-			self.driver.find_element_by_xpath("//span[text()='Page']//input").send_keys(Keys.ENTER)
-			time.sleep(5)
-			if self.driver.find_element_by_xpath("//a[text()='"+playName+"']").is_displayed():
-				is_recommendationExist = True
-				break
-		try:
-			assert is_recommendationExist
-		except AssertionError:
-			log.error("Sync Data Failed")
-		else:
-			log.info("Sync Data successfully")
-	def checkAccountPage(self,playName):
-		if not self.islogin():
-			self.loginSF()
-	def quit(self):
-		self.driver.quit()
-def main():
-	d=DealSFDC()
-	d.loginSF()
-	print d.islogin()
-	d.configDanteServer()
-	d.configOTK()
-	d.resetSFDC()
-	d.syncData()
-	d.quit()
-if __name__ == '__main__':
-	main()
+#if __name__ == '__main__':
+    #des=DealSFDC1()
+    #des.configDanteServer()

@@ -46,7 +46,7 @@ class DealPlay(object):
 		assert self.aspAuth!=None
 	def setPlaymakerConfigurationByRest(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,useDataPlatform=SalePrismEnvironments.withModelingOnDataPlatform):
 		log.info("##########  playmaker system configuration start   ##########")
-		with open('..\\PlayMakerSysConfig.json') as jsonData:
+		with open(SalePrismEnvironments.rootPath+'PlayMakerSysConfig.json') as jsonData:
 			sysConfigJson=json.load(jsonData)
 		conn = pyodbc.connect(DRIVER=SalePrismEnvironments.ODBCSqlServer,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=tenant,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword)
 		cur = conn.cursor()
@@ -86,7 +86,9 @@ class DealPlay(object):
 		response=requests.post(resetCacheUrl,data=resetCacheXML,headers=resetCacheHeaders,verify=False)
 		assert response.status_code==200
 		log.info("reset cache successfully")
-	def createPlayByREST(self,UseEVModel=False,playType=SalePrismEnvironments.playType):
+	def createPlayByREST(self,needCleanUpTenantDB=SalePrismEnvironments.needCleanUpTenantDB,UseEVModel=False,playType=SalePrismEnvironments.playType):
+		if needCleanUpTenantDB:
+			self.cleanUpPlaysAndPreleads()
 		log.info("##########  play creation starts   ##########")
 		playName=playType+repr(time.time()).replace('.','')
 		time.sleep(1)
@@ -94,7 +96,7 @@ class DealPlay(object):
 		log.info("The play type is: %s" % (playType))
 		#Prepare the list for anlytics play type
 		AnlyticPlayList=[PlayTypes.t_CSFirstPurchase,PlayTypes.t_AnalyticList,PlayTypes.t_CSRepeatPurchase,PlayTypes.t_Winback]
-		with open("..\\PlaysCreationJsonFiles\\"+playType+".json") as createPlayJsonFile:
+		with open(SalePrismEnvironments.rootPath+"PlaysCreationJsonFiles\\"+playType+".json") as createPlayJsonFile:
 			createPlayJson=json.load(createPlayJsonFile)
 		createPlayJson['DisplayName']=playName
 		createPlayJson['ExternalID']=playExternalId
@@ -115,7 +117,7 @@ class DealPlay(object):
 				createPlayJson=self.enableEVModelInJson(createPlayJson)
 			else:
 				log.info("This play has unchecked Use EV modeling")
-				#createPlayJson=self.disableEVModelInJson(createPlayJson)
+				createPlayJson=self.disableEVModelInJson(createPlayJson)
 		#post create play data
 		savePlayUrl=SalePrismEnvironments.savePlayUrl
 		createPlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"application/json, text/javascript, */*; q=0.01","LEFormsTicket":self.aspAuth,"Content-Type":"application/json; charset=UTF-8","User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host}
@@ -205,22 +207,43 @@ class DealPlay(object):
 
 	def enableEVModelInJson(self,jsonPost):
 		json_EVModel=dict(jsonPost)
-		json_EVModel['ModelingMethodID']='ExpectedRevenue'
+		json_EVModel['ModelingMethodID']='ExpectedValue'
 		json_EVModel['ScoringMethodID']='ExpectedRevenue'
 		log.info("Have enable EVModeling,ModelingMethodID value is %s, ScoringMethodID value is %s" % (json_EVModel['ModelingMethodID'],json_EVModel['ScoringMethodID']))
 		return json_EVModel
 
 	def disableEVModelInJson(self,jsonPost):
 		json_EVModel=dict(jsonPost)
-		json_EVModel['ModelingMethodID']='Probability'
+		json_EVModel['ModelingMethodID']='Standard'
 		json_EVModel['ScoringMethodID']='Lift'
 		log.info("Have disable EVModeling,ModelingMethodID value is %s, ScoringMethodID value is %s" % (json_EVModel['ModelingMethodID'],json_EVModel['ScoringMethodID']))
 		return json_EVModel
 
+	def cleanUpPlaysAndPreleads(self,Server=SalePrismEnvironments.tenantDBUrl,Database=SalePrismEnvironments.tenantName,User=SalePrismEnvironments.tenantDBUser,Password=SalePrismEnvironments.tenantDBPassword,Driver=SalePrismEnvironments.ODBCSqlServer):
+		#set all previous plays isActive to 0
+		conn=None
+		try:
+			conn = pyodbc.connect(DRIVER=Driver,SERVER=Server,DATABASE=Database,UID=User,PWD=Password)
+			updateSql="update Play set IsActive=0"
+			cur=conn.cursor()
+			assert cur != None
+			cur.execute(updateSql)
+			conn.commit()
+			#delete from Prelead
+			deleteRecommendationsSql="""
+				delete from RecommendationAccount
+				delete from Prelead
+			"""
+			cur.execute(deleteRecommendationsSql)
+			conn.commit()
+		except Exception,e:
+			log.error(e)
+		finally:
+			conn.close()
 if __name__=='__main__':
 	Play=DealPlay()
-	playDict=Play.createPlayByREST()
-	PlayID=playDict.get("playId")
+	#playDict=Play.createPlayByREST()
+	#PlayID=playDict.get("playId")
 	#Play.approvePlay(idOfPlay=PlayID)
 	#Play.scorePlay(idOfPlay=PlayID)
 	#status=Play.getStatusOfPlay(idOfPlay=PlayID)
@@ -230,3 +253,4 @@ if __name__=='__main__':
 	#print Play.getLaunchStatus(idOfPlay=PlayID)
 	#Play.launchPlay()
 	#Play.getLaunchStatus(idOfPlay=PlayID)
+	#Play.cleanUpPlaysAndPreleads()

@@ -76,16 +76,16 @@ class TestSteps(unittest.TestCase):
 		assert numberOf2800==numberOfRecommendations
 		dlDealer=DataloaderDealer()
 		sfdcDealer=DealSFDC()
+		sfdcDealer.configDanteServer()
 		sfdcDealer.loginSF()
 		sfdcDealer.resetSFDC()
-		sfdcDealer.configDanteServer()
 		sfdcDealer.configOTK()
-		#assert dlDealer.isDanteGroupFinishSuccessfully(timePoint=playLaunchTime)
+		assert dlDealer.isDanteGroupFinishSuccessfully(timePoint=playLaunchTime)
 		sfdcDealer.syncData()
 		sfdcDealer.checkRecommendations(playName)
 		sfdcDealer.quit()
 
-	def test_CreateAllTypeOfPlays(self):
+	def atest_CreateAllTypeOfPlays(self):
 		playDealer=DealPlay()
 		numberOfRecommendations=0
 		playIdList=[]
@@ -118,9 +118,9 @@ class TestSteps(unittest.TestCase):
 		#assert numberOf2800==numberOfRecommendations
 		dlDealer=DataloaderDealer()
 		sfdcDealer=DealSFDC()
+		sfdcDealer.configDanteServer()
 		sfdcDealer.loginSF()
 		sfdcDealer.resetSFDC()
-		sfdcDealer.configDanteServer()
 		sfdcDealer.configOTK()
 		#assert dlDealer.isDanteGroupFinishSuccessfully(timePoint=playLaunchTime)
 		sfdcDealer.syncData()

@@ -21,7 +21,7 @@ def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser
                 return
             else:
                 jsonIni['SFDCPWD']=SFDCPWD
-    with open("..\\config.ini",mode='w') as ini:
+    with open(".\\PlaymakerEnd2End\\config.ini",mode='w') as ini:
         ini.write(json.dumps(jsonIni))
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

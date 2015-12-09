@@ -20,12 +20,12 @@ log=SalePrismEnvironments.log
 class DataloaderDealer(object):
 	def __init__(self):
 		self.headers={"MagicAuthentication":"Security through obscurity!","Accept":"application/json;","Content-Type":"application/json; charset=utf-8;"}
-	def setTenantDataProviderByREST(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,dbUser=SalePrismEnvironments.tenantDBUser,dbPwd=SalePrismEnvironments.tenantDBPassword):
+	def setTenantDataProviderByREST(self,tenant=SalePrismEnvironments.tenantName):
 		log.info("##########  dataloader configuration start   ##########")
 		RESTurl=SalePrismEnvironments.dataloaderUpdateRESTURL
-		AnalyticsDBJson={"tenantName": tenant,"dataProviderName": "AnalyticsDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": host},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": dbUser},{"Key": "Password","Value": dbPwd},{"Key": "Database","Value": tenant},{"Key": "Schema","Value": "dbo"}]}
-		DanteDBJson={"tenantName": tenant,"dataProviderName": "DanteDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": host},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": dbUser},{"Key": "Password","Value": dbPwd},{"Key": "Database","Value": "DT_"+tenant},{"Key": "Schema","Value": "dbo"}]}
-		PlayMakerDBJson={"tenantName": tenant,"dataProviderName": "PlayMakerDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": host+"\\SQL2012STD"},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": dbUser},{"Key": "Password","Value": dbPwd},{"Key": "Database","Value": tenant},{"Key": "Schema","Value": "dbo"}]}
+		AnalyticsDBJson={"tenantName": tenant,"dataProviderName": "AnalyticsDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": SalePrismEnvironments.tenantDBUrl},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": SalePrismEnvironments.tenantDBUser},{"Key": "Password","Value": SalePrismEnvironments.tenantDBPassword},{"Key": "Database","Value": tenant},{"Key": "Schema","Value": "dbo"}]}
+		DanteDBJson={"tenantName": tenant,"dataProviderName": "DanteDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": SalePrismEnvironments.tenantDBUrl},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": SalePrismEnvironments.tenantDBUser},{"Key": "Password","Value": SalePrismEnvironments.tenantDBPassword},{"Key": "Database","Value": "DT_"+tenant},{"Key": "Schema","Value": "dbo"}]}
+		PlayMakerDBJson={"tenantName": tenant,"dataProviderName": "PlayMakerDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": SalePrismEnvironments.tenantDBUrl},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": SalePrismEnvironments.tenantDBUser},{"Key": "Password","Value": SalePrismEnvironments.tenantDBPassword},{"Key": "Database","Value": tenant},{"Key": "Schema","Value": "dbo"}]}
 		request=None
 		try:
 			request = requests.post(RESTurl,json=AnalyticsDBJson,headers=self.headers)

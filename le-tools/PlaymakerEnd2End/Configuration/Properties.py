@@ -13,9 +13,11 @@ except Exception,e:
 	from selenium import webdriver
 class SalePrismEnvironments(object):
     "parser that read configuration properties from config.ini file"
-    with open("..\\config.ini") as configFile:
+    rootPath='.\\PlaymakerEnd2End\\'
+    with open(rootPath+"\config.ini") as configFile:
         paras = json.load(configFile)
     # properties definition in config.ini
+    needCleanUpTenantDB=paras.get("needCleanUpTenantDB")
     withModelingOnDataPlatform=paras.get("withModelingOnDataPlatform")
     tenantName=paras.get('tenantName')
     host=paras.get('host')
