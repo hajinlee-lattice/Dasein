@@ -8,6 +8,7 @@
 
     <properties>
         <le.serviceflows.core.version>2.0.17-SNAPSHOT</le.serviceflows.core.version>
+        <le.dataflow.version>2.0.17-SNAPSHOT</le.dataflow.version>
         <component-name>prospectdiscovery</component-name>
     </properties>
 
