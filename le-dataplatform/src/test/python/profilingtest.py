@@ -1,7 +1,6 @@
 from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
 
-
 class ProfilingTest(ProfilingTestBase):
 
     def testExecuteProfiling(self):
@@ -12,3 +11,25 @@ class ProfilingTest(ProfilingTestBase):
 
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
         self.assertTrue(results is not None)
+
+        # Check if Skew and Kurtosis are being calculated and added to the Profile.
+        self.assertSkewnessAndKurtosis(results)
+
+    def assertSkewnessAndKurtosis(self, results):
+        metadataDict = dict(results[0])
+
+        featureKey = "BusinessAnnualSalesAbs"
+        self.assertTrue(metadataDict.has_key(featureKey))
+
+        # Check if Kurtosis and Skewness keys are added
+        skewnessKey = "skewness"
+        self.assertTrue(metadataDict[featureKey][0].has_key(skewnessKey))
+        kurtosisKey = "kurtosis"
+        self.assertTrue(metadataDict[featureKey][0].has_key(kurtosisKey))
+
+        # Check if Kurtosis and Skewness are calculated for an arbitrary record
+        skew = metadataDict[featureKey][0][skewnessKey]
+        self.assertEqual(round(skew, 4), 1.4014)
+
+        kurtosis = metadataDict[featureKey][0][kurtosisKey]
+        self.assertEqual(round(kurtosis, 4), 0.5726)

@@ -14,7 +14,7 @@ from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
 import numpy as np
 import pandas as pd
-
+from scipy import stats
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -104,6 +104,16 @@ def getSchema():
         "name" : "median",
         "type" : [ "double", "null" ],
         "columnName" : "median",
+        "sqlType" : "8"
+      }, {
+        "name" : "kurtosis",
+        "type" : [ "double", "null" ],
+        "columnName" : "kurtosis",
+        "sqlType" : "8"
+      }, {
+        "name" : "skewness",
+        "type" : [ "double", "null" ],
+        "columnName" : "skewness",
         "sqlType" : "8"
       }, {
         "name" : "count",
@@ -370,9 +380,11 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         diagnostics["Type"] = "Band"
         # Convert all continuous values into a numeric data type
         if columnData.dtype == np.object_:
-            columnData = pd.Series(pd.lib.maybe_convert_numeric(columnData.as_matrix(), set(), coerce_numeric=True)) 
+            columnData = pd.Series(pd.lib.maybe_convert_numeric(columnData.as_matrix(), set(), coerce_numeric=True))
         mean = columnData.mean()
         median = columnData.median()
+        skewness, kurtosis = getKurtosisAndSkewness(columnData)
+
         if math.isnan(median):
             logger.warn("Median to impute for column name: " + colName + " is null; excluding this column.")
             return (index, diagnostics)
@@ -385,16 +397,20 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
             logger.debug("Using default bucketer for column name: " + colName)
             bands = bucketDispatcher.bucketColumn(columnData, eventVector)
             diagnostics["BucketingStrategy"] = None
-        index, diagnostics["UncertaintyCoefficient"] = writeBandsToAvro(dataWriter, columnData, eventVector, bands, mean, median, colName, otherMetadata, index)
+        index, diagnostics["UncertaintyCoefficient"] = writeBandsToAvro(dataWriter, columnData, eventVector, bands, mean, median, kurtosis, skewness, colName, otherMetadata, index)
     return (index, diagnostics)
 
+def getKurtosisAndSkewness(columnData):
+    n, (minInData, maxInData), mean, variance, skewness, kurtosis = stats.describe(columnData.data)
+
+    return skewness, kurtosis
 
 def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, colName, otherMetadata, index):
     '''
-    Creates a datum for each unique value in the categorical column and writes to buffered writer   
+    Creates a datum for each unique value in the categorical column and writes to buffered writer
     Args:
         dataWriter: Buffered writer which appends each datum to the avro file
-        columnVector: A DataFrame vector of column data 
+        columnVector: A DataFrame vector of column data
         eventVector: A DataFrame vector of event column
         mode: Mode of all values in the column vector
         colName: Name of given column
@@ -425,6 +441,8 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum["mean"] = None
         datum["median"] = None
         datum["mode"] = mode
+        datum["kurtosis"] = None
+        datum["skewness"] = None
         datum["count"] = valueCount
         datum["lift"] = getLift(avgProbability, valueCount, valueVector, eventVector)
         datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[value], entropyValue)
@@ -437,12 +455,12 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
     index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, None, None, dataWriter, False, componentMi, entropyValue)
     return index, uncertaintyCoefficient(mi, entropyValue)
 
-def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colName, otherMetadata, index):
+def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, kurtosis, skewness, colName, otherMetadata, index):
     '''
-    Creates a datum for each band in the band column and writes to buffered writer   
+    Creates a datum for each band in the band column and writes to buffered writer
     Args:
         dataWriter: Buffered writer which appends each datum to the avro file
-        columnVector: A DataFrame vector of column data 
+        columnVector: A DataFrame vector of column data
         eventVector: A DataFrame vector of event column
         bands: A list of band boundries, i.e. band i = (band[i], band[i+1)
         colName: Name of given column
@@ -478,6 +496,8 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum["mean"] = mean
         datum["median"] = median
         datum["mode"] = None
+        datum["kurtosis"] = kurtosis
+        datum["skewness"] = skewness
         datum["count"] = bandCount
         datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
         datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[bands[i]], entropyValue)
@@ -528,6 +548,8 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
     datum["mean"] = mean
     datum["median"] = median
     datum["mode"] = None
+    datum["kurtosis"] = None
+    datum["skewness"] = None
     datum["count"] = bandCount
     datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
     datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[None], entropyValue) if None in componentMi else None
