@@ -96,6 +96,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     private static final int MAX_RETRIES = 3;
     private static final String[] RETRY_TRIGGERS = new String[] {"Collection was modified"};
+    private static final int RETRY_WAIT_TIME = 10000;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -585,8 +586,37 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return false;
     }
 
+    private <T> String callDLRestServiceWithRetry(String dlUrl, String endpoint, T payload) throws IOException {
+        String response = null;
+        int retries = 0;
+        IOException exception = null;
+        do {
+            if (retries > 0) {
+                try {
+                    Thread.sleep(RETRY_WAIT_TIME);
+                } catch (InterruptedException e) {
+                    // Do nothing if sleep interrupted
+                }
+                log.info("Retry #" + String.valueOf(retries) + ": Send POST to " + dlUrl + endpoint);
+            }
+
+            try {
+                response = callDLRestService(dlUrl, endpoint, payload);
+                exception = null;
+            } catch (IOException e) {
+                exception = e;
+            }
+        } while (exception != null && (retries++ < MAX_RETRIES));
+
+        if (exception != null) {
+            throw exception;
+        }
+
+        return response;
+    }
+
     @RestApiCall
-    public long executeLoadGroup(String tenantName, String groupName, String email, String dlUrl) {
+    public long executeLoadGroup(String tenantName, String groupName, String dlUrl) {
         try {
             Map<String, String> paramerters = new HashMap<>();
             paramerters.put("email", DL_USER);
@@ -624,11 +654,16 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     @RestApiCall
-    public LaunchJobsResult getLaunchJobs(long launchId, String dlUrl) {
+    public LaunchJobsResult getLaunchJobs(long launchId, String dlUrl, boolean retry) {
         try {
             Map<String, String> paramerters = new HashMap<>();
             paramerters.put("launchId", String.valueOf(launchId));
-            String response = callDLRestService(dlUrl, GET_LAUNCH_JOBS, paramerters);
+            String response;
+            if (retry) {
+                response = callDLRestServiceWithRetry(dlUrl, GET_LAUNCH_JOBS, paramerters);
+            } else {
+                response = callDLRestService(dlUrl, GET_LAUNCH_JOBS, paramerters);
+            }
             LaunchJobsResult result = JsonUtils.deserialize(response, LaunchJobsResult.class);
 
             if (result.getStatus() != 3) {
@@ -683,6 +718,15 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             throw new LedpException(LedpCode.LEDP_21017);
         }
         return Long.parseLong(launchId);
+    }
+
+    @Override
+    @RestApiCall
+    public boolean isLoadGroupRunning(String tenantName, String groupName, String dlUrl) {
+        InstallResult result = getLoadGroupStatus(tenantName, groupName, dlUrl);
+        List<ValueResult> valueResults = result.getValueResult();
+        String status = getValue("ProcessStatus", valueResults);
+        return "InProcess".equalsIgnoreCase(status);
     }
 
     private String getValue(String key, List<ValueResult> valueResults) {
