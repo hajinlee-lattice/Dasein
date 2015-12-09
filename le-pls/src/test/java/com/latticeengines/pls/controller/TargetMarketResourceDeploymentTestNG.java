@@ -131,8 +131,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
     public void createDefault() {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TargetMarket.DEFAULT_NAME,
-                TargetMarket.class);
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
 
         waitForWorkflowCompletion(targetMarket.getApplicationId());

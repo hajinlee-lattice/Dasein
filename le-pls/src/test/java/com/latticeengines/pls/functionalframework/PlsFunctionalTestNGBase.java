@@ -103,7 +103,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         tenant.setId(tenantName);
         tenant.setName(tenantName);
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{ addMagicAuthHeader }));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         return magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
                 new HashMap<>());
     }
@@ -337,7 +337,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupSecurityContext(mainTestingTenant);
         List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.getAllTargetMarkets();
         for (TargetMarket targetMarket : targetMarkets) {
-            if (targetMarket.getName().startsWith("TEST")) {
+            if (targetMarket.getName().startsWith("TEST") || targetMarket.getIsDefault()) {
                 this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
             }
         }
@@ -355,7 +355,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     protected void cleanupProspectDiscoveryOptionDB() {
         setupSecurityContext(mainTestingTenant);
-        List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryOptionEntityMgr.findAllProspectDiscoveryOptions();
+        List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryOptionEntityMgr
+                .findAllProspectDiscoveryOptions();
         for (ProspectDiscoveryOption option : prospectDiscoveryOptions) {
             this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(option.getOption());
         }

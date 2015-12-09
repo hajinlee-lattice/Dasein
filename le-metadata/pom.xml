@@ -14,6 +14,7 @@
         <le.security.version>2.0.18-SNAPSHOT</le.security.version>
         <le.camille.version>2.0.18-SNAPSHOT</le.camille.version>
         <le.baton.version>2.0.18-SNAPSHOT</le.baton.version>
+        <le.network.version>2.0.18-SNAPSHOT</le.network.version>
     </properties>
 
     <parent>
@@ -64,6 +65,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-network</artifactId>
+            <version>${le.network.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>

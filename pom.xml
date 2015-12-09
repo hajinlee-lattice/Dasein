@@ -17,8 +17,10 @@
     <modules>
         <module>le-common</module>
         <module>le-testframework</module>
+        <module>le-network</module>
         <module>le-microservice</module>
         <module>le-domain</module>
+        <module>le-proxy</module>
         <module>le-remote</module>
         <module>le-scheduler</module>
         <module>le-parent</module>
@@ -46,7 +48,7 @@
         <module>le-release</module>
         <module>le-liaison</module>
         <module>le-workflow</module>
-<module>le-serviceflows</module>
+        <module>le-serviceflows</module>
         <module>le-workflowapi</module>
     </modules>
 </project>

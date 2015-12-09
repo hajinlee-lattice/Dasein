@@ -70,7 +70,7 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
     protected static final String MODEL_ID = "MODEL_ID";
     protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
     protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
-    protected static final Boolean IS_DEFAULT = true;
+    protected static final Boolean IS_DEFAULT = false;
     protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account", new ArrayList<Restriction>());
     protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact", new ArrayList<Restriction>());
     protected static final Integer OFFSET = 1;

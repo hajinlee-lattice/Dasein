@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 import com.wordnik.swagger.annotations.Api;
@@ -30,7 +30,7 @@ public class JobResource {
     private static final Log log = LogFactory.getLog(JobResource.class);
 
     @Autowired
-    private RestApiProxy restApiProxy;
+    private WorkflowProxy workflowProxy;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -38,9 +38,9 @@ public class JobResource {
     @RequestMapping(value = "/{jobId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a job by id")
-   // @PreAuthorize("hasRole('View_PLS_Jobs')")
+    // @PreAuthorize("hasRole('View_PLS_Jobs')")
     public Job find(@PathVariable String jobId) {
-        return restApiProxy.getWorkflowExecution(jobId);
+        return workflowProxy.getWorkflowExecution(jobId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -49,11 +49,11 @@ public class JobResource {
         Tenant tenant = SecurityContextUtils.getTenant();
         Tenant tenantWithPid = tenantEntityMgr.findByTenantId(tenant.getId());
         log.info("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
-        if (restApiProxy == null) {
+        if (workflowProxy == null) {
             log.info("restApiProxy is not set");
         }
 
-        List<Job> jobs = restApiProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
@@ -63,7 +63,7 @@ public class JobResource {
     @RequestMapping(value = "/{jobId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Cancel a job")
-  //  @PreAuthorize("hasRole('Edit_PLS_Jobs')")
+    // @PreAuthorize("hasRole('Edit_PLS_Jobs')")
     public void cancel(@PathVariable String jobId) {
         // TODO
     }

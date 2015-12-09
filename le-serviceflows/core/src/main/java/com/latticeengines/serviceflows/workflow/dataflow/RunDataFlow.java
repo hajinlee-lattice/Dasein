@@ -2,7 +2,6 @@ package com.latticeengines.serviceflows.workflow.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,11 +68,10 @@ public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
             tables.add(t);
         }
 
-        for (Map<String, String> extraSourcePath : configuration.getExtraSources()) {
-            Map.Entry<String, String> entry = extraSourcePath.entrySet().iterator().next();
-            Table extraSourceTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, entry.getValue(),
-                    null, null);
-            extraSourceTable.setName(entry.getKey());
+        for (String extraSourceName : configuration.getExtraSources().keySet()) {
+            Table extraSourceTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, configuration
+                    .getExtraSources().get(extraSourceName), null, null);
+            extraSourceTable.setName(extraSourceName);
             // register the extra source table
             url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                     configuration.getCustomerSpace(), extraSourceTable.getName());

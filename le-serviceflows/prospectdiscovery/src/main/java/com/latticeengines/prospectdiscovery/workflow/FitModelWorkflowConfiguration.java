@@ -56,7 +56,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder extraSources(List<Map<String, String>> extraSources) {
+        public Builder extraSources(Map<String, String> extraSources) {
             dataFlow.setExtraSources(extraSources);
             return this;
         }

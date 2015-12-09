@@ -8,6 +8,8 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
 
+    <import resource="classpath:network-context.xml"/>
+  
     <context:component-scan base-package="com.latticeengines.microservice">
         <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.swagger.SwaggerConfig" />
         <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.doc.AppProvider" />

@@ -44,7 +44,8 @@ public class TableResource {
     @RequestMapping(value = "/tables/{tableName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table metadata by name")
-    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName, HttpServletRequest request) {
+    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName,
+            HttpServletRequest request) {
         return tableResourceHelper.getTableMetadata(customerSpace, tableName, request);
     }
 

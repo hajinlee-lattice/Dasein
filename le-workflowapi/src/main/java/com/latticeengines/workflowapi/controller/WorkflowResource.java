@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowAppContext;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.workflow.exposed.entitymgr.WorkflowAppContextEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -33,7 +34,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "workflow", description = "REST resource for workflows")
 @RestController
 @RequestMapping("/workflows")
-public class WorkflowResource {
+public class WorkflowResource implements WorkflowInterface {
 
     private static final Log log = LogFactory.getLog(WorkflowResource.class);
 
@@ -52,13 +53,16 @@ public class WorkflowResource {
     @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a workflow execution in a Yarn container")
+    @Override
     public AppSubmission submitWorkflowExecution(@RequestBody WorkflowConfiguration workflowConfig) {
-        return new AppSubmission(Arrays.<ApplicationId>asList(new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
+        return new AppSubmission(Arrays.<ApplicationId> asList(new ApplicationId[] { workflowContainerService
+                .submitWorkFlow(workflowConfig) }));
     }
 
     @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
+    @Override
     public String getWorkflowId(@PathVariable String applicationId) {
         return getWorkflowIdFromAppId(applicationId);
     }
@@ -66,6 +70,7 @@ public class WorkflowResource {
     @RequestMapping(value = "/status/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted workflow")
+    @Override
     public WorkflowStatus getWorkflowStatus(@PathVariable String workflowId) {
         return workflowService.getStatus(new WorkflowExecutionId(Long.valueOf(workflowId)));
     }
@@ -73,6 +78,7 @@ public class WorkflowResource {
     @RequestMapping(value = "/yarnapps/status/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
+    @Override
     public WorkflowStatus getWorkflowStatusFromApplicationId(@PathVariable String applicationId) {
         String workflowId = getWorkflowIdFromAppId(applicationId);
         return workflowService.getStatus(new WorkflowExecutionId(Long.valueOf(workflowId)));
@@ -80,7 +86,8 @@ public class WorkflowResource {
 
     private String getWorkflowIdFromAppId(String applicationId) {
         log.info("getWorkflowId for applicationId:" + applicationId);
-        WorkflowExecutionId workflowId = workflowContainerService.getWorkflowId(YarnUtils.appIdFromString(applicationId));
+        WorkflowExecutionId workflowId = workflowContainerService.getWorkflowId(YarnUtils
+                .appIdFromString(applicationId));
         return String.valueOf(workflowId.getId());
     }
 
@@ -103,7 +110,8 @@ public class WorkflowResource {
             // TODO handle this case
         }
         log.info("Looking for workflows for tenant: " + tenantWithPid.toString());
-        List<WorkflowAppContext> workflowAppContexts = workflowAppContextEntityMgr.findWorkflowIdsByTenant(tenantWithPid);
+        List<WorkflowAppContext> workflowAppContexts = workflowAppContextEntityMgr
+                .findWorkflowIdsByTenant(tenantWithPid);
         List<Job> jobs = new ArrayList<>();
         for (WorkflowAppContext workflowAppContext : workflowAppContexts) {
             Job job = workflowService.getJob(workflowAppContext.getAsWorkflowId());

@@ -111,10 +111,8 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         eventCols.add("Event_IsClosed");
         eventCols.add("Event_OpportunityCreated");
 
-        List<Map<String, String>> extraSources = new ArrayList<>();
-        Map<String, String> map = new HashMap<>();
-        map.put("PublicDomain", "/tmp/Stoplist/*.avro");
-        extraSources.add(map);
+        Map<String, String> extraSources = new HashMap<>();
+        extraSources.put("PublicDomain", "/tmp/Stoplist/*.avro");
 
         FitModelWorkflowConfiguration workflowConfig = new FitModelWorkflowConfiguration.Builder()
                 .customer(DEMO_CUSTOMERSPACE) //
