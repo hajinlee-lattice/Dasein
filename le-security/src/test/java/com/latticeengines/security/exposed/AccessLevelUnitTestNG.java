@@ -17,11 +17,13 @@ public class AccessLevelUnitTestNG {
         AccessLevel.valueOf(GrantedRight.VIEW_PLS_MODELS.getAuthority());
     }
 
-    @Test(groups = { "unit", "functional", "deployment" })
+    @Test(groups = "unit")
     public void cardinalityOfAccessLevels() {
         AccessLevel[] levelsInOrder = new AccessLevel[] {
-                AccessLevel.SUPER_ADMIN, AccessLevel.INTERNAL_ADMIN,
-                AccessLevel.INTERNAL_USER, AccessLevel.EXTERNAL_ADMIN,
+                AccessLevel.SUPER_ADMIN, //
+                AccessLevel.INTERNAL_ADMIN, //
+                AccessLevel.INTERNAL_USER, //
+                AccessLevel.EXTERNAL_ADMIN, //
                 AccessLevel.EXTERNAL_USER };
         for (int i = 0; i < levelsInOrder.length - 1; i++) {
             assertTrue(levelsInOrder[i].compareTo(levelsInOrder[i + 1]) > 0);
@@ -29,7 +31,7 @@ public class AccessLevelUnitTestNG {
         }
     }
 
-    @Test(groups = { "unit", "functional", "deployment" })
+    @Test(groups = "unit")
     public void maxAccessLevel() {
         List<GrantedRight> rights = new ArrayList<>();
         testMaxAccessLevel(rights, null);
@@ -41,11 +43,11 @@ public class AccessLevelUnitTestNG {
         rights = Collections.singletonList(GrantedRight.VIEW_PLS_REPORTING);
         testMaxAccessLevel(rights, null);
 
-        rights = Arrays.asList(GrantedRight.VIEW_PLS_USERS,
-                GrantedRight.EDIT_PLS_USERS,
-                GrantedRight.VIEW_PLS_CONFIGURATIONS,
-                GrantedRight.EDIT_PLS_CONFIGURATIONS,
-                GrantedRight.VIEW_PLS_REPORTING, GrantedRight.EDIT_PLS_MODELS);
+        rights = Arrays.asList(GrantedRight.VIEW_PLS_USERS, //
+                GrantedRight.EDIT_PLS_USERS, //
+                GrantedRight.VIEW_PLS_CONFIGURATIONS, //
+                GrantedRight.EDIT_PLS_CONFIGURATIONS, //
+                GrantedRight.EDIT_PLS_MODELS);
         testMaxAccessLevel(rights, null);
 
     }

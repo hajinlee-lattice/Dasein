@@ -7,6 +7,7 @@ public enum AccessLevel {
 
     EXTERNAL_USER(
         Arrays.asList(
+            GrantedRight.VIEW_PLS_REPORTING,
             GrantedRight.VIEW_PLS_DATA,
             GrantedRight.VIEW_PLS_MODELS,
             GrantedRight.VIEW_PLS_JOBS,
@@ -17,6 +18,8 @@ public enum AccessLevel {
     ),
     EXTERNAL_ADMIN(
         Arrays.asList(
+            GrantedRight.VIEW_PLS_REPORTING,
+            GrantedRight.EDIT_PLS_REPORTING,
             GrantedRight.VIEW_PLS_DATA,
             GrantedRight.EDIT_PLS_DATA,
             GrantedRight.VIEW_PLS_USERS,
@@ -31,13 +34,19 @@ public enum AccessLevel {
     ),
     INTERNAL_USER(
         Arrays.asList(
-            GrantedRight.VIEW_PLS_REPORTING,
-            GrantedRight.VIEW_PLS_DATA,
-            GrantedRight.VIEW_PLS_MODELS,
-            GrantedRight.VIEW_PLS_JOBS,
-            GrantedRight.EDIT_PLS_JOBS,
-            GrantedRight.VIEW_PLS_TARGETMARKETS,
-            GrantedRight.VIEW_PLS_QUOTAS
+                GrantedRight.VIEW_PLS_REPORTING,
+                GrantedRight.EDIT_PLS_REPORTING,
+                GrantedRight.VIEW_PLS_DATA,
+                GrantedRight.EDIT_PLS_DATA,
+                GrantedRight.VIEW_PLS_USERS,
+                GrantedRight.EDIT_PLS_USERS,
+                GrantedRight.VIEW_PLS_MODELS,
+                GrantedRight.VIEW_PLS_JOBS,
+                GrantedRight.EDIT_PLS_JOBS,
+                GrantedRight.VIEW_PLS_TARGETMARKETS,
+                GrantedRight.CREATE_PLS_TARGETMARKETS,
+                GrantedRight.VIEW_PLS_QUOTAS,
+                GrantedRight.EDIT_PLS_QUOTAS
         )
     ),
     INTERNAL_ADMIN(
@@ -49,6 +58,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_CONFIGURATIONS,
             GrantedRight.EDIT_PLS_CONFIGURATIONS,
             GrantedRight.VIEW_PLS_REPORTING,
+            GrantedRight.EDIT_PLS_REPORTING,
             GrantedRight.VIEW_PLS_MODELS,
             GrantedRight.EDIT_PLS_MODELS,
             GrantedRight.VIEW_PLS_JOBS,
@@ -68,6 +78,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_CONFIGURATIONS,
             GrantedRight.EDIT_PLS_CONFIGURATIONS,
             GrantedRight.VIEW_PLS_REPORTING,
+            GrantedRight.EDIT_PLS_REPORTING,
             GrantedRight.VIEW_PLS_MODELS,
             GrantedRight.EDIT_PLS_MODELS,
             GrantedRight.CREATE_PLS_MODELS,
