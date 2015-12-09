@@ -1,22 +1,29 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.pls.Report;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.dao.ReportDao;
-import com.latticeengines.pls.entitymanager.ReportEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import com.latticeengines.common.exposed.util.HibernateUtils;
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.pls.KeyValue;
+import com.latticeengines.domain.exposed.pls.Report;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.dao.KeyValueDao;
+import com.latticeengines.pls.dao.ReportDao;
+import com.latticeengines.pls.entitymanager.ReportEntityMgr;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component("reportEntityMgr")
 public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements ReportEntityMgr {
+
+    @Autowired
+    private KeyValueDao keyValueDao;
 
     @Autowired
     private ReportDao reportDao;
@@ -30,41 +37,66 @@ public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements Re
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Report findByGuid(String guid) {
-        return reportDao.findByField("guid", guid);
+    public Report findByName(String name) {
+        Report report = reportDao.findByField("name", name);
+
+        if (report != null) {
+            KeyValue json = report.getJson();
+            json = HibernateUtils.inflateDetails(json);
+            report.setJson(json);
+        }
+        return report;
+    }
+
+    private void internalCreate(Report report) {
+        initialize(report);
+        KeyValue json = report.getJson();
+        json.setTenantId(report.getTenantId());
+        keyValueDao.create(json);
+        getDao().create(report);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void create(Report report) {
-        Report existing = findByGuid(report.getGuid());
-        if (existing != null) {
-            throw new RuntimeException(String.format("Report with guid %s already exists", report.getGuid()));
-        }
-
-        initialize(report);
-        getDao().create(report);
+        internalCreate(report);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void createOrUpdate(Report report) {
-        Report existing = findByGuid(report.getGuid());
+        Report existing = findByName(report.getName());
         if (existing != null) {
             delete(existing);
         }
-
-        initialize(report);
-        if (existing != null) {
-            report.setGuid(existing.getGuid());
-        }
-        getDao().create(report);
+        internalCreate(report);
     }
 
     private void initialize(Report report) {
         Tenant tenant = tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
         report.setPid(null);
-        report.setGuid(UUID.randomUUID().toString());
         report.setTenant(tenant);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Report> findAll() {
+        return super.findAll();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Report> getAll() {
+        return super.findAll();
+    }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void delete(Report report) {
+        KeyValue kv = report.getJson();
+        super.delete(report);
+        keyValueDao.delete(kv);
+        
+    }
+
 }

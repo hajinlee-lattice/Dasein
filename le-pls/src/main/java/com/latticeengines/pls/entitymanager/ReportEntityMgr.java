@@ -1,9 +1,9 @@
 package com.latticeengines.pls.entitymanager;
 
 
-import com.latticeengines.domain.exposed.pls.Report;
-
 import java.util.List;
+
+import com.latticeengines.domain.exposed.pls.Report;
 
 public interface ReportEntityMgr {
 
@@ -11,9 +11,11 @@ public interface ReportEntityMgr {
 
     void createOrUpdate(Report entity);
 
-    Report findByGuid(String guid);
+    Report findByName(String name);
 
     List<Report> findAll();
 
     void delete(Report report);
+
+    List<Report> getAll();
 }
