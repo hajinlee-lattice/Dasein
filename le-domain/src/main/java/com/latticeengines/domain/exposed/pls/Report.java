@@ -12,23 +12,30 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "REPORT")
+@Table(name = "REPORT", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class Report implements HasPid, HasTenant, HasAuditingFields {
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+public class Report implements HasPid, HasName, HasTenant, HasTenantId, HasAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,35 +45,41 @@ public class Report implements HasPid, HasTenant, HasAuditingFields {
     private Long pid;
 
     @Column(name = "PURPOSE", nullable = false)
-    @JsonProperty
+    @JsonProperty("purpose")
     private String purpose;
 
     @JsonIgnore
     @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
-    @JoinColumn(name = "TENANT_ID", nullable = false)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @Column(name = "GUID", length = 128, nullable = false)
-    @JsonProperty
-    private String guid;
-
-    @Column(name = "JSON", length = 16384)
-    @JsonProperty
-    private String json;
+    @Column(name = "NAME", length = 255, nullable = false)
+    @JsonProperty("name")
+    private String name;
 
     @Column(name = "IS_OUT_OF_DATE", nullable = false)
-    @JsonProperty
-    private boolean isOutOfDate;
+    @JsonProperty("is_out_of_date")
+    private Boolean isOutOfDate = false;
 
     @Column(name = "UPDATED", nullable = false)
-    @JsonProperty
+    @JsonProperty("updated")
     private Date updated;
 
     @Column(name = "CREATED", nullable = false)
-    @JsonProperty
+    @JsonProperty("created")
     private Date created;
-
+    
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "FK_KEY_VALUE_ID", nullable = false)
+    @JsonProperty("json")
+    private KeyValue json;
+    
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
+    private Long tenantId;
+    
     public String getPurpose() {
         return purpose;
     }
@@ -75,23 +88,17 @@ public class Report implements HasPid, HasTenant, HasAuditingFields {
         this.purpose = purpose;
     }
 
-    public String getGuid() {
-        return guid;
+    @Override
+    public String getName() {
+        return name;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getJson() {
-        return json;
-    }
-
-    public void setJson(String json) {
-        this.json = json;
-    }
-
-    public boolean isOutOfDate() {
+    public boolean getIsOutOfDate() {
         return isOutOfDate;
     }
 
@@ -112,6 +119,9 @@ public class Report implements HasPid, HasTenant, HasAuditingFields {
     @Override
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
     }
 
     @Override
@@ -137,5 +147,35 @@ public class Report implements HasPid, HasTenant, HasAuditingFields {
     @Override
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public KeyValue getJson() {
+        return json;
+    }
+
+    public void setJson(KeyValue json) {
+        this.json = json;
+        if (json != null) {
+            if (tenant != null) {
+                json.setTenantId(tenant.getPid());
+            }
+            
+            json.setOwnerType(Report.class.getSimpleName());
+        }
+    }
+
+    @Override
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    @Override
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }

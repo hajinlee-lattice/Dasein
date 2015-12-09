@@ -18,6 +18,7 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 @Entity
 @Table(name = "KEY_VALUE")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class KeyValue implements HasTenantId, HasPid {
 
     private static final Log log = LogFactory.getLog(KeyValue.class);
