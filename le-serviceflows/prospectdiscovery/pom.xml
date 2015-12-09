@@ -7,8 +7,10 @@
     <name>le-serviceflows-${component-name}</name>
 
     <properties>
-        <le.serviceflows.core.version>2.0.17-SNAPSHOT</le.serviceflows.core.version>
         <le.dataflow.version>2.0.17-SNAPSHOT</le.dataflow.version>
+        <le.domain.version>2.0.17-SNAPSHOT</le.domain.version>
+        <le.serviceflows.core.version>2.0.17-SNAPSHOT</le.serviceflows.core.version>
+        <le.workflow.version>2.0.17-SNAPSHOT</le.workflow.version>
         <component-name>prospectdiscovery</component-name>
     </properties>
 
