@@ -147,4 +147,76 @@ angular.module('mainApp.setup.services.MetadataService', [
 
         return deferred.promise;
     };
+
+    this.IsBuildModelGroupRunning = function () {
+        var deferred = $q.defer();
+
+        var groupName = 'CreateAnalyticPlay';
+        $http({
+            method: 'GET',
+            url: '/pls/vdbmetadata/runninggroups/' + groupName + '?' + new Date().getTime(),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .success(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: null
+            };
+            if (data.Success) {
+                result.Success = true;
+                result.ResultObj = data.Result;
+            } else {
+                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_BUILD_MODEL_GROUP_RUNNING_ERROR');
+            }
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_BUILD_MODEL_GROUP_RUNNING_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
+    this.BuildModel = function () {
+        var deferred = $q.defer();
+
+        var groupName = 'CreateAnalyticPlay';
+        $http({
+            method: 'POST',
+            url: '/pls/vdbmetadata/executegroup/' + groupName,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .success(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: null
+            };
+            if (data.Success) {
+                result.Success = true;
+                result.ResultObj = data.Result;
+            } else {
+                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_ERROR');
+            }
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 });

@@ -500,6 +500,17 @@ var ManageFields = function() {
         });
     };
 
+    this.testBuildModel = function() {
+        var buildModel = element(by.id('manage-fields-build-model'));
+        helper.elementExists(buildModel, true);
+        var buildModelSpin = element(by.id('manage-fields-build-model-spin'));
+        buildModelSpin.isDisplayed().then(function (displayed) {
+            buildModel.getAttribute('class').then(function (classes) {
+                expect(classes.split(' ').indexOf('disabled') > -1).toBe(displayed);
+            });
+        });
+    };
+
     function sortColumnDesc(table, columnIndex) {
         var ths = table.element(by.tagName("thead")).all(by.tagName("th"));
         ths.get(columnIndex).click();
@@ -521,7 +532,7 @@ var ManageFields = function() {
 
     function clickSaveFieldsButton() {
         element(by.id("manage-fields-save")).click();
-        sleep(22000);
+        sleep(25000);
     }
 
     function clickEditFieldLink(grid, fieldName) {
@@ -533,7 +544,7 @@ var ManageFields = function() {
 
     function clickSaveFieldButton() {
         element(by.id("edit-field-save")).click();
-        sleep(22000);
+        sleep(25000);
     }
 
     function sleep(ms) {

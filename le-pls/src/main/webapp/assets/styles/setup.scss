@@ -54,9 +54,27 @@
   max-width: 580px;
 }
 
-#setup .manage-fields .title button {
-  margin: 10px 0 0 20px;
+#setup .manage-fields .title .button-area {
   float: right;
+  margin-top: 10px;
+}
+
+#setup .manage-fields .title .button-area button {
+  margin: 0 16px 0 0;
+}
+
+#setup .manage-fields .title .button-area button.disabled {
+  background: #999;
+  border: 1px solid #999;
+}
+
+#setup .manage-fields .title #manage-fields-build-model {
+  margin-right: 4px;
+}
+
+#setup .manage-fields .fa-spin {
+  -webkit-animation: fa-spin 1.4s infinite linear;
+  animation: fa-spin 1.4s infinite linear;
 }
 
 #setup .manage-fields .form-group .form-control {

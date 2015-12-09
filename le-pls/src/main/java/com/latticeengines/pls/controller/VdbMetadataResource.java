@@ -117,4 +117,41 @@ public class VdbMetadataResource {
         }
     }
 
+    @RequestMapping(value = "/runninggroups/{groupName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get a value specifying load group is running or not")
+    public ResponseDocument<Boolean> isLoadGroupRunning(@PathVariable String groupName, HttpServletRequest request) {
+        ResponseDocument<Boolean> response = new ResponseDocument<>();
+        try
+        {
+            Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+            boolean running = vdbMetadataService.isLoadGroupRunning(tenant, groupName);
+
+            response.setSuccess(true);
+            response.setResult(running);
+        } catch (Exception ex) {
+            response.setSuccess(false);
+            response.setErrors(Arrays.asList(ex.getMessage()));
+        }
+
+        return response;
+    }
+
+    @RequestMapping(value = "/executegroup/{groupName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Execute load group")
+    public SimpleBooleanResponse executeLoadGroup(@PathVariable String groupName, HttpServletRequest request) {
+        try
+        {
+            Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+            vdbMetadataService.executeLoadGroup(tenant, groupName);
+
+            return SimpleBooleanResponse.successResponse();
+        } catch (LedpException e) {
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
+        } catch (Exception e) {
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
+                    .getFullStackTrace(e)));
+        }
+    }
 }

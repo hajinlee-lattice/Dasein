@@ -20,6 +20,7 @@ import com.latticeengines.liaison.exposed.service.QueryColumn;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.service.VdbMetadataService;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 @Component("vdbMetadataService")
 public class VdbMetadataServiceImpl implements VdbMetadataService {
@@ -29,6 +30,9 @@ public class VdbMetadataServiceImpl implements VdbMetadataService {
 
     @Autowired
     private ConnectionMgrFactory connectionMgrFactory;
+
+    @Autowired
+    private DataLoaderService dataLoaderService;
 
     @Override
     public List<VdbMetadataField> getFields(Tenant tenant) {
@@ -194,4 +198,25 @@ public class VdbMetadataServiceImpl implements VdbMetadataService {
         return metadata;
     }
 
+    @Override
+    public boolean isLoadGroupRunning(Tenant tenant, String groupName) {
+        try {
+            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
+            return dataLoaderService.isLoadGroupRunning(tenantName, groupName, dlUrl);
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_18071, ex, new String[] { groupName, ex.getMessage() });
+        }
+    }
+
+    @Override
+    public void executeLoadGroup(Tenant tenant, String groupName) {
+        try {
+            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
+            dataLoaderService.executeLoadGroup(tenantName, groupName, dlUrl);
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_18072, ex, new String[] { groupName, ex.getMessage() });
+        }
+    }
 }

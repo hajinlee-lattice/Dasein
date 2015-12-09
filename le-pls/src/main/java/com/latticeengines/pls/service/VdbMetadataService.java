@@ -14,4 +14,8 @@ public interface VdbMetadataService {
     void UpdateField(Tenant tenant, VdbMetadataField field);
 
     void UpdateFields(Tenant tenant, List<VdbMetadataField> fields);
+
+    boolean isLoadGroupRunning(Tenant tenant, String groupName);
+
+    void executeLoadGroup(Tenant tenant, String groupName);
 }

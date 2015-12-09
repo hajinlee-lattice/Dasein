@@ -101,7 +101,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
         CustomerSpace space = CustomerSpace.parse(tenantId);
         String group = getGroupName(step);
         String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
-        long launchId = dataLoaderService.executeLoadGroup(space.getTenantId(), group, deployment.getCreatedBy(), dlUrl);
+        long launchId = dataLoaderService.executeLoadGroup(space.getTenantId(), group, dlUrl);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         DlGroupRunnable runnable = new DlGroupRunnable(dlUrl, launchId, dataLoaderService);
@@ -122,6 +122,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
         deployment.setCurrentLaunchId(launchId);
         deployment.setStep(step);
         deployment.setStatus(TenantDeploymentStatus.IN_PROGRESS);
+        deployment.setMessage(null);
         tenantDeploymentService.updateTenantDeployment(deployment);
     }
 
@@ -147,6 +148,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
             }
 
             deployment.setStep(TenantDeploymentStep.VALIDATE_METADATA);
+            deployment.setMessage(null);
             if (missingMetadata) {
                 deployment.setStatus(TenantDeploymentStatus.WARNING);
             } else {
@@ -228,7 +230,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
             String group = getGroupName(step);
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             long launchId = dataLoaderService.getLastFailedLaunchId(space.getTenantId(), group, dlUrl);
-            return dataLoaderService.getLaunchJobs(launchId, dlUrl);
+            return dataLoaderService.getLaunchJobs(launchId, dlUrl, false);
         } catch(Exception e) {
             throw new LedpException(LedpCode.LEDP_18060, e, new String[] { step.toString(), e.getMessage() });
         }

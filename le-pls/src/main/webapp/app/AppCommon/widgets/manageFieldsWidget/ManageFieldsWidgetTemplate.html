@@ -14,12 +14,20 @@
         <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{editFieldsErrorMessage}}</span>
         <button class="close btn btn-link" data-ng-click="showEditFieldsError = false;"><i class="fa fa-times fa-inverse"></i></button>
     </div>
+    <div class="global-error local-error" data-ng-show="showBuildModelError">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{buildModelErrorMessage}}</span>
+        <button class="close btn btn-link" data-ng-click="showBuildModelError = false;"><i class="fa fa-times fa-inverse"></i></button>
+    </div>
     <div data-ng-hide="loading || showFieldDetails || saveInProgress || showLoadingError">
         <div class="title">
             <h2>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</h2>
-            <button id="manage-fields-edit" data-ng-click="editClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">Edit</button>
-            <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">Save</button>
-            <button id="manage-fields-cancel" data-ng-click="cancelClicked($event)" data-ng-show="batchEdit" class="btn btn-secondary">Cancel</button>
+            <div class="button-area">
+                <button id="manage-fields-cancel" data-ng-click="cancelClicked($event)" data-ng-show="batchEdit" class="btn btn-secondary">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+                <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
+                <button id="manage-fields-edit" data-ng-click="editClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_EDIT_LABEL')}}</button>
+                <button id="manage-fields-build-model" data-ng-click="buildModelClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary" data-ng-class="{'disabled': !buildModelEnable}">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_LABEL')}}</button>
+                <i id="manage-fields-build-model-spin" data-ng-show="!batchEdit && !buildModelEnable" class="fa fa-refresh fa-spin"></i>
+            </div>
         </div>
         <div data-ng-hide="batchEdit">
             <div class="form-group">

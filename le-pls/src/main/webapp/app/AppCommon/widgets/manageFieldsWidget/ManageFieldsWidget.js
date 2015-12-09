@@ -13,6 +13,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
     $scope.showFieldDetails = false;
+    $scope.buildModelEnable = false;
     $scope.fieldAttributes = [];
 
     getOptionsAndFields();
@@ -50,6 +51,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                         $scope.fieldAttributes.push(attr);
                     }
                 }
+
+                initBuildModel();
             } else {
                 $scope.showLoadingError = true;
                 $scope.loadingError = result.ResultErrors;
@@ -83,8 +86,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             if (state.page > 1 || state.sort != null || state.filter != null) {
                 grid.dataSource.query(state);
             }
-
-            $scope.loading = false;
         } else {
             var pageSize = fields.length;
             if (pageSize > 50) {
@@ -160,9 +161,88 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                     }
                 ]
             };
-            $scope.loading = false;
         }
     }
+
+    function initBuildModel() {
+        MetadataService.IsBuildModelGroupRunning().then(function(result) {
+            if (result.Success) {
+                var running = result.ResultObj;
+                $scope.buildModelEnable = !running;
+                if (running) {
+                    startGetBuildModelStatusTimer();
+                }
+            } else {
+                $scope.buildModelErrorMessage = result.ResultErrors;
+                $scope.showBuildModelError = true;
+            }
+            $scope.loading = false;
+        });
+    }
+
+    function startGetBuildModelStatusTimer() {
+        clearBuildModelTimer();
+        $scope.buildModelTimerId = window.setInterval(getBuildModelStatus, 10000);
+    }
+
+    function getBuildModelStatus() {
+        if ($('#manage-fields-build-model').length !== 1) {
+            clearBuildModelTimer();
+            $scope.gettingQueryStatus = false;
+            return;
+        }
+
+        if ($scope.gettingBuildModelStatus === true) {
+            return;
+        }
+        $scope.gettingBuildModelStatus = true;
+        MetadataService.IsBuildModelGroupRunning().then(function(result) {
+            if (result.Success) {
+                var running = result.ResultObj;
+                $scope.buildModelEnable = !running;
+                if (!running) {
+                    clearBuildModelTimer();
+                }
+                $scope.getBuildModelStatusRetries = 0;
+            } else {
+                if ($scope.getBuildModelStatusRetries++ > 10) {
+                    clearBuildModelTimer();
+                    $scope.buildModelErrorMessage = result.ResultErrors;
+                    $scope.showBuildModelError = true;
+                }
+            }
+            $scope.gettingBuildModelStatus = false;
+        });
+    }
+
+    function clearBuildModelTimer() {
+        if ($scope.buildModelTimerId != null) {
+            window.clearInterval($scope.buildModelTimerId);
+            $scope.buildModelTimerId = null;
+        }
+        $scope.getBuildModelStatusRetries = 0;
+    }
+
+    $scope.buildModelClicked = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        if (!$scope.buildModelEnable) {
+            return;
+        }
+        $scope.buildModelEnable = false;
+        $scope.showBuildModelError = false;
+        MetadataService.BuildModel().then(function(result){
+            if (result.Success) {
+                startGetBuildModelStatusTimer();
+            } else {
+                $scope.buildModelEnable = true;
+                $scope.buildModelErrorMessage = result.ResultErrors;
+                $scope.showBuildModelError = true;
+            }
+        });
+    };
 
     $scope.categoryEditable = function(dataItem) {
         return ManageFieldsService.CategoryEditable(dataItem);

@@ -77,6 +77,7 @@ public class TenantDeploymentServiceImpl implements TenantDeploymentService {
         deploymentFromDb.setStatus(tenantDeployment.getStatus());
         deploymentFromDb.setCurrentLaunchId(tenantDeployment.getCurrentLaunchId());
         deploymentFromDb.setModelId(tenantDeployment.getModelId());
+        deploymentFromDb.setMessage(tenantDeployment.getMessage());
         tenantDeploymentEntityMgr.update(deploymentFromDb);
     }
 

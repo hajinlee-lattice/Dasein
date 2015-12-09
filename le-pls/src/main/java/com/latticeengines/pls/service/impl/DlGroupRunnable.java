@@ -41,7 +41,7 @@ public class DlGroupRunnable implements Runnable {
 
             LaunchJobsResult result;
             while (true) {
-                result = dataLoaderService.getLaunchJobs(launchId, dlUrl);
+                result = dataLoaderService.getLaunchJobs(launchId, dlUrl, true);
                 if (result.getLaunchStatus() == JobStatus.SUCCESS || 
                         result.getLaunchStatus() == JobStatus.FAIL) {
                     break;

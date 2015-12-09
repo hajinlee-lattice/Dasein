@@ -19,16 +19,16 @@
                 <span data-ng-show="importCompleteTime != null" class="link-area large">
                     <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/profilesummarycsv" filename="DataProfileSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_IMPORT_DATA}}" data-ng-class="{'disabled' : deployment.Status === SetupUtility.STATUS_IN_PROGRESS}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_PROFILE_SUMMARY_CSV')}}</span></a>
                 </span>
-                <span data-ng-show="getImportCompleteTimeError != null" class="link-area">{{getImportCompleteTimeError}}</span>
+                <span data-ng-show="getImportCompleteTimeError != null" class="link-area"><i class="fa fa-exclamation-circle"></i>&nbsp;{{getImportCompleteTimeError}}</span>
             </div>
             <div data-ng-if="showImportError">
                 <span><i class="fa fa-times-circle red"></i>{{ResourceUtility.getString('SETUP_ERROR_IMPORTING_DATA_LABEL')}}</span>
                 <span class="link-area"><a href="#" data-ng-click="retryImportDataClicked($event)">{{ResourceUtility.getString('BUTTON_RETRY_LABEL')}}</a></span>
             </div>
+            <div data-ng-show="getObjectsError != null" class="objects">
+                <span><i class="fa fa-exclamation-circle"></i>&nbsp;{{getObjectsError}}</span>
+            </div>
             <div data-ng-show="tables != null" class="objects">
-                <div data-ng-show="getObjectsError != null">
-                    <span><i class="fa fa-times-circle red"></i>{{getObjectsError}}</span>
-                </div>
                 <div class="title">{{ResourceUtility.getString('SETUP_OBJECTS_TITLE')}}</div>
                 <div data-ng-repeat="table in tables">
                     <span class="name">{{table.name}}</span>
@@ -48,7 +48,7 @@
                 <span data-ng-show="enrichCompleteTime != null" class="link-area large">
                     <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/enrichmentsummarycsv" filename="DataEnrichmentSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_ENRICH_DATA}}" data-ng-class="{'disabled' : deployment.Status === SetupUtility.STATUS_IN_PROGRESS}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_ENRICHMENT_SUMMARY_CSV')}}</span></a>
                 </span>
-                <span data-ng-show="getEnrichCompleteTimeError != null" class="link-area">{{getEnrichCompleteTimeError}}</span>
+                <span data-ng-show="getEnrichCompleteTimeError != null" class="link-area"><i class="fa fa-exclamation-circle"></i>&nbsp;{{getEnrichCompleteTimeError}}</span>
             </div>
             <div data-ng-if="showEnrichError">
                 <span><i class="fa fa-times-circle red"></i>{{ResourceUtility.getString('SETUP_ERROR_ENRICHING_DATA_LABEL')}}</span>

@@ -29,6 +29,24 @@ describe('manage fields tests', function () {
         loginPage.logout();
     });
 
+    it('should validate that you can build model', function () {
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Filter Fields
+        //==================================================
+        userDropdown.toggleDropdown();
+        browser.waitForAngular();
+        userDropdown.SetupLink.isPresent().then(function (present){
+            if (present) {
+                clickSetupLink();
+                manageFields.testBuildModel();
+            }
+        });
+
+        loginPage.logout();
+    });
+
     it('should validate that you can filter fields', function () {
         loginPage.loginAsSuperAdmin();
 
@@ -239,7 +257,7 @@ describe('manage fields tests', function () {
     function clickSetupLink() {
         userDropdown.SetupLink.click();
         browser.waitForAngular();
-        browser.driver.sleep(12000);
+        browser.driver.sleep(15000);
     }
 
 });
