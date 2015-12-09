@@ -13,7 +13,7 @@ except Exception,e:
 	from selenium import webdriver
 class SalePrismEnvironments(object):
     "parser that read configuration properties from config.ini file"
-    with open(".\\PlaymakerEnd2End\\config.ini") as configFile:
+    with open("..\\config.ini") as configFile:
         paras = json.load(configFile)
     # properties definition in config.ini
     withModelingOnDataPlatform=paras.get("withModelingOnDataPlatform")
@@ -29,8 +29,6 @@ class SalePrismEnvironments(object):
     SPUser=paras.get("SPUser")
     resetUrl=paras.get("resetUrl")
     SPPwd=paras.get("SPPwd")
-    DBUser=paras.get("DBUser")
-    DBPwd=paras.get("DBPwd")
     tenantUrl=paras.get("tenantUrl")
     dante_Server='https://'+host+'/DT_'+tenantName
     jdbc='jdbc:sqlserver://'+host+'\\SQL2012STD;databaseName='+tenantName
@@ -48,9 +46,21 @@ class SalePrismEnvironments(object):
     getLaunchStatusUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/GetPlayDetailsWithHeader?playID="
     getPortfililPlaysUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/GetPortfolioPlays?queryName=AllPortfolioPlays"
     launchPlaysUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/LaunchPlays?simulate=false&queryName=AllPortfolioPlays"
+    dataloaderDBUrl=paras.get("dataloaderDBUrl")
+    dataloaderDBUser=paras.get("dataloaderDBUser")
+    dataloaderDBPassword=paras.get("dataloaderDBPassword")
+    dataloaderDBName=paras.get("dataloaderDBName")
+    JAMSDBUrl=paras.get("JAMSDBUrl")
+    JAMSDBName=paras.get("JAMSDBName")
+    JAMSDBUser=paras.get("JAMSDBUser")
+    JAMSDBPassword=paras.get("JAMSDBPassword")
+    tenantDBUser=paras.get("tenantDBUser")
+    tenantDBPassword=paras.get("tenantDBPassword")
     #configuration in Properties
     log=LogFactory.getLog("End2End",True)
     OTK=getOneTimeKey(tenantName,jdbc)
+    ODBCSqlServer="{SQL SERVER}"
+    tenantDBUrl=host
     #webdriver
     driverType=paras.get("driverType")
     def __init__(self):

@@ -20,7 +20,7 @@ log=SalePrismEnvironments.log
 class DataloaderDealer(object):
 	def __init__(self):
 		self.headers={"MagicAuthentication":"Security through obscurity!","Accept":"application/json;","Content-Type":"application/json; charset=utf-8;"}
-	def setTenantDataProviderByREST(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,dbUser=SalePrismEnvironments.DBUser,dbPwd=SalePrismEnvironments.DBPwd):
+	def setTenantDataProviderByREST(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,dbUser=SalePrismEnvironments.tenantDBUser,dbPwd=SalePrismEnvironments.tenantDBPassword):
 		log.info("##########  dataloader configuration start   ##########")
 		RESTurl=SalePrismEnvironments.dataloaderUpdateRESTURL
 		AnalyticsDBJson={"tenantName": tenant,"dataProviderName": "AnalyticsDB","dataSourceType": "SQL","values": [{"Key": "ServerName","Value": host},{"Key": "Authentication","Value": "SQL Server Authentication"},{"Key": "User","Value": dbUser},{"Key": "Password","Value": dbPwd},{"Key": "Database","Value": tenant},{"Key": "Schema","Value": "dbo"}]}
@@ -50,7 +50,8 @@ class DataloaderDealer(object):
 	def isDanteGroupFinishSuccessfully(self,tenant=SalePrismEnvironments.tenantName,timePoint=None):
 		assert timePoint!=None
 		sql="SELECT LaunchId,CreateTime FROM Launches where tenantid=(SELECT TenantId FROM Tenant where name='"+tenant+"') and GroupName='Full_Dante_Data_Flow' and createtime>'"+timePoint+"'"
-		result=DealDB.fetchResultOfSelect(SQL=sql,SERVER="10.41.1.193\SQL2012STD",DATABASE="DataLoader",fetchAll=False)
+		result=DealDB.fetchResultOfSelect(SQL=sql,SERVER=SalePrismEnvironments.dataloaderDBUrl,DATABASE=SalePrismEnvironments.dataloaderDBName,UID=SalePrismEnvironments.dataloaderDBUser,PWD=SalePrismEnvironments.dataloaderDBPassword,fetchAll=False)
+		assert result!=None
 		launchId=result[0]
 		assert launchId !=None
 		log.info("The running FULL_DANTE_DATA_FLOW ID is %s "%launchId)

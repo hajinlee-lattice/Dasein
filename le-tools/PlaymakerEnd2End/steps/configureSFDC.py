@@ -66,7 +66,7 @@ class DealSFDC(object):
 		self.driver.find_element_by_xpath("//label[text()='Customer ID:']//parent::div//child::input").clear()
 		self.driver.find_element_by_xpath("//label[text()='Customer ID:']//parent::div//child::input").send_keys(tenant)
 		self.driver.find_element_by_xpath("//label[text()='Token:']//parent::div//child::input").clear()
-		print SalePrismEnvironments.OTK
+		log.info("The OTK is %s"%SalePrismEnvironments.OTK)
 		self.driver.find_element_by_xpath("//label[text()='Token:']//parent::div//child::input").send_keys(SalePrismEnvironments.OTK)
 		time.sleep(5)
 		self.driver.find_element_by_xpath("//input[@value='Connect']").click()

@@ -11,6 +11,7 @@ from PlaymakerEnd2End.steps.configureDataloader import DataloaderDealer
 from PlaymakerEnd2End.steps.configureSFDC  import DealSFDC
 from PlaymakerEnd2End.steps.dealPlay  import DealPlay
 from PlaymakerEnd2End.tools.DBHelper import DealDB
+from PlaymakerEnd2End.steps.dealPlay import PlayTypes
 log=SalePrismEnvironments.log
 
 """
@@ -54,7 +55,7 @@ class DifferentScenario(object):
 playLaunchTime=None
 """
 class TestSteps(unittest.TestCase):
-	def test_SimpleDataFlowPlaymakerPart(self):
+	def test_SimpleDataFlow(self):
 		playDealer=DealPlay()
 		createPlayResult=playDealer.createPlayByREST()#create a play
 		playId=createPlayResult["playId"]
@@ -66,12 +67,12 @@ class TestSteps(unittest.TestCase):
 			time.sleep(20)
 			status=playDealer.getStatusOfPlay(idOfPlay=playId)
 		selectSQL="SELECT  PreLead_ID  FROM PreLead where Status=1000 and Play_ID=%s"%playId
-		numberOfRecommendations=len(DealDB.fetchResultOfSelect(selectSQL,fetchAll=True))
+		numberOfRecommendations=len(DealDB.fetchResultOfSelect(SQL=selectSQL,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
 		log.info("This play generated %s recommendations "%numberOfRecommendations)
 		playLaunchTime=playDealer.launchPlay(nameOfPlayToLaunch=playName)#launch play
 		time.sleep(10)
-		numberOf2800=len(DealDB.fetchResultOfSelect(SQL="SELECT  PreLead_ID  FROM PreLead where Status=2800 and Play_ID=%s"%playId,fetchAll=True))
-		print "numberOf2800 is %s"%numberOf2800
+		numberOf2800=len(DealDB.fetchResultOfSelect(SQL="SELECT  PreLead_ID  FROM PreLead where Status=2800 and Play_ID=%s"%playId,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
+		log.info("numberOf2800 is %s"%numberOf2800)
 		assert numberOf2800==numberOfRecommendations
 		dlDealer=DataloaderDealer()
 		sfdcDealer=DealSFDC()
@@ -83,5 +84,50 @@ class TestSteps(unittest.TestCase):
 		sfdcDealer.syncData()
 		sfdcDealer.checkRecommendations(playName)
 		sfdcDealer.quit()
+
+	def test_CreateAllTypeOfPlays(self):
+		playDealer=DealPlay()
+		numberOfRecommendations=0
+		playIdList=[]
+		playNameList=[]
+		#create all play
+		for playType in PlayTypes.t_allTypes:
+			createPlayResult=playDealer.createPlayByREST(playType=playType)#create a play
+			playId=createPlayResult["playId"]
+			assert playId!=None
+			playIdList.append(playId)
+			playName=createPlayResult["playName"]
+			assert playName!=None
+			playNameList.append(playName)
+			playDealer.approvePlay(idOfPlay=playId)#approve a play
+			if playType != "LatticeGenerates":
+				playDealer.scorePlay(idOfPlay=playId)#do score
+				status=None
+				while status != 'Complete':#until score finish
+					time.sleep(20)
+					status=playDealer.getStatusOfPlay(idOfPlay=playId)
+			selectSQL="SELECT  PreLead_ID  FROM PreLead where Status=1000 and Play_ID=%s"%playId
+			numberOfRecommendations=numberOfRecommendations+len(DealDB.fetchResultOfSelect(SQL=selectSQL,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
+		log.info("This play generated %s recommendations "%numberOfRecommendations)
+		playLaunchTime=playDealer.launchPlay(launchAllPlays=True)#launch all play
+		time.sleep(10)
+		numberOf2800=0
+		for playId in playIdList:
+			numberOf2800=numberOf2800+len(DealDB.fetchResultOfSelect(SQL="SELECT  PreLead_ID  FROM PreLead where Status=2800 and Play_ID=%s"%playId,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
+		print "numberOf2800 is %s"%numberOf2800
+		#assert numberOf2800==numberOfRecommendations
+		dlDealer=DataloaderDealer()
+		sfdcDealer=DealSFDC()
+		sfdcDealer.loginSF()
+		sfdcDealer.resetSFDC()
+		sfdcDealer.configDanteServer()
+		sfdcDealer.configOTK()
+		#assert dlDealer.isDanteGroupFinishSuccessfully(timePoint=playLaunchTime)
+		sfdcDealer.syncData()
+		assert playNameList!=None
+		for name in playNameList:
+			sfdcDealer.checkRecommendations(name)
+		sfdcDealer.quit()
+
 if __name__ == '__main__':
 	unittest.main()

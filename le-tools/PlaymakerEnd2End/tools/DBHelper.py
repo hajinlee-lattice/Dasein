@@ -8,8 +8,8 @@ except  ImportError:
     import pyodbc
 class DealDB(object):
     @classmethod
-    def fetchResultOfSelect(cls,SQL,fetchAll=False,DRIVER='{SQL SERVER}',SERVER=SalePrismEnvironments.host,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.DBUser,PWD=SalePrismEnvironments.DBPwd):
-        conn = pyodbc.connect(DRIVER=DRIVER,SERVER=SERVER,DATABASE=DATABASE,UID=UID,PWD=PWD)
+    def fetchResultOfSelect(cls,SQL,SERVER,DATABASE,UID,PWD,fetchAll=False,DRIVER=SalePrismEnvironments.ODBCSqlServer):
+        conn = pyodbc.connect(DRIVER=DRIVER,SERVER=SERVER+"\\SQL2012STD",DATABASE=DATABASE,UID=UID,PWD=PWD)
         cur = conn.cursor()
         assert cur != None
         cur.execute(SQL)
@@ -22,6 +22,4 @@ class DealDB(object):
 
 
 if __name__ == "__main__":
-    sql="SELECT LaunchId,CreateTime FROM Launches where tenantid=(SELECT TenantId FROM Tenant where name='20151125205352345') and GroupName='Full_Dante_Data_Flow' "
-    a= DealDB.fetchResultOfSelect(SQL=sql,SERVER="10.41.1.193\SQL2012STD",DATABASE="DataLoader",fetchAll=False)
-    print a[0]
+    pass

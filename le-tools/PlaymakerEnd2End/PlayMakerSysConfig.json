@@ -3,7 +3,7 @@
 	"AppConfig.System.LEApiTokenOauthApiUrl":"http://testapi.lattice-engines.com:8080",
 	"AppConfig.System.LEApiTokenOauthJDBCPassword":"playmaker",
 	"AppConfig.System.LEApiTokenOauthJDBCUserName":"playmaker",
-	"AppConfig.System.DataLoaderLaunchLoadGroupEnable":"",
+	"AppConfig.System.DataLoaderLaunchLoadGroupEnable":"TRUE",
 	"AppConfig.System.DataLoaderRestURL":"http://bodcdevvint207.dev.lattice.local:8081/",
 	"AppConfig.System.DataLoaderUserID":"richard.liu@lattice-engines.com",
 	"AppConfig.System.DataLoaderTenantName":"tenant",

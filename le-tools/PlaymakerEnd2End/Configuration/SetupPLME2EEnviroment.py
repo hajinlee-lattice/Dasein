@@ -3,7 +3,6 @@ from PlaymakerEnd2End.steps.updateAccount import updateTenantAccount
 from PlaymakerEnd2End.steps.configureDataloader import DataloaderDealer
 from PlaymakerEnd2End.steps.configureJAMS  import update247DB
 from PlaymakerEnd2End.steps.dealPlay  import DealPlay
-
 def setUpEnvironments():
     playDealer=DealPlay()
     dlDealer=DataloaderDealer()

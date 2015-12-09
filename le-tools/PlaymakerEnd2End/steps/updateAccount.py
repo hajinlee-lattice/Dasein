@@ -11,11 +11,11 @@ except Exception,e:
 import json
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 log=SalePrismEnvironments.log
-def updateTenantAccount(tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,user=SalePrismEnvironments.DBUser,pwd=SalePrismEnvironments.DBPwd):
+def updateTenantAccount(tenant=SalePrismEnvironments.tenantName):
 	log.info("##########  Account Match process starts   ##########")
-	with open('.\\PlaymakerEnd2End\\AccountJson.json') as jsonData:
+	with open('..\\AccountJson.json') as jsonData:
 		data=json.load(jsonData)
-	conn = pyodbc.connect(DRIVER='{SQL SERVER}',SERVER=host,DATABASE=tenant,UID=user,PWD=pwd)
+	conn = pyodbc.connect(DRIVER=SalePrismEnvironments.ODBCSqlServer,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=tenant,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword)
 	cur = conn.cursor()
 	assert cur!=None
 	keys=data.keys()

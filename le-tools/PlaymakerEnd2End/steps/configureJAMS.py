@@ -16,7 +16,7 @@ def update247DB(tenant=SalePrismEnvironments.tenantName,qname=SalePrismEnvironme
 	updateDQName = "update Tenants set Dante_Queue_Name='"+qname+"' where Tenant = '"+tenant+"'"
 	conn=None
 	try:
-		conn = pyodbc.connect(DRIVER='{SQL SERVER}',SERVER='10.41.1.247',DATABASE='JAMSCFG',UID=SalePrismEnvironments.DBUser,PWD=SalePrismEnvironments.DBPwd)
+		conn = pyodbc.connect(DRIVER=SalePrismEnvironments.ODBCSqlServer,SERVER=SalePrismEnvironments.JAMSDBUrl,DATABASE=SalePrismEnvironments.JAMSDBName,UID=SalePrismEnvironments.JAMSDBUser,PWD=SalePrismEnvironments.JAMSDBPassword)
 		cur = conn.cursor()
 		assert cur != None
 		cur.execute(updateQName)

@@ -18,6 +18,7 @@ from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 from PlaymakerEnd2End.tools.DBHelper import DealDB
 log=SalePrismEnvironments.log
 class PlayTypes(object):
+	t_allTypes=['AnalyticList','CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','List','RuleBased','Winback']
 	t_AnalyticList='AnalyticList'
 	t_CSRepeatPurchase='CSRepeatPurchase'
 	t_CSFirstPurchase='CSFirstPurchase'
@@ -45,9 +46,9 @@ class DealPlay(object):
 		assert self.aspAuth!=None
 	def setPlaymakerConfigurationByRest(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,useDataPlatform=SalePrismEnvironments.withModelingOnDataPlatform):
 		log.info("##########  playmaker system configuration start   ##########")
-		with open('.\\PlaymakerEnd2End\\SysConfig.json') as jsonData:
+		with open('..\\PlayMakerSysConfig.json') as jsonData:
 			sysConfigJson=json.load(jsonData)
-		conn = pyodbc.connect(DRIVER='{SQL SERVER}',SERVER=host,DATABASE=tenant,UID=SalePrismEnvironments.DBUser,PWD=SalePrismEnvironments.DBPwd)
+		conn = pyodbc.connect(DRIVER=SalePrismEnvironments.ODBCSqlServer,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=tenant,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword)
 		cur = conn.cursor()
 		assert cur!=None
 		keys=sysConfigJson.keys()
@@ -87,13 +88,13 @@ class DealPlay(object):
 		log.info("reset cache successfully")
 	def createPlayByREST(self,UseEVModel=False,playType=SalePrismEnvironments.playType):
 		log.info("##########  play creation starts   ##########")
-		playName=playType+str(time.time()).replace('.','')
+		playName=playType+repr(time.time()).replace('.','')
 		time.sleep(1)
-		playExternalId=playName+"_"+str(time.time()).replace('.','')
+		playExternalId=playName+"_"+repr(time.time()).replace('.','')
 		log.info("The play type is: %s" % (playType))
 		#Prepare the list for anlytics play type
 		AnlyticPlayList=[PlayTypes.t_CSFirstPurchase,PlayTypes.t_AnalyticList,PlayTypes.t_CSRepeatPurchase,PlayTypes.t_Winback]
-		with open(".\\PlaymakerEnd2End\\PlaysCreationJsonFiles\\"+playType+".json") as createPlayJsonFile:
+		with open("..\\PlaysCreationJsonFiles\\"+playType+".json") as createPlayJsonFile:
 			createPlayJson=json.load(createPlayJsonFile)
 		createPlayJson['DisplayName']=playName
 		createPlayJson['ExternalID']=playExternalId
@@ -102,7 +103,7 @@ class DealPlay(object):
 		if len(talkingPointsList)>0:
 			log.info("Modifying Talking Points timestamp")
 			for index in range(0,len(talkingPointsList)):
-				createPlayJson["TalkingPoints"][index]["ExternalID"]=talkingPointsPrefix+str(time.time()).replace('.','')
+				createPlayJson["TalkingPoints"][index]["ExternalID"]=talkingPointsPrefix+repr(time.time()).replace('.','')
 				createPlayJson["TalkingPoints"][index]["PlayExternalID"]=playExternalId
 				time.sleep(1)
 		else:
@@ -114,7 +115,7 @@ class DealPlay(object):
 				createPlayJson=self.enableEVModelInJson(createPlayJson)
 			else:
 				log.info("This play has unchecked Use EV modeling")
-				createPlayJson=self.disableEVModelInJson(createPlayJson)
+				#createPlayJson=self.disableEVModelInJson(createPlayJson)
 		#post create play data
 		savePlayUrl=SalePrismEnvironments.savePlayUrl
 		createPlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"application/json, text/javascript, */*; q=0.01","LEFormsTicket":self.aspAuth,"Content-Type":"application/json; charset=UTF-8","User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host}
@@ -126,7 +127,6 @@ class DealPlay(object):
 		assert int(PlayID)>0
 		log.info("Play created!")
 		log.info("Name of created Play is  "+playName)
-
 		playDict={"playName":playName,"playId":PlayID}
 		return playDict
 	def scorePlay(self,idOfPlay):
@@ -150,7 +150,9 @@ class DealPlay(object):
 		resultJson=json.loads(response.text)
 		status=json.loads(resultJson['CompressedResult'])['CombinedModelScoreStatusID']
 		return status
-	def launchPlay(self,nameOfPlayToLaunch,launchAllPlays=False):
+	def launchPlay(self,nameOfPlayToLaunch=None,launchAllPlays=False):
+		if not launchAllPlays:
+			assert nameOfPlayToLaunch
 		log.info("##########  Play Launch starts   ##########")
 		getPortfililPlaysUrl=SalePrismEnvironments.getPortfililPlaysUrl
 		getPortfililPlaysHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"LEFormsTicket":self.aspAuth,"Origin":"https://"+SalePrismEnvironments.host}
