@@ -23,46 +23,32 @@
     <div id="inner-wrap">
 
 
-        <nav id="nav">
-            <div class="primary-nav">
-                <div class="container row">
-                    <div class="columns three">
-                        <a href="#" class="logo">
-                            <img src="../img/lattice-logo.png" alt="Lattice Logo" />
-                        </a>
-                    </div>
-                    <div class="columns nine">
-                        <ul class="primary-menu">
-                            <li class="active"><a href="#" title="">Fingerprints</a></li>
-                            <li><a href="#" title="">Markets</a></li>
-                            <li><a href="#" title="">Jobs <span class="badge">0</span></a></li>
-                            <li class="dropdown">
-                                <a href="#" title="">superuser</a>
-                                <ul>
-                                    <li><a href="#" title="">Settings</a></li>
-                                    <li><a href="#" title="">Sign Out</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="secondary-nav">
-                <div class="container row">
-                    <div class="columns twelve">
-                        <ul class="secondary-menu">
-                            <li class="active"><a href="#" title="">ROI Dashboard</a></li>
-                            <li><a href="#" title="">Markets</a></li>
-                            <li><a href="#" title="">Prospect Schedule</a></li>
-                            <li><a href="#" title="">Prospect Lists</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        <nav id="nav" role="navigation">
+            <a href="#" class="logo"><img src="../img/lattice-logo.png" alt="Lattice Logo" /></a>
+            <ul class="secondary-menu">
+                <li class="active"><a href="#" title="">ROI Dashboard</a></li>
+                <li><a href="#" title="">Markets</a></li>
+                <li><a href="#" title="">Prospect Schedule</a></li>
+                <li><a href="#" title="">Prospect Lists</a></li>
+            </ul>
         </nav>
 
         <section id="main">
-            <a id="openNav" class="button white-button nav-button" href="#nav">Menu</a>
+            <div class="secondary-nav">
+                <button id="toggleNav" type="button"><span class="fa fa-bars"></span></a>            
+                <ul class="primary-menu">
+                    <li class="active"><a href="#" title="">Fingerprints</a></li>
+                    <li><a href="#" title="">Markets</a></li>
+                    <li><a href="#" title="">Jobs <span class="badge">0</span></a></li>
+                    <li class="dropdown">
+                        <a href="#" title="">superuser</a>
+                        <ul>
+                            <li><a href="#" title="">Settings</a></li>
+                            <li><a href="#" title="">Sign Out</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </button>
 
             <div class="container row">
                 <div class="columns twelve">

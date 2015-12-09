@@ -6,7 +6,12 @@ html {
   box-sizing: inherit;
 }
 
-
+.pull-left {
+  float: left !important;
+}
+.pull-right {
+  float: right !important;
+}
 
 .italic { font-style: italic; }
 .bold   { font-weight: 700; }

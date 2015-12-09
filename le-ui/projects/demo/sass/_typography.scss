@@ -129,6 +129,7 @@ a.emphasized {
 	}
 }
 
+
 /* 
 Lists
 ========================================================= */
@@ -141,20 +142,13 @@ Lists
 .ordered-list { 
 	list-style: decimal; 
 }
-
-.blue-summary-list, .gray-summary-list {
+.summary-list {
 	padding: 20px;
-}
-.blue-summary-list {
-	background: $blue-summary-list;
-	color: $pearl-white;
-}
-	.blue-summary-list .summary-title {
-		color: $pearl-white;
-	}
-.gray-summary-list {
-	background: $palladium;
+	background: rgba(223, 223, 223, 0.6);
 	color: $dark-gray;
+}
+.gray-summary-list {
+	background: $white-gold;
 }
 
 .summary-title {
@@ -163,19 +157,23 @@ Lists
 	text-align: center;
 	margin-bottom: 8px;
 }
-
 .summary-list dt {
-	float: left;
-	clear: left;
-	width: 100px;
+	@include media(">large") {
+		float: left;
+		clear: left;
+		text-align: left;
+		width: 100px;
+	}
 }
 .summary-list dt:after {
 	content: ":";
 }
 .summary-list dd {
-	margin: 0 0 0 110px;
-	padding: 0 0 0.5em 0;
-	text-align: right;
+	@include media(">medium") {
+		margin: 0 0 0 110px;
+		padding: 0 0 0.5em 0;
+		text-align: right;
+	}
 }
 
 
