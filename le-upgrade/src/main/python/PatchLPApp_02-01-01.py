@@ -22,7 +22,7 @@ print ''
 sequence = []
 sequence.append( appsequence.LPCheckVersion('2.1.0') )
 sequence.append( lp020101.LP_020101_PushLeadsLastScoredToDestination() )
-#sequence.append( appsequence.LPSetVersion('2.1.1') )
+sequence.append( appsequence.LPSetVersion('2.1.1') )
 
 app = appsequence.AppSequence( tenantFileName, resultsFileName, sequence, checkOnly )
 app.execute()

@@ -56,17 +56,22 @@ class LPCheckVersion( StepBase ):
     appseq.setText( 'template_version', version )
     appseq.setText( 'template_version_spec_defn', defn )
 
-    if not lgm.hasLoadGroup('PushToLeadDestination_Step1'):
-      return Applicability.cannotApplyFail
+    if version < 2.1:
+      if not lgm.hasLoadGroup('PushToLeadDestination_Step1'):
+        return Applicability.cannotApplyFail
 
-    if type in ('MKTO', 'ELQ'):
-      ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
-    else:
-      ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step2', 'targetQueries')
+      if type in ('MKTO', 'ELQ'):
+        ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
+      else:
+        ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step2', 'targetQueries')
 
-    appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type) )
-    appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type) )
-    appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
+      try:
+        appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type) )
+        appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type) )
+        appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
+      except ValueError:
+        print "Get the score/scoreDate Field failed"
+        return Applicability.cannotApplyFail
 
     if version == self._template_version:
       return Applicability.canApply
