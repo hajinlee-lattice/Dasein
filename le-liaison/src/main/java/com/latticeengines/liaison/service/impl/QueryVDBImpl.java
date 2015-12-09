@@ -29,14 +29,25 @@ public class QueryVDBImpl extends Query {
 	);
 	
 	private static final Pattern pattern_slq = Pattern.compile("^SpecLatticeQuery\\((LatticeAddressSet.*), SpecQueryNamedFunctions\\((.*)\\), (SpecQueryResultSet.*)\\)$");
-    private static final Pattern pattern_las_meet = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\(LatticeAddressSetMeet\\((.*?)\\)\\), LatticeAddressSetMeet\\((.*?)\\), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
-	private static final Pattern pattern_las_atomic = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\(LatticeAddressSetMeet\\((.*?)\\)\\), LatticeAddressSetMeet\\((.*?)\\), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");
-    private static final Pattern pattern_las_expmeet_meet = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionMeet\\((.*?)\\), LatticeAddressSetMeet\\((.*?)\\), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
-	private static final Pattern pattern_las_expmeet_atomic = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionMeet\\((.*?)\\), LatticeAddressSetMeet\\((.*?)\\), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");
-    private static final Pattern pattern_filter_fcn = Pattern.compile("^(LatticeAddressSetFcn\\(LatticeFunction.*?LatticeAddressSet.*?\\))(, LatticeAddressSet.*|$)");
+    
+	private static final Pattern pattern_las_meet         = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\(LatticeAddressSetMeet\\((.*?)\\)\\), LatticeAddressSetMeet\\((.*?)\\), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
+	private static final Pattern pattern_las_atomic       = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\(LatticeAddressSetMeet\\((.*?)\\)\\), LatticeAddressSetMeet\\((.*?)\\), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");
+	private static final Pattern pattern_las_setID_meet   = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\((LatticeAddressSetIdentifier\\(.*?\\))\\), (LatticeAddressSetIdentifier\\(.*?\\)), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
+	private static final Pattern pattern_las_setID_atomic = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\((LatticeAddressSetIdentifier\\(.*?\\))\\), (LatticeAddressSetIdentifier\\(.*?\\)), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");
+	private static final Pattern pattern_las_expmeet_meet = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionMeet\\((.*?)\\), LatticeAddressSetMeet\\((.*?)\\), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
+	private static final Pattern pattern_las_expmeet_atomic = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionMeet\\((.*?)\\), LatticeAddressSetMeet\\((.*?)\\), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");    
+	private static final Pattern pattern_las_expatomic_setPI_atomic = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionAtomic\\((.*?)\\), (LatticeAddressSetPi\\(.*?\\)), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");
+	private static final Pattern pattern_las_expatomic_setID_meet = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionAtomic\\((LatticeAddressAtomicIdentifier\\(.*?\\))\\), (LatticeAddressSetIdentifier\\(.*?\\)), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
+	private static final Pattern pattern_las_expatomic_setID_atomic = Pattern.compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionAtomic\\((LatticeAddressAtomicIdentifier\\(.*?\\))\\), (LatticeAddressSetIdentifier\\(.*?\\)), (LatticeAddressExpressionAtomic\\(.*\\))\\)$");
+    
+	private static final Pattern pattern_filter_fcn = Pattern.compile("^(LatticeAddressSetFcn\\(LatticeFunction.*?LatticeAddressSet.*?\\))(, LatticeAddressSet.*|$)");
 	private static final Pattern pattern_filter_las = Pattern.compile("^(LatticeAddressSet(.*?)\\((.*?)\\))(, LatticeAddressSet.*|$)");
+	
 	private static final Pattern pattern_entity_lae = Pattern.compile("^(LatticeAddressExpression(.*?)\\((.*?)\\))(, LatticeAddressExpression.*|$)");
+	
 	private static final Pattern pattern_sqnf = Pattern.compile("^(SpecQueryNamedFunction.*?)( SpecQueryNamedFunction.*|$)");
+	
+	private String lasPatternMatched;
 
 	public QueryVDBImpl( String name, String definition ) throws DefinitionException {
 		super( name, definition );
@@ -44,6 +55,7 @@ public class QueryVDBImpl extends Query {
 	
 	public QueryVDBImpl( QueryVDBImpl other ) {
 		super( other );
+		lasPatternMatched = other.lasPatternMatched;
 	}
 	
 	public QueryColumn createColumn( QueryColumn qc ) {
@@ -79,6 +91,7 @@ public class QueryVDBImpl extends Query {
                 lasm = m_las_meet.group(2);
                 lae = m_las_meet.group(3);
                 isMatchedTopLevel = Boolean.TRUE;
+                lasPatternMatched = "pattern_las_meet";
             }
         }
 		
@@ -88,6 +101,27 @@ public class QueryVDBImpl extends Query {
 				lasm = m_las_atomic.group(2);
 				lae = "(" + m_las_atomic.group(3) + ")";
 				isMatchedTopLevel = Boolean.TRUE;
+				lasPatternMatched = "pattern_las_atomic";
+			}
+		}
+		
+		if( !isMatchedTopLevel ) {
+			Matcher m_las_setID_meet = pattern_las_setID_meet.matcher( las_spec );
+			if( m_las_setID_meet.matches() ) {
+				lasm = "(" + m_las_setID_meet.group(2) + ")";
+				lae = m_las_setID_meet.group(3);
+				isMatchedTopLevel = Boolean.TRUE;
+				lasPatternMatched = "pattern_las_setID_meet";
+			}
+		}
+		
+		if( !isMatchedTopLevel ) {
+			Matcher m_las_setID_atomic = pattern_las_setID_atomic.matcher( las_spec );
+			if( m_las_setID_atomic.matches() ) {
+				lasm = "(" + m_las_setID_atomic.group(2) + ")";
+				lae = "(" + m_las_setID_atomic.group(3) + ")";
+				isMatchedTopLevel = Boolean.TRUE;
+				lasPatternMatched = "pattern_las_setID_atomic";
 			}
 		}
 		
@@ -97,6 +131,7 @@ public class QueryVDBImpl extends Query {
                 lasm = m_las_expmeet_meet.group(2);
                 lae = m_las_expmeet_meet.group(3);
                 isMatchedTopLevel = Boolean.TRUE;
+                lasPatternMatched = "pattern_las_expmeet_meet";
             }
         }
         
@@ -106,9 +141,39 @@ public class QueryVDBImpl extends Query {
                 lasm = m_las_expmeet_atomic.group(2);
                 lae = "(" + m_las_expmeet_atomic.group(3) + ")";
                 isMatchedTopLevel = Boolean.TRUE;
+                lasPatternMatched = "pattern_las_expmeet_atomic";
             }
         }
 		
+		if( !isMatchedTopLevel ) {
+			Matcher m_las_expatomic_setPI_atomic = pattern_las_expatomic_setPI_atomic.matcher( las_spec );
+			if( m_las_expatomic_setPI_atomic.matches() ) {
+				lasm = "(" + m_las_expatomic_setPI_atomic.group(2) + ")";
+				lae = "(" + m_las_expatomic_setPI_atomic.group(3) + ")";
+				isMatchedTopLevel = Boolean.TRUE;
+				lasPatternMatched = "pattern_las_expatomic_setPI_atomic";
+			}
+		}
+		
+		if( !isMatchedTopLevel ) {
+			Matcher m_las_expatomic_setID_meet = pattern_las_expatomic_setID_meet.matcher( las_spec );
+			if( m_las_expatomic_setID_meet.matches() ) {
+				lasm = "(" + m_las_expatomic_setID_meet.group(2) + ")";
+				lae = m_las_expatomic_setID_meet.group(3);
+				isMatchedTopLevel = Boolean.TRUE;
+				lasPatternMatched = "pattern_las_expatomic_setID_meet";
+			}
+		}
+		
+		if( !isMatchedTopLevel ) {
+			Matcher m_las_expatomic_setID_atomic = pattern_las_expatomic_setID_atomic.matcher( las_spec );
+			if( m_las_expatomic_setID_atomic.matches() ) {
+				lasm = "(" + m_las_expatomic_setID_atomic.group(2) + ")";
+				lae = "(" + m_las_expatomic_setID_atomic.group(3) + ")";
+				isMatchedTopLevel = Boolean.TRUE;
+				lasPatternMatched = "pattern_las_expatomic_setID_atomic";
+			}
+		}
 		
 		
 		if( !isMatchedTopLevel ) {
@@ -266,5 +331,9 @@ public class QueryVDBImpl extends Query {
 		defn.append(               ")"                                           );
 		
 		return defn.toString();
+	}
+	
+	public String getLASPatternMatched() {
+		return lasPatternMatched;
 	}
 }

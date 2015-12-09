@@ -7,6 +7,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-liaison-context.xml" })
-public abstract class LiaisonFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+public abstract class LiaisonTestNGBase extends AbstractTestNGSpringContextTests {
 
 }

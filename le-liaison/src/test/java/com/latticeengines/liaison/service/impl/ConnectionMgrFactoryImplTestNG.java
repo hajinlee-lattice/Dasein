@@ -12,9 +12,9 @@ import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
 import com.latticeengines.liaison.exposed.service.Query;
 import com.latticeengines.liaison.exposed.service.QueryColumn;
-import com.latticeengines.liaison.testframework.LiaisonFunctionalTestNGBase;
+import com.latticeengines.liaison.testframework.LiaisonTestNGBase;
 
-public class ConnectionMgrFactoryImplTestNG extends LiaisonFunctionalTestNGBase {
+public class ConnectionMgrFactoryImplTestNG extends LiaisonTestNGBase {
 
     @Autowired
     private ConnectionMgrFactory connectionMgrFactory;
