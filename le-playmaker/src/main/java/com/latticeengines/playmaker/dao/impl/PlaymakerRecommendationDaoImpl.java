@@ -99,10 +99,10 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return "FROM [PreLead] L WITH (NOLOCK) LEFT OUTER JOIN LaunchRun R WITH (NOLOCK) "
                 + "ON L.[LaunchRun_ID] = R.[LaunchRun_ID]  AND R.Launch_Stage = 0 JOIN LEAccount A WITH (NOLOCK) "
                 + "ON L.Account_ID = A.LEAccount_ID JOIN Play PL "
-                + "ON L.Play_ID = PL.Play_ID JOIN Priority P WITH (NOLOCK) "
+                + "ON L.Play_ID = PL.Play_ID AND PL.IsActive = 1 AND PL.IsVisible = 1 JOIN Priority P WITH (NOLOCK) "
                 + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C WITH (NOLOCK) "
                 + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M WITH (NOLOCK) "
-                + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID " + "WHERE L.Status = 2800 AND "
+                + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID " + "WHERE L.Status = 2800 AND L.IsActive = 1 AND "
                 + "L.Synchronization_Destination in (" + getDestinationonValues(syncDestination) + ") "
                 + "AND DATEDIFF(s,'19700101 00:00:00:000',L.[Last_Modification_Date]) >= :start ";
     }
@@ -188,7 +188,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getPlayFromWhereClause() {
-        return "FROM [Play] WITH (NOLOCK) WHERE DATEDIFF(s,'19700101 00:00:00:000', [Last_Modification_Date]) >= :start ";
+        return "FROM [Play] WITH (NOLOCK) WHERE Play.IsActive = 1 AND Play.IsVisible = 1 AND DATEDIFF(s,'19700101 00:00:00:000', [Last_Modification_Date]) >= :start ";
     }
 
     @Override
