@@ -163,7 +163,8 @@ public enum LedpCode {
     LEDP_18068("Could not copy HDFS file {0} to local."), //
     LEDP_18069("Target market with name {0} already exists."), //
     LEDP_18070("Default target market already exists."), //
-
+    LEDP_18071("Failed to get a value specifying load group {0} is running or not, error: {1}."), //
+    LEDP_18072("Failed to run load group {0}, error: {1}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
