@@ -1,0 +1,3 @@
+#!/bin/bash
+echo 'Running Postinstall'
+hdfs dfs -copyFromLocal /tmp/app/dataflow/le-propdata*-shaded.jar /app/dataflow/lib

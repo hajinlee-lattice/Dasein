@@ -3,9 +3,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-dataflow-hdfs</artifactId>
+    <artifactId>le-propdata-hdfs</artifactId>
     <packaging>rpm</packaging>
-    <description>LE DATAFLOW NO DEPENDENCY RPM</description>
+    <description>LE PROPDATA NO DEPENDENCY RPM</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
@@ -43,16 +43,16 @@
                             <groupname>${mapping.groupname}</groupname>
                             <sources>
                                 <source>
-                                    <location>target/le-dataflow-${le.rpm.version}-shaded.jar</location>
+                                    <location>target/le-propdata-${le.rpm.version}-shaded.jar</location>
                                 </source>
                             </sources>
                         </mapping>
                     </mappings>
                     <preinstallScriptlet>
-                        <scriptFile>src/main/resources/rpm/dataflow-hdfs/scripts/${pre.install.script}</scriptFile>
+                        <scriptFile>src/main/resources/rpm/propdata-hdfs/scripts/${pre.install.script}</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>src/main/resources/rpm/dataflow-hdfs/scripts/${post.install.script}</scriptFile>
+                        <scriptFile>src/main/resources/rpm/propdata-hdfs/scripts/${post.install.script}</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>

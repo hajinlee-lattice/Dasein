@@ -27,9 +27,6 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
     @Value("${propdata.madison.use.default.job.properties}")
     private boolean useDefaultProperties;
 
-    @Value("${propdata.madison.cascading.engine:tez}")
-    private String cascadingEngine;
-
     @Override
     public void execute(String flowName, List<String> sourcePaths, String targetPath, String targetSchemaPath) {
 
@@ -48,9 +45,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         }
 
         DataFlowContext ctx = new DataFlowContext();
-        if ("MR".equalsIgnoreCase(cascadingEngine)) {
-            ctx.setProperty("ENGINE", "MR");
-        }
+        ctx.setProperty("ENGINE", "MR");
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("CUSTOMER", "MadisonLogic");
         ctx.setProperty("TARGETPATH", targetPath + "/1");
@@ -70,9 +65,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         sources.put("MadisonLogic0", targetPath + "/1/*.avro");
 
         DataFlowContext ctx = new DataFlowContext();
-        if ("MR".equalsIgnoreCase(cascadingEngine)) {
-            ctx.setProperty("ENGINE", "MR");
-        }
+        ctx.setProperty("ENGINE", "MR");
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("CUSTOMER", "MadisonLogic");
         ctx.setProperty("TARGETPATH", targetPath + "/output");
