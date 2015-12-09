@@ -19,6 +19,8 @@ class ExpressionVDBImplFactory( object ):
     def Create( cls, defn ):
 
         if re.search( '^LatticeFunctionExpressionConstant', defn ):
+            if re.search( '^LatticeFunctionExpressionConstantNull', defn ):
+                return ExpressionVDBImplGeneric.InitFromDefn(defn)
             return ExpressionVDBImplConst.InitFromDefn( defn )
 
         elif re.search( '^LatticeFunctionIdentifier\(ContainerElementName\(', defn ):
