@@ -1,5 +1,8 @@
 // Grids adapted from CSS SMart Grids http://dryan.github.io/css-smart-grid/
 
+html, body {
+    height: 100%;
+}
 .main-content section {
     margin-top: 2em;
     &:last-child {

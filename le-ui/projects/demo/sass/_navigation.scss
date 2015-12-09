@@ -121,6 +121,7 @@ Off Canvas Navigation
 .open-nav .main-content {
   @include media('>large') {
     margin-right: 340px;
+    right: 0;
   }
 }
 
@@ -177,7 +178,7 @@ Primary Sidebar Nav Menu Styling
   -o-transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
   transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
   text-align: left;
-  a {
+  a, li > div {
     display: block;
     padding: 0.75em 1.25em;
     font-size: 16px;
@@ -191,25 +192,45 @@ Primary Sidebar Nav Menu Styling
     }
   }
   & > li:first-of-type a {
-    background-image: url("../img/bkg-nav-half-piping.png");
     background-position: 28px 20px;
   }
   & > li:last-child a {
-    background-image: url("../img/bkg-nav-half-piping.png");
-    background-position: 28px -24px;
+    background-position: 28px -320px;
   }
-  li.active a {
+  li.active > a {
     background-color: #2d333c;
     border-left: #ef6a30 solid 4px;
   }
-  ul a {
-    padding: 0.75em 1.5em 0.75em 5em;
+  ul a, li > div {
+    padding: 0.75em 1.5em 0.75em 4em;
+  }
+  li > div {
+    background-image: url("../img/bkg-nav-full-piping.png");
+    background-repeat: no-repeat;
+    background-position: 28px;
+    padding-top: 10px;
+    p, ul {
+      margin-bottom: 10px;
+    }
   }
   .fa {
     display: inline-block;
     margin-right: 12px;
     font-size: 20px;
     color: #fff;
+  }
+  .fa-circle-thin, .fa-check-circle-o {
+    background-color: #222831; 
+  }
+}
+.toggle {
+  ul {
+    display: none;
+  }
+  &.open {
+    ul {
+      display: block;
+    }
   }
 }
 

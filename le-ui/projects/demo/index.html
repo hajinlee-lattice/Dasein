@@ -34,16 +34,35 @@
                 <li class="active"><a href="index.html"><span class="fa fa-bullseye"></span>Saphire Design System</a></li>
                 <li><a href="colors.html"><span class="fa fa-bullseye"></span>Colors</a></li>
                 <li><a href="typography.html"><span class="fa fa-bullseye"></span>Typography</a></li>
-                <li><a href="menus.html"><span class="fa fa-bullseye"></span>Menus</a></li>
-                <li><a href="lists.html"><span class="fa fa-bullseye"></span>Lists</a></li>
-                <li>
-                    <a href="links.html"><span class="fa fa-bullseye"></span>Links &amp; Buttons</a>
+                <li class="toggle">
+                    <a href="#"><span class="fa fa-check-circle-o"></span>Menus <span class="fa fa-angle-double-down pull-right"></span></a>
                     <ul>
-                        <li class="active"><a href="#">second level</a></li>
+                        <li><a href="#">second level</a></li>
                     </ul>
                 </li>
-                <li><a href="forms.html"><span class="fa fa-cog"></span>Forms</a></li>
-                <li><a href="tables.html"><span class="fa fa-user"></span>Data Tables</a></li>
+                <li><a href="lists.html"><span class="fa fa-circle-thin"></span>Lists</a></li>
+                <li class="active"><a href="links.html"><span class="fa fa-bullseye"></span>Links &amp; Buttons</a></li>
+                <li>
+                    <a href="forms.html"><span class="fa fa-cog"></span>Forms <span class="loading pull-right"></span></a>
+                    <div>
+                        <p class="smaller"><span class="orange-text">Model has not been created yet.</span> Continue adding attributes until you are ready to build a model. This launches a 10-20 minute job so choose accordingly.</p>
+                        <button type="button" class="button orange-button">Build Model</button>
+                    </div>
+                </li>
+                <li>
+                    <a href="tables.html"><span class="fa fa-user"></span>Data Tables <span class="badge badge-success pull-right">1</span></a>
+                    <div>
+                        <ul class="smaller unordered-list">
+                            <li>Contact Filters</li>
+                            <li>Fit Model Settings</li>
+                            <li>Intent Model Settings</li>
+                            <li>Prospecting Settings</li>
+                        </ul>
+                        <p class="smaller"><span class="orange-text">Create model first.</span> Once you have created a model, check the deployment settings and enable prospecting or generate lists at your convenience.</p>
+                        <button type="button" class="button" disabled>Enable</button>
+                        <button type="button" class="button" disabled>Generate List</button>
+                    </div>
+                </li>
                 <li><a href="grid.html"><span class="fa fa-user"></span>Grids</a></li>
             </ul>
         </nav>
@@ -53,14 +72,13 @@
             <div class="secondary-nav">
                 <button id="toggleNav" class="nav-button"><span class="fa fa-bars"></span></button>
                 <div class="profile-nav dropdown">
-                    <a href="#" title="">superuser <span class="fa fa-carrot"></span></a>
+                    <a href="#" title="">superuser <span class="fa fa-angle-down"></span></a>
                     <ul>
                         <li><a href="#" title="">Settings</a></li>
                         <li><a href="#" title="">Sign Out</a></li>
                     </ul>
                 </div>
             </div>
-
 
             <!-- Summary list at top of page. By default (without the blue-steel class) the summary list is the gray color -->
             <div class="summary blue-steel">

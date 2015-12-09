@@ -72,10 +72,8 @@ Body Copy
 ========================================================= */
 .smaller {
 	font-size: 13px;
-	color: $jet;
 }
 .smallest {
-	@extend .smaller;
 	font-size: 10px;
 }
 
@@ -205,14 +203,15 @@ Badges
 .badge {
     display: inline-block;
     min-width: 10px;
-    padding: 3px 7px;
+    padding: 3px 10px;
     font-size: 12px;
-    font-weight: 700;
     line-height: 1;
     color: #fff;
     text-align: center;
     white-space: nowrap;
     vertical-align: middle;
     background-color: #777;
-    border-radius: 10px;
+    &.badge-success {
+    	background-color: #71bc51;
+    }
 }
