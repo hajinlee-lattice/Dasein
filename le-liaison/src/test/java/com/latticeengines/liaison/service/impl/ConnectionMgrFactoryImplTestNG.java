@@ -21,20 +21,17 @@ public class ConnectionMgrFactoryImplTestNG extends LiaisonTestNGBase {
 
     @Test(groups = "functional")
     public void testConnection() {
-        String tenantName = "MW_Devel_Modeling_ELQ_20150529";
-        String dlURL = "https://10.41.1.187:8080/";
+        String tenantName = "ProductionTestPLSTenant2";
+        String dlURL = "https://data-pls.lattice-engines.com/Dataloader_PLS/";
 
         String queryName = "Q_PLS_Modeling";
-        //String queryName = "Q_Timestamp_PreScoringIncr";
-
+        
         ConnectionMgr conn_mgr = connectionMgrFactory.getConnectionMgr( "visiDB", tenantName, dlURL );
-        // ConnectionMgr conn_mgr = new ConnectionMgrVDBImpl( tenantName, dlURL );
-
+        
         try {
-            System.out.print( "Initializing..." );
+            
             Map< String, Map<String,String>> modelcols = conn_mgr.getMetadata( queryName );
-            System.out.println( "Done" );
-
+            
             // This is the sorted set of all the column names
             TreeSet<String> colNames = new TreeSet<>( modelcols.keySet() );
 
@@ -42,12 +39,12 @@ public class ConnectionMgrFactoryImplTestNG extends LiaisonTestNGBase {
             Query q = conn_mgr.getQuery( queryName );
 
             // Get a column you wish to update
-            QueryColumn qc = q.getColumn("AlexaRank");
+            QueryColumn qc = q.getColumn("Title_IsTechRelated");
 
             // Put the updated metadata in a map
             Map<String,String> newMetadata = new HashMap<>();
-            newMetadata.put("Category","Something Old");
-            newMetadata.put("StatisticalType","ratio");
+            newMetadata.put("Category","Lead Information");
+            newMetadata.put("StatisticalType","nominal");
 
             // Update the column
             qc.setMetadata( newMetadata );
@@ -62,7 +59,6 @@ public class ConnectionMgrFactoryImplTestNG extends LiaisonTestNGBase {
             System.out.println( String.format("Exception: %s",ex.getMessage()) );
         }
 
-        System.out.println("Finished successfully");
     }
 
 }
