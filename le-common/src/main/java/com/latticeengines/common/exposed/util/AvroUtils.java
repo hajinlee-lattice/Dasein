@@ -282,17 +282,20 @@ public class AvroUtils {
 
     }
 
-    public static String generateHiveCreateTableStatement(Schema schema) {
+    public static String generateHiveCreateTableStatement(String tableName, String path, Schema schema) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("CREATE TABLE %s (\n", schema.getName()));
+        if (tableName == null) {
+            tableName = schema.getName();
+        }
+        sb.append(String.format("CREATE TABLE %s (\n", tableName));
         int size = schema.getFields().size();
         int i = 1;
         for (Field field : schema.getFields()) {
             sb.append(String.format("  %s %s%s\n", field.name(),
-                    getHiveType(field.schema().getTypes().get(1).getType()), i == size ? ")" : ","));
+                    getHiveType(field.schema().getTypes().get(0).getType()), i == size ? ")" : ","));
             i++;
         }
-        sb.append("STORED AS PARQUET;");
+        sb.append("STORED AS AVRO LOCATION '" + path + "'");
         return sb.toString();
     }
 
