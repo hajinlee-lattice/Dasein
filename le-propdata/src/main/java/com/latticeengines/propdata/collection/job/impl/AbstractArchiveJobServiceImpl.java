@@ -97,6 +97,27 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
         } else {
             P progress = jobCtx.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
             log.info("Found a job to retry: " + progress);
+            if (ArchiveProgressStatus.FAILED.equals(progress.getStatus())) {
+                ArchiveProgressStatus resumeStatus;
+                switch (progress.getStatusBeforeFailed()) {
+                    case NEW:
+                    case DOWNLOADING:
+                        resumeStatus = ArchiveProgressStatus.NEW;
+                        break;
+                    case DOWNLOADED:
+                    case TRANSFORMING:
+                        resumeStatus = ArchiveProgressStatus.DOWNLOADED;
+                        break;
+                    case TRANSFORMED:
+                    case UPLOADING:
+                        resumeStatus = ArchiveProgressStatus.TRANSFORMED;
+                        break;
+                    default:
+                        resumeStatus = ArchiveProgressStatus.NEW;
+                }
+                progress.setStatus(resumeStatus);
+                jobCtx.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
+            }
             proceedProgress(jobCtx);
         }
 
@@ -106,11 +127,15 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
     }
 
     private void proceedProgress(CollectionJobContext context) {
-        context = archiveService.importFromDB(context);
-        context = archiveService.transformRawData(context);
-        context = archiveService.exportToDB(context);
-
         P progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
+
+        switch (progress.getStatus()) {
+            case NEW: context = archiveService.importFromDB(context);
+            case DOWNLOADED: context = archiveService.transformRawData(context);
+            case TRANSFORMED: context = archiveService.exportToDB(context);
+        }
+
+        progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
         if (progress.getStatus().equals(ArchiveProgressStatus.FAILED)) {
             logJobFailed(progress);
         } else {
