@@ -184,18 +184,9 @@ Primary Sidebar Nav Menu Styling
     font-size: 16px;
     border-left: transparent solid 4px;
     color: #bcbec1;
-    background-image: url("../img/bkg-nav-full-piping.png");
-    background-repeat: no-repeat;
-    background-position: 28px;
     &:hover {
       background-color: #2d333c;
     }
-  }
-  & > li:first-of-type a {
-    background-position: 28px 20px;
-  }
-  & > li:last-child a {
-    background-position: 28px -320px;
   }
   li.active > a {
     background-color: #2d333c;
@@ -203,16 +194,7 @@ Primary Sidebar Nav Menu Styling
   }
   ul a, li > div {
     padding: 0.75em 1.5em 0.75em 4em;
-  }
-  li > div {
-    background-image: url("../img/bkg-nav-full-piping.png");
-    background-repeat: no-repeat;
-    background-position: 28px;
-    padding-top: 10px;
-    p, ul {
-      margin-bottom: 10px;
-    }
-  }
+  }  
   .fa {
     display: inline-block;
     margin-right: 12px;
@@ -221,6 +203,26 @@ Primary Sidebar Nav Menu Styling
   }
   .fa-circle-thin, .fa-check-circle-o {
     background-color: #222831; 
+  }
+  &.progress-menu a, &.progress-menu li > div {    
+    background-image: url("/demo/img/bkg-nav-full-piping.png");
+    background-repeat: no-repeat;
+    background-position: 28px;
+  }
+  &.progress-menu > li:first-of-type a {
+    background-position: 28px 20px;
+  }
+  &.progress-menu > li:last-child a {
+    background-position: 28px -320px;
+  }
+  &.progress-menu li > div {
+    background-image: url("/demo/img/bkg-nav-full-piping.png");
+    background-repeat: no-repeat;
+    background-position: 28px;
+    padding-top: 10px;
+    p, ul {
+      margin-bottom: 10px;
+    }
   }
 }
 .toggle {
@@ -275,5 +277,7 @@ Page Summary / Sub-Nav Headers
     background-size: cover;
   }
 }
+
+
 
 

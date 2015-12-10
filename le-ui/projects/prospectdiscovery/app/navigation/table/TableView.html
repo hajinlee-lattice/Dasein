@@ -1,13 +1,19 @@
-<div data-ng-controller="TableCtrl" class="pd-summary palladium">
-    <div class="container">
-        <ul class="row">
-            <li class="columns three blue-summary-list pd-summary-panel" ng-repeat="table in tables">
+<div data-ng-controller="TableCtrl" class="summary blue-steel">
+    <div class="container row">
+
+        <div class="three columns" ng-repeat="table in tables">
+            <div class="summary-list">
+                
                 <h3 class="summary-title">{{table.name}}</h3>
-                <dl class="summary-list" ng-repeat="(key, value) in table.items">
-                    <dt>{{key}}</dt>
-                    <dd>{{value}}</dd>
+                <dl>
+                    <span ng-repeat="(key, value) in table.items">
+                        <dt>{{key}}</dt>
+                        <dd><a href="#">{{value}}</a></dd>
+                    </span>
                 </dl>
-            </li>
-        </ul>
+
+            </div><!-- End .summary-list -->
+        </div><!-- End .three.columns -->
+
     </div>
 </div>
