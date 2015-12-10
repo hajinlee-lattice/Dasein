@@ -1,0 +1,2 @@
+#!/bin/sh
+hdfs dfs -rm -f -r /app/swlib/dataflowapi/com/latticeengines/le-serviceflows/
