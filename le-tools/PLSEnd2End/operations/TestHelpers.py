@@ -69,11 +69,11 @@ def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
         returnDict = getLoadGroupStatus(dlc, tenant, load_group)
         if returnDict["Start"].strip() != "-":
             lg_start_datetime = datetime.strptime(returnDict["Start"], "%Y-%m-%d %H:%M:%S")
-        if returnDict["Last Succeeded"] != "Never":
+        if returnDict["Last Succeeded"].strip() != "Never":
             lg_last_succeed_date = datetime.strptime(returnDict["Last Succeeded"], "%Y-%m-%d %H:%M:%S")
-        if returnDict["Last Failed"] != "Never":
+        if returnDict["Last Failed"].strip() != "Never":
             lg_last_fail_date = datetime.strptime(returnDict["Last Failed"], "%Y-%m-%d %H:%M:%S")
-        lg_status = returnDict["State"]
+        lg_status = returnDict["State"].strip()
         if lg_status == "Launch Succeeded":
             print "Load Group %s Launch Succeeded" % load_group
             break
@@ -341,7 +341,7 @@ class LPConfigRunner(SessionRunner):
     def init(self, tenant, marketting_app):
         ''' configure dataLoader settings '''
         print "add new tenant: %s via tenant console" % tenant
-        created=False;
+        created = False;
         if marketting_app == PLSEnvironments.pls_marketing_app_ELQ:
             if True == self.addNewTenant(tenant, "Eloqua", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                          PLSEnvironments.dl_server_name):
@@ -349,7 +349,7 @@ class LPConfigRunner(SessionRunner):
                 time.sleep(300);
                 assert self.lpSFDCCredentials(tenant)
                 assert self.lpElQCredentials(tenant);
-                created=True;
+                created = True;
         elif marketting_app == PLSEnvironments.pls_marketing_app_MKTO:
             if True == self.addNewTenant(tenant, "Marketo", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                          PLSEnvironments.dl_server_name):
@@ -357,14 +357,14 @@ class LPConfigRunner(SessionRunner):
                 time.sleep(300);
                 assert self.lpSFDCCredentials(tenant)
                 assert self.lpMKTOCredentials(tenant)
-                created=True;
+                created = True;
         else:
             if True == self.addNewTenant(tenant, "SFDC", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                          PLSEnvironments.dl_server_name):
                 print "Credentials will be input after 5 minutes."
                 time.sleep(300);
                 assert self.lpSFDCCredentials(tenant)
-                created=True;
+                created = True;
         print "configure dataloader settings"
         if created:
             dlConfig = DLConfigRunner();
@@ -389,17 +389,16 @@ class LPConfigRunner(SessionRunner):
     def lpActivateModel(self, tenantName, modelPriority=0):
         authorization = self.modelLogin();
         self.modelLoginAttach(tenantName, authorization);
-        count=0
-        while(count<120):
+        count = 0
+        while (count < 120):
             models = self.lpGetModel(authorization);
 
-            if len(models) > modelPriority:
-                print "the model is: %s" % models
+            if len(models) >= modelPriority:
                 break;
             print "we can't get the model, will try again after 30 seconds."
-            count=count+1
+            count = count + 1
             time.sleep(120)
-        if count==120:
+        if count == 120:
             print "The existing models: %d is less than the expected: %d" % (len(models), modelPriority + 1)
             return False;
 
@@ -716,16 +715,17 @@ class DanteRunner(SessionRunner):
 
     def checkDanteValueFromDB(self, tenantName, dante_lead):
         connection_string = PLSEnvironments.SQL_conn_dante;
-        query = "SELECT count(*)  FROM [LeadCache] where [Customer_ID]='%s' and [Salesforce_ID]='%s' " % (tenantName, dante_lead);
+        query = "SELECT count(*)  FROM [LeadCache] where [Customer_ID]='%s' and [Salesforce_ID]='%s' " % (
+            tenantName, dante_lead);
         print query
         result = self.getQuery(connection_string, query);
-        assert result[0][0] == 1,result[0][0]
+        assert result[0][0] == 1, result[0][0]
 
     def checkDanteValues(self, dante_leads):
         for danteLead in dante_leads:
             self.checkDanteValue(danteLead.values()[0])
 
-    def checkDanteValue(self,tenantName, dante_lead):
+    def checkDanteValue(self, tenantName, dante_lead):
         self.checkDanteValueFromDB(tenantName, dante_lead)
 
 
@@ -776,7 +776,7 @@ class JamsRunner(SessionRunner):
         if not queue_name:
             queue_name = 'QATest' + re.search('\\d+$', PLSEnvironments.dante_server_name).group(0)
         query = "exec AlterJAMSDanteCfg @Tenant='%s', @Queue='%s', @DanteDB='%s'" % (
-        tenant_name, queue_name, dante_db.split('_')[1]);
+            tenant_name, queue_name, dante_db.split('_')[1]);
         #       print self.connection_string;
         #       print query;
         results = runner.execProc(self.connection_string, query);
