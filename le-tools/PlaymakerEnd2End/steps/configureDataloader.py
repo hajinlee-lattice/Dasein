@@ -50,6 +50,7 @@ class DataloaderDealer(object):
 	def isDanteGroupFinishSuccessfully(self,tenant=SalePrismEnvironments.tenantName,timePoint=None):
 		assert timePoint!=None
 		sql="SELECT LaunchId,CreateTime FROM Launches where tenantid=(SELECT TenantId FROM Tenant where name='"+tenant+"') and GroupName='Full_Dante_Data_Flow' and createtime>'"+timePoint+"'"
+		log.info('sql to query Launch ID is: '+sql)
 		result=DealDB.fetchResultOfSelect(SQL=sql,SERVER=SalePrismEnvironments.dataloaderDBUrl,DATABASE=SalePrismEnvironments.dataloaderDBName,UID=SalePrismEnvironments.dataloaderDBUser,PWD=SalePrismEnvironments.dataloaderDBPassword,fetchAll=False)
 		assert result!=None
 		launchId=result[0]

@@ -78,24 +78,33 @@ class DealSFDC(object):
         self.driver.wait_until_page_contains_element('Xpath=//div[@id="ext-gen11"]/div',self.timeout)
         is_recommendationExist = False
         num_recommendation=0
+        num_page=1
 		#pageNumber=int(self.driver.find_element_by_xpath("//span[text()='Page']").text[-1])
-        next_page_is_enable=self.driver._is_element_present("Xpath=//a[text()='Next']")
-        if self.driver._is_element_present("Xpath=//a[text()='"+playName+"']"):
-            num_this_page=0
-            is_recommendationExist = True
-            num_this_page=int(self.driver.get_matching_xpath_count("//a[text()='"+playName+"']"))
-            num_recommendation=int(num_recommendation)+int(num_this_page)
-            log.info('new play exist in this page and num is %s' % (str(num_this_page)))
+        next_page_is_enable=True
         while next_page_is_enable:
-            self.driver.wait_until_page_contains_element("Xpath=//a[text()='Next']",self.timeout)
-            self.driver.click_link("Xpath=//a[text()='Next']")
-            self.driver.wait_until_page_contains_element('Xpath=//div[@id="ext-gen11"]/div',self.timeout)
+            #print 'this is page:'+str(num_page)
+            next_page_is_enable=self.driver._is_element_present("Xpath=//a[text()='Next']")
+            #print 'Next page exist status:'+str(next_page_is_enable)
             if self.driver._is_element_present("Xpath=//a[text()='"+playName+"']"):
                 num_this_page=0
                 is_recommendationExist = True
                 num_this_page=int(self.driver.get_matching_xpath_count("//a[text()='"+playName+"']"))
                 num_recommendation=int(num_recommendation)+int(num_this_page)
                 log.info('new play exist in this page and num is %s' % (str(num_this_page)))
+                log.info('new play exist total num so far is %s' % (str(num_recommendation)))
+            if next_page_is_enable:
+                log.info('Next page exist then click it to next page')
+                self.driver.wait_until_page_contains_element("Xpath=//a[text()='Next']",self.timeout)
+                self.driver.click_link("Xpath=//a[text()='Next']")
+                num_page=num_page+1
+                #print '======='
+                self.driver.wait_until_page_contains_element("Xpath=//span[text()='Page']//input[@value='"+str(num_page)+"']",self.timeout)
+                self.driver.wait_until_page_contains_element('Xpath=//div[@id="ext-gen11"]/div',self.timeout)
+                #print '-------'
+            else:
+                log.info('This is the last page!')
+                next_page_is_enable=False
+            print next_page_is_enable
         try:
             assert is_recommendationExist
             log.info("Sync Data successfully")

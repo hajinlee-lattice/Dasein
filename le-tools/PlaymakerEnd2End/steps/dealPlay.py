@@ -192,10 +192,11 @@ class DealPlay(object):
 				realJson["SettingsPopUpVisible"]=False
 				realJson["LaunchRuleAvailability"]="PlaysWithNewLeads"
 				realJson=json.loads("["+json.dumps(realJson)+"]")
+				time_start_launch=time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())
 				response=requests.post(launchPlaysUrl,json=realJson,headers=launchPlaysHeaders,verify=False)
 				assert response.status_code==200
 				log.info("play %s launched successfully"%nameOfPlayToLaunch)
-				return time.strftime('%Y-%m-%d %H:%M:%S')
+				return time_start_launch+'.000'
 
 	def getLaunchStatus(self,idOfPlay):
 		getLaunchStatusUrl=SalePrismEnvironments.getLaunchStatusUrl+str(idOfPlay)
