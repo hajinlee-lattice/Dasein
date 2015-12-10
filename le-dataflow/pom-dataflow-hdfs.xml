@@ -46,10 +46,10 @@
                                     <location>target/le-dataflow-${le.rpm.version}-shaded.jar</location>
                                 </source>
                                 <source>
-                                    <location>target/le-propdata-${le.rpm.version}-shaded.jar</location>
+                                    <location>../le-propdata/target/le-propdata-${le.rpm.version}-shaded.jar</location>
                                 </source>
                                 <source>
-                                    <location>target/le-dellebi-${le.rpm.version}-shaded.jar</location>
+                                    <location>../le-dellebi/target/le-dellebi-${le.rpm.version}-shaded.jar</location>
                                 </source>
                             </sources>
                         </mapping>
