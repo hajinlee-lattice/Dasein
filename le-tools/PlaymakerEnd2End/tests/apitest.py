@@ -29,6 +29,13 @@ class Test(unittest.TestCase):
         # print  "token is: " + cls.token
 
 
+    '''
+    There are 471 preleads in the DB. Out of the total 471 preleads, 130 are inactive, 1 does not have status 2800 and 1 does not have synchrozization_destination
+    as SFDC. So there should be 339 preleads that can be synchronized.
+    
+    FUTURE NOTE: this can be handled better. Rather than comparing the results with hardcoded number, it can compared against DB query. 
+    
+    '''
     def testGetRecommendationCount(self):
         url = self.apiUrl + "/recommendationcount"
         headers = {'Authorization':self.token}
@@ -37,13 +44,13 @@ class Test(unittest.TestCase):
         params = {'start':'0', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(json.loads(request.text)['count'], 471)
+        self.assertEqual(json.loads(request.text)['count'], 339)
 
         # second request, start time = 1445738581
         params = {'start':'1445738581', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(json.loads(request.text)['count'], 230)
+        self.assertEqual(json.loads(request.text)['count'], 136)
 
 
     def testGetRecommendation(self):
@@ -54,19 +61,10 @@ class Test(unittest.TestCase):
         params = {'start':startTime, 'offset':'0', 'maximum':'1000', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(self.getRecordCount(request.text), 230)
-        self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
-        self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
+        self.assertEqual(apitool.getRecordCount(request.text), 136)
+        self.assertGreaterEqual(apitool.getStartTimestamp(request.text), startTime)
+        self.assertGreaterEqual(apitool.getEndTimestamp(request.text), startTime)
 
-
-    def getRecordCount(self, response):
-        return len(json.loads(response)['records'])
-
-    def getStartTimestamp(self, response):
-        return int(json.loads(response)['startDatetime'])
-
-    def getEndTimestamp(self, response):
-        return int(json.loads(response)['endDatetime'])
 
 
     def testGetRecommendationOffset(self):
@@ -77,9 +75,9 @@ class Test(unittest.TestCase):
         params = {'start':startTime, 'offset':'100', 'maximum':'1000', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(self.getRecordCount(request.text), 130)
-        self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
-        self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
+        self.assertEqual(apitool.getRecordCount(request.text), 36)
+        self.assertGreaterEqual(apitool.getStartTimestamp(request.text), startTime)
+        self.assertGreaterEqual(apitool.getEndTimestamp(request.text), startTime)
 
 
     def testGetRecommendationRowLimit(self):
@@ -90,13 +88,18 @@ class Test(unittest.TestCase):
         params = {'start':startTime, 'offset':'0', 'maximum':'99', 'destination':'SFDC'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(self.getRecordCount(request.text), 99)
-        self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
-        self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
+        self.assertEqual(apitool.getRecordCount(request.text), 99)
+        self.assertGreaterEqual(apitool.getStartTimestamp(request.text), startTime)
+        self.assertGreaterEqual(apitool.getEndTimestamp(request.text), startTime)
 
 
 
-
+    '''
+    There are 29 plays in the DB. Out of the total 29 plays, 1 is inactive, 9 are invisible. So there should be 19 plays that can be synchronized.
+    
+    FUTURE NOTE: this can be handled better. Rather than comparing the results with hardcoded number, it can compared against DB query. 
+    
+    '''
     def testGetPlayCount(self):
         url = self.apiUrl + "/playcount"
         headers = {'Authorization':self.token}
@@ -106,14 +109,14 @@ class Test(unittest.TestCase):
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
         # print 'Play count: ' + request.text
-        self.assertEqual(json.loads(request.text)['count'], 29)
+        self.assertEqual(json.loads(request.text)['count'], 19)
 
         # second request, start time = 1445738581
         params = {'start':'1445738581'}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
         # print 'Play count: ' + request.text
-        self.assertEqual(json.loads(request.text)['count'], 19)
+        self.assertEqual(json.loads(request.text)['count'], 9)
 
 
     def testGetPlay(self):
@@ -126,9 +129,9 @@ class Test(unittest.TestCase):
         assert request.status_code == 200
         # print 'Plays: ' + request.text
 
-        self.assertEqual(self.getRecordCount(request.text), 29)
-        self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
-        self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
+        self.assertEqual(apitool.getRecordCount(request.text), 19)
+        self.assertGreaterEqual(apitool.getStartTimestamp(request.text), startTime)
+        self.assertGreaterEqual(apitool.getEndTimestamp(request.text), startTime)
 
 
 
@@ -160,9 +163,9 @@ class Test(unittest.TestCase):
         params = {'start':startTime, 'offset':'0', 'maximum':'99', 'destination':'SFDC'}
         request = requests.get(self.apiUrl + "/recommendations", headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(self.getRecordCount(request.text), 99)
-        self.assertGreaterEqual(self.getStartTimestamp(request.text), startTime)
-        self.assertGreaterEqual(self.getEndTimestamp(request.text), startTime)
+        self.assertEqual(apitool.getRecordCount(request.text), 99)
+        self.assertGreaterEqual(apitool.getStartTimestamp(request.text), startTime)
+        self.assertGreaterEqual(apitool.getEndTimestamp(request.text), startTime)
         self.threadCount += 1
         print 'finishing within the thread {} at time {}'.format(i, time.ctime())
 
@@ -181,13 +184,13 @@ class Test(unittest.TestCase):
         headers = {'Authorization':self.token}
         request = requests.get(url, headers=headers, params=params)
         assert request.status_code == 200
-        self.assertEqual(json.loads(request.text)['count'], 471)
+        self.assertEqual(json.loads(request.text)['count'], 339)
 
         # second request, for second tenant
         headers = {'Authorization':secondToken}
         request2 = requests.get(url, headers=headers, params=params)
         assert request2.status_code == 200
-        self.assertEqual(json.loads(request2.text)['count'], 298)
+        self.assertEqual(json.loads(request2.text)['count'], 175)
 
 
 if __name__ == "__main__":
