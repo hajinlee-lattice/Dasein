@@ -210,6 +210,8 @@ public class ComponentOrchestrator {
                                         dependency.getName())).state.equals(BootstrapState.State.OK)) {
                             // dependency not satisfied
                             failed.add(component.getName());
+                            log.error(String.format("Component %s's dependency: %s is not met", component.getName(),
+                                    dependency.getName()));
                             return;
                         }
                     }
