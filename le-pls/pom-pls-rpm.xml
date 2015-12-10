@@ -66,6 +66,7 @@
                 <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
                 <pls.properties.path>conf/env/qacluster</pls.properties.path>
                 <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
